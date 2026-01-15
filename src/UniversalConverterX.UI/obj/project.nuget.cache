@@ -1,0 +1,177 @@
+{
+  "version": 2,
+  "dgSpecHash": "cZFQ+A17riA=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\communitytoolkit.common\\7.1.2\\communitytoolkit.common.7.1.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\communitytoolkit.mvvm\\8.2.2\\communitytoolkit.mvvm.8.2.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\communitytoolkit.winui\\7.1.2\\communitytoolkit.winui.7.1.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\communitytoolkit.winui.ui\\7.1.2\\communitytoolkit.winui.ui.7.1.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.1\\microsoft.extensions.dependencyinjection.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging\\8.0.1\\microsoft.extensions.logging.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windows.sdk.buildtools\\10.0.26100.1\\microsoft.windows.sdk.buildtools.10.0.26100.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windowsappsdk\\1.5.240802000\\microsoft.windowsappsdk.1.5.240802000.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.23\\microsoft.netcore.app.runtime.win-x64.8.0.23.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.23\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.23.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.23\\microsoft.aspnetcore.app.runtime.win-x64.8.0.23.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX depends on Microsoft.Extensions.DependencyInjection (>= 8.0.0) but Microsoft.Extensions.DependencyInjection 8.0.0 was not found. Microsoft.Extensions.DependencyInjection 8.0.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Extensions.DependencyInjection",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX depends on Microsoft.Extensions.Logging (>= 8.0.0) but Microsoft.Extensions.Logging 8.0.0 was not found. Microsoft.Extensions.Logging 8.0.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Extensions.Logging",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX depends on Microsoft.Windows.SDK.BuildTools (>= 10.0.22621.3233) but Microsoft.Windows.SDK.BuildTools 10.0.22621.3233 was not found. Microsoft.Windows.SDK.BuildTools 10.0.26100.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Windows.SDK.BuildTools",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX depends on Microsoft.WindowsAppSDK (>= 1.5.240311000) but Microsoft.WindowsAppSDK 1.5.240311000 was not found. Microsoft.WindowsAppSDK 1.5.240802000 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.WindowsAppSDK",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package CommunityToolkit.WinUI.UI.Controls. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "CommunityToolkit.WinUI.UI.Controls",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Hosting. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Extensions.Hosting",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Options.ConfigurationExtensions. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Extensions.Options.ConfigurationExtensions",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package System.Text.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.NETCore.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.NETCore.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.WindowsDesktop.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.WindowsDesktop.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.AspNetCore.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.AspNetCore.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Windows.SDK.NET.Ref. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+      "libraryId": "Microsoft.Windows.SDK.NET.Ref",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    }
+  ]
+}

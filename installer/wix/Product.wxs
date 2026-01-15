@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- WiX Installer for UniversalConverter X -->
+<!-- Build with: wix build Product.wxs -o UniversalConverterX.msi -->
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="UniversalConverter X"
+           Manufacturer="UniversalConverterX"
+           Version="1.0.0.0"
+           UpgradeCode="UCX00000-1234-5678-90AB-CDEF12345678"
+           Scope="perMachine"
+           Language="1033"
+           Codepage="1252">
+
+    <SummaryInformation Description="UniversalConverter X - File Format Conversion Tool"
+                        Manufacturer="UniversalConverterX"
+                        Keywords="converter,ffmpeg,imagemagick,file conversion" />
+
+    <!-- Major Upgrade handling -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
+                  AllowSameVersionUpgrades="yes" />
+
+    <!-- Require Windows 10 or later -->
+    <Launch Condition="VersionNT &gt;= 603" Message="This application requires Windows 10 or later." />
+
+    <!-- Media -->
+    <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Properties -->
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/UniversalConverterX" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/UniversalConverterX" />
+    
+    <!-- Features -->
+    <Feature Id="MainApplication" Title="UniversalConverter X" Level="1" ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentGroupRef Id="ShellExtension" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="RegistryEntries" />
+    </Feature>
+
+    <Feature Id="CLITool" Title="Command Line Interface" Level="1">
+      <ComponentRef Id="PathEnvironment" />
+    </Feature>
+
+    <Feature Id="ContextMenu" Title="Explorer Context Menu" Level="1">
+      <ComponentGroupRef Id="ContextMenuRegistration" />
+    </Feature>
+
+    <!-- UI -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+
+    <!-- Custom Actions -->
+    <CustomAction Id="RegisterShellExtension" 
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]UniversalConverterX.Console.exe tools register-shell"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check" />
+
+    <CustomAction Id="UnregisterShellExtension"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]UniversalConverterX.Console.exe tools unregister-shell"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="UnregisterShellExtension" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot;" />
+      <Custom Action="RegisterShellExtension" After="InstallFiles" Condition="NOT Installed" />
+    </InstallExecuteSequence>
+
+  </Package>
+
+  <!-- Directory Structure -->
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="UniversalConverterX">
+        <Directory Id="ToolsFolder" Name="tools">
+          <Directory Id="BinFolder" Name="bin" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="UniversalConverter X" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+  </Fragment>
+
+  <!-- Application Files -->
+  <Fragment>
+    <ComponentGroup Id="ApplicationFiles" Directory="INSTALLFOLDER">
+      
+      <!-- Main UI Application -->
+      <Component Id="MainExecutable" Guid="UCX00001-1111-1111-1111-111111111111">
+        <File Id="UIExe" Source="$(var.PublishDir)\UniversalConverterX.UI.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" 
+                    Directory="ApplicationProgramsFolder" 
+                    Name="UniversalConverter X"
+                    Description="File format conversion tool"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Advertise="yes"
+                    Icon="AppIcon.exe" />
+        </File>
+      </Component>
+
+      <!-- Console CLI -->
+      <Component Id="ConsoleExecutable" Guid="UCX00002-2222-2222-2222-222222222222">
+        <File Id="ConsoleExe" Source="$(var.PublishDir)\UniversalConverterX.Console.exe" KeyPath="yes" />
+        <File Id="ConsoleExeAlias" Source="$(var.PublishDir)\UniversalConverterX.Console.exe" Name="ucx.exe" />
+      </Component>
+
+      <!-- Core Library -->
+      <Component Id="CoreLibrary" Guid="UCX00003-3333-3333-3333-333333333333">
+        <File Id="CoreDll" Source="$(var.PublishDir)\UniversalConverterX.Core.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- Dependencies -->
+      <Component Id="Dependencies" Guid="UCX00004-4444-4444-4444-444444444444">
+        <File Id="MicrosoftExtensionsLogging" Source="$(var.PublishDir)\Microsoft.Extensions.Logging.dll" />
+        <File Id="MicrosoftExtensionsOptions" Source="$(var.PublishDir)\Microsoft.Extensions.Options.dll" />
+        <File Id="MicrosoftExtensionsDI" Source="$(var.PublishDir)\Microsoft.Extensions.DependencyInjection.dll" />
+        <File Id="SpectreConsole" Source="$(var.PublishDir)\Spectre.Console.dll" />
+        <File Id="SpectreConsoleCli" Source="$(var.PublishDir)\Spectre.Console.Cli.dll" />
+        <File Id="CommunityToolkitMvvm" Source="$(var.PublishDir)\CommunityToolkit.Mvvm.dll" />
+      </Component>
+
+      <!-- Runtime Config -->
+      <Component Id="RuntimeConfig" Guid="UCX00005-5555-5555-5555-555555555555">
+        <File Id="UIRuntimeConfig" Source="$(var.PublishDir)\UniversalConverterX.UI.runtimeconfig.json" KeyPath="yes" />
+        <File Id="ConsoleRuntimeConfig" Source="$(var.PublishDir)\UniversalConverterX.Console.runtimeconfig.json" />
+        <File Id="UIDepsJson" Source="$(var.PublishDir)\UniversalConverterX.UI.deps.json" />
+        <File Id="ConsoleDepsJson" Source="$(var.PublishDir)\UniversalConverterX.Console.deps.json" />
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Shell Extension -->
+  <Fragment>
+    <ComponentGroup Id="ShellExtension" Directory="INSTALLFOLDER">
+      <Component Id="ShellExtensionDll" Guid="UCX00006-6666-6666-6666-666666666666">
+        <File Id="ShellExtDll" Source="$(var.PublishDir)\UniversalConverterX.ShellExtension.dll" KeyPath="yes" />
+        <File Id="ShellExtComHost" Source="$(var.PublishDir)\UniversalConverterX.ShellExtension.comhost.dll" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Shortcuts -->
+  <Fragment>
+    <Component Id="ApplicationShortcut" Directory="ApplicationProgramsFolder" Guid="UCX00007-7777-7777-7777-777777777777">
+      <Shortcut Id="AppShortcut" 
+                Name="UniversalConverter X" 
+                Target="[INSTALLFOLDER]UniversalConverterX.UI.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon.exe" />
+      <RemoveFolder Id="RemoveAppFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\UniversalConverterX" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="UCX00008-8888-8888-8888-888888888888">
+      <Shortcut Id="DeskShortcut"
+                Name="UniversalConverter X"
+                Target="[INSTALLFOLDER]UniversalConverterX.UI.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon.exe" />
+      <RegistryValue Root="HKCU" Key="Software\UniversalConverterX" Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <!-- Registry Entries -->
+  <Fragment>
+    <Component Id="RegistryEntries" Directory="INSTALLFOLDER" Guid="UCX00009-9999-9999-9999-999999999999">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\UniversalConverterX">
+        <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" />
+        <RegistryValue Name="Version" Type="string" Value="1.0.0.0" />
+        <RegistryValue Name="ToolsPath" Type="string" Value="[INSTALLFOLDER]tools\" />
+      </RegistryKey>
+    </Component>
+  </Fragment>
+
+  <!-- PATH Environment Variable -->
+  <Fragment>
+    <Component Id="PathEnvironment" Directory="INSTALLFOLDER" Guid="UCX0000A-AAAA-AAAA-AAAA-AAAAAAAAAAAA">
+      <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
+    </Component>
+  </Fragment>
+
+  <!-- Context Menu Registration -->
+  <Fragment>
+    <ComponentGroup Id="ContextMenuRegistration" Directory="INSTALLFOLDER">
+      
+      <!-- CLSID Registration -->
+      <Component Id="ContextMenuCLSID" Guid="UCX0000B-BBBB-BBBB-BBBB-BBBBBBBBBBBB">
+        <RegistryKey Root="HKCR" Key="CLSID\{7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3}">
+          <RegistryValue Type="string" Value="UniversalConverterX Shell Extension" />
+        </RegistryKey>
+        <RegistryKey Root="HKCR" Key="CLSID\{7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3}\InprocServer32">
+          <RegistryValue Type="string" Value="[INSTALLFOLDER]UniversalConverterX.ShellExtension.comhost.dll" />
+          <RegistryValue Name="ThreadingModel" Type="string" Value="Apartment" />
+        </RegistryKey>
+      </Component>
+
+      <!-- File Context Menu -->
+      <Component Id="FileContextMenu" Guid="UCX0000C-CCCC-CCCC-CCCC-CCCCCCCCCCCC">
+        <RegistryKey Root="HKCR" Key="*\shell\UniversalConverterX">
+          <RegistryValue Type="string" Value="Convert with UniversalConverter X" />
+          <RegistryValue Name="Icon" Type="string" Value="[INSTALLFOLDER]UniversalConverterX.UI.exe,0" />
+          <RegistryValue Name="ExplorerCommandHandler" Type="string" Value="{7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3}" />
+        </RegistryKey>
+      </Component>
+
+      <!-- Directory Context Menu -->
+      <Component Id="DirectoryContextMenu" Guid="UCX0000D-DDDD-DDDD-DDDD-DDDDDDDDDDDD">
+        <RegistryKey Root="HKCR" Key="Directory\shell\UniversalConverterX">
+          <RegistryValue Type="string" Value="Convert with UniversalConverter X" />
+          <RegistryValue Name="Icon" Type="string" Value="[INSTALLFOLDER]UniversalConverterX.UI.exe,0" />
+          <RegistryValue Name="ExplorerCommandHandler" Type="string" Value="{7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3}" />
+        </RegistryKey>
+      </Component>
+
+      <!-- Approved Shell Extensions -->
+      <Component Id="ApprovedExtension" Guid="UCX0000E-EEEE-EEEE-EEEE-EEEEEEEEEEEE">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved">
+          <RegistryValue Name="{7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3}" Type="string" Value="UniversalConverterX Shell Extension" />
+        </RegistryKey>
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Icon -->
+  <Fragment>
+    <Icon Id="AppIcon.exe" SourceFile="$(var.PublishDir)\UniversalConverterX.UI.exe" />
+  </Fragment>
+
+</Wix>
