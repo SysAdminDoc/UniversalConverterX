@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  IgnorableNamespaces="uap uap3 uap5 rescap desktop desktop4 desktop5 com">
+
+  <Identity
+    Name="UniversalConverterX"
+    Publisher="CN=UniversalConverterX"
+    Version="1.0.0.0"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>UniversalConverter X</DisplayName>
+    <PublisherDisplayName>UniversalConverterX</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Powerful file conversion tool with Windows shell integration. Supports 1000+ formats via FFmpeg, ImageMagick, Pandoc, and other CLI tools.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us"/>
+  </Resources>
+
+  <Applications>
+    <!-- Main UI Application -->
+    <Application Id="App"
+      Executable="UniversalConverterX.UI.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      
+      <uap:VisualElements
+        DisplayName="UniversalConverter X"
+        Description="File format conversion tool"
+        BackgroundColor="#020617"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo"/>
+            <uap:ShowOn Tile="wide310x150Logo"/>
+            <uap:ShowOn Tile="square310x310Logo"/>
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+      </uap:VisualElements>
+
+      <!-- File Type Associations -->
+      <Extensions>
+        <!-- Image formats -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="images">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.jpg</uap:FileType>
+              <uap:FileType>.jpeg</uap:FileType>
+              <uap:FileType>.png</uap:FileType>
+              <uap:FileType>.gif</uap:FileType>
+              <uap:FileType>.bmp</uap:FileType>
+              <uap:FileType>.webp</uap:FileType>
+              <uap:FileType>.tiff</uap:FileType>
+              <uap:FileType>.tif</uap:FileType>
+              <uap:FileType>.svg</uap:FileType>
+              <uap:FileType>.heic</uap:FileType>
+              <uap:FileType>.heif</uap:FileType>
+              <uap:FileType>.avif</uap:FileType>
+              <uap:FileType>.jxl</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Convert Image</uap:DisplayName>
+            <uap:Logo>Assets\ImageIcon.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+
+        <!-- Video formats -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="video">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.mp4</uap:FileType>
+              <uap:FileType>.mkv</uap:FileType>
+              <uap:FileType>.avi</uap:FileType>
+              <uap:FileType>.mov</uap:FileType>
+              <uap:FileType>.wmv</uap:FileType>
+              <uap:FileType>.flv</uap:FileType>
+              <uap:FileType>.webm</uap:FileType>
+              <uap:FileType>.m4v</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Convert Video</uap:DisplayName>
+            <uap:Logo>Assets\VideoIcon.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+
+        <!-- Audio formats -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="audio">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.mp3</uap:FileType>
+              <uap:FileType>.wav</uap:FileType>
+              <uap:FileType>.flac</uap:FileType>
+              <uap:FileType>.aac</uap:FileType>
+              <uap:FileType>.ogg</uap:FileType>
+              <uap:FileType>.m4a</uap:FileType>
+              <uap:FileType>.wma</uap:FileType>
+              <uap:FileType>.opus</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Convert Audio</uap:DisplayName>
+            <uap:Logo>Assets\AudioIcon.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+
+        <!-- Document formats -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="documents">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.pdf</uap:FileType>
+              <uap:FileType>.doc</uap:FileType>
+              <uap:FileType>.docx</uap:FileType>
+              <uap:FileType>.xls</uap:FileType>
+              <uap:FileType>.xlsx</uap:FileType>
+              <uap:FileType>.ppt</uap:FileType>
+              <uap:FileType>.pptx</uap:FileType>
+              <uap:FileType>.md</uap:FileType>
+              <uap:FileType>.html</uap:FileType>
+              <uap:FileType>.epub</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>Convert Document</uap:DisplayName>
+            <uap:Logo>Assets\DocumentIcon.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+
+        <!-- Windows 11 Context Menu (IExplorerCommand) -->
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="*">
+              <desktop5:Verb Id="UCXConvert" Clsid="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="UCXConvert" Clsid="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+
+        <!-- COM Server Registration -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:ExeServer Executable="UniversalConverterX.ShellExtension.exe" Arguments="-Embedding" DisplayName="UniversalConverterX Shell Extension">
+              <com:Class Id="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" DisplayName="UniversalConverterX Explorer Command" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
+
+        <!-- App Execution Alias (CLI) -->
+        <uap5:Extension Category="windows.appExecutionAlias">
+          <uap5:AppExecutionAlias>
+            <uap5:ExecutionAlias Alias="ucx.exe" />
+          </uap5:AppExecutionAlias>
+        </uap5:Extension>
+
+        <!-- Protocol Handler -->
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="ucx">
+            <uap:DisplayName>UniversalConverter X Protocol</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
+
+        <!-- Startup Task -->
+        <desktop:Extension Category="windows.startupTask">
+          <desktop:StartupTask TaskId="UCXStartup" Enabled="false" DisplayName="UniversalConverter X" />
+        </desktop:Extension>
+
+        <!-- Toast Notifications -->
+        <desktop:Extension Category="windows.toastNotificationActivation">
+          <desktop:ToastNotificationActivation ToastActivatorCLSID="8F9C0B2D-3E4F-5A6B-C7D8-E9F0A1B2C3D4" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="allowElevation" />
+  </Capabilities>
+
+</Package>
