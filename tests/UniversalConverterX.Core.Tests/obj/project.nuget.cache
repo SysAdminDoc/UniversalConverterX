@@ -1,0 +1,91 @@
+{
+  "version": 2,
+  "dgSpecHash": "rSU7hSWeurE=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\coverlet.collector\\6.0.0\\coverlet.collector.6.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\fluentassertions\\6.12.0\\fluentassertions.6.12.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.1\\microsoft.extensions.dependencyinjection.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging\\8.0.1\\microsoft.extensions.logging.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\moq\\4.20.70\\moq.4.20.70.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\system.configuration.configurationmanager\\4.4.0\\system.configuration.configurationmanager.4.4.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\system.diagnostics.eventlog\\6.0.0\\system.diagnostics.eventlog.6.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.4.0\\system.security.cryptography.protecteddata.4.4.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core.Tests depends on Microsoft.Extensions.Logging (>= 8.0.0) but Microsoft.Extensions.Logging 8.0.0 was not found. Microsoft.Extensions.Logging 8.0.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "Microsoft.Extensions.Logging",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core.Tests depends on Microsoft.Extensions.Options (>= 8.0.0) but Microsoft.Extensions.Options 8.0.0 was not found. Microsoft.Extensions.Options 8.0.2 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "Microsoft.Extensions.Options",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1103",
+      "level": "Error",
+      "message": "Unable to find a stable package Microsoft.NET.Test.Sdk with version (>= 17.9.0)\r\n  - Found 1 version(s) in Microsoft Visual Studio Offline Packages [ Nearest version: 17.10.0-preview-24080-01 ]\r\n  - Found 0 version(s) in C:\\Program Files\\dotnet\\library-packs",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "Microsoft.NET.Test.Sdk",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package xunit. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "xunit",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package xunit.runner.visualstudio. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "xunit.runner.visualstudio",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package System.Text.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}

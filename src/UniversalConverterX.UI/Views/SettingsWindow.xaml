@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="UniversalConverterX.UI.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Settings - UniversalConverter X">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <TextBlock Text="Settings" 
+                       Style="{StaticResource TitleTextBlockStyle}"
+                       VerticalAlignment="Center"
+                       Margin="24,0,0,0"/>
+        </Grid>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" Padding="24">
+            <StackPanel Spacing="24" MaxWidth="800">
+                
+                <!-- General Settings -->
+                <Expander IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE713;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="General" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Output location, overwrite behavior, notifications" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <!-- Default Output Directory -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="OutputDirectoryTextBox"
+                                     Header="Default Output Directory"
+                                     PlaceholderText="Same as input file"
+                                     IsReadOnly="True"/>
+                            <Button Grid.Column="1" 
+                                    Content="Browse..."
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    Click="BrowseOutputDirectory_Click"/>
+                        </Grid>
+
+                        <!-- Overwrite Behavior -->
+                        <ComboBox x:Name="OverwriteBehaviorComboBox"
+                                  Header="When output file exists"
+                                  SelectedIndex="0"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="Ask each time"/>
+                            <ComboBoxItem Content="Always overwrite"/>
+                            <ComboBoxItem Content="Never overwrite (rename)"/>
+                            <ComboBoxItem Content="Skip file"/>
+                        </ComboBox>
+
+                        <!-- Delete Source -->
+                        <ToggleSwitch x:Name="DeleteSourceToggle"
+                                      Header="Delete source files after conversion"
+                                      OffContent="Keep original files"
+                                      OnContent="Move to Recycle Bin"/>
+
+                        <!-- Notifications -->
+                        <ToggleSwitch x:Name="NotificationsToggle"
+                                      Header="Show notifications"
+                                      OffContent="Disabled"
+                                      OnContent="Enabled"
+                                      IsOn="True"/>
+
+                        <!-- Sound -->
+                        <ToggleSwitch x:Name="SoundToggle"
+                                      Header="Play sound when complete"
+                                      OffContent="Silent"
+                                      OnContent="Enabled"
+                                      IsOn="True"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Quality & Performance -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE9D9;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Quality &amp; Performance" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Default quality, hardware acceleration, parallel processing" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <!-- Default Quality -->
+                        <ComboBox x:Name="DefaultQualityComboBox"
+                                  Header="Default quality preset"
+                                  SelectedIndex="3"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="Lowest - Smallest file size"/>
+                            <ComboBoxItem Content="Low"/>
+                            <ComboBoxItem Content="Medium - Balanced"/>
+                            <ComboBoxItem Content="High - Recommended"/>
+                            <ComboBoxItem Content="Highest - Best quality"/>
+                            <ComboBoxItem Content="Lossless - No quality loss"/>
+                        </ComboBox>
+
+                        <!-- Hardware Acceleration -->
+                        <ComboBox x:Name="HardwareAccelComboBox"
+                                  Header="Hardware acceleration"
+                                  SelectedIndex="0"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="Auto-detect"/>
+                            <ComboBoxItem Content="NVIDIA NVENC (CUDA)"/>
+                            <ComboBoxItem Content="Intel Quick Sync"/>
+                            <ComboBoxItem Content="AMD AMF"/>
+                            <ComboBoxItem Content="Disabled (CPU only)"/>
+                        </ComboBox>
+
+                        <!-- Parallel Conversions -->
+                        <StackPanel>
+                            <TextBlock Text="Maximum parallel conversions" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider x:Name="ParallelSlider"
+                                        Minimum="1"
+                                        Maximum="16"
+                                        Value="4"
+                                        StepFrequency="1"
+                                        TickFrequency="1"
+                                        TickPlacement="Outside"/>
+                                <TextBlock Grid.Column="1" 
+                                           Text="{Binding Value, ElementName=ParallelSlider}"
+                                           Width="30"
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Preserve Metadata -->
+                        <ToggleSwitch x:Name="PreserveMetadataToggle"
+                                      Header="Preserve metadata"
+                                      OffContent="Strip metadata"
+                                      OnContent="Keep EXIF, tags, etc."
+                                      IsOn="True"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Tools Management -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE90F;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Converter Tools" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Manage FFmpeg, ImageMagick, and other CLI tools" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <!-- Tools Path -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ToolsPathTextBox"
+                                     Header="Tools directory"
+                                     PlaceholderText="Default location"
+                                     IsReadOnly="True"/>
+                            <Button Grid.Column="1" 
+                                    Content="Browse..."
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    Click="BrowseToolsPath_Click"/>
+                        </Grid>
+
+                        <!-- Tools List -->
+                        <ListView x:Name="ToolsListView"
+                                  SelectionMode="None"
+                                  IsItemClickEnabled="False"
+                                  MaxHeight="300">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="0,8" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Status Icon -->
+                                        <FontIcon Grid.Column="0"
+                                                  Glyph="{Binding StatusGlyph}"
+                                                  Foreground="{Binding StatusColor}"
+                                                  FontSize="16"/>
+                                        
+                                        <!-- Tool Info -->
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                            <TextBlock Text="{Binding StatusText}" 
+                                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Version -->
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Version}"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        
+                                        <!-- Action Button -->
+                                        <Button Grid.Column="3"
+                                                Content="{Binding ActionText}"
+                                                Click="ToolAction_Click"
+                                                Tag="{Binding Id}"
+                                                MinWidth="100"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Download All Button -->
+                        <Button x:Name="DownloadAllToolsButton"
+                                Content="Download All Missing Tools"
+                                HorizontalAlignment="Right"
+                                Click="DownloadAllTools_Click"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Shell Integration -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8B7;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Shell Integration" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Windows Explorer context menu options" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <!-- Enable Context Menu -->
+                        <ToggleSwitch x:Name="ContextMenuToggle"
+                                      Header="Show in Explorer context menu"
+                                      OffContent="Disabled"
+                                      OnContent="Enabled"
+                                      IsOn="True"
+                                      Toggled="ContextMenuToggle_Toggled"/>
+
+                        <!-- Context Menu Style -->
+                        <ComboBox x:Name="ContextMenuStyleComboBox"
+                                  Header="Context menu style"
+                                  SelectedIndex="0"
+                                  HorizontalAlignment="Stretch"
+                                  IsEnabled="{Binding IsOn, ElementName=ContextMenuToggle}">
+                            <ComboBoxItem Content="Cascading menu (Convert to →)"/>
+                            <ComboBoxItem Content="Flat menu (individual formats)"/>
+                            <ComboBoxItem Content="Single item (opens app)"/>
+                        </ComboBox>
+
+                        <!-- Quick Convert Presets -->
+                        <TextBlock Text="Quick convert presets in context menu" Margin="0,8,0,0"/>
+                        <StackPanel Spacing="8">
+                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True"/>
+                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True"/>
+                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True"/>
+                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True"/>
+                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract Audio (MP3)" IsChecked="True"/>
+                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True"/>
+                        </StackPanel>
+
+                        <!-- Register/Unregister Buttons -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                            <Button x:Name="RegisterShellButton"
+                                    Content="Register Context Menu"
+                                    Click="RegisterShell_Click"/>
+                            <Button x:Name="UnregisterShellButton"
+                                    Content="Unregister"
+                                    Click="UnregisterShell_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Appearance -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE790;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Theme, accent color, window behavior" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <!-- Theme -->
+                        <ComboBox x:Name="ThemeComboBox"
+                                  Header="App theme"
+                                  SelectedIndex="2"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="ThemeComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Light"/>
+                            <ComboBoxItem Content="Dark"/>
+                            <ComboBoxItem Content="Use system setting"/>
+                        </ComboBox>
+
+                        <!-- Accent Color -->
+                        <StackPanel>
+                            <TextBlock Text="Accent color" Margin="0,0,0,8"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="AccentGreenButton" 
+                                        Width="40" Height="40" 
+                                        Background="#22c55e"
+                                        CornerRadius="20"
+                                        Click="AccentColor_Click" Tag="#22c55e"/>
+                                <Button x:Name="AccentBlueButton" 
+                                        Width="40" Height="40" 
+                                        Background="#60a5fa"
+                                        CornerRadius="20"
+                                        Click="AccentColor_Click" Tag="#60a5fa"/>
+                                <Button x:Name="AccentPurpleButton" 
+                                        Width="40" Height="40" 
+                                        Background="#a78bfa"
+                                        CornerRadius="20"
+                                        Click="AccentColor_Click" Tag="#a78bfa"/>
+                                <Button x:Name="AccentOrangeButton" 
+                                        Width="40" Height="40" 
+                                        Background="#fb923c"
+                                        CornerRadius="20"
+                                        Click="AccentColor_Click" Tag="#fb923c"/>
+                                <Button x:Name="AccentRedButton" 
+                                        Width="40" Height="40" 
+                                        Background="#f87171"
+                                        CornerRadius="20"
+                                        Click="AccentColor_Click" Tag="#f87171"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Minimize to Tray -->
+                        <ToggleSwitch x:Name="MinimizeToTrayToggle"
+                                      Header="Minimize to system tray"
+                                      OffContent="Close to taskbar"
+                                      OnContent="Minimize to tray"/>
+
+                        <!-- Start Minimized -->
+                        <ToggleSwitch x:Name="StartMinimizedToggle"
+                                      Header="Start minimized"
+                                      OffContent="Show window on startup"
+                                      OnContent="Start in background"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- About -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE946;" FontSize="20" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="About" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Version info, updates, licenses" 
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="UniversalConverter X" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <TextBlock x:Name="VersionText" 
+                                       Text="Version 1.0.0"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="A powerful file conversion tool with Windows shell integration. Supports 1000+ formats via FFmpeg, ImageMagick, Pandoc, and other CLI tools."
+                                   TextWrapping="Wrap"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/"/>
+                            <HyperlinkButton Content="Documentation" NavigateUri="https://github.com/"/>
+                            <HyperlinkButton Content="Report Issue" NavigateUri="https://github.com/"/>
+                        </StackPanel>
+
+                        <Button x:Name="CheckUpdatesButton"
+                                Content="Check for Updates"
+                                Click="CheckUpdates_Click"/>
+
+                        <!-- Credits -->
+                        <TextBlock Text="Built with:" Margin="0,16,0,0"/>
+                        <TextBlock Text="• FFmpeg - Video/Audio processing (LGPL/GPL)&#x0a;• ImageMagick - Image processing (Apache 2.0)&#x0a;• Pandoc - Document conversion (GPL)&#x0a;• LibreOffice - Office documents (MPL)&#x0a;• Ghostscript - PDF processing (AGPL)&#x0a;• Inkscape - Vector graphics (GPL)&#x0a;• Calibre - Ebook conversion (GPL)"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Expander>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom Bar -->
+        <Grid Grid.Row="2" 
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+              Padding="24,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="ResetButton"
+                    Content="Reset to Defaults"
+                    Click="ResetSettings_Click"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        Click="Cancel_Click"/>
+                <Button x:Name="SaveButton"
+                        Content="Save"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Click="Save_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

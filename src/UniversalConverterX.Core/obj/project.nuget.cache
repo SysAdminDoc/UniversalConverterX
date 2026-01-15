@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "dgSpecHash": "MYDKWml4154=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core depends on Microsoft.Extensions.Logging.Abstractions (>= 8.0.0) but Microsoft.Extensions.Logging.Abstractions 8.0.0 was not found. Microsoft.Extensions.Logging.Abstractions 8.0.2 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "libraryId": "Microsoft.Extensions.Logging.Abstractions",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core depends on Microsoft.Extensions.Options (>= 8.0.0) but Microsoft.Extensions.Options 8.0.0 was not found. Microsoft.Extensions.Options 8.0.2 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "libraryId": "Microsoft.Extensions.Options",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package System.Text.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.DependencyInjection.Abstractions from 8.0.2 to 8.0.0. Reference the package directly from the project to select a different version. \r\n UniversalConverterX.Core -> Microsoft.Extensions.Logging.Abstractions 8.0.2 -> Microsoft.Extensions.DependencyInjection.Abstractions (>= 8.0.2) \r\n UniversalConverterX.Core -> Microsoft.Extensions.DependencyInjection.Abstractions (>= 8.0.0)",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+      "libraryId": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}

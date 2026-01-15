@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="UniversalConverterX.UI.Views.ProgressWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Converting - UniversalConverter X">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
+            <TextBlock x:Name="TitleText" 
+                       Text="Converting Files" 
+                       Style="{StaticResource TitleTextBlockStyle}"/>
+            <TextBlock x:Name="StatusText" 
+                       Text="Preparing..."
+                       Style="{StaticResource BodyTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- File List -->
+        <ListView x:Name="FileListView"
+                  Grid.Row="1"
+                  SelectionMode="None"
+                  IsItemClickEnabled="False"
+                  Margin="0,0,0,16">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="8,12" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Status Icon -->
+                        <FontIcon Grid.Column="0" 
+                                  Grid.RowSpan="3"
+                                  Glyph="{Binding StatusIcon}"
+                                  Foreground="{Binding StatusColor}"
+                                  FontSize="24"
+                                  VerticalAlignment="Center"/>
+
+                        <!-- File Name -->
+                        <TextBlock Grid.Column="1" 
+                                   Grid.Row="0"
+                                   Text="{Binding FileName}"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Status Text -->
+                        <TextBlock Grid.Column="1" 
+                                   Grid.Row="1"
+                                   Text="{Binding StatusMessage}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding ShowStatus}"/>
+
+                        <!-- Progress Bar -->
+                        <ProgressBar Grid.Column="1" 
+                                     Grid.Row="2"
+                                     Value="{Binding Progress}"
+                                     Maximum="100"
+                                     IsIndeterminate="{Binding IsIndeterminate}"
+                                     Visibility="{Binding ShowProgress}"
+                                     Margin="0,4,0,0"/>
+
+                        <!-- Size/Time Info -->
+                        <StackPanel Grid.Column="2" 
+                                    Grid.RowSpan="3"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding SizeInfo}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       HorizontalAlignment="Right"/>
+                            <TextBlock Text="{Binding TimeInfo}"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Overall Progress -->
+        <StackPanel Grid.Row="2" Spacing="8" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="OverallProgressText" 
+                           Text="0 of 0 files"
+                           Style="{StaticResource BodyTextBlockStyle}"/>
+                <TextBlock x:Name="EtaText" 
+                           Grid.Column="1"
+                           Text=""
+                           Style="{StaticResource BodyTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </Grid>
+            <ProgressBar x:Name="OverallProgressBar"
+                         Value="0"
+                         Maximum="100"/>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal" 
+                    Spacing="8"
+                    HorizontalAlignment="Right">
+            <Button x:Name="OpenFolderButton"
+                    Content="Open Output Folder"
+                    Click="OpenFolder_Click"
+                    Visibility="Collapsed"/>
+            <Button x:Name="PauseButton"
+                    Content="Pause"
+                    Click="Pause_Click"/>
+            <Button x:Name="CancelButton"
+                    Content="Cancel"
+                    Click="Cancel_Click"/>
+            <Button x:Name="CloseButton"
+                    Content="Close"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="Close_Click"
+                    Visibility="Collapsed"/>
+        </StackPanel>
+    </Grid>
+</Window>

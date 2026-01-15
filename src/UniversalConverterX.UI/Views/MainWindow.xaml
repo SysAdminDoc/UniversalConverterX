@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="UniversalConverterX.UI.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="UniversalConverter X">
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid Grid.Row="0" Background="{StaticResource SurfaceBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0">
+                <FontIcon Glyph="&#xE8AB;" FontSize="20" Foreground="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="UniversalConverter X" FontWeight="SemiBold" FontSize="14" 
+                           Foreground="{StaticResource TextPrimaryBrush}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="16,0">
+                <Button x:Name="SettingsButton" Click="SettingsButton_Click"
+                        Background="Transparent" BorderThickness="0" Padding="8">
+                    <FontIcon Glyph="&#xE713;" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Padding="32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="Convert Files" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Drag and drop files or click to browse" 
+                           Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- Drop Zone -->
+            <Border x:Name="DropZone" Grid.Row="1" Style="{StaticResource CardStyle}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2"
+                    AllowDrop="True" DragOver="DropZone_DragOver" Drop="DropZone_Drop"
+                    PointerPressed="DropZone_PointerPressed">
+                <Grid>
+                    <!-- Empty State -->
+                    <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE896;" FontSize="64" 
+                                  Foreground="{StaticResource TextMutedBrush}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Drop files here" 
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center" Margin="0,16,0,0"/>
+                        <TextBlock Text="or click to browse" 
+                                   Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="BrowseButton_Click" Margin="0,24,0,0"
+                                HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- File List -->
+                    <ListView x:Name="FileList" Visibility="Collapsed"
+                              Background="Transparent"
+                              SelectionMode="Extended">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="12,8" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="32"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <FontIcon Grid.Column="0" Glyph="&#xE8A5;" FontSize="20"
+                                              Foreground="{StaticResource AccentBlueBrush}"
+                                              VerticalAlignment="Center"/>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding FileName}" 
+                                                   Style="{StaticResource BodyTextStyle}"/>
+                                        <TextBlock Text="{Binding FileSize}" 
+                                                   Style="{StaticResource MutedTextStyle}"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="2" Text="{Binding Extension}"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               VerticalAlignment="Center"
+                                               Padding="8,4"
+                                               Background="{StaticResource SurfaceLightBrush}"/>
+
+                                    <Button Grid.Column="3" Background="Transparent" BorderThickness="0"
+                                            Click="RemoveFile_Click" Tag="{Binding}">
+                                        <FontIcon Glyph="&#xE711;" FontSize="12" 
+                                                  Foreground="{StaticResource TextMutedBrush}"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <!-- Bottom Actions -->
+            <Grid Grid.Row="2" Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Format Selector -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="Convert to:" Style="{StaticResource BodyTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox x:Name="FormatSelector" Width="200" 
+                              PlaceholderText="Select format"
+                              SelectionChanged="FormatSelector_SelectionChanged">
+                        <ComboBoxItem Content="MP4" Tag="mp4"/>
+                        <ComboBoxItem Content="MP3" Tag="mp3"/>
+                        <ComboBoxItem Content="PNG" Tag="png"/>
+                        <ComboBoxItem Content="JPG" Tag="jpg"/>
+                        <ComboBoxItem Content="WEBP" Tag="webp"/>
+                        <ComboBoxItem Content="PDF" Tag="pdf"/>
+                        <ComboBoxItem Content="DOCX" Tag="docx"/>
+                        <ComboBoxItem Content="GIF" Tag="gif"/>
+                        <ComboBoxItem Content="WAV" Tag="wav"/>
+                        <ComboBoxItem Content="FLAC" Tag="flac"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Actions -->
+                <Button Grid.Column="1" Content="Clear All" 
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="ClearAll_Click" Margin="0,0,12,0"/>
+                
+                <Button x:Name="ConvertButton" Grid.Column="2" Content="Convert" 
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="ConvertButton_Click" IsEnabled="False"/>
+            </Grid>
+        </Grid>
+
+        <!-- Progress Overlay -->
+        <Grid x:Name="ProgressOverlay" Grid.RowSpan="2" Visibility="Collapsed"
+              Background="#80000000">
+            <Border Style="{StaticResource CardStyle}" 
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="400" MaxWidth="500">
+                <StackPanel Spacing="16">
+                    <TextBlock x:Name="ProgressTitle" Text="Converting..." 
+                               Style="{StaticResource TitleTextStyle}"/>
+                    
+                    <ProgressBar x:Name="ConversionProgress" 
+                                 Height="8" CornerRadius="4"
+                                 Minimum="0" Maximum="100"/>
+                    
+                    <TextBlock x:Name="ProgressStatus" 
+                               Style="{StaticResource SubtitleTextStyle}"/>
+                    
+                    <TextBlock x:Name="ProgressDetails" 
+                               Style="{StaticResource MutedTextStyle}"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                        <Button x:Name="CancelButton" Content="Cancel" 
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="CancelButton_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

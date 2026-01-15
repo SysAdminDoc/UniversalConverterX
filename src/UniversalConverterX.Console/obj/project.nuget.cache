@@ -1,0 +1,139 @@
+{
+  "version": 2,
+  "dgSpecHash": "5fDckNhAsME=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.1\\microsoft.extensions.dependencyinjection.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging\\8.0.1\\microsoft.extensions.logging.8.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "ucx depends on Microsoft.Extensions.DependencyInjection (>= 8.0.0) but Microsoft.Extensions.DependencyInjection 8.0.0 was not found. Microsoft.Extensions.DependencyInjection 8.0.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.DependencyInjection",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "ucx depends on Microsoft.Extensions.Logging (>= 8.0.0) but Microsoft.Extensions.Logging 8.0.0 was not found. Microsoft.Extensions.Logging 8.0.1 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Logging",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Spectre.Console. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Spectre.Console",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Spectre.Console.Cli. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Spectre.Console.Cli",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Logging.Console. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Logging.Console",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Configuration. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Configuration",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Configuration.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Configuration.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Configuration.EnvironmentVariables. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Configuration.EnvironmentVariables",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Extensions.Options.ConfigurationExtensions. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.Extensions.Options.ConfigurationExtensions",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.NET.ILLink.Tasks. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "Microsoft.NET.ILLink.Tasks",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package System.Text.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Console\\UniversalConverterX.Console.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}

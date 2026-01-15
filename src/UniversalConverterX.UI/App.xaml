@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="UniversalConverterX.UI.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    RequestedTheme="Dark">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Brand Colors -->
+            <Color x:Key="BrandBackground">#020617</Color>
+            <Color x:Key="BrandSurface">#0f172a</Color>
+            <Color x:Key="BrandSurfaceLight">#1e293b</Color>
+            <Color x:Key="BrandBorder">#334155</Color>
+            <Color x:Key="BrandAccentGreen">#22c55e</Color>
+            <Color x:Key="BrandAccentBlue">#60a5fa</Color>
+            <Color x:Key="BrandAccentRed">#ef4444</Color>
+            <Color x:Key="BrandAccentYellow">#facc15</Color>
+            <Color x:Key="BrandTextPrimary">#f8fafc</Color>
+            <Color x:Key="BrandTextSecondary">#94a3b8</Color>
+            <Color x:Key="BrandTextMuted">#64748b</Color>
+
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BrandBackground}"/>
+            <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource BrandSurface}"/>
+            <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource BrandSurfaceLight}"/>
+            <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BrandBorder}"/>
+            <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource BrandAccentGreen}"/>
+            <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandAccentBlue}"/>
+            <SolidColorBrush x:Key="AccentRedBrush" Color="{StaticResource BrandAccentRed}"/>
+            <SolidColorBrush x:Key="AccentYellowBrush" Color="{StaticResource BrandAccentYellow}"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource BrandTextPrimary}"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource BrandTextSecondary}"/>
+            <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource BrandTextMuted}"/>
+
+            <!-- Card Style -->
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="20"/>
+            </Style>
+
+            <!-- Primary Button Style -->
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="24,12"/>
+            </Style>
+
+            <!-- Secondary Button Style -->
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="24,12"/>
+            </Style>
+
+            <!-- Title Text Style -->
+            <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            </Style>
+
+            <!-- Subtitle Text Style -->
+            <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            </Style>
+
+            <!-- Body Text Style -->
+            <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <!-- Muted Text Style -->
+            <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

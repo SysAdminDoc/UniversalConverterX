@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>UniversalConverterX.ShellExtension</RootNamespace>
+    <AssemblyName>UniversalConverterX.ShellExtension</AssemblyName>
+    
+    <!-- COM Interop -->
+    <EnableComHosting>true</EnableComHosting>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
+    <!-- Platform -->
+    <Platforms>x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    
+    <!-- Assembly info -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Company>UniversalConverterX</Company>
+    <Product>UniversalConverter X Shell Extension</Product>
+    <Description>Windows Explorer context menu integration for UniversalConverter X</Description>
+    <Copyright>Copyright © 2024</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UniversalConverterX.Core\UniversalConverterX.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="NativeMethods.txt" />
+  </ItemGroup>
+
+</Project>

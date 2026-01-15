@@ -1,0 +1,7 @@
+SHChangeNotify
+RegCreateKeyEx
+RegSetValueEx
+RegDeleteTree
+RegCloseKey
+CoCreateInstance
+SHGetKnownFolderPath

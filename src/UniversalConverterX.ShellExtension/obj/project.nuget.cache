@@ -1,0 +1,146 @@
+{
+  "version": 2,
+  "dgSpecHash": "rJNy/r4FkKU=",
+  "success": false,
+  "projectFilePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windows.cswin32\\0.3.106\\microsoft.windows.cswin32.0.3.106.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windows.sdk.win32docs\\0.1.42-alpha\\microsoft.windows.sdk.win32docs.0.1.42-alpha.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windows.sdk.win32metadata\\60.0.34-preview\\microsoft.windows.sdk.win32metadata.60.0.34-preview.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windows.wdk.win32metadata\\0.11.4-experimental\\microsoft.windows.wdk.win32metadata.0.11.4-experimental.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.23\\microsoft.netcore.app.runtime.win-x64.8.0.23.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.23\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.23.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.23\\microsoft.aspnetcore.app.runtime.win-x64.8.0.23.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core depends on Microsoft.Extensions.Logging.Abstractions (>= 8.0.0) but Microsoft.Extensions.Logging.Abstractions 8.0.0 was not found. Microsoft.Extensions.Logging.Abstractions 8.0.2 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.Extensions.Logging.Abstractions",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.Core depends on Microsoft.Extensions.Options (>= 8.0.0) but Microsoft.Extensions.Options 8.0.0 was not found. Microsoft.Extensions.Options 8.0.2 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.Extensions.Options",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "UniversalConverterX.ShellExtension depends on Microsoft.Windows.CsWin32 (>= 0.3.49-beta) but Microsoft.Windows.CsWin32 0.3.49-beta was not found. Microsoft.Windows.CsWin32 0.3.106 was resolved instead.",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.Windows.CsWin32",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1102",
+      "level": "Error",
+      "message": "Unable to find package System.Drawing.Common with version (>= 8.0.0)\r\n  - Found 1 version(s) in Microsoft Visual Studio Offline Packages [ Nearest version: 6.0.0 ]\r\n  - Found 0 version(s) in C:\\Program Files\\dotnet\\library-packs",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "System.Drawing.Common",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package System.Text.Json. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.NETCore.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.NETCore.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.WindowsDesktop.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.WindowsDesktop.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.AspNetCore.App.Runtime.win-arm64. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.AspNetCore.App.Runtime.win-arm64",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.Windows.SDK.NET.Ref. No packages exist with this id in source(s): C:\\Program Files\\dotnet\\library-packs, Microsoft Visual Studio Offline Packages",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.Windows.SDK.NET.Ref",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041"
+      ]
+    },
+    {
+      "code": "NU1605",
+      "level": "Error",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.DependencyInjection.Abstractions from 8.0.2 to 8.0.0. Reference the package directly from the project to select a different version. \r\n UniversalConverterX.ShellExtension -> UniversalConverterX.Core -> Microsoft.Extensions.Logging.Abstractions 8.0.2 -> Microsoft.Extensions.DependencyInjection.Abstractions (>= 8.0.2) \r\n UniversalConverterX.ShellExtension -> UniversalConverterX.Core -> Microsoft.Extensions.DependencyInjection.Abstractions (>= 8.0.0)",
+      "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "filePath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.ShellExtension\\UniversalConverterX.ShellExtension.csproj",
+      "libraryId": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "targetGraphs": [
+        "net8.0-windows10.0.19041",
+        "net8.0-windows10.0.19041/win-arm64",
+        "net8.0-windows10.0.19041/win-x64"
+      ]
+    }
+  ]
+}
