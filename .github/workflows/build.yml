@@ -1,0 +1,32 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Publish Console
+        run: dotnet publish src/UniversalConverterX.Console/UniversalConverterX.Console.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish/console
+      - name: Publish UI
+        run: dotnet publish src/UniversalConverterX.UI/UniversalConverterX.UI.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish/ui
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: UniversalConverterX-win-x64
+          path: publish/
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          gh release upload ${{ github.ref_name }} publish/console/UniversalConverterX.Console.exe --clobber
+          gh release upload ${{ github.ref_name }} publish/ui/UniversalConverterX.UI.exe --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
