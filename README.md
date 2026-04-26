@@ -1,3 +1,13 @@
+<!-- codex-branding:start -->
+<p align="center"><img src="icon.png" width="128" alt="Universal Converter X"></p>
+
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-58A6FF?style=for-the-badge">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-4ade80?style=for-the-badge">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Desktop%20App-58A6FF?style=for-the-badge">
+</p>
+<!-- codex-branding:end -->
+
 # UniversalConverter X
 
 A powerful, native Windows file conversion application with context menu integration, supporting 1000+ format conversions.
