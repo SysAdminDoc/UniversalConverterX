@@ -7,9 +7,26 @@ namespace UniversalConverterX.UI.Views;
 
 public sealed partial class MainWindow : Window
 {
+    private readonly List<NavSearchSuggestion> _searchSuggestions =
+    [
+        new("Home", "Dashboard, recent work, and recommended workflows", "home"),
+        new("Converter", "Batch convert video, audio, image, document, and archive formats", "converter"),
+        new("AI Lab", "Video enhancer, subtitles, noise removal, background tools, and more", "ai-lab"),
+        new("Compressor", "Shrink videos for web, email, archive, and social delivery", "compressor"),
+        new("Video Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
+        new("Downloader", "Download video or audio from supported URLs", "downloader"),
+        new("Recorder", "Screen, webcam, microphone, and system audio capture", "recorder"),
+        new("Toolbox", "Specialized creation, enhancement, export, audio, and disc tools", "toolbox"),
+        new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
+        new("Account", "Optional preset sync and entitlement area", "account"),
+    ];
+
+    private SettingsWindow? _settingsWindow;
+
     public MainWindow()
     {
         InitializeComponent();
+        NavSearchBox.ItemsSource = _searchSuggestions;
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
@@ -46,6 +63,7 @@ public sealed partial class MainWindow : Window
         {
             "home" => typeof(HomePage),
             "converter" => typeof(ConverterPage),
+            "ai-lab" => typeof(AiLabPage),
             "compressor" => typeof(CompressorPage),
             "editor" => typeof(EditorPage),
             "downloader" => typeof(DownloaderPage),
@@ -90,12 +108,7 @@ public sealed partial class MainWindow : Window
     {
         if (args.IsSettingsSelected)
         {
-            ContentFrame.Navigate(typeof(PlaceholderPage), new PlaceholderInfo(
-                Title: "Settings",
-                Subtitle: "App preferences, themes, and tool paths.",
-                IconGlyph: "\uE713",
-                Headline: "Full settings UI arrives in v2.1",
-                Description: "Preferences are read from settings.json today. A dedicated settings UI lands alongside the v2.1 AI Tools release."));
+            OpenSettingsWindow();
             return;
         }
 
@@ -103,5 +116,68 @@ public sealed partial class MainWindow : Window
         {
             NavigateTo(tag);
         }
+    }
+
+    private void NavSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+            return;
+
+        var query = sender.Text.Trim();
+        sender.ItemsSource = string.IsNullOrWhiteSpace(query)
+            ? _searchSuggestions
+            : _searchSuggestions
+                .Where(s => s.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+                    || s.Subtitle.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+    }
+
+    private void NavSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is NavSearchSuggestion suggestion)
+            sender.Text = suggestion.Title;
+    }
+
+    private void NavSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        var suggestion = args.ChosenSuggestion as NavSearchSuggestion
+            ?? _searchSuggestions.FirstOrDefault(s =>
+                s.Title.Equals(args.QueryText, StringComparison.OrdinalIgnoreCase))
+            ?? _searchSuggestions.FirstOrDefault(s =>
+                s.Title.Contains(args.QueryText, StringComparison.OrdinalIgnoreCase)
+                || s.Subtitle.Contains(args.QueryText, StringComparison.OrdinalIgnoreCase));
+
+        if (suggestion is null)
+            return;
+
+        if (suggestion.RouteKey == "settings")
+            OpenSettingsWindow();
+        else
+            NavigateTo(suggestion.RouteKey);
+    }
+
+    private void OpenSettingsWindow()
+    {
+        if (_settingsWindow is null)
+        {
+            _settingsWindow = new SettingsWindow(App.Services);
+            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        }
+
+        _settingsWindow.Activate();
+    }
+}
+
+public sealed class NavSearchSuggestion
+{
+    public string Title { get; set; }
+    public string Subtitle { get; set; }
+    public string RouteKey { get; set; }
+
+    public NavSearchSuggestion(string title, string subtitle, string routeKey)
+    {
+        Title = title;
+        Subtitle = subtitle;
+        RouteKey = routeKey;
     }
 }

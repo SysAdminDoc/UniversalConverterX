@@ -33,8 +33,23 @@
             </NavigationView.PaneHeader>
 
             <NavigationView.AutoSuggestBox>
-                <AutoSuggestBox PlaceholderText="Search modules and tools..."
-                                QueryIcon="Find"/>
+                <AutoSuggestBox x:Name="NavSearchBox"
+                                PlaceholderText="Search modules and tools..."
+                                QueryIcon="Find"
+                                TextChanged="NavSearchBox_TextChanged"
+                                SuggestionChosen="NavSearchBox_SuggestionChosen"
+                                QuerySubmitted="NavSearchBox_QuerySubmitted">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Padding="4">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
             </NavigationView.AutoSuggestBox>
 
             <NavigationView.MenuItems>
@@ -49,6 +64,11 @@
                 <NavigationViewItem Tag="converter" Content="Converter">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="ai-lab" Content="AI Lab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE950;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Tag="compressor" Content="Compressor">
