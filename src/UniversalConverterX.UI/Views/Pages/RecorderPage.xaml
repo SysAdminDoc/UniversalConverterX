@@ -350,7 +350,7 @@
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"/>
             <Button Grid.Column="2"
-                    Content="Clear"
+                    Content="Clear Queue"
                     x:Name="ClearQueueButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ClearQueue_Click"

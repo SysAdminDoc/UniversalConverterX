@@ -192,8 +192,19 @@ public sealed partial class ConverterPage : Page
         }
     }
 
-    private void ClearAll_Click(object sender, RoutedEventArgs e)
+    private async void ClearAll_Click(object sender, RoutedEventArgs e)
     {
+        if (_files.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear conversion queue?",
+                $"Remove {_files.Count} queued file(s)? Finished results stay available."))
+        {
+            return;
+        }
+
         _files.Clear();
         UpdateUI();
     }

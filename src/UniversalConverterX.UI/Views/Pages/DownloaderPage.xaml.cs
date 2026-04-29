@@ -135,10 +135,21 @@ public sealed partial class DownloaderPage : Page
         UpdateUi();
     }
 
-    private void ClearQueue_Click(object sender, RoutedEventArgs e)
+    private async void ClearQueue_Click(object sender, RoutedEventArgs e)
     {
         if (_cts is not null)
             return;
+
+        if (_queue.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear download queue?",
+                $"Remove {_queue.Count} queued URL(s)? Finished downloads stay available."))
+        {
+            return;
+        }
 
         _queue.Clear();
         UpdateUi();

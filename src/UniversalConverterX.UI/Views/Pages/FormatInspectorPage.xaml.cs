@@ -341,10 +341,21 @@ public sealed partial class FormatInspectorPage : Page
             OpenContainingFolder(item.Path);
     }
 
-    private void Clear_Click(object sender, RoutedEventArgs e)
+    private async void Clear_Click(object sender, RoutedEventArgs e)
     {
         if (_isInspecting)
             return;
+
+        if (_files.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear inspection list?",
+                $"Remove {_files.Count} file(s) and clear the current report?"))
+        {
+            return;
+        }
 
         _files.Clear();
         ClearReport();

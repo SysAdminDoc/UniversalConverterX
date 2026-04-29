@@ -202,10 +202,21 @@ public sealed partial class EditorPage : Page
         }
     }
 
-    private void Clear_Click(object sender, RoutedEventArgs e)
+    private async void Clear_Click(object sender, RoutedEventArgs e)
     {
         if (_cts is not null)
             return;
+
+        if (_files.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear editing queue?",
+                $"Remove {_files.Count} queued clip(s)? Finished exports stay available."))
+        {
+            return;
+        }
 
         _files.Clear();
         UpdateUi();

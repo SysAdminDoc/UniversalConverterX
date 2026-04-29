@@ -237,7 +237,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"/>
             <Button Grid.Column="2"
-                    Content="Clear"
+                    Content="Clear List"
                     x:Name="ClearButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="Clear_Click"
