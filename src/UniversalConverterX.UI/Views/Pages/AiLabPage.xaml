@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.AiLabPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="AiToolTemplate">
+            <Border Width="264" Height="170" Padding="18" Margin="0,0,14,14"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18">
+                <Grid RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                                Background="{StaticResource SurfaceLightBrush}">
+                            <FontIcon Glyph="{Binding Glyph}" FontSize="20"
+                                      Foreground="{Binding AccentBrush}"/>
+                        </Border>
+                        <Border Grid.Column="2" Padding="8,3" CornerRadius="10"
+                                Background="{StaticResource SurfaceSoftBrush}">
+                            <TextBlock Text="{Binding Phase}" FontSize="10" FontWeight="SemiBold"
+                                       Foreground="{StaticResource AccentGreenBrush}"/>
+                        </Border>
+                    </Grid>
+                    <StackPanel Grid.Row="1" Spacing="5">
+                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding Description}" FontSize="12"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   TextWrapping="Wrap" MaxLines="3"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="2" Text="{Binding WorkflowHint}" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{Binding AccentBrush}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
+        <Grid Padding="34,28,34,38" RowSpacing="26">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="28" Padding="32">
+                <Grid ColumnSpacing="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="300"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Spacing="14">
+                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
+                                Padding="12,5" HorizontalAlignment="Left">
+                            <TextBlock Text="AI Lab" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{StaticResource AccentBlueBrush}"/>
+                        </Border>
+                        <TextBlock Text="Enhance video, audio, images, captions, and social-ready edits from one AI queue."
+                                   FontSize="34" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextWrapping="Wrap" MaxWidth="760"/>
+                        <TextBlock Text="This route turns the public UniConverter-style AI feature surface into UCX's local roadmap: feature cards, expected workflow behavior, and sidecar ownership in one place."
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   TextWrapping="Wrap" MaxWidth="760"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                            <Button Content="Open Toolbox" Style="{StaticResource PrimaryButtonStyle}"
+                                    Click="OpenToolbox_Click"/>
+                            <Button Content="Start Converter" Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="OpenConverter_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="24" Padding="22">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="AI Delivery Stack" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Shared ONNX cache" Style="{StaticResource MutedTextStyle}"/>
+                            <ProgressBar Value="35" Maximum="100" Height="8" CornerRadius="4"/>
+                            <TextBlock Text="Wave 1 sidecars are staged; Wave 2 tools need model download, preview, and batch queue contracts."
+                                       Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="1" Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="Featured AI Tools" FontSize="20" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Click a card for implementation scope" Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Bottom"/>
+                </StackPanel>
+                <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          ItemClick="AiTool_Click"
+                          ItemTemplate="{StaticResource AiToolTemplate}"/>
+            </StackPanel>
+
+            <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="20" Padding="22">
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="8">
+                        <TextBlock Text="1. Import" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Drop media, inspect streams, detect duration, codec, subtitles, and target workflow."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="8">
+                        <TextBlock Text="2. Preview" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Show before/after frames, estimated storage, model cost, and fallback behavior before processing."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="8">
+                        <TextBlock Text="3. Export" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Queue batch output with format presets, alpha/subtitle handling, and clear partial-success results."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

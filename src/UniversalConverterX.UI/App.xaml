@@ -3,7 +3,7 @@
     x:Class="UniversalConverterX.UI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    RequestedTheme="Dark">
+    RequestedTheme="Light">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -11,30 +11,47 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Brand Colors -->
-            <Color x:Key="BrandBackground">#020617</Color>
-            <Color x:Key="BrandSurface">#0f172a</Color>
-            <Color x:Key="BrandSurfaceLight">#1e293b</Color>
-            <Color x:Key="BrandBorder">#334155</Color>
-            <Color x:Key="BrandAccentGreen">#22c55e</Color>
-            <Color x:Key="BrandAccentBlue">#60a5fa</Color>
+            <Color x:Key="BrandBackground">#f5f7ff</Color>
+            <Color x:Key="BrandSurface">#ffffff</Color>
+            <Color x:Key="BrandSurfaceLight">#eef4ff</Color>
+            <Color x:Key="BrandSurfaceSoft">#e9fbf6</Color>
+            <Color x:Key="BrandBorder">#d9e2f2</Color>
+            <Color x:Key="BrandAccentGreen">#0fb981</Color>
+            <Color x:Key="BrandAccentBlue">#2563eb</Color>
+            <Color x:Key="BrandAccentCyan">#06b6d4</Color>
+            <Color x:Key="BrandAccentOrange">#f97316</Color>
             <Color x:Key="BrandAccentRed">#ef4444</Color>
-            <Color x:Key="BrandAccentYellow">#facc15</Color>
-            <Color x:Key="BrandTextPrimary">#f8fafc</Color>
-            <Color x:Key="BrandTextSecondary">#94a3b8</Color>
-            <Color x:Key="BrandTextMuted">#64748b</Color>
+            <Color x:Key="BrandAccentYellow">#d97706</Color>
+            <Color x:Key="BrandTextPrimary">#101828</Color>
+            <Color x:Key="BrandTextSecondary">#475467</Color>
+            <Color x:Key="BrandTextMuted">#667085</Color>
 
             <!-- Brushes -->
             <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BrandBackground}"/>
             <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource BrandSurface}"/>
             <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource BrandSurfaceLight}"/>
+            <SolidColorBrush x:Key="SurfaceSoftBrush" Color="{StaticResource BrandSurfaceSoft}"/>
             <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BrandBorder}"/>
             <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource BrandAccentGreen}"/>
             <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandAccentBlue}"/>
+            <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource BrandAccentCyan}"/>
+            <SolidColorBrush x:Key="AccentOrangeBrush" Color="{StaticResource BrandAccentOrange}"/>
             <SolidColorBrush x:Key="AccentRedBrush" Color="{StaticResource BrandAccentRed}"/>
             <SolidColorBrush x:Key="AccentYellowBrush" Color="{StaticResource BrandAccentYellow}"/>
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource BrandTextPrimary}"/>
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource BrandTextSecondary}"/>
             <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource BrandTextMuted}"/>
+
+            <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#eaf3ff" Offset="0"/>
+                <GradientStop Color="#f7fbff" Offset="0.48"/>
+                <GradientStop Color="#dffbf3" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="AiGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#ecfeff" Offset="0"/>
+                <GradientStop Color="#eff6ff" Offset="0.55"/>
+                <GradientStop Color="#f8fafc" Offset="1"/>
+            </LinearGradientBrush>
 
             <!-- Card Style -->
             <Style x:Key="CardStyle" TargetType="Border">
