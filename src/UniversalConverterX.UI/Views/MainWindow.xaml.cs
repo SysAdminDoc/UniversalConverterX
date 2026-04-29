@@ -15,8 +15,9 @@ public sealed partial class MainWindow : Window
         new("Compressor", "Shrink videos for web, email, archive, and social delivery", "compressor"),
         new("Video Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
         new("Downloader", "Download video or audio from supported URLs", "downloader"),
-        new("Recorder", "Screen, webcam, microphone, and system audio capture", "recorder"),
+        new("Recorder", "Screen recording plus planned webcam and audio capture", "recorder"),
         new("Toolbox", "Specialized creation, enhancement, export, audio, and disc tools", "toolbox"),
+        new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
         new("Account", "Optional preset sync and entitlement area", "account"),
     ];
@@ -69,6 +70,7 @@ public sealed partial class MainWindow : Window
             "downloader" => typeof(DownloaderPage),
             "recorder" => typeof(RecorderPage),
             "toolbox" => typeof(ToolboxPage),
+            "format-inspector" => typeof(FormatInspectorPage),
             "account" => typeof(PlaceholderPage),
             _ => typeof(PlaceholderPage)
         };

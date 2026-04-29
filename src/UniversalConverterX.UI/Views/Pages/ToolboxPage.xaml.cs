@@ -74,7 +74,7 @@ public sealed partial class ToolboxPage : Page
         DiscTools.Add(new ToolboxTile("cd-burner", "CD Burner", "Burn audio CDs", "\uE958", red, "Future", yellow, false, null));
 
         // Other (already covered above; placeholder for parity expansions)
-        OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Future", yellow, false, null));
+        OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));
         OtherTools.Add(new ToolboxTile("batch-rename", "Batch Rename", "Rename files with patterns", "\uE8AC", blue, "Future", yellow, false, null));
     }
 
@@ -82,6 +82,12 @@ public sealed partial class ToolboxPage : Page
     {
         if (e.ClickedItem is ToolboxTile tile)
         {
+            if (tile.StatusBadge == "Ready")
+            {
+                App.RequestNavigation(tile.RouteKey);
+                return;
+            }
+
             var statusText = tile.StatusBadge switch
             {
                 "Planned" => "Coming Soon",
