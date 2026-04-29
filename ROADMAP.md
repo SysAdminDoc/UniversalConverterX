@@ -41,7 +41,7 @@ Forward-looking plans for UniversalConverter X — the all-in-one media tool for
 ### UniConverter-Style UX Parity Audit (2026-04-29)
 - **Public reference reviewed:** Wondershare UniConverter 17 public landing page positions the app as an all-in-one AI video converter and enhancer with Convert, Enhance, Compress, Record, AI Lab, Toolbox, solution/persona guidance, and strong download/pricing CTAs.
 - **Built in this pass:** Light AI-suite visual direction, richer Home dashboard, first-class AI Lab navigation, guided search, workflow cards for Convert/Enhance/Compress/Download/Record/Toolbox, and Settings access to the existing settings window.
-- **Highest remaining GUI gaps:** real media preview panes, persistent job history, before/after quality comparisons, per-file output overrides, GPU/hardware acceleration visibility, guided solution presets, AI model cache management, richer partial-success recovery, and matching queue behavior in Downloader/Editor.
+- **Highest remaining GUI gaps:** real media preview panes, persistent job history, before/after quality comparisons, per-file output overrides, GPU/hardware acceleration visibility, guided solution presets, AI model cache management, richer partial-success recovery, and matching queue behavior in Editor/Recorder.
 - **Highest remaining feature gaps:** video/image enhancer, AI subtitle translation, video summarizer, watermark/object remover, old photo restoration, recorder implementation, chapter generation, metadata preservation/repair, and social-format auto-reframe.
 - **Behavior standard:** tools should use a consistent Import -> Preview -> Queue -> Export flow with visible engine, estimated output size, cancellation, retry, and local-processing trust signals.
 

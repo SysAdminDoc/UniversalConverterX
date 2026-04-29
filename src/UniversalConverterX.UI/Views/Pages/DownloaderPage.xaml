@@ -8,6 +8,124 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
+    <Page.Resources>
+        <DataTemplate x:Key="DownloadQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="142"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.RowSpan="3" Grid.Column="0"
+                            Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE896;" FontSize="20"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Url}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10" Padding="10,5">
+                        <TextBlock Text="{Binding OptionSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"/>
+                    </Border>
+
+                    <Button Grid.Column="3" Grid.Row="0"
+                            Background="Transparent" BorderThickness="0"
+                            Click="RemoveQueued_Click" Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="12"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Grid.Column="0" Minimum="0" Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6" CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="112" TextAlignment="Right"/>
+                    </Grid>
+
+                    <TextBlock Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2"
+                               Text="{Binding LogPreview}"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontFamily="Cascadia Mono, Consolas"
+                               FontSize="11"
+                               TextTrimming="CharacterEllipsis"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DownloadFinishedTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="{Binding Glyph}" FontSize="19"
+                                  Foreground="{Binding AccentBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OutputPath}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="2" Content="Open folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="14,8"
+                            Click="OpenFinishedFolder_Click"
+                            Tag="{Binding OutputPath}"
+                            IsEnabled="{Binding CanOpenFolder}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid Padding="32" RowSpacing="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,10 +134,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
+        <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Download videos and audio from 1000+ sites — YouTube, Twitch, Vimeo, X, Facebook, Reddit, podcasts, direct URLs, and more. Powered by the StreamKeep sidecar (yt-dlp backend in v2.1)."
-                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            <TextBlock Text="Queue video and audio downloads from supported URLs, then review completed results."
+                       Style="{StaticResource SubtitleTextStyle}" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}">
@@ -33,17 +151,22 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
+
                 <TextBox x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
-                         PlaceholderText="Paste URL — https://..."
+                         PlaceholderText="Paste one or more URLs - https://..."
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="44"
+                         MaxHeight="96"
                          TextChanged="UrlBox_TextChanged"/>
                 <Button x:Name="PasteButton" Grid.Row="0" Grid.Column="1" Content="Paste"
                         Style="{StaticResource SecondaryButtonStyle}" Click="Paste_Click"/>
-                <Button x:Name="DownloadButton" Grid.Row="0" Grid.Column="2" Content="Download"
-                        Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click" IsEnabled="False"/>
+                <Button x:Name="AddUrlButton" Grid.Row="0" Grid.Column="2" Content="Add to Queue"
+                        Style="{StaticResource PrimaryButtonStyle}" Click="AddUrl_Click" IsEnabled="False"/>
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
-                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="160" SelectedIndex="0">
-                        <ComboBoxItem Content="Best (video + audio merged)" Tag="best"/>
+                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0">
+                        <ComboBoxItem Content="Best (video + audio)" Tag="best"/>
                         <ComboBoxItem Content="1080p" Tag="1080"/>
                         <ComboBoxItem Content="720p" Tag="720"/>
                         <ComboBoxItem Content="480p" Tag="480"/>
@@ -67,49 +190,72 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+
                 <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Activity" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Activity" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="QueueSummaryText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   VerticalAlignment="Bottom"/>
+                    </StackPanel>
                     <Button Grid.Column="1" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="OpenOutput_Click"/>
                 </Grid>
 
-                <Grid Grid.Row="1">
-                    <StackPanel x:Name="QueueEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                        <FontIcon Glyph="&#xE896;" FontSize="40"
-                                  Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Paste a URL above and click Download"
-                                   Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
-                    </StackPanel>
+                <Pivot x:Name="QueuePivot" Grid.Row="1" SelectionChanged="QueuePivot_SelectionChanged">
+                    <PivotItem Header="Downloading">
+                        <Grid MinHeight="330" Padding="0,8,0,0">
+                            <StackPanel x:Name="QueueEmpty"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xE896;" FontSize="42"
+                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="Paste a URL above and add it to the queue"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Multiple pasted URLs are split automatically."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
 
-                    <StackPanel x:Name="ActiveJob" Visibility="Collapsed" Spacing="10">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="JobUrl" Grid.Column="0"
-                                       Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock x:Name="JobStatus" Grid.Column="1"
-                                       Style="{StaticResource MutedTextStyle}"/>
+                            <ListView x:Name="QueueList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource DownloadQueueTemplate}"/>
                         </Grid>
-                        <ProgressBar x:Name="JobProgress" Height="8" CornerRadius="4"
-                                     Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="JobDetail" Style="{StaticResource MutedTextStyle}"/>
-                        <ScrollViewer Height="160" VerticalScrollBarVisibility="Auto"
-                                      Background="{StaticResource SurfaceLightBrush}"
-                                      Padding="10" CornerRadius="6">
-                            <TextBlock x:Name="JobLog" Style="{StaticResource MutedTextStyle}"
-                                       FontFamily="Cascadia Mono, Consolas" FontSize="11"
-                                       TextWrapping="Wrap"/>
-                        </ScrollViewer>
-                    </StackPanel>
-                </Grid>
+                    </PivotItem>
+
+                    <PivotItem Header="Finished">
+                        <Grid MinHeight="330" Padding="0,8,0,0">
+                            <StackPanel x:Name="FinishedEmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xE73E;" FontSize="42"
+                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="No finished downloads yet"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Saved, failed, and cancelled downloads appear here."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FinishedList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource DownloadFinishedTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+                </Pivot>
             </Grid>
         </Border>
 
@@ -117,11 +263,20 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText" Grid.Column="0"
-                       Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button x:Name="CancelButton" Grid.Column="1" Content="Cancel"
+            <Button x:Name="ClearQueueButton" Grid.Column="1" Content="Clear Queue"
+                    Style="{StaticResource SecondaryButtonStyle}" Click="ClearQueue_Click"
+                    Margin="0,0,12,0" IsEnabled="False"/>
+            <Button x:Name="DownloadButton" Grid.Column="2" Content="Download All"
+                    Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click"
+                    Margin="0,0,12,0" IsEnabled="False"/>
+            <Button x:Name="CancelButton" Grid.Column="3" Content="Cancel"
                     Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click"
                     IsEnabled="False"/>
         </Grid>
