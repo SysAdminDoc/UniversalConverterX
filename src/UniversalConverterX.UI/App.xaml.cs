@@ -40,6 +40,7 @@ public partial class App : Application
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<ISidecarRunner, SidecarRunner>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();
