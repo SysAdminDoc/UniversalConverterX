@@ -42,7 +42,7 @@ public sealed partial class HomePage : Page
         Actions.Add(new HomeActionTile("Video Enhancer", "AI upscaling, denoise, face/anime detail, and frame interpolation workflow.", "\uE7B3", blue, blueSurface, "AI Lab", "Plan enhancement", "ai-lab"));
         Actions.Add(new HomeActionTile("Compressor", "Preserve quality while targeting web, email, and archive size budgets.", "\uE91F", cyan, blueSurface, "Ready", "Compress video", "compressor"));
         Actions.Add(new HomeActionTile("Downloader", "Paste a URL, choose quality, merge audio, and save to the local queue.", "\uE896", blue, blueSurface, "Ready", "Download media", "downloader"));
-        Actions.Add(new HomeActionTile("Recorder", "Prepare app-window, screen, webcam, mic, and system-audio capture.", "\uE7C8", red, blueSurface, "v2.4", "Review recorder", "recorder"));
+        Actions.Add(new HomeActionTile("Recorder", "Capture fixed-duration desktop recordings with local FFmpeg processing.", "\uE7C8", red, blueSurface, "Ready", "Record screen", "recorder"));
         Actions.Add(new HomeActionTile("Toolbox", "Open specialized tools for subtitles, watermark, audio, discs, metadata, and more.", "\uE713", orange, greenSurface, "29 tools", "Browse tools", "toolbox"));
 
         AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Condense long videos into searchable recaps.", "\uE8D2", blue, "Roadmap", "ai-lab"));
@@ -70,12 +70,13 @@ public sealed partial class HomePage : Page
             new("Compress video", "Open preset video compression", "compressor"),
             new("Trim a clip", "Open video editor trim workflow", "editor"),
             new("Download from URL", "Open downloader", "downloader"),
-            new("Record screen", "Open recorder planning surface", "recorder"),
+            new("Record screen", "Open desktop screen recorder", "recorder"),
             new("Video enhancer", "Open AI Lab", "ai-lab"),
             new("Subtitle generator", "Open AI Lab", "ai-lab"),
             new("Watermark remover", "Open AI Lab", "ai-lab"),
             new("Background remover", "Open AI Lab", "ai-lab"),
             new("Vocal remover", "Open AI Lab", "ai-lab"),
+            new("Inspect file format", "Probe codecs, streams, and conversion targets", "format-inspector"),
             new("Toolbox", "Browse all specialized tools", "toolbox"),
         ]);
     }

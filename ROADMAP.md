@@ -15,6 +15,7 @@ Forward-looking plans for UniversalConverter X — the all-in-one media tool for
 - **Editor** powered by ClipForge sidecar — trim, crop, rotate, upscale (Real-ESRGAN), filter, audio adjust, batch.
 - **Downloader** powered by StreamKeep sidecar — Kick/Twitch/Rumble native + yt-dlp fallback for 1000+ sites.
 - **Recorder** powered by first-party RecordCast sidecar — fixed-duration Windows desktop capture via FFmpeg gdigrab.
+- **Format Inspector** toolbox workspace for signatures, FFprobe stream metadata, and conversion target suggestions.
 - Settings UI — preferences pane, theme switcher, tool-path overrides.
 
 ### v2.2 — AI Toolbox Wave 1
@@ -43,7 +44,7 @@ Forward-looking plans for UniversalConverter X — the all-in-one media tool for
 - **Public reference reviewed:** Wondershare UniConverter 17 public landing page positions the app as an all-in-one AI video converter and enhancer with Convert, Enhance, Compress, Record, AI Lab, Toolbox, solution/persona guidance, and strong download/pricing CTAs.
 - **Built in this pass:** Light AI-suite visual direction, richer Home dashboard, first-class AI Lab navigation, guided search, workflow cards for Convert/Enhance/Compress/Download/Record/Toolbox, and Settings access to the existing settings window.
 - **Highest remaining GUI gaps:** real media preview panes, persistent job history, before/after quality comparisons, per-file output overrides, GPU/hardware acceleration visibility, guided solution presets, AI model cache management, richer partial-success recovery, and richer recorder device selection.
-- **Highest remaining feature gaps:** video/image enhancer, AI subtitle translation, video summarizer, watermark/object remover, old photo restoration, webcam/audio recorder capture, chapter generation, metadata preservation/repair, and social-format auto-reframe.
+- **Highest remaining feature gaps:** video/image enhancer, AI subtitle translation, video summarizer, watermark/object remover, old photo restoration, webcam/audio recorder capture, chapter generation, metadata repair/editing, and social-format auto-reframe.
 - **Behavior standard:** tools should use a consistent Import -> Preview -> Queue -> Export flow with visible engine, estimated output size, cancellation, retry, and local-processing trust signals.
 
 ### Converter Backends
