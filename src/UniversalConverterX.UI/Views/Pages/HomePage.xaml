@@ -106,7 +106,7 @@
             </StackPanel>
 
             <!-- Footer -->
-            <TextBlock Grid.Row="4" Text="UniversalConverter X v2.0.0 • Local processing, no telemetry"
+            <TextBlock Grid.Row="4" Text="UniversalConverter X v2.1.0 • Local processing, no telemetry"
                        Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"
                        Margin="0,8,0,0"/>
         </Grid>
