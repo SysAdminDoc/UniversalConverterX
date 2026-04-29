@@ -1,24 +1,60 @@
 # tools/ — Sidecar Engines
 
-Each subdirectory will host a vendored copy of an external tool that UniversalConverterX hosts as a sidecar process. The C# shell launches the sidecar's CLI (`<tool>.exe`) and parses NDJSON progress events on stdout.
+Each subdirectory hosts a vendored copy of an external engine that UniversalConverterX hosts as a sidecar process. The C# shell launches each sidecar's frozen binary and parses NDJSON progress events on stdout.
+
+## Audit (v2.0.0)
+
+All 10 backing repos have been ported into this directory. Build artifacts (`build/`, `dist/`, frozen `.exe`s, `__pycache__`, `venv`, `.git`, AI working files) were stripped. Source code, `LICENSE`, `requirements.txt`, original `README` (renamed to `README-source.md`), and small assets were preserved.
+
+| Directory | Source repo | Entry point | UCX module | Phase | Size |
+|---|---|---|---|---|---|
+| [`videocrush/`](videocrush/) | `~/repos/VideoCrush/` | `video_compressor.py` | Compressor | v2.1 | 1.4 MB |
+| [`clipforge/`](clipforge/) | `~/repos/ClipForge/` | `clipforge.py` | Editor | v2.1 | 270 KB |
+| [`streamkeep/`](streamkeep/) | `~/repos/StreamKeep/` | `StreamKeep.py` | Downloader | v2.1 | 3.2 MB |
+| [`alphacut/`](alphacut/) | `~/repos/AlphaCut/` | `AlphaCut.py` | Toolbox > Background Remover | v2.2 | 206 KB |
+| [`videosubtitleremover/`](videosubtitleremover/) | `~/repos/VideoSubtitleRemover/` | `VideoSubtitleRemover.py` | Toolbox > Subtitle Remover | v2.2 | 1.8 MB |
+| [`lipsight/`](lipsight/) | `~/repos/LipSight/` | `LipSight.py` | Toolbox > Lip Reading | v2.2 | 1.3 MB |
+| [`vertigo/`](vertigo/) | `~/repos/Vertigo/` | `vertigo.py` | Toolbox > Auto Reframe | v2.3 | 1.2 MB |
+| [`framesnap/`](framesnap/) | `~/repos/FrameSnap/` | `framesnap.py` | Toolbox > Frame Snapshot | v2.3 | 642 KB |
+| [`gifstudio/`](gifstudio/) | `~/repos/GifStudio/` | `index.html` (WebView2) | Toolbox > GIF Maker | v2.3 | 1.1 MB |
+| [`heicshift/`](heicshift/) | `~/repos/HEICShift/` | `heicshift.py` | Toolbox > Image Converter | v2.3 | 1.3 MB |
+
+**Total ported: ~12.4 MB of source.**
+
+## Subprojects deliberately not ported
+
+| Repo | Reason |
+|---|---|
+| `MediaForge` | Superseded — UCX's native FFmpeg strategy covers identical functionality |
+| `MediaDL` | Userscript + PowerShell server; doesn't fit the sidecar pattern. StreamKeep is the canonical UCX downloader |
+| `yt_livestream_downloader` | Subset of StreamKeep functionality |
+| `Tunerize` | Audio chiptune synth — niche, not a Wondershare module |
+| `Stock-Video-Collector` | Web-scraping niche tool, not a Wondershare module |
+| `NovaCut` | Android video editor — separate platform target |
+| `OpenCut` | Adobe Premiere Pro CEP plugin — separate target |
 
 ## Vendoring contract
 
-Each sidecar tool ships under `tools/<name>/` with:
+Each sidecar tool will ship under `tools/<name>/` with:
 
 ```
 tools/<name>/
-  <name>.exe          # frozen with PyInstaller (or native binary)
-  README.md           # adapted from the source repo
-  LICENSE             # source-tool license retained
-  models/             # any AI/ML weights (downloaded on first use, gitignored)
+  <entry>.py / index.html  # main entry point (now present)
+  sidecar.py               # NDJSON CLI shim — added at the integration phase
+  build.ps1                # PyInstaller freezer — added at the integration phase
+  <name>.exe               # frozen binary — produced by build.ps1, gitignored
+  README.md                # UCX-side sidecar contract (now present)
+  README-source.md         # original project README (now present)
+  LICENSE                  # source-tool license retained
+  requirements.txt         # Python deps where applicable
+  models/                  # any AI/ML weights (downloaded on first use, gitignored)
 ```
 
 The C# orchestrator looks up the binary by walking up from `AppContext.BaseDirectory` and falling back to `%LocalAppData%\UniversalConverterX\tools`.
 
 ## NDJSON CLI contract
 
-Each sidecar must accept JSON arguments on stdin OR command-line flags, and emit progress as one JSON object per line on stdout:
+Each sidecar shim must emit one JSON object per line on stdout:
 
 ```json
 {"event": "progress", "percent": 42.5, "stage": "encoding", "eta_seconds": 12}
@@ -27,21 +63,10 @@ Each sidecar must accept JSON arguments on stdin OR command-line flags, and emit
 {"event": "error", "code": "missing_dep", "message": "ffmpeg not found"}
 ```
 
-This matches the existing `IConversionOrchestrator` progress contract and minimizes glue code per tool.
+This matches UCX's existing `IConversionOrchestrator` progress contract and minimizes glue code per tool.
 
-## Planned sidecars
+## What lands per phase
 
-| Directory | Source repo | UCX module | Phase |
-|---|---|---|---|
-| `videocrush/` | `~/repos/VideoCrush/` | Compressor | v2.0 |
-| `clipforge/` | `~/repos/ClipForge/` | Editor | v2.0 |
-| `streamkeep/` | `~/repos/StreamKeep/` | Downloader | v2.0 |
-| `alphacut/` | `~/repos/AlphaCut/` | Toolbox > Background Remover | v2.1 |
-| `videosubtitleremover/` | `~/repos/VideoSubtitleRemover/` | Toolbox > Subtitle Remover | v2.1 |
-| `lipsight/` | `~/repos/LipSight/` | Toolbox > Lip Reading | v2.1 |
-| `vertigo/` | `~/repos/Vertigo/` | Toolbox > Auto Reframe | v2.2 |
-| `framesnap/` | `~/repos/FrameSnap/` | Toolbox > Frame Snapshot | v2.2 |
-| `gifstudio/` | `~/repos/GifStudio/` | Toolbox > GIF Maker | v2.2 |
-| `heicshift/` | `~/repos/HEICShift/` | Toolbox > Image Converter (defaults absorbed into UCX FFmpeg/libvips strategies) | v2.2 |
-
-Each subdirectory currently holds a stub README. Real binaries land in their target phase.
+- **v2.1** — `videocrush/sidecar.py` + `clipforge/sidecar.py` + `streamkeep/sidecar.py` + freeze scripts; UI tabs (Compressor / Editor / Downloader) wired to invoke them.
+- **v2.2** — `alphacut/sidecar.py` + `videosubtitleremover/sidecar.py` + `lipsight/sidecar.py`; shared ONNX model cache at `tools/_models/` (gitignored).
+- **v2.3** — `vertigo/sidecar.py` + `framesnap/sidecar.py` + `heicshift/` defaults absorbed into UCX FFmpeg/libvips strategies; `gifstudio/index.html` hosted via WebView2 (no shim needed).

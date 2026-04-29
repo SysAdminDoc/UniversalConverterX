@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#f5c2e7"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8"/>
+      <feOffset dy="2"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- dark rounded container -->
+  <rect x="16" y="16" width="480" height="480" rx="112" ry="112" fill="#11111b"/>
+
+  <!-- subtle inner vignette -->
+  <rect x="16" y="16" width="480" height="480" rx="112" ry="112"
+        fill="none" stroke="#1e1e2e" stroke-width="1"/>
+
+  <!-- horizontal ghost frame (source) -->
+  <g stroke="#45475a" stroke-width="6" fill="none" filter="url(#softShadow)">
+    <rect x="84" y="188" width="344" height="194" rx="14" ry="14"/>
+  </g>
+
+  <!-- motion arc sweep -->
+  <path d="M 150 190 Q 256 110 362 190"
+        fill="none" stroke="#7f849c" stroke-width="5"
+        stroke-linecap="round" opacity="0.7"/>
+
+  <!-- target vertical frame filled with accent gradient -->
+  <g filter="url(#softShadow)">
+    <rect x="180" y="96" width="152" height="320" rx="24" ry="24"
+          fill="url(#accent)"/>
+  </g>
+
+  <!-- inner glass highlight -->
+  <rect x="194" y="108" width="124" height="40" rx="16" ry="16"
+        fill="#ffffff" opacity="0.18"/>
+
+  <!-- play triangle glyph -->
+  <polygon points="238,228 238,298 298,263" fill="#11111b"/>
+</svg>

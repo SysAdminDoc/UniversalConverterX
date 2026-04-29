@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="icon" href="icons/32.png">
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: dark; }
+  body { background:#1e1e2e; color:#cdd6f4; font-family:system-ui,Segoe UI,Arial; width:320px; margin:0; padding:14px; }
+  h1 { font-size:14px; margin:0 0 10px 0; color:#cba6f7; letter-spacing:0.02em; }
+  label { display:block; font-size:11px; color:#a6adc8; margin-top:10px; }
+  input[type=text], input[type=number] { width:100%; box-sizing:border-box; padding:6px 8px; background:#181825; border:1px solid #313244; color:#cdd6f4; border-radius:6px; font-size:12px; }
+  .row { display:flex; gap:8px; margin-top:10px; }
+  button { flex:1; background:#89b4fa; color:#11111b; border:none; border-radius:6px; padding:8px 10px; font-weight:600; cursor:pointer; }
+  button.secondary { background:#313244; color:#cdd6f4; }
+  button:disabled { opacity:0.5; cursor:default; }
+  .status { margin-top:10px; font-size:11px; color:#a6adc8; min-height:14px; }
+  .ok { color:#a6e3a1; } .err { color:#f38ba8; }
+</style>
+</head>
+<body>
+  <h1>StreamKeep Companion</h1>
+
+  <label>Host</label>
+  <input type="text" id="host" value="127.0.0.1" />
+
+  <label>Port</label>
+  <input type="number" id="port" value="0" min="1" max="65535" />
+
+  <label>Pairing token (paste from Settings → Browser companion)</label>
+  <input type="text" id="token" placeholder="32-character hex token" />
+
+  <div class="row">
+    <button id="test" class="secondary">Test pairing</button>
+    <button id="save" class="secondary">Save</button>
+  </div>
+  <div class="row">
+    <button id="send-fetch">Send to Fetch</button>
+    <button id="send-queue" class="secondary">Send to Queue</button>
+  </div>
+  <div class="row">
+    <button id="send-all-tabs" class="secondary">Send all tabs</button>
+  </div>
+  <div class="status" id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

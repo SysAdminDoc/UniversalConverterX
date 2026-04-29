@@ -1,16 +1,26 @@
-# ClipForge (sidecar)
+# ClipForge sidecar
 
-UCX module: **Video Editor**
-Phase: **v2.0**
+| | |
+|---|---|
+| **UCX module** | Editor |
+| **Integration phase** | v2.1 |
+| **Source ported** | YES — see this directory |
+| **Entry point** | `clipforge.py` |
+| **Runtime** | Python 3.10+ + FFmpeg + Real-ESRGAN |
+| **NDJSON CLI shim** | not yet — lands at integration phase |
 
-## What lands here
+## What this engine does
 
-A vendored, frozen copy of [ClipForge](https://github.com/SysAdminDoc/ClipForge) — Trim, crop, upscale, filter, audio, batch.
+All-in-one editor: trim (lossless or re-encode), crop / rotate / flip with aspect presets, AI upscale via Real-ESRGAN, frame interpolation, format convert, filter, audio adjust, batch queue. Includes browser-based preview via index.html + editor.js.
 
-## Integration
+## How UCX will use it
 
-The C# shell hosts this tool as a sidecar process invoked via `ProcessStartInfo` and parses NDJSON progress on stdout. See `../README.md` for the contract.
+The C# shell will launch a frozen build of this tool as a sidecar process via `ProcessStartInfo`, parsing NDJSON progress events on stdout. The contract lives in [`../README.md`](../README.md). The shim that adapts `clipforge.py` to the contract will be added when this module is wired up in v2.1.
 
-## Status
+## Original docs
 
-Empty — landing in v2.0. Source lives at `~/repos/ClipForge/` until then.
+- [`README-source.md`](README-source.md) — full project README from when this was a standalone repo
+- [`LICENSE`](LICENSE) — source-tool license (preserved for attribution)
+- [`CHANGELOG.md`](CHANGELOG.md) — pre-port changelog
+- [`ROADMAP.md`](ROADMAP.md) — pre-port roadmap (now superseded by parent ROADMAP)
+- `requirements.txt` (where present) — Python dependencies

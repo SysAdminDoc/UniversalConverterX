@@ -1,0 +1,57 @@
+# Optional integrations — installed on demand, not auto-bootstrapped.
+#
+# Every core/* module that depends on one of these has a clean fallback
+# when the package isn't present (see each module's ``is_available()``
+# and ``ensure_installed()`` helpers). Install with:
+#
+#     pip install -r requirements-optional.txt
+#
+# …or cherry-pick the ones you actually want.
+#
+# LICENSING — Vertigo itself is MIT. The opt-in deps below carry their
+# own licenses; end-users installing these on their own machines
+# inherit the corresponding terms. Vertigo never redistributes any of
+# them. The AGPL-3.0 and non-commercial-weights surfaces are called out
+# explicitly so downstream packagers (SaaS, kiosks) know where they
+# stand:
+
+# ---------------------------------------------- Tier 1
+# core.vad — Silero VAD for speech detection / silence trim
+silero-vad>=5.1                 # MIT (https://github.com/snakers4/silero-vad)
+
+# core.animated_captions — pycaps per-word animated captions
+pycaps>=0.7                     # Apache-2.0 (https://github.com/francozanardi/pycaps)
+
+# core.tracker_boxmot — BoT-SORT / ByteTrack / DeepOCSORT speaker tracking
+# !! AGPL-3.0 !! Desktop builds ship fine (Vertigo never bundles boxmot);
+# SaaS / hosted use of Vertigo-plus-BoxMOT triggers AGPL network-copyleft.
+# Installing this on your own machine is purely the user's decision.
+boxmot>=11                      # AGPL-3.0 (https://github.com/mikel-brostrom/boxmot)
+
+# ---------------------------------------------- Tier 2
+# core.auto_edit — silence/motion cut planner (invokes CLI as subprocess)
+auto-editor>=27                 # Unlicense (https://github.com/WyattBlue/auto-editor)
+
+# core.highlights — Lighthouse moment retrieval (pulls PyTorch; ~1 GB weights on first run)
+# The fallback heuristic is used when this isn't installed.
+lighthouse-ml>=0.4              # Apache-2.0 (https://github.com/line/lighthouse)
+
+# ---------------------------------------------- Tier 3
+# core.diarize — pyannote speaker diarization (requires HF_TOKEN at runtime)
+# Python package is MIT; HuggingFace model weights for the default
+# `pyannote/speaker-diarization-3.1` checkpoint ship under a gated
+# license that is typically CC-BY-NC-4.0 (non-commercial). Accept the
+# terms on the HF model card before use. Vertigo does not bundle weights.
+pyannote.audio>=3.3             # MIT code; HF weights often CC-BY-NC-4.0
+
+# core.broll — transcript-driven b-roll
+# KeyBERT for keyword extraction (falls back to a stdlib-only noun-phrase picker)
+keybert>=0.8                    # MIT (https://github.com/MaartenGr/KeyBERT)
+# pypexels is an optional thin wrapper; the module uses urllib if absent
+pypexels>=1.0.2                 # MIT (https://github.com/salmoni/pypexels)
+# open_clip_torch for CLIP re-ranking (~500 MB model on first run)
+open_clip_torch>=2.26           # Apache-2.0 code; pretrained weights vary per-checkpoint
+torch>=2.2                      # BSD-3-Clause (https://github.com/pytorch/pytorch)
+
+# core.keyframes — Katna thumbnail picker (cv2 fallback ships with Vertigo)
+Katna>=0.9.2                    # Apache-2.0 (https://github.com/keplerlab/katna)

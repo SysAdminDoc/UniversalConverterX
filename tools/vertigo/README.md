@@ -1,16 +1,26 @@
-# Vertigo (sidecar)
+# Vertigo sidecar
 
-UCX module: **Auto Reframe**
-Phase: **16/1:1/4:5:v2.2**
+| | |
+|---|---|
+| **UCX module** | Toolbox > Auto Reframe |
+| **Integration phase** | v2.3 |
+| **Source ported** | YES — see this directory |
+| **Entry point** | `vertigo.py` |
+| **Runtime** | Python 3.10+ + PyQt6 + MediaPipe |
+| **NDJSON CLI shim** | not yet — lands at integration phase |
 
-## What lands here
+## What this engine does
 
-A vendored, frozen copy of [Vertigo](https://github.com/SysAdminDoc/Vertigo) — Horizontal to 9.
+Vertical-video studio for short-form creators. Reframes any-aspect footage into 9:16 (Shorts/Reels/TikTok), 1:1, or 4:5 with four modes: Center Crop, Smart Track (MediaPipe face detection with scene-aware keyframes), Blur Letterbox, Manual. Batch queue with platform presets.
 
-## Integration
+## How UCX will use it
 
-The C# shell hosts this tool as a sidecar process invoked via `ProcessStartInfo` and parses NDJSON progress on stdout. See `../README.md` for the contract.
+The C# shell will launch a frozen build of this tool as a sidecar process via `ProcessStartInfo`, parsing NDJSON progress events on stdout. The contract lives in [`../README.md`](../README.md). The shim that adapts `vertigo.py` to the contract will be added when this module is wired up in v2.3.
 
-## Status
+## Original docs
 
-Empty — landing in 16/1:1/4:5:v2.2. Source lives at `~/repos/Vertigo/` until then.
+- [`README-source.md`](README-source.md) — full project README from when this was a standalone repo
+- [`LICENSE`](LICENSE) — source-tool license (preserved for attribution)
+- [`CHANGELOG.md`](CHANGELOG.md) — pre-port changelog
+- [`ROADMAP.md`](ROADMAP.md) — pre-port roadmap (now superseded by parent ROADMAP)
+- `requirements.txt` (where present) — Python dependencies

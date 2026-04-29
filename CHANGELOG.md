@@ -12,7 +12,9 @@ Major scope expansion: from a context-menu file converter into a full all-in-one
 - **Toolbox page** — categorized tile grid with 29 specialized tools across Image, Video, AI, Audio, Disc, and Other.
 - **Module shells** — Compressor, Video Editor, Downloader, and Recorder pages with mocked-up final-state UI.
 - **Placeholder page** — generic "Coming Soon" landing for tiles whose backing engines arrive in later phases.
-- `tools/` directory — sidecar staging area for VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift.
+- **`tools/` directory — all 10 sidecar engines ported in.** Source code (~12 MB total) for VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift now lives under the UCX repo. Build artifacts (`build/`, `dist/`, `__pycache__`, frozen `.exe`s, `.git`, AI working files) were stripped during the port. Each tool retains its `LICENSE`, original README (renamed to `README-source.md`), `requirements.txt`, and small assets.
+- Per-tool sidecar README documenting UCX module mapping, integration phase, entry point, and runtime.
+- Top-level [`tools/README.md`](tools/README.md) audit table with deliberate skip list (MediaForge, MediaDL, yt_livestream_downloader, Tunerize, Stock-Video-Collector, NovaCut, OpenCut).
 - NDJSON sidecar contract documented in `tools/README.md`.
 
 ### Changed
