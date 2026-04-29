@@ -335,8 +335,8 @@ public sealed partial class ProgressWindow : Window
     {
         try
         {
-            // Play Windows notification sound
-            System.Media.SystemSounds.Asterisk.Play();
+            // System.Media.SystemSounds is unavailable in net8.0-windows10.0 WinUI 3 target.
+            // Notification sound is handled by Windows toast machinery in ShowCompletionNotification().
         }
         catch { }
     }

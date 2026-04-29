@@ -46,4 +46,21 @@ public sealed partial class HomePage : Page
         App.RequestNavigation("toolbox");
 }
 
-public sealed record ModuleTile(string Title, string Description, string Glyph, Brush AccentBrush, string RouteKey);
+public sealed class ModuleTile
+{
+    public string Title { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string Glyph { get; set; } = "";
+    public Brush AccentBrush { get; set; } = null!;
+    public string RouteKey { get; set; } = "";
+
+    public ModuleTile() { }
+    public ModuleTile(string title, string description, string glyph, Brush accentBrush, string routeKey)
+    {
+        Title = title;
+        Description = description;
+        Glyph = glyph;
+        AccentBrush = accentBrush;
+        RouteKey = routeKey;
+    }
+}

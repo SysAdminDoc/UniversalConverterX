@@ -10,7 +10,7 @@ public sealed partial class PlaceholderPage : Page
         InitializeComponent();
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs e)
+    protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         if (e.Parameter is PlaceholderInfo info)

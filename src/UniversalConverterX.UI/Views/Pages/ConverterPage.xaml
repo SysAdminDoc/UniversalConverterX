@@ -65,11 +65,12 @@
                                                Style="{StaticResource MutedTextStyle}"/>
                                 </StackPanel>
 
-                                <TextBlock Grid.Column="2" Text="{Binding Extension}"
-                                           Style="{StaticResource MutedTextStyle}"
-                                           VerticalAlignment="Center"
-                                           Padding="8,4"
-                                           Background="{StaticResource SurfaceLightBrush}"/>
+                                <Border Grid.Column="2" VerticalAlignment="Center"
+                                        Background="{StaticResource SurfaceLightBrush}" CornerRadius="4">
+                                    <TextBlock Text="{Binding Extension}"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               Padding="8,4"/>
+                                </Border>
 
                                 <Button Grid.Column="3" Background="Transparent" BorderThickness="0"
                                         Click="RemoveFile_Click" Tag="{Binding}">
