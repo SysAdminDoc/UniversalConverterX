@@ -18,6 +18,7 @@ public sealed partial class MainWindow : Window
         new("Recorder", "Screen recording plus planned webcam and audio capture", "recorder"),
         new("Toolbox", "Specialized creation, enhancement, export, audio, and disc tools", "toolbox"),
         new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
+        new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
         new("Account", "Optional preset sync and entitlement area", "account"),
     ];
@@ -71,6 +72,7 @@ public sealed partial class MainWindow : Window
             "recorder" => typeof(RecorderPage),
             "toolbox" => typeof(ToolboxPage),
             "format-inspector" => typeof(FormatInspectorPage),
+            "frame-snapshot" => typeof(FrameSnapshotPage),
             "account" => typeof(PlaceholderPage),
             _ => typeof(PlaceholderPage)
         };

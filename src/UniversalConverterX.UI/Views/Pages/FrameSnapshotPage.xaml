@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.FrameSnapshotPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="SnapshotQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="138"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.RowSpan="2"
+                            Grid.Column="0"
+                            Width="44"
+                            Height="44"
+                            CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE722;"
+                                  FontSize="20"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2"
+                            Grid.Row="0"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10"
+                            Padding="10,5"
+                            VerticalAlignment="Top">
+                        <TextBlock Text="{Binding PlanSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Border>
+
+                    <Button Grid.Column="3"
+                            Grid.Row="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="RemoveQueued_Click"
+                            Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;"
+                                  FontSize="12"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Grid.Column="0"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6"
+                                     CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="130"
+                                   TextAlignment="Right"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SnapshotFinishedTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0"
+                            Width="44"
+                            Height="44"
+                            CornerRadius="14"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="{Binding Glyph}"
+                                  FontSize="19"
+                                  Foreground="{Binding AccentBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="{Binding Title}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OutputPath}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Content="Open folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="14,8"
+                            Click="OpenFinishedFolder_Click"
+                            Tag="{Binding OutputPath}"
+                            IsEnabled="{Binding CanOpenFolder}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="6">
+                <TextBlock Text="Frame Snapshot" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Export precise video stills or image-sequence samples with local FFmpeg processing."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Add Files"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BrowseFiles_Click"/>
+                <Button Content="Add Folder"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BrowseFolder_Click"/>
+                <Button Content="Extract"
+                        x:Name="ExtractButton"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Extract_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="366"/>
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="DropZone"
+                    Grid.Column="0"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="22"
+                    Padding="18"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop"
+                    PointerPressed="DropZone_PointerPressed">
+                <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
+                    <PivotItem Header="Snapshots">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="QueueEmpty"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="12">
+                                <Border Width="132" Height="132" CornerRadius="66"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE722;"
+                                              FontSize="54"
+                                              Foreground="{StaticResource AccentBlueBrush}"/>
+                                </Border>
+                                <TextBlock Text="Drop videos to extract frames"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Create stills for thumbnails, contact sheets, review notes, and image-sequence handoff."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           MaxWidth="440"/>
+                                <Button Content="Browse Videos"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="BrowseFiles_Click"
+                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <ListView x:Name="QueueList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource SnapshotQueueTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+
+                    <PivotItem Header="Finished">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="FinishedEmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xE73E;"
+                                          FontSize="42"
+                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="No exported snapshots yet"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Completed, failed, and cancelled snapshot jobs appear here."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FinishedList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource SnapshotFinishedTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+                </Pivot>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Engine"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="FfmpegStatusText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Snapshot Plan"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <ComboBox x:Name="FormatCombo"
+                                  Header="Image format"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Option_Changed"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="PNG lossless" Tag="png"/>
+                            <ComboBoxItem Content="JPEG compact" Tag="jpg"/>
+                            <ComboBoxItem Content="WebP web-ready" Tag="webp"/>
+                        </ComboBox>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="StartSecondBox"
+                                     Grid.Column="0"
+                                     Header="Start second"
+                                     Text="0"
+                                     TextChanged="Option_TextChanged"/>
+                            <TextBox x:Name="IntervalSecondBox"
+                                     Grid.Column="1"
+                                     Header="Interval"
+                                     Text="5"
+                                     TextChanged="Option_TextChanged"/>
+                        </Grid>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CountBox"
+                                     Grid.Column="0"
+                                     Header="Frames per video"
+                                     Text="3"
+                                     TextChanged="Option_TextChanged"/>
+                            <ComboBox x:Name="QualityCombo"
+                                      Grid.Column="1"
+                                      Header="Quality"
+                                      SelectedIndex="1"
+                                      SelectionChanged="Option_Changed"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Highest" Tag="2"/>
+                                <ComboBoxItem Content="Balanced" Tag="4"/>
+                                <ComboBoxItem Content="Compact" Tag="8"/>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="PlanSummaryText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="File Location"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBox x:Name="OutputDirectoryBox"
+                                 Header="Save to"
+                                 IsReadOnly="True"/>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    Content="Browse"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"/>
+                            <Button Grid.Column="1"
+                                    Content="Same as source"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="SameAsSource_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Queue Summary"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="QueueSummaryText"
+                                   Text="0 queued / 0 finished"
+                                   Style="{StaticResource BodyTextStyle}"/>
+                        <TextBlock Text="Local-only extraction. UCX never uploads video content for snapshots."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText"
+                       Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1"
+                    Content="Open Output Folder"
+                    x:Name="OpenOutputButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="OpenOutputFolder_Click"
+                    Margin="0,0,12,0"/>
+            <Button Grid.Column="2"
+                    Content="Clear"
+                    x:Name="ClearQueueButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ClearQueue_Click"
+                    Margin="0,0,12,0"/>
+            <Button Grid.Column="3"
+                    Content="Cancel"
+                    x:Name="CancelButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Cancel_Click"
+                    IsEnabled="False"/>
+        </Grid>
+    </Grid>
+</Page>
