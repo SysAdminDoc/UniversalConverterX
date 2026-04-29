@@ -26,7 +26,7 @@
                     <StackPanel>
                         <TextBlock Text="UniversalConverter X" FontSize="13" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="v2.0.0" FontSize="10"
+                        <TextBlock Text="v2.1.0" FontSize="10"
                                    Foreground="{StaticResource TextMutedBrush}"/>
                     </StackPanel>
                 </StackPanel>

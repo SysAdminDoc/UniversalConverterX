@@ -13,19 +13,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
-                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="Preview" FontSize="10" FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentYellowBrush}"/>
-                </Border>
-            </StackPanel>
-            <TextBlock Text="Download videos and audio from 1000+ sites. Will be powered by StreamKeep in v2.0."
-                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+            <TextBlock Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock Text="Download videos and audio from 1000+ sites — YouTube, Twitch, Vimeo, X, Facebook, Reddit, podcasts, direct URLs, and more. Powered by the StreamKeep sidecar (yt-dlp backend in v2.1)."
+                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}">
@@ -34,29 +28,34 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBox Grid.Row="0" Grid.Column="0"
-                         PlaceholderText="Paste URL — YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, and 1000+ more..."
-                         IsEnabled="False"/>
-                <Button Grid.Row="0" Grid.Column="1" Content="Paste"
-                        Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
-                <Button Grid.Row="0" Grid.Column="2" Content="Analyze"
-                        Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
-                <Button Grid.Row="0" Grid.Column="3" Content="Download"
-                        Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
+                <TextBox x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
+                         PlaceholderText="Paste URL — https://..."
+                         TextChanged="UrlBox_TextChanged"/>
+                <Button x:Name="PasteButton" Grid.Row="0" Grid.Column="1" Content="Paste"
+                        Style="{StaticResource SecondaryButtonStyle}" Click="Paste_Click"/>
+                <Button x:Name="DownloadButton" Grid.Row="0" Grid.Column="2" Content="Download"
+                        Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click" IsEnabled="False"/>
 
-                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="20">
-                    <ComboBox Header="Format" PlaceholderText="MP4" Width="160" IsEnabled="False"/>
-                    <ComboBox Header="Quality" PlaceholderText="Best" Width="160" IsEnabled="False"/>
-                    <ComboBox Header="Audio" PlaceholderText="Original" Width="160" IsEnabled="False"/>
-                    <CheckBox Content="Subtitles" IsEnabled="False"
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
+                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="160" SelectedIndex="0">
+                        <ComboBoxItem Content="Best (video + audio merged)" Tag="best"/>
+                        <ComboBoxItem Content="1080p" Tag="1080"/>
+                        <ComboBoxItem Content="720p" Tag="720"/>
+                        <ComboBoxItem Content="480p" Tag="480"/>
+                    </ComboBox>
+                    <ComboBox x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0">
+                        <ComboBoxItem Content="MP4" Tag="mp4"/>
+                        <ComboBoxItem Content="MKV" Tag="mkv"/>
+                        <ComboBoxItem Content="WebM" Tag="webm"/>
+                    </ComboBox>
+                    <CheckBox x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox Content="Audio only" IsEnabled="False"
+                    <CheckBox x:Name="SubtitlesCheck" Content="Embed subtitles"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                 </StackPanel>
             </Grid>
@@ -73,20 +72,58 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Download Queue" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="0" Text="Activity" FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <Button Grid.Column="1" Content="Clear Completed"
-                            Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
+                    <Button Grid.Column="1" Content="Open Output Folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="OpenOutput_Click"/>
                 </Grid>
-                <Border Grid.Row="1" Background="{StaticResource SurfaceLightBrush}" CornerRadius="6">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+
+                <Grid Grid.Row="1">
+                    <StackPanel x:Name="QueueEmpty" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
                         <FontIcon Glyph="&#xE896;" FontSize="40"
                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Queue is empty" Style="{StaticResource MutedTextStyle}"
-                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Paste a URL above and click Download"
+                                   Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
                     </StackPanel>
-                </Border>
+
+                    <StackPanel x:Name="ActiveJob" Visibility="Collapsed" Spacing="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="JobUrl" Grid.Column="0"
+                                       Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="JobStatus" Grid.Column="1"
+                                       Style="{StaticResource MutedTextStyle}"/>
+                        </Grid>
+                        <ProgressBar x:Name="JobProgress" Height="8" CornerRadius="4"
+                                     Minimum="0" Maximum="100"/>
+                        <TextBlock x:Name="JobDetail" Style="{StaticResource MutedTextStyle}"/>
+                        <ScrollViewer Height="160" VerticalScrollBarVisibility="Auto"
+                                      Background="{StaticResource SurfaceLightBrush}"
+                                      Padding="10" CornerRadius="6">
+                            <TextBlock x:Name="JobLog" Style="{StaticResource MutedTextStyle}"
+                                       FontFamily="Cascadia Mono, Consolas" FontSize="11"
+                                       TextWrapping="Wrap"/>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Border>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button x:Name="CancelButton" Grid.Column="1" Content="Cancel"
+                    Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click"
+                    IsEnabled="False"/>
+        </Grid>
     </Grid>
 </Page>
