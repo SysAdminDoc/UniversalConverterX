@@ -4,13 +4,14 @@ Each subdirectory hosts a vendored copy of an external engine that UniversalConv
 
 ## Audit (v2.0.0)
 
-All 10 backing repos have been ported into this directory. Build artifacts (`build/`, `dist/`, frozen `.exe`s, `__pycache__`, `venv`, `.git`, AI working files) were stripped. Source code, `LICENSE`, `requirements.txt`, original `README` (renamed to `README-source.md`), and small assets were preserved.
+All 10 backing repos have been ported into this directory, plus a first-party `recordcast` recorder shim. Build artifacts (`build/`, `dist/`, frozen `.exe`s, `__pycache__`, `venv`, `.git`, AI working files) were stripped. Source code, `LICENSE`, `requirements.txt`, original `README` (renamed to `README-source.md`), and small assets were preserved.
 
 | Directory | Source repo | Entry point | UCX module | Phase | Size |
 |---|---|---|---|---|---|
 | [`videocrush/`](videocrush/) | `~/repos/VideoCrush/` | `video_compressor.py` | Compressor | v2.1 | 1.4 MB |
 | [`clipforge/`](clipforge/) | `~/repos/ClipForge/` | `clipforge.py` | Editor | v2.1 | 270 KB |
 | [`streamkeep/`](streamkeep/) | `~/repos/StreamKeep/` | `StreamKeep.py` | Downloader | v2.1 | 3.2 MB |
+| [`recordcast/`](recordcast/) | first-party UCX shim | `sidecar.py` | Recorder | v2.1 | under 100 KB |
 | [`alphacut/`](alphacut/) | `~/repos/AlphaCut/` | `AlphaCut.py` | Toolbox > Background Remover | v2.2 | 206 KB |
 | [`videosubtitleremover/`](videosubtitleremover/) | `~/repos/VideoSubtitleRemover/` | `VideoSubtitleRemover.py` | Toolbox > Subtitle Remover | v2.2 | 1.8 MB |
 | [`lipsight/`](lipsight/) | `~/repos/LipSight/` | `LipSight.py` | Toolbox > Lip Reading | v2.2 | 1.3 MB |
@@ -67,6 +68,6 @@ This matches UCX's existing `IConversionOrchestrator` progress contract and mini
 
 ## What lands per phase
 
-- **v2.1** — `videocrush/sidecar.py` + `clipforge/sidecar.py` + `streamkeep/sidecar.py` + freeze scripts; UI tabs (Compressor / Editor / Downloader) wired to invoke them.
+- **v2.1** — `videocrush/sidecar.py` + `clipforge/sidecar.py` + `streamkeep/sidecar.py` + `recordcast/sidecar.py` + freeze scripts; UI tabs (Compressor / Editor / Downloader / Recorder) wired to invoke them.
 - **v2.2** — `alphacut/sidecar.py` + `videosubtitleremover/sidecar.py` + `lipsight/sidecar.py`; shared ONNX model cache at `tools/_models/` (gitignored).
 - **v2.3** — `vertigo/sidecar.py` + `framesnap/sidecar.py` + `heicshift/` defaults absorbed into UCX FFmpeg/libvips strategies; `gifstudio/index.html` hosted via WebView2 (no shim needed).
