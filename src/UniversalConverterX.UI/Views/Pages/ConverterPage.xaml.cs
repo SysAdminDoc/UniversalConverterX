@@ -19,6 +19,26 @@ namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class ConverterPage : Page
 {
+    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "MP4", "MKV", "MOV", "WEBM", "AVI", "WMV", "M4V", "FLV", "TS", "MTS"
+    };
+
+    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "MP3", "WAV", "FLAC", "AAC", "M4A", "OGG", "WMA"
+    };
+
+    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "PNG", "JPG", "JPEG", "WEBP", "AVIF", "GIF", "BMP", "TIFF", "HEIC"
+    };
+
+    private static readonly HashSet<string> DocumentExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "PDF", "DOC", "DOCX", "ODT", "TXT", "RTF", "MD", "HTML", "EPUB"
+    };
+
     private readonly IConversionOrchestrator _orchestrator;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
@@ -225,6 +245,25 @@ public sealed partial class ConverterPage : Page
         }
     }
 
+    private void SmartMatch_Click(object sender, RoutedEventArgs e)
+    {
+        var recommended = RecommendFormatTag();
+        if (recommended is null)
+            return;
+
+        SelectFormat(recommended);
+        StatusText.Text = $"Applied the recommended {recommended.ToUpperInvariant()} output profile.";
+    }
+
+    private void ProfileShortcut_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string format })
+        {
+            SelectFormat(format);
+            StatusText.Text = $"Output profile set to {format.ToUpperInvariant()}.";
+        }
+    }
+
     private void UpdateUI()
     {
         var hasFiles = _files.Count > 0;
@@ -234,7 +273,9 @@ public sealed partial class ConverterPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
         ConvertButton.IsEnabled = hasFiles && !string.IsNullOrEmpty(_selectedFormat) && _cancellationTokenSource is null;
+        SmartMatchButton.IsEnabled = hasFiles && RecommendFormatTag() is not null;
         QueueSummaryText.Text = $"{_files.Count} queued / {_finishedFiles.Count} finished";
+        RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
     }
 
@@ -249,6 +290,76 @@ public sealed partial class ConverterPage : Page
             StatusText.Text = "Choose an output profile before starting.";
         else
             StatusText.Text = $"Ready to convert {_files.Count} files to {_selectedFormat.ToUpperInvariant()}.";
+    }
+
+    private string BuildRecommendationText()
+    {
+        if (_files.Count == 0)
+            return "Add files to receive a local output recommendation.";
+
+        var tag = RecommendFormatTag();
+        return tag switch
+        {
+            "mp4" => "Recommended: MP4 for broad playback, sharing, browser upload, and device compatibility.",
+            "mp3" => "Recommended: MP3 for compact audio extraction and broad player support.",
+            "webp" => "Recommended: WebP for modern image sharing with smaller file sizes.",
+            "pdf" => "Recommended: PDF for fixed-layout document delivery and sharing.",
+            _ => "This mixed batch does not have a single safe default. Choose a profile that matches your output goal.",
+        };
+    }
+
+    private string? RecommendFormatTag()
+    {
+        if (_files.Count == 0)
+            return null;
+
+        var categories = _files
+            .Select(file => CategorizeExtension(file.Extension))
+            .GroupBy(category => category)
+            .OrderByDescending(group => group.Count())
+            .ToList();
+
+        var dominant = categories.FirstOrDefault();
+        if (dominant is null || dominant.Key == FileCategory.Unknown)
+            return null;
+
+        if (dominant.Count() < Math.Ceiling(_files.Count * 0.6))
+            return null;
+
+        return dominant.Key switch
+        {
+            FileCategory.Video => "mp4",
+            FileCategory.Audio => "mp3",
+            FileCategory.Image => "webp",
+            FileCategory.Document => "pdf",
+            _ => null,
+        };
+    }
+
+    private void SelectFormat(string format)
+    {
+        foreach (var item in FormatSelector.Items.OfType<ComboBoxItem>())
+        {
+            if (string.Equals(item.Tag?.ToString(), format, StringComparison.OrdinalIgnoreCase))
+            {
+                FormatSelector.SelectedItem = item;
+                return;
+            }
+        }
+    }
+
+    private static FileCategory CategorizeExtension(string extension)
+    {
+        var normalized = extension.TrimStart('.').ToUpperInvariant();
+        if (VideoExtensions.Contains(normalized))
+            return FileCategory.Video;
+        if (AudioExtensions.Contains(normalized))
+            return FileCategory.Audio;
+        if (ImageExtensions.Contains(normalized))
+            return FileCategory.Image;
+        if (DocumentExtensions.Contains(normalized))
+            return FileCategory.Document;
+        return FileCategory.Unknown;
     }
 
     private async void ConvertButton_Click(object sender, RoutedEventArgs e)
@@ -494,6 +605,15 @@ public sealed partial class ConverterPage : Page
         }
 
         return locations[0];
+    }
+
+    private enum FileCategory
+    {
+        Unknown,
+        Video,
+        Audio,
+        Image,
+        Document,
     }
 
     private sealed record QueuedConversion(FileItem File, ConversionJob Job);
