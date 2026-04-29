@@ -1,16 +1,26 @@
-# FrameSnap (sidecar)
+# FrameSnap sidecar
 
-UCX module: **Frame Snapshot**
-Phase: **v2.2**
+| | |
+|---|---|
+| **UCX module** | Toolbox > Frame Snapshot |
+| **Integration phase** | v2.3 |
+| **Source ported** | YES — see this directory |
+| **Entry point** | `framesnap.py` |
+| **Runtime** | Python 3.10+ + FFmpeg |
+| **NDJSON CLI shim** | not yet — lands at integration phase |
 
-## What lands here
+## What this engine does
 
-A vendored, frozen copy of [FrameSnap](https://github.com/SysAdminDoc/FrameSnap) — Precise frame extraction.
+Browse any video, mark frames visually, and export precise screenshots. Supports 30+ video formats via FFmpeg with OS fallback.
 
-## Integration
+## How UCX will use it
 
-The C# shell hosts this tool as a sidecar process invoked via `ProcessStartInfo` and parses NDJSON progress on stdout. See `../README.md` for the contract.
+The C# shell will launch a frozen build of this tool as a sidecar process via `ProcessStartInfo`, parsing NDJSON progress events on stdout. The contract lives in [`../README.md`](../README.md). The shim that adapts `framesnap.py` to the contract will be added when this module is wired up in v2.3.
 
-## Status
+## Original docs
 
-Empty — landing in v2.2. Source lives at `~/repos/FrameSnap/` until then.
+- [`README-source.md`](README-source.md) — full project README from when this was a standalone repo
+- [`LICENSE`](LICENSE) — source-tool license (preserved for attribution)
+- [`CHANGELOG.md`](CHANGELOG.md) — pre-port changelog
+- [`ROADMAP.md`](ROADMAP.md) — pre-port roadmap (now superseded by parent ROADMAP)
+- `requirements.txt` (where present) — Python dependencies

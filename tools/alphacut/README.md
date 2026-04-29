@@ -1,16 +1,26 @@
-# AlphaCut (sidecar)
+# AlphaCut sidecar
 
-UCX module: **Background Remover**
-Phase: **v2.1**
+| | |
+|---|---|
+| **UCX module** | Toolbox > Background Remover |
+| **Integration phase** | v2.2 |
+| **Source ported** | YES — see this directory |
+| **Entry point** | `AlphaCut.py` |
+| **Runtime** | Python 3.9+ + ONNX Runtime + FFmpeg |
+| **NDJSON CLI shim** | not yet — lands at integration phase |
 
-## What lands here
+## What this engine does
 
-A vendored, frozen copy of [AlphaCut](https://github.com/SysAdminDoc/AlphaCut) — AI segmentation, ProRes/WebM alpha, batch.
+AI video background removal and compositing. 8 ONNX segmentation models (U2Net / ISNet / BiRefNet) with chroma-key fallback. Output to ProRes 4444 + alpha, WebM VP9 + alpha, animated WebP, animated GIF, PNG sequences, green screen, or grayscale matte. Pipelined I/O with parallel decode/infer/save.
 
-## Integration
+## How UCX will use it
 
-The C# shell hosts this tool as a sidecar process invoked via `ProcessStartInfo` and parses NDJSON progress on stdout. See `../README.md` for the contract.
+The C# shell will launch a frozen build of this tool as a sidecar process via `ProcessStartInfo`, parsing NDJSON progress events on stdout. The contract lives in [`../README.md`](../README.md). The shim that adapts `AlphaCut.py` to the contract will be added when this module is wired up in v2.2.
 
-## Status
+## Original docs
 
-Empty — landing in v2.1. Source lives at `~/repos/AlphaCut/` until then.
+- [`README-source.md`](README-source.md) — full project README from when this was a standalone repo
+- [`LICENSE`](LICENSE) — source-tool license (preserved for attribution)
+- [`CHANGELOG.md`](CHANGELOG.md) — pre-port changelog
+- [`ROADMAP.md`](ROADMAP.md) — pre-port roadmap (now superseded by parent ROADMAP)
+- `requirements.txt` (where present) — Python dependencies

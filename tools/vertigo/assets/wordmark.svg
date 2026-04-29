@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 200" width="820" height="200">
+  <defs>
+    <linearGradient id="wordmark_accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#cba6f7"/>
+      <stop offset="100%" stop-color="#f5c2e7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="820" height="200" fill="#11111b"/>
+
+  <text x="40" y="128"
+        font-family="Segoe UI, Space Grotesk, sans-serif"
+        font-size="104"
+        font-weight="800"
+        letter-spacing="8"
+        fill="#cdd6f4">VERTIGO</text>
+
+  <!-- underline sweeping into a 9:16 glyph -->
+  <line x1="46" y1="152" x2="676" y2="152"
+        stroke="url(#wordmark_accent)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- terminal 9:16 frame glyph -->
+  <rect x="690" y="108" width="26" height="48" rx="4" ry="4"
+        fill="none" stroke="url(#wordmark_accent)" stroke-width="3"/>
+  <polygon points="697,124 697,140 709,132" fill="url(#wordmark_accent)"/>
+</svg>

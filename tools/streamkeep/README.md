@@ -1,16 +1,26 @@
-# StreamKeep (sidecar)
+# StreamKeep sidecar
 
-UCX module: **Downloader**
-Phase: **v2.0**
+| | |
+|---|---|
+| **UCX module** | Downloader |
+| **Integration phase** | v2.1 |
+| **Source ported** | YES — see this directory |
+| **Entry point** | `StreamKeep.py` |
+| **Runtime** | Python 3.10+ + yt-dlp + ffmpeg |
+| **NDJSON CLI shim** | not yet — lands at integration phase |
 
-## What lands here
+## What this engine does
 
-A vendored, frozen copy of [StreamKeep](https://github.com/SysAdminDoc/StreamKeep) — VOD/live stream downloader, native + yt-dlp.
+Multi-platform VOD and live-stream downloader. Native extractors for Kick, Twitch, Rumble, SoundCloud, Reddit, Audius; podcast RSS; direct URL sniffing; yt-dlp fallback for 1000+ sites. Channel monitoring, segmented downloads, GPU-accelerated post-processing.
 
-## Integration
+## How UCX will use it
 
-The C# shell hosts this tool as a sidecar process invoked via `ProcessStartInfo` and parses NDJSON progress on stdout. See `../README.md` for the contract.
+The C# shell will launch a frozen build of this tool as a sidecar process via `ProcessStartInfo`, parsing NDJSON progress events on stdout. The contract lives in [`../README.md`](../README.md). The shim that adapts `StreamKeep.py` to the contract will be added when this module is wired up in v2.1.
 
-## Status
+## Original docs
 
-Empty — landing in v2.0. Source lives at `~/repos/StreamKeep/` until then.
+- [`README-source.md`](README-source.md) — full project README from when this was a standalone repo
+- [`LICENSE`](LICENSE) — source-tool license (preserved for attribution)
+- [`CHANGELOG.md`](CHANGELOG.md) — pre-port changelog
+- [`ROADMAP.md`](ROADMAP.md) — pre-port roadmap (now superseded by parent ROADMAP)
+- `requirements.txt` (where present) — Python dependencies

@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="Client-side GIF creation and editing studio with frame manipulation, timing controls, effects, and export tools.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/SysAdminDoc/GifStudio/main/banner.png">
+    <link rel="icon" href="data:image/x-icon;base64,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">
+    <meta name="theme-color" content="#0a0e17">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GifStudio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #111113;
+            --bg-tertiary: #18181b;
+            --bg-elevated: #1f1f23;
+            --bg-hover: #27272a;
+            --border-subtle: #27272a;
+            --border-medium: #3f3f46;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #22d3ee;
+            --accent-secondary: #06b6d4;
+            --accent-glow: rgba(34, 211, 238, 0.15);
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--bg-primary);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-medium);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .btn-ghost:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* Tool Panels */
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            transition: border-color var(--transition-fast);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform var(--transition-fast);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .canvas-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .tool-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .tool-btn.active {
+            background: var(--accent-glow);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-subtle);
+            margin: 0 4px;
+        }
+
+        .zoom-display {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 40px;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: repeating-conic-gradient(var(--bg-tertiary) 0% 25%, var(--bg-secondary) 0% 50%) 50% / 16px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        #mainCanvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .crop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+
+        .crop-overlay.active {
+            display: block;
+            pointer-events: auto;
+        }
+
+        .crop-box {
+            position: absolute;
+            border: 2px dashed var(--accent-primary);
+            background: rgba(34, 211, 238, 0.1);
+            cursor: move;
+        }
+
+        .crop-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .crop-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .crop-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .crop-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .crop-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+
+        /* Drop Zone */
+        .drop-zone {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: var(--bg-primary);
+            z-index: 50;
+            transition: opacity var(--transition-normal);
+        }
+
+        .drop-zone.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .drop-zone.dragover {
+            background: var(--accent-glow);
+        }
+
+        .drop-icon {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed var(--border-medium);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all var(--transition-normal);
+        }
+
+        .drop-zone.dragover .drop-icon {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .drop-text {
+            text-align: center;
+        }
+
+        .drop-text h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .drop-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Timeline */
+        .timeline {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .timeline-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .timeline-stat {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .timeline-stat span {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .playback-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timeline-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .frames-container {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            min-height: 120px;
+        }
+
+        .frame-item {
+            flex-shrink: 0;
+            width: 80px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .frame-item:hover {
+            border-color: var(--border-medium);
+        }
+
+        .frame-item.selected {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .frame-item.dragging {
+            opacity: 0.5;
+        }
+
+        .frame-thumb {
+            width: 100%;
+            height: 60px;
+            object-fit: contain;
+            background: var(--bg-primary);
+        }
+
+        .frame-info {
+            padding: 6px 8px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .frame-number {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .frame-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            opacity: 0;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .frame-item:hover .frame-delete {
+            opacity: 1;
+        }
+
+        .frame-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* Progress */
+        .progress-container {
+            width: 100%;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .progress-text {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-subtle);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-frames {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* SVG Icons */
+        .icon {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .icon-sm {
+            width: 14px;
+            height: 14px;
+        }
+
+        .icon-lg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* GIF Info */
+        .gif-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .info-item {
+            background: var(--bg-tertiary);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .info-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .header {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">GS</div>
+                <div class="logo-text">GIF <span>Studio</span></div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="importBtn">
+                    <svg class="icon icon-sm"><use href="#icon-upload"/></svg>
+                    Import GIF
+                </button>
+                <button class="btn btn-primary" id="exportBtn" disabled>
+                    <svg class="icon icon-sm"><use href="#icon-download"/></svg>
+                    Export GIF
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- GIF Info -->
+                <div class="sidebar-section" id="gifInfoSection" style="display: none;">
+                    <div class="sidebar-title">GIF Information</div>
+                    <div class="gif-info">
+                        <div class="info-item">
+                            <div class="info-label">Dimensions</div>
+                            <div class="info-value" id="infoDimensions">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Frames</div>
+                            <div class="info-value" id="infoFrames">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value" id="infoDuration">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">File Size</div>
+                            <div class="info-value" id="infoSize">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crop Tool -->
+                <div class="sidebar-section" id="cropSection" style="display: none;">
+                    <div class="sidebar-title">Crop</div>
+                    <div class="tool-group">
+                        <div class="input-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">X</label>
+                                <input type="number" id="cropX" value="0" min="0">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">Y</label>
+                                <input type="number" id="cropY" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">Width</label>
+                                <input type="number" id="cropW" value="100" min="1">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">Height</label>
+                                <input type="number" id="cropH" value="100" min="1">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="applyCrop" style="width: 100%;">
+                            Apply Crop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resize Tool -->
+                <div class="sidebar-section" id="resizeSection" style="display: none;">
+                    <div class="sidebar-title">Resize</div>
+                    <div class="tool-group">
+                        <div class="input-row">
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">Width</label>
+                                <input type="number" id="resizeW" value="100" min="1">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label class="input-label">Height</label>
+                                <input type="number" id="resizeH" value="100" min="1">
+                            </div>
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="lockAspect" checked>
+                            Lock aspect ratio
+                        </label>
+                        <button class="btn btn-primary" id="applyResize" style="width: 100%;">
+                            Apply Resize
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Frame Timing -->
+                <div class="sidebar-section" id="timingSection" style="display: none;">
+                    <div class="sidebar-title">Frame Timing</div>
+                    <div class="tool-group">
+                        <div class="input-group">
+                            <label class="input-label">Delay (ms)</label>
+                            <input type="number" id="frameDelay" value="100" min="10" max="5000" step="10">
+                        </div>
+                        <div class="input-row">
+                            <button class="btn btn-secondary" id="applyDelaySelected" style="flex: 1;">
+                                Apply to Selected
+                            </button>
+                            <button class="btn btn-secondary" id="applyDelayAll" style="flex: 1;">
+                                Apply to All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Playback Speed -->
+                <div class="sidebar-section" id="speedSection" style="display: none;">
+                    <div class="sidebar-title">Playback Speed</div>
+                    <div class="tool-group">
+                        <div class="input-group">
+                            <div class="input-row">
+                                <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
+                                <span class="zoom-display" id="speedDisplay">1x</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Settings -->
+                <div class="sidebar-section" id="exportSection" style="display: none;">
+                    <div class="sidebar-title">Export Settings</div>
+                    <div class="tool-group">
+                        <div class="input-group">
+                            <label class="input-label">Quality (1-30, lower = better)</label>
+                            <input type="range" id="qualitySlider" min="1" max="30" value="10">
+                            <span class="zoom-display" id="qualityDisplay">10</span>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Dithering</label>
+                            <select id="ditherSelect">
+                                <option value="FloydSteinberg">Floyd-Steinberg</option>
+                                <option value="FalseFloydSteinberg">False Floyd-Steinberg</option>
+                                <option value="Stucki">Stucki</option>
+                                <option value="Atkinson">Atkinson</option>
+                            </select>
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="loopGif" checked>
+                            Loop forever
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-toolbar">
+                    <button class="tool-btn" id="toolSelect" title="Select">
+                        <svg class="icon"><use href="#icon-cursor"/></svg>
+                    </button>
+                    <button class="tool-btn" id="toolCrop" title="Crop">
+                        <svg class="icon"><use href="#icon-crop"/></svg>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="tool-btn" id="zoomOut" title="Zoom Out">
+                        <svg class="icon"><use href="#icon-minus"/></svg>
+                    </button>
+                    <span class="zoom-display" id="zoomDisplay">100%</span>
+                    <button class="tool-btn" id="zoomIn" title="Zoom In">
+                        <svg class="icon"><use href="#icon-plus"/></svg>
+                    </button>
+                    <button class="tool-btn" id="zoomFit" title="Fit to View">
+                        <svg class="icon"><use href="#icon-maximize"/></svg>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="tool-btn" id="flipH" title="Flip Horizontal">
+                        <svg class="icon"><use href="#icon-flip-h"/></svg>
+                    </button>
+                    <button class="tool-btn" id="flipV" title="Flip Vertical">
+                        <svg class="icon"><use href="#icon-flip-v"/></svg>
+                    </button>
+                    <button class="tool-btn" id="rotate" title="Rotate 90°">
+                        <svg class="icon"><use href="#icon-rotate"/></svg>
+                    </button>
+                </div>
+
+                <div class="canvas-container">
+                    <!-- Drop Zone -->
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-icon">
+                            <svg class="icon icon-lg"><use href="#icon-upload"/></svg>
+                        </div>
+                        <div class="drop-text">
+                            <h2>Drop your GIF here</h2>
+                            <p>or click Import to browse files</p>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Wrapper -->
+                    <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
+                        <canvas id="mainCanvas"></canvas>
+                        <div class="crop-overlay" id="cropOverlay">
+                            <div class="crop-box" id="cropBox">
+                                <div class="crop-handle nw"></div>
+                                <div class="crop-handle ne"></div>
+                                <div class="crop-handle sw"></div>
+                                <div class="crop-handle se"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline" id="timeline" style="display: none;">
+            <div class="timeline-header">
+                <div class="timeline-info">
+                    <div class="playback-controls">
+                        <button class="tool-btn" id="prevFrame" title="Previous Frame">
+                            <svg class="icon"><use href="#icon-skip-back"/></svg>
+                        </button>
+                        <button class="tool-btn" id="playPause" title="Play/Pause">
+                            <svg class="icon" id="playIcon"><use href="#icon-play"/></svg>
+                        </button>
+                        <button class="tool-btn" id="nextFrame" title="Next Frame">
+                            <svg class="icon"><use href="#icon-skip-forward"/></svg>
+                        </button>
+                    </div>
+                    <div class="timeline-stat">Frame: <span id="currentFrameNum">0</span> / <span id="totalFrames">0</span></div>
+                    <div class="timeline-stat">Delay: <span id="currentDelay">0</span>ms</div>
+                </div>
+                <div class="timeline-actions">
+                    <button class="btn btn-ghost btn-icon" id="duplicateFrame" title="Duplicate Frame">
+                        <svg class="icon"><use href="#icon-copy"/></svg>
+                    </button>
+                    <button class="btn btn-ghost btn-icon" id="deleteFrame" title="Delete Frame">
+                        <svg class="icon"><use href="#icon-trash"/></svg>
+                    </button>
+                    <button class="btn btn-ghost btn-icon" id="reverseFrames" title="Reverse All Frames">
+                        <svg class="icon"><use href="#icon-refresh"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="frames-container" id="framesContainer">
+                <div class="empty-frames">No frames loaded</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal">
+            <div class="modal-title">Exporting GIF...</div>
+            <div class="modal-body">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="exportProgress" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text" id="exportStatus">Preparing frames...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept=".gif,image/gif" style="display: none;">
+
+    <!-- SVG Icons -->
+    <svg style="display: none;">
+        <defs>
+            <symbol id="icon-upload" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </symbol>
+            <symbol id="icon-download" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </symbol>
+            <symbol id="icon-cursor" viewBox="0 0 24 24">
+                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                <path d="M13 13l6 6"/>
+            </symbol>
+            <symbol id="icon-crop" viewBox="0 0 24 24">
+                <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/>
+                <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/>
+            </symbol>
+            <symbol id="icon-plus" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </symbol>
+            <symbol id="icon-minus" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </symbol>
+            <symbol id="icon-maximize" viewBox="0 0 24 24">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+            </symbol>
+            <symbol id="icon-play" viewBox="0 0 24 24">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </symbol>
+            <symbol id="icon-pause" viewBox="0 0 24 24">
+                <rect x="6" y="4" width="4" height="16"/>
+                <rect x="14" y="4" width="4" height="16"/>
+            </symbol>
+            <symbol id="icon-skip-back" viewBox="0 0 24 24">
+                <polygon points="19 20 9 12 19 4 19 20"/>
+                <line x1="5" y1="19" x2="5" y2="5"/>
+            </symbol>
+            <symbol id="icon-skip-forward" viewBox="0 0 24 24">
+                <polygon points="5 4 15 12 5 20 5 4"/>
+                <line x1="19" y1="5" x2="19" y2="19"/>
+            </symbol>
+            <symbol id="icon-copy" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </symbol>
+            <symbol id="icon-trash" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </symbol>
+            <symbol id="icon-refresh" viewBox="0 0 24 24">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </symbol>
+            <symbol id="icon-flip-h" viewBox="0 0 24 24">
+                <path d="M12 3v18"/>
+                <path d="M16 7l4 5-4 5"/>
+                <path d="M8 7l-4 5 4 5"/>
+            </symbol>
+            <symbol id="icon-flip-v" viewBox="0 0 24 24">
+                <path d="M3 12h18"/>
+                <path d="M7 8l5-4 5 4"/>
+                <path d="M7 16l5 4 5-4"/>
+            </symbol>
+            <symbol id="icon-rotate" viewBox="0 0 24 24">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </symbol>
+            <symbol id="icon-x" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/gifuct-js@2.1.2/dist/gifuct-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+
+    <script>
+        // ============================================
+        // GIF Studio Pro - Main Application
+        // ============================================
+
+        class GIFEditor {
+            constructor() {
+                // State
+                this.frames = [];
+                this.currentFrame = 0;
+                this.isPlaying = false;
+                this.playInterval = null;
+                this.playbackSpeed = 1;
+                this.zoom = 1;
+                this.originalWidth = 0;
+                this.originalHeight = 0;
+                this.fileSize = 0;
+                this.activeTool = 'select';
+
+                // Crop state
+                this.cropRect = { x: 0, y: 0, w: 100, h: 100 };
+                this.isDraggingCrop = false;
+                this.cropDragStart = { x: 0, y: 0 };
+                this.cropDragType = null;
+
+                // Elements
+                this.canvas = document.getElementById('mainCanvas');
+                this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+                this.dropZone = document.getElementById('dropZone');
+                this.canvasWrapper = document.getElementById('canvasWrapper');
+                this.timeline = document.getElementById('timeline');
+                this.framesContainer = document.getElementById('framesContainer');
+                this.fileInput = document.getElementById('fileInput');
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.setActiveTool('select');
+            }
+
+            bindEvents() {
+                // File handling
+                document.getElementById('importBtn').addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
+
+                // Drag and drop
+                this.dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.dropZone.classList.add('dragover');
+                });
+                this.dropZone.addEventListener('dragleave', () => {
+                    this.dropZone.classList.remove('dragover');
+                });
+                this.dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.dropZone.classList.remove('dragover');
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type === 'image/gif') {
+                        this.handleFileSelect(file);
+                    }
+                });
+
+                // Tools
+                document.getElementById('toolSelect').addEventListener('click', () => this.setActiveTool('select'));
+                document.getElementById('toolCrop').addEventListener('click', () => this.setActiveTool('crop'));
+
+                // Zoom
+                document.getElementById('zoomIn').addEventListener('click', () => this.setZoom(this.zoom + 0.25));
+                document.getElementById('zoomOut').addEventListener('click', () => this.setZoom(this.zoom - 0.25));
+                document.getElementById('zoomFit').addEventListener('click', () => this.fitToView());
+
+                // Transforms
+                document.getElementById('flipH').addEventListener('click', () => this.flipHorizontal());
+                document.getElementById('flipV').addEventListener('click', () => this.flipVertical());
+                document.getElementById('rotate').addEventListener('click', () => this.rotate90());
+
+                // Playback
+                document.getElementById('playPause').addEventListener('click', () => this.togglePlay());
+                document.getElementById('prevFrame').addEventListener('click', () => this.goToFrame(this.currentFrame - 1));
+                document.getElementById('nextFrame').addEventListener('click', () => this.goToFrame(this.currentFrame + 1));
+
+                // Frame actions
+                document.getElementById('duplicateFrame').addEventListener('click', () => this.duplicateFrame());
+                document.getElementById('deleteFrame').addEventListener('click', () => this.deleteFrame());
+                document.getElementById('reverseFrames').addEventListener('click', () => this.reverseFrames());
+
+                // Crop controls
+                document.getElementById('applyCrop').addEventListener('click', () => this.applyCrop());
+                ['cropX', 'cropY', 'cropW', 'cropH'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', () => this.updateCropFromInputs());
+                });
+
+                // Resize controls
+                document.getElementById('applyResize').addEventListener('click', () => this.applyResize());
+                document.getElementById('resizeW').addEventListener('input', () => this.handleResizeInput('width'));
+                document.getElementById('resizeH').addEventListener('input', () => this.handleResizeInput('height'));
+
+                // Timing controls
+                document.getElementById('applyDelaySelected').addEventListener('click', () => this.applyDelayToSelected());
+                document.getElementById('applyDelayAll').addEventListener('click', () => this.applyDelayToAll());
+
+                // Speed control
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.playbackSpeed = parseFloat(e.target.value);
+                    document.getElementById('speedDisplay').textContent = this.playbackSpeed + 'x';
+                });
+
+                // Quality display
+                document.getElementById('qualitySlider').addEventListener('input', (e) => {
+                    document.getElementById('qualityDisplay').textContent = e.target.value;
+                });
+
+                // Export
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportGIF());
+
+                // Crop overlay interactions
+                this.initCropInteraction();
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+            }
+
+            // ============================================
+            // File Loading
+            // ============================================
+
+            async handleFileSelect(file) {
+                if (!file || file.type !== 'image/gif') {
+                    this.showToast('Please select a valid GIF file', 'error');
+                    return;
+                }
+
+                this.fileSize = file.size;
+                this.showToast('Loading GIF...', 'info');
+
+                try {
+                    const buffer = await file.arrayBuffer();
+                    const gif = gifuct.parseGIF(buffer);
+                    const frames = gifuct.decompressFrames(gif, true);
+
+                    if (frames.length === 0) {
+                        throw new Error('No frames found in GIF');
+                    }
+
+                    this.loadFrames(frames);
+                    this.showEditor();
+                    this.showToast(`Loaded ${frames.length} frames`, 'success');
+
+                } catch (error) {
+                    console.error('Error loading GIF:', error);
+                    this.showToast('Failed to load GIF: ' + error.message, 'error');
+                }
+            }
+
+            loadFrames(rawFrames) {
+                this.frames = [];
+                
+                // Get GIF dimensions from first frame
+                const firstFrame = rawFrames[0];
+                this.originalWidth = firstFrame.dims.width;
+                this.originalHeight = firstFrame.dims.height;
+
+                // Find full canvas dimensions
+                let maxWidth = 0, maxHeight = 0;
+                rawFrames.forEach(f => {
+                    maxWidth = Math.max(maxWidth, f.dims.left + f.dims.width);
+                    maxHeight = Math.max(maxHeight, f.dims.top + f.dims.height);
+                });
+
+                this.originalWidth = maxWidth;
+                this.originalHeight = maxHeight;
+
+                // Create a temp canvas for compositing
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.originalWidth;
+                tempCanvas.height = this.originalHeight;
+                const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+
+                // Process each frame
+                rawFrames.forEach((frame, index) => {
+                    // Handle disposal
+                    if (index === 0) {
+                        tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    }
+
+                    // Create ImageData from patch
+                    const frameImageData = new ImageData(
+                        new Uint8ClampedArray(frame.patch),
+                        frame.dims.width,
+                        frame.dims.height
+                    );
+
+                    // Draw frame patch at correct position
+                    tempCtx.putImageData(frameImageData, frame.dims.left, frame.dims.top);
+
+                    // Create a canvas for this frame
+                    const frameCanvas = document.createElement('canvas');
+                    frameCanvas.width = this.originalWidth;
+                    frameCanvas.height = this.originalHeight;
+                    const frameCtx = frameCanvas.getContext('2d');
+                    frameCtx.drawImage(tempCanvas, 0, 0);
+
+                    this.frames.push({
+                        canvas: frameCanvas,
+                        delay: frame.delay * 10 || 100, // Convert to ms
+                        disposalType: frame.disposalType
+                    });
+
+                    // Handle disposal for next frame
+                    if (frame.disposalType === 2) {
+                        // Restore to background
+                        tempCtx.clearRect(frame.dims.left, frame.dims.top, frame.dims.width, frame.dims.height);
+                    } else if (frame.disposalType === 3 && index > 0) {
+                        // Restore to previous - copy previous frame
+                        tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                        tempCtx.drawImage(this.frames[index - 1].canvas, 0, 0);
+                    }
+                });
+
+                this.currentFrame = 0;
+            }
+
+            showEditor() {
+                this.dropZone.classList.add('hidden');
+                this.canvasWrapper.style.display = 'block';
+                this.timeline.style.display = 'flex';
+
+                // Show sidebar sections
+                document.getElementById('gifInfoSection').style.display = 'block';
+                document.getElementById('cropSection').style.display = 'block';
+                document.getElementById('resizeSection').style.display = 'block';
+                document.getElementById('timingSection').style.display = 'block';
+                document.getElementById('speedSection').style.display = 'block';
+                document.getElementById('exportSection').style.display = 'block';
+
+                // Enable export
+                document.getElementById('exportBtn').disabled = false;
+
+                // Update UI
+                this.updateGIFInfo();
+                this.updateResizeInputs();
+                this.updateCropInputs();
+                this.renderTimeline();
+                this.renderFrame();
+                this.fitToView();
+            }
+
+            // ============================================
+            // Rendering
+            // ============================================
+
+            renderFrame() {
+                if (this.frames.length === 0) return;
+
+                const frame = this.frames[this.currentFrame];
+                this.canvas.width = this.originalWidth;
+                this.canvas.height = this.originalHeight;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(frame.canvas, 0, 0);
+
+                // Apply zoom
+                this.canvas.style.width = (this.originalWidth * this.zoom) + 'px';
+                this.canvas.style.height = (this.originalHeight * this.zoom) + 'px';
+
+                // Update UI
+                document.getElementById('currentFrameNum').textContent = this.currentFrame + 1;
+                document.getElementById('currentDelay').textContent = frame.delay;
+
+                // Update timeline selection
+                this.updateTimelineSelection();
+            }
+
+            renderTimeline() {
+                if (this.frames.length === 0) {
+                    this.framesContainer.innerHTML = '<div class="empty-frames">No frames loaded</div>';
+                    return;
+                }
+
+                document.getElementById('totalFrames').textContent = this.frames.length;
+
+                this.framesContainer.innerHTML = '';
+                
+                this.frames.forEach((frame, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'frame-item' + (index === this.currentFrame ? ' selected' : '');
+                    item.draggable = true;
+                    item.dataset.index = index;
+
+                    // Create thumbnail
+                    const thumb = document.createElement('canvas');
+                    thumb.className = 'frame-thumb';
+                    thumb.width = 80;
+                    thumb.height = 60;
+                    const thumbCtx = thumb.getContext('2d');
+                    
+                    // Scale to fit
+                    const scale = Math.min(80 / frame.canvas.width, 60 / frame.canvas.height);
+                    const w = frame.canvas.width * scale;
+                    const h = frame.canvas.height * scale;
+                    const x = (80 - w) / 2;
+                    const y = (60 - h) / 2;
+                    
+                    thumbCtx.fillStyle = '#000';
+                    thumbCtx.fillRect(0, 0, 80, 60);
+                    thumbCtx.drawImage(frame.canvas, x, y, w, h);
+
+                    const info = document.createElement('div');
+                    info.className = 'frame-info';
+                    info.innerHTML = `
+                        <span class="frame-number">#${index + 1}</span>
+                        <span>${frame.delay}ms</span>
+                    `;
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'frame-delete';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.deleteFrameAt(index);
+                    });
+
+                    item.appendChild(thumb);
+                    item.appendChild(info);
+                    item.appendChild(deleteBtn);
+
+                    // Click to select
+                    item.addEventListener('click', () => {
+                        this.goToFrame(index);
+                    });
+
+                    // Drag events for reordering
+                    item.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', index);
+                        item.classList.add('dragging');
+                    });
+
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('dragging');
+                    });
+
+                    item.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                    });
+
+                    item.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                        const toIndex = index;
+                        if (fromIndex !== toIndex) {
+                            this.reorderFrame(fromIndex, toIndex);
+                        }
+                    });
+
+                    this.framesContainer.appendChild(item);
+                });
+            }
+
+            updateTimelineSelection() {
+                const items = this.framesContainer.querySelectorAll('.frame-item');
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === this.currentFrame);
+                });
+
+                // Scroll into view
+                const selected = this.framesContainer.querySelector('.frame-item.selected');
+                if (selected) {
+                    selected.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }
+
+            // ============================================
+            // Playback
+            // ============================================
+
+            togglePlay() {
+                if (this.isPlaying) {
+                    this.stopPlayback();
+                } else {
+                    this.startPlayback();
+                }
+            }
+
+            startPlayback() {
+                if (this.frames.length < 2) return;
+
+                this.isPlaying = true;
+                document.getElementById('playIcon').innerHTML = '<use href="#icon-pause"/>';
+                this.playNextFrame();
+            }
+
+            stopPlayback() {
+                this.isPlaying = false;
+                document.getElementById('playIcon').innerHTML = '<use href="#icon-play"/>';
+                if (this.playInterval) {
+                    clearTimeout(this.playInterval);
+                    this.playInterval = null;
+                }
+            }
+
+            playNextFrame() {
+                if (!this.isPlaying) return;
+
+                const frame = this.frames[this.currentFrame];
+                const delay = frame.delay / this.playbackSpeed;
+
+                this.playInterval = setTimeout(() => {
+                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+                    this.renderFrame();
+                    this.playNextFrame();
+                }, delay);
+            }
+
+            goToFrame(index) {
+                if (index < 0) index = this.frames.length - 1;
+                if (index >= this.frames.length) index = 0;
+                
+                this.currentFrame = index;
+                this.renderFrame();
+                
+                // Update delay input
+                document.getElementById('frameDelay').value = this.frames[index].delay;
+            }
+
+            // ============================================
+            // Frame Operations
+            // ============================================
+
+            duplicateFrame() {
+                if (this.frames.length === 0) return;
+
+                const frame = this.frames[this.currentFrame];
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = frame.canvas.width;
+                newCanvas.height = frame.canvas.height;
+                newCanvas.getContext('2d').drawImage(frame.canvas, 0, 0);
+
+                this.frames.splice(this.currentFrame + 1, 0, {
+                    canvas: newCanvas,
+                    delay: frame.delay,
+                    disposalType: frame.disposalType
+                });
+
+                this.renderTimeline();
+                this.goToFrame(this.currentFrame + 1);
+                this.showToast('Frame duplicated', 'success');
+            }
+
+            deleteFrame() {
+                this.deleteFrameAt(this.currentFrame);
+            }
+
+            deleteFrameAt(index) {
+                if (this.frames.length <= 1) {
+                    this.showToast('Cannot delete the last frame', 'warning');
+                    return;
+                }
+
+                this.frames.splice(index, 1);
+                
+                if (this.currentFrame >= this.frames.length) {
+                    this.currentFrame = this.frames.length - 1;
+                }
+
+                this.renderTimeline();
+                this.renderFrame();
+                this.updateGIFInfo();
+                this.showToast('Frame deleted', 'success');
+            }
+
+            reorderFrame(fromIndex, toIndex) {
+                const [frame] = this.frames.splice(fromIndex, 1);
+                this.frames.splice(toIndex, 0, frame);
+                
+                // Update current frame index
+                if (this.currentFrame === fromIndex) {
+                    this.currentFrame = toIndex;
+                } else if (fromIndex < this.currentFrame && toIndex >= this.currentFrame) {
+                    this.currentFrame--;
+                } else if (fromIndex > this.currentFrame && toIndex <= this.currentFrame) {
+                    this.currentFrame++;
+                }
+
+                this.renderTimeline();
+                this.renderFrame();
+            }
+
+            reverseFrames() {
+                if (this.frames.length < 2) return;
+                
+                this.frames.reverse();
+                this.currentFrame = this.frames.length - 1 - this.currentFrame;
+                this.renderTimeline();
+                this.renderFrame();
+                this.showToast('Frames reversed', 'success');
+            }
+
+            // ============================================
+            // Timing
+            // ============================================
+
+            applyDelayToSelected() {
+                const delay = parseInt(document.getElementById('frameDelay').value) || 100;
+                this.frames[this.currentFrame].delay = delay;
+                this.renderTimeline();
+                this.renderFrame();
+                this.showToast('Delay applied to current frame', 'success');
+            }
+
+            applyDelayToAll() {
+                const delay = parseInt(document.getElementById('frameDelay').value) || 100;
+                this.frames.forEach(f => f.delay = delay);
+                this.renderTimeline();
+                this.updateGIFInfo();
+                this.showToast('Delay applied to all frames', 'success');
+            }
+
+            // ============================================
+            // Crop
+            // ============================================
+
+            initCropInteraction() {
+                const overlay = document.getElementById('cropOverlay');
+                const box = document.getElementById('cropBox');
+
+                overlay.addEventListener('mousedown', (e) => {
+                    if (this.activeTool !== 'crop') return;
+                    
+                    const rect = overlay.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / this.zoom;
+                    const y = (e.clientY - rect.top) / this.zoom;
+
+                    // Check if clicking on a handle
+                    const handles = box.querySelectorAll('.crop-handle');
+                    for (const handle of handles) {
+                        const hRect = handle.getBoundingClientRect();
+                        if (e.clientX >= hRect.left && e.clientX <= hRect.right &&
+                            e.clientY >= hRect.top && e.clientY <= hRect.bottom) {
+                            this.isDraggingCrop = true;
+                            this.cropDragType = handle.className.replace('crop-handle ', '');
+                            this.cropDragStart = { x: e.clientX, y: e.clientY };
+                            return;
+                        }
+                    }
+
+                    // Check if clicking inside box (move)
+                    if (x >= this.cropRect.x && x <= this.cropRect.x + this.cropRect.w &&
+                        y >= this.cropRect.y && y <= this.cropRect.y + this.cropRect.h) {
+                        this.isDraggingCrop = true;
+                        this.cropDragType = 'move';
+                        this.cropDragStart = { x: e.clientX, y: e.clientY };
+                    }
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!this.isDraggingCrop) return;
+
+                    const dx = (e.clientX - this.cropDragStart.x) / this.zoom;
+                    const dy = (e.clientY - this.cropDragStart.y) / this.zoom;
+                    this.cropDragStart = { x: e.clientX, y: e.clientY };
+
+                    switch (this.cropDragType) {
+                        case 'move':
+                            this.cropRect.x = Math.max(0, Math.min(this.originalWidth - this.cropRect.w, this.cropRect.x + dx));
+                            this.cropRect.y = Math.max(0, Math.min(this.originalHeight - this.cropRect.h, this.cropRect.y + dy));
+                            break;
+                        case 'nw':
+                            const newX = Math.max(0, this.cropRect.x + dx);
+                            const newY = Math.max(0, this.cropRect.y + dy);
+                            this.cropRect.w += this.cropRect.x - newX;
+                            this.cropRect.h += this.cropRect.y - newY;
+                            this.cropRect.x = newX;
+                            this.cropRect.y = newY;
+                            break;
+                        case 'ne':
+                            this.cropRect.w = Math.max(10, Math.min(this.originalWidth - this.cropRect.x, this.cropRect.w + dx));
+                            const newYne = Math.max(0, this.cropRect.y + dy);
+                            this.cropRect.h += this.cropRect.y - newYne;
+                            this.cropRect.y = newYne;
+                            break;
+                        case 'sw':
+                            const newXsw = Math.max(0, this.cropRect.x + dx);
+                            this.cropRect.w += this.cropRect.x - newXsw;
+                            this.cropRect.x = newXsw;
+                            this.cropRect.h = Math.max(10, Math.min(this.originalHeight - this.cropRect.y, this.cropRect.h + dy));
+                            break;
+                        case 'se':
+                            this.cropRect.w = Math.max(10, Math.min(this.originalWidth - this.cropRect.x, this.cropRect.w + dx));
+                            this.cropRect.h = Math.max(10, Math.min(this.originalHeight - this.cropRect.y, this.cropRect.h + dy));
+                            break;
+                    }
+
+                    this.cropRect.w = Math.max(10, this.cropRect.w);
+                    this.cropRect.h = Math.max(10, this.cropRect.h);
+                    this.updateCropBox();
+                    this.updateCropInputs();
+                });
+
+                document.addEventListener('mouseup', () => {
+                    this.isDraggingCrop = false;
+                    this.cropDragType = null;
+                });
+            }
+
+            updateCropBox() {
+                const box = document.getElementById('cropBox');
+                box.style.left = (this.cropRect.x * this.zoom) + 'px';
+                box.style.top = (this.cropRect.y * this.zoom) + 'px';
+                box.style.width = (this.cropRect.w * this.zoom) + 'px';
+                box.style.height = (this.cropRect.h * this.zoom) + 'px';
+            }
+
+            updateCropInputs() {
+                document.getElementById('cropX').value = Math.round(this.cropRect.x);
+                document.getElementById('cropY').value = Math.round(this.cropRect.y);
+                document.getElementById('cropW').value = Math.round(this.cropRect.w);
+                document.getElementById('cropH').value = Math.round(this.cropRect.h);
+            }
+
+            updateCropFromInputs() {
+                this.cropRect.x = parseInt(document.getElementById('cropX').value) || 0;
+                this.cropRect.y = parseInt(document.getElementById('cropY').value) || 0;
+                this.cropRect.w = parseInt(document.getElementById('cropW').value) || 10;
+                this.cropRect.h = parseInt(document.getElementById('cropH').value) || 10;
+
+                // Clamp values
+                this.cropRect.x = Math.max(0, Math.min(this.originalWidth - 10, this.cropRect.x));
+                this.cropRect.y = Math.max(0, Math.min(this.originalHeight - 10, this.cropRect.y));
+                this.cropRect.w = Math.max(10, Math.min(this.originalWidth - this.cropRect.x, this.cropRect.w));
+                this.cropRect.h = Math.max(10, Math.min(this.originalHeight - this.cropRect.y, this.cropRect.h));
+
+                this.updateCropBox();
+            }
+
+            applyCrop() {
+                if (this.frames.length === 0) return;
+
+                const { x, y, w, h } = this.cropRect;
+                
+                this.frames.forEach(frame => {
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = w;
+                    newCanvas.height = h;
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.drawImage(frame.canvas, -x, -y);
+                    frame.canvas = newCanvas;
+                });
+
+                this.originalWidth = w;
+                this.originalHeight = h;
+                this.cropRect = { x: 0, y: 0, w, h };
+
+                this.updateGIFInfo();
+                this.updateResizeInputs();
+                this.updateCropInputs();
+                this.renderTimeline();
+                this.renderFrame();
+                this.fitToView();
+                this.showToast('Crop applied', 'success');
+            }
+
+            // ============================================
+            // Resize
+            // ============================================
+
+            updateResizeInputs() {
+                document.getElementById('resizeW').value = this.originalWidth;
+                document.getElementById('resizeH').value = this.originalHeight;
+            }
+
+            handleResizeInput(dimension) {
+                if (!document.getElementById('lockAspect').checked) return;
+
+                const aspect = this.originalWidth / this.originalHeight;
+                
+                if (dimension === 'width') {
+                    const w = parseInt(document.getElementById('resizeW').value) || 1;
+                    document.getElementById('resizeH').value = Math.round(w / aspect);
+                } else {
+                    const h = parseInt(document.getElementById('resizeH').value) || 1;
+                    document.getElementById('resizeW').value = Math.round(h * aspect);
+                }
+            }
+
+            applyResize() {
+                if (this.frames.length === 0) return;
+
+                const newWidth = parseInt(document.getElementById('resizeW').value) || this.originalWidth;
+                const newHeight = parseInt(document.getElementById('resizeH').value) || this.originalHeight;
+
+                if (newWidth === this.originalWidth && newHeight === this.originalHeight) return;
+
+                this.frames.forEach(frame => {
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = newWidth;
+                    newCanvas.height = newHeight;
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(frame.canvas, 0, 0, newWidth, newHeight);
+                    frame.canvas = newCanvas;
+                });
+
+                this.originalWidth = newWidth;
+                this.originalHeight = newHeight;
+                this.cropRect = { x: 0, y: 0, w: newWidth, h: newHeight };
+
+                this.updateGIFInfo();
+                this.updateCropInputs();
+                this.renderTimeline();
+                this.renderFrame();
+                this.fitToView();
+                this.showToast(`Resized to ${newWidth}×${newHeight}`, 'success');
+            }
+
+            // ============================================
+            // Transforms
+            // ============================================
+
+            flipHorizontal() {
+                if (this.frames.length === 0) return;
+
+                this.frames.forEach(frame => {
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = frame.canvas.width;
+                    newCanvas.height = frame.canvas.height;
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.translate(newCanvas.width, 0);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(frame.canvas, 0, 0);
+                    frame.canvas = newCanvas;
+                });
+
+                this.renderTimeline();
+                this.renderFrame();
+                this.showToast('Flipped horizontally', 'success');
+            }
+
+            flipVertical() {
+                if (this.frames.length === 0) return;
+
+                this.frames.forEach(frame => {
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = frame.canvas.width;
+                    newCanvas.height = frame.canvas.height;
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.translate(0, newCanvas.height);
+                    ctx.scale(1, -1);
+                    ctx.drawImage(frame.canvas, 0, 0);
+                    frame.canvas = newCanvas;
+                });
+
+                this.renderTimeline();
+                this.renderFrame();
+                this.showToast('Flipped vertically', 'success');
+            }
+
+            rotate90() {
+                if (this.frames.length === 0) return;
+
+                this.frames.forEach(frame => {
+                    const newCanvas = document.createElement('canvas');
+                    newCanvas.width = frame.canvas.height;
+                    newCanvas.height = frame.canvas.width;
+                    const ctx = newCanvas.getContext('2d');
+                    ctx.translate(newCanvas.width / 2, newCanvas.height / 2);
+                    ctx.rotate(Math.PI / 2);
+                    ctx.drawImage(frame.canvas, -frame.canvas.width / 2, -frame.canvas.height / 2);
+                    frame.canvas = newCanvas;
+                });
+
+                [this.originalWidth, this.originalHeight] = [this.originalHeight, this.originalWidth];
+                this.cropRect = { x: 0, y: 0, w: this.originalWidth, h: this.originalHeight };
+
+                this.updateGIFInfo();
+                this.updateResizeInputs();
+                this.updateCropInputs();
+                this.renderTimeline();
+                this.renderFrame();
+                this.fitToView();
+                this.showToast('Rotated 90°', 'success');
+            }
+
+            // ============================================
+            // Zoom
+            // ============================================
+
+            setZoom(level) {
+                this.zoom = Math.max(0.25, Math.min(4, level));
+                document.getElementById('zoomDisplay').textContent = Math.round(this.zoom * 100) + '%';
+                this.renderFrame();
+                if (this.activeTool === 'crop') {
+                    this.updateCropBox();
+                }
+            }
+
+            fitToView() {
+                const container = document.querySelector('.canvas-container');
+                const padding = 80;
+                const availableWidth = container.clientWidth - padding;
+                const availableHeight = container.clientHeight - padding;
+                
+                const scaleX = availableWidth / this.originalWidth;
+                const scaleY = availableHeight / this.originalHeight;
+                const scale = Math.min(scaleX, scaleY, 2);
+                
+                this.setZoom(scale);
+            }
+
+            // ============================================
+            // Tools
+            // ============================================
+
+            setActiveTool(tool) {
+                this.activeTool = tool;
+                
+                document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+
+                const cropOverlay = document.getElementById('cropOverlay');
+                if (tool === 'crop') {
+                    cropOverlay.classList.add('active');
+                    this.cropRect = { x: 0, y: 0, w: this.originalWidth || 100, h: this.originalHeight || 100 };
+                    this.updateCropBox();
+                    this.updateCropInputs();
+                } else {
+                    cropOverlay.classList.remove('active');
+                }
+            }
+
+            // ============================================
+            // Export
+            // ============================================
+
+            async exportGIF() {
+                if (this.frames.length === 0) return;
+
+                const modal = document.getElementById('exportModal');
+                const progress = document.getElementById('exportProgress');
+                const status = document.getElementById('exportStatus');
+                modal.classList.add('active');
+
+                const quality = parseInt(document.getElementById('qualitySlider').value);
+                const dither = document.getElementById('ditherSelect').value;
+                const loop = document.getElementById('loopGif').checked ? 0 : -1;
+
+                try {
+                    const gif = new GIF({
+                        workers: 2,
+                        quality: quality,
+                        width: this.originalWidth,
+                        height: this.originalHeight,
+                        dither: dither,
+                        repeat: loop,
+                        workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+                    });
+
+                    // Add frames
+                    this.frames.forEach((frame, i) => {
+                        gif.addFrame(frame.canvas, { delay: frame.delay, copy: true });
+                        progress.style.width = ((i + 1) / this.frames.length * 50) + '%';
+                        status.textContent = `Adding frame ${i + 1} of ${this.frames.length}...`;
+                    });
+
+                    status.textContent = 'Encoding...';
+
+                    gif.on('progress', (p) => {
+                        progress.style.width = (50 + p * 50) + '%';
+                        status.textContent = `Encoding: ${Math.round(p * 100)}%`;
+                    });
+
+                    gif.on('finished', (blob) => {
+                        modal.classList.remove('active');
+                        
+                        // Download
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'edited.gif';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        this.showToast(`GIF exported (${this.formatBytes(blob.size)})`, 'success');
+                    });
+
+                    gif.render();
+
+                } catch (error) {
+                    modal.classList.remove('active');
+                    console.error('Export error:', error);
+                    this.showToast('Export failed: ' + error.message, 'error');
+                }
+            }
+
+            // ============================================
+            // UI Helpers
+            // ============================================
+
+            updateGIFInfo() {
+                document.getElementById('infoDimensions').textContent = `${this.originalWidth}×${this.originalHeight}`;
+                document.getElementById('infoFrames').textContent = this.frames.length;
+                
+                const totalDuration = this.frames.reduce((sum, f) => sum + f.delay, 0);
+                document.getElementById('infoDuration').textContent = (totalDuration / 1000).toFixed(2) + 's';
+                document.getElementById('infoSize').textContent = this.formatBytes(this.fileSize);
+            }
+
+            formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+                toast.textContent = message;
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(20px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            handleKeyboard(e) {
+                // Don't trigger if typing in input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+                switch (e.key) {
+                    case ' ':
+                        e.preventDefault();
+                        this.togglePlay();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.goToFrame(this.currentFrame - 1);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.goToFrame(this.currentFrame + 1);
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        e.preventDefault();
+                        this.deleteFrame();
+                        break;
+                    case 'd':
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            this.duplicateFrame();
+                        }
+                        break;
+                    case '+':
+                    case '=':
+                        e.preventDefault();
+                        this.setZoom(this.zoom + 0.25);
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        this.setZoom(this.zoom - 0.25);
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        this.fitToView();
+                        break;
+                }
+            }
+        }
+
+        // Initialize the app
+        const editor = new GIFEditor();
+    </script>
+</body>
+</html>
