@@ -8,6 +8,129 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
+    <Page.Resources>
+        <DataTemplate x:Key="EditQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="132"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.RowSpan="2" Grid.Column="0"
+                            Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE714;" FontSize="20"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding SourceSummary}"
+                                   Style="{StaticResource MutedTextStyle}"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10" Padding="10,5">
+                        <TextBlock Text="{Binding OperationSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Border>
+
+                    <Button Grid.Column="3" Grid.Row="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="RemoveFile_Click"
+                            Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="12"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Grid.Column="0"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6"
+                                     CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="112"
+                                   TextAlignment="Right"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EditFinishedTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0"
+                            Width="44"
+                            Height="44"
+                            CornerRadius="14"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="{Binding Glyph}"
+                                  FontSize="19"
+                                  Foreground="{Binding AccentBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OutputPath}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Content="Open folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="14,8"
+                            Click="OpenFinishedFolder_Click"
+                            Tag="{Binding OutputPath}"
+                            IsEnabled="{Binding CanOpenFolder}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid Padding="32" RowSpacing="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,72 +138,196 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <TextBlock Text="Video Editor" Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Trim clips fast (lossless or re-encode). Crop, upscale, filter, and audio operations land in v2.2+. Powered by the ClipForge sidecar."
-                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap"/>
-        </StackPanel>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="6">
+                <TextBlock Text="Video Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Batch-trim clips with local ClipForge processing, progress, and finished results."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Add Files"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Browse_Click"/>
+                <Button Content="Add Folder"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BrowseFolder_Click"/>
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1" ColumnSpacing="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
-            <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2"
+            <Border x:Name="DropZone"
+                    Grid.Column="0"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="22"
+                    Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
-                <Grid>
-                    <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                        <FontIcon Glyph="&#xE714;" FontSize="64"
-                                  Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Drop a video to edit"
-                                   Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="MP4, MKV, MOV, AVI, WebM and more"
-                                   Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
-                        <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
-                                Click="Browse_Click" HorizontalAlignment="Center"/>
-                    </StackPanel>
+                <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
+                    <PivotItem Header="Editing">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="EmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE714;" FontSize="48"
+                                              Foreground="{StaticResource AccentBlueBrush}"/>
+                                </Border>
+                                <TextBlock Text="Drop videos to edit"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, WMV, TS, MTS, and M4V."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <Button Content="Browse Files"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="Browse_Click"
+                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
 
-                    <StackPanel x:Name="FileState" Visibility="Collapsed" VerticalAlignment="Center" Spacing="14">
-                        <FontIcon Glyph="&#xE714;" FontSize="48"
-                                  Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="FileNameText" Style="{StaticResource SubtitleTextStyle}"
-                                   HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="420"/>
-                        <TextBlock x:Name="FileMetaText" Style="{StaticResource MutedTextStyle}"
-                                   HorizontalAlignment="Center"/>
-                        <Button Content="Choose different file" Style="{StaticResource SecondaryButtonStyle}"
-                                Click="Browse_Click" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Grid>
+                            <ListView x:Name="FileList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource EditQueueTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+
+                    <PivotItem Header="Finished">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="FinishedEmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xE73E;" FontSize="42"
+                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="No finished edits yet"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Completed, failed, and cancelled exports appear here."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FinishedList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource EditFinishedTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+                </Pivot>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="12">
+            <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Trim" FontWeight="SemiBold"
+                        <TextBlock Text="Trim"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="Times in seconds (e.g. 12.5). Leave end blank for end of clip."
-                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
-                        <TextBox x:Name="StartBox" Header="Start (s)" PlaceholderText="0" InputScope="Number"/>
-                        <TextBox x:Name="EndBox" Header="End (s)" PlaceholderText="(end of clip)" InputScope="Number"/>
-                        <CheckBox x:Name="LosslessCheck" Content="Lossless (stream-copy, fast)" IsChecked="True"
+                        <TextBlock Text="Times in seconds. Leave end blank to export through the end of each clip."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBox x:Name="StartBox"
+                                 Header="Start"
+                                 PlaceholderText="0"
+                                 InputScope="Number"
+                                 TextChanged="TrimText_Changed"/>
+                        <TextBox x:Name="EndBox"
+                                 Header="End"
+                                 PlaceholderText="End of clip"
+                                 InputScope="Number"
+                                 TextChanged="TrimText_Changed"/>
+                        <CheckBox x:Name="LosslessCheck"
+                                  Content="Lossless stream-copy"
+                                  IsChecked="True"
+                                  Checked="TrimOption_Changed"
+                                  Unchecked="TrimOption_Changed"
                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="Lossless cuts on keyframes — output may be slightly off. Uncheck for frame-accurate re-encode."
-                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" FontSize="11"/>
+                        <TextBlock Text="Lossless is fast and preserves quality, but cuts on keyframes. Re-encode for frame-accurate trims."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Re-encode quality" Style="{StaticResource MutedTextStyle}"/>
-                        <Slider x:Name="CrfSlider" Minimum="0" Maximum="51" Value="18" StepFrequency="1"
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Re-encode Quality"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Slider x:Name="CrfSlider"
+                                Minimum="0"
+                                Maximum="51"
+                                Value="18"
+                                StepFrequency="1"
                                 ValueChanged="CrfSlider_ValueChanged"/>
-                        <TextBlock x:Name="CrfLabel" Text="CRF 18 (visually lossless)"
+                        <TextBlock x:Name="CrfLabel"
+                                   Text="CRF 18 (visually lossless)"
                                    Style="{StaticResource MutedTextStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="File Location"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBox x:Name="OutputDirectoryBox"
+                                 Header="Save to"
+                                 PlaceholderText="Same as source file"
+                                 IsReadOnly="True"/>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0"
+                                    Content="Browse"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"/>
+                            <Button Grid.Column="1"
+                                    Content="Same as source"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="SameAsSource_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Queue Summary"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="QueueCountText"
+                                   Text="0 clips queued"
+                                   Style="{StaticResource BodyTextStyle}"/>
+                        <TextBlock x:Name="OperationText"
+                                   Text="Trim from 0s to end"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="OutputText"
+                                   Text="Output: same as source"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -91,37 +338,70 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="StatusText" Grid.Column="0"
-                       Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center"
+            <TextBlock x:Name="StatusText"
+                       Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" Content="Clear" x:Name="ClearButton"
+            <Button Grid.Column="1"
+                    Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
-            <Button Grid.Column="2" Content="Export" x:Name="ExportButton"
+                    Click="OpenOutputFolder_Click"
+                    Margin="0,0,12,0"/>
+            <Button Grid.Column="2"
+                    Content="Clear"
+                    x:Name="ClearButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Clear_Click"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"/>
+            <Button Grid.Column="3"
+                    Content="Export All"
+                    x:Name="ExportButton"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Click="Export_Click" IsEnabled="False"/>
+                    Click="Export_Click"
+                    IsEnabled="False"/>
         </Grid>
 
-        <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
+        <Grid x:Name="ProgressOverlay"
+              Grid.RowSpan="3"
+              Visibility="Collapsed"
               Background="#80000000">
             <Border Style="{StaticResource CardStyle}"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                    MinWidth="420" MaxWidth="520">
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MinWidth="440"
+                    MaxWidth="540">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle" Text="Trimming…"
+                    <TextBlock x:Name="ProgressTitle"
+                               Text="Exporting..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar x:Name="ProgressBar" Height="8" CornerRadius="4"
-                                 Minimum="0" Maximum="100"/>
-                    <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
-                    <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
-                    <ScrollViewer Height="80" VerticalScrollBarVisibility="Auto"
-                                  Background="{StaticResource SurfaceLightBrush}" Padding="8" CornerRadius="4">
-                        <TextBlock x:Name="ProgressLog" Style="{StaticResource MutedTextStyle}"
-                                   FontFamily="Cascadia Mono, Consolas" FontSize="11"/>
+                    <ProgressBar x:Name="ProgressBar"
+                                 Height="8"
+                                 CornerRadius="4"
+                                 Minimum="0"
+                                 Maximum="100"/>
+                    <TextBlock x:Name="ProgressStage"
+                               Style="{StaticResource SubtitleTextStyle}"/>
+                    <TextBlock x:Name="ProgressEta"
+                               Style="{StaticResource MutedTextStyle}"/>
+                    <ScrollViewer Height="86"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="{StaticResource SurfaceLightBrush}"
+                                  Padding="8"
+                                  CornerRadius="4">
+                        <TextBlock x:Name="ProgressLog"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontFamily="Cascadia Mono, Consolas"
+                                   FontSize="11"/>
                     </ScrollViewer>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                        <Button x:Name="CancelButton" Content="Cancel"
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="12">
+                        <Button x:Name="CancelButton"
+                                Content="Cancel"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="Cancel_Click"/>
                     </StackPanel>
