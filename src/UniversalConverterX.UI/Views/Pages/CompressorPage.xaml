@@ -16,15 +16,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
-                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="Preview" FontSize="10" FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentYellowBrush}"/>
-                </Border>
-            </StackPanel>
-            <TextBlock Text="Reduce video file size with preset profiles. Will be powered by VideoCrush in v2.0."
+            <TextBlock Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock Text="Reduce video file size with preset profiles. Powered by the VideoCrush sidecar."
                        Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
         </StackPanel>
 
@@ -34,18 +27,35 @@
                 <ColumnDefinition Width="320"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <FontIcon Glyph="&#xE91F;" FontSize="64"
-                              Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Drop video files to compress"
-                               Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, and more"
-                               Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
-                    <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
-                            HorizontalAlignment="Center" IsEnabled="False"/>
-                </StackPanel>
+            <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop"
+                    PointerPressed="DropZone_PointerPressed">
+                <Grid>
+                    <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                        <FontIcon Glyph="&#xE91F;" FontSize="64"
+                                  Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Drop video files to compress"
+                                   Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, and more"
+                                   Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
+                        <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Browse_Click" HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="FileState" Visibility="Collapsed" VerticalAlignment="Center" Spacing="14">
+                        <FontIcon Glyph="&#xE714;" FontSize="48"
+                                  Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="FileNameText" Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="420"/>
+                        <TextBlock x:Name="FileMetaText" Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center"/>
+                        <Button Content="Choose different file" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Browse_Click" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <StackPanel Grid.Column="1" Spacing="12">
@@ -53,50 +63,78 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Preset Profile" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <RadioButton Content="Web upload (1080p)" IsChecked="True" IsEnabled="False"
+                        <RadioButton x:Name="PresetWeb" Content="Web upload (1080p, CRF 23)" GroupName="Preset"
+                                     Tag="web-1080p" IsChecked="True"
                                      Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <RadioButton Content="Email friendly (&lt;10 MB)" IsEnabled="False"
+                        <RadioButton x:Name="PresetEmail" Content="Email friendly (~9.5 MB)" GroupName="Preset"
+                                     Tag="email-10mb"
                                      Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <RadioButton Content="Archive (AV1, CRF 28)" IsEnabled="False"
+                        <RadioButton x:Name="PresetArchive" Content="Archive (AV1, CRF 28)" GroupName="Preset"
+                                     Tag="archive-av1"
                                      Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <RadioButton Content="Custom" IsEnabled="False"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Quality" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <Slider Minimum="0" Maximum="100" Value="75" IsEnabled="False"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Smaller file"
-                                       Style="{StaticResource MutedTextStyle}"/>
-                            <TextBlock Grid.Column="1" Text="Higher quality"
-                                       Style="{StaticResource MutedTextStyle}"
-                                       HorizontalAlignment="Right"/>
-                        </Grid>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Estimated output"
-                                   Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock Text="—" FontSize="22" FontWeight="SemiBold"
+                        <TextBlock Text="Source size" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="SourceSizeText" Text="—" FontSize="20" FontWeight="SemiBold"
                                    Foreground="{StaticResource AccentBlueBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Result size" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="ResultSizeText" Text="—" FontSize="20" FontWeight="SemiBold"
+                                   Foreground="{StaticResource AccentGreenBrush}"/>
+                        <TextBlock x:Name="SavingsText" Text="" Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-            <Button Content="Clear" Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
-            <Button Content="Compress" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
-        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1" Content="Clear" x:Name="ClearButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
+            <Button Grid.Column="2" Content="Compress" x:Name="CompressButton"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Compress_Click" IsEnabled="False"/>
+        </Grid>
+
+        <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
+              Background="#80000000">
+            <Border Style="{StaticResource CardStyle}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="420" MaxWidth="520">
+                <StackPanel Spacing="14">
+                    <TextBlock x:Name="ProgressTitle" Text="Compressing..."
+                               Style="{StaticResource TitleTextStyle}"/>
+                    <ProgressBar x:Name="ProgressBar" Height="8" CornerRadius="4"
+                                 Minimum="0" Maximum="100"/>
+                    <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
+                    <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
+                    <ScrollViewer Height="80" VerticalScrollBarVisibility="Auto"
+                                  Background="{StaticResource SurfaceLightBrush}" Padding="8" CornerRadius="4">
+                        <TextBlock x:Name="ProgressLog" Style="{StaticResource MutedTextStyle}"
+                                   FontFamily="Cascadia Mono, Consolas" FontSize="11"/>
+                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                        <Button x:Name="CancelButton" Content="Cancel"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Cancel_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

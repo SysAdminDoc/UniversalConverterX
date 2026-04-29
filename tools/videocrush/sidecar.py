@@ -1,0 +1,382 @@
+"""VideoCrush sidecar — NDJSON CLI shim for the UCX Compressor module.
+
+Reuses VideoCrush's two-pass FFmpeg compression strategy without the PyQt6 GUI
+dependency. The C# host launches this with arguments, reads stdout line-by-line
+as NDJSON, and updates the Compressor page's progress UI accordingly.
+
+Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+
+# ─── NDJSON emitter ──────────────────────────────────────────────────────────
+
+def emit(event: str, **fields) -> None:
+    """Write a single NDJSON line to stdout and flush."""
+    payload = {"event": event, **fields}
+    sys.stdout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    sys.stdout.flush()
+
+
+def fail(code: str, message: str) -> "int":
+    emit("error", code=code, message=message)
+    return 1
+
+
+# ─── FFmpeg discovery ────────────────────────────────────────────────────────
+
+def find_ffmpeg() -> str | None:
+    candidates = [
+        os.environ.get("FFMPEG_PATH"),
+        shutil.which("ffmpeg"),
+    ]
+    # Bundled locations (next to the sidecar exe, or under tools/_bin/)
+    here = Path(__file__).resolve().parent
+    candidates += [
+        str(here / "ffmpeg.exe"),
+        str(here.parent / "_bin" / "ffmpeg.exe"),
+    ]
+    for c in candidates:
+        if c and Path(c).is_file():
+            return c
+    return None
+
+
+def find_ffprobe() -> str | None:
+    candidates = [
+        os.environ.get("FFPROBE_PATH"),
+        shutil.which("ffprobe"),
+    ]
+    here = Path(__file__).resolve().parent
+    candidates += [
+        str(here / "ffprobe.exe"),
+        str(here.parent / "_bin" / "ffprobe.exe"),
+    ]
+    for c in candidates:
+        if c and Path(c).is_file():
+            return c
+    return None
+
+
+def probe(ffprobe: str, path: str) -> dict | None:
+    try:
+        result = subprocess.run(
+            [ffprobe, "-v", "quiet", "-print_format", "json",
+             "-show_format", "-show_streams", path],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            return None
+        return json.loads(result.stdout)
+    except (subprocess.SubprocessError, json.JSONDecodeError, OSError):
+        return None
+
+
+# ─── Preset → encoding parameters ────────────────────────────────────────────
+
+PRESETS = {
+    "web-1080p": {
+        "target_mb": None,           # use CRF instead
+        "crf": 23,
+        "codec": "libx264",
+        "preset": "medium",
+        "resolution": "1080p",
+        "audio_codec": "aac",
+        "audio_bitrate": 192,
+    },
+    "email-10mb": {
+        "target_mb": 9.5,
+        "crf": None,
+        "codec": "libx264",
+        "preset": "slow",
+        "resolution": "720p",
+        "audio_codec": "aac",
+        "audio_bitrate": 96,
+    },
+    "archive-av1": {
+        "target_mb": None,
+        "crf": 28,
+        "codec": "libsvtav1",
+        "preset": None,
+        "resolution": "Original",
+        "audio_codec": "libopus",
+        "audio_bitrate": 128,
+    },
+}
+
+
+# ─── FFmpeg progress parsing ─────────────────────────────────────────────────
+
+_TIME_RE = re.compile(r"out_time_ms=(\d+)")
+
+
+def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str,
+               start_pct: float, end_pct: float) -> int:
+    """Run FFmpeg with -progress pipe:1, emit NDJSON progress events.
+
+    Returns FFmpeg's exit code. start_pct..end_pct maps the linear ffmpeg
+    progress into a sub-range of overall job progress.
+    """
+    full_cmd = cmd + ["-progress", "pipe:1", "-nostats"]
+    proc = subprocess.Popen(
+        full_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+    )
+    started = time.monotonic()
+    last_pct = -1.0
+    try:
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            line = line.strip()
+            if not line:
+                continue
+            m = _TIME_RE.search(line)
+            if m and duration_sec > 0:
+                cur_sec = int(m.group(1)) / 1_000_000
+                local = max(0.0, min(1.0, cur_sec / duration_sec))
+                pct = start_pct + (end_pct - start_pct) * local
+                if pct - last_pct >= 0.5:  # throttle to ~200 events max
+                    last_pct = pct
+                    elapsed = time.monotonic() - started
+                    eta = (elapsed / local - elapsed) if local > 0.01 else None
+                    emit("progress", percent=round(pct, 1),
+                         stage=stage,
+                         eta_seconds=int(eta) if eta and eta < 86400 else None)
+            elif line.startswith("progress=end"):
+                emit("progress", percent=end_pct, stage=stage, eta_seconds=0)
+    finally:
+        proc.wait()
+        # Drain stderr for failure diagnostics
+        if proc.returncode != 0 and proc.stderr is not None:
+            tail = proc.stderr.read().splitlines()[-15:]
+            for ln in tail:
+                emit("log", level="error", message=ln)
+    return proc.returncode
+
+
+# ─── Job ─────────────────────────────────────────────────────────────────────
+
+def compress(args: argparse.Namespace) -> int:
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install FFmpeg or set FFPROBE_PATH.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Resolve preset
+    preset_cfg = PRESETS.get(args.preset, {}) if args.preset else {}
+    target_mb = args.target_mb if args.target_mb is not None else preset_cfg.get("target_mb")
+    crf = args.crf if args.crf is not None else preset_cfg.get("crf")
+    codec = args.codec or preset_cfg.get("codec", "libx264")
+    fpreset = args.ffmpeg_preset or preset_cfg.get("preset")
+    resolution = args.resolution or preset_cfg.get("resolution", "Original")
+    audio_codec = args.audio_codec or preset_cfg.get("audio_codec", "aac")
+    audio_bitrate = args.audio_bitrate or preset_cfg.get("audio_bitrate", 128)
+
+    if target_mb is None and crf is None:
+        return fail("invalid_args",
+                    "Must specify either --target-mb (size-targeted) or --crf (quality-targeted), "
+                    "or pick a preset that defines one.")
+
+    emit("log", level="info", message=f"Probing {in_path.name}")
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata via ffprobe.")
+    duration = float(info.get("format", {}).get("duration", 0))
+    if duration <= 0:
+        return fail("probe_failed", "Could not determine input duration.")
+    emit("log", level="info", message=f"Duration: {duration:.1f}s")
+
+    # Build vf filter
+    vf_filters: list[str] = []
+    if resolution and resolution != "Original":
+        height = int(resolution.replace("p", ""))
+        vf_filters.append(f"scale=-2:{height}")
+
+    is_av1 = codec == "libsvtav1"
+    is_vp9 = codec == "libvpx-vp9"
+
+    # ─── CRF mode (single-pass) ──────────────────────────────────────────────
+    if crf is not None:
+        emit("progress", percent=0, stage="encoding", eta_seconds=None)
+        cmd = [ffmpeg, "-y", "-i", str(in_path)]
+        if vf_filters:
+            cmd += ["-vf", ",".join(vf_filters)]
+        cmd += ["-c:v", codec, "-crf", str(crf)]
+        if fpreset and not is_av1:
+            cmd += ["-preset", fpreset]
+        if is_av1:
+            cmd += ["-svtav1-params", f"crf={crf}"]
+        if audio_codec == "an":
+            cmd += ["-an"]
+        elif audio_codec == "copy":
+            cmd += ["-c:a", "copy"]
+        else:
+            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+        cmd += ["-movflags", "+faststart", str(out_path)]
+
+        rc = run_ffmpeg(cmd, duration, "encoding", 0.0, 100.0)
+        if rc != 0:
+            return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+        return finalize(out_path)
+
+    # ─── Size-targeted mode (two-pass) ───────────────────────────────────────
+    target_bits = float(target_mb) * 8 * 1024 * 1024
+    audio_kbps = audio_bitrate if audio_codec not in ("copy", "an") else 0
+    if audio_codec == "copy":
+        for stream in info.get("streams", []):
+            if stream.get("codec_type") == "audio":
+                audio_kbps = int(stream.get("bit_rate", 128_000)) // 1000
+                break
+    audio_bits = audio_kbps * 1000 * duration
+    video_bits = target_bits - audio_bits
+    if video_bits <= 0:
+        return fail("target_too_small",
+                    "Target size too small for the chosen audio settings. "
+                    "Increase target or lower audio bitrate.")
+    video_kbps = int(video_bits / duration / 1000)
+    if video_kbps < 50:
+        return fail("target_too_small",
+                    f"Calculated video bitrate ({video_kbps} kbps) is unusably low. Increase target.")
+
+    emit("log", level="info", message=f"Target: {target_mb} MB → video {video_kbps} kbps + audio {audio_kbps} kbps")
+
+    null_out = "NUL" if sys.platform == "win32" else "/dev/null"
+    pass_log = str(out_path.parent / "ucx_ffmpeg2pass")
+
+    # AV1: SVT-AV1 doesn't support 2-pass cleanly, fall back to single-pass with target bitrate
+    if is_av1:
+        cmd = [ffmpeg, "-y", "-i", str(in_path)]
+        if vf_filters:
+            cmd += ["-vf", ",".join(vf_filters)]
+        cmd += ["-c:v", codec, "-b:v", f"{video_kbps}k",
+                "-svtav1-params", f"tbr={video_kbps}"]
+        if audio_codec == "an":
+            cmd += ["-an"]
+        elif audio_codec == "copy":
+            cmd += ["-c:a", "copy"]
+        else:
+            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+        cmd += ["-movflags", "+faststart", str(out_path)]
+        rc = run_ffmpeg(cmd, duration, "encoding", 0.0, 100.0)
+        if rc != 0:
+            return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+        return finalize(out_path)
+
+    # H.264/H.265/VP9 two-pass
+    pass1 = [ffmpeg, "-y", "-i", str(in_path)]
+    if vf_filters:
+        pass1 += ["-vf", ",".join(vf_filters)]
+    pass1 += ["-c:v", codec, "-b:v", f"{video_kbps}k",
+              "-pass", "1", "-passlogfile", pass_log, "-an"]
+    if is_vp9:
+        pass1 += ["-speed", "4", "-f", "webm", null_out]
+    else:
+        if fpreset:
+            pass1 += ["-preset", fpreset]
+        pass1 += ["-f", "null", null_out]
+
+    emit("log", level="info", message="Pass 1 of 2 — analyzing")
+    rc = run_ffmpeg(pass1, duration, "pass1", 0.0, 50.0)
+    if rc != 0:
+        cleanup_pass_logs(pass_log)
+        return fail("ffmpeg_failed", f"FFmpeg pass 1 exited with code {rc}")
+
+    pass2 = [ffmpeg, "-y", "-i", str(in_path)]
+    if vf_filters:
+        pass2 += ["-vf", ",".join(vf_filters)]
+    pass2 += ["-c:v", codec, "-b:v", f"{video_kbps}k",
+              "-pass", "2", "-passlogfile", pass_log]
+    if is_vp9:
+        pass2 += ["-speed", "2"]
+    elif fpreset:
+        pass2 += ["-preset", fpreset]
+
+    if audio_codec == "an":
+        pass2 += ["-an"]
+    elif audio_codec == "copy":
+        pass2 += ["-c:a", "copy"]
+    else:
+        pass2 += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+    pass2 += ["-movflags", "+faststart", str(out_path)]
+
+    emit("log", level="info", message="Pass 2 of 2 — encoding")
+    rc = run_ffmpeg(pass2, duration, "pass2", 50.0, 100.0)
+    cleanup_pass_logs(pass_log)
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg pass 2 exited with code {rc}")
+    return finalize(out_path)
+
+
+def cleanup_pass_logs(pass_log: str) -> None:
+    for ext in ("-0.log", "-0.log.mbtree", ".log", ".log.mbtree"):
+        p = Path(pass_log + ext)
+        if p.exists():
+            try:
+                p.unlink()
+            except OSError:
+                pass
+
+
+def finalize(out_path: Path) -> int:
+    if not out_path.is_file():
+        return fail("output_missing", f"Expected output file was not produced: {out_path}")
+    size = out_path.stat().st_size
+    emit("complete", output=str(out_path), size_bytes=size)
+    return 0
+
+
+# ─── Entry point ─────────────────────────────────────────────────────────────
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="videocrush-sidecar",
+                                description="UCX VideoCrush sidecar — FFmpeg compression with NDJSON progress.")
+    p.add_argument("--input", required=True, help="Input video path")
+    p.add_argument("--output", required=True, help="Output video path")
+    p.add_argument("--preset", choices=list(PRESETS.keys()),
+                   help="Predefined preset (web-1080p, email-10mb, archive-av1)")
+    p.add_argument("--target-mb", type=float, help="Target file size in megabytes")
+    p.add_argument("--crf", type=int, help="Constant Rate Factor (quality-targeted)")
+    p.add_argument("--codec", help="Video codec (libx264, libx265, libvpx-vp9, libsvtav1)")
+    p.add_argument("--ffmpeg-preset", help="FFmpeg encoder preset (ultrafast..veryslow)")
+    p.add_argument("--resolution", help="Target height (Original, 1080p, 720p, 480p)")
+    p.add_argument("--audio-codec", help="Audio codec or 'copy' or 'an' (none)")
+    p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps")
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return compress(args)
+    except KeyboardInterrupt:
+        emit("error", code="cancelled", message="Cancelled by user")
+        return 130
+    except Exception as exc:  # pylint: disable=broad-except
+        emit("error", code="unhandled", message=f"{type(exc).__name__}: {exc}")
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

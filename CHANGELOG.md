@@ -2,6 +2,13 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [Unreleased — v2.1 in progress]
+
+### Added
+- **`SidecarRunner` service** — generic launcher for `tools/<name>/<name>.exe` sidecars. Walks up from `AppContext.BaseDirectory` to locate the binary, falls back to `%LocalAppData%/UniversalConverterX/tools/`. Streams stdout NDJSON line-by-line, parses `progress`/`log`/`complete`/`error` events, supports cancellation by killing the process tree.
+- **VideoCrush sidecar wired** — `tools/videocrush/sidecar.py` reimplements the FFmpeg two-pass / CRF compression logic without the PyQt6 dependency, emitting NDJSON. Supports `web-1080p`, `email-10mb`, `archive-av1` presets out of the box. `tools/videocrush/build.ps1` freezes it to `videocrush.exe` via PyInstaller.
+- **Compressor page wired** — drag/drop or browse → preset radio → live progress overlay (with FFmpeg pass1/pass2 split, ETA, log tail) → result-size + savings calculation. Cancel kills the sidecar.
+
 ## [v2.0.0] - 2026-04-29
 
 Major scope expansion: from a context-menu file converter into a full all-in-one media tool — a Wondershare UniConverter alternative.
