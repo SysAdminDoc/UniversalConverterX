@@ -13,8 +13,8 @@
     <Company>UniversalConverterX</Company>
     <Product>UniversalConverter X</Product>
     <Description>Core library for UniversalConverter X file format conversion</Description>
-    <Copyright>Copyright © 2024</Copyright>
-    <Version>1.0.0</Version>
+    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
+    <Version>2.0.0</Version>
     
     <!-- Enable source generators -->
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
@@ -27,25 +27,17 @@
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- File organization -->
+  <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->
+
+  <!-- Cross-namespace global usings — Core's Interfaces and Models reference each other,
+       and most files omit explicit usings. Surface both namespaces project-wide. -->
   <ItemGroup>
-    <!-- Interfaces -->
-    <Compile Include="Interfaces\*.cs" />
-    
-    <!-- Models -->
-    <Compile Include="Models\*.cs" />
-    
-    <!-- Converters -->
-    <Compile Include="Converters\*.cs" />
-    
-    <!-- Services -->
-    <Compile Include="Services\*.cs" />
-    
-    <!-- Configuration -->
-    <Compile Include="Configuration\*.cs" />
-    
-    <!-- Detection -->
-    <Compile Include="Detection\*.cs" />
+    <Using Include="UniversalConverterX.Core.Models" />
+    <Using Include="UniversalConverterX.Core.Interfaces" />
+    <Using Include="UniversalConverterX.Core.Configuration" />
+    <Using Include="UniversalConverterX.Core.Detection" />
+    <Using Include="UniversalConverterX.Core.Converters" />
+    <Using Include="UniversalConverterX.Core.Services" />
   </ItemGroup>
 
 </Project>

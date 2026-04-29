@@ -1,6 +1,40 @@
 # Roadmap
 
-Forward-looking plans for UniversalConverter X — native Windows (WinUI 3, .NET 8) converter with right-click context menu, CLI, and 13 converter backends covering 1000+ formats. v1.0.0 today.
+Forward-looking plans for UniversalConverter X — the all-in-one media tool for Windows. WinUI 3 + .NET 8 shell with native Converter (1000+ formats, 13 backends) plus Compressor, Editor, Downloader, Recorder, and a 29-tool Toolbox. v2.0.0 today (layout pass + sidecar staging). Phased integration follows.
+
+## Phased Integration
+
+### v2.0.x — Layout & Native Converter (current)
+- WonderShare-style NavigationView shell with sidebar modules and Toolbox tile grid (done).
+- Tab routing for Home / Converter / Compressor / Editor / Downloader / Recorder / Toolbox / Account (done).
+- Native Converter remains fully functional inside the new shell (done).
+- `tools/` sidecar staging directory with NDJSON CLI contract (done).
+
+### v2.1 — Core Modules Wired
+- **Compressor** powered by VideoCrush sidecar with preset profiles (web 1080p, email <10MB, archive AV1).
+- **Editor** powered by ClipForge sidecar — trim, crop, rotate, upscale (Real-ESRGAN), filter, audio adjust, batch.
+- **Downloader** powered by StreamKeep sidecar — Kick/Twitch/Rumble native + yt-dlp fallback for 1000+ sites.
+- Settings UI — preferences pane, theme switcher, tool-path overrides.
+
+### v2.2 — AI Toolbox Wave 1
+- **Background Remover** powered by AlphaCut (8 ONNX segmentation models, ProRes/WebM alpha output).
+- **Subtitle Remover** powered by VideoSubtitleRemover (AI inpainting).
+- **Lip Reading** powered by LipSight (visual speech recognition).
+- Shared ONNX model cache across AI sidecars.
+
+### v2.3 — Toolbox Wave 2
+- **Auto Reframe** powered by Vertigo (9:16 / 1:1 / 4:5 with MediaPipe face tracking).
+- **Frame Snapshot** powered by FrameSnap.
+- **GIF Maker** powered by GifStudio (WebView2 host).
+- **Image Converter** — HEICShift's metadata/ICC defaults absorbed into UCX's existing libvips/libjxl strategies.
+
+### v2.4 — Recorder + Account
+- Screen, webcam, microphone, system audio capture.
+- Optional account sync for presets and license entitlements (still fully offline by default).
+
+### v2.5+ — AI Toolbox Wave 2 (gap-fillers)
+- Caption Generator (Whisper), Vocal Remover, Voice Changer, TTS, STT, Image Upscaler standalone, Auto Highlight, Auto Crop, Watermark add/remove, Noise Remover.
+- DVD/CD modules — defer until demand confirmed; consider `cdrtools`/`growisofs` wrappers if pursued.
 
 ## Planned Features
 

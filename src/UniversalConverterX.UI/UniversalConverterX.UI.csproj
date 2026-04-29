@@ -19,10 +19,10 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Company>UniversalConverterX</Company>
     <Product>UniversalConverter X</Product>
-    <Description>Windows desktop application for file format conversion</Description>
-    <Copyright>Copyright © 2024</Copyright>
-    <Version>1.0.0</Version>
-    
+    <Description>All-in-one media tool: convert, compress, edit, download, record, and 25+ AI-powered tools</Description>
+    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
+    <Version>2.0.0</Version>
+
     <!-- Enable unpackaged deployment -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -47,27 +47,24 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- XAML Files -->
+  <!-- XAML / code-behind: the WindowsAppSDK and .NET SDK auto-include Page/ApplicationDefinition/Compile items.
+       We only Update DependentUpon so VS nests *.xaml.cs under *.xaml properly. -->
   <ItemGroup>
-    <Page Include="Views\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingsWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ProgressWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Update="App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Update="Views\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Pages\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
-  <!-- Code Files -->
+  <!-- Code Files (SDK auto-includes; we only set DependentUpon for proper VS nesting) -->
   <ItemGroup>
-    <Compile Include="Views\*.xaml.cs" DependentUpon="Views\%(Filename)" />
-    <Compile Include="ViewModels\*.cs" />
-    <Compile Include="Services\*.cs" />
+    <Compile Update="Views\*.xaml.cs" DependentUpon="Views\%(Filename)" />
+    <Compile Update="Views\Pages\*.xaml.cs" DependentUpon="Views\Pages\%(Filename)" />
   </ItemGroup>
 
   <!-- Assets -->

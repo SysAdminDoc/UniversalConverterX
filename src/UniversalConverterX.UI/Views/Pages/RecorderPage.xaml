@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.RecorderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Recorder" Style="{StaticResource TitleTextStyle}"/>
+                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="Coming Soon" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource AccentYellowBrush}"/>
+                </Border>
+            </StackPanel>
+            <TextBlock Text="Capture screen, webcam, and audio. Lands in v2.3."
+                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <StackPanel Spacing="14">
+                <TextBlock Text="Source" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ToggleButton Content="Screen" IsChecked="True" IsEnabled="False" Padding="20,10"/>
+                    <ToggleButton Content="Webcam" IsEnabled="False" Padding="20,10"/>
+                    <ToggleButton Content="Screen + Webcam" IsEnabled="False" Padding="20,10"/>
+                    <ToggleButton Content="Audio Only" IsEnabled="False" Padding="20,10"/>
+                </StackPanel>
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox Grid.Column="0" Header="Region" PlaceholderText="Full Screen" IsEnabled="False"
+                              HorizontalAlignment="Stretch"/>
+                    <ComboBox Grid.Column="1" Header="Frame Rate" PlaceholderText="60 fps" IsEnabled="False"
+                              HorizontalAlignment="Stretch"/>
+                    <ComboBox Grid.Column="2" Header="Format" PlaceholderText="MP4 (H.264)" IsEnabled="False"
+                              HorizontalAlignment="Stretch"/>
+                </Grid>
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" Content="Microphone" IsEnabled="False"
+                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <CheckBox Grid.Column="1" Content="System Audio" IsEnabled="False"
+                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="80" Width="160" Height="160">
+                    <FontIcon Glyph="&#xE7C8;" FontSize="64"
+                              Foreground="{StaticResource AccentRedBrush}"/>
+                </Border>
+                <TextBlock Text="Press Record to begin" Style="{StaticResource SubtitleTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <Button Content="Start Recording" Style="{StaticResource PrimaryButtonStyle}"
+                        Background="{StaticResource AccentRedBrush}" IsEnabled="False"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

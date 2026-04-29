@@ -14,8 +14,8 @@
     <Company>UniversalConverterX</Company>
     <Product>UniversalConverter X CLI</Product>
     <Description>Command-line interface for UniversalConverter X file format conversion</Description>
-    <Copyright>Copyright © 2024</Copyright>
-    <Version>1.0.0</Version>
+    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
+    <Version>2.0.0</Version>
     
     <!-- Publish settings for single-file -->
     <PublishSingleFile>true</PublishSingleFile>
@@ -39,8 +39,6 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="Commands\*.cs" />
-  </ItemGroup>
+  <!-- SDK auto-includes all *.cs under the project. -->
 
 </Project>

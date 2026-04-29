@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.PlaceholderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="48">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock x:Name="ModuleTitle" Text="Module" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock x:Name="ModuleSubtitle" Text="Module description"
+                       Style="{StaticResource SubtitleTextStyle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,32,0,0"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20" MaxWidth="520">
+                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="48"
+                        Width="96" Height="96" HorizontalAlignment="Center">
+                    <FontIcon x:Name="ModuleIcon" Glyph="&#xE713;" FontSize="44"
+                              Foreground="{StaticResource AccentBlueBrush}"/>
+                </Border>
+
+                <TextBlock x:Name="StatusBadge" Text="Coming Soon"
+                           HorizontalAlignment="Center"
+                           FontSize="11" FontWeight="SemiBold"
+                           Foreground="{StaticResource AccentYellowBrush}"
+                           Padding="12,4"/>
+
+                <TextBlock x:Name="HeadlineText" Text="Module under construction"
+                           TextAlignment="Center"
+                           FontSize="20" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           TextWrapping="Wrap"/>
+
+                <TextBlock x:Name="DescriptionText"
+                           Text="This module is part of the v2.0 layout. Functionality lands in a follow-up release."
+                           TextAlignment="Center"
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+
+                <Border x:Name="PoweredByBox" Visibility="Collapsed"
+                        Background="{StaticResource SurfaceLightBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        CornerRadius="8" Padding="14,10" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE71B;" FontSize="14"
+                                  Foreground="{StaticResource AccentGreenBrush}"
+                                  VerticalAlignment="Center"/>
+                        <TextBlock x:Name="PoweredByText" Text=""
+                                   Style="{StaticResource MutedTextStyle}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

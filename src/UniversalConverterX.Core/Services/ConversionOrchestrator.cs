@@ -166,7 +166,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
             jobList,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = Math.Clamp(maxParallelism, 1, _options.MaxConcurrentConversions),
+                MaxDegreeOfParallelism = Math.Clamp(maxParallelism, 1, _options.MaxParallelConversions),
                 CancellationToken = cancellationToken
             },
             async (job, ct) =>

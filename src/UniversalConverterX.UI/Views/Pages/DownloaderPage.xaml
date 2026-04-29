@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.DownloaderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
+                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="Preview" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource AccentYellowBrush}"/>
+                </Border>
+            </StackPanel>
+            <TextBlock Text="Download videos and audio from 1000+ sites. Will be powered by StreamKeep in v2.0."
+                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <Grid ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" Grid.Column="0"
+                         PlaceholderText="Paste URL — YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, and 1000+ more..."
+                         IsEnabled="False"/>
+                <Button Grid.Row="0" Grid.Column="1" Content="Paste"
+                        Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="Analyze"
+                        Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
+                <Button Grid.Row="0" Grid.Column="3" Content="Download"
+                        Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="20">
+                    <ComboBox Header="Format" PlaceholderText="MP4" Width="160" IsEnabled="False"/>
+                    <ComboBox Header="Quality" PlaceholderText="Best" Width="160" IsEnabled="False"/>
+                    <ComboBox Header="Audio" PlaceholderText="Original" Width="160" IsEnabled="False"/>
+                    <CheckBox Content="Subtitles" IsEnabled="False"
+                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <CheckBox Content="Audio only" IsEnabled="False"
+                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Download Queue" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <Button Grid.Column="1" Content="Clear Completed"
+                            Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
+                </Grid>
+                <Border Grid.Row="1" Background="{StaticResource SurfaceLightBrush}" CornerRadius="6">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                        <FontIcon Glyph="&#xE896;" FontSize="40"
+                                  Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Queue is empty" Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

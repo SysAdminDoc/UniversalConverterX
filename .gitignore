@@ -8,3 +8,11 @@ obj/
 packages/
 *.nupkg
 CLAUDE.md
+CODEX_CHANGELOG.md
+.claude/
+
+# Sidecar runtime artifacts (binaries land in tools/ at build time, not in git)
+tools/**/*.exe
+tools/**/*.dll
+tools/**/models/
+tools/**/__pycache__/

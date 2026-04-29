@@ -111,9 +111,9 @@ public class ConversionJob
     }
 
     /// <summary>
-    /// Create a job with auto-generated output path
+    /// Create a job with auto-generated output path from a target extension.
     /// </summary>
-    public static ConversionJob Create(string inputPath, string outputExtension, ConversionOptions? options = null)
+    public static ConversionJob CreateForExtension(string inputPath, string outputExtension, ConversionOptions? options = null)
     {
         var dir = Path.GetDirectoryName(inputPath) ?? ".";
         var name = Path.GetFileNameWithoutExtension(inputPath);
