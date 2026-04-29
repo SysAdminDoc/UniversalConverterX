@@ -12,110 +12,121 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="220"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="Video Editor" Style="{StaticResource TitleTextStyle}"/>
-                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="Preview" FontSize="10" FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentYellowBrush}"/>
-                </Border>
-            </StackPanel>
-            <TextBlock Text="Trim, crop, rotate, upscale, filter, and adjust audio. Will be powered by ClipForge in v2.0."
-                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+            <TextBlock Text="Video Editor" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock Text="Trim clips fast (lossless or re-encode). Crop, upscale, filter, and audio operations land in v2.2+. Powered by the ClipForge sidecar."
+                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Grid Grid.Row="1" ColumnSpacing="20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="68"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="320"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="6">
-                <StackPanel Spacing="6">
-                    <Button Style="{StaticResource SecondaryButtonStyle}" Padding="0" Width="56" Height="56"
-                            Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE71D;" FontSize="20" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Style="{StaticResource SecondaryButtonStyle}" Padding="0" Width="56" Height="56"
-                            Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE7AD;" FontSize="20" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Style="{StaticResource SecondaryButtonStyle}" Padding="0" Width="56" Height="56"
-                            Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE74A;" FontSize="20" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Style="{StaticResource SecondaryButtonStyle}" Padding="0" Width="56" Height="56"
-                            Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE790;" FontSize="20" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Style="{StaticResource SecondaryButtonStyle}" Padding="0" Width="56" Height="56"
-                            Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE799;" FontSize="20" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                </StackPanel>
+            <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop"
+                    PointerPressed="DropZone_PointerPressed">
+                <Grid>
+                    <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                        <FontIcon Glyph="&#xE714;" FontSize="64"
+                                  Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Drop a video to edit"
+                                   Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="MP4, MKV, MOV, AVI, WebM and more"
+                                   Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
+                        <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Browse_Click" HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="FileState" Visibility="Collapsed" VerticalAlignment="Center" Spacing="14">
+                        <FontIcon Glyph="&#xE714;" FontSize="48"
+                                  Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="FileNameText" Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="420"/>
+                        <TextBlock x:Name="FileMetaText" Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center"/>
+                        <Button Content="Choose different file" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Browse_Click" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Background="#000000">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                    <FontIcon Glyph="&#xE714;" FontSize="56" Foreground="{StaticResource TextMutedBrush}"
-                              HorizontalAlignment="Center"/>
-                    <TextBlock Text="Preview" Style="{StaticResource MutedTextStyle}"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-
-            <StackPanel Grid.Column="2" Spacing="12">
+            <StackPanel Grid.Column="1" Spacing="12">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Properties" FontWeight="SemiBold"
+                        <TextBlock Text="Trim" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="No clip selected" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock Text="Times in seconds (e.g. 12.5). Leave end blank for end of clip."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                        <TextBox x:Name="StartBox" Header="Start (s)" PlaceholderText="0" InputScope="Number"/>
+                        <TextBox x:Name="EndBox" Header="End (s)" PlaceholderText="(end of clip)" InputScope="Number"/>
+                        <CheckBox x:Name="LosslessCheck" Content="Lossless (stream-copy, fast)" IsChecked="True"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Lossless cuts on keyframes — output may be slightly off. Uncheck for frame-accurate re-encode."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap" FontSize="11"/>
                     </StackPanel>
                 </Border>
+
                 <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Filters" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <ComboBox Header="Effect" PlaceholderText="None" Width="240" IsEnabled="False"/>
-                        <ComboBox Header="LUT" PlaceholderText="None" Width="240" IsEnabled="False"/>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Re-encode quality" Style="{StaticResource MutedTextStyle}"/>
+                        <Slider x:Name="CrfSlider" Minimum="0" Maximum="51" Value="18" StepFrequency="1"
+                                ValueChanged="CrfSlider_ValueChanged"/>
+                        <TextBlock x:Name="CrfLabel" Text="CRF 18 (visually lossless)"
+                                   Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,12">
-                    <Button Padding="10,6" Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE768;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Padding="10,6" Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE71A;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <Button Padding="10,6" Background="Transparent" BorderThickness="0" IsEnabled="False">
-                        <FontIcon Glyph="&#xE76C;" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </Button>
-                    <TextBlock Text="00:00:00 / 00:00:00" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center" Margin="20,0,0,0"/>
-                </StackPanel>
-                <Border Grid.Row="1" Background="{StaticResource SurfaceLightBrush}" CornerRadius="6">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="Timeline" Style="{StaticResource MutedTextStyle}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="Drop a clip to begin" Style="{StaticResource MutedTextStyle}"
-                                   HorizontalAlignment="Center" FontSize="10"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1" Content="Clear" x:Name="ClearButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
+            <Button Grid.Column="2" Content="Export" x:Name="ExportButton"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Export_Click" IsEnabled="False"/>
+        </Grid>
+
+        <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
+              Background="#80000000">
+            <Border Style="{StaticResource CardStyle}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="420" MaxWidth="520">
+                <StackPanel Spacing="14">
+                    <TextBlock x:Name="ProgressTitle" Text="Trimming…"
+                               Style="{StaticResource TitleTextStyle}"/>
+                    <ProgressBar x:Name="ProgressBar" Height="8" CornerRadius="4"
+                                 Minimum="0" Maximum="100"/>
+                    <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
+                    <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
+                    <ScrollViewer Height="80" VerticalScrollBarVisibility="Auto"
+                                  Background="{StaticResource SurfaceLightBrush}" Padding="8" CornerRadius="4">
+                        <TextBlock x:Name="ProgressLog" Style="{StaticResource MutedTextStyle}"
+                                   FontFamily="Cascadia Mono, Consolas" FontSize="11"/>
+                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                        <Button x:Name="CancelButton" Content="Cancel"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Cancel_Click"/>
                     </StackPanel>
-                </Border>
-            </Grid>
-        </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>
