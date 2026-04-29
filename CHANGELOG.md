@@ -8,6 +8,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 - **`SidecarRunner` service** — generic launcher for `tools/<name>/<name>.exe` sidecars. Walks up from `AppContext.BaseDirectory` to locate the binary, falls back to `%LocalAppData%/UniversalConverterX/tools/`. Streams stdout NDJSON line-by-line, parses `progress`/`log`/`complete`/`error` events, supports cancellation by killing the process tree.
 - **VideoCrush sidecar wired** — `tools/videocrush/sidecar.py` reimplements the FFmpeg two-pass / CRF compression logic without the PyQt6 dependency, emitting NDJSON. Supports `web-1080p`, `email-10mb`, `archive-av1` presets out of the box. `tools/videocrush/build.ps1` freezes it to `videocrush.exe` via PyInstaller.
 - **Compressor page wired** — drag/drop or browse → preset radio → live progress overlay (with FFmpeg pass1/pass2 split, ETA, log tail) → result-size + savings calculation. Cancel kills the sidecar.
+- **ClipForge sidecar wired (trim only for v2.1)** — `tools/clipforge/sidecar.py` exposes a `trim` op with `--start`, `--end`, `--lossless`, `--crf`, `--preset` flags. Lossless mode stream-copies (fast, keyframe-bounded); re-encode mode is frame-accurate. `tools/clipforge/build.ps1` produces `clipforge.exe`.
+- **Editor page wired (trim slice)** — drag/drop or browse → start/end time inputs (seconds) → lossless toggle → CRF slider with quality hints → Export. Crop, upscale, filter, audio operations land as additional sidecar ops in v2.2+.
 
 ## [v2.0.0] - 2026-04-29
 
