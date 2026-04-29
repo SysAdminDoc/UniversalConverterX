@@ -218,6 +218,48 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
+                        <TextBlock Text="Smart Recommendations" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="RecommendationText"
+                                   Text="Add files to receive a local output recommendation."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <Grid ColumnSpacing="8" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="SmartMatchButton"
+                                    Grid.Row="0" Grid.Column="0"
+                                    Content="Smart Match"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Click="SmartMatch_Click"
+                                    IsEnabled="False"/>
+                            <Button Grid.Row="0" Grid.Column="1"
+                                    Content="Web MP4"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Tag="mp4"
+                                    Click="ProfileShortcut_Click"/>
+                            <Button Grid.Row="1" Grid.Column="0"
+                                    Content="Audio MP3"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Tag="mp3"
+                                    Click="ProfileShortcut_Click"/>
+                            <Button Grid.Row="1" Grid.Column="1"
+                                    Content="Image WebP"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Tag="webp"
+                                    Click="ProfileShortcut_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
                         <TextBlock Text="Output Profile" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                         <ComboBox x:Name="FormatSelector"
