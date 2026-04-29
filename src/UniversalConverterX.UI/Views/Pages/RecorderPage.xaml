@@ -8,74 +8,360 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
+    <Page.Resources>
+        <DataTemplate x:Key="RecordingQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="132"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.RowSpan="2" Grid.Column="0"
+                            Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE7C8;" FontSize="20"
+                                  Foreground="{StaticResource AccentRedBrush}"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10" Padding="10,5">
+                        <TextBlock Text="{Binding PresetSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Border>
+
+                    <Button Grid.Column="3" Grid.Row="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="RemoveQueued_Click"
+                            Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="12"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Grid.Column="0"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6"
+                                     CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="112"
+                                   TextAlignment="Right"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RecordingFinishedTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0"
+                            Width="44"
+                            Height="44"
+                            CornerRadius="14"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="{Binding Glyph}"
+                                  FontSize="19"
+                                  Foreground="{Binding AccentBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="{Binding Title}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OutputPath}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Content="Open folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="14,8"
+                            Click="OpenFinishedFolder_Click"
+                            Tag="{Binding OutputPath}"
+                            IsEnabled="{Binding CanOpenFolder}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid Padding="32" RowSpacing="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="10">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="6">
                 <TextBlock Text="Recorder" Style="{StaticResource TitleTextStyle}"/>
-                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="Coming Soon" FontSize="10" FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentYellowBrush}"/>
+                <TextBlock Text="Record the Windows desktop with local FFmpeg capture, progress, and finished results."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Add Session"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="AddSession_Click"/>
+                <Button Content="Record All"
+                        x:Name="RecordButton"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Background="{StaticResource AccentRedBrush}"
+                        Click="Record_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="22"
+                    Padding="18">
+                <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
+                    <PivotItem Header="Recording">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="QueueEmpty"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="12">
+                                <Border Width="132" Height="132" CornerRadius="66"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE7C8;" FontSize="54"
+                                              Foreground="{StaticResource AccentRedBrush}"/>
+                                </Border>
+                                <TextBlock Text="Build a recording queue"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Capture desktop sessions as MP4 files. Audio and webcam modes are planned next."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           MaxWidth="420"/>
+                                <Button Content="Add Current Setup"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="AddSession_Click"
+                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <ListView x:Name="QueueList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource RecordingQueueTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+
+                    <PivotItem Header="Finished">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="FinishedEmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+                                <FontIcon Glyph="&#xE73E;" FontSize="42"
+                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="No finished recordings yet"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Completed, failed, and cancelled recording sessions appear here."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FinishedList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource RecordingFinishedTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+                </Pivot>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Capture Source"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton Grid.Column="0"
+                                          Content="Screen"
+                                          IsChecked="True"
+                                          IsEnabled="False"
+                                          Padding="16,10"/>
+                            <ToggleButton Grid.Column="1"
+                                          Content="Webcam"
+                                          IsEnabled="False"
+                                          Padding="16,10"/>
+                        </Grid>
+                        <TextBlock Text="Screen capture is active. Webcam, microphone, and system audio need device enumeration and are tracked for the next pass."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Recording Setup"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <ComboBox x:Name="DurationCombo"
+                                  Header="Duration"
+                                  SelectedIndex="1"
+                                  SelectionChanged="Option_Changed"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="15 seconds" Tag="15"/>
+                            <ComboBoxItem Content="30 seconds" Tag="30"/>
+                            <ComboBoxItem Content="1 minute" Tag="60"/>
+                            <ComboBoxItem Content="5 minutes" Tag="300"/>
+                            <ComboBoxItem Content="10 minutes" Tag="600"/>
+                        </ComboBox>
+                        <ComboBox x:Name="FrameRateCombo"
+                                  Header="Frame rate"
+                                  SelectedIndex="1"
+                                  SelectionChanged="Option_Changed"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="24 fps" Tag="24"/>
+                            <ComboBoxItem Content="30 fps" Tag="30"/>
+                            <ComboBoxItem Content="60 fps" Tag="60"/>
+                        </ComboBox>
+                        <ComboBox x:Name="QualityCombo"
+                                  Header="Quality"
+                                  SelectedIndex="1"
+                                  SelectionChanged="Option_Changed"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="Archive quality (CRF 18)" Tag="18"/>
+                            <ComboBoxItem Content="Balanced (CRF 20)" Tag="20"/>
+                            <ComboBoxItem Content="Compact (CRF 24)" Tag="24"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="File Location"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBox x:Name="OutputDirectoryBox"
+                                 Header="Save to"
+                                 IsReadOnly="True"/>
+                        <Button Content="Browse"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="BrowseOutputFolder_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Queue Summary"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="QueueSummaryText"
+                                   Text="0 pending / 0 finished"
+                                   Style="{StaticResource BodyTextStyle}"/>
+                        <TextBlock x:Name="CurrentSetupText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
                 </Border>
             </StackPanel>
-            <TextBlock Text="Capture screen, webcam, and audio. Lands in v2.3."
-                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
-        </StackPanel>
+        </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
-            <StackPanel Spacing="14">
-                <TextBlock Text="Source" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <ToggleButton Content="Screen" IsChecked="True" IsEnabled="False" Padding="20,10"/>
-                    <ToggleButton Content="Webcam" IsEnabled="False" Padding="20,10"/>
-                    <ToggleButton Content="Screen + Webcam" IsEnabled="False" Padding="20,10"/>
-                    <ToggleButton Content="Audio Only" IsEnabled="False" Padding="20,10"/>
-                </StackPanel>
-                <Grid ColumnSpacing="20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" Header="Region" PlaceholderText="Full Screen" IsEnabled="False"
-                              HorizontalAlignment="Stretch"/>
-                    <ComboBox Grid.Column="1" Header="Frame Rate" PlaceholderText="60 fps" IsEnabled="False"
-                              HorizontalAlignment="Stretch"/>
-                    <ComboBox Grid.Column="2" Header="Format" PlaceholderText="MP4 (H.264)" IsEnabled="False"
-                              HorizontalAlignment="Stretch"/>
-                </Grid>
-                <Grid ColumnSpacing="20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <CheckBox Grid.Column="0" Content="Microphone" IsEnabled="False"
-                              Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox Grid.Column="1" Content="System Audio" IsEnabled="False"
-                              Foreground="{StaticResource TextPrimaryBrush}"/>
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="80" Width="160" Height="160">
-                    <FontIcon Glyph="&#xE7C8;" FontSize="64"
-                              Foreground="{StaticResource AccentRedBrush}"/>
-                </Border>
-                <TextBlock Text="Press Record to begin" Style="{StaticResource SubtitleTextStyle}"
-                           HorizontalAlignment="Center"/>
-                <Button Content="Start Recording" Style="{StaticResource PrimaryButtonStyle}"
-                        Background="{StaticResource AccentRedBrush}" IsEnabled="False"
-                        HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Border>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText"
+                       Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1"
+                    Content="Open Output Folder"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="OpenOutputFolder_Click"
+                    Margin="0,0,12,0"/>
+            <Button Grid.Column="2"
+                    Content="Clear"
+                    x:Name="ClearQueueButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ClearQueue_Click"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"/>
+            <Button Grid.Column="3"
+                    Content="Cancel"
+                    x:Name="CancelButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Cancel_Click"
+                    IsEnabled="False"/>
+        </Grid>
     </Grid>
 </Page>

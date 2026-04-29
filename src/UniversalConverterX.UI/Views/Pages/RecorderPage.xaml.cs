@@ -1,11 +1,412 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.UI.Services;
+using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class RecorderPage : Page
 {
+    private readonly ISidecarRunner _runner;
+    private readonly ObservableCollection<RecordingJobItem> _queue = [];
+    private readonly ObservableCollection<RecordingFinishedItem> _finished = [];
+    private readonly string _defaultOutputDirectory;
+    private string _outputDirectory;
+    private CancellationTokenSource? _cts;
+
     public RecorderPage()
     {
         InitializeComponent();
+        _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _defaultOutputDirectory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
+            "UniversalConverterX",
+            "Recordings");
+        _outputDirectory = _defaultOutputDirectory;
+        Directory.CreateDirectory(_outputDirectory);
+
+        QueueList.ItemsSource = _queue;
+        FinishedList.ItemsSource = _finished;
+        OutputDirectoryBox.Text = _outputDirectory;
+        UpdateUi();
     }
+
+    private async void BrowseOutputFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker
+        {
+            SuggestedStartLocation = PickerLocationId.VideosLibrary,
+        };
+        picker.FileTypeFilter.Add("*");
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is null)
+            return;
+
+        _outputDirectory = folder.Path;
+        Directory.CreateDirectory(_outputDirectory);
+        OutputDirectoryBox.Text = _outputDirectory;
+        UpdateUi();
+    }
+
+    private void AddSession_Click(object sender, RoutedEventArgs e)
+    {
+        _queue.Add(CreateJob());
+        QueuePivot.SelectedIndex = 0;
+        UpdateUi();
+    }
+
+    private void RemoveQueued_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cts is not null)
+            return;
+
+        if (sender is Button button && button.Tag is RecordingJobItem item)
+        {
+            _queue.Remove(item);
+            UpdateUi();
+        }
+    }
+
+    private void ClearQueue_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cts is not null)
+            return;
+
+        _queue.Clear();
+        UpdateUi();
+    }
+
+    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUi();
+
+    private void Option_Changed(object sender, SelectionChangedEventArgs e) => UpdateUi();
+
+    private async void Record_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cts is not null)
+            return;
+
+        if (_queue.Count == 0)
+            _queue.Add(CreateJob());
+
+        var pending = _queue.Where(j => !j.IsComplete).ToList();
+        if (pending.Count == 0)
+            return;
+
+        Directory.CreateDirectory(_outputDirectory);
+        _cts = new CancellationTokenSource();
+        RecordButton.IsEnabled = false;
+        ClearQueueButton.IsEnabled = false;
+        CancelButton.IsEnabled = true;
+        StatusText.Text = $"Recording {pending.Count} queued sessions...";
+
+        var completed = 0;
+        var failed = 0;
+        try
+        {
+            foreach (var job in pending)
+            {
+                if (_cts.IsCancellationRequested)
+                    break;
+
+                var outputPath = BuildOutputPath(job);
+                var args = BuildArgs(job, outputPath);
+
+                job.Progress = 0;
+                job.StatusText = "Starting";
+                StatusText.Text = $"Recording {job.Title}";
+
+                var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
+                {
+                    job.Progress = p.Percent;
+                    job.StatusText = $"{p.Percent:F1}% - {p.Stage}";
+                }));
+                var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
+                {
+                    job.StatusText = l.Level == "error" ? "Recorder error" : job.StatusText;
+                }));
+
+                SidecarResult result;
+                try
+                {
+                    result = await _runner.RunAsync("recordcast", args, progress, log, _cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    result = new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", 130);
+                }
+
+                if (result.Success)
+                {
+                    completed++;
+                    job.IsComplete = true;
+                    job.Progress = 100;
+                    job.StatusText = "Done";
+                }
+                else
+                {
+                    failed++;
+                    job.IsComplete = true;
+                    job.StatusText = result.ErrorCode == "cancelled" ? "Cancelled" : "Failed";
+                }
+
+                AddFinishedItem(job, result);
+
+                if (result.ErrorCode == "cancelled")
+                    break;
+            }
+        }
+        finally
+        {
+            _cts.Dispose();
+            _cts = null;
+        }
+
+        QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
+        StatusText.Text = $"{completed} recordings completed, {failed} failed.";
+        UpdateUi(updateStatus: false);
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cts is { IsCancellationRequested: false })
+            _cts.Cancel();
+    }
+
+    private void OpenOutputFolder_Click(object sender, RoutedEventArgs e) => OpenContainingFolder(_outputDirectory);
+
+    private void OpenFinishedFolder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is string path)
+            OpenContainingFolder(path);
+    }
+
+    private RecordingJobItem CreateJob()
+    {
+        var duration = SelectedInt(DurationCombo, 30);
+        var frameRate = SelectedInt(FrameRateCombo, 30);
+        var crf = SelectedInt(QualityCombo, 20);
+        var now = DateTime.Now;
+        var title = $"Screen recording {now:HH-mm-ss}";
+
+        return new RecordingJobItem
+        {
+            Title = title,
+            StartedAt = now,
+            DurationSeconds = duration,
+            FrameRate = frameRate,
+            Crf = crf,
+            EncoderPreset = "veryfast",
+            PresetSummary = $"{FormatDuration(duration)} - {frameRate} fps",
+            Details = $"Desktop capture, MP4 H.264, CRF {crf}",
+            StatusText = "Queued",
+        };
+    }
+
+    private List<string> BuildArgs(RecordingJobItem job, string outputPath)
+        =>
+        [
+            "record",
+            "--output", outputPath,
+            "--duration", job.DurationSeconds.ToString(),
+            "--framerate", job.FrameRate.ToString(),
+            "--crf", job.Crf.ToString(),
+            "--preset", job.EncoderPreset,
+        ];
+
+    private string BuildOutputPath(RecordingJobItem job)
+    {
+        var safeTitle = string.Join("_", job.Title.Split(Path.GetInvalidFileNameChars()));
+        var fileName = $"{safeTitle}_{job.DurationSeconds}s.mp4";
+        return EnsureUniquePath(Path.Combine(_outputDirectory, fileName));
+    }
+
+    private void AddFinishedItem(RecordingJobItem job, SidecarResult result)
+    {
+        var successBrush = (Brush)Application.Current.Resources["AccentGreenBrush"];
+        var errorBrush = (Brush)Application.Current.Resources["AccentRedBrush"];
+        var details = result.Success
+            ? $"{job.PresetSummary} - {(result.SizeBytes is long size ? FormatSize(size) : "saved")}"
+            : result.ErrorMessage ?? "Recording failed";
+
+        _finished.Insert(0, new RecordingFinishedItem
+        {
+            Title = result.Success && !string.IsNullOrWhiteSpace(result.OutputPath)
+                ? Path.GetFileName(result.OutputPath)
+                : job.Title,
+            Details = details,
+            OutputPath = result.OutputPath ?? "",
+            Success = result.Success,
+            Glyph = result.Success ? "\uE73E" : "\uE711",
+            AccentBrush = result.Success ? successBrush : errorBrush,
+        });
+    }
+
+    private void UpdateUi(bool updateStatus = true)
+    {
+        var hasQueued = _queue.Count > 0;
+        var hasFinished = _finished.Count > 0;
+        var pending = _queue.Count(j => !j.IsComplete);
+
+        QueueEmpty.Visibility = hasQueued ? Visibility.Collapsed : Visibility.Visible;
+        QueueList.Visibility = hasQueued ? Visibility.Visible : Visibility.Collapsed;
+        FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
+        FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
+
+        QueueSummaryText.Text = $"{pending} pending / {_finished.Count} finished";
+        CurrentSetupText.Text = $"{FormatDuration(SelectedInt(DurationCombo, 30))}, {SelectedInt(FrameRateCombo, 30)} fps, CRF {SelectedInt(QualityCombo, 20)}. Output: {_outputDirectory}.";
+        RecordButton.IsEnabled = _cts is null;
+        ClearQueueButton.IsEnabled = hasQueued && _cts is null;
+        CancelButton.IsEnabled = _cts is not null;
+
+        if (updateStatus && _cts is null)
+        {
+            StatusText.Text = pending == 0
+                ? "Add a recording session, or click Record All to capture the current setup."
+                : $"Ready to record {pending} queued sessions.";
+        }
+    }
+
+    private static int SelectedInt(ComboBox combo, int fallback)
+    {
+        if (combo.SelectedItem is ComboBoxItem item &&
+            int.TryParse(item.Tag?.ToString(), out var value))
+        {
+            return value;
+        }
+
+        return fallback;
+    }
+
+    private static string EnsureUniquePath(string path)
+    {
+        if (!File.Exists(path))
+            return path;
+
+        var directory = Path.GetDirectoryName(path) ?? ".";
+        var name = Path.GetFileNameWithoutExtension(path);
+        var extension = Path.GetExtension(path);
+        for (var i = 1; i < 10_000; i++)
+        {
+            var candidate = Path.Combine(directory, $"{name} ({i}){extension}");
+            if (!File.Exists(candidate))
+                return candidate;
+        }
+
+        return Path.Combine(directory, $"{name}-{Guid.NewGuid():N}{extension}");
+    }
+
+    private static void OpenContainingFolder(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        var folder = Directory.Exists(path)
+            ? path
+            : Path.GetDirectoryName(path);
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo("explorer.exe", folder)
+            {
+                UseShellExecute = true,
+            });
+        }
+        catch
+        {
+            // Convenience action only; keep recorder state intact if Explorer fails.
+        }
+    }
+
+    private static string FormatDuration(int seconds)
+    {
+        if (seconds < 60)
+            return $"{seconds}s";
+
+        var span = TimeSpan.FromSeconds(seconds);
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}h {span.Minutes}m"
+            : $"{span.Minutes}m";
+    }
+
+    private static string FormatSize(long bytes)
+    {
+        string[] s = ["B", "KB", "MB", "GB", "TB"];
+        var i = 0;
+        double v = bytes;
+        while (v >= 1024 && i < s.Length - 1)
+        {
+            v /= 1024;
+            i++;
+        }
+
+        return $"{v:F1} {s[i]}";
+    }
+}
+
+public sealed class RecordingJobItem : INotifyPropertyChanged
+{
+    private double _progress;
+    private string _statusText = "";
+    private bool _isComplete;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string Title { get; set; } = "";
+    public DateTime StartedAt { get; set; }
+    public int DurationSeconds { get; set; }
+    public int FrameRate { get; set; }
+    public int Crf { get; set; }
+    public string EncoderPreset { get; set; } = "veryfast";
+    public string PresetSummary { get; set; } = "";
+    public string Details { get; set; } = "";
+
+    public double Progress
+    {
+        get => _progress;
+        set => SetProperty(ref _progress, value);
+    }
+
+    public string StatusText
+    {
+        get => _statusText;
+        set => SetProperty(ref _statusText, value);
+    }
+
+    public bool IsComplete
+    {
+        get => _isComplete;
+        set => SetProperty(ref _isComplete, value);
+    }
+
+    private void SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = "")
+    {
+        if (EqualityComparer<T>.Default.Equals(storage, value))
+            return;
+
+        storage = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+public sealed class RecordingFinishedItem
+{
+    public string Title { get; set; } = "";
+    public string Details { get; set; } = "";
+    public string OutputPath { get; set; } = "";
+    public bool Success { get; set; }
+    public string Glyph { get; set; } = "";
+    public Brush AccentBrush { get; set; } = null!;
+    public bool CanOpenFolder => Success && !string.IsNullOrWhiteSpace(OutputPath);
 }
