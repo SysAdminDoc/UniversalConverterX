@@ -36,7 +36,7 @@ public sealed partial class SettingsWindow : Window
         var hwnd = WindowNative.GetWindowHandle(this);
         var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-        appWindow.Resize(new Windows.Graphics.SizeInt32(700, 900));
+        appWindow.Resize(new Windows.Graphics.SizeInt32(820, 920));
         appWindow.Title = "Settings - UniversalConverter X";
 
         LoadSettings();
@@ -107,14 +107,30 @@ public sealed partial class SettingsWindow : Window
                 IsInstalled = tool.IsInstalled,
                 StatusGlyph = tool.IsInstalled ? "\uE73E" : "\uE711",
                 StatusColor = tool.IsInstalled 
-                    ? new SolidColorBrush(Colors.Green) 
-                    : new SolidColorBrush(Colors.Orange),
+                    ? (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"]
+                    : (SolidColorBrush)Application.Current.Resources["AccentOrangeBrush"],
                 StatusText = tool.IsInstalled 
                     ? $"Installed • {tool.Description}" 
                     : $"Not installed • {tool.Description}",
-                ActionText = tool.IsInstalled ? "Update" : "Download"
+                ActionText = tool.IsInstalled ? "Update" : "Install"
             });
         }
+    }
+
+    private void SettingsSelection_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (Content is FrameworkElement { IsLoaded: true })
+            _isDirty = true;
+    }
+
+    private void SettingsToggle_Changed(object sender, RoutedEventArgs e) => _isDirty = true;
+
+    private void SettingsCheck_Changed(object sender, RoutedEventArgs e) => _isDirty = true;
+
+    private void ParallelSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        if (Content is FrameworkElement { IsLoaded: true })
+            _isDirty = true;
     }
 
     private async void BrowseOutputDirectory_Click(object sender, RoutedEventArgs e)
@@ -187,7 +203,7 @@ public sealed partial class SettingsWindow : Window
                 toolVm.IsInstalled = true;
                 toolVm.Version = result.Version ?? "";
                 toolVm.StatusGlyph = "\uE73E";
-                toolVm.StatusColor = new SolidColorBrush(Colors.Green);
+                toolVm.StatusColor = (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"];
                 toolVm.StatusText = "Installed successfully!";
                 toolVm.ActionText = "Update";
             }
@@ -254,7 +270,7 @@ public sealed partial class SettingsWindow : Window
         finally
         {
             DownloadAllToolsButton.IsEnabled = true;
-            DownloadAllToolsButton.Content = "Download All Missing Tools";
+            DownloadAllToolsButton.Content = "Install Missing Tools";
         }
     }
 
@@ -347,7 +363,7 @@ public sealed partial class SettingsWindow : Window
         var dialog = new ContentDialog
         {
             Title = "Reset Settings",
-            Content = "Are you sure you want to reset all settings to their default values?",
+            Content = "Reset preferences to their default values? Your files and installed tools are not changed.",
             PrimaryButtonText = "Reset",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close,
@@ -366,7 +382,30 @@ public sealed partial class SettingsWindow : Window
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
+        if (_isDirty)
+        {
+            _ = ConfirmDiscardAndCloseAsync();
+            return;
+        }
+
         Close();
+    }
+
+    private async Task ConfirmDiscardAndCloseAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Discard unsaved changes?",
+            Content = "You have changed settings that have not been saved.",
+            PrimaryButtonText = "Discard",
+            CloseButtonText = "Keep editing",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+            Close();
     }
 
     private async void Save_Click(object sender, RoutedEventArgs e)

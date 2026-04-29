@@ -72,14 +72,16 @@
                     <StackPanel Grid.Column="0" Spacing="14">
                         <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
                                 Padding="12,5" HorizontalAlignment="Left">
-                            <TextBlock Text="AI Lab" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="AI LAB"
+                                       Style="{StaticResource EyebrowTextStyle}"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="Enhance video, audio, images, captions, and social-ready edits from one AI queue."
+                        <TextBlock Text="Plan enhancement workflows with the same discipline as ready tools."
                                    FontSize="34" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
+                                   LineHeight="41"
                                    TextWrapping="Wrap" MaxWidth="760"/>
-                        <TextBlock Text="This route turns the public UniConverter-style AI feature surface into UCX's local roadmap: feature cards, expected workflow behavior, and sidecar ownership in one place."
+                        <TextBlock Text="AI cards are deliberately transparent: each tool shows scope, required engine, and the missing workflow contract before it graduates into a ready queue."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
@@ -94,11 +96,10 @@
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                             CornerRadius="24" Padding="22">
                         <StackPanel Spacing="14">
-                            <TextBlock Text="AI Delivery Stack" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Delivery Discipline" Style="{StaticResource PanelTitleTextStyle}"/>
                             <TextBlock Text="Shared ONNX cache" Style="{StaticResource MutedTextStyle}"/>
                             <ProgressBar Value="35" Maximum="100" Height="8" CornerRadius="4"/>
-                            <TextBlock Text="Wave 1 sidecars are staged; Wave 2 tools need model download, preview, and batch queue contracts."
+                            <TextBlock Text="AI features remain in roadmap status until model cache, preview, batch export, cancellation, and failure recovery are all explicit."
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -107,9 +108,8 @@
 
             <StackPanel Grid.Row="1" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Featured AI Tools" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Click a card for implementation scope" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Featured AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Roadmap with implementation scope" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"

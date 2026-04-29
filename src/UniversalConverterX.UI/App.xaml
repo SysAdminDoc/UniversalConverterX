@@ -11,27 +11,36 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Brand Colors -->
-            <Color x:Key="BrandBackground">#f5f7ff</Color>
+            <Color x:Key="BrandBackground">#f4f7fb</Color>
             <Color x:Key="BrandSurface">#ffffff</Color>
-            <Color x:Key="BrandSurfaceLight">#eef4ff</Color>
-            <Color x:Key="BrandSurfaceSoft">#e9fbf6</Color>
-            <Color x:Key="BrandBorder">#d9e2f2</Color>
-            <Color x:Key="BrandAccentGreen">#0fb981</Color>
+            <Color x:Key="BrandSurfaceLight">#edf4ff</Color>
+            <Color x:Key="BrandSurfaceSoft">#e8f8f2</Color>
+            <Color x:Key="BrandSurfaceWarm">#fff7ed</Color>
+            <Color x:Key="BrandSurfaceDanger">#fff1f2</Color>
+            <Color x:Key="BrandSurfaceMuted">#f8fafc</Color>
+            <Color x:Key="BrandBorder">#d7e0ec</Color>
+            <Color x:Key="BrandBorderStrong">#b7c4d6</Color>
+            <Color x:Key="BrandAccentGreen">#0e9f6e</Color>
             <Color x:Key="BrandAccentBlue">#2563eb</Color>
             <Color x:Key="BrandAccentCyan">#06b6d4</Color>
             <Color x:Key="BrandAccentOrange">#f97316</Color>
             <Color x:Key="BrandAccentRed">#ef4444</Color>
             <Color x:Key="BrandAccentYellow">#d97706</Color>
-            <Color x:Key="BrandTextPrimary">#101828</Color>
+            <Color x:Key="BrandTextPrimary">#0f172a</Color>
             <Color x:Key="BrandTextSecondary">#475467</Color>
             <Color x:Key="BrandTextMuted">#667085</Color>
+            <Color x:Key="BrandTextSubtle">#8a95a6</Color>
 
             <!-- Brushes -->
             <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BrandBackground}"/>
             <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource BrandSurface}"/>
             <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource BrandSurfaceLight}"/>
             <SolidColorBrush x:Key="SurfaceSoftBrush" Color="{StaticResource BrandSurfaceSoft}"/>
+            <SolidColorBrush x:Key="SurfaceWarmBrush" Color="{StaticResource BrandSurfaceWarm}"/>
+            <SolidColorBrush x:Key="SurfaceDangerBrush" Color="{StaticResource BrandSurfaceDanger}"/>
+            <SolidColorBrush x:Key="SurfaceMutedBrush" Color="{StaticResource BrandSurfaceMuted}"/>
             <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BrandBorder}"/>
+            <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BrandBorderStrong}"/>
             <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource BrandAccentGreen}"/>
             <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandAccentBlue}"/>
             <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource BrandAccentCyan}"/>
@@ -41,16 +50,22 @@
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource BrandTextPrimary}"/>
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource BrandTextSecondary}"/>
             <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource BrandTextMuted}"/>
+            <SolidColorBrush x:Key="TextSubtleBrush" Color="{StaticResource BrandTextSubtle}"/>
 
             <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#eaf3ff" Offset="0"/>
-                <GradientStop Color="#f7fbff" Offset="0.48"/>
-                <GradientStop Color="#dffbf3" Offset="1"/>
+                <GradientStop Color="#e9f2ff" Offset="0"/>
+                <GradientStop Color="#f8fbff" Offset="0.45"/>
+                <GradientStop Color="#e6fbf3" Offset="1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="AiGradientBrush" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#ecfeff" Offset="0"/>
                 <GradientStop Color="#eff6ff" Offset="0.55"/>
                 <GradientStop Color="#f8fafc" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="ShellGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#ffffff" Offset="0"/>
+                <GradientStop Color="#f3f8ff" Offset="0.56"/>
+                <GradientStop Color="#ecfbf5" Offset="1"/>
             </LinearGradientBrush>
 
             <!-- Card Style -->
@@ -58,7 +73,7 @@
                 <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="CornerRadius" Value="18"/>
                 <Setter Property="Padding" Value="20"/>
             </Style>
 
@@ -67,32 +82,45 @@
                 <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
                 <Setter Property="Foreground" Value="#FFFFFF"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CornerRadius" Value="8"/>
-                <Setter Property="Padding" Value="24,12"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="CornerRadius" Value="11"/>
+                <Setter Property="MinHeight" Value="42"/>
+                <Setter Property="MinWidth" Value="104"/>
+                <Setter Property="Padding" Value="20,11"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
             </Style>
 
             <!-- Secondary Button Style -->
             <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="8"/>
-                <Setter Property="Padding" Value="24,12"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CornerRadius" Value="11"/>
+                <Setter Property="MinHeight" Value="42"/>
+                <Setter Property="MinWidth" Value="104"/>
+                <Setter Property="Padding" Value="20,11"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
             </Style>
 
             <!-- Title Text Style -->
             <Style x:Key="TitleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="FontSize" Value="28"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="34"/>
             </Style>
 
             <!-- Subtitle Text Style -->
             <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontSize" Value="15"/>
                 <Setter Property="FontWeight" Value="Normal"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="LineHeight" Value="22"/>
             </Style>
 
             <!-- Body Text Style -->
@@ -100,12 +128,52 @@
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <!-- Muted Text Style -->
             <Style x:Key="MutedTextStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="LineHeight" Value="18"/>
+            </Style>
+
+            <Style x:Key="EyebrowTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CharacterSpacing" Value="40"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+            </Style>
+
+            <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="18"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="24"/>
+            </Style>
+
+            <Style x:Key="PanelTitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            </Style>
+
+            <Style x:Key="PillTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            </Style>
+
+            <Style x:Key="PremiumTextBoxStyle" TargetType="TextBox">
+                <Setter Property="MinHeight" Value="42"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="12,8"/>
+            </Style>
+
+            <Style x:Key="PremiumComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="MinHeight" Value="42"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="10,6"/>
             </Style>
 
         </ResourceDictionary>

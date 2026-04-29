@@ -34,6 +34,12 @@ public sealed partial class PlaceholderPage : Page
             PoweredByBox.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
     }
+
+    private void OpenToolbox_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
+        App.RequestNavigation("toolbox");
+
+    private void OpenHome_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) =>
+        App.RequestNavigation("home");
 }
 
 public sealed record PlaceholderInfo(

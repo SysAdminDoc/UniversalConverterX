@@ -8,24 +8,49 @@
     mc:Ignorable="d"
     Title="Settings - UniversalConverter X">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="48"/>
+            <RowDefinition Height="112"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar -->
-        <Grid Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-            <TextBlock Text="Settings" 
-                       Style="{StaticResource TitleTextBlockStyle}"
-                       VerticalAlignment="Center"
-                       Margin="24,0,0,0"/>
-        </Grid>
+        <Border Grid.Row="0"
+                Background="{StaticResource ShellGradientBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="30,20">
+            <Grid ColumnSpacing="18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Spacing="5">
+                    <TextBlock Text="Settings" Style="{StaticResource TitleTextStyle}"/>
+                    <TextBlock Text="Tune defaults, local tools, Explorer integration, and appearance without changing your files."
+                               Style="{StaticResource SubtitleTextStyle}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Grid.Column="1"
+                        Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="18"
+                        Padding="14,10"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE83D;" FontSize="15"
+                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                        <TextBlock Text="Offline-first defaults"
+                                   Style="{StaticResource PillTextStyle}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
 
-        <!-- Main Content -->
-        <ScrollViewer Grid.Row="1" Padding="24">
-            <StackPanel Spacing="24" MaxWidth="800">
+        <ScrollViewer Grid.Row="1" Padding="30,26">
+            <StackPanel Spacing="18" MaxWidth="920">
                 
                 <!-- General Settings -->
                 <Expander IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
@@ -54,11 +79,13 @@
                             <TextBox x:Name="OutputDirectoryTextBox"
                                      Header="Default Output Directory"
                                      PlaceholderText="Same as input file"
+                                     Style="{StaticResource PremiumTextBoxStyle}"
                                      IsReadOnly="True"/>
                             <Button Grid.Column="1" 
-                                    Content="Browse..."
+                                    Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
+                                    Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputDirectory_Click"/>
                         </Grid>
 
@@ -66,6 +93,8 @@
                         <ComboBox x:Name="OverwriteBehaviorComboBox"
                                   Header="When output file exists"
                                   SelectedIndex="0"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem Content="Ask each time"/>
                             <ComboBoxItem Content="Always overwrite"/>
@@ -77,21 +106,24 @@
                         <ToggleSwitch x:Name="DeleteSourceToggle"
                                       Header="Delete source files after conversion"
                                       OffContent="Keep original files"
-                                      OnContent="Move to Recycle Bin"/>
+                                      OnContent="Move to Recycle Bin"
+                                      Toggled="SettingsToggle_Changed"/>
 
                         <!-- Notifications -->
                         <ToggleSwitch x:Name="NotificationsToggle"
                                       Header="Show notifications"
                                       OffContent="Disabled"
                                       OnContent="Enabled"
-                                      IsOn="True"/>
+                                      IsOn="True"
+                                      Toggled="SettingsToggle_Changed"/>
 
                         <!-- Sound -->
                         <ToggleSwitch x:Name="SoundToggle"
                                       Header="Play sound when complete"
                                       OffContent="Silent"
                                       OnContent="Enabled"
-                                      IsOn="True"/>
+                                      IsOn="True"
+                                      Toggled="SettingsToggle_Changed"/>
                     </StackPanel>
                 </Expander>
 
@@ -117,6 +149,8 @@
                         <ComboBox x:Name="DefaultQualityComboBox"
                                   Header="Default quality preset"
                                   SelectedIndex="3"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem Content="Lowest - Smallest file size"/>
                             <ComboBoxItem Content="Low"/>
@@ -130,6 +164,8 @@
                         <ComboBox x:Name="HardwareAccelComboBox"
                                   Header="Hardware acceleration"
                                   SelectedIndex="0"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch">
                             <ComboBoxItem Content="Auto-detect"/>
                             <ComboBoxItem Content="NVIDIA NVENC (CUDA)"/>
@@ -152,7 +188,8 @@
                                         Value="4"
                                         StepFrequency="1"
                                         TickFrequency="1"
-                                        TickPlacement="Outside"/>
+                                        TickPlacement="Outside"
+                                        ValueChanged="ParallelSlider_ValueChanged"/>
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding Value, ElementName=ParallelSlider}"
                                            Width="30"
@@ -167,7 +204,8 @@
                                       Header="Preserve metadata"
                                       OffContent="Strip metadata"
                                       OnContent="Keep EXIF, tags, etc."
-                                      IsOn="True"/>
+                                      IsOn="True"
+                                      Toggled="SettingsToggle_Changed"/>
                     </StackPanel>
                 </Expander>
 
@@ -198,11 +236,13 @@
                             <TextBox x:Name="ToolsPathTextBox"
                                      Header="Tools directory"
                                      PlaceholderText="Default location"
+                                     Style="{StaticResource PremiumTextBoxStyle}"
                                      IsReadOnly="True"/>
                             <Button Grid.Column="1" 
-                                    Content="Browse..."
+                                    Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
+                                    Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseToolsPath_Click"/>
                         </Grid>
 
@@ -247,6 +287,7 @@
                                                 Content="{Binding ActionText}"
                                                 Click="ToolAction_Click"
                                                 Tag="{Binding Id}"
+                                                Style="{StaticResource SecondaryButtonStyle}"
                                                 MinWidth="100"/>
                                     </Grid>
                                 </DataTemplate>
@@ -255,7 +296,8 @@
 
                         <!-- Download All Button -->
                         <Button x:Name="DownloadAllToolsButton"
-                                Content="Download All Missing Tools"
+                                Content="Install Missing Tools"
+                                Style="{StaticResource PrimaryButtonStyle}"
                                 HorizontalAlignment="Right"
                                 Click="DownloadAllTools_Click"/>
                     </StackPanel>
@@ -291,6 +333,8 @@
                         <ComboBox x:Name="ContextMenuStyleComboBox"
                                   Header="Context menu style"
                                   SelectedIndex="0"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
                                   IsEnabled="{Binding IsOn, ElementName=ContextMenuToggle}">
                             <ComboBoxItem Content="Cascading menu (Convert to →)"/>
@@ -301,21 +345,23 @@
                         <!-- Quick Convert Presets -->
                         <TextBlock Text="Quick convert presets in context menu" Margin="0,8,0,0"/>
                         <StackPanel Spacing="8">
-                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True"/>
-                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True"/>
-                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True"/>
-                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True"/>
-                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract Audio (MP3)" IsChecked="True"/>
-                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True"/>
+                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract audio as MP3" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
                         </StackPanel>
 
                         <!-- Register/Unregister Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
                             <Button x:Name="RegisterShellButton"
                                     Content="Register Context Menu"
+                                    Style="{StaticResource SecondaryButtonStyle}"
                                     Click="RegisterShell_Click"/>
                             <Button x:Name="UnregisterShellButton"
                                     Content="Unregister"
+                                    Style="{StaticResource SecondaryButtonStyle}"
                                     Click="UnregisterShell_Click"/>
                         </StackPanel>
                     </StackPanel>
@@ -343,6 +389,7 @@
                         <ComboBox x:Name="ThemeComboBox"
                                   Header="App theme"
                                   SelectedIndex="2"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="ThemeComboBox_SelectionChanged">
                             <ComboBoxItem Content="Light"/>
@@ -386,13 +433,15 @@
                         <ToggleSwitch x:Name="MinimizeToTrayToggle"
                                       Header="Minimize to system tray"
                                       OffContent="Close to taskbar"
-                                      OnContent="Minimize to tray"/>
+                                      OnContent="Minimize to tray"
+                                      Toggled="SettingsToggle_Changed"/>
 
                         <!-- Start Minimized -->
                         <ToggleSwitch x:Name="StartMinimizedToggle"
                                       Header="Start minimized"
                                       OffContent="Show window on startup"
-                                      OnContent="Start in background"/>
+                                      OnContent="Start in background"
+                                      Toggled="SettingsToggle_Changed"/>
                     </StackPanel>
                 </Expander>
 
@@ -433,6 +482,7 @@
 
                         <Button x:Name="CheckUpdatesButton"
                                 Content="Check for Updates"
+                                Style="{StaticResource SecondaryButtonStyle}"
                                 Click="CheckUpdates_Click"/>
 
                         <!-- Credits -->
@@ -446,28 +496,33 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Bottom Bar -->
-        <Grid Grid.Row="2" 
-              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-              Padding="24,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="2"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="30,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <Button x:Name="ResetButton"
-                    Content="Reset to Defaults"
-                    Click="ResetSettings_Click"/>
+                <Button x:Name="ResetButton"
+                        Content="Reset to Defaults"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="ResetSettings_Click"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                <Button x:Name="CancelButton"
-                        Content="Cancel"
-                        Click="Cancel_Click"/>
-                <Button x:Name="SaveButton"
-                        Content="Save"
-                        Style="{StaticResource AccentButtonStyle}"
-                        Click="Save_Click"/>
-            </StackPanel>
-        </Grid>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="CancelButton"
+                            Content="Cancel"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="Cancel_Click"/>
+                    <Button x:Name="SaveButton"
+                            Content="Save"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="Save_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

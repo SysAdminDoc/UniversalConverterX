@@ -20,13 +20,16 @@
                         Background="{StaticResource BackgroundBrush}">
 
             <NavigationView.PaneHeader>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,8,0,8">
-                    <FontIcon Glyph="&#xE8AB;" FontSize="22"
-                              Foreground="{StaticResource AccentGreenBrush}"/>
+                <StackPanel Orientation="Horizontal" Spacing="11" Margin="12,12,0,12">
+                    <Border Width="34" Height="34" CornerRadius="12"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="&#xE8AB;" FontSize="18"
+                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                    </Border>
                     <StackPanel>
                         <TextBlock Text="UniversalConverter X" FontSize="13" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="v2.1.0" FontSize="10"
+                        <TextBlock Text="Local media workspace" FontSize="10"
                                    Foreground="{StaticResource TextMutedBrush}"/>
                     </StackPanel>
                 </StackPanel>
@@ -108,6 +111,28 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
+
+            <NavigationView.PaneFooter>
+                <Border Margin="12,8,12,12"
+                        Padding="12"
+                        Background="{StaticResource ShellGradientBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="16">
+                    <StackPanel Spacing="7">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE83D;" FontSize="14"
+                                      Foreground="{StaticResource AccentGreenBrush}"/>
+                            <TextBlock Text="Private by default"
+                                       Style="{StaticResource PillTextStyle}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                        <TextBlock Text="Files stay local unless you explicitly choose an online workflow."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </NavigationView.PaneFooter>
 
             <Frame x:Name="ContentFrame" Background="{StaticResource BackgroundBrush}"/>
         </NavigationView>
