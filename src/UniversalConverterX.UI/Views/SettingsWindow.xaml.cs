@@ -10,11 +10,14 @@ using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
+using Windows.System;
 
 namespace UniversalConverterX.UI.Views;
 
 public sealed partial class SettingsWindow : Window
 {
+    private const string ReleasesUrl = "https://github.com/SysAdminDoc/UniversalConverterX/releases";
+
     private readonly IServiceProvider _serviceProvider;
     private readonly ConverterXOptions _options;
     private readonly IToolManager _toolManager;
@@ -281,35 +284,16 @@ public sealed partial class SettingsWindow : Window
 
     private async void RegisterShell_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            // This would call the shell registration service
-            // ShellIntegration.Register();
-            await ShowMessageAsync("Shell Integration", 
-                "Context menu registered successfully.\n\n" +
-                "You may need to restart Explorer or sign out for changes to take effect.");
-        }
-        catch (Exception ex)
-        {
-            await ShowMessageAsync("Registration Failed", 
-                $"Failed to register context menu: {ex.Message}\n\n" +
-                "Try running the application as Administrator.");
-        }
+        await ShowMessageAsync("Shell Integration",
+            "Explorer registration is handled by the installer or an elevated registration command. " +
+            "This settings page saves your context-menu preferences, but it will not silently modify system shell entries.");
     }
 
     private async void UnregisterShell_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            // ShellIntegration.Unregister();
-            await ShowMessageAsync("Shell Integration",
-                "Context menu unregistered successfully.");
-        }
-        catch (Exception ex)
-        {
-            await ShowMessageAsync("Unregistration Failed",
-                $"Failed to unregister context menu: {ex.Message}");
-        }
+        await ShowMessageAsync("Shell Integration",
+            "Use the installer or elevated shell-extension registration command to remove Explorer integration. " +
+            "Saved preferences can be changed here before the next registration.");
     }
 
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -341,20 +325,21 @@ public sealed partial class SettingsWindow : Window
     private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         CheckUpdatesButton.IsEnabled = false;
-        CheckUpdatesButton.Content = "Checking...";
+        CheckUpdatesButton.Content = "Opening...";
 
         try
         {
-            // Simulate update check
-            await Task.Delay(1500);
-            
-            await ShowMessageAsync("No Updates Available",
-                "You're running the latest version of UniversalConverter X.");
+            var launched = await Launcher.LaunchUriAsync(new Uri(ReleasesUrl));
+            if (!launched)
+            {
+                await ShowMessageAsync("Releases",
+                    "Open the releases page manually to check for updates:\n" + ReleasesUrl);
+            }
         }
         finally
         {
             CheckUpdatesButton.IsEnabled = true;
-            CheckUpdatesButton.Content = "Check for Updates";
+            CheckUpdatesButton.Content = "View Releases";
         }
     }
 
