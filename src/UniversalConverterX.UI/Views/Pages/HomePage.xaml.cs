@@ -77,6 +77,7 @@ public sealed partial class HomePage : Page
             new("Background remover", "Open AI Lab", "ai-lab"),
             new("Vocal remover", "Open AI Lab", "ai-lab"),
             new("Inspect file format", "Probe codecs, streams, and conversion targets", "format-inspector"),
+            new("Extract video frames", "Open Frame Snapshot", "frame-snapshot"),
             new("Toolbox", "Browse all specialized tools", "toolbox"),
         ]);
     }

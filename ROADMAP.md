@@ -16,6 +16,7 @@ Forward-looking plans for UniversalConverter X — the all-in-one media tool for
 - **Downloader** powered by StreamKeep sidecar — Kick/Twitch/Rumble native + yt-dlp fallback for 1000+ sites.
 - **Recorder** powered by first-party RecordCast sidecar — fixed-duration Windows desktop capture via FFmpeg gdigrab.
 - **Format Inspector** toolbox workspace for signatures, FFprobe stream metadata, and conversion target suggestions.
+- **Frame Snapshot** toolbox workspace for batch timestamped still extraction and image-sequence samples via FFmpeg.
 - Settings UI — preferences pane, theme switcher, tool-path overrides.
 
 ### v2.2 — AI Toolbox Wave 1
@@ -26,7 +27,6 @@ Forward-looking plans for UniversalConverter X — the all-in-one media tool for
 
 ### v2.3 — Toolbox Wave 2
 - **Auto Reframe** powered by Vertigo (9:16 / 1:1 / 4:5 with MediaPipe face tracking).
-- **Frame Snapshot** powered by FrameSnap.
 - **GIF Maker** powered by GifStudio (WebView2 host).
 - **Image Converter** — HEICShift's metadata/ICC defaults absorbed into UCX's existing libvips/libjxl strategies.
 
