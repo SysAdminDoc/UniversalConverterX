@@ -196,8 +196,19 @@ public sealed partial class CompressorPage : Page
         }
     }
 
-    private void Clear_Click(object sender, RoutedEventArgs e)
+    private async void Clear_Click(object sender, RoutedEventArgs e)
     {
+        if (_files.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear compression queue?",
+                $"Remove {_files.Count} queued video file(s)? Finished results stay available."))
+        {
+            return;
+        }
+
         _files.Clear();
         UpdateUi();
     }

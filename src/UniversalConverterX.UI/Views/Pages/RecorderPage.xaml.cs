@@ -77,10 +77,21 @@ public sealed partial class RecorderPage : Page
         }
     }
 
-    private void ClearQueue_Click(object sender, RoutedEventArgs e)
+    private async void ClearQueue_Click(object sender, RoutedEventArgs e)
     {
         if (_cts is not null)
             return;
+
+        if (_queue.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear recording queue?",
+                $"Remove {_queue.Count} queued recording session(s)? Finished recordings stay available."))
+        {
+            return;
+        }
 
         _queue.Clear();
         UpdateUi();
