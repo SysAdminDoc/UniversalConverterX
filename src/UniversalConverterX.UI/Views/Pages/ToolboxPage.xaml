@@ -10,10 +10,10 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ToolboxTileTemplate">
-            <Border Width="200" Height="124" Padding="14" Margin="0,0,12,12"
+            <Border Width="224" Height="142" Padding="16" Margin="0,0,12,12"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="12">
+                    CornerRadius="18">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -26,78 +26,132 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Background="{StaticResource SurfaceLightBrush}" CornerRadius="8"
-                                Width="36" Height="36">
+                        <Border Grid.Column="0" Background="{StaticResource SurfaceLightBrush}" CornerRadius="12"
+                                Width="40" Height="40">
                             <FontIcon Glyph="{Binding Glyph}" FontSize="16"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}" CornerRadius="8"
+                        <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}" CornerRadius="10"
                                 Padding="6,2" Visibility="{Binding ShowAi}">
                             <TextBlock Text="AI" FontSize="9" FontWeight="SemiBold"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                     </Grid>
-                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="4" Margin="0,8,0,0">
-                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="5" Margin="0,10,0,0">
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding Description}" FontSize="10"
+                        <TextBlock Text="{Binding Description}" FontSize="11"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" MaxLines="2"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Text="{Binding StatusBadge}" FontSize="9" FontWeight="SemiBold"
-                               Foreground="{Binding StatusBrush}"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="7">
+                        <Ellipse Width="7" Height="7"
+                                 Fill="{Binding StatusBrush}"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="{Binding StatusBrush}"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
-        <StackPanel Padding="32" Spacing="24">
-            <StackPanel Spacing="6">
-                <TextBlock Text="Toolbox" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="29 specialized tools — image, video, audio, AI, disc, and more."
-                           Style="{StaticResource SubtitleTextStyle}"/>
-            </StackPanel>
+        <StackPanel Padding="32" Spacing="26">
+            <Border Background="{StaticResource ShellGradientBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="28"
+                    Padding="28">
+                <Grid ColumnSpacing="28">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="320"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="9">
+                        <TextBlock Text="TOOLBOX" Style="{StaticResource EyebrowTextStyle}"/>
+                        <TextBlock Text="Specialized tools for finishing, repairing, extracting, and preparing media."
+                                   Style="{StaticResource TitleTextStyle}"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="720"/>
+                        <TextBlock Text="Ready tools open directly. Planned tools explain their engine and implementation path, so the roadmap stays discoverable without pretending unfinished work is complete."
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="760"/>
+                    </StackPanel>
+                    <Border Grid.Column="1"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="22"
+                            Padding="18">
+                        <Grid ColumnSpacing="12" RowSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="2" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentGreenBrush}"/>
+                                <TextBlock Text="Ready tools" Style="{StaticResource MutedTextStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                <TextBlock Text="29" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentBlueBrush}"/>
+                                <TextBlock Text="Mapped tools" Style="{StaticResource MutedTextStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0">
+                                <TextBlock Text="Local" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentGreenBrush}"/>
+                                <TextBlock Text="Processing" Style="{StaticResource MutedTextStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1">
+                                <TextBlock Text="AI" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentOrangeBrush}"/>
+                                <TextBlock Text="Clearly marked" Style="{StaticResource MutedTextStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Image" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Image" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="ImageGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Video" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Video" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="VideoGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="AI Tools" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Audio" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Audio" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AudioGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Disc" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DiscGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Other" FontSize="16" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Other" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="OtherGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>

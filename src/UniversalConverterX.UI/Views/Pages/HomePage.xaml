@@ -146,14 +146,16 @@
                     <StackPanel Grid.Column="0" Spacing="14" VerticalAlignment="Center">
                         <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
                                 Padding="12,5" HorizontalAlignment="Left">
-                            <TextBlock Text="AI-first local media suite" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="LOCAL MEDIA WORKSPACE"
+                                       Style="{StaticResource EyebrowTextStyle}"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="Convert, enhance, compress, record, and finish every media file from one workspace."
+                        <TextBlock Text="Convert, compress, record, inspect, and finish media without losing control."
                                    FontSize="36" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
+                                   LineHeight="43"
                                    TextWrapping="Wrap" MaxWidth="760"/>
-                        <TextBlock Text="Start with a file, a URL, or a media problem. UCX keeps the workflow local while moving toward UniConverter-style guided modules, AI tools, and batch queues."
+                        <TextBlock Text="Start with a file, URL, or capture task. UCX keeps high-volume media work local while presenting each workflow as a guided queue with clear output, recovery, and status."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
@@ -170,8 +172,7 @@
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                             CornerRadius="24" Padding="22" VerticalAlignment="Stretch">
                         <StackPanel Spacing="16">
-                            <TextBlock Text="Workspace Status" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Readiness Snapshot" Style="{StaticResource PanelTitleTextStyle}"/>
                             <Grid RowSpacing="12" ColumnSpacing="12">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -184,9 +185,9 @@
                                 <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
                                         CornerRadius="16" Padding="14">
                                     <StackPanel>
-                                        <TextBlock Text="1000+" FontSize="24" FontWeight="SemiBold"
+                                        <TextBlock Text="7" FontSize="24" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentBlueBrush}"/>
-                                        <TextBlock Text="Formats" Style="{StaticResource MutedTextStyle}"/>
+                                        <TextBlock Text="Workspaces ready" Style="{StaticResource MutedTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
@@ -200,9 +201,9 @@
                                 <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
                                         CornerRadius="16" Padding="14">
                                     <StackPanel>
-                                        <TextBlock Text="3" FontSize="24" FontWeight="SemiBold"
+                                        <TextBlock Text="1000+" FontSize="24" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentOrangeBrush}"/>
-                                        <TextBlock Text="Sidecars wired" Style="{StaticResource MutedTextStyle}"/>
+                                        <TextBlock Text="Formats covered" Style="{StaticResource MutedTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
@@ -210,7 +211,7 @@
                                     <StackPanel>
                                         <TextBlock Text="Local" FontSize="24" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <TextBlock Text="No telemetry" Style="{StaticResource MutedTextStyle}"/>
+                                        <TextBlock Text="Default mode" Style="{StaticResource MutedTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -230,7 +231,7 @@
                     <FontIcon Grid.Column="0" Glyph="&#xE721;" FontSize="18"
                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                     <AutoSuggestBox x:Name="TaskSearchBox" Grid.Column="1"
-                                    PlaceholderText="Search convert, subtitles, watermark, recorder, compression..."
+                                    PlaceholderText="Search a task: convert, compress, record, inspect, extract frames..."
                                     QueryIcon="Find"
                                     TextChanged="TaskSearchBox_TextChanged"
                                     SuggestionChosen="TaskSearchBox_SuggestionChosen"
@@ -250,9 +251,8 @@
 
             <StackPanel Grid.Row="2" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Begin" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Core workflows" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Begin" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Ready workflows" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -262,9 +262,8 @@
 
             <StackPanel Grid.Row="3" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="AI Lab" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Next-generation enhancement queue" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Enhancement roadmap" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -274,9 +273,8 @@
 
             <StackPanel Grid.Row="4" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Professional Toolbox" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Creation, enhancement, and export" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Professional Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Specialized utilities" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ClustersGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -286,14 +284,13 @@
 
             <StackPanel Grid.Row="5" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Choose Your Scenario" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Guided presets coming next" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Choose Your Scenario" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Workflow guidance" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="PersonasGrid" SelectionMode="None"
                           ItemTemplate="{StaticResource PersonaTemplate}"/>
-                <TextBlock Text="UniversalConverter X v2.1.0 - local processing, no telemetry"
+                <TextBlock Text="UniversalConverter X v2.1.0 - local-first processing"
                            Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"
                            Margin="0,8,0,0"/>
             </StackPanel>
