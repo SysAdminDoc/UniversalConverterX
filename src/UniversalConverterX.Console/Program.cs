@@ -12,7 +12,7 @@ public class Program
         app.Configure(config =>
         {
             config.SetApplicationName("ucx");
-            config.SetApplicationVersion("1.0.0");
+            config.SetApplicationVersion("2.0.0");
 
             config.AddCommand<ConvertCommand>("convert")
                 .WithDescription("Convert one or more files to a different format")

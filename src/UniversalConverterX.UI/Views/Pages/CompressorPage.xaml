@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.CompressorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
+                <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="10" Padding="8,2"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="Preview" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{StaticResource AccentYellowBrush}"/>
+                </Border>
+            </StackPanel>
+            <TextBlock Text="Reduce video file size with preset profiles. Will be powered by VideoCrush in v2.0."
+                       Style="{StaticResource SubtitleTextStyle}" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="2">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <FontIcon Glyph="&#xE91F;" FontSize="64"
+                              Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Drop video files to compress"
+                               Style="{StaticResource SubtitleTextStyle}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, and more"
+                               Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"/>
+                    <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Center" IsEnabled="False"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="12">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Preset Profile" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <RadioButton Content="Web upload (1080p)" IsChecked="True" IsEnabled="False"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <RadioButton Content="Email friendly (&lt;10 MB)" IsEnabled="False"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <RadioButton Content="Archive (AV1, CRF 28)" IsEnabled="False"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <RadioButton Content="Custom" IsEnabled="False"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Quality" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Slider Minimum="0" Maximum="100" Value="75" IsEnabled="False"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Smaller file"
+                                       Style="{StaticResource MutedTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="Higher quality"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Estimated output"
+                                   Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock Text="—" FontSize="22" FontWeight="SemiBold"
+                                   Foreground="{StaticResource AccentBlueBrush}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+            <Button Content="Clear" Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"/>
+            <Button Content="Compress" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
+        </StackPanel>
+    </Grid>
+</Page>

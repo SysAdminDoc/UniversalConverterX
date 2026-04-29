@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
@@ -7,14 +6,18 @@ using UniversalConverterX.Core.Services;
 using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.ViewModels;
 using UniversalConverterX.UI.Views;
+using UniversalConverterX.UI.Views.Pages;
 
 namespace UniversalConverterX.UI;
 
 public partial class App : Application
 {
-    private Window? _mainWindow;
+    private static MainWindow? _mainWindow;
 
     public static IServiceProvider Services { get; private set; } = null!;
+
+    public static Window MainWindowHandle => _mainWindow
+        ?? throw new InvalidOperationException("Main window not registered yet.");
 
     public App()
     {
@@ -26,22 +29,18 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
-        // Configuration
         services.Configure<ConverterXOptions>(options =>
         {
             options.ToolsBasePath = GetDefaultToolsPath();
         });
 
-        // Core services
         services.AddSingleton<IConversionOrchestrator, ConversionOrchestrator>();
         services.AddSingleton<IToolManager, ToolManager>();
 
-        // UI services
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
 
-        // ViewModels
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();
         services.AddTransient<SettingsViewModel>();
@@ -56,12 +55,19 @@ public partial class App : Application
         _mainWindow.Activate();
     }
 
+    internal static void Register(MainWindow window) => _mainWindow = window;
+
+    public static void RequestNavigation(string routeKey) => _mainWindow?.NavigateTo(routeKey);
+
+    public static void RequestPlaceholderNavigation(PlaceholderInfo info) =>
+        _mainWindow?.NavigateToPlaceholder(info);
+
     private static string GetDefaultToolsPath()
     {
         var locations = new[]
         {
             Path.Combine(AppContext.BaseDirectory, "tools"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "UniversalConverterX", "tools"),
         };
 

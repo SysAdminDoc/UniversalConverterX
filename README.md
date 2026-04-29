@@ -2,7 +2,7 @@
 <p align="center"><img src="icon.png" width="128" alt="Universal Converter X"></p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-58A6FF?style=for-the-badge">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-58A6FF?style=for-the-badge">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-4ade80?style=for-the-badge">
   <img alt="Platform" src="https://img.shields.io/badge/platform-Desktop%20App-58A6FF?style=for-the-badge">
 </p>
@@ -10,21 +10,48 @@
 
 # UniversalConverter X
 
-A powerful, native Windows file conversion application with context menu integration, supporting 1000+ format conversions.
+The all-in-one media tool for Windows — convert, compress, edit, download, record, and 25+ AI-powered tools, all running locally.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
+
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## Modules
+
+- **Converter** — 1000+ formats via FFmpeg, ImageMagick, Pandoc, libvips, libjxl, libheif, Inkscape, Calibre, Assimp, Ghostscript, LibreOffice, resvg, Potrace.
+- **Compressor** — preset profiles (web, email, archive) and quality slider, FFmpeg backend.
+- **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
+- **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
+- **Recorder** — screen, webcam, system audio, microphone.
+- **Toolbox** — 29 specialized tools across Image, Video, AI, Audio, Disc, and Other categories.
+
+## Toolbox highlights
+
+| Category | Tools |
+|---|---|
+| **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
+| **Video** | Smart Trimmer (AI) · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Auto Highlight (AI) · Intro & Outro · Lens Correction · VR Converter · Frame Snapshot |
+| **AI** | Background Remover · Subtitle Remover · Subtitle Editor · Caption Generator · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Lip Reading |
+| **Audio** | Audio Converter · Audio Compressor · Noise Remover (AI) |
+| **Disc** | DVD Burn · DVD Copy · CD Burner |
+| **Other** | Format Inspector · Batch Rename |
+
+## Architecture
+
+UCX is a C# / .NET 8 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
+
+Sidecar engines (vendored as binaries land per phase): VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift.
+
 ## Features
 
-- **🖱️ Right-Click Context Menu** - Convert files directly from Windows Explorer
-- **📁 1000+ Formats** - Video, audio, images, documents, e-books, 3D models, and more
-- **🔒 Local Processing** - All conversions happen on your machine
-- **📊 Progress Tracking** - Real-time progress with speed and ETA
-- **⚡ Batch Conversion** - Convert multiple files at once
-- **🎨 Modern UI** - WinUI 3 with dark theme and Mica effects
-- **💻 CLI Support** - Full command-line interface for automation
+- Right-Click Context Menu — convert files directly from Windows Explorer.
+- Local Processing — all conversions happen on your machine. No telemetry.
+- Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
+- Batch Conversion — convert and process multiple files at once.
+- Modern UI — WinUI 3 with dark theme and Mica effects.
+- CLI Support — full command-line interface for automation (`ucx`).
 
 ## Supported Converters
 
