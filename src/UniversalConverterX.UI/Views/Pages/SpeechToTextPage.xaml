@@ -244,6 +244,22 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
+                        <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="BackendCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="Settings_Changed">
+                            <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
+                            <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
+                        </ComboBox>
+                        <CheckBox x:Name="VadCheck"
+                                  Content="VAD pre-filter (skip silence — whisper.cpp only)"
+                                  Checked="Settings_Changed"
+                                  Unchecked="Settings_Changed"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo"
                                   HorizontalAlignment="Stretch"
