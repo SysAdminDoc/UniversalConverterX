@@ -24,6 +24,7 @@ public sealed partial class ProgressWindow : Window
     private bool _isCompleted;
     private int _completedCount;
     private int _failedCount;
+    private int _cancelledCount;
     private DateTime _startTime;
 
     public ProgressWindow(
@@ -73,6 +74,7 @@ public sealed partial class ProgressWindow : Window
         _cts = new CancellationTokenSource();
         _startTime = DateTime.Now;
         _isCompleted = false;
+        _cancelledCount = 0;
 
         TitleText.Text = $"Converting to {_targetFormat.ToUpperInvariant()}";
         StatusText.Text = "Starting conversions...";
@@ -109,7 +111,7 @@ public sealed partial class ProgressWindow : Window
         }
         finally
         {
-            OnConversionComplete();
+            OnConversionComplete(_cts?.IsCancellationRequested == true);
         }
     }
 
@@ -201,6 +203,7 @@ public sealed partial class ProgressWindow : Window
             item.StatusColor = new SolidColorBrush(Colors.Orange);
             item.StatusMessage = "Cancelled";
             item.ShowProgress = Visibility.Collapsed;
+            _cancelledCount++;
             throw;
         }
         catch (Exception ex)
@@ -218,7 +221,7 @@ public sealed partial class ProgressWindow : Window
     private void UpdateOverallProgress()
     {
         var total = _items.Count;
-        var processed = _completedCount + _failedCount;
+        var processed = _completedCount + _failedCount + _cancelledCount;
         var percent = total > 0 ? (double)processed / total * 100 : 0;
 
         OverallProgressText.Text = $"{processed} of {total} files";
@@ -237,13 +240,21 @@ public sealed partial class ProgressWindow : Window
         }
     }
 
-    private void OnConversionComplete()
+    private void OnConversionComplete(bool wasCancelled)
     {
         _isCompleted = true;
+        MarkUnprocessedItemsCancelled(wasCancelled);
 
         var elapsed = DateTime.Now - _startTime;
         
-        if (_failedCount == 0)
+        if (wasCancelled)
+        {
+            TitleText.Text = "Conversion Cancelled";
+            StatusText.Text = _completedCount > 0
+                ? $"Converted {_completedCount} file(s), cancelled {_cancelledCount} in {FormatTimeSpan(elapsed)}"
+                : $"Cancelled {_cancelledCount} file(s)";
+        }
+        else if (_failedCount == 0)
         {
             TitleText.Text = "Conversion Complete";
             StatusText.Text = $"Successfully converted {_completedCount} file(s) in {FormatTimeSpan(elapsed)}";
@@ -268,15 +279,40 @@ public sealed partial class ProgressWindow : Window
         OverallProgressBar.Value = 100;
         EtaText.Text = "";
 
-        // Play completion sound
-        PlayCompletionSound();
+        if (!wasCancelled)
+        {
+            // Play completion sound
+            PlayCompletionSound();
 
-        // Show notification
-        ShowCompletionNotification();
+            // Show notification
+            ShowCompletionNotification();
+        }
+    }
+
+    private void MarkUnprocessedItemsCancelled(bool wasCancelled)
+    {
+        if (!wasCancelled)
+            return;
+
+        foreach (var item in _items.Where(item =>
+            item.Status is ConversionItemStatus.Pending or ConversionItemStatus.Converting))
+        {
+            item.Status = ConversionItemStatus.Cancelled;
+            item.StatusIcon = "\uE711"; // Error
+            item.StatusColor = new SolidColorBrush(Colors.Orange);
+            item.StatusMessage = "Cancelled";
+            item.ShowProgress = Visibility.Collapsed;
+            _cancelledCount++;
+        }
+
+        UpdateOverallProgress();
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
     {
+        if (_isCompleted)
+            return;
+
         _isPaused = !_isPaused;
         PauseButton.Content = _isPaused ? "Resume" : "Pause";
         StatusText.Text = _isPaused ? "Paused" : "Converting...";
@@ -284,6 +320,11 @@ public sealed partial class ProgressWindow : Window
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
+        if (_isCompleted)
+            return;
+
+        PauseButton.IsEnabled = false;
+        CancelButton.IsEnabled = false;
         _cts?.Cancel();
         StatusText.Text = "Cancelling...";
     }

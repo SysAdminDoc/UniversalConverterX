@@ -234,7 +234,6 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             StartInfo = new ProcessStartInfo
             {
                 FileName = executable,
-                Arguments = string.Join(" ", arguments.Select(QuoteArgument)),
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
@@ -243,6 +242,8 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             },
             EnableRaisingEvents = true
         };
+        foreach (var argument in arguments)
+            process.StartInfo.ArgumentList.Add(argument);
 
         process.OutputDataReceived += (_, e) =>
         {

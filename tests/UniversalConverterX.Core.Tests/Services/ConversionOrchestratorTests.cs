@@ -142,6 +142,17 @@ public class ConversionOrchestratorTests
         formats.Should().NotBeEmpty();
     }
 
+    [Theory]
+    [InlineData(".mp4")]
+    [InlineData("clip.mp4")]
+    [InlineData(@"C:\media\clip.mp4")]
+    public void GetOutputFormatsFor_ExtensionOrPath_ShouldReturnFormats(string input)
+    {
+        var formats = _orchestrator.GetOutputFormatsFor(input);
+
+        formats.Should().NotBeEmpty();
+    }
+
     [Fact]
     public void GetOutputFormatsFor_UnknownFormat_ShouldReturnEmpty()
     {
@@ -274,7 +285,8 @@ public class ConversionOrchestratorTests
             .ReturnsAsync((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                 ConversionResult.Succeeded(j, j.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-        var results = await _orchestrator.ConvertBatchAsync(jobs).ToListAsync();
+        var batch = await _orchestrator.ConvertBatchAsync(jobs);
+        var results = batch.Results;
 
         results.Should().HaveCount(3);
         results.Should().OnlyContain(r => r.Success);

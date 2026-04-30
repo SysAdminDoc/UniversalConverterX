@@ -34,6 +34,20 @@ public class ConversionOrchestrator : IConversionOrchestrator
         BuildConversionGraph();
     }
 
+    public ConversionOrchestrator(
+        IEnumerable<IConverterStrategy> converters,
+        IOptions<ConverterXOptions> options,
+        ILogger<ConversionOrchestrator>? logger = null)
+    {
+        _options = options.Value;
+        _logger = logger;
+        _formatDetector = new MagicBytesDetector();
+        _converters = converters.OrderByDescending(c => c.Priority).ToList();
+        _conversionGraph = [];
+
+        BuildConversionGraph();
+    }
+
     public ConversionOrchestrator(string toolsBasePath, ILogger<ConversionOrchestrator>? logger = null)
         : this(Options.Create(new ConverterXOptions { ToolsBasePath = toolsBasePath }), logger)
     {
@@ -106,46 +120,59 @@ public class ConversionOrchestrator : IConversionOrchestrator
         IProgress<ConversionProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        var startedAt = DateTime.UtcNow;
         _logger?.LogInformation("Starting conversion: {Input} → {Output}", 
             job.InputFileName, job.OutputExtension);
 
-        // Detect format if not specified
-        if (job.SourceFormat == null)
+        try
         {
-            job.SourceFormat = await DetectFormatAsync(job.InputPath, cancellationToken);
-        }
-
-        // Find the best converter
-        var converter = GetBestConverter(job.InputExtension, job.OutputExtension);
-        if (converter == null)
-        {
-            _logger?.LogError("No converter found for {Input} → {Output}", 
-                job.InputExtension, job.OutputExtension);
-            
-            return ConversionResult.Failed(
-                job,
-                $"No converter available for {job.InputExtension} → {job.OutputExtension}",
-                TimeSpan.Zero);
-        }
-
-        // Use forced converter if specified
-        if (!string.IsNullOrEmpty(job.Options.ForceConverter))
-        {
-            var forcedConverter = _converters.FirstOrDefault(c => 
-                c.Id.Equals(job.Options.ForceConverter, StringComparison.OrdinalIgnoreCase));
-            
-            if (forcedConverter != null)
+            // Detect format if not specified
+            if (job.SourceFormat == null)
             {
-                converter = forcedConverter;
-                _logger?.LogDebug("Using forced converter: {Converter}", converter.Id);
+                job.SourceFormat = await DetectFormatAsync(job.InputPath, cancellationToken);
             }
+
+            // Find the best converter
+            var converter = GetBestConverter(job.InputExtension, job.OutputExtension);
+            if (converter == null)
+            {
+                _logger?.LogError("No converter found for {Input} → {Output}",
+                    job.InputExtension, job.OutputExtension);
+
+                job.Status = ConversionStatus.Failed;
+                job.CompletedAt = DateTime.UtcNow;
+
+                return ConversionResult.Failed(
+                    job,
+                    $"No converter available for {job.InputExtension} → {job.OutputExtension}",
+                    DateTime.UtcNow - startedAt);
+            }
+
+            // Use forced converter if specified
+            if (!string.IsNullOrEmpty(job.Options.ForceConverter))
+            {
+                var forcedConverter = _converters.FirstOrDefault(c =>
+                    c.Id.Equals(job.Options.ForceConverter, StringComparison.OrdinalIgnoreCase));
+
+                if (forcedConverter != null)
+                {
+                    converter = forcedConverter;
+                    _logger?.LogDebug("Using forced converter: {Converter}", converter.Id);
+                }
+            }
+
+            job.ConverterUsed = converter.Id;
+            _logger?.LogDebug("Using converter: {Converter}", converter.Name);
+
+            // Execute conversion
+            return await converter.ConvertAsync(job, progress, cancellationToken);
         }
-
-        job.ConverterUsed = converter.Id;
-        _logger?.LogDebug("Using converter: {Converter}", converter.Name);
-
-        // Execute conversion
-        return await converter.ConvertAsync(job, progress, cancellationToken);
+        catch (OperationCanceledException)
+        {
+            job.Status = ConversionStatus.Cancelled;
+            job.CompletedAt = DateTime.UtcNow;
+            return ConversionResult.Cancelled(job, DateTime.UtcNow - startedAt);
+        }
     }
 
     public async Task<BatchConversionResult> ConvertBatchAsync(
@@ -209,7 +236,13 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
     public IReadOnlyCollection<string> GetOutputFormatsFor(string inputPath)
     {
-        var ext = Path.GetExtension(inputPath).TrimStart('.').ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(inputPath))
+            return [];
+
+        var trimmed = inputPath.Trim();
+        var ext = Path.HasExtension(trimmed)
+            ? Path.GetExtension(trimmed).TrimStart('.').ToLowerInvariant()
+            : trimmed.TrimStart('.').ToLowerInvariant();
         
         if (_conversionGraph.TryGetValue(ext, out var outputs))
             return outputs;
@@ -221,14 +254,13 @@ public class ConversionOrchestrator : IConversionOrchestrator
     {
         var inputExt = inputExtension.ToLowerInvariant().TrimStart('.');
         var outputExt = outputExtension.ToLowerInvariant().TrimStart('.');
+        var source = new FileFormat(inputExt, GetMimeType(inputExt), DetermineCategory(inputExt));
+        var target = new FileFormat(outputExt, GetMimeType(outputExt), DetermineCategory(outputExt));
 
         // Find highest priority converter that supports this conversion
         foreach (var converter in _converters)
         {
-            var inputFormats = converter.GetSupportedInputFormats();
-            var outputFormats = converter.GetOutputFormatsFor(inputExt);
-
-            if (inputFormats.Contains(inputExt) && outputFormats.Contains(outputExt))
+            if (converter.CanConvert(source, target))
             {
                 return converter;
             }
@@ -238,6 +270,27 @@ public class ConversionOrchestrator : IConversionOrchestrator
     }
 
     public IReadOnlyCollection<IConverterStrategy> GetConverters() => _converters.AsReadOnly();
+
+    public IReadOnlyCollection<IConverterStrategy> GetAvailableConverters() => GetConverters();
+
+    public IConverterStrategy? GetConverterById(string id) =>
+        _converters.FirstOrDefault(c => c.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+
+    public IReadOnlyCollection<IConverterStrategy> GetConvertersFor(FileFormat source, FileFormat target) =>
+        _converters
+            .Where(c => c.CanConvert(source, target))
+            .OrderByDescending(c => c.Priority)
+            .ToList();
+
+    public IReadOnlyCollection<string> GetSupportedInputFormats() =>
+        _conversionGraph.Keys.OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
+
+    public IReadOnlyCollection<string> GetSupportedOutputFormats() =>
+        _conversionGraph.Values
+            .SelectMany(outputs => outputs)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     public bool CanConvert(string inputExtension, string outputExtension)
     {
@@ -260,6 +313,14 @@ public class ConversionOrchestrator : IConversionOrchestrator
         var mimeType = GetMimeType(ext);
 
         return new FileFormat(ext, mimeType, category);
+    }
+
+    public FileFormat? DetectFormat(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return null;
+
+        return _formatDetector.DetectFormat(filePath);
     }
 
     private static FormatCategory DetermineCategory(string extension) => extension switch

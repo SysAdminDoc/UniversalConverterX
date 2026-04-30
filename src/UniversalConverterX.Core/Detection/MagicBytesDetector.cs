@@ -1,3 +1,4 @@
+using System.Text;
 using UniversalConverterX.Core.Interfaces;
 
 namespace UniversalConverterX.Core.Detection;
@@ -8,7 +9,23 @@ namespace UniversalConverterX.Core.Detection;
 public class MagicBytesDetector
 {
     private readonly List<MagicSignature> _signatures;
-    private const int BufferSize = 32;
+    private const int BufferSize = 512;
+    private static readonly HashSet<string> AvifBrands = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "avif", "avis"
+    };
+    private static readonly HashSet<string> HeifBrands = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "heic", "heix", "hevc", "hevx", "heim", "heis", "mif1", "msf1"
+    };
+    private static readonly HashSet<string> QuickTimeBrands = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "qt"
+    };
+    private static readonly HashSet<string> M4aBrands = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "M4A", "M4B", "M4P"
+    };
 
     public MagicBytesDetector()
     {
@@ -36,24 +53,145 @@ public class MagicBytesDetector
             if (bytesRead == 0)
                 return null;
 
-            foreach (var sig in _signatures)
-            {
-                if (sig.Matches(buffer, bytesRead))
-                {
-                    return new FileFormat(
-                        sig.Extension,
-                        GetMimeType(sig.Extension),
-                        sig.Category,
-                        sig.Description);
-                }
-            }
+            return DetectFromBuffer(buffer, bytesRead, Path.GetExtension(filePath));
         }
         catch (Exception)
         {
-            // Fall back to extension-based detection
+            // Magic-byte detection is best effort; callers may choose extension fallback.
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Synchronous detection convenience API. Uses magic bytes first, then falls
+    /// back to extension metadata when the file exists but has no known signature.
+    /// </summary>
+    public FileFormat? DetectFormat(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return null;
+
+        try
+        {
+            var buffer = new byte[BufferSize];
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize);
+            var bytesRead = stream.Read(buffer, 0, BufferSize);
+
+            var detected = bytesRead > 0 ? DetectFromBuffer(buffer, bytesRead, Path.GetExtension(filePath)) : null;
+            if (detected is not null)
+                return detected;
+        }
+        catch
+        {
+            // Extension fallback below is safer than surfacing IO/parsing details to callers.
+        }
+
+        var extension = Path.GetExtension(filePath);
+        return string.IsNullOrWhiteSpace(extension) ? null : GetFormatInfo(extension);
+    }
+
+    /// <summary>
+    /// Get metadata for a file extension without reading a file.
+    /// </summary>
+    public FileFormat GetFormatInfo(string extension)
+    {
+        var normalized = extension.Trim().TrimStart('.').ToLowerInvariant();
+        var signature = _signatures.FirstOrDefault(s =>
+            s.Extension.Equals(normalized, StringComparison.OrdinalIgnoreCase));
+
+        return new FileFormat(
+            normalized,
+            GetMimeType(normalized),
+            signature?.Category ?? DetermineCategory(normalized),
+            signature?.Description ?? GetDescription(normalized));
+    }
+
+    private FileFormat? DetectFromBuffer(byte[] buffer, int bytesRead, string? fileExtension)
+    {
+        var isoFormat = DetectIsoBaseMediaFormat(buffer, bytesRead);
+        if (isoFormat is not null)
+            return isoFormat;
+
+        var zipFamilyFormat = DetectZipFamilyFormat(buffer, bytesRead, fileExtension);
+        if (zipFamilyFormat is not null)
+            return zipFamilyFormat;
+
+        foreach (var sig in _signatures)
+        {
+            if (sig.Matches(buffer, bytesRead))
+            {
+                return new FileFormat(
+                    sig.Extension,
+                    GetMimeType(sig.Extension),
+                    sig.Category,
+                    sig.Description);
+            }
+        }
+
+        return null;
+    }
+
+    private FileFormat? DetectZipFamilyFormat(byte[] data, int length, string? fileExtension)
+    {
+        if (length < 4 || data[0] != 0x50 || data[1] != 0x4B || data[2] != 0x03 || data[3] != 0x04)
+            return null;
+
+        var ext = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
+        return ext switch
+        {
+            "docx" or "xlsx" or "pptx" or "epub" or "zip" => GetFormatInfo(ext),
+            _ => GetFormatInfo("zip")
+        };
+    }
+
+    private FileFormat? DetectIsoBaseMediaFormat(byte[] data, int length)
+    {
+        if (length < 12 || !MatchesAscii(data, 4, "ftyp"))
+            return null;
+
+        var brands = GetIsoBrands(data, length).ToArray();
+        if (brands.Length == 0)
+            return null;
+
+        if (brands.Any(AvifBrands.Contains))
+            return GetFormatInfo("avif");
+
+        if (brands.Any(HeifBrands.Contains))
+            return GetFormatInfo("heic");
+
+        if (brands.Any(QuickTimeBrands.Contains))
+            return GetFormatInfo("mov");
+
+        if (brands.Any(M4aBrands.Contains))
+            return GetFormatInfo("m4a");
+
+        return GetFormatInfo("mp4");
+    }
+
+    private static IEnumerable<string> GetIsoBrands(byte[] data, int length)
+    {
+        var maxBrandOffset = Math.Min(length - 4, 64);
+        for (var offset = 8; offset <= maxBrandOffset; offset += 4)
+        {
+            var brand = Encoding.ASCII.GetString(data, offset, 4).Trim();
+            if (!string.IsNullOrWhiteSpace(brand))
+                yield return brand;
+        }
+    }
+
+    private static bool MatchesAscii(byte[] data, int offset, string value)
+    {
+        if (data.Length < offset + value.Length)
+            return false;
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (data[offset + i] != (byte)value[i])
+                return false;
+        }
+
+        return true;
     }
 
     private static List<MagicSignature> InitializeSignatures()
@@ -70,11 +208,8 @@ public class MagicBytesDetector
             new("tiff", [0x49, 0x49, 0x2A, 0x00], FormatCategory.Image, 0, "TIFF Image (LE)"),
             new("tiff", [0x4D, 0x4D, 0x00, 0x2A], FormatCategory.Image, 0, "TIFF Image (BE)"),
             new("psd", [0x38, 0x42, 0x50, 0x53], FormatCategory.Image, 0, "Photoshop Document"),
-            new("heic", [0x00, 0x00, 0x00], FormatCategory.Image, 0, "HEIC Image"), // Simplified
-            new("avif", [0x00, 0x00, 0x00], FormatCategory.Image, 0, "AVIF Image"), // Simplified
 
             // Video
-            new("mp4", [0x00, 0x00, 0x00], FormatCategory.Video, 0, "MP4 Video"), // ftyp at offset 4
             new("mkv", [0x1A, 0x45, 0xDF, 0xA3], FormatCategory.Video, 0, "Matroska Video"),
             new("avi", [0x52, 0x49, 0x46, 0x46], FormatCategory.Video, 0, [0x41, 0x56, 0x49, 0x20], "AVI Video"),
             new("mov", [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], FormatCategory.Video, 0, "QuickTime Movie"),
@@ -89,24 +224,18 @@ public class MagicBytesDetector
             new("wav", [0x52, 0x49, 0x46, 0x46], FormatCategory.Audio, 0, [0x57, 0x41, 0x56, 0x45], "WAV Audio"),
             new("flac", [0x66, 0x4C, 0x61, 0x43], FormatCategory.Audio, 0, "FLAC Audio"),
             new("ogg", [0x4F, 0x67, 0x67, 0x53], FormatCategory.Audio, 0, "OGG Audio"),
-            new("m4a", [0x00, 0x00, 0x00], FormatCategory.Audio, 0, "M4A Audio"), // ftyp
             new("wma", [0x30, 0x26, 0xB2, 0x75], FormatCategory.Audio, 0, "Windows Media Audio"),
             new("aiff", [0x46, 0x4F, 0x52, 0x4D], FormatCategory.Audio, 0, "AIFF Audio"),
 
             // Documents
             new("pdf", [0x25, 0x50, 0x44, 0x46, 0x2D], FormatCategory.Document, 0, "PDF Document"),
-            new("docx", [0x50, 0x4B, 0x03, 0x04], FormatCategory.Document, 0, "Word Document"),
-            new("xlsx", [0x50, 0x4B, 0x03, 0x04], FormatCategory.Document, 0, "Excel Spreadsheet"),
-            new("pptx", [0x50, 0x4B, 0x03, 0x04], FormatCategory.Document, 0, "PowerPoint Presentation"),
             new("doc", [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1], FormatCategory.Document, 0, "Word Document (Legacy)"),
             new("rtf", [0x7B, 0x5C, 0x72, 0x74, 0x66], FormatCategory.Document, 0, "Rich Text Format"),
 
             // Ebooks
-            new("epub", [0x50, 0x4B, 0x03, 0x04], FormatCategory.Ebook, 0, "EPUB Ebook"),
             new("mobi", [0x42, 0x4F, 0x4F, 0x4B, 0x4D, 0x4F, 0x42, 0x49], FormatCategory.Ebook, 60, "MOBI Ebook"),
 
             // Archives
-            new("zip", [0x50, 0x4B, 0x03, 0x04], FormatCategory.Archive, 0, "ZIP Archive"),
             new("rar", [0x52, 0x61, 0x72, 0x21, 0x1A, 0x07], FormatCategory.Archive, 0, "RAR Archive"),
             new("7z", [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C], FormatCategory.Archive, 0, "7-Zip Archive"),
             new("gz", [0x1F, 0x8B], FormatCategory.Archive, 0, "GZIP Archive"),
@@ -172,6 +301,8 @@ public class MagicBytesDetector
         "xml" => "application/xml",
         "json" => "application/json",
         "sqlite" => "application/x-sqlite3",
+        "txt" => "text/plain",
+        "csv" => "text/csv",
         "ttf" => "font/ttf",
         "otf" => "font/otf",
         "woff" => "font/woff",
@@ -180,6 +311,32 @@ public class MagicBytesDetector
         "glb" => "model/gltf-binary",
         "stl" => "model/stl",
         _ => "application/octet-stream"
+    };
+
+    private static FormatCategory DetermineCategory(string extension) => extension switch
+    {
+        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "mts" => FormatCategory.Video,
+        "mp3" or "wav" or "flac" or "aac" or "ogg" or "wma" or "m4a" or "opus" or "aiff" or "ape" or "ac3" => FormatCategory.Audio,
+        "jpg" or "jpeg" or "png" or "gif" or "bmp" or "tiff" or "tif" or "webp" or "ico" or "heic" or "heif" or "avif" or "jxl" or "psd" or "raw" or "cr2" or "nef" => FormatCategory.Image,
+        "pdf" or "doc" or "docx" or "odt" or "rtf" or "txt" or "html" or "htm" or "md" or "tex" => FormatCategory.Document,
+        "epub" or "mobi" or "azw" or "azw3" or "fb2" or "lit" => FormatCategory.Ebook,
+        "svg" or "eps" or "ai" => FormatCategory.Vector,
+        "obj" or "fbx" or "stl" or "gltf" or "glb" or "3ds" or "dae" => FormatCategory.ThreeD,
+        "zip" or "rar" or "7z" or "gz" or "tar" => FormatCategory.Archive,
+        "json" or "xml" or "yaml" or "yml" or "csv" or "tsv" or "sqlite" => FormatCategory.Data,
+        "ttf" or "otf" or "woff" or "woff2" => FormatCategory.Font,
+        "srt" or "vtt" or "ass" => FormatCategory.Subtitle,
+        _ => FormatCategory.Unknown
+    };
+
+    private static string? GetDescription(string extension) => extension switch
+    {
+        "mp4" => "MP4 Video",
+        "m4a" => "M4A Audio",
+        "mov" => "QuickTime Movie",
+        "heic" or "heif" => "HEIC Image",
+        "avif" => "AVIF Image",
+        _ => null
     };
 }
 

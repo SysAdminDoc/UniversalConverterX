@@ -25,8 +25,6 @@ public partial class GhostscriptConverter : BaseConverterStrategy
     protected override HashSet<string> SupportedOutputFormats => _outputFormats;
     protected override Dictionary<string, HashSet<string>> FormatMappings => [];
 
-    private int _totalPages;
-
     #region Format Definitions
 
     private static readonly HashSet<string> _inputFormats =
@@ -181,13 +179,6 @@ public partial class GhostscriptConverter : BaseConverterStrategy
         if (pageMatch.Success)
         {
             var currentPage = int.Parse(pageMatch.Groups[1].Value);
-            
-            if (_totalPages > 0)
-            {
-                var percent = (double)currentPage / _totalPages * 100;
-                return ConversionProgress.FromPercent(percent, $"Processing page {currentPage}/{_totalPages}");
-            }
-            
             return ConversionProgress.Indeterminate($"Processing page {currentPage}...", ConversionStage.Converting);
         }
 

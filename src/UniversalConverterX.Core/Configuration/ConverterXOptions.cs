@@ -26,6 +26,11 @@ public class ConverterXOptions
     public string ToolsBasePath { get; set; } = GetDefaultToolsPath();
 
     /// <summary>
+    /// Search PATH and common install locations for converter tools when they are not bundled locally
+    /// </summary>
+    public bool SearchSystemTools { get; set; } = true;
+
+    /// <summary>
     /// Default output directory (null = same as input)
     /// </summary>
     public string? DefaultOutputDirectory { get; set; }
@@ -247,6 +252,7 @@ public class ConverterXOptions
 
         // Copy all properties
         ToolsBasePath = defaults.ToolsBasePath;
+        SearchSystemTools = defaults.SearchSystemTools;
         DefaultOutputDirectory = defaults.DefaultOutputDirectory;
         OverwriteBehavior = defaults.OverwriteBehavior;
         DeleteSourceOnSuccess = defaults.DeleteSourceOnSuccess;
