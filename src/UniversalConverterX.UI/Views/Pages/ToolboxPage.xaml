@@ -59,11 +59,11 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
         <StackPanel Padding="32" Spacing="26">
-            <Border Background="{StaticResource ShellGradientBrush}"
+            <Border Background="{StaticResource HeroGradientBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="28"
-                    Padding="28">
+                    CornerRadius="24"
+                    Padding="32">
                 <Grid ColumnSpacing="28">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
