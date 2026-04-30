@@ -298,18 +298,20 @@ public sealed partial class SettingsWindow : Window
 
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _isDirty = true;
+        if (Content is FrameworkElement { IsLoaded: true })
+            _isDirty = true;
 
-        // Apply theme immediately for preview
-        if (ThemeComboBox.SelectedIndex >= 0 && Content is FrameworkElement root)
+        var theme = ThemeComboBox.SelectedIndex switch
         {
-            root.RequestedTheme = ThemeComboBox.SelectedIndex switch
-            {
-                0 => ElementTheme.Light,
-                1 => ElementTheme.Dark,
-                _ => ElementTheme.Default
-            };
-        }
+            0 => ElementTheme.Light,
+            1 => ElementTheme.Dark,
+            _ => ElementTheme.Default
+        };
+
+        if (Content is FrameworkElement root)
+            root.RequestedTheme = theme;
+
+        App.ApplyTheme(theme);
     }
 
     private void AccentColor_Click(object sender, RoutedEventArgs e)

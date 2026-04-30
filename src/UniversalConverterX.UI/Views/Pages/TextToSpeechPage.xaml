@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.TextToSpeechPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="32" Spacing="20">
+
+            <!-- Header -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Text to Speech" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Generate natural-sounding voiceover audio from script text using local AI voice models."
+                           Style="{StaticResource SubtitleTextStyle}"/>
+            </StackPanel>
+
+            <!-- Dev status banner -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource AccentOrangeBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="20">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            VerticalAlignment="Top">
+                        <FontIcon Glyph="&#xEC4F;" FontSize="22"
+                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="FUTURE" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource AccentOrangeBrush}"/>
+                            </Border>
+                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="Voice catalog needed" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Text to Speech is planned for a future release."
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="What's needed: local TTS engine integration (Coqui TTS / Piper), voice catalog, SSML support, and audio export pipeline."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Script input -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Script" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBox x:Name="ScriptBox"
+                             PlaceholderText="Type or paste your script text here..."
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinHeight="160"
+                             VerticalAlignment="Stretch"
+                             Style="{StaticResource PremiumTextBoxStyle}"/>
+                    <TextBlock x:Name="CharCountLabel"
+                               Text="0 characters"
+                               Style="{StaticResource MutedTextStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Settings panel -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Voice" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Voice Model" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="en-US-Neural (neutral)" IsSelected="True"/>
+                                <ComboBoxItem Content="en-US-Male (deep)"/>
+                                <ComboBoxItem Content="en-US-Female (bright)"/>
+                                <ComboBoxItem Content="en-GB-Male"/>
+                                <ComboBoxItem Content="en-AU-Female"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Speaking Speed" Style="{StaticResource MutedTextStyle}"/>
+                            <Slider Minimum="50" Maximum="200" Value="100" TickFrequency="10"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Pitch" Style="{StaticResource MutedTextStyle}"/>
+                            <Slider Minimum="-50" Maximum="50" Value="0" TickFrequency="5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Output" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Format" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="MP3 (320kbps)" IsSelected="True"/>
+                                <ComboBoxItem Content="WAV (lossless)"/>
+                                <ComboBoxItem Content="FLAC (lossless)"/>
+                                <ComboBoxItem Content="OGG Vorbis"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <ToggleSwitch Header="Paragraph pauses" OffContent="Off" OnContent="On" IsOn="True"/>
+                        <ToggleSwitch Header="Save alongside project" OffContent="Off" OnContent="On"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Action bar -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Text to Speech is planned for a future release."
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="Generate Audio"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            IsEnabled="False"/>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -38,21 +38,29 @@ public sealed partial class AiLabPage : Page
         Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Future", "Photo-specific presets needed", null));
     }
 
+    private static readonly Dictionary<string, string> _titleToRoute = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Video Enhancer"]          = "ai-video-enhancer",
+        ["Image Enhancer"]          = "ai-image-enhancer",
+        ["Background Remover"]      = "ai-bgremove",
+        ["Watermark Remover"]       = "ai-watermark",
+        ["AI Subtitle & Translation"] = "ai-subtitle",
+        ["Video Summarizer"]        = "ai-summarizer",
+        ["Noise Remover"]           = "ai-noise",
+        ["Vocal Remover"]           = "ai-vocal",
+        ["Voice Changer"]           = "ai-voice-changer",
+        ["Text-to-Speech"]          = "ai-tts",
+        ["Speech-to-Text"]          = "ai-stt",
+        ["Old Photo Restoration"]   = "ai-photo-restore",
+    };
+
     private void AiTool_Click(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is not AiLabToolTile tile)
             return;
 
-        App.RequestPlaceholderNavigation(new PlaceholderInfo(
-            Title: tile.Title,
-            Subtitle: tile.Description,
-            IconGlyph: tile.Glyph,
-            Headline: $"{tile.Title} implementation scope",
-            Description: tile.PoweredBy is null
-                ? $"{tile.WorkflowHint}. This feature needs a model/runtime selection, preview contract, and batch export UI before it can ship."
-                : $"{tile.WorkflowHint}. Planned engine: {tile.PoweredBy}. Next step is wiring import, preview, progress, and export through the shared sidecar contract.",
-            StatusBadge: tile.Phase,
-            PoweredBy: tile.PoweredBy));
+        if (_titleToRoute.TryGetValue(tile.Title, out var route))
+            App.RequestNavigation(route);
     }
 
     private void OpenToolbox_Click(object sender, RoutedEventArgs e) =>

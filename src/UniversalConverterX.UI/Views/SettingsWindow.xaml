@@ -388,7 +388,7 @@
                         <!-- Theme -->
                         <ComboBox x:Name="ThemeComboBox"
                                   Header="App theme"
-                                  SelectedIndex="2"
+                                  SelectedIndex="1"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="ThemeComboBox_SelectionChanged">

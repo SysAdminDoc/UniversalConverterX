@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.WatermarkRemoverPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="32" Spacing="20">
+
+            <!-- Header -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Watermark Remover" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Detect logos, captions, static overlays, or objects and inpaint the region with surrounding content."
+                           Style="{StaticResource SubtitleTextStyle}"/>
+            </StackPanel>
+
+            <!-- Dev status banner -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource AccentOrangeBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="20">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            VerticalAlignment="Top">
+                        <FontIcon Glyph="&#xE71B;" FontSize="22"
+                                  Foreground="{StaticResource AccentOrangeBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="WAVE 2" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource TextInverseBrush}"/>
+                            </Border>
+                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="Engine: VideoSubtitleRemover" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource AccentOrangeBrush}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Watermark Remover is not yet available in this build."
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="What's needed: VideoSubtitleRemover sidecar, region selector UI overlay, multi-region support, and detection confidence threshold."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Input area -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="20"
+                    MinHeight="160"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <Border Width="72" Height="72" CornerRadius="18"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE71B;" FontSize="32"
+                                  Foreground="{StaticResource AccentOrangeBrush}"/>
+                    </Border>
+                    <TextBlock x:Name="DropZoneLabel"
+                               Text="Drop video or image files here or click Browse"
+                               Style="{StaticResource BodyTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <Button Content="Browse Files"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Center"
+                            Click="Browse_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Settings panel -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Detection" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Watermark Type" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Static logo / bug" IsSelected="True"/>
+                                <ComboBoxItem Content="Subtitle / text overlay"/>
+                                <ComboBoxItem Content="Semi-transparent logo"/>
+                                <ComboBoxItem Content="Auto-detect all"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Detection Mode" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Auto (AI detection)" IsSelected="True"/>
+                                <ComboBoxItem Content="Manual region select"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Confidence Threshold" Style="{StaticResource MutedTextStyle}"/>
+                            <Slider Minimum="10" Maximum="99" Value="60"
+                                    TickFrequency="10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Inpainting" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Inpainting Strength" Style="{StaticResource MutedTextStyle}"/>
+                            <Slider Minimum="0" Maximum="100" Value="75"
+                                    TickFrequency="10"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Mask Expansion (px)" Style="{StaticResource MutedTextStyle}"/>
+                            <Slider Minimum="0" Maximum="20" Value="2"
+                                    TickFrequency="1"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="MP4 (H.264)" IsSelected="True"/>
+                                <ComboBoxItem Content="MKV"/>
+                                <ComboBoxItem Content="Preserve source"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Action bar -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Watermark Remover is coming in Wave 2."
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="Remove Watermarks"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            IsEnabled="False"/>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -115,7 +115,7 @@ public class ConverterXOptions
     /// <summary>
     /// Application theme
     /// </summary>
-    public AppTheme Theme { get; set; } = AppTheme.System;
+    public AppTheme Theme { get; set; } = AppTheme.Dark;
 
     /// <summary>
     /// Accent color hex value

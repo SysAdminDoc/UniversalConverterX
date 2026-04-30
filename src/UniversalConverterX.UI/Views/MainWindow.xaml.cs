@@ -20,7 +20,6 @@ public sealed partial class MainWindow : Window
         new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
         new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
-        new("Account", "Optional preset sync and entitlement area", "account"),
     ];
 
     private SettingsWindow? _settingsWindow;
@@ -73,20 +72,22 @@ public sealed partial class MainWindow : Window
             "toolbox" => typeof(ToolboxPage),
             "format-inspector" => typeof(FormatInspectorPage),
             "frame-snapshot" => typeof(FrameSnapshotPage),
-            "account" => typeof(PlaceholderPage),
+            "ai-bgremove" => typeof(BackgroundRemoverPage),
+            "ai-video-enhancer" => typeof(VideoEnhancerPage),
+            "ai-image-enhancer" => typeof(ImageEnhancerPage),
+            "ai-watermark" => typeof(WatermarkRemoverPage),
+            "ai-subtitle" => typeof(AiSubtitlePage),
+            "ai-summarizer" => typeof(VideoSummarizerPage),
+            "ai-noise" => typeof(NoiseRemoverPage),
+            "ai-vocal" => typeof(VocalRemoverPage),
+            "ai-voice-changer" => typeof(VoiceChangerPage),
+            "ai-tts" => typeof(TextToSpeechPage),
+            "ai-stt" => typeof(SpeechToTextPage),
+            "ai-photo-restore" => typeof(PhotoRestorationPage),
             _ => typeof(PlaceholderPage)
         };
 
-        object? parameter = routeKey switch
-        {
-            "account" => new PlaceholderInfo(
-                Title: "Account",
-                Subtitle: "Sign-in is optional — UCX runs fully offline.",
-                IconGlyph: "\uE77B",
-                Headline: "Account features arrive in v2.4",
-                Description: "Sign-in syncs presets and license entitlements across machines. UCX always runs locally without an account."),
-            _ => null
-        };
+        object? parameter = null;
 
         ContentFrame.Navigate(pageType, parameter, new EntranceNavigationTransitionInfo());
     }
