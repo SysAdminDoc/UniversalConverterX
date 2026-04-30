@@ -82,6 +82,47 @@ def probe(ffprobe: str, path: str) -> dict | None:
         return None
 
 
+# ─── Hardware accelerator → encoder mapping ──────────────────────────────────
+
+# Maps codec names to their hardware-accelerated equivalents per accelerator.
+# "none" means software encoder (unchanged). If a codec has no HW variant for a
+# given accelerator, fall back to software silently.
+_HW_ENCODER: dict[str, dict[str, str]] = {
+    "nvenc": {
+        "libx264":    "h264_nvenc",
+        "libx265":    "hevc_nvenc",
+        "libvpx-vp9": "libvpx-vp9",   # no NVENC VP9 encoder in FFmpeg
+        "libsvtav1":  "av1_nvenc",
+    },
+    "amf": {
+        "libx264":    "h264_amf",
+        "libx265":    "hevc_amf",
+        "libvpx-vp9": "libvpx-vp9",
+        "libsvtav1":  "av1_amf",
+    },
+    "qsv": {
+        "libx264":    "h264_qsv",
+        "libx265":    "hevc_qsv",
+        "libvpx-vp9": "vp9_qsv",
+        "libsvtav1":  "libsvtav1",      # no QSV AV1 encoder broadly available
+    },
+    "d3d12": {
+        "libx264":    "h264_d3d12va",
+        "libx265":    "hevc_d3d12va",
+        "libvpx-vp9": "libvpx-vp9",
+        "libsvtav1":  "av1_d3d12va",
+    },
+}
+
+
+def resolve_encoder(codec: str, hwaccel: str | None) -> str:
+    """Return the best available encoder for the given codec + accelerator."""
+    if not hwaccel or hwaccel == "none":
+        return codec
+    mapping = _HW_ENCODER.get(hwaccel, {})
+    return mapping.get(codec, codec)
+
+
 # ─── Preset → encoding parameters ────────────────────────────────────────────
 
 PRESETS = {
@@ -193,6 +234,12 @@ def compress(args: argparse.Namespace) -> int:
     resolution = args.resolution or preset_cfg.get("resolution", "Original")
     audio_codec = args.audio_codec or preset_cfg.get("audio_codec", "aac")
     audio_bitrate = args.audio_bitrate or preset_cfg.get("audio_bitrate", 128)
+
+    # Resolve HW encoder; falls back to software if accelerator is unavailable
+    hwaccel = getattr(args, "hwaccel", None)
+    codec = resolve_encoder(codec, hwaccel)
+    if hwaccel and hwaccel != "none":
+        emit("log", level="info", message=f"Hardware accelerator: {hwaccel} -> encoder: {codec}")
 
     if target_mb is None and crf is None:
         return fail("invalid_args",
@@ -363,6 +410,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--resolution", help="Target height (Original, 1080p, 720p, 480p)")
     p.add_argument("--audio-codec", help="Audio codec or 'copy' or 'an' (none)")
     p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps")
+    p.add_argument("--hwaccel",
+                   choices=["none", "nvenc", "amf", "qsv", "d3d12"],
+                   default="none",
+                   help="Hardware video encoder to use (default: none / software)")
     return p
 
 

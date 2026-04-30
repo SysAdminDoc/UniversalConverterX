@@ -219,6 +219,25 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
+                        <TextBlock Text="Hardware Acceleration" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="HwAccelCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="HwAccel_SelectionChanged">
+                            <ComboBoxItem Content="Software (CPU)" Tag="none" IsSelected="True"/>
+                            <ComboBoxItem Content="NVIDIA NVENC" Tag="nvenc"/>
+                            <ComboBoxItem Content="AMD AMF" Tag="amf"/>
+                            <ComboBoxItem Content="Intel QSV" Tag="qsv"/>
+                            <ComboBoxItem Content="D3D12 (Windows)" Tag="d3d12"/>
+                        </ComboBox>
+                        <TextBlock Text="GPU encoding is faster but may produce larger files at the same CRF."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
                         <TextBlock Text="Preset Profile" Style="{StaticResource PanelTitleTextStyle}"/>
                         <RadioButton x:Name="PresetWeb" Content="Web upload (1080p, CRF 23)"
                                      GroupName="Preset"

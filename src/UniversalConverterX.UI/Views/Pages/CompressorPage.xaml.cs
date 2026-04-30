@@ -231,6 +231,19 @@ public sealed partial class CompressorPage : Page
         UpdateStatusText();
     }
 
+    private void HwAccel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (StatusText is null) return;
+        UpdateStatusText();
+    }
+
+    private string SelectedHwAccel()
+    {
+        if (HwAccelCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return "none";
+    }
+
     private async void Compress_Click(object sender, RoutedEventArgs e)
     {
         if (_files.Count == 0 || _cts is not null)
@@ -263,6 +276,7 @@ public sealed partial class CompressorPage : Page
                     "--input", item.Path,
                     "--output", outputPath,
                     "--preset", preset,
+                    "--hwaccel", SelectedHwAccel(),
                 };
 
                 item.StatusText = "Compressing";

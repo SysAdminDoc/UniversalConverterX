@@ -235,6 +235,23 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
+                        <TextBlock Text="Operation"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="OperationCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="OperationCombo_SelectionChanged">
+                            <ComboBoxItem Content="Trim" Tag="trim" IsSelected="True"/>
+                            <ComboBoxItem Content="Crop" Tag="crop"/>
+                            <ComboBoxItem Content="Rotate / Flip" Tag="rotate"/>
+                            <ComboBoxItem Content="Normalize Audio" Tag="loudnorm"/>
+                            <ComboBoxItem Content="Rewrap Container" Tag="rewrap"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Trim panel -->
+                <Border x:Name="TrimPanel" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="Trim"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="Times in seconds. Leave end blank to export through the end of each clip."
@@ -263,7 +280,8 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource CardStyle}">
+                <!-- Re-encode Quality panel (trim re-encode + crop + rotate) -->
+                <Border x:Name="QualityPanel" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Re-encode Quality"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
@@ -276,6 +294,101 @@
                         <TextBlock x:Name="CrfLabel"
                                    Text="CRF 18 (visually lossless)"
                                    Style="{StaticResource MutedTextStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Crop panel -->
+                <Border x:Name="CropPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Crop Rectangle"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock Text="All values in pixels. Output = W x H region starting at (X, Y)."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CropWidthBox" Grid.Column="0"
+                                     Header="Width" PlaceholderText="1920"
+                                     InputScope="Number"
+                                     TextChanged="TrimText_Changed"/>
+                            <TextBox x:Name="CropHeightBox" Grid.Column="1"
+                                     Header="Height" PlaceholderText="1080"
+                                     InputScope="Number"
+                                     TextChanged="TrimText_Changed"/>
+                        </Grid>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CropXBox" Grid.Column="0"
+                                     Header="X offset" PlaceholderText="0"
+                                     InputScope="Number"
+                                     TextChanged="TrimText_Changed"/>
+                            <TextBox x:Name="CropYBox" Grid.Column="1"
+                                     Header="Y offset" PlaceholderText="0"
+                                     InputScope="Number"
+                                     TextChanged="TrimText_Changed"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Rotate panel -->
+                <Border x:Name="RotatePanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Rotate / Flip"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="RotateAngleCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="TrimOption_Changed">
+                            <ComboBoxItem Content="90° clockwise" Tag="90" IsSelected="True"/>
+                            <ComboBoxItem Content="180°" Tag="180"/>
+                            <ComboBoxItem Content="270° clockwise" Tag="270"/>
+                            <ComboBoxItem Content="Flip horizontal" Tag="flip_h"/>
+                            <ComboBoxItem Content="Flip vertical" Tag="flip_v"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Loudnorm panel -->
+                <Border x:Name="LoudnormPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Audio Normalisation"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock Text="EBU R128 two-pass normalisation. Video stream is copied unchanged."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBox x:Name="LufsBox"
+                                 Header="Target LUFS"
+                                 PlaceholderText="-14"
+                                 InputScope="Number"
+                                 TextChanged="TrimText_Changed"/>
+                        <TextBlock Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Rewrap panel -->
+                <Border x:Name="RewrapPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Rewrap Container"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock Text="Stream-copy all tracks into the container chosen by the output extension. No re-encode."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <ComboBox x:Name="RewrapFormatCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="TrimOption_Changed">
+                            <ComboBoxItem Content=".mp4 (H.264/AAC)" Tag=".mp4" IsSelected="True"/>
+                            <ComboBoxItem Content=".mkv (universal)" Tag=".mkv"/>
+                            <ComboBoxItem Content=".mov (Apple)" Tag=".mov"/>
+                            <ComboBoxItem Content=".webm (web)" Tag=".webm"/>
+                        </ComboBox>
                     </StackPanel>
                 </Border>
 

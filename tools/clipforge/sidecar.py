@@ -1,7 +1,11 @@
 """ClipForge sidecar — NDJSON CLI shim for the UCX Editor module.
 
-v2.1 scope: trim (lossless or re-encode). Crop / upscale / filter / audio
-extensions land in subsequent v2.x releases as additional --op modes.
+Supported ops:
+  trim      Trim a clip by start/end seconds (lossless stream-copy or re-encode).
+  crop      Crop video to W:H:X:Y via -vf crop.
+  rotate    Rotate/flip video via -vf transpose / hflip / vflip.
+  loudnorm  EBU R128 loudness normalisation via -af loudnorm.
+  rewrap    Change container without re-encoding (-c copy stream copy).
 
 Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 """
@@ -155,11 +159,222 @@ def op_trim(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_crop(args: argparse.Namespace) -> int:
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install FFmpeg or set FFPROBE_PATH.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    crop_filter = f"crop={args.width}:{args.height}:{args.x}:{args.y}"
+    emit("log", level="info", message=f"Crop filter: {crop_filter}")
+
+    cmd = [ffmpeg, "-y", "-i", str(in_path),
+           "-vf", crop_filter,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy",
+           "-movflags", "+faststart", str(out_path)]
+    emit("progress", percent=0, stage="crop", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "crop")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+# Mapping from human-readable angle/flip to FFmpeg filter
+_ROTATE_FILTERS: dict[str, str] = {
+    "90":     "transpose=1",        # 90° clockwise
+    "180":    "transpose=2,transpose=2",  # 180°
+    "270":    "transpose=2",        # 90° counter-clockwise (270° clockwise)
+    "flip_h": "hflip",
+    "flip_v": "vflip",
+}
+
+
+def op_rotate(args: argparse.Namespace) -> int:
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install FFmpeg or set FFPROBE_PATH.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    vf = _ROTATE_FILTERS.get(args.angle)
+    if not vf:
+        return fail("invalid_args", f"Unknown angle: {args.angle}. Use 90, 180, 270, flip_h, or flip_v.")
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    emit("log", level="info", message=f"Rotate filter: {vf}")
+
+    cmd = [ffmpeg, "-y", "-i", str(in_path),
+           "-vf", vf,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy",
+           "-movflags", "+faststart", str(out_path)]
+    emit("progress", percent=0, stage="rotate", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "rotate")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def op_loudnorm(args: argparse.Namespace) -> int:
+    """Two-pass EBU R128 loudness normalisation.
+
+    Pass 1 analyses the input and writes measured levels to a temp JSON.
+    Pass 2 applies the linear normalisation filter with the measured values
+    so the output has exactly the target integrated loudness.
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install FFmpeg or set FFPROBE_PATH.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    il = args.integrated_lufs   # target integrated loudness (e.g. -14)
+    tp = args.true_peak          # max true peak (e.g. -1.5)
+    lra = args.lra               # loudness range (e.g. 11)
+
+    # Pass 1: measure input levels
+    emit("log", level="info", message="Loudnorm pass 1 — measuring levels")
+    emit("progress", percent=0, stage="loudnorm (measure)", eta_seconds=None)
+    p1_filter = f"loudnorm=I={il}:TP={tp}:LRA={lra}:print_format=json"
+    p1_cmd = [ffmpeg, "-y", "-i", str(in_path),
+              "-af", p1_filter,
+              "-f", "null",
+              "NUL" if sys.platform == "win32" else "/dev/null"]
+    proc = subprocess.run(p1_cmd, capture_output=True, text=True)
+    # loudnorm stats come on stderr as a JSON block
+    measured: dict = {}
+    try:
+        stderr_text = proc.stderr or ""
+        # Locate the JSON block in the stderr output
+        start = stderr_text.rfind("{")
+        end = stderr_text.rfind("}") + 1
+        if start != -1 and end > start:
+            measured = json.loads(stderr_text[start:end])
+    except (json.JSONDecodeError, ValueError):
+        pass
+
+    if not measured:
+        # Graceful fallback: single-pass without measured values
+        emit("log", level="warning", message="Could not parse loudnorm measurements; falling back to single-pass.")
+        p2_filter = f"loudnorm=I={il}:TP={tp}:LRA={lra}"
+    else:
+        p2_filter = (
+            f"loudnorm=I={il}:TP={tp}:LRA={lra}"
+            f":measured_I={measured.get('input_i', il)}"
+            f":measured_TP={measured.get('input_tp', tp)}"
+            f":measured_LRA={measured.get('input_lra', lra)}"
+            f":measured_thresh={measured.get('input_thresh', -70)}"
+            f":offset={measured.get('target_offset', 0)}"
+            f":linear=true"
+        )
+
+    emit("log", level="info", message="Loudnorm pass 2 — applying normalisation")
+    emit("progress", percent=50, stage="loudnorm (encode)", eta_seconds=None)
+    p2_cmd = [ffmpeg, "-y", "-i", str(in_path),
+              "-af", p2_filter,
+              "-c:v", "copy",
+              "-c:a", args.audio_codec, "-b:a", f"{args.audio_bitrate}k",
+              "-ar", "48000",
+              str(out_path)]
+    rc = run_ffmpeg(p2_cmd, duration, "loudnorm (encode)")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def op_rewrap(args: argparse.Namespace) -> int:
+    """Stream-copy into a new container — no re-encode, instant remux."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install FFmpeg or set FFPROBE_PATH.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    in_ext = in_path.suffix.lower()
+    out_ext = out_path.suffix.lower()
+    emit("log", level="info", message=f"Rewrap {in_ext} -> {out_ext} (stream copy)")
+
+    cmd = [ffmpeg, "-y", "-i", str(in_path),
+           "-c", "copy",
+           "-map_metadata", "0"]
+    if out_ext in (".mp4", ".m4v", ".mov"):
+        cmd += ["-movflags", "+faststart"]
+    cmd.append(str(out_path))
+
+    emit("progress", percent=0, stage="rewrap", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "rewrap")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="clipforge-sidecar",
                                 description="UCX ClipForge sidecar — video editor operations with NDJSON progress.")
     sub = p.add_subparsers(dest="op", required=True)
 
+    # ── trim ──────────────────────────────────────────────────────────────────
     trim = sub.add_parser("trim", help="Trim a video clip")
     trim.add_argument("--input", required=True)
     trim.add_argument("--output", required=True)
@@ -172,6 +387,49 @@ def build_parser() -> argparse.ArgumentParser:
     trim.add_argument("--preset", default="medium", help="FFmpeg encoder preset")
     trim.add_argument("--audio-codec", default="aac")
     trim.add_argument("--audio-bitrate", type=int, default=192)
+
+    # ── crop ──────────────────────────────────────────────────────────────────
+    crop = sub.add_parser("crop", help="Crop video to a rectangle")
+    crop.add_argument("--input", required=True)
+    crop.add_argument("--output", required=True)
+    crop.add_argument("--width", type=int, required=True, help="Output width in pixels")
+    crop.add_argument("--height", type=int, required=True, help="Output height in pixels")
+    crop.add_argument("--x", type=int, default=0, help="Left edge of crop (pixels from left)")
+    crop.add_argument("--y", type=int, default=0, help="Top edge of crop (pixels from top)")
+    crop.add_argument("--codec", default="libx264")
+    crop.add_argument("--crf", type=int, default=18)
+    crop.add_argument("--preset", default="medium")
+
+    # ── rotate ────────────────────────────────────────────────────────────────
+    rotate = sub.add_parser("rotate", help="Rotate or flip video")
+    rotate.add_argument("--input", required=True)
+    rotate.add_argument("--output", required=True)
+    rotate.add_argument("--angle", required=True,
+                        choices=list(_ROTATE_FILTERS.keys()),
+                        help="90 | 180 | 270 | flip_h | flip_v")
+    rotate.add_argument("--codec", default="libx264")
+    rotate.add_argument("--crf", type=int, default=18)
+    rotate.add_argument("--preset", default="medium")
+
+    # ── loudnorm ──────────────────────────────────────────────────────────────
+    loudnorm = sub.add_parser("loudnorm", help="EBU R128 loudness normalisation")
+    loudnorm.add_argument("--input", required=True)
+    loudnorm.add_argument("--output", required=True)
+    loudnorm.add_argument("--integrated-lufs", type=float, default=-14.0,
+                          dest="integrated_lufs",
+                          help="Target integrated loudness in LUFS (default: -14)")
+    loudnorm.add_argument("--true-peak", type=float, default=-1.5, dest="true_peak",
+                          help="Max true peak in dBTP (default: -1.5)")
+    loudnorm.add_argument("--lra", type=float, default=11.0,
+                          help="Loudness range target in LU (default: 11)")
+    loudnorm.add_argument("--audio-codec", default="aac", dest="audio_codec")
+    loudnorm.add_argument("--audio-bitrate", type=int, default=192, dest="audio_bitrate")
+
+    # ── rewrap ────────────────────────────────────────────────────────────────
+    rewrap = sub.add_parser("rewrap", help="Remux into a different container without re-encoding")
+    rewrap.add_argument("--input", required=True)
+    rewrap.add_argument("--output", required=True)
+
     return p
 
 
@@ -180,6 +438,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "trim":
             return op_trim(args)
+        if args.op == "crop":
+            return op_crop(args)
+        if args.op == "rotate":
+            return op_rotate(args)
+        if args.op == "loudnorm":
+            return op_loudnorm(args)
+        if args.op == "rewrap":
+            return op_rewrap(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")
