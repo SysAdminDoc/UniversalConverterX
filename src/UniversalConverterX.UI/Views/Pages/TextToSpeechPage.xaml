@@ -8,131 +8,194 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="32" Spacing="20">
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Spacing="6">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="6">
                 <TextBlock Text="Text to Speech" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Generate natural-sounding voiceover audio from script text using local AI voice models."
-                           Style="{StaticResource SubtitleTextStyle}"/>
+                <TextBlock Text="Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
             </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Refresh Voices"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="RefreshVoices_Click"/>
+                <Button x:Name="GenerateButton"
+                        Content="Generate Audio"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Generate_Click"
+                        IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
 
-            <!-- Dev status banner -->
-            <Border Style="{StaticResource CardStyle}">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xEC4F;" FontSize="22"
-                                  Foreground="{StaticResource AccentGreenBrush}"/>
-                    </Border>
-                    <StackPanel Grid.Column="1" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="FUTURE" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentOrangeBrush}"/>
-                            </Border>
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="Voice catalog needed" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource TextMutedBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="Text to Speech is not available yet."
-                                   Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Required before enabling: voice catalog, script validation, preview, export path, cancellation, and failure recovery."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Script input -->
-            <Border Style="{StaticResource CardStyle}" IsHitTestVisible="False" Opacity="0.72">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Script" Style="{StaticResource PanelTitleTextStyle}"/>
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" CornerRadius="22" Padding="18">
+                <Grid RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Script" Style="{StaticResource PanelTitleTextStyle}"/>
+
                     <TextBox x:Name="ScriptBox"
+                             Grid.Row="1"
                              PlaceholderText="Type or paste your script text here..."
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
-                             MinHeight="160"
                              VerticalAlignment="Stretch"
-                             Style="{StaticResource PremiumTextBoxStyle}"/>
-                    <TextBlock x:Name="CharCountLabel"
-                               Text="0 characters"
-                               Style="{StaticResource MutedTextStyle}"/>
-                </StackPanel>
-            </Border>
+                             VerticalContentAlignment="Top"
+                             MinHeight="320"
+                             Style="{StaticResource PremiumTextBoxStyle}"
+                             TextChanged="ScriptBox_TextChanged"/>
 
-            <!-- Settings panel -->
-            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Voice" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Voice Model" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="en-US-Neural (neutral)" IsSelected="True"/>
-                                <ComboBoxItem Content="en-US-Male (deep)"/>
-                                <ComboBoxItem Content="en-US-Female (bright)"/>
-                                <ComboBoxItem Content="en-GB-Male"/>
-                                <ComboBoxItem Content="en-AU-Female"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Speaking Speed" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="50" Maximum="200" Value="100" TickFrequency="10"/>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Pitch" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="-50" Maximum="50" Value="0" TickFrequency="5"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="MP3 (320kbps)" IsSelected="True"/>
-                                <ComboBoxItem Content="WAV (lossless)"/>
-                                <ComboBoxItem Content="FLAC (lossless)"/>
-                                <ComboBoxItem Content="OGG Vorbis"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <ToggleSwitch Header="Paragraph pauses" OffContent="Off" OnContent="On" IsOn="True"/>
-                        <ToggleSwitch Header="Save alongside project" OffContent="Off" OnContent="On"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <!-- Action bar -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
-                               Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Generate Audio"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"/>
+                    <Grid Grid.Row="2" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="CharCountLabel"
+                                   Grid.Column="0"
+                                   Text="0 characters"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   VerticalAlignment="Center"/>
+                        <ProgressBar x:Name="ProgressBar"
+                                     Grid.Column="1"
+                                     Width="220"
+                                     Height="6"
+                                     CornerRadius="3"
+                                     Visibility="Collapsed"
+                                     Minimum="0"
+                                     Maximum="100"/>
+                    </Grid>
                 </Grid>
             </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+            <StackPanel Grid.Column="1" Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Voice" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="LocaleCombo"
+                                  Header="Locale filter"
+                                  SelectedIndex="0"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="LocaleCombo_SelectionChanged">
+                            <ComboBoxItem Content="English (any)" Tag="en"/>
+                            <ComboBoxItem Content="English (US)" Tag="en-US"/>
+                            <ComboBoxItem Content="English (UK)" Tag="en-GB"/>
+                            <ComboBoxItem Content="English (AU)" Tag="en-AU"/>
+                            <ComboBoxItem Content="Spanish" Tag="es"/>
+                            <ComboBoxItem Content="French" Tag="fr"/>
+                            <ComboBoxItem Content="German" Tag="de"/>
+                            <ComboBoxItem Content="Italian" Tag="it"/>
+                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem Content="Russian" Tag="ru"/>
+                            <ComboBoxItem Content="(all locales)" Tag=""/>
+                        </ComboBox>
+                        <ComboBox x:Name="VoiceCombo"
+                                  Header="Voice"
+                                  HorizontalAlignment="Stretch"
+                                  PlaceholderText="Loading..."
+                                  SelectionChanged="VoiceCombo_SelectionChanged"/>
+                        <TextBlock x:Name="VoiceMetaText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Delivery" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Name="RateSlider"
+                                Header="Rate"
+                                Minimum="-50" Maximum="100" Value="0"
+                                StepFrequency="5"
+                                ValueChanged="Setting_Slider_Changed"/>
+                        <TextBlock x:Name="RateLabel"
+                                   Text="0% (normal)"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Right"/>
+                        <Slider x:Name="PitchSlider"
+                                Header="Pitch (Hz)"
+                                Minimum="-50" Maximum="50" Value="0"
+                                StepFrequency="5"
+                                ValueChanged="Setting_Slider_Changed"/>
+                        <TextBlock x:Name="PitchLabel"
+                                   Text="0 Hz"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="FormatCombo"
+                                  Header="Format"
+                                  SelectedIndex="0"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="Setting_Combo_Changed">
+                            <ComboBoxItem Content="MP3" Tag=".mp3"/>
+                            <ComboBoxItem Content="WAV" Tag=".wav"/>
+                            <ComboBoxItem Content="FLAC" Tag=".flac"/>
+                            <ComboBoxItem Content="OGG Vorbis" Tag=".ogg"/>
+                            <ComboBoxItem Content="Opus" Tag=".opus"/>
+                            <ComboBoxItem Content="AAC (.m4a)" Tag=".m4a"/>
+                        </ComboBox>
+                        <Button Content="Save to..."
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="ChooseOutput_Click"
+                                HorizontalAlignment="Stretch"/>
+                        <TextBlock x:Name="OutputPathText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText"
+                       Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1"
+                    Content="Open Output"
+                    x:Name="OpenOutputButton"
+                    Style="{StaticResource GhostButtonStyle}"
+                    Click="OpenOutput_Click"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"/>
+            <Button Grid.Column="2"
+                    Content="Cancel"
+                    x:Name="CancelButton"
+                    Style="{StaticResource DangerButtonStyle}"
+                    Click="Cancel_Click"
+                    IsEnabled="False"/>
+        </Grid>
+    </Grid>
 </Page>
