@@ -30,8 +30,13 @@ REPO = Path(__file__).resolve().parents[2]
 TOOLS = REPO / "tools"
 
 KNOWN_EVENTS = {
+    # Standard lifecycle
     "progress", "log", "complete", "error",
-    "segment", "stem", "device",
+    # Domain-specific result events (one per sidecar's output type)
+    "segment",  # whisper-stt, lipsight — transcript segments
+    "stem",     # demucs — separated audio stems
+    "device",   # recordcast — DirectShow device enumeration
+    "preset",   # gifstudio — known render presets
 }
 
 

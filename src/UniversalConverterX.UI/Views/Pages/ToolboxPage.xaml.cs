@@ -36,7 +36,7 @@ public sealed partial class ToolboxPage : Page
 
         // Image
         ImageTools.Add(new ToolboxTile("image-converter", "Image Converter", "JPEG, PNG, HEIC, AVIF, JPEG XL, WebP, RAW, TIFF", "\uEB9F", blue, "Planned", orange, false, "HEICShift"));
-        ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Planned", orange, false, "GifStudio"));
+        ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Ready", green, false, "GifStudio"));
         ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Super-resolution up to 4x", "\uE799", blue, "Planned", orange, true, "Real-ESRGAN"));
         ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "Apply portrait stylization filters", "\uE77B", blue, "Future", yellow, true, null));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Stitch images into a video slideshow", "\uE786", blue, "Future", yellow, false, null));
