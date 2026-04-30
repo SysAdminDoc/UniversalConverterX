@@ -105,6 +105,7 @@ public sealed partial class MainWindow : Window
             "ai-tts" => typeof(TextToSpeechPage),
             "ai-stt" => typeof(SpeechToTextPage),
             "ai-photo-restore" => typeof(PhotoRestorationPage),
+            "lip-reading" => typeof(LipReadingPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -222,7 +223,8 @@ public sealed partial class MainWindow : Window
             or "ai-voice-changer"
             or "ai-tts"
             or "ai-stt"
-            or "ai-photo-restore" => "ai-lab",
+            or "ai-photo-restore"
+            or "lip-reading" => "ai-lab",
         _ => routeKey
     };
 }
