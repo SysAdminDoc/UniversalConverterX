@@ -39,6 +39,7 @@ KNOWN_EVENTS = {
     "preset",   # gifstudio — known render presets
     "format",   # heicshift — supported input/output format inventory
     "voice",    # edge-tts — voice catalog enumeration
+    "model",    # rnnoise — discoverable .rnnn model files
 }
 
 

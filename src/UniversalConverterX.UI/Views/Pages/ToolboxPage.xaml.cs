@@ -67,7 +67,7 @@ public sealed partial class ToolboxPage : Page
         // Audio
         AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, OPUS", "\uEC4F", green, "Planned", orange, false, "FFmpeg"));
         AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Reduce audio file size", "\uE91F", blue, "Future", yellow, false, null));
-        AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "Reduce steady background noise", "\uE767", blue, "Future", yellow, true, null));
+        AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "RNNoise broadband speech denoise (FFmpeg arnndn)", "\uE767", blue, "Ready", green, true, "RNNoise"));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));

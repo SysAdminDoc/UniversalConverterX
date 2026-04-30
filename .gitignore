@@ -17,6 +17,10 @@ tools/**/*.dll
 tools/**/models/
 tools/**/__pycache__/
 
+# Track placeholder/.gitkeep readme inside model dirs so the dir survives
+# fresh clones — the .rnnn weights themselves stay ignored.
+!tools/**/models/.gitkeep
+
 # Shared AI model cache — track the placeholder, not the model weights
 tools/_models/*
 !tools/_models/.gitkeep
