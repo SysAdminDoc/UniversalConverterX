@@ -81,6 +81,13 @@
             <SolidColorBrush x:Key="TextSubtleBrush" Color="{StaticResource BrandTextSubtle}"/>
             <SolidColorBrush x:Key="TextInverseBrush" Color="{StaticResource BrandTextInverse}"/>
 
+            <!-- Overlay (modal scrim) -->
+            <SolidColorBrush x:Key="OverlayBrush" Color="#b2000000"/>
+
+            <!-- Accent hover / pressed variants as brushes -->
+            <SolidColorBrush x:Key="AccentPrimaryHoverBrush"   Color="{StaticResource BrandAccentPrimaryHover}"/>
+            <SolidColorBrush x:Key="AccentPrimaryPressedBrush" Color="{StaticResource BrandAccentPrimaryPressed}"/>
+
             <!-- ════════════════════════════════════════════════════════════════
                  GRADIENTS (hero / shell accents)
                  ════════════════════════════════════════════════════════════════ -->
@@ -163,14 +170,23 @@
             <Style x:Key="EyebrowTextStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="11"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CharacterSpacing" Value="60"/>
+                <Setter Property="CharacterSpacing" Value="80"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
             </Style>
 
             <Style x:Key="PillTextStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="11"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CharacterSpacing" Value="20"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            </Style>
+
+            <!-- CodeTextStyle: monospaced output, log panels -->
+            <Style x:Key="CodeTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Courier New"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="LineHeight" Value="17"/>
             </Style>
 
             <Style x:Key="MetricNumberTextStyle" TargetType="TextBlock">
@@ -290,17 +306,17 @@
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
             </Style>
 
-            <!-- IconButton: 36×36 square icon-only button (close, options, more) -->
+            <!-- IconButton: 32×32 circular icon-only button (close, remove, options) -->
             <Style x:Key="IconButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderBrush" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="MinHeight" Value="36"/>
-                <Setter Property="MinWidth" Value="36"/>
-                <Setter Property="Width" Value="36"/>
-                <Setter Property="Height" Value="36"/>
+                <Setter Property="MinHeight" Value="32"/>
+                <Setter Property="MinWidth" Value="32"/>
+                <Setter Property="Width" Value="32"/>
+                <Setter Property="Height" Value="32"/>
                 <Setter Property="Padding" Value="0"/>
-                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="CornerRadius" Value="16"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
