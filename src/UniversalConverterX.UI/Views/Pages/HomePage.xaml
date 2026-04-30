@@ -231,8 +231,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}"
                     CornerRadius="20" Padding="14,8">
                 <AutoSuggestBox x:Name="TaskSearchBox"
                                 PlaceholderText="Search a task: convert, compress, record, inspect, extract frames..."

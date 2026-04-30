@@ -83,8 +83,8 @@
                             Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
-                            CornerRadius="22"
-                            Padding="18">
+                            CornerRadius="20"
+                            Padding="22">
                         <Grid ColumnSpacing="12" RowSpacing="12">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -94,25 +94,25 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Row="0" Grid.Column="0">
+                            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
                                 <TextBlock Text="2" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>
-                                <TextBlock Text="Ready tools" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock Text="READY TOOLS" Style="{StaticResource MetricLabelTextStyle}"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="1">
+                            <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
                                 <TextBlock Text="29" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentBlueBrush}"/>
-                                <TextBlock Text="Mapped tools" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock Text="MAPPED TOOLS" Style="{StaticResource MetricLabelTextStyle}"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="0">
+                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="2">
                                 <TextBlock Text="Local" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>
-                                <TextBlock Text="Processing" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock Text="PROCESSING" Style="{StaticResource MetricLabelTextStyle}"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="1">
+                            <StackPanel Grid.Row="1" Grid.Column="1" Spacing="2">
                                 <TextBlock Text="AI" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentOrangeBrush}"/>
-                                <TextBlock Text="Clearly marked" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock Text="CLEARLY MARKED" Style="{StaticResource MetricLabelTextStyle}"/>
                             </StackPanel>
                         </Grid>
                     </Border>
