@@ -64,6 +64,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #8 Real-ESRGAN Image/Video Upscaler — new `realesrgan` sidecar wrapping the portable `realesrgan-ncnn-vulkan.exe` (no Python ML deps at runtime). ImageEnhancerPage + VideoEnhancerPage rewritten with model picker, scale 2/3/4, format/CRF controls, batch queue. Two Toolbox tiles flipped to Ready (image + video upscaler).
 - ✓ #12 whisper.cpp GPU sidecar — new `whisper-cpp` sidecar wrapping `whisper-cli.exe` (Vulkan/CUDA, no Python deps). SpeechToTextPage now has a Backend combo (faster-whisper vs whisper.cpp) and a VAD pre-filter checkbox.
 - ✓ #6 GFPGAN Photo Restoration — new `gfpgan` sidecar (Apache-2.0 face restoration via GFPGAN v1.4). PhotoRestorationPage wired with model picker, upscale 1–4, weight slider, batch queue + Finished pivot. Toolbox tile under AI added.
+- ✓ #9 .NET 10 LTS migration — all 4 C# projects + test project bumped net8.0 → net10.0; WindowsAppSDK 1.5 → 1.7; Microsoft.Extensions.* + System.Text.Json + System.Drawing.Common 8.0.0 → 10.0.0; version 2.3.0 → 2.4.0 synced across all manifests, README badge, and repo CLAUDE.md. Build clean.
 
 ---
 
@@ -99,8 +100,8 @@ ImageUpscalerPage and VideoEnhancerPage stubs exist. Use `realesrgan-ncnn-vulkan
 
 ### Platform Migration
 
-#### 9. .NET 10 LTS Migration
-.NET 8 mainstream support ends **2026-11-10** — hard deadline. .NET 10 (GA, LTS, supported until 2028-11) is the successor. HandBrake 1.11 already requires .NET 10 Desktop Runtime on Windows. Steps: update `<TargetFramework>` in all `.csproj` files, audit WinAppSDK compatibility, update CI workflow. **Impact 5 / Effort 3.** [R-1, S-NET10]
+#### 9. .NET 10 LTS Migration ✓ Shipped v2.4
+.NET 8 mainstream support ends **2026-11-10** — hard deadline. .NET 10 (GA, LTS, supported until 2028-11) is the successor. HandBrake 1.11 already requires .NET 10 Desktop Runtime on Windows. Steps: update `<TargetFramework>` in all `.csproj` files, audit WinAppSDK compatibility, update CI workflow. **Impact 5 / Effort 3.** [R-1, S-NET10] Shipped: bumped `Directory.Build.props` (root + src/) from `net8.0` → `net10.0` and LangVersion 12 → 13. Per-project `TargetFramework` updated for all four C# projects (Core, Console, ShellExtension, UI) plus the test project. WindowsAppSDK 1.5.240311000 → 1.7.250606001. Microsoft.Extensions.* family bumped 8.0.0 → 10.0.0; System.Text.Json 8.0.6 → 10.0.0; System.Drawing.Common 8.0.0 → 10.0.0; CommunityToolkit.Mvvm 8.2.2 → 8.4.0; Spectre.Console 0.48 → 0.49. Removed `<EnablePreviewFeatures>true</EnablePreviewFeatures>` from Core (the .NET 10 analyzer escalates CA2252 to errors against UI consumers; Core wasn't actually using preview language features). Version strings synced: 2.3.0 → 2.4.0 across all `<Version>` elements + README badge + repo CLAUDE.md. Build verified clean Debug|x64; only advisory warnings (NU1510 prune, MVVMTK0045 AOT-partial-property suggestions, CA2024 EndOfStream-in-async edge case).
 
 ### AI Engine Quality
 

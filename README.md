@@ -4,7 +4,7 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.3.0-blue)
+![Version](https://img.shields.io/badge/version-2.4.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -30,7 +30,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 
 ## Architecture
 
-UCX is a C# / .NET 8 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
+UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
 
 Sidecar engines (vendored as binaries land per phase): VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift.
 
@@ -66,7 +66,7 @@ Sidecar engines (vendored as binaries land per phase): VideoCrush, ClipForge, St
 ### Requirements
 
 - Windows 10 21H2+ or Windows 11
-- .NET 8 Runtime
+- .NET 10 Runtime
 - One or more converter tools (FFmpeg, ImageMagick, etc.)
 
 ### Quick Start
@@ -149,7 +149,7 @@ UniversalConverterX/
 
 ### Prerequisites
 
-- .NET 8 SDK
+- .NET 10 SDK
 - Windows 10 SDK (for UI project)
 - Visual Studio 2022 (recommended)
 
