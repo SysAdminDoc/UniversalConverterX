@@ -32,7 +32,7 @@ public sealed partial class AiLabPage : Page
         Tools.Add(new AiLabToolTile("Video Summarizer", "Extract chapters, highlights, and written summaries from long recordings.", "\uE8D2", blue, "Wave 2", "Transcript pipeline needed", "Whisper + local LLM"));
         Tools.Add(new AiLabToolTile("Noise Remover", "Clean voice and camera audio with configurable denoise strength.", "\uE767", cyan, "Wave 2", "Audio model needed", "RNNoise / Demucs"));
         Tools.Add(new AiLabToolTile("Vocal Remover", "Split vocals and instrumentals for music and editing workflows.", "\uEC4F", red, "Wave 2", "Stem preview needed", "Demucs"));
-        Tools.Add(new AiLabToolTile("Voice Changer", "Transform narration tone while preserving timing.", "\uE720", orange, "Future", "Model choice open", null));
+        Tools.Add(new AiLabToolTile("Voice Changer", "Transform narration tone while preserving timing.", "\uED28", orange, "Future", "Model choice open", null));
         Tools.Add(new AiLabToolTile("Text-to-Speech", "Generate voiceover audio from script text.", "\uEC4F", green, "Future", "Voice catalog needed", null));
         Tools.Add(new AiLabToolTile("Speech-to-Text", "Transcribe audio/video into editable transcript files.", "\uE720", blue, "Future", "Can share subtitle pipeline", "Whisper"));
         Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Future", "Photo-specific presets needed", null));
@@ -76,6 +76,7 @@ public sealed class AiLabToolTile
     public string Description { get; set; }
     public string Glyph { get; set; }
     public Brush AccentBrush { get; set; }
+    public Brush PhaseBrush { get; set; }
     public string Phase { get; set; }
     public string WorkflowHint { get; set; }
     public string? PoweredBy { get; set; }
@@ -90,5 +91,11 @@ public sealed class AiLabToolTile
         Phase = phase;
         WorkflowHint = workflowHint;
         PoweredBy = poweredBy;
+        PhaseBrush = phase switch
+        {
+            "Wave 1" => (Brush)Application.Current.Resources["AccentGreenBrush"],
+            "Wave 2" => (Brush)Application.Current.Resources["AccentOrangeBrush"],
+            _        => (Brush)Application.Current.Resources["TextMutedBrush"],
+        };
     }
 }

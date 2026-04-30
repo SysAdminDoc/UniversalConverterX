@@ -56,11 +56,11 @@ public sealed partial class HomePage : Page
         Clusters.Add(new HomeClusterTile("Enhancement Tools", "Fix and improve", "Noise removal, background removal, image/video enhancement, vocal isolation, and restoration workflows.", "\uE950", blue, blueSurface, "ai-lab"));
         Clusters.Add(new HomeClusterTile("Export & Conversion", "Deliver anywhere", "Format conversion, compression, merger, DVD/CD, snapshots, GIF, social aspect ratios, and web presets.", "\uE8AB", orange, greenSurface, "toolbox"));
 
-        Personas.Add(new HomePersonaTile("Content Creator", "Batch convert camera files, download references, compress for upload, and generate captions."));
-        Personas.Add(new HomePersonaTile("Video Lover", "Convert 4K/8K libraries to player-ready formats while preserving quality."));
-        Personas.Add(new HomePersonaTile("Social Publisher", "Compress clips for platform limits and reframe to 9:16, 1:1, or 4:5."));
-        Personas.Add(new HomePersonaTile("Educator", "Record lessons, clean audio, create subtitles, and export LMS-friendly files."));
-        Personas.Add(new HomePersonaTile("Business Team", "Reuse saved presets for recurring conversion, compression, and delivery workflows."));
+        Personas.Add(new HomePersonaTile("Content Creator", "Batch convert camera files, download references, compress for upload, and generate captions.", "converter"));
+        Personas.Add(new HomePersonaTile("Video Lover", "Convert 4K/8K libraries to player-ready formats while preserving quality.", "converter"));
+        Personas.Add(new HomePersonaTile("Social Publisher", "Compress clips for platform limits and reframe to 9:16, 1:1, or 4:5.", "compressor"));
+        Personas.Add(new HomePersonaTile("Educator", "Record lessons, clean audio, create subtitles, and export LMS-friendly files.", "recorder"));
+        Personas.Add(new HomePersonaTile("Business Team", "Reuse saved presets for recurring conversion, compression, and delivery workflows.", "toolbox"));
     }
 
     private void SeedSearch()
@@ -130,6 +130,12 @@ public sealed partial class HomePage : Page
     private void ClusterTile_Click(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is HomeClusterTile tile)
+            App.RequestNavigation(tile.RouteKey);
+    }
+
+    private void PersonaTile_Click(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is HomePersonaTile tile)
             App.RequestNavigation(tile.RouteKey);
     }
 
@@ -217,11 +223,13 @@ public sealed class HomePersonaTile
 {
     public string Title { get; set; }
     public string Description { get; set; }
+    public string RouteKey { get; set; }
 
-    public HomePersonaTile(string title, string description)
+    public HomePersonaTile(string title, string description, string routeKey)
     {
         Title = title;
         Description = description;
+        RouteKey = routeKey;
     }
 }
 

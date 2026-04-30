@@ -33,9 +33,9 @@
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
                         <Border Grid.Column="2" Padding="8,3" CornerRadius="10"
-                                Background="{StaticResource SurfaceSoftBrush}">
+                                Background="{StaticResource SurfaceLightBrush}">
                             <TextBlock Text="{Binding Phase}" FontSize="10" FontWeight="SemiBold"
-                                       Foreground="{StaticResource AccentGreenBrush}"/>
+                                       Foreground="{Binding PhaseBrush}"/>
                         </Border>
                     </Grid>
                     <StackPanel Grid.Row="1" Spacing="5">
@@ -96,10 +96,61 @@
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                             CornerRadius="24" Padding="22">
                         <StackPanel Spacing="14">
-                            <TextBlock Text="Delivery Discipline" Style="{StaticResource PanelTitleTextStyle}"/>
-                            <TextBlock Text="Shared ONNX cache" Style="{StaticResource MutedTextStyle}"/>
-                            <ProgressBar Value="35" Maximum="100" Height="8" CornerRadius="4"/>
-                            <TextBlock Text="AI features remain in roadmap status until model cache, preview, batch export, cancellation, and failure recovery are all explicit."
+                            <TextBlock Text="Release waves" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <StackPanel Spacing="10">
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Grid.Column="0" Width="8" Height="8"
+                                             Fill="{StaticResource AccentGreenBrush}"
+                                             VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Wave 1 — Background Remover"
+                                               Style="{StaticResource MutedTextStyle}"/>
+                                    <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
+                                            Background="{StaticResource SurfaceLightBrush}">
+                                        <TextBlock Text="In progress" FontSize="10" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentGreenBrush}"/>
+                                    </Border>
+                                </Grid>
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Grid.Column="0" Width="8" Height="8"
+                                             Fill="{StaticResource AccentOrangeBrush}"
+                                             VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Wave 2 — 8 AI tools"
+                                               Style="{StaticResource MutedTextStyle}"/>
+                                    <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
+                                            Background="{StaticResource SurfaceLightBrush}">
+                                        <TextBlock Text="Planned" FontSize="10" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentOrangeBrush}"/>
+                                    </Border>
+                                </Grid>
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Grid.Column="0" Width="8" Height="8"
+                                             Fill="{StaticResource TextMutedBrush}"
+                                             VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Future — 4 tools"
+                                               Style="{StaticResource MutedTextStyle}"/>
+                                    <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
+                                            Background="{StaticResource SurfaceLightBrush}">
+                                        <TextBlock Text="Roadmap" FontSize="10" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextMutedBrush}"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                            <TextBlock Text="Each wave ships only when model cache, preview, batch export, and failure recovery are all explicit."
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -109,7 +160,7 @@
             <StackPanel Grid.Row="1" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="Featured AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Roadmap with implementation scope" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Click any tool to open its workflow" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"

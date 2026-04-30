@@ -96,22 +96,22 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="2" FontSize="24" FontWeight="SemiBold"
+                                <TextBlock Text="2" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>
                                 <TextBlock Text="Ready tools" Style="{StaticResource MutedTextStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="0" Grid.Column="1">
-                                <TextBlock Text="29" FontSize="24" FontWeight="SemiBold"
+                                <TextBlock Text="29" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentBlueBrush}"/>
                                 <TextBlock Text="Mapped tools" Style="{StaticResource MutedTextStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="0">
-                                <TextBlock Text="Local" FontSize="24" FontWeight="SemiBold"
+                                <TextBlock Text="Local" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>
                                 <TextBlock Text="Processing" Style="{StaticResource MutedTextStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="1">
-                                <TextBlock Text="AI" FontSize="24" FontWeight="SemiBold"
+                                <TextBlock Text="AI" Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentOrangeBrush}"/>
                                 <TextBlock Text="Clearly marked" Style="{StaticResource MutedTextStyle}"/>
                             </StackPanel>
