@@ -54,9 +54,7 @@ public partial class App : Application
     {
         UnhandledException += (_, e) =>
         {
-            var log = Path.Combine(AppContext.BaseDirectory, "ucx_crash.log");
-            File.AppendAllText(log,
-                $"[{DateTime.Now:o}] {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}\n---\n");
+            LogUnhandledException(e.Exception);
             e.Handled = false;
         };
         _mainWindow = new MainWindow();
@@ -65,7 +63,7 @@ public partial class App : Application
 
     internal static void Register(MainWindow window) => _mainWindow = window;
 
-    public static void RequestNavigation(string routeKey) => _mainWindow?.NavigateTo(routeKey);
+    public static void RequestNavigation(string routeKey) => _mainWindow?.RequestNavigation(routeKey);
 
     public static void RequestPlaceholderNavigation(PlaceholderInfo info) =>
         _mainWindow?.NavigateToPlaceholder(info);
@@ -92,5 +90,25 @@ public partial class App : Application
         }
 
         return locations[0];
+    }
+
+    private static void LogUnhandledException(Exception? exception)
+    {
+        try
+        {
+            var logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "UniversalConverterX",
+                "logs");
+            Directory.CreateDirectory(logDirectory);
+
+            var log = Path.Combine(logDirectory, "ucx_crash.log");
+            File.AppendAllText(log,
+                $"[{DateTime.Now:o}] {exception?.GetType().FullName}: {exception?.Message}\n{exception?.StackTrace}\n---\n");
+        }
+        catch
+        {
+            // Never let crash logging throw inside the unhandled-exception path.
+        }
     }
 }
