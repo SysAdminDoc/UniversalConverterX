@@ -10,139 +10,115 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Brand Colors -->
-            <Color x:Key="BrandBackground">#f4f7fb</Color>
-            <Color x:Key="BrandSurface">#ffffff</Color>
-            <Color x:Key="BrandSurfaceLight">#edf4ff</Color>
-            <Color x:Key="BrandSurfaceSoft">#e8f8f2</Color>
-            <Color x:Key="BrandSurfaceWarm">#fff7ed</Color>
-            <Color x:Key="BrandSurfaceDanger">#fff1f2</Color>
-            <Color x:Key="BrandSurfaceMuted">#f8fafc</Color>
-            <Color x:Key="BrandBorder">#d7e0ec</Color>
-            <Color x:Key="BrandBorderStrong">#b7c4d6</Color>
-            <Color x:Key="BrandAccentGreen">#0e9f6e</Color>
-            <Color x:Key="BrandAccentBlue">#2563eb</Color>
-            <Color x:Key="BrandAccentCyan">#06b6d4</Color>
-            <Color x:Key="BrandAccentOrange">#f97316</Color>
-            <Color x:Key="BrandAccentRed">#ef4444</Color>
-            <Color x:Key="BrandAccentYellow">#d97706</Color>
-            <Color x:Key="BrandTextPrimary">#0f172a</Color>
-            <Color x:Key="BrandTextSecondary">#475467</Color>
-            <Color x:Key="BrandTextMuted">#667085</Color>
-            <Color x:Key="BrandTextSubtle">#8a95a6</Color>
+            <!-- ════════════════════════════════════════════════════════════════
+                 PALETTE
+                 Surface: gentle blue-cool neutrals, never pure white-on-white.
+                 Primary brand: refined indigo (calm AI-suite identity).
+                 Green is reserved for status (Ready / Private / Success).
+                 ════════════════════════════════════════════════════════════════ -->
 
-            <!-- Brushes -->
+            <!-- Surfaces (background → subtle tonal layering up to elevated) -->
+            <Color x:Key="BrandBackground">#f3f6fb</Color>
+            <Color x:Key="BrandSurface">#ffffff</Color>
+            <Color x:Key="BrandSurfaceMuted">#f7faff</Color>
+            <Color x:Key="BrandSurfaceLight">#eef3fb</Color>
+            <Color x:Key="BrandSurfaceSoft">#e7f6ef</Color>
+            <Color x:Key="BrandSurfaceWarm">#fff4e5</Color>
+            <Color x:Key="BrandSurfaceDanger">#fef2f2</Color>
+            <Color x:Key="BrandSurfaceInfo">#eff4ff</Color>
+
+            <!-- Borders (two tiers: hairline + emphasis) -->
+            <Color x:Key="BrandBorder">#d8dfeb</Color>
+            <Color x:Key="BrandBorderStrong">#b2bdce</Color>
+            <Color x:Key="BrandDivider">#eaeef5</Color>
+
+            <!-- Accents (semantic) -->
+            <Color x:Key="BrandAccentPrimary">#2f5ce0</Color>
+            <Color x:Key="BrandAccentPrimaryHover">#244cc7</Color>
+            <Color x:Key="BrandAccentPrimaryPressed">#1e40b3</Color>
+            <Color x:Key="BrandAccentBlue">#2563eb</Color>
+            <Color x:Key="BrandAccentCyan">#0891b2</Color>
+            <Color x:Key="BrandAccentGreen">#0d9669</Color>
+            <Color x:Key="BrandAccentOrange">#ea7211</Color>
+            <Color x:Key="BrandAccentYellow">#b86e00</Color>
+            <Color x:Key="BrandAccentRed">#dc2626</Color>
+
+            <!-- Text (4 readable tiers + inverse) -->
+            <Color x:Key="BrandTextPrimary">#0f172a</Color>
+            <Color x:Key="BrandTextSecondary">#3f4a5e</Color>
+            <Color x:Key="BrandTextMuted">#64718a</Color>
+            <Color x:Key="BrandTextSubtle">#8a95a8</Color>
+            <Color x:Key="BrandTextInverse">#ffffff</Color>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 BRUSHES
+                 ════════════════════════════════════════════════════════════════ -->
+
             <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BrandBackground}"/>
             <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource BrandSurface}"/>
+            <SolidColorBrush x:Key="SurfaceMutedBrush" Color="{StaticResource BrandSurfaceMuted}"/>
             <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource BrandSurfaceLight}"/>
             <SolidColorBrush x:Key="SurfaceSoftBrush" Color="{StaticResource BrandSurfaceSoft}"/>
             <SolidColorBrush x:Key="SurfaceWarmBrush" Color="{StaticResource BrandSurfaceWarm}"/>
             <SolidColorBrush x:Key="SurfaceDangerBrush" Color="{StaticResource BrandSurfaceDanger}"/>
-            <SolidColorBrush x:Key="SurfaceMutedBrush" Color="{StaticResource BrandSurfaceMuted}"/>
+            <SolidColorBrush x:Key="SurfaceInfoBrush" Color="{StaticResource BrandSurfaceInfo}"/>
+
             <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BrandBorder}"/>
             <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BrandBorderStrong}"/>
-            <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource BrandAccentGreen}"/>
+            <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource BrandDivider}"/>
+
+            <SolidColorBrush x:Key="AccentPrimaryBrush" Color="{StaticResource BrandAccentPrimary}"/>
             <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandAccentBlue}"/>
             <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource BrandAccentCyan}"/>
+            <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource BrandAccentGreen}"/>
             <SolidColorBrush x:Key="AccentOrangeBrush" Color="{StaticResource BrandAccentOrange}"/>
-            <SolidColorBrush x:Key="AccentRedBrush" Color="{StaticResource BrandAccentRed}"/>
             <SolidColorBrush x:Key="AccentYellowBrush" Color="{StaticResource BrandAccentYellow}"/>
+            <SolidColorBrush x:Key="AccentRedBrush" Color="{StaticResource BrandAccentRed}"/>
+
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource BrandTextPrimary}"/>
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource BrandTextSecondary}"/>
             <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource BrandTextMuted}"/>
             <SolidColorBrush x:Key="TextSubtleBrush" Color="{StaticResource BrandTextSubtle}"/>
+            <SolidColorBrush x:Key="TextInverseBrush" Color="{StaticResource BrandTextInverse}"/>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 GRADIENTS (hero / shell accents)
+                 ════════════════════════════════════════════════════════════════ -->
 
             <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#e9f2ff" Offset="0"/>
-                <GradientStop Color="#f8fbff" Offset="0.45"/>
-                <GradientStop Color="#e6fbf3" Offset="1"/>
+                <GradientStop Color="#e9efff" Offset="0"/>
+                <GradientStop Color="#f6f9ff" Offset="0.45"/>
+                <GradientStop Color="#e7f7ef" Offset="1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="AiGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#ecfeff" Offset="0"/>
-                <GradientStop Color="#eff6ff" Offset="0.55"/>
-                <GradientStop Color="#f8fafc" Offset="1"/>
+                <GradientStop Color="#eef9ff" Offset="0"/>
+                <GradientStop Color="#eff4ff" Offset="0.55"/>
+                <GradientStop Color="#f7faff" Offset="1"/>
             </LinearGradientBrush>
             <LinearGradientBrush x:Key="ShellGradientBrush" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#ffffff" Offset="0"/>
-                <GradientStop Color="#f3f8ff" Offset="0.56"/>
-                <GradientStop Color="#ecfbf5" Offset="1"/>
+                <GradientStop Color="#f1f6ff" Offset="0.56"/>
+                <GradientStop Color="#ebf8f1" Offset="1"/>
             </LinearGradientBrush>
 
-            <!-- Card Style -->
-            <Style x:Key="CardStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="18"/>
-                <Setter Property="Padding" Value="20"/>
-            </Style>
+            <!-- ════════════════════════════════════════════════════════════════
+                 TYPOGRAPHY
+                 Display 32 / Title 24 / Section 18 / Panel 15 /
+                 Subtitle 14 / Body 14 / Muted 12 / Subtle 11 / Eyebrow 11 (caps)
+                 ════════════════════════════════════════════════════════════════ -->
 
-            <!-- Primary Button Style -->
-            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
-                <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="32"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="FontSize" Value="13"/>
-                <Setter Property="CornerRadius" Value="11"/>
-                <Setter Property="MinHeight" Value="42"/>
-                <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,11"/>
-                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                <Setter Property="VerticalContentAlignment" Value="Center"/>
-            </Style>
-
-            <!-- Secondary Button Style -->
-            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="FontSize" Value="13"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CornerRadius" Value="11"/>
-                <Setter Property="MinHeight" Value="42"/>
-                <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,11"/>
-                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="LineHeight" Value="40"/>
             </Style>
 
-            <!-- Title Text Style -->
             <Style x:Key="TitleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontSize" Value="24"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="LineHeight" Value="34"/>
-            </Style>
-
-            <!-- Subtitle Text Style -->
-            <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="15"/>
-                <Setter Property="FontWeight" Value="Normal"/>
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                <Setter Property="LineHeight" Value="22"/>
-            </Style>
-
-            <!-- Body Text Style -->
-            <Style x:Key="BodyTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="14"/>
-                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-                <Setter Property="LineHeight" Value="20"/>
-            </Style>
-
-            <!-- Muted Text Style -->
-            <Style x:Key="MutedTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-                <Setter Property="LineHeight" Value="18"/>
-            </Style>
-
-            <Style x:Key="EyebrowTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="11"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CharacterSpacing" Value="40"/>
-                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="LineHeight" Value="30"/>
             </Style>
 
             <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
@@ -156,6 +132,39 @@
                 <Setter Property="FontSize" Value="15"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="20"/>
+            </Style>
+
+            <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="LineHeight" Value="22"/>
+            </Style>
+
+            <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="LineHeight" Value="20"/>
+            </Style>
+
+            <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="LineHeight" Value="18"/>
+            </Style>
+
+            <Style x:Key="SubtleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
+                <Setter Property="LineHeight" Value="16"/>
+            </Style>
+
+            <Style x:Key="EyebrowTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CharacterSpacing" Value="60"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
             </Style>
 
             <Style x:Key="PillTextStyle" TargetType="TextBlock">
@@ -164,16 +173,155 @@
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             </Style>
 
-            <Style x:Key="PremiumTextBoxStyle" TargetType="TextBox">
-                <Setter Property="MinHeight" Value="42"/>
+            <Style x:Key="MetricNumberTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="26"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="LineHeight" Value="30"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            </Style>
+
+            <Style x:Key="MetricLabelTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CharacterSpacing" Value="40"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+            </Style>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 SURFACES
+                 - CardStyle: standard panel
+                 - SubtleCardStyle: low-contrast nested card on muted background
+                 - SectionDividerStyle: 1px hairline rule between groups
+                 ════════════════════════════════════════════════════════════════ -->
+
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="16"/>
+                <Setter Property="Padding" Value="20"/>
+            </Style>
+
+            <Style x:Key="SubtleCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="14"/>
+                <Setter Property="Padding" Value="16"/>
+            </Style>
+
+            <Style x:Key="SectionDividerStyle" TargetType="Border">
+                <Setter Property="Height" Value="1"/>
+                <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
+            </Style>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 BUTTONS
+                 WinUI 3's DefaultButtonStyle handles hover/pressed/focus visuals
+                 via subtle overlay layers on top of the explicit Background brush
+                 we set here, so all variants get correct interactive feedback
+                 without needing a custom ControlTemplate.
+                 ════════════════════════════════════════════════════════════════ -->
+
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextInverseBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="FontSize" Value="13"/>
                 <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="Padding" Value="12,8"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="MinWidth" Value="104"/>
+                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="UseSystemFocusVisuals" Value="True"/>
+            </Style>
+
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="MinWidth" Value="104"/>
+                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="UseSystemFocusVisuals" Value="True"/>
+            </Style>
+
+            <!-- Ghost: text-only inline action. Used when a secondary action
+                 should not compete visually with primary actions next to it
+                 (e.g., "Clear", "Cancel" in a row that already has "Convert"). -->
+            <Style x:Key="GhostButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="Padding" Value="14,9"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="UseSystemFocusVisuals" Value="True"/>
+            </Style>
+
+            <!-- Danger: destructive actions (Stop, Delete, Cancel-job). -->
+            <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource SurfaceDangerBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource AccentRedBrush}"/>
+                <Setter Property="BorderBrush" Value="#fecaca"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="MinWidth" Value="104"/>
+                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="UseSystemFocusVisuals" Value="True"/>
+            </Style>
+
+            <!-- IconButton: 36×36 square icon-only button (close, options, more) -->
+            <Style x:Key="IconButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="MinHeight" Value="36"/>
+                <Setter Property="MinWidth" Value="36"/>
+                <Setter Property="Width" Value="36"/>
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="UseSystemFocusVisuals" Value="True"/>
+            </Style>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 INPUTS
+                 ════════════════════════════════════════════════════════════════ -->
+
+            <Style x:Key="PremiumTextBoxStyle" TargetType="TextBox">
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="12,7"/>
+                <Setter Property="FontSize" Value="13"/>
             </Style>
 
             <Style x:Key="PremiumComboBoxStyle" TargetType="ComboBox">
-                <Setter Property="MinHeight" Value="42"/>
+                <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="FontSize" Value="13"/>
             </Style>
 
         </ResourceDictionary>

@@ -239,7 +239,7 @@
             <Button Grid.Column="2"
                     Content="Clear List"
                     x:Name="ClearButton"
-                    Style="{StaticResource SecondaryButtonStyle}"
+                    Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
                     IsEnabled="False"/>

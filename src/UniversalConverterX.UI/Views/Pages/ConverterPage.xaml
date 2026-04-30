@@ -343,7 +343,7 @@
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
             <Button Grid.Column="1" Content="Clear Queue"
-                    Style="{StaticResource SecondaryButtonStyle}"
+                    Style="{StaticResource GhostButtonStyle}"
                     Click="ClearAll_Click" Margin="0,0,12,0"/>
             <Button Grid.Column="2" Content="Open Output"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -378,7 +378,7 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                         <Button x:Name="CancelButton" Content="Cancel"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource DangerButtonStyle}"
                                 Click="CancelButton_Click"/>
                     </StackPanel>
                 </StackPanel>
