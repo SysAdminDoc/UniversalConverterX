@@ -153,7 +153,74 @@ PRESETS = {
         "audio_codec": "libopus",
         "audio_bitrate": 128,
     },
+    # ── Professional-tier intermediate codecs (HandBrake 1.11 / FFmpeg 8.1) ──
+    "prores-422-proxy": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 0,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "prores-422-lt": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 1,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "prores-422": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 2,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "prores-422-hq": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 3,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "prores-4444": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 4,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "dnxhr-sq": {
+        "target_mb": None, "crf": None,
+        "codec": "dnxhd", "dnxhd_profile": "dnxhr_sq",
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "dnxhr-hq": {
+        "target_mb": None, "crf": None,
+        "codec": "dnxhd", "dnxhd_profile": "dnxhr_hq",
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "dnxhr-hqx": {
+        "target_mb": None, "crf": None,
+        "codec": "dnxhd", "dnxhd_profile": "dnxhr_hqx",
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    "dnxhr-444": {
+        "target_mb": None, "crf": None,
+        "codec": "dnxhd", "dnxhd_profile": "dnxhr_444",
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s16le", "audio_bitrate": 0,
+    },
+    # ── Archival lossless (#31) — FFV1 + FLAC in MKV. Checksummed lossless. ──
+    "archive-ffv1": {
+        "target_mb": None, "crf": None,
+        "codec": "ffv1",
+        "preset": None, "resolution": "Original",
+        "audio_codec": "flac", "audio_bitrate": 0,
+    },
 }
+
+
+# ─── Codec families that bypass CRF/two-pass logic ──────────────────────────
+INTERMEDIATE_CODECS = {"prores_ks", "prores_aw", "dnxhd"}
+LOSSLESS_CODECS = {"ffv1"}
 
 
 # ─── FFmpeg progress parsing ─────────────────────────────────────────────────
@@ -263,6 +330,60 @@ def compress(args: argparse.Namespace) -> int:
 
     is_av1 = codec == "libsvtav1"
     is_vp9 = codec == "libvpx-vp9"
+    is_intermediate = codec in INTERMEDIATE_CODECS
+    is_lossless = codec in LOSSLESS_CODECS
+
+    # ─── ProRes / DNxHR / FFV1 — profile-driven encode (no CRF, no 2-pass) ──
+    if is_intermediate or is_lossless:
+        emit("progress", percent=0, stage="encoding (intermediate)", eta_seconds=None)
+        cmd = [ffmpeg, "-y", "-i", str(in_path)]
+        if vf_filters:
+            cmd += ["-vf", ",".join(vf_filters)]
+
+        # Force pixel format compatible with the chosen codec.
+        if codec == "prores_ks":
+            profile = int(preset_cfg.get("prores_profile", args.prores_profile or 3))
+            cmd += ["-c:v", "prores_ks", "-profile:v", str(profile),
+                    "-pix_fmt", "yuv422p10le" if profile <= 3 else "yuva444p10le"]
+        elif codec == "dnxhd":
+            profile = preset_cfg.get("dnxhd_profile", args.dnxhd_profile or "dnxhr_hq")
+            cmd += ["-c:v", "dnxhd", "-profile:v", profile]
+            # DNxHR expects yuv422p (sq/hq), yuv422p10le (hqx), or yuv444p10le (444)
+            pix = "yuv444p10le" if profile == "dnxhr_444" else (
+                  "yuv422p10le" if profile == "dnxhr_hqx" else "yuv422p")
+            cmd += ["-pix_fmt", pix]
+        elif codec == "ffv1":
+            cmd += ["-c:v", "ffv1", "-level", "3",
+                    "-coder", "1", "-context", "1",
+                    "-g", "1", "-slices", "24", "-slicecrc", "1",
+                    "-pix_fmt", "yuv420p"]
+
+        if audio_codec == "an":
+            cmd += ["-an"]
+        elif audio_codec == "copy":
+            cmd += ["-c:a", "copy"]
+        elif audio_codec in ("pcm_s16le", "pcm_s24le", "flac"):
+            cmd += ["-c:a", audio_codec]
+        else:
+            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+
+        # Container hint: ProRes/DNxHR → MOV is conventional, FFV1 → MKV.
+        # We honour the user's explicit output extension, but warn on unusual combos.
+        out_ext = out_path.suffix.lower()
+        if codec == "ffv1" and out_ext != ".mkv":
+            emit("log", level="warn",
+                 message=f"FFV1 archival is conventionally muxed in MKV; "
+                         f"got {out_ext} — proceeding anyway.")
+        if (codec == "prores_ks" or codec == "dnxhd") and out_ext not in (".mov", ".mxf"):
+            emit("log", level="warn",
+                 message=f"ProRes/DNxHR is conventionally muxed in MOV (or MXF); "
+                         f"got {out_ext} — proceeding anyway.")
+
+        cmd += [str(out_path)]
+        rc = run_ffmpeg(cmd, duration, "encoding", 0.0, 100.0)
+        if rc != 0:
+            return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+        return finalize(out_path)
 
     # ─── CRF mode (single-pass) ──────────────────────────────────────────────
     if crf is not None:
@@ -402,18 +523,29 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--input", required=True, help="Input video path")
     p.add_argument("--output", required=True, help="Output video path")
     p.add_argument("--preset", choices=list(PRESETS.keys()),
-                   help="Predefined preset (web-1080p, email-10mb, archive-av1)")
+                   help="Predefined preset — see PRESETS dict in sidecar.py for the full list "
+                        "(web-1080p, email-10mb, archive-av1, prores-422-{proxy,lt,hq}, prores-4444, "
+                        "dnxhr-{sq,hq,hqx,444}, archive-ffv1).")
     p.add_argument("--target-mb", type=float, help="Target file size in megabytes")
     p.add_argument("--crf", type=int, help="Constant Rate Factor (quality-targeted)")
-    p.add_argument("--codec", help="Video codec (libx264, libx265, libvpx-vp9, libsvtav1)")
+    p.add_argument("--codec",
+                   help="Video codec. Lossy: libx264, libx265, libvpx-vp9, libsvtav1. "
+                        "Intermediate: prores_ks, dnxhd. Archival: ffv1.")
     p.add_argument("--ffmpeg-preset", help="FFmpeg encoder preset (ultrafast..veryslow)")
     p.add_argument("--resolution", help="Target height (Original, 1080p, 720p, 480p)")
-    p.add_argument("--audio-codec", help="Audio codec or 'copy' or 'an' (none)")
-    p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps")
+    p.add_argument("--audio-codec",
+                   help="Audio codec, or 'copy' / 'an' (none). For ProRes/DNxHR use pcm_s16le or pcm_s24le; "
+                        "for FFV1 archival use flac.")
+    p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps (ignored for PCM/FLAC)")
     p.add_argument("--hwaccel",
                    choices=["none", "nvenc", "amf", "qsv", "d3d12"],
                    default="none",
-                   help="Hardware video encoder to use (default: none / software)")
+                   help="Hardware video encoder to use (default: none / software). "
+                        "d3d12 enables h264_d3d12va / hevc_d3d12va / av1_d3d12va.")
+    p.add_argument("--prores-profile", type=int, default=None,
+                   help="ProRes profile when --codec=prores_ks: 0=Proxy / 1=LT / 2=SQ / 3=HQ / 4=4444 / 5=4444 XQ.")
+    p.add_argument("--dnxhd-profile", default=None,
+                   help="DNxHR profile when --codec=dnxhd: dnxhr_sq / dnxhr_hq / dnxhr_hqx / dnxhr_444.")
     return p
 
 

@@ -68,6 +68,8 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #14 JumpList Integration — taskbar/Start menu quick-launch shortcuts to Converter / Compressor / Editor / Downloader / Recorder / Toolbox; activation via `--route <key>` parsed in `MainWindow_Activated`.
 - ✓ #17 VAD Pre-Filter for Whisper STT — already shipped as part of #12 (`VadCheck` toggle in SpeechToTextPage; `--vad` flag passed to whisper-cpp sidecar).
 - ✓ #54 Light + system-following theme — `<ResourceDictionary.ThemeDictionaries>` with Catppuccin Latte-inspired Light variant; SolidColorBrushes switched to `{ThemeResource}` so existing pages get live theme switching with zero per-page edits.
+- ✓ #19 + #31 ProRes / DNxHR / FFV1 — 9 new VideoCrush presets (ProRes 4 tiers + 4444; DNxHR SQ/HQ/HQX/444; FFV1 archival). Sidecar bypasses CRF/two-pass for intermediate codecs; CompressorPage gained "Professional / archival" sub-combo.
+- ✓ #20 D3D12 Hardware Encode — verified shipped in v2.2 (h264/hevc/av1_d3d12va selectable as the `d3d12` accelerator).
 
 ---
 
@@ -180,11 +182,11 @@ Screen recorder is full-screen-only today. (a) Region capture: `gdigrab -offset_
 
 ### Encoder Improvements
 
-#### 19. ProRes / DNxHR Export Presets
-HandBrake 1.11 and FFmpeg 8.1 both added ProRes and DNxHR (Avid) encoders. Add professional-tier presets to VideoCrush and the native Converter: ProRes 422, ProRes 4444, DNxHR HQ, DNxHR SQ. Target audience: video editors who need intermediate codecs for NLE handoff. **Impact 3 / Effort 2.** [R-1, S-3]
+#### 19. ProRes / DNxHR Export Presets ✓ Shipped v2.4
+HandBrake 1.11 and FFmpeg 8.1 both added ProRes and DNxHR (Avid) encoders. Add professional-tier presets to VideoCrush and the native Converter: ProRes 422, ProRes 4444, DNxHR HQ, DNxHR SQ. Target audience: video editors who need intermediate codecs for NLE handoff. **Impact 3 / Effort 2.** [R-1, S-3] Shipped: 9 new VideoCrush presets — ProRes 422 (Proxy / LT / SQ / HQ) + ProRes 4444 + DNxHR (SQ / HQ / HQX / 444). Sidecar bypasses CRF/two-pass for `prores_ks` / `dnxhd` codecs and routes through a profile-driven encode path with correct pixel formats per profile. CompressorPage gained a "Professional / archival ▾" radio + sub-combo exposing all presets. CLI `--prores-profile` and `--dnxhd-profile` flags added.
 
-#### 20. D3D12 Hardware Encode (H.264 + AV1)
-FFmpeg 8.1 added `h264_d3d12va` and `av1_d3d12va` encoders alongside the existing `hevc_d3d12va`. VideoCrush already uses D3D12 for GPU-accelerated resize (`scale_d3d12`). Expose D3D12 encode as a selectable hardware accelerator alongside NVENC/AMF/QSV. Also surfaces AMD VCN AV1 10-bit encode option from HandBrake 1.11. **Impact 3 / Effort 2.** [S-3, R-1]
+#### 20. D3D12 Hardware Encode (H.264 + AV1) ✓ Shipped v2.4 (with #2.2)
+FFmpeg 8.1 added `h264_d3d12va` and `av1_d3d12va` encoders alongside the existing `hevc_d3d12va`. VideoCrush already uses D3D12 for GPU-accelerated resize (`scale_d3d12`). Expose D3D12 encode as a selectable hardware accelerator alongside NVENC/AMF/QSV. Also surfaces AMD VCN AV1 10-bit encode option from HandBrake 1.11. **Impact 3 / Effort 2.** [S-3, R-1] Verified shipped already in v2.2.0 — VideoCrush sidecar's `_HW_ENCODER` map at `tools/videocrush/sidecar.py:109-114` includes the `d3d12` accelerator with `h264_d3d12va` / `hevc_d3d12va` / `av1_d3d12va`; CompressorPage HW combo at line 230 has the "D3D12 (Windows)" item.
 
 ### Editor & Toolbox
 
@@ -222,8 +224,8 @@ VMAF comparison workspace in Format Inspector: reference + distorted → per-fra
 #### 30. JPEG XL Encode/Decode
 Surface JPEG XL as a conversion target in the native Converter with a quality slider (via `libjxl`, planned UCX dependency). Shutter Encoder ships this as a named output option. **Impact 3 / Effort 1.** [R-11]
 
-#### 31. FFV1 Archival Codec Preset
-Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, checksummed. FFmpeg 8.1 shipped Vulkan FFV1 encode/decode. **Impact 3 / Effort 1.** [R-11, S-3]
+#### 31. FFV1 Archival Codec Preset ✓ Shipped v2.4
+Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, checksummed. FFmpeg 8.1 shipped Vulkan FFV1 encode/decode. **Impact 3 / Effort 1.** [R-11, S-3] Shipped via the new `archive-ffv1` preset in `tools/videocrush/sidecar.py` PRESETS dict — uses `-c:v ffv1 -level 3 -coder 1 -context 1 -g 1 -slices 24 -slicecrc 1` (slice-CRC checksums) with FLAC audio. Sidecar warns if the user asked for a non-MKV container. CompressorPage's Professional sub-combo lists "FFV1 + FLAC archival (lossless, MKV)" as a selectable preset.
 
 ### Accessibility
 
