@@ -112,7 +112,9 @@ def resolve_stems(stems_arg: str, model: str) -> list[str]:
         return ["vocals"]
     if stems_arg == "accompaniment":
         return ["no_vocals"]
-    # Default: all stems for the model
+    if stems_arg == "6stem":
+        return ["vocals", "drums", "bass", "guitar", "piano", "other"]
+    # 4stem or default: all stems for the model
     if "6s" in model:
         return ["vocals", "drums", "bass", "guitar", "piano", "other"]
     return ["vocals", "drums", "bass", "other"]

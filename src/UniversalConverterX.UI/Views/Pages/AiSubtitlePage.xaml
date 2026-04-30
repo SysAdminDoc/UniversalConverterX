@@ -8,159 +8,170 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="32" Spacing="20">
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <!-- Header -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="AI Subtitle &amp; Translation" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Generate, edit, translate, burn, or export SRT/VTT/ASS captions using Whisper speech recognition."
-                           Style="{StaticResource SubtitleTextStyle}"/>
+                <TextBlock Text="Auto Subtitle" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Whisper transcription → SRT/VTT subtitle file. Optional burn-in produces a video with hard-coded captions."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
             </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Browse File"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Browse_Click"/>
+                <Button x:Name="RunButton"
+                        Content="Generate"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Run_Click"
+                        IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
 
-            <!-- Dev status banner -->
-            <Border Style="{StaticResource CardStyle}">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xED1E;" FontSize="22"
-                                  Foreground="{StaticResource AccentGreenBrush}"/>
-                    </Border>
-                    <StackPanel Grid.Column="1" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource TextInverseBrush}"/>
-                            </Border>
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="Engine: Whisper" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentGreenBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="AI Subtitle &amp; Translation is not available yet."
-                                   Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Required before enabling: Whisper pipeline, subtitle editor, preview, export path, cancellation, and failure recovery."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Input area -->
-            <Border Style="{StaticResource CardStyle}"
-                    MinHeight="160"
-                    AllowDrop="False"
-                    Opacity="0.72"
+            <Border Grid.Column="0"
+                    Style="{StaticResource CardStyle}"
+                    CornerRadius="22"
+                    Padding="24"
+                    AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <Border Width="72" Height="72" CornerRadius="18"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xED1E;" FontSize="32"
-                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14"
+                            MinHeight="430">
+                    <Border Width="116" Height="116" CornerRadius="28"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xED1E;" FontSize="48"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Input is disabled until this workflow is ready."
-                               Style="{StaticResource BodyTextStyle}"
-                               HorizontalAlignment="Center"/>
-                    <Button Content="Browse Files"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            IsEnabled="False"
-                            HorizontalAlignment="Center"
-                            Click="Browse_Click"/>
+                               Text="Drop a video or audio file here"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               MaxWidth="460"/>
+                    <TextBlock x:Name="ProgressLabel"
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               MaxWidth="460"/>
+                    <ProgressBar x:Name="ProgressBar"
+                                 Width="380" Height="6" CornerRadius="3"
+                                 Minimum="0" Maximum="100"
+                                 Visibility="Collapsed"/>
+                    <Button Content="Browse File"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="Browse_Click"
+                            HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
 
-            <!-- Settings panel -->
-            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Recognition" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Source Language" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="Auto-detect" IsSelected="True"/>
-                                <ComboBoxItem Content="English"/>
-                                <ComboBoxItem Content="Spanish"/>
-                                <ComboBoxItem Content="French"/>
-                                <ComboBoxItem Content="German"/>
-                                <ComboBoxItem Content="Japanese"/>
-                                <ComboBoxItem Content="Korean"/>
-                                <ComboBoxItem Content="Chinese (Simplified)"/>
-                                <ComboBoxItem Content="Portuguese"/>
-                                <ComboBoxItem Content="Italian"/>
-                                <ComboBoxItem Content="Russian"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Whisper Model" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="medium (balanced)" IsSelected="True"/>
-                                <ComboBoxItem Content="small (fast)"/>
-                                <ComboBoxItem Content="large-v3 (accurate)"/>
-                                <ComboBoxItem Content="tiny (fastest)"/>
-                            </ComboBox>
-                        </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="BackendCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Settings_Changed">
+                            <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt"/>
+                            <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · binary)" Tag="whisper-cpp"/>
+                        </ComboBox>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Model + Language" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="ModelCombo"
+                                  Header="Model"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="1"
+                                  SelectionChanged="Settings_Changed">
+                            <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
+                            <ComboBoxItem Content="base" Tag="base"/>
+                            <ComboBoxItem Content="small" Tag="small"/>
+                            <ComboBoxItem Content="medium" Tag="medium"/>
+                            <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
+                        </ComboBox>
+                        <ComboBox x:Name="LanguageCombo"
+                                  Header="Language"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Settings_Changed">
+                            <ComboBoxItem Content="Auto-detect" Tag="auto"/>
+                            <ComboBoxItem Content="English" Tag="en"/>
+                            <ComboBoxItem Content="Spanish" Tag="es"/>
+                            <ComboBoxItem Content="French" Tag="fr"/>
+                            <ComboBoxItem Content="German" Tag="de"/>
+                            <ComboBoxItem Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem Content="Italian" Tag="it"/>
+                            <ComboBoxItem Content="Russian" Tag="ru"/>
+                            <ComboBoxItem Content="Korean" Tag="ko"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="SRT (SubRip)" IsSelected="True"/>
-                                <ComboBoxItem Content="VTT (WebVTT)"/>
-                                <ComboBoxItem Content="ASS (Advanced SubStation)"/>
-                                <ComboBoxItem Content="Burn-in (hard subtitles)"/>
-                                <ComboBoxItem Content="All formats"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Translate To" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="No translation" IsSelected="True"/>
-                                <ComboBoxItem Content="English"/>
-                                <ComboBoxItem Content="Spanish"/>
-                                <ComboBoxItem Content="French"/>
-                                <ComboBoxItem Content="German"/>
-                                <ComboBoxItem Content="Japanese"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <ToggleSwitch Header="Word-level timestamps"
-                                      OffContent="Off" OnContent="On"/>
+                        <ComboBox x:Name="FormatCombo"
+                                  Header="Subtitle format"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Settings_Changed">
+                            <ComboBoxItem Content="SubRip (.srt)" Tag="srt"/>
+                            <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
+                        </ComboBox>
+                        <CheckBox x:Name="BurnInCheck"
+                                  Content="Also burn subtitles into a copy of the video"
+                                  Checked="Settings_Bool_Changed"
+                                  Unchecked="Settings_Bool_Changed"/>
+                        <TextBlock Text="Burn-in re-encodes the video with hard-coded captions. The original .srt/.vtt is kept alongside."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
-            </Grid>
+            </StackPanel>
+        </Grid>
 
-            <!-- Action bar -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
-                               Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Generate Subtitles"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"/>
-                </Grid>
-            </Border>
-
-        </StackPanel>
-    </ScrollViewer>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1" x:Name="OpenOutputButton" Content="Open Output"
+                    Style="{StaticResource GhostButtonStyle}"
+                    Click="OpenOutput_Click"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"/>
+            <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
+                    Style="{StaticResource DangerButtonStyle}"
+                    Click="Cancel_Click"
+                    IsEnabled="False"/>
+        </Grid>
+    </Grid>
 </Page>
