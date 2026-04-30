@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.VmafAnalysisPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="VMAF Quality Analysis"
+                       Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock Text="Score a distorted (compressed / re-encoded) clip against its high-quality reference. VMAF runs frame-by-frame; results show pooled mean, Netflix-style harmonic mean (more sensitive to worst frames), and the percentage of frames below 70 (visible degradation)."
+                       Style="{StaticResource SubtitleTextStyle}"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
+            <Grid ColumnSpacing="14" RowSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Reference"
+                           Style="{StaticResource LabelTextStyle}"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="ReferenceLabel"
+                           Grid.Column="1"
+                           Style="{StaticResource MutedTextStyle}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           Text="(pick the original master clip)"/>
+                <Button Grid.Column="2"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Content="Browse..."
+                        Click="PickReference_Click"/>
+
+                <TextBlock Grid.Row="1" Text="Distorted"
+                           Style="{StaticResource LabelTextStyle}"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="DistortedLabel"
+                           Grid.Row="1" Grid.Column="1"
+                           Style="{StaticResource MutedTextStyle}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           Text="(pick the compressed clip to evaluate)"/>
+                <Button Grid.Row="1" Grid.Column="2"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Content="Browse..."
+                        Click="PickDistorted_Click"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="VmafProgress"
+                         Minimum="0" Maximum="100"
+                         IsIndeterminate="False"
+                         VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    x:Name="RunButton"
+                    Content="Run VMAF"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Run_Click"
+                    IsEnabled="False"/>
+        </Grid>
+
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20">
+            <Grid RowSpacing="14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="Mean (pooled)" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="StatMean" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="Harmonic mean" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="StatHarmonic" Text="--" Style="{StaticResource TitleTextStyle}"
+                                   FontSize="28" Foreground="{StaticResource AccentBlueBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="3">
+                        <TextBlock Text="Min frame" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="StatMin" Text="--" Style="{StaticResource TitleTextStyle}"
+                                   FontSize="28" Foreground="{StaticResource AccentRedBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Spacing="3">
+                        <TextBlock Text="Frames &lt; 70" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Name="StatBelow70" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
+                    </StackPanel>
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="LogText"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontFamily="Consolas, Cascadia Mono, monospace"
+                               TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="4"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   Text="Pick a reference + distorted clip to start."/>
+    </Grid>
+</Page>
