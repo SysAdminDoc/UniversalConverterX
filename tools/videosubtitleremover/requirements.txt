@@ -6,6 +6,11 @@ numpy>=1.21.0
 opencv-python>=4.5.0
 Pillow>=9.0.0
 
+# Pin ONNX Runtime ≥ 1.25.1 to inherit the heap-OOB / Pad-Reflect / transpose
+# CPU-kernel security patches (15+ CVEs vs 1.25.0). rapidocr-onnxruntime below
+# pulls onnxruntime transitively; this floor forces resolution above 1.25.1.
+onnxruntime>=1.25.1
+
 # AI/ML Frameworks (choose based on your GPU)
 # ------------------------------------------
 
