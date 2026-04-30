@@ -255,6 +255,28 @@
                                      Tag="archive-av1"
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <RadioButton x:Name="PresetPro" Content="Professional / archival ▾"
+                                     GroupName="Preset"
+                                     Tag="__pro__"
+                                     Checked="Preset_Checked"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <ComboBox x:Name="ProPresetCombo"
+                                  Header="Intermediate / archival codec"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="2"
+                                  SelectionChanged="ProPreset_Changed"
+                                  Visibility="Collapsed">
+                            <ComboBoxItem Content="ProRes 422 Proxy (low-res rough cut)" Tag="prores-422-proxy"/>
+                            <ComboBoxItem Content="ProRes 422 LT (offline edit)"        Tag="prores-422-lt"/>
+                            <ComboBoxItem Content="ProRes 422 (online edit)"            Tag="prores-422"/>
+                            <ComboBoxItem Content="ProRes 422 HQ (master / colour grade)" Tag="prores-422-hq"/>
+                            <ComboBoxItem Content="ProRes 4444 (alpha + grading)"       Tag="prores-4444"/>
+                            <ComboBoxItem Content="DNxHR SQ (Avid offline edit)"        Tag="dnxhr-sq"/>
+                            <ComboBoxItem Content="DNxHR HQ (Avid online edit)"         Tag="dnxhr-hq"/>
+                            <ComboBoxItem Content="DNxHR HQX (10-bit master)"           Tag="dnxhr-hqx"/>
+                            <ComboBoxItem Content="DNxHR 444 (4:4:4 grading)"           Tag="dnxhr-444"/>
+                            <ComboBoxItem Content="FFV1 + FLAC archival (lossless, MKV)" Tag="archive-ffv1"/>
+                        </ComboBox>
                     </StackPanel>
                 </Border>
 

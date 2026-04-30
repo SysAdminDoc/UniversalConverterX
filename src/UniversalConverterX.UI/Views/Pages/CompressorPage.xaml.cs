@@ -227,6 +227,18 @@ public sealed partial class CompressorPage : Page
         // IsChecked="True" on PresetWeb fires this during InitializeComponent() before
         // all Connect() cases have run — bail out until the visual tree is complete.
         if (PresetEmail is null) return;
+        // Show the professional sub-combo only when its radio is selected.
+        if (ProPresetCombo is not null)
+            ProPresetCombo.Visibility = PresetPro?.IsChecked == true
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        UpdatePresetSummaries();
+        UpdateStatusText();
+    }
+
+    private void ProPreset_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (StatusText is null) return;
         UpdatePresetSummaries();
         UpdateStatusText();
     }
@@ -439,6 +451,13 @@ public sealed partial class CompressorPage : Page
     {
         if (PresetEmail.IsChecked == true) return "email-10mb";
         if (PresetArchive.IsChecked == true) return "archive-av1";
+        if (PresetPro?.IsChecked == true)
+        {
+            // Professional radio: pick from the sub-combo.
+            if (ProPresetCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+                return tag;
+            return "prores-422-hq";
+        }
         return "web-1080p";
     }
 
