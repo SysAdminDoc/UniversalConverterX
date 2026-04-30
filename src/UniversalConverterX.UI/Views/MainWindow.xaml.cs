@@ -7,6 +7,8 @@ namespace UniversalConverterX.UI.Views;
 
 public sealed partial class MainWindow : Window
 {
+    private bool _isSelectingNavigationItem;
+
     private readonly List<NavSearchSuggestion> _searchSuggestions =
     [
         new("Home", "Dashboard, recent work, and recommended workflows", "home"),
@@ -68,8 +70,13 @@ public sealed partial class MainWindow : Window
     {
         Activated -= MainWindow_Activated;
         // Default landing
-        NavigateTo("home");
-        SelectMenuItem("home");
+        RequestNavigation("home");
+    }
+
+    public void RequestNavigation(string routeKey)
+    {
+        NavigateTo(routeKey);
+        SelectMenuItem(GetNavigationSelectionTag(routeKey));
     }
 
     public void NavigateTo(string routeKey)
@@ -117,7 +124,19 @@ public sealed partial class MainWindow : Window
         {
             if (item is NavigationViewItem nvi && (nvi.Tag as string) == tag)
             {
-                MainNav.SelectedItem = nvi;
+                if (ReferenceEquals(MainNav.SelectedItem, nvi))
+                    return;
+
+                try
+                {
+                    _isSelectingNavigationItem = true;
+                    MainNav.SelectedItem = nvi;
+                }
+                finally
+                {
+                    _isSelectingNavigationItem = false;
+                }
+
                 return;
             }
         }
@@ -125,6 +144,9 @@ public sealed partial class MainWindow : Window
 
     private void MainNav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
+        if (_isSelectingNavigationItem)
+            return;
+
         if (args.IsSettingsSelected)
         {
             OpenSettingsWindow();
@@ -172,7 +194,7 @@ public sealed partial class MainWindow : Window
         if (suggestion.RouteKey == "settings")
             OpenSettingsWindow();
         else
-            NavigateTo(suggestion.RouteKey);
+            RequestNavigation(suggestion.RouteKey);
     }
 
     private void OpenSettingsWindow()
@@ -185,6 +207,24 @@ public sealed partial class MainWindow : Window
 
         _settingsWindow.Activate();
     }
+
+    private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
+    {
+        "format-inspector" or "frame-snapshot" => "toolbox",
+        "ai-bgremove"
+            or "ai-video-enhancer"
+            or "ai-image-enhancer"
+            or "ai-watermark"
+            or "ai-subtitle"
+            or "ai-summarizer"
+            or "ai-noise"
+            or "ai-vocal"
+            or "ai-voice-changer"
+            or "ai-tts"
+            or "ai-stt"
+            or "ai-photo-restore" => "ai-lab",
+        _ => routeKey
+    };
 }
 
 public sealed class NavSearchSuggestion
