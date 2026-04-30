@@ -29,7 +29,8 @@ public interface ISidecarRunner
         IEnumerable<string> args,
         IProgress<SidecarProgress>? progress = null,
         IProgress<SidecarLog>? log = null,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        Action<string, JsonElement>? onRawEvent = null);
 }
 
 public sealed class SidecarRunner : ISidecarRunner
@@ -61,7 +62,8 @@ public sealed class SidecarRunner : ISidecarRunner
         IEnumerable<string> args,
         IProgress<SidecarProgress>? progress = null,
         IProgress<SidecarLog>? log = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        Action<string, JsonElement>? onRawEvent = null)
     {
         var exe = Locate(toolName);
         if (exe is null)
@@ -125,6 +127,10 @@ public sealed class SidecarRunner : ISidecarRunner
                         var root = doc.RootElement;
                         if (!root.TryGetProperty("event", out var ev)) continue;
                         var evName = ev.GetString();
+
+                        // Notify raw event subscriber before processing known events
+                        if (onRawEvent is not null && evName is not null)
+                            onRawEvent(evName, root.Clone());
 
                         switch (evName)
                         {
@@ -226,3 +232,4 @@ public sealed class SidecarRunner : ISidecarRunner
         return null;
     }
 }
+

@@ -185,7 +185,7 @@
                                 <TextBlock Text="Build a recording queue"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Capture desktop sessions as MP4 files. Audio and webcam modes are planned next."
+                                <TextBlock Text="Capture desktop sessions as MP4 files. Select Webcam mode and choose devices from the panel."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
@@ -243,19 +243,47 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ToggleButton Grid.Column="0"
+                            <ToggleButton x:Name="ScreenToggle"
+                                          Grid.Column="0"
                                           Content="Screen"
                                           IsChecked="True"
-                                          IsEnabled="False"
-                                          Padding="16,10"/>
-                            <ToggleButton Grid.Column="1"
+                                          Padding="16,10"
+                                          Click="SourceToggle_Click"
+                                          HorizontalAlignment="Stretch"/>
+                            <ToggleButton x:Name="WebcamToggle"
+                                          Grid.Column="1"
                                           Content="Webcam"
-                                          IsEnabled="False"
-                                          Padding="16,10"/>
+                                          IsChecked="False"
+                                          Padding="16,10"
+                                          Click="SourceToggle_Click"
+                                          HorizontalAlignment="Stretch"/>
                         </Grid>
-                        <TextBlock Text="Screen capture is active. Webcam, microphone, and system audio need device enumeration and are tracked for the next pass."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
+
+                        <!-- Webcam device (visible when Webcam mode active) -->
+                        <StackPanel x:Name="WebcamDevicePanel"
+                                    Visibility="Collapsed"
+                                    Spacing="6">
+                            <TextBlock Text="Webcam device" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="WebcamDeviceCombo"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Loading devices..."
+                                      SelectionChanged="Option_Changed"/>
+                        </StackPanel>
+
+                        <!-- Microphone section (always visible) -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Microphone (optional)" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="AudioDeviceCombo"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Loading devices..."
+                                      SelectionChanged="Option_Changed"/>
+                        </StackPanel>
+
+                        <Button x:Name="RefreshDevicesButton"
+                                Content="Refresh Devices"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                Click="RefreshDevices_Click"/>
                     </StackPanel>
                 </Border>
 

@@ -1,9 +1,9 @@
-"""RecordCast sidecar - NDJSON screen recorder for the UCX Recorder module.
+"""RecordCast sidecar - NDJSON screen/webcam recorder for the UCX Recorder module.
 
-Initial scope is intentionally narrow: Windows desktop capture via FFmpeg
-gdigrab with fixed-duration sessions. Webcam and audio capture require device
-enumeration and consent flows and are kept out of this shim until the UI can
-surface those choices safely.
+Supports:
+  - Screen capture (gdigrab) with optional microphone audio (dshow)
+  - Webcam-only capture (dshow video + audio)
+  - Device enumeration via 'list-devices' subcommand
 """
 from __future__ import annotations
 
@@ -42,9 +42,11 @@ def find_ffmpeg() -> str | None:
 
 
 _TIME_RE = re.compile(r"out_time_ms=(\d+)")
+_DSHOW_DEVICE_RE = re.compile(r'^\[dshow[^\]]*\]\s+"(.+)"')
+_DSHOW_TYPE_RE = re.compile(r"DirectShow (video|audio) devices")
 
 
-def run_ffmpeg(cmd: list[str], duration_sec: int) -> int:
+def run_ffmpeg(cmd: list[str], duration_sec: int, stage: str = "recording") -> int:
     proc = subprocess.Popen(
         cmd + ["-progress", "pipe:1", "-nostats"],
         stdout=subprocess.PIPE,
@@ -60,7 +62,6 @@ def run_ffmpeg(cmd: list[str], duration_sec: int) -> int:
             line = line.strip()
             if not line:
                 continue
-
             match = _TIME_RE.search(line)
             if match and duration_sec > 0:
                 current = int(match.group(1)) / 1_000_000
@@ -73,7 +74,7 @@ def run_ffmpeg(cmd: list[str], duration_sec: int) -> int:
                     emit(
                         "progress",
                         percent=round(pct, 1),
-                        stage="recording screen",
+                        stage=stage,
                         eta_seconds=int(eta) if eta and eta < 86400 else None,
                     )
             elif line.startswith("progress=end"):
@@ -84,6 +85,38 @@ def run_ffmpeg(cmd: list[str], duration_sec: int) -> int:
             for ln in proc.stderr.read().splitlines()[-20:]:
                 emit("log", level="error", message=ln)
     return proc.returncode
+
+
+def op_list_devices(args: argparse.Namespace) -> int:
+    """Enumerate DirectShow video and audio devices via FFmpeg and emit them as NDJSON."""
+    ffmpeg = find_ffmpeg()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+
+    proc = subprocess.run(
+        [ffmpeg, "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
+        capture_output=True,
+        text=True,
+    )
+
+    # FFmpeg prints device list on stderr
+    output = proc.stderr + proc.stdout
+    current_type: str | None = None
+    found = 0
+    for line in output.splitlines():
+        type_match = _DSHOW_TYPE_RE.search(line)
+        if type_match:
+            current_type = type_match.group(1)
+            continue
+        if current_type:
+            device_match = _DSHOW_DEVICE_RE.search(line)
+            if device_match:
+                name = device_match.group(1)
+                emit("device", type=current_type, name=name)
+                found += 1
+
+    emit("complete", device_count=found)
+    return 0
 
 
 def op_record(args: argparse.Namespace) -> int:
@@ -97,35 +130,59 @@ def op_record(args: argparse.Namespace) -> int:
     duration = max(1, min(args.duration, 21_600))
     framerate = max(5, min(args.framerate, 120))
     crf = max(0, min(args.crf, 51))
+    source = (args.source or "screen").lower()
+    webcam = args.webcam or None
+    audio = args.audio or None
 
-    emit("log", level="info", message=f"Recording desktop for {duration}s at {framerate} fps")
+    if source == "webcam" and not webcam:
+        return fail("missing_webcam", "--webcam <device name> is required when --source webcam")
+
+    emit("log", level="info",
+         message=f"Recording ({source}) for {duration}s at {framerate} fps")
     emit("progress", percent=0, stage="starting capture", eta_seconds=duration)
 
-    cmd = [
-        ffmpeg,
-        "-y",
-        "-f",
-        "gdigrab",
-        "-framerate",
-        str(framerate),
-        "-i",
-        "desktop",
-        "-t",
-        str(duration),
-        "-c:v",
-        "libx264",
-        "-preset",
-        args.preset,
-        "-crf",
-        str(crf),
-        "-pix_fmt",
-        "yuv420p",
-        "-movflags",
-        "+faststart",
-        str(output),
-    ]
+    cmd: list[str] = [ffmpeg, "-y"]
 
-    rc = run_ffmpeg(cmd, duration)
+    if source == "screen":
+        # gdigrab desktop + optional dshow microphone
+        cmd += ["-f", "gdigrab", "-framerate", str(framerate), "-i", "desktop"]
+        if audio:
+            cmd += ["-f", "dshow", "-i", f"audio={audio}"]
+        cmd += [
+            "-t", str(duration),
+            "-c:v", "libx264",
+            "-preset", args.preset,
+            "-crf", str(crf),
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+        ]
+        if audio:
+            cmd += ["-c:a", "aac", "-b:a", "192k"]
+        stage = "recording screen"
+
+    elif source == "webcam":
+        # dshow webcam video + optional dshow microphone
+        cmd += ["-f", "dshow", "-framerate", str(framerate), "-i", f"video={webcam}"]
+        if audio:
+            cmd += ["-f", "dshow", "-i", f"audio={audio}"]
+        cmd += [
+            "-t", str(duration),
+            "-c:v", "libx264",
+            "-preset", args.preset,
+            "-crf", str(crf),
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+        ]
+        if audio:
+            cmd += ["-c:a", "aac", "-b:a", "192k"]
+        stage = "recording webcam"
+
+    else:
+        return fail("invalid_source", f"Unknown source: {source}. Use screen or webcam.")
+
+    cmd.append(str(output))
+
+    rc = run_ffmpeg(cmd, duration, stage=stage)
     if rc != 0:
         return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
     if not output.is_file():
@@ -138,16 +195,26 @@ def op_record(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="recordcast-sidecar",
-        description="UCX RecordCast sidecar - fixed-duration Windows screen capture.",
+        description="UCX RecordCast sidecar — Windows screen/webcam capture.",
     )
     sub = parser.add_subparsers(dest="op", required=True)
 
-    record = sub.add_parser("record", help="Record the Windows desktop")
+    # list-devices
+    sub.add_parser("list-devices", help="Enumerate DirectShow video and audio devices")
+
+    # record
+    record = sub.add_parser("record", help="Record screen or webcam")
     record.add_argument("--output", required=True)
     record.add_argument("--duration", type=int, required=True, help="Duration in seconds")
     record.add_argument("--framerate", type=int, default=30)
     record.add_argument("--crf", type=int, default=20)
     record.add_argument("--preset", default="veryfast")
+    record.add_argument("--source", default="screen", choices=["screen", "webcam"],
+                        help="Capture source: screen (gdigrab) or webcam (dshow)")
+    record.add_argument("--webcam", default=None, metavar="DEVICE",
+                        help="DirectShow webcam device name (required when --source webcam)")
+    record.add_argument("--audio", default=None, metavar="DEVICE",
+                        help="DirectShow audio device name for microphone capture")
     return parser
 
 
@@ -156,6 +223,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "record":
             return op_record(args)
+        if args.op == "list-devices":
+            return op_list_devices(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")
