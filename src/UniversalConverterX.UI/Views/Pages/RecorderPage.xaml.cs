@@ -2,9 +2,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.UI.Services;
 using Windows.Storage.Pickers;
@@ -19,6 +21,9 @@ public sealed partial class RecorderPage : Page
     private readonly string _defaultOutputDirectory;
     private string _outputDirectory;
     private CancellationTokenSource? _cts;
+    private bool _useWebcam;
+    private string? _selectedWebcam;
+    private string? _selectedAudio;
 
     public RecorderPage()
     {
@@ -35,6 +40,7 @@ public sealed partial class RecorderPage : Page
         FinishedList.ItemsSource = _finished;
         OutputDirectoryBox.Text = _outputDirectory;
         UpdateUi();
+        _ = LoadDevicesAsync();
     }
 
     private async void BrowseOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -56,6 +62,83 @@ public sealed partial class RecorderPage : Page
         Directory.CreateDirectory(_outputDirectory);
         OutputDirectoryBox.Text = _outputDirectory;
         UpdateUi();
+    }
+
+    private void SourceToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleButton tb)
+        {
+            _useWebcam = tb == WebcamToggle;
+            ScreenToggle.IsChecked = !_useWebcam;
+            WebcamToggle.IsChecked = _useWebcam;
+            WebcamDevicePanel.Visibility = _useWebcam ? Visibility.Visible : Visibility.Collapsed;
+            UpdateUi();
+        }
+    }
+
+    private async void RefreshDevices_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshDevicesButton.IsEnabled = false;
+        await LoadDevicesAsync();
+        RefreshDevicesButton.IsEnabled = true;
+    }
+
+    private async Task LoadDevicesAsync()
+    {
+        var videoDevices = new List<string>();
+        var audioDevices = new List<string>();
+
+        var progress = new Progress<SidecarProgress>(_ => { });
+        var logHandler = new Progress<SidecarLog>(_ => { });
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        try
+        {
+            await _runner.RunAsync(
+                "recordcast",
+                ["list-devices"],
+                progress,
+                logHandler,
+                cts.Token,
+                onRawEvent: (evName, data) =>
+                {
+                    if (evName != "device") return;
+                    var type = data.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
+                    var name = data.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                    if (type == "video" && name.Length > 0)
+                        videoDevices.Add(name);
+                    else if (type == "audio" && name.Length > 0)
+                        audioDevices.Add(name);
+                });
+        }
+        catch (OperationCanceledException)
+        {
+            // Timeout — proceed with empty lists
+        }
+        catch (Exception)
+        {
+            // Device enumeration is best-effort
+        }
+
+        DispatcherQueue.TryEnqueue(() => PopulateDeviceComboBoxes(videoDevices, audioDevices));
+    }
+
+    private void PopulateDeviceComboBoxes(List<string> videoDevices, List<string> audioDevices)
+    {
+        WebcamDeviceCombo.Items.Clear();
+        foreach (var dev in videoDevices)
+            WebcamDeviceCombo.Items.Add(new ComboBoxItem { Content = dev, Tag = dev });
+        if (videoDevices.Count > 0)
+            WebcamDeviceCombo.SelectedIndex = 0;
+
+        AudioDeviceCombo.Items.Clear();
+        AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = "None (no microphone)", Tag = "" });
+        foreach (var dev in audioDevices)
+            AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = dev, Tag = dev });
+        AudioDeviceCombo.SelectedIndex = 0;
+
+        _selectedWebcam = videoDevices.Count > 0 ? videoDevices[0] : null;
+        _selectedAudio = null;
     }
 
     private void AddSession_Click(object sender, RoutedEventArgs e)
@@ -106,6 +189,13 @@ public sealed partial class RecorderPage : Page
     private void Option_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (QueueSummaryText is null) return;
+
+        // Track selected webcam/audio device names
+        if (ReferenceEquals(sender, WebcamDeviceCombo) && WebcamDeviceCombo.SelectedItem is ComboBoxItem wci)
+            _selectedWebcam = wci.Tag as string;
+        if (ReferenceEquals(sender, AudioDeviceCombo) && AudioDeviceCombo.SelectedItem is ComboBoxItem aci)
+            _selectedAudio = (aci.Tag as string)?.Length > 0 ? aci.Tag as string : null;
+
         UpdateUi();
     }
 
@@ -215,7 +305,9 @@ public sealed partial class RecorderPage : Page
         var frameRate = SelectedInt(FrameRateCombo, 30);
         var crf = SelectedInt(QualityCombo, 20);
         var now = DateTime.Now;
-        var title = $"Screen recording {now:HH-mm-ss}";
+        var source = _useWebcam ? "webcam" : "screen";
+        var audioLabel = _selectedAudio is not null ? " + mic" : "";
+        var title = $"{(char.ToUpperInvariant(source[0]) + source[1..])}{audioLabel} recording {now:HH-mm-ss}";
 
         return new RecordingJobItem
         {
@@ -224,23 +316,43 @@ public sealed partial class RecorderPage : Page
             DurationSeconds = duration,
             FrameRate = frameRate,
             Crf = crf,
+            Source = source,
+            WebcamDevice = _useWebcam ? _selectedWebcam : null,
+            AudioDevice = _selectedAudio,
             EncoderPreset = "veryfast",
             PresetSummary = $"{FormatDuration(duration)} - {frameRate} fps",
-            Details = $"Desktop capture, MP4 H.264, CRF {crf}",
+            Details = $"{(char.ToUpperInvariant(source[0]) + source[1..])} capture, MP4 H.264, CRF {crf}{audioLabel}",
             StatusText = "Queued",
         };
     }
 
     private List<string> BuildArgs(RecordingJobItem job, string outputPath)
-        =>
-        [
+    {
+        var args = new List<string>
+        {
             "record",
             "--output", outputPath,
             "--duration", job.DurationSeconds.ToString(),
             "--framerate", job.FrameRate.ToString(),
             "--crf", job.Crf.ToString(),
             "--preset", job.EncoderPreset,
-        ];
+            "--source", job.Source,
+        };
+
+        if (job.Source == "webcam" && job.WebcamDevice is not null)
+        {
+            args.Add("--webcam");
+            args.Add(job.WebcamDevice);
+        }
+
+        if (job.AudioDevice is not null)
+        {
+            args.Add("--audio");
+            args.Add(job.AudioDevice);
+        }
+
+        return args;
+    }
 
     private string BuildOutputPath(RecordingJobItem job)
     {
@@ -390,6 +502,9 @@ public sealed class RecordingJobItem : INotifyPropertyChanged
     public string EncoderPreset { get; set; } = "veryfast";
     public string PresetSummary { get; set; } = "";
     public string Details { get; set; } = "";
+    public string Source { get; set; } = "screen";
+    public string? WebcamDevice { get; set; }
+    public string? AudioDevice { get; set; }
 
     public double Progress
     {
