@@ -46,6 +46,16 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 
 ---
 
+## v2.4.0 Shipped ✓ (in progress)
+
+- ✓ Sidecar bootstraps hardened against PyInstaller fork-bomb (frozen guard in demucs/whisper-stt/lipsight)
+- ✓ #48 Stop tracking `obj/` — already in `.gitignore`; one-time `git rm -r --cached`
+- ✓ #49 Sidecar NDJSON contract conformance test (`tests/sidecar_contract/check_contract.py`) — frozen-guard, error-code-field, known-events checks
+- ✓ #50 Unified `tools/build-all.ps1` orchestrator with build report (`artifacts/build-reports/build-report.{json,md}`)
+- ✓ #51 SidecarRunner no-progress watchdog — `stuck_sidecar` error code after `silenceTimeout` (default 10 min)
+
+---
+
 ## NOW (v2.4)
 
 ### Security / Dependency Pins
@@ -94,17 +104,17 @@ Current Whisper sidecar uses faster-whisper (Python/CUDA). Add secondary path: w
 
 ### Repo & CI Hygiene
 
-#### 48. Drop tracked `obj/` from git
-`.gitignore` lists `obj/` and `bin/` but the directories are still tracked from before the rule was added. v2.3.0's release commit alone added ~16k lines of build-artifact churn (`project.assets.json` etc.). One-time fix: `git rm -r --cached **/obj **/bin`, then commit. Prevents every release from polluting diffs and review. **Impact 3 / Effort 1.**
+#### 48. Drop tracked `obj/` from git ✓ Shipped v2.4
+`.gitignore` lists `obj/` and `bin/` but the directories are still tracked from before the rule was added. v2.3.0's release commit alone added ~16k lines of build-artifact churn (`project.assets.json` etc.). One-time fix: `git rm -r --cached **/obj **/bin`, then commit. Prevents every release from polluting diffs and review. **Impact 3 / Effort 1.** Shipped via `git rm -r --cached` over 31 tracked files.
 
-#### 49. Sidecar contract conformance test (CI gate)
-The v2.3 wave shipped a regression class: lipsight bootstrapped without a `getattr(sys, 'frozen', False)` short-circuit (PyInstaller fork-bomb risk) and emitted `error` events with no `code` field (every failure showed as `"unknown"` in the UI). Add a Python unit test under `tests/sidecar_contract/` that grep-validates every `tools/*/sidecar.py` for: (a) frozen-guard before any `pip install` invocation, (b) `code` field on every emitted `error` event, (c) NDJSON event names match the documented set. Wire to GitHub Actions PR check. Sub-task of existing #46. **Impact 4 / Effort 1.**
+#### 49. Sidecar contract conformance test (CI gate) ✓ Shipped v2.4
+The v2.3 wave shipped a regression class: lipsight bootstrapped without a `getattr(sys, 'frozen', False)` short-circuit (PyInstaller fork-bomb risk) and emitted `error` events with no `code` field (every failure showed as `"unknown"` in the UI). Add a Python unit test under `tests/sidecar_contract/` that grep-validates every `tools/*/sidecar.py` for: (a) frozen-guard before any `pip install` invocation, (b) `code` field on every emitted `error` event, (c) NDJSON event names match the documented set. Wire to GitHub Actions PR check. Sub-task of existing #46. **Impact 4 / Effort 1.** Shipped as [`tests/sidecar_contract/check_contract.py`](tests/sidecar_contract/check_contract.py) — AST-walking, no pytest dependency, runs from `tools/build-all.ps1` (#50) before any build.
 
-#### 50. Unified `tools/build-all.ps1` orchestrator
-Each sidecar has its own `build.ps1`; v2.4 ships 4 new frozen sidecars (demucs, whisper-stt, lipsight, GFPGAN, edge-tts, RNNoise once added) with no single entry point. Build a top-level `tools/build-all.ps1 [-Tools demucs,whisper-stt] [-Clean] [-Parallel]` that fans out across `tools/*/build.ps1`, gathers exit codes, and writes a build report. CI artifact upload becomes one step instead of N. **Impact 3 / Effort 1.**
+#### 50. Unified `tools/build-all.ps1` orchestrator ✓ Shipped v2.4
+Each sidecar has its own `build.ps1`; v2.4 ships 4 new frozen sidecars (demucs, whisper-stt, lipsight, GFPGAN, edge-tts, RNNoise once added) with no single entry point. Build a top-level `tools/build-all.ps1 [-Tools demucs,whisper-stt] [-Clean] [-Parallel]` that fans out across `tools/*/build.ps1`, gathers exit codes, and writes a build report. CI artifact upload becomes one step instead of N. **Impact 3 / Effort 1.** Shipped at [`tools/build-all.ps1`](tools/build-all.ps1) with `-Tools`, `-Clean`, `-SkipContract`, `-Parallel` switches and JSON+Markdown build reports under `artifacts/build-reports/`.
 
-#### 51. SidecarRunner no-progress watchdog
-`SidecarRunner.RunAsync` honors cancellation tokens but has no defense against silent hangs — a sidecar that emits no `progress`/`log`/`stem`/`segment` events for N minutes (configurable, default 600 s) sits forever. Add a watchdog timer that resets on every NDJSON event; when it fires, log a stuck-process warning and call `process.Kill(entireProcessTree: true)`. Pattern reference: NVMe Patcher's `EventLogWatcher` push model in [`win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs`](../win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs). **Impact 4 / Effort 2.** [internal-nvme]
+#### 51. SidecarRunner no-progress watchdog ✓ Shipped v2.4
+`SidecarRunner.RunAsync` honors cancellation tokens but has no defense against silent hangs — a sidecar that emits no `progress`/`log`/`stem`/`segment` events for N minutes (configurable, default 600 s) sits forever. Add a watchdog timer that resets on every NDJSON event; when it fires, log a stuck-process warning and call `process.Kill(entireProcessTree: true)`. Pattern reference: NVMe Patcher's `EventLogWatcher` push model in [`win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs`](../win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs). **Impact 4 / Effort 2.** [internal-nvme] Shipped via linked CTS in `SidecarRunner.RunAsync` — distinct `stuck_sidecar` error code, opt-in `silenceTimeout` parameter for sidecars that legitimately run quietly during model load / network upload.
 
 ---
 
