@@ -46,6 +46,7 @@ KNOWN_EVENTS = {
     "vmaf",          # clipforge.vmaf — per-frame VMAF scores
     "vmaf_summary",  # clipforge.vmaf — pooled mean / harmonic / min / pct<70
     "scene",         # scenedetect — detected scene cut (start/end timecodes)
+    "thumb",         # clipforge.timeline — generated thumbnail in the strip
 }
 
 
