@@ -58,7 +58,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("subtitle-remover", "Subtitle Remover", "Remove hard-coded subtitles from selected regions", "\uE93B", blue, "Planned", orange, true, "VideoSubtitleRemover"));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Subtitle Editor", "Create and edit SRT/VTT/ASS subtitles", "\uED1E", blue, "Future", yellow, false, null));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Caption Generator", "Auto-generate captions with Whisper", "\uE8D2", blue, "Future", yellow, true, null));
-        AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Future", yellow, true, null));
+        AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Ready", blue, true, "Demucs"));
         AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "AI voice transformation", "\uE720", red, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-tts", "Text-to-Speech", "Generate voiceovers from text", "\uEC4F", green, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-stt", "Speech-to-Text", "Transcribe audio to text", "\uE720", green, "Future", yellow, true, null));
