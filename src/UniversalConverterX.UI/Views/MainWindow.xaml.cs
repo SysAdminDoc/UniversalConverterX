@@ -13,7 +13,7 @@ public sealed partial class MainWindow : Window
         new("Converter", "Batch convert video, audio, image, document, and archive formats", "converter"),
         new("AI Lab", "Video enhancer, subtitles, noise removal, background tools, and more", "ai-lab"),
         new("Compressor", "Shrink videos for web, email, archive, and social delivery", "compressor"),
-        new("Video Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
+        new("Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
         new("Downloader", "Download video or audio from supported URLs", "downloader"),
         new("Recorder", "Screen recording plus planned webcam and audio capture", "recorder"),
         new("Toolbox", "Specialized creation, enhancement, export, audio, and disc tools", "toolbox"),
