@@ -2,19 +2,17 @@
 
 <!-- Researched and updated 2026-04-30. Sources in Appendix. -->
 
-UniversalConverterX (UCX) v2.2.0 — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
+UniversalConverterX (UCX) v2.3.0 — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
 
 ---
 
-## Current State (v2.2.0)
+## Current State (v2.3.0)
 
-**Wired end-to-end:** Native Converter (1000+ formats, magic-byte routing), VideoCrush compressor (CRF + 2-pass, AV1/H.265/H.264, HW accel NVENC/AMF/QSV/D3D12), ClipForge editor (trim, crop, rotate, loudnorm, rewrap), StreamKeep downloader (yt-dlp, 1000+ sites), RecordCast screen recorder, AlphaCut background remover (ONNX, shared model cache), FrameSnap (batch frame extraction), Format Inspector (FFprobe), CLI (`ucx`), Shell Extension (right-click).
+**Wired end-to-end:** Native Converter (1000+ formats, magic-byte routing), VideoCrush compressor (CRF + 2-pass, AV1/H.265/H.264, HW accel NVENC/AMF/QSV/D3D12), ClipForge editor (trim, crop, rotate, loudnorm, rewrap, undo/redo), StreamKeep downloader (yt-dlp, 1000+ sites), RecordCast screen/webcam/mic recorder, AlphaCut background remover (ONNX, shared model cache), FrameSnap (batch frame extraction), Format Inspector (FFprobe), VideoSubtitleRemover (subtitle inpainting), LipSight (visual lip reading), Demucs Vocal Remover (htdemucs_ft, 4-stem), Whisper STT (faster-whisper, all formats + word timestamps), CLI (`ucx`), Shell Extension (right-click).
 
-**Stubbed / placeholder (page exists, no sidecar):** VideoEnhancer, ImageEnhancer, NoiseRemover, PhotoRestoration, WatermarkRemover, VideoSummarizer, VocalRemover, VoiceChanger, SpeechToText, TextToSpeech, AiSubtitle, VideoStabilizer, SmartTrimmer, AutoReframe, AutoCrop, WatermarkEditor, AutoHighlight, IntroOutro, LensCorrection, VRConverter, ImageConverter, GifMaker, ImageUpscaler, AiPortrait, SlideshowMaker, MetadataEditor, AudioCompressor, BatchRename, DVD/CD.
+**Stubbed / placeholder (page exists, no sidecar):** VideoEnhancer, ImageEnhancer, NoiseRemover, PhotoRestoration, VideoSummarizer, VoiceChanger, TextToSpeech, AiSubtitle, VideoStabilizer, SmartTrimmer, AutoReframe, AutoCrop, WatermarkEditor, AutoHighlight, IntroOutro, LensCorrection, VRConverter, ImageConverter, GifMaker, ImageUpscaler, AiPortrait, SlideshowMaker, MetadataEditor, AudioCompressor, BatchRename, DVD/CD.
 
-**Editor gaps (ClipForge):** Upscale and audio filter ops deferred to v2.3.
-
-**Recorder gaps (RecordCast):** Only desktop screen capture; webcam, microphone, system audio deferred.
+**Editor gaps (ClipForge):** Upscale and audio filter ops deferred to v2.4.
 
 ---
 
@@ -22,58 +20,47 @@ UniversalConverterX (UCX) v2.2.0 — WinUI 3 / .NET 8 / Windows-only desktop app
 
 | Tier | Meaning |
 |------|---------|
-| **Now** | v2.2 — either already stubbed and needs sidecar, or security/regression critical |
-| **Next** | v2.3–v2.5 — high-value, scoped, no blocking dependency |
+| **Now** | v2.3 — either already stubbed and needs sidecar, or security/regression critical |
+| **Next** | v2.4–v2.6 — high-value, scoped, no blocking dependency |
 | **Later** | v3.x — meaningful but requires significant new infrastructure |
 | **Under Consideration** | Needs more validation before committing resources |
 | **Rejected** | Explicitly out of scope — reason given |
 
 ---
 
-## NOW (v2.2)
+## NOW (v2.3) — All v2.2 NOW items shipped ✓
 
-### 1. Security: yt-dlp CVE-2026-26331 pin update
-Pin StreamKeep's yt-dlp to ≥ 2026.02.21 (command injection via `--netrc-cmd`). Update `requirements.txt` in streamkeep sidecar and re-freeze. **Impact 5 / Effort 1.** [S-1]
+The following items were completed in v2.2 and v2.3:
 
-### 2. Security: ONNX Runtime upgrade to 1.25.x
-ORT 1.25.0 fixes heap OOB read/write, Pad Reflect vulnerability, integer overflow, and multiple input validation bugs across CPU kernels. Raises CUDA minimum to 12.0; CUDA Plugin EP now available. Update all Python sidecars that import `onnxruntime`. **Impact 4 / Effort 2.** [S-2]
+- ✓ Security: yt-dlp CVE-2026-26331 pin (`≥2026.02.21`)
+- ✓ Security: ONNX Runtime upgrade to 1.25.x
+- ✓ Shared ONNX model cache (`tools/_models/`, `UCX_MODEL_DIR`)
+- ✓ VideoSubtitleRemover sidecar + WatermarkRemoverPage wired
+- ✓ LipSight sidecar + LipReadingPage wired
+- ✓ ClipForge: crop, rotate/flip, loudnorm (EBU R128 two-pass), rewrap ops
+- ✓ Editor: Undo/Redo stack
+- ✓ VideoCrush: D3D12 + NVENC/AMF/QSV hardware acceleration
+- ✓ Demucs Vocal Remover sidecar + VocalRemoverPage wired
+- ✓ Whisper STT sidecar (faster-whisper) + SpeechToTextPage wired
+- ✓ RecordCast: webcam (DirectShow) + microphone capture
 
-### 3. Shared ONNX Model Cache (`tools/_models/`)
-AlphaCut, VideoSubtitleRemover, and future ONNX sidecars should all resolve models from a single `tools/_models/` directory. Models download on first use, shared across sidecars. Eliminates duplicate ~500 MB downloads. Implementation: SidecarRunner passes `--model-dir` flag; each sidecar honours it. **Impact 4 / Effort 2.**
+### Next NOW items:
 
-### 4. VideoSubtitleRemover sidecar (subtitle inpainting)
-Port `VideoSubtitleRemover` Python source to UCX NDJSON sidecar contract. Wires to existing SubtitleRemoverPage. **Impact 4 / Effort 3.** [R-4]
+### 1. Lossless Trim Mode (stream copy, no re-encode)
+Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy` instead of re-encoding. Huge quality and speed win for cut-to-post workflows. Expose as a "Lossless Cut" toggle in the editor — default for trim-only operations. **Impact 5 / Effort 2.** [R-3]
 
-### 5. LipSight sidecar (visual lip reading)
-Port LipSight Python source to NDJSON sidecar. Wires to LipReadingPage. **Impact 3 / Effort 3.**
+### 2. RNNoise Noise Remover sidecar
+NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes background noise from audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute of audio. **Impact 4 / Effort 2.**
 
-### 6. Editor: Crop + Rotate
-ClipForge sidecar already handles trim via FFmpeg. Add `-vf crop=W:H:X:Y` and `-vf transpose=N` passes to ClipForge. Expose in ClipForge UI and wire to existing page controls. This is the single highest-demand incomplete ClipForge feature — crop is table stakes for any video editor. **Impact 5 / Effort 2.** [R-3]
+### 3. Real-ESRGAN Image/Video Upscaler sidecar
+ImageUpscalerPage and VideoEnhancerPage stubs exist. Real-ESRGAN (BSD-3) does 2× / 4× upscale via ONNX. Share model cache. Batch-capable for images. **Impact 5 / Effort 3.** [R-5]
 
-### 7. Editor: Audio Normalize (LUFS / R128)
-Add FFmpeg `loudnorm` filter to ClipForge as an optional pass. Target: EBU R128 / -14 LUFS (streaming default). Expose as a toggle in the editor UI. Requires no new sidecar; add to ClipForge command builder. **Impact 4 / Effort 1.** [R-11]
-
-### 8. Editor: Undo / Redo
-ClipForge currently applies operations destructively. Maintain an in-memory operations stack. This is baseline editor UX. LosslessCut ships this; our editor page needs it before feature expansion. **Impact 4 / Effort 2.** [R-3]
-
-### 9. Lossless Trim Mode (stream copy, no re-encode)
-Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy` instead of re-encoding. Huge quality and speed win for cut-to-post workflows; LosslessCut is built entirely on this. Expose as a "Lossless Cut" toggle in the editor — default for trim-only operations. **Impact 5 / Effort 2.** [R-3]
-
-### 10. Demucs Vocal Remover sidecar
-VocalRemoverPage stub exists. Implement `demucs` (htdemucs_ft model, 9 dB SDR) as an NDJSON sidecar. Output vocals + accompaniment tracks. Demucs v4 is MIT-licensed, ONNX-exportable. Model cache via `tools/_models/`. **Impact 5 / Effort 3.** [R-6]
-
-### 11. whisper.cpp Speech-to-Text sidecar
-SpeechToTextPage stub exists. Use `whisper.cpp` C++ binary (not Python Whisper) — no Python dependency, supports GPU via Vulkan, ships as a single `.exe`, all 6 model sizes from tiny (75 MB) to large (2.9 GB). Download model on first use to `tools/_models/`. Output: SRT/VTT/TXT formats. **Impact 5 / Effort 3.** [R-7, R-8]
-
-### 12. D3D12 Hardware Acceleration in VideoCrush
-FFmpeg 8.1 added D3D12 H.264/AV1 encoding and `scale_d3d12`/`deinterlace_d3d12` filters. Expose a hardware acceleration dropdown (None / NVENC / AMF / QSV / D3D12) in VideoCrush UI. Auto-detect available encoders via `ffmpeg -encoders`. **Impact 4 / Effort 2.** [S-3]
-
-### 13. Recorder: Webcam + Microphone
-RecordCast currently captures desktop only. Add webcam (DirectShow `dshow` device source) and microphone inputs to the RecordCast sidecar. Multi-source mux via FFmpeg. Wires to existing RecorderPage device selection stubs. **Impact 4 / Effort 3.**
+### 4. whisper.cpp C++ STT sidecar (GPU via Vulkan)
+Current Whisper sidecar uses faster-whisper (Python). Add a secondary whisper.cpp path: single `.exe`, Vulkan GPU, no Python dependency, ships 6 model sizes. Route based on what's available. **Impact 3 / Effort 3.** [R-7, R-8]
 
 ---
 
-## NEXT (v2.3–v2.5)
+## NEXT (v2.4–v2.6)
 
 ### 14. Vertigo Auto-Reframe sidecar (v2.3)
 Already in CLAUDE.md schedule. 9:16/1:1/4:5 output with MediaPipe face tracking. Wires to AutoReframePage. **Impact 4 / Effort 3.**

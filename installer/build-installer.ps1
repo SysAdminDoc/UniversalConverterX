@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.2.0.0',
+    [string]$Version = '2.3.0.0',
     
     [switch]$Sign,
     
