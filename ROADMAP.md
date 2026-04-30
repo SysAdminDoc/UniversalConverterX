@@ -92,6 +92,20 @@ NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes broadband 
 #### 12. whisper.cpp GPU sidecar (Vulkan/CUDA)
 Current Whisper sidecar uses faster-whisper (Python/CUDA). Add secondary path: whisper.cpp v1.8.4 single `.exe`, Vulkan GPU, no Python dependency, 6 model sizes. v1.8.4 adds Silero VAD v6.2.0 (auto-skip silence, reduce hallucinations), GPU device selection (`-g`), and 12× speedup on Intel iGPU. Route: prefer whisper.cpp if CUDA unavailable; prefer faster-whisper if CUDA 12.0+ present. **Impact 3 / Effort 3.** [R-8]
 
+### Repo & CI Hygiene
+
+#### 48. Drop tracked `obj/` from git
+`.gitignore` lists `obj/` and `bin/` but the directories are still tracked from before the rule was added. v2.3.0's release commit alone added ~16k lines of build-artifact churn (`project.assets.json` etc.). One-time fix: `git rm -r --cached **/obj **/bin`, then commit. Prevents every release from polluting diffs and review. **Impact 3 / Effort 1.**
+
+#### 49. Sidecar contract conformance test (CI gate)
+The v2.3 wave shipped a regression class: lipsight bootstrapped without a `getattr(sys, 'frozen', False)` short-circuit (PyInstaller fork-bomb risk) and emitted `error` events with no `code` field (every failure showed as `"unknown"` in the UI). Add a Python unit test under `tests/sidecar_contract/` that grep-validates every `tools/*/sidecar.py` for: (a) frozen-guard before any `pip install` invocation, (b) `code` field on every emitted `error` event, (c) NDJSON event names match the documented set. Wire to GitHub Actions PR check. Sub-task of existing #46. **Impact 4 / Effort 1.**
+
+#### 50. Unified `tools/build-all.ps1` orchestrator
+Each sidecar has its own `build.ps1`; v2.4 ships 4 new frozen sidecars (demucs, whisper-stt, lipsight, GFPGAN, edge-tts, RNNoise once added) with no single entry point. Build a top-level `tools/build-all.ps1 [-Tools demucs,whisper-stt] [-Clean] [-Parallel]` that fans out across `tools/*/build.ps1`, gathers exit codes, and writes a build report. CI artifact upload becomes one step instead of N. **Impact 3 / Effort 1.**
+
+#### 51. SidecarRunner no-progress watchdog
+`SidecarRunner.RunAsync` honors cancellation tokens but has no defense against silent hangs — a sidecar that emits no `progress`/`log`/`stem`/`segment` events for N minutes (configurable, default 600 s) sits forever. Add a watchdog timer that resets on every NDJSON event; when it fires, log a stuck-process warning and call `process.Kill(entireProcessTree: true)`. Pattern reference: NVMe Patcher's `EventLogWatcher` push model in [`win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs`](../win11-nvme-driver-patcher/src/NVMeDriverPatcher.Watchdog/Program.cs). **Impact 4 / Effort 2.** [internal-nvme]
+
 ---
 
 ## NEXT (v2.5–v2.6)
@@ -111,6 +125,12 @@ Requires package family name review; migration guide available. **Impact 4 / Eff
 #### 14. JumpList Integration
 Windows JumpList provides quick-launch toolbox entries from the taskbar icon without opening the app. WinUI Gallery 2.8 ships a reference implementation. Map most-used tools (Convert, Compress, Trim, Record) to JumpList tasks via `JumpList.LoadCurrentAsync()`. **Impact 3 / Effort 1.** [S-8]
 
+#### 54. Light + system-following theme
+UCX is dark-only (App.xaml `RequestedTheme="Dark"` + brand brushes hard-coded against `BrandSurface*` darks). User CLAUDE.md states "Include a light theme option when practical." Add `Themes/LightTheme.xaml` with a parallel brand palette, drive selection from a Settings option (Dark / Light / System), persist via `SettingsService`, and bind via `RequestedTheme = Application.Current.RequestedTheme`. Pattern reference: [`Images/src/Images/Themes/DarkTheme.xaml`](../Images/src/Images/Themes/DarkTheme.xaml) + Catppuccin variants used in the Images viewer. **Impact 3 / Effort 3.** [internal-images]
+
+#### 55. Code signing for release artifacts
+Shipped `UniversalConverterX.exe` is unsigned today, so first launch hits SmartScreen "Unknown publisher" — major trust friction and a hard blocker for #45 (WinGet/Microsoft Store). Acquire a code-signing certificate (DigiCert / Sectigo / SignPath OSS), wire `signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256` into the release workflow before `gh release upload`. Apply to UI exe, console exe, shell extension dll, and each frozen sidecar. **Impact 5 / Effort 2** (cert procurement + workflow plumb; SmartScreen reputation builds once signed releases ship).
+
 ### AI Features
 
 #### 15. Auto-Subtitle sidecar (Whisper → SRT/VTT)
@@ -124,6 +144,14 @@ Integrate Silero VAD v6.2.0 (available in whisper.cpp v1.8.4 and as standalone `
 
 #### 18. Scene Detection + Smart Split (PySceneDetect sidecar)
 SmartTrimmerPage stub exists. PySceneDetect v0.6.7 as sidecar: detect scene cuts → output timestamped chapter list (CSV/OTIO/EDL CMX 3600). Actions: auto-split into segments, insert as chapter markers, or feed into ClipForge batch trim. OTIO/EDL formats (v0.6.6+) enable direct DaVinci Resolve import. FFmpeg `silencedetect` filter as companion for audio-based splits. **Impact 4 / Effort 3.** [R-18, R-3]
+
+### Recorder & Capture
+
+#### 52. RecordCast system-audio loopback (WASAPI)
+RecordCast captures microphone via DirectShow but cannot record desktop audio — every screencast that wants narration over a video/game/Zoom playback needs system loopback. FFmpeg supports it via `-f dshow -i audio=virtual-audio-capturer` or, preferred, WASAPI loopback (no virtual driver install). Detect Windows version, prefer WASAPI on Windows 10+, fall back to dshow. Expose an "Include system audio" toggle on RecorderPage alongside the existing mic combo, and a "Mic + system" mix mode. Most-requested gap-filler in screen-recorder competitor reviews. **Impact 4 / Effort 2.**
+
+#### 53. RecordCast region capture + pause/resume
+Screen recorder is full-screen-only today. (a) Region capture: `gdigrab -offset_x N -offset_y N -video_size WxH` already supports rect; add a region picker overlay (transparent `Window` with adornment for drag-to-select), persist last region in settings. (b) Pause/resume: stop the active ffmpeg process on Pause, write segment to `_part01.mp4`, restart on Resume into `_part02.mp4`, on Stop run `ffmpeg -f concat -i list.txt -c copy` to merge — lossless join, no re-encode. **Impact 4 / Effort 3.**
 
 ### Encoder Improvements
 
@@ -226,6 +254,15 @@ End-to-end tests for conversion pipelines: reference input → expected output f
 ### 47. User Documentation / Wiki
 In-app help overlay or GitHub Wiki: quick-start per module, supported format matrix, sidecar requirements, CLI reference, common workflows. Zero user docs beyond README today. **Impact 3 / Effort 2.**
 
+### 56. Crash reporter + in-app diagnostics page
+No crash logging today — unhandled exceptions surface as a SmartScreen-styled crash dialog with no log capture, leaving sysadmin users blind. Catch `AppDomain.CurrentDomain.UnhandledException` + `TaskScheduler.UnobservedTaskException` + `App.UnhandledException`, dump structured reports (timestamp, version, OS build, GPU, last 3 sidecar runs, stack trace) to `%LocalAppData%\UniversalConverterX\crashes\`. Add a Diagnostics page (under Settings) that lists last 10 crash files, last 10 sidecar failures, system info, and a "Copy diagnostic bundle" button. Pattern references: [`Images/src/Images/Services/CrashLog.cs`](../Images/src/Images/Services/CrashLog.cs) (C# WPF reference) and [`Vertigo/core/crashlog.py`](../Vertigo/core/crashlog.py) (Python sidecar-side). **Impact 4 / Effort 3.** [internal-images, internal-vertigo]
+
+### 57. Format-routing drag-drop on title bar / tray
+Drop any file on the app chrome (title bar, tray icon, anywhere outside a module-specific drop zone) → app sniffs MIME / magic bytes via the existing FormatInspector, navigates to the matching module (video → Converter; image → ImageConverter; audio → VocalRemover or STT depending on user pref; .srt → AiSubtitle, etc.), and pre-loads the file. Polish item with high discoverability payoff — surfaces the toolbox without users hunting through the nav. Re-uses existing `IFormatDetectionService` from `UniversalConverterX.Core`. **Impact 3 / Effort 2.**
+
+### 58. SBOM (Software Bill of Materials) generation
+Required for Microsoft Store submission, increasingly expected for WinGet manifests, and a security posture signal for sysadmin users vetting installs. Generate CycloneDX 1.5 JSON for: (a) C# projects via `dotnet sbom-tool generate`, (b) frozen Python sidecars via `cyclonedx-py environment` against each tool's `requirements.txt`. Merge into one repo-level SBOM in the release workflow; attach to the GitHub release. Prerequisite: WinAppSDK 2.0 (#13) and WinGet/MSIX (#45). **Impact 2 / Effort 2.**
+
 ---
 
 ## UNDER CONSIDERATION
@@ -259,6 +296,18 @@ VoiceChangerPage stub exists. Requires a real-time or offline voice conversion m
 
 ### J. AutoHighlight / AutoCrop / AiPortrait
 AutoHighlightPage, AutoCropPage, AiPortrait stubs exist. AutoHighlight: detect interesting moments via audio energy + scene change → extract clips. AutoCrop: AI-based content-aware crop (needs object detection model). AiPortrait: portrait background blur/replacement. All three require additional AI models not yet in the model cache. Evaluate together as a "smart editing" batch during v2.5 scoping.
+
+### K. Proxy / clipping workflow for ClipForge
+Premiere/Resolve standard pattern: on import of 4K+ source, auto-generate low-res proxies (typically 1080p H.264 or 720p ProRes Proxy) for editor preview/scrubbing, then swap back to originals at export render time. Eliminates timeline lag on consumer hardware. Reusable reference implementation already lives at [`OpenCut/opencut/core/proxy_gen.py`](../OpenCut/opencut/core/proxy_gen.py) and [`proxy_swap.py`](../OpenCut/opencut/core/proxy_swap.py) — port the FFmpeg recipe and the proxy-to-original relink table into a `clipforge` sidecar op. Validate demand from UCX user feedback before committing — 4K editing on UCX is currently rare. [internal-opencut]
+
+### L. Live LUFS / true-peak meter in editor preview
+Companion to ClipForge's existing `loudnorm` op (#10 shipped). During preview playback, surface integrated/momentary LUFS + true-peak in dB above the seek bar so users know what target to dial in *before* re-rendering. Implementation path: pipe a parallel `ffmpeg -af ebur128 -f null -` analysis to a small async loop that emits NDJSON loudness frames, render in a thin overlay strip. Pairs naturally with the planned waveform strip (#21). Validate demand among podcast / VO users.
+
+### M. Borrow Vertigo's auto-edit + scene/keyframe modules into ClipForge
+Vertigo already ships [`auto_edit.py`](../Vertigo/core/auto_edit.py), [`scenes.py`](../Vertigo/core/scenes.py), [`keyframes.py`](../Vertigo/core/keyframes.py), [`hook_score.py`](../Vertigo/core/hook_score.py), [`reframe.py`](../Vertigo/core/reframe.py), [`subtitles.py`](../Vertigo/core/subtitles.py), [`cameraman.py`](../Vertigo/core/cameraman.py) — overlapping with planned ClipForge work in #18 (PySceneDetect), #21 (waveform/thumbnails), #15 (auto-subtitle), J (AutoHighlight). Rather than re-implement, evaluate vendoring `Vertigo/core/*.py` modules into `tools/clipforge/` as the scene/keyframe engine. License compatibility (MIT) is given; risk is binary size + sidecar surface area. Decision: spike a port of one module (`scenes.py` → ClipForge SceneDetect op) before committing. [internal-vertigo]
+
+### N. Borrow Vertigo's encode-pipeline patterns for VideoCrush hardware-decode chain
+Vertigo's [`encode.py`](../Vertigo/core/encode.py) and [`encoders.py`](../Vertigo/core/encoders.py) already model NVENC/AMF/QSV preset selection plus the gnarly fallback chain when a GPU encoder is reported but unusable (driver mismatch, codec not supported on this generation). UCX VideoCrush (#20) re-derives this. Worth a one-pass diff to harvest what Vertigo already proved out. [internal-vertigo]
 
 ---
 
@@ -357,3 +406,7 @@ AutoHighlightPage, AutoCropPage, AiPortrait stubs exist. AutoHighlight: detect i
 
 ### Internal Sources
 - [plan] — Phase 0 repo reconnaissance: source code confirmed at `tools/vertigo/`, `tools/gifstudio/`, `tools/heicshift/` with no corresponding `sidecar.py`; pages confirmed in `ToolboxPage.xaml.cs` and `MainWindow.xaml.cs` route table
+- [internal-images] — `~/repos/Images/` (v0.1.2) — C# .NET 9 WPF photo viewer with Catppuccin theming. Reference files: `src/Images/Themes/DarkTheme.xaml`, `src/Images/Services/CrashLog.cs`, `src/Images/Services/WindowChrome.cs`. Source for theme switching pattern (#54) and crash logger pattern (#56).
+- [internal-nvme] — `~/repos/win11-nvme-driver-patcher/` (v4.6.0) — C# .NET 9 watchdog Windows Service. Reference: `src/NVMeDriverPatcher.Watchdog/Program.cs` push-model `EventLogWatcher` pattern, `/install` and `/uninstall` self-service plumbing, async pipe drain to avoid deadlock. Pattern source for SidecarRunner watchdog (#51).
+- [internal-opencut] — `~/repos/OpenCut/` (v1.9.3) — Premiere Pro CEP extension, Python/Flask + JS. Reference: `opencut/core/proxy_gen.py`, `proxy_swap.py`, `gpu_preview_pipeline.py`, `live_preview.py`, `preview_cache.py`, `render_cache.py`. Production-grade proxy editing pipeline reusable for ClipForge (item K).
+- [internal-vertigo] — `~/repos/Vertigo/` (v0.12.2) — Python/PyQt6 9:16 vertical-video studio. Reference: `core/auto_edit.py`, `scenes.py`, `keyframes.py`, `hook_score.py`, `reframe.py`, `subtitles.py`, `cameraman.py`, `encode.py`, `encoders.py`, `crashlog.py`, `tracker_boxmot.py`, `face_samples.py`. Heavily overlapping with planned ClipForge engine work — vendoring candidate (items M, N) and crash-log pattern source (#56).
