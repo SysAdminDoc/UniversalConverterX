@@ -62,6 +62,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Ready", blue, true, "Demucs"));
         AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "AI voice transformation", "\uE720", red, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-tts", "Text-to-Speech", "Generate voiceovers from text — 322 voices, 50+ languages", "\uEC4F", green, "Ready", green, true, "edge-tts"));
+        AiTools.Add(new ToolboxTile("ai-photo-restore", "Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "\uE77B", green, "Ready", green, true, "GFPGAN"));
         AiTools.Add(new ToolboxTile("ai-stt", "Speech-to-Text", "Transcribe audio to text", "\uE720", green, "Ready", blue, true, "Whisper"));
         AiTools.Add(new ToolboxTile("lip-reading", "Lip Reading", "Visual speech recognition", "\uE909", blue, "Ready", blue, true, "LipSight"));
 
