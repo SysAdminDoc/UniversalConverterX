@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.ChapterMarksPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="ChapterRowTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="14" Padding="12"
+                    Margin="0,0,0,8">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Header="Start (s)"
+                             Text="{Binding StartText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Grid.Column="1"
+                             Header="End (s)"
+                             PlaceholderText="auto"
+                             Text="{Binding EndText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Grid.Column="2"
+                             Header="Title"
+                             Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Grid.Column="3"
+                            VerticalAlignment="Bottom"
+                            Style="{StaticResource IconButtonStyle}"
+                            ToolTipService.ToolTip="Remove chapter"
+                            Click="RemoveRow_Click"
+                            Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Chapter Marks Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Read, edit, and rewrite the embedded chapter table for MKV / MP4 / MOV without re-encoding."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Open File"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="OpenFile_Click"/>
+                <Button x:Name="SaveButton"
+                        Content="Save As..."
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Save_Click"
+                        IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="3">
+                    <TextBlock x:Name="SourceLabel" Text="No file loaded."
+                               Style="{StaticResource LabelTextStyle}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="SourceMeta"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="Add Chapter"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="AddRow_Click"
+                        IsEnabled="False"
+                        x:Name="AddButton"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" CornerRadius="22" Padding="16">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="10">
+                    <Border Width="96" Height="96" CornerRadius="24"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE8B7;" FontSize="40"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock Text="Open a video file to read its chapters"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="If the file has no chapters, click Add Chapter to start fresh."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap" TextAlignment="Center"
+                               MaxWidth="420"/>
+                </StackPanel>
+                <ScrollViewer x:Name="ChapterScroll" Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="ChapterList"
+                                  ItemTemplate="{StaticResource ChapterRowTemplate}"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   TextTrimming="CharacterEllipsis"/>
+    </Grid>
+</Page>

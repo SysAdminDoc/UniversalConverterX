@@ -141,13 +141,44 @@ def op_record(args: argparse.Namespace) -> int:
          message=f"Recording ({source}) for {duration}s at {framerate} fps")
     emit("progress", percent=0, stage="starting capture", eta_seconds=duration)
 
+    # Optional system-audio loopback (#52). Common Windows device names:
+    #   "Stereo Mix (Realtek...)" / "What U Hear" / "virtual-audio-capturer"
+    # If the user passes --system-audio without a name, try common aliases.
+    system_audio = getattr(args, "system_audio", None)
+    if system_audio == "":
+        # Empty string from the page means "use default loopback"
+        system_audio = "virtual-audio-capturer"
+
+    # Region capture (#53). Format: "x,y,w,h" — passed through to gdigrab.
+    region = getattr(args, "region", None)
+    region_args: list[str] = []
+    if region:
+        try:
+            x, y, w, h = (int(v) for v in region.split(","))
+            region_args = [
+                "-offset_x", str(x), "-offset_y", str(y),
+                "-video_size", f"{w}x{h}",
+            ]
+            emit("log", level="info",
+                 message=f"Region capture: {w}x{h} at ({x},{y})")
+        except ValueError:
+            emit("log", level="warn",
+                 message=f"--region must be 'x,y,w,h'; got {region!r}; ignoring")
+
     cmd: list[str] = [ffmpeg, "-y"]
+    audio_input_count = 0
 
     if source == "screen":
-        # gdigrab desktop + optional dshow microphone
-        cmd += ["-f", "gdigrab", "-framerate", str(framerate), "-i", "desktop"]
+        # gdigrab desktop (full or region) + optional dshow microphone + optional system loopback
+        cmd += ["-f", "gdigrab", "-framerate", str(framerate)]
+        cmd += region_args
+        cmd += ["-i", "desktop"]
         if audio:
             cmd += ["-f", "dshow", "-i", f"audio={audio}"]
+            audio_input_count += 1
+        if system_audio:
+            cmd += ["-f", "dshow", "-i", f"audio={system_audio}"]
+            audio_input_count += 1
         cmd += [
             "-t", str(duration),
             "-c:v", "libx264",
@@ -156,15 +187,23 @@ def op_record(args: argparse.Namespace) -> int:
             "-pix_fmt", "yuv420p",
             "-movflags", "+faststart",
         ]
-        if audio:
+        # If both mic + loopback are present, mix them into one stereo track.
+        if audio_input_count == 2:
+            cmd += ["-filter_complex", "[1:a][2:a]amix=inputs=2:duration=longest:dropout_transition=2[a]",
+                    "-map", "0:v", "-map", "[a]"]
+        if audio_input_count > 0:
             cmd += ["-c:a", "aac", "-b:a", "192k"]
         stage = "recording screen"
 
     elif source == "webcam":
-        # dshow webcam video + optional dshow microphone
+        # dshow webcam video + optional dshow microphone (system loopback rarely makes sense here, skip)
         cmd += ["-f", "dshow", "-framerate", str(framerate), "-i", f"video={webcam}"]
         if audio:
             cmd += ["-f", "dshow", "-i", f"audio={audio}"]
+            audio_input_count += 1
+        if system_audio:
+            cmd += ["-f", "dshow", "-i", f"audio={system_audio}"]
+            audio_input_count += 1
         cmd += [
             "-t", str(duration),
             "-c:v", "libx264",
@@ -173,7 +212,10 @@ def op_record(args: argparse.Namespace) -> int:
             "-pix_fmt", "yuv420p",
             "-movflags", "+faststart",
         ]
-        if audio:
+        if audio_input_count == 2:
+            cmd += ["-filter_complex", "[1:a][2:a]amix=inputs=2:duration=longest:dropout_transition=2[a]",
+                    "-map", "0:v", "-map", "[a]"]
+        if audio_input_count > 0:
             cmd += ["-c:a", "aac", "-b:a", "192k"]
         stage = "recording webcam"
 
@@ -215,6 +257,14 @@ def build_parser() -> argparse.ArgumentParser:
                         help="DirectShow webcam device name (required when --source webcam)")
     record.add_argument("--audio", default=None, metavar="DEVICE",
                         help="DirectShow audio device name for microphone capture")
+    record.add_argument("--system-audio", default=None, metavar="DEVICE",
+                        help="Capture system audio (loopback). Pass a DirectShow audio device "
+                             "name (e.g. 'Stereo Mix (Realtek...)' or 'virtual-audio-capturer'); "
+                             "pass an empty string to use the default loopback alias. "
+                             "Mic + loopback are auto-mixed via FFmpeg amix=2 when both present.")
+    record.add_argument("--region", default=None, metavar="X,Y,W,H",
+                        help="Region capture (screen source only): comma-separated x,y,w,h in "
+                             "pixels. Drives gdigrab -offset_x/-offset_y/-video_size.")
     return parser
 
 

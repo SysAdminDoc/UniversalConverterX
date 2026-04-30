@@ -279,11 +279,55 @@
                                       SelectionChanged="Option_Changed"/>
                         </StackPanel>
 
+                        <!-- System audio loopback (#52) -->
+                        <CheckBox x:Name="SystemAudioCheck"
+                                  Content="Capture system audio (loopback)"
+                                  Click="Option_BoolChanged"/>
+                        <ComboBox x:Name="SystemAudioCombo"
+                                  HorizontalAlignment="Stretch"
+                                  PlaceholderText="auto-detect (Stereo Mix / loopback)"
+                                  Visibility="Collapsed"
+                                  SelectionChanged="Option_Changed"/>
+
                         <Button x:Name="RefreshDevicesButton"
                                 Content="Refresh Devices"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
                                 Click="RefreshDevices_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Region capture (#53) -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Region (screen mode only)"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="RegionCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Option_Changed">
+                            <ComboBoxItem Content="Full screen" Tag=""/>
+                            <ComboBoxItem Content="1920×1080 at (0,0)"  Tag="0,0,1920,1080"/>
+                            <ComboBoxItem Content="1280×720 at (0,0)"   Tag="0,0,1280,720"/>
+                            <ComboBoxItem Content="800×600 at (0,0)"    Tag="0,0,800,600"/>
+                            <ComboBoxItem Content="Custom..."           Tag="custom"/>
+                        </ComboBox>
+                        <Grid ColumnSpacing="8" RowSpacing="6"
+                              x:Name="CustomRegionGrid"
+                              Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBox x:Name="RegionXBox" Header="X"     PlaceholderText="0"     Grid.Row="0" Grid.Column="0" TextChanged="Option_TextChanged"/>
+                            <TextBox x:Name="RegionYBox" Header="Y"     PlaceholderText="0"     Grid.Row="0" Grid.Column="1" TextChanged="Option_TextChanged"/>
+                            <TextBox x:Name="RegionWBox" Header="Width" PlaceholderText="1920"  Grid.Row="1" Grid.Column="0" TextChanged="Option_TextChanged"/>
+                            <TextBox x:Name="RegionHBox" Header="Height" PlaceholderText="1080" Grid.Row="1" Grid.Column="1" TextChanged="Option_TextChanged"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
