@@ -37,8 +37,7 @@
 
                     <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
                         <TextBlock Text="{Binding Title}"
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -109,8 +108,7 @@
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="3">
                         <TextBlock Text="{Binding Title}"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -180,9 +178,9 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="132" Height="132" CornerRadius="66"
+                                <Border Width="116" Height="116" CornerRadius="28"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE7C8;" FontSize="54"
+                                    <FontIcon Glyph="&#xE7C8;" FontSize="48"
                                               Foreground="{StaticResource AccentRedBrush}"/>
                                 </Border>
                                 <TextBlock Text="Build a recording queue"
@@ -214,8 +212,11 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="10">
-                                <FontIcon Glyph="&#xE73E;" FontSize="42"
-                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                              Foreground="{StaticResource TextMutedBrush}"/>
+                                </Border>
                                 <TextBlock Text="No finished recordings yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>

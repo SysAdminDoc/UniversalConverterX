@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="AI Subtitle &amp; Translation is not yet available in this build."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: Whisper sidecar with NDJSON progress, translation integration, subtitle editor panel, and burn-in pipeline."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

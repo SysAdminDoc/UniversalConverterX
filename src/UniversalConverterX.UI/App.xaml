@@ -121,6 +121,14 @@
                 <Setter Property="LineHeight" Value="40"/>
             </Style>
 
+            <!-- HeroTextStyle: hero-section headlines (slightly larger than Display) -->
+            <Style x:Key="HeroTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="34"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="42"/>
+            </Style>
+
             <Style x:Key="TitleTextStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="24"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -159,6 +167,14 @@
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
                 <Setter Property="LineHeight" Value="18"/>
+            </Style>
+
+            <!-- LabelTextStyle: compact section labels (settings expanders, tile titles) -->
+            <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <Style x:Key="SubtleTextStyle" TargetType="TextBlock">

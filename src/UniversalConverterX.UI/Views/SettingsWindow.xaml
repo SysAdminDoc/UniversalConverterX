@@ -62,7 +62,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE713;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="General" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="General" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Output location, overwrite behavior, notifications" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -137,7 +137,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE9D9;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Quality &amp; Performance" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Quality &amp; Performance" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Default quality, hardware acceleration, parallel processing" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -219,7 +219,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE90F;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Converter Tools" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Converter Tools" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Manage FFmpeg, ImageMagick, and other CLI tools" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -269,8 +269,8 @@
                                         
                                         <!-- Tool Info -->
                                         <StackPanel Grid.Column="1">
-                                            <TextBlock Text="{Binding Name}" 
-                                                       FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="{Binding Name}"
+                                                       Style="{StaticResource LabelTextStyle}"/>
                                             <TextBlock Text="{Binding StatusText}" 
                                                        Style="{StaticResource MutedTextStyle}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -313,7 +313,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE8B7;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Shell Integration" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Shell Integration" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Windows Explorer context menu options" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -377,7 +377,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE790;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Appearance" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Appearance" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Theme, accent color, window behavior" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -455,7 +455,7 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE946;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="About" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="About" Style="{StaticResource LabelTextStyle}"/>
                                 <TextBlock Text="Version info, updates, licenses" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>

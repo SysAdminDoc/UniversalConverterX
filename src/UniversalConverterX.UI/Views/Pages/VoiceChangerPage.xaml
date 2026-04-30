@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Voice Changer is planned for a future release."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: voice conversion model selection, real-time preview, and quality/naturalness tradeoff controls."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

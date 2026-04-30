@@ -40,8 +40,7 @@
                         </Border>
                     </Grid>
                     <StackPanel Grid.Row="1" Spacing="4">
-                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" MaxLines="3"/>
@@ -96,8 +95,7 @@
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
                         <StackPanel>
-                            <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
                             <TextBlock Text="{Binding Subtitle}" FontSize="11"
                                        Foreground="{StaticResource TextMutedBrush}"/>
                         </StackPanel>
@@ -115,8 +113,7 @@
                     BorderThickness="1"
                     CornerRadius="16">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource LabelTextStyle}"/>
                     <TextBlock Text="{Binding Description}" Style="{StaticResource MutedTextStyle}"
                                TextWrapping="Wrap" MaxLines="3"/>
                 </StackPanel>
@@ -158,9 +155,7 @@
                             </StackPanel>
                         </Border>
                         <TextBlock Text="The all-in-one media workshop, kept entirely on your machine."
-                                   FontSize="34" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   LineHeight="42"
+                                   Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
                         <TextBlock Text="Convert, compress, edit, download, record, and inspect — every workflow as a guided queue with clear output, recovery, and status. Files stay on disk unless you opt in."
                                    Style="{StaticResource SubtitleTextStyle}"

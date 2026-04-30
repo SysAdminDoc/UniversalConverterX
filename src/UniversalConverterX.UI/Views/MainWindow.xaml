@@ -27,9 +27,9 @@
                                   Foreground="{StaticResource AccentPrimaryBrush}"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center" Spacing="1">
-                        <TextBlock Text="UCX" FontSize="14" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Text="Universal Converter" FontSize="10"
+                        <TextBlock Text="UCX" Style="{StaticResource LabelTextStyle}"/>
+                        <TextBlock Text="Universal Converter"
+                                   Style="{StaticResource SubtleTextStyle}"
                                    Foreground="{StaticResource TextMutedBrush}"/>
                     </StackPanel>
                 </StackPanel>
@@ -89,7 +89,7 @@
                 </NavigationViewItem>
                 <NavigationViewItem Tag="recorder" Content="Recorder">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7B3;"/>
+                        <FontIcon Glyph="&#xE7C8;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
 

@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Image Enhancer is not yet available in this build."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: Real-ESRGAN image sidecar, standalone workflow (no video pipeline), face enhancement mode, and batch export UI."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

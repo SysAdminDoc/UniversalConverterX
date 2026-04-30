@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Watermark Remover is not yet available in this build."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: VideoSubtitleRemover sidecar, region selector UI overlay, multi-region support, and detection confidence threshold."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

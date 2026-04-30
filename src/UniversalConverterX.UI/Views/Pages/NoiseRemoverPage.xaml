@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Noise Remover is not yet available in this build."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: RNNoise/Demucs sidecar integration, audio model selection, and export pipeline for both audio-only and muxed video output."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
