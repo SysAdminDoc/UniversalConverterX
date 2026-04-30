@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Image Enhancer is not yet available in this build."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: Real-ESRGAN image sidecar, standalone workflow (no video pipeline), face enhancement mode, and batch export UI."
+                        <TextBlock Text="Planned scope: Real-ESRGAN image sidecar, standalone workflow (no video pipeline), face enhancement mode, and batch export UI."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>

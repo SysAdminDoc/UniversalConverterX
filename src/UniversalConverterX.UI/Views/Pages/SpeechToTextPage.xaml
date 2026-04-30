@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Speech to Text is planned for a future release."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: Whisper sidecar integration, speaker diarization, real-time word-level timestamps, and SRT/VTT/plain text export."
+                        <TextBlock Text="Planned scope: Whisper sidecar integration, speaker diarization, real-time word-level timestamps, and SRT/VTT/plain text export."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>

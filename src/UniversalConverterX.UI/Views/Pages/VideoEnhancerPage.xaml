@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Video Enhancer is not yet available in this build."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: Real-ESRGAN sidecar integration, RIFE frame interpolation pipeline, per-scene model switching, and preview contract."
+                        <TextBlock Text="Planned scope: Real-ESRGAN sidecar integration, RIFE frame interpolation pipeline, per-scene model switching, and preview contract."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>

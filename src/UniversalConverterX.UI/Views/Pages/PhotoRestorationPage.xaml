@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Old Photo Restoration is planned for a future release."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: scratch/stain detection model, fading colorization pipeline (DeOldify), GFPGAN face enhancement, and before/after preview UI."
+                        <TextBlock Text="Planned scope: scratch/stain detection model, fading colorization pipeline (DeOldify), GFPGAN face enhancement, and before/after preview UI."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>

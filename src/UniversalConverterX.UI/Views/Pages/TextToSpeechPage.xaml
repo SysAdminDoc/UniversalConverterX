@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Text to Speech is planned for a future release."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: local TTS engine integration (Coqui TTS / Piper), voice catalog, SSML support, and audio export pipeline."
+                        <TextBlock Text="Planned scope: local TTS engine integration (Coqui TTS / Piper), voice catalog, SSML support, and audio export pipeline."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
