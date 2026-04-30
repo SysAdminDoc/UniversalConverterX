@@ -37,7 +37,7 @@ public sealed partial class ToolboxPage : Page
         // Image
         ImageTools.Add(new ToolboxTile("image-converter", "Image Converter", "JPEG, PNG, HEIC, AVIF, WebP, TIFF, BMP", "\uEB9F", blue, "Ready", green, false, "HEICShift"));
         ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Ready", green, false, "GifStudio"));
-        ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Super-resolution up to 4x", "\uE799", blue, "Planned", orange, true, "Real-ESRGAN"));
+        ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Real-ESRGAN super-resolution up to 4× (ncnn-vulkan)", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
         ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "Apply portrait stylization filters", "\uE77B", blue, "Future", yellow, true, null));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Stitch images into a video slideshow", "\uE786", blue, "Future", yellow, false, null));
         ImageTools.Add(new ToolboxTile("metadata-editor", "Metadata Editor", "View and edit EXIF / XMP / IPTC tags", "\uE8B7", blue, "Future", yellow, false, null));
@@ -52,6 +52,7 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("lens-correction", "Lens Correction", "Fix distortion, rolling shutter, stabilize", "\uE71E", blue, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("vr-converter", "VR Converter", "Equirectangular, fisheye, 360° to 2D", "\uE787", blue, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("frame-snapshot", "Frame Snapshot", "Extract precise frames as images", "\uE722", blue, "Ready", green, false, "FFmpeg"));
+        VideoTools.Add(new ToolboxTile("ai-video-enhancer", "Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution (slow)", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
 
         // AI
         AiTools.Add(new ToolboxTile("ai-bgremove", "Background Remover", "Remove or replace video background", "\uE91B", green, "Ready", green, true, "AlphaCut"));
