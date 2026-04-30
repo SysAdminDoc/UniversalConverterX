@@ -390,17 +390,24 @@ public class ToolDownloader : IToolDownloader
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "tar",
-                    Arguments = $"-xzf \"{tarGzPath}\" -C \"{tempExtract}\"",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+                startInfo.ArgumentList.Add("-xzf");
+                startInfo.ArgumentList.Add(tarGzPath);
+                startInfo.ArgumentList.Add("-C");
+                startInfo.ArgumentList.Add(tempExtract);
 
                 using var process = Process.Start(startInfo);
-                if (process != null)
-                {
-                    await process.WaitForExitAsync(cancellationToken);
-                }
+                if (process == null)
+                    throw new InvalidOperationException("Failed to start tar extraction process.");
+
+                var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
+                var error = await errorTask;
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException($"tar exited with code {process.ExitCode}: {error.Trim()}");
 
                 // Find and copy the executable
                 var exeName = downloadInfo.ExecutableName;
@@ -445,18 +452,27 @@ public class ToolDownloader : IToolDownloader
             var startInfo = new ProcessStartInfo
             {
                 FileName = sevenZipPath,
-                Arguments = $"x \"{archivePath}\" -o\"{tempExtract}\" -y",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            startInfo.ArgumentList.Add("x");
+            startInfo.ArgumentList.Add(archivePath);
+            startInfo.ArgumentList.Add($"-o{tempExtract}");
+            startInfo.ArgumentList.Add("-y");
 
             using var process = Process.Start(startInfo);
-            if (process != null)
-            {
-                await process.WaitForExitAsync(cancellationToken);
-            }
+            if (process == null)
+                throw new InvalidOperationException("Failed to start 7-Zip extraction process.");
+
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            var output = await outputTask;
+            var error = await errorTask;
+            if (process.ExitCode != 0)
+                throw new InvalidOperationException($"7-Zip exited with code {process.ExitCode}: {(error + output).Trim()}");
 
             // Find and copy the executable
             var exeName = downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : "");
@@ -555,6 +571,7 @@ public class ToolDownloader : IToolDownloader
         // Find the appropriate asset for our platform
         var assetPattern = GetAssetPattern(downloadInfo);
         var asset = response.Assets.FirstOrDefault(a => 
+            !string.IsNullOrWhiteSpace(a.Name) &&
             assetPattern.Any(p => a.Name.Contains(p, StringComparison.OrdinalIgnoreCase)));
 
         return asset?.BrowserDownloadUrl ?? "";
@@ -633,12 +650,12 @@ public class ToolDownloader : IToolDownloader
             var startInfo = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = downloadInfo.VersionArg ?? "--version",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            startInfo.ArgumentList.Add(downloadInfo.VersionArg ?? "--version");
 
             using var process = Process.Start(startInfo);
             if (process == null)
@@ -701,10 +718,11 @@ public class ToolDownloader : IToolDownloader
         var startInfo = new ProcessStartInfo
         {
             FileName = "chmod",
-            Arguments = $"+x \"{filePath}\"",
             UseShellExecute = false,
             CreateNoWindow = true
         };
+        startInfo.ArgumentList.Add("+x");
+        startInfo.ArgumentList.Add(filePath);
 
         using var process = Process.Start(startInfo);
         if (process != null)

@@ -18,7 +18,11 @@ public class ToolManagerTests
     {
         _toolsBasePath = Path.Combine(Path.GetTempPath(), "ucx-test-tools");
         
-        var options = new ConverterXOptions { ToolsBasePath = _toolsBasePath };
+        var options = new ConverterXOptions
+        {
+            ToolsBasePath = _toolsBasePath,
+            SearchSystemTools = false
+        };
         _optionsMock = new Mock<IOptions<ConverterXOptions>>();
         _optionsMock.Setup(x => x.Value).Returns(options);
         
@@ -46,6 +50,7 @@ public class ToolManagerTests
         var path = _toolManager.GetToolPath(toolName);
 
         path.Should().NotBeNullOrEmpty();
+        path.Should().StartWith(_toolsBasePath);
         path.Should().Contain(toolName == "imagemagick" ? "magick" : 
                              toolName == "ghostscript" ? "gs" :
                              toolName == "calibre" ? "ebook-convert" :
@@ -66,8 +71,6 @@ public class ToolManagerTests
     {
         var result = _toolManager.IsToolAvailable("ffmpeg");
 
-        // Unless FFmpeg is installed on the test system
-        // This test might need adjustment based on environment
         result.Should().BeFalse();
     }
 

@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Models;
 
 namespace UniversalConverterX.Console.Commands;
 
@@ -24,6 +26,11 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
     }
 
     private static readonly string ConfigPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "UniversalConverterX",
+        "settings.json");
+
+    private static readonly string LegacyConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "UniversalConverterX",
         "config.json");
@@ -52,16 +59,17 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
         table.AddColumn("Setting");
         table.AddColumn("Value");
 
-        table.AddRow("tools-path", config.ToolsBasePath);
-        table.AddRow("max-parallel", config.MaxConcurrentConversions.ToString());
-        table.AddRow("default-timeout", config.DefaultTimeout.ToString());
-        table.AddRow("hardware-accel", config.EnableHardwareAcceleration.ToString());
-        table.AddRow("temp-directory", config.TempDirectory);
-        table.AddRow("keep-failed-output", config.KeepFailedOutput.ToString());
-        table.AddRow("verbose-logging", config.VerboseLogging.ToString());
-        table.AddRow("auto-download-tools", config.AutoDownloadTools.ToString());
-        table.AddRow("default-quality", config.DefaultQuality);
-        table.AddRow("preserve-metadata", config.PreserveMetadata.ToString());
+        AddConfigRow(table, "tools-path", config.ToolsBasePath);
+        AddConfigRow(table, "search-system-tools", config.SearchSystemTools.ToString());
+        AddConfigRow(table, "max-parallel", config.MaxParallelConversions.ToString());
+        AddConfigRow(table, "default-timeout", config.DefaultTimeout.ToString());
+        AddConfigRow(table, "hardware-accel", config.EnableHardwareAcceleration.ToString());
+        AddConfigRow(table, "temp-directory", config.TempDirectory);
+        AddConfigRow(table, "keep-failed-output", config.KeepFailedOutput.ToString());
+        AddConfigRow(table, "verbose-logging", config.VerboseLogging.ToString());
+        AddConfigRow(table, "auto-download-tools", config.AutoDownloadTools.ToString());
+        AddConfigRow(table, "default-quality", config.DefaultQuality.ToString());
+        AddConfigRow(table, "preserve-metadata", config.PreserveMetadataByDefault.ToString());
 
         AnsiConsole.Write(table);
 
@@ -100,15 +108,19 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
                     break;
 
                 case "maxparallel":
-                    config.MaxConcurrentConversions = int.Parse(value);
+                    config.MaxParallelConversions = ParsePositiveInt(value, "max-parallel");
                     break;
 
                 case "defaulttimeout":
-                    config.DefaultTimeout = TimeSpan.Parse(value);
+                    config.DefaultTimeout = ParsePositiveTimeSpan(value, "default-timeout");
                     break;
 
                 case "hardwareaccel":
                     config.EnableHardwareAcceleration = bool.Parse(value);
+                    break;
+
+                case "searchsystemtools":
+                    config.SearchSystemTools = bool.Parse(value);
                     break;
 
                 case "tempdirectory":
@@ -128,11 +140,13 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
                     break;
 
                 case "defaultquality":
-                    config.DefaultQuality = value;
+                    if (!Enum.TryParse<QualityPreset>(value, ignoreCase: true, out var quality))
+                        throw new ArgumentException($"default-quality must be one of: {string.Join(", ", Enum.GetNames<QualityPreset>())}");
+                    config.DefaultQuality = quality;
                     break;
 
                 case "preservemetadata":
-                    config.PreserveMetadata = bool.Parse(value);
+                    config.PreserveMetadataByDefault = bool.Parse(value);
                     break;
 
                 default:
@@ -154,9 +168,22 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
 
     private int ResetConfig()
     {
+        var reset = false;
+
         if (File.Exists(ConfigPath))
         {
             File.Delete(ConfigPath);
+            reset = true;
+        }
+
+        if (File.Exists(LegacyConfigPath))
+        {
+            File.Delete(LegacyConfigPath);
+            reset = true;
+        }
+
+        if (reset)
+        {
             AnsiConsole.MarkupLine("[green]✓[/] Configuration reset to defaults");
         }
         else
@@ -184,19 +211,20 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
     {
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[dim]Available keys:[/]");
-        AnsiConsole.MarkupLine("  tools-path, max-parallel, default-timeout, hardware-accel,");
+        AnsiConsole.MarkupLine("  tools-path, search-system-tools, max-parallel, default-timeout, hardware-accel,");
         AnsiConsole.MarkupLine("  temp-directory, keep-failed-output, verbose-logging,");
         AnsiConsole.MarkupLine("  auto-download-tools, default-quality, preserve-metadata");
     }
 
     private static ConverterXOptions LoadConfig()
     {
-        if (File.Exists(ConfigPath))
+        var path = File.Exists(ConfigPath) ? ConfigPath : LegacyConfigPath;
+        if (File.Exists(path))
         {
             try
             {
-                var json = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<ConverterXOptions>(json) ?? new ConverterXOptions();
+                var json = File.ReadAllText(path);
+                return JsonSerializer.Deserialize<ConverterXOptions>(json, CreateJsonOptions()) ?? new ConverterXOptions();
             }
             catch
             {
@@ -215,7 +243,38 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
             Directory.CreateDirectory(dir);
         }
 
-        var json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(config, CreateJsonOptions());
         File.WriteAllText(ConfigPath, json);
     }
+
+    private static void AddConfigRow(Table table, string setting, string value)
+    {
+        table.Rows.Add(
+        [
+            new Text(setting),
+            new Text(value)
+        ]);
+    }
+
+    private static int ParsePositiveInt(string value, string key)
+    {
+        if (!int.TryParse(value, out var parsed) || parsed < 1)
+            throw new ArgumentException($"{key} must be a positive integer");
+
+        return parsed;
+    }
+
+    private static TimeSpan ParsePositiveTimeSpan(string value, string key)
+    {
+        if (!TimeSpan.TryParse(value, out var parsed) || parsed <= TimeSpan.Zero)
+            throw new ArgumentException($"{key} must be a positive time span");
+
+        return parsed;
+    }
+
+    private static JsonSerializerOptions CreateJsonOptions() => new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
 }

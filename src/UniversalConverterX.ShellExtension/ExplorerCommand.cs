@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 
 namespace UniversalConverterX.ShellExtension;
 
@@ -9,11 +8,8 @@ namespace UniversalConverterX.ShellExtension;
 [ComVisible(true)]
 [Guid(Guids.ExplorerCommand)]
 [ClassInterface(ClassInterfaceType.None)]
-[GeneratedComClass]
 public partial class ConverterExplorerCommand : IExplorerCommand
 {
-    private readonly List<string> _selectedFiles = [];
-
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
     {
         ppszName = "Convert with UniversalConverter X";
@@ -149,15 +145,14 @@ public partial class ConverterExplorerCommand : IExplorerCommand
         if (!File.Exists(exePath))
             return;
 
-        // Build arguments with file list
-        var args = string.Join(" ", files.Select(f => $"\"{f}\""));
-
         var startInfo = new System.Diagnostics.ProcessStartInfo
         {
             FileName = exePath,
-            Arguments = args,
-            UseShellExecute = true
+            UseShellExecute = false
         };
+
+        foreach (var file in files)
+            startInfo.ArgumentList.Add(file);
 
         System.Diagnostics.Process.Start(startInfo);
     }
@@ -191,7 +186,8 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 /// Enumerates subcommands for quick convert presets
 /// </summary>
 [ComVisible(true)]
-[GeneratedComClass]
+[Guid(Guids.SubCommandEnumerator)]
+[ClassInterface(ClassInterfaceType.None)]
 public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 {
     private readonly List<IExplorerCommand> _commands;
@@ -252,18 +248,22 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 /// <summary>
 /// Quick convert command for specific format
 /// </summary>
-[GeneratedComClass]
+[ComVisible(true)]
+[Guid(Guids.QuickConvertCommand)]
+[ClassInterface(ClassInterfaceType.None)]
 public partial class QuickConvertCommand : IExplorerCommand
 {
     private readonly string _title;
     private readonly string _format;
     private readonly string _tooltip;
+    private readonly Guid _canonicalName;
 
     public QuickConvertCommand(string title, string format, string tooltip)
     {
         _title = title;
         _format = format;
         _tooltip = tooltip;
+        _canonicalName = GetCanonicalGuid(format);
     }
 
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
@@ -286,7 +286,7 @@ public partial class QuickConvertCommand : IExplorerCommand
 
     public int GetCanonicalName(out Guid pguidCommandName)
     {
-        pguidCommandName = Guid.NewGuid();
+        pguidCommandName = _canonicalName;
         return HResult.S_OK;
     }
 
@@ -349,19 +349,33 @@ public partial class QuickConvertCommand : IExplorerCommand
         if (string.IsNullOrEmpty(exePath))
             return;
 
-        // Build command for batch conversion
-        var args = $"convert {string.Join(" ", files.Select(f => $"\"{f}\""))} -o {targetFormat}";
-
         var startInfo = new System.Diagnostics.ProcessStartInfo
         {
             FileName = exePath,
-            Arguments = args,
             UseShellExecute = false,
             CreateNoWindow = false
         };
+        startInfo.ArgumentList.Add("convert");
+        foreach (var file in files)
+            startInfo.ArgumentList.Add(file);
+        startInfo.ArgumentList.Add("-o");
+        startInfo.ArgumentList.Add(targetFormat);
 
         System.Diagnostics.Process.Start(startInfo);
     }
+
+    private static Guid GetCanonicalGuid(string format) => format.ToLowerInvariant() switch
+    {
+        "png" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740001"),
+        "jpg" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740002"),
+        "webp" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740003"),
+        "gif" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740004"),
+        "mp4" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740005"),
+        "mp3" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740006"),
+        "wav" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740007"),
+        "pdf" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740008"),
+        _ => new Guid(Guids.QuickConvertCommand)
+    };
 
     private static string GetCliPath()
     {
@@ -389,7 +403,9 @@ public partial class QuickConvertCommand : IExplorerCommand
 /// <summary>
 /// Separator command
 /// </summary>
-[GeneratedComClass]
+[ComVisible(true)]
+[Guid(Guids.SeparatorCommand)]
+[ClassInterface(ClassInterfaceType.None)]
 public partial class SeparatorCommand : IExplorerCommand
 {
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
@@ -412,7 +428,7 @@ public partial class SeparatorCommand : IExplorerCommand
 
     public int GetCanonicalName(out Guid pguidCommandName)
     {
-        pguidCommandName = Guid.NewGuid();
+        pguidCommandName = new Guid(Guids.SeparatorCommand);
         return HResult.S_OK;
     }
 
@@ -443,7 +459,9 @@ public partial class SeparatorCommand : IExplorerCommand
 /// <summary>
 /// Open app command
 /// </summary>
-[GeneratedComClass]
+[ComVisible(true)]
+[Guid(Guids.OpenAppCommand)]
+[ClassInterface(ClassInterfaceType.None)]
 public partial class OpenAppCommand : IExplorerCommand
 {
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
@@ -466,7 +484,7 @@ public partial class OpenAppCommand : IExplorerCommand
 
     public int GetCanonicalName(out Guid pguidCommandName)
     {
-        pguidCommandName = Guid.NewGuid();
+        pguidCommandName = new Guid(Guids.OpenAppCommand);
         return HResult.S_OK;
     }
 
@@ -482,27 +500,32 @@ public partial class OpenAppCommand : IExplorerCommand
         var exePath = GetExecutablePath();
         if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
         {
-            var args = "";
+            var files = new List<string>();
             if (psiItemArray != null)
             {
-                var files = new List<string>();
                 psiItemArray.GetCount(out var count);
                 for (uint i = 0; i < count; i++)
                 {
                     psiItemArray.GetItemAt(i, out var item);
-                    item?.GetDisplayName(SIGDN.FILESYSPATH, out var path);
+                    if (item == null)
+                        continue;
+
+                    item.GetDisplayName(SIGDN.FILESYSPATH, out var path);
                     if (!string.IsNullOrEmpty(path))
-                        files.Add($"\"{path}\"");
+                        files.Add(path);
                 }
-                args = string.Join(" ", files);
             }
 
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            var startInfo = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = args,
-                UseShellExecute = true
-            });
+                UseShellExecute = false
+            };
+
+            foreach (var file in files)
+                startInfo.ArgumentList.Add(file);
+
+            System.Diagnostics.Process.Start(startInfo);
         }
         return HResult.S_OK;
     }

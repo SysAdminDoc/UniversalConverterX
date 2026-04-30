@@ -161,6 +161,52 @@ public class MagicBytesDetectorTests
     }
 
     [Fact]
+    public void DetectFormat_OoxmlZipContainer_ShouldPreferExtension()
+    {
+        var zipBytes = new byte[] { 0x50, 0x4B, 0x03, 0x04 };
+        var tempFile = CreateTempFileWithContent(zipBytes, ".docx");
+
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("docx");
+            format.Category.Should().Be(FormatCategory.Document);
+        }
+        finally
+        {
+            CleanupTempFile(tempFile);
+        }
+    }
+
+    [Fact]
+    public void DetectFormat_AvifIsoBmff_ShouldReturnAvifFormat()
+    {
+        var avifBytes = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x18,
+            0x66, 0x74, 0x79, 0x70,
+            0x61, 0x76, 0x69, 0x66,
+            0x00, 0x00, 0x00, 0x00
+        };
+        var tempFile = CreateTempFileWithContent(avifBytes, ".bin");
+
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("avif");
+            format.Category.Should().Be(FormatCategory.Image);
+        }
+        finally
+        {
+            CleanupTempFile(tempFile);
+        }
+    }
+
+    [Fact]
     public void DetectFormat_NonExistentFile_ShouldReturnNull()
     {
         var format = _detector.DetectFormat("/nonexistent/path/file.xyz");

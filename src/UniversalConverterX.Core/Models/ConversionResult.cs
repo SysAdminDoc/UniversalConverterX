@@ -36,6 +36,11 @@ public class ConversionResult
     public string? ErrorMessage { get; init; }
 
     /// <summary>
+    /// Whether the operation ended because the caller cancelled it.
+    /// </summary>
+    public bool WasCancelled { get; init; }
+
+    /// <summary>
     /// Exit code from the converter process
     /// </summary>
     public int ExitCode { get; init; }
@@ -151,7 +156,8 @@ public class ConversionResult
             Job = job,
             ErrorMessage = "Conversion was cancelled",
             Duration = duration,
-            ExitCode = -1
+            ExitCode = -1,
+            WasCancelled = true
         };
     }
 }

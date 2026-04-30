@@ -40,21 +40,27 @@ public class ToolManager : IToolManager
         if (File.Exists(toolPath))
             return toolPath;
 
-        // Check PATH
-        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
-        foreach (var dir in pathDirs)
+        if (_options.SearchSystemTools)
         {
-            var fullPath = Path.Combine(dir, exeName);
-            if (File.Exists(fullPath))
-                return fullPath;
-        }
+            // Check PATH
+            var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
+            foreach (var dir in pathDirs)
+            {
+                if (string.IsNullOrWhiteSpace(dir))
+                    continue;
 
-        // Check common installation paths
-        var commonPaths = GetCommonPaths(def.Executable);
-        foreach (var path in commonPaths)
-        {
-            if (File.Exists(path))
-                return path;
+                var fullPath = Path.Combine(dir, exeName);
+                if (File.Exists(fullPath))
+                    return fullPath;
+            }
+
+            // Check common installation paths
+            var commonPaths = GetCommonPaths(def.Executable);
+            foreach (var path in commonPaths)
+            {
+                if (File.Exists(path))
+                    return path;
+            }
         }
 
         // Return expected path even if not found

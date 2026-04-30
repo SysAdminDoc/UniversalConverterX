@@ -131,8 +131,6 @@ public partial class LibHeifConverter : BaseConverterStrategy
 
     protected override string GetExecutablePath()
     {
-        var inputExt = ""; // We'll determine this dynamically
-        
         // For encoding, use heif-enc; for decoding, use heif-convert
         // Default to heif-convert for detection
         var baseName = ExecutableName;

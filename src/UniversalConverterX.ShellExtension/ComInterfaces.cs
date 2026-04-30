@@ -10,6 +10,10 @@ public static class Guids
 {
     public const string ExplorerCommand = "7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3";
     public const string ContextMenu = "8F9C0B2D-3E4F-5A6B-C7D8-E9F0A1B2C3D4";
+    public const string SubCommandEnumerator = "3D7F4E8A-5C9B-4A2F-9D1E-8C7B6A5F4E3D";
+    public const string QuickConvertCommand = "4E8A5C9B-6D7F-4B30-A1E2-9D8C7B6A5F4E";
+    public const string SeparatorCommand = "5F9B6D7F-8E4A-4C41-B2F3-AE9D8C7B6A5F";
+    public const string OpenAppCommand = "6A5F8E4A-9B6D-4D52-C3A4-BFAE9D8C7B6A";
 }
 
 /// <summary>
