@@ -24,13 +24,22 @@ public interface ISidecarRunner
     /// </summary>
     string? Locate(string toolName);
 
+    /// <summary>
+    /// Default watchdog grace period. A sidecar that emits no NDJSON events for
+    /// longer than this is presumed stuck and killed. Pages that genuinely run
+    /// quietly (e.g. waiting on a long network upload) should pass a larger
+    /// <c>silenceTimeout</c> rather than relying on the default.
+    /// </summary>
+    public static readonly TimeSpan DefaultSilenceTimeout = TimeSpan.FromMinutes(10);
+
     Task<SidecarResult> RunAsync(
         string toolName,
         IEnumerable<string> args,
         IProgress<SidecarProgress>? progress = null,
         IProgress<SidecarLog>? log = null,
         CancellationToken ct = default,
-        Action<string, JsonElement>? onRawEvent = null);
+        Action<string, JsonElement>? onRawEvent = null,
+        TimeSpan? silenceTimeout = null);
 }
 
 public sealed class SidecarRunner : ISidecarRunner
@@ -63,7 +72,8 @@ public sealed class SidecarRunner : ISidecarRunner
         IProgress<SidecarProgress>? progress = null,
         IProgress<SidecarLog>? log = null,
         CancellationToken ct = default,
-        Action<string, JsonElement>? onRawEvent = null)
+        Action<string, JsonElement>? onRawEvent = null,
+        TimeSpan? silenceTimeout = null)
     {
         var exe = Locate(toolName);
         if (exe is null)
@@ -108,6 +118,22 @@ public sealed class SidecarRunner : ISidecarRunner
         string? errorCode = null;
         string? errorMessage = null;
 
+        // Watchdog: if no NDJSON event lands for `effectiveTimeout`, cancel via
+        // a linked CTS so the kill path below runs. Reset on every event the
+        // sidecar emits — progress, log, segment, stem, device, complete, error.
+        var effectiveTimeout = silenceTimeout ?? ISidecarRunner.DefaultSilenceTimeout;
+        using var watchdogCts = new CancellationTokenSource();
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, watchdogCts.Token);
+        var lct = linkedCts.Token;
+        var stuckByWatchdog = false;
+
+        void ResetWatchdog()
+        {
+            try { watchdogCts.CancelAfter(effectiveTimeout); }
+            catch (ObjectDisposedException) { /* race with completion — ignore */ }
+        }
+        ResetWatchdog();
+
         process.Start();
 
         // Stream stdout line-by-line, parsing NDJSON.
@@ -117,9 +143,12 @@ public sealed class SidecarRunner : ISidecarRunner
             {
                 while (!process.StandardOutput.EndOfStream)
                 {
-                    ct.ThrowIfCancellationRequested();
-                    var line = await process.StandardOutput.ReadLineAsync(ct).ConfigureAwait(false);
+                    lct.ThrowIfCancellationRequested();
+                    var line = await process.StandardOutput.ReadLineAsync(lct).ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    // Any output (NDJSON or otherwise) means the sidecar is alive.
+                    ResetWatchdog();
 
                     try
                     {
@@ -186,11 +215,33 @@ public sealed class SidecarRunner : ISidecarRunner
 
         try
         {
-            await process.WaitForExitAsync(ct).ConfigureAwait(false);
+            await process.WaitForExitAsync(lct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
+            // Determine which side of the linked CTS fired: watchdog vs. user.
+            stuckByWatchdog = watchdogCts.IsCancellationRequested && !ct.IsCancellationRequested;
             try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { /* swallow */ }
+
+            if (stuckByWatchdog)
+            {
+                log?.Report(new SidecarLog(
+                    "warn",
+                    $"{toolName} emitted no output for " +
+                    $"{(int)effectiveTimeout.TotalSeconds}s — killed as stuck"));
+                return new SidecarResult(
+                    Success: false,
+                    OutputPath: null,
+                    SizeBytes: null,
+                    ErrorCode: "stuck_sidecar",
+                    ErrorMessage:
+                        $"{toolName} produced no output for " +
+                        $"{(int)effectiveTimeout.TotalSeconds}s and was terminated. " +
+                        $"Pass a larger silenceTimeout to RunAsync if this sidecar " +
+                        $"runs quietly during long network or model-load phases.",
+                    ExitCode: -1);
+            }
+
             return new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", -1);
         }
 
