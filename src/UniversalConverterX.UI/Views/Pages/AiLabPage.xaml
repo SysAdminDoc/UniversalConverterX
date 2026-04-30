@@ -178,20 +178,17 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="8">
-                        <TextBlock Text="1. Import" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="1. Import" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="Drop media, inspect streams, detect duration, codec, subtitles, and target workflow."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="8">
-                        <TextBlock Text="2. Preview" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="2. Preview" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="Show before/after frames, estimated storage, model cost, and fallback behavior before processing."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Spacing="8">
-                        <TextBlock Text="3. Export" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="3. Export" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="Queue batch output with format presets, alpha/subtitle handling, and clear partial-success results."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>

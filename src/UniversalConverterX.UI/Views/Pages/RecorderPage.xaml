@@ -59,7 +59,7 @@
                             Style="{StaticResource IconButtonStyle}"
                             Click="RemoveQueued_Click"
                             Tag="{Binding}">
-                        <FontIcon Glyph="&#xE711;" FontSize="12"
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
 
