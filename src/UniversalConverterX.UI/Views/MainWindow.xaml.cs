@@ -23,6 +23,7 @@ public sealed partial class MainWindow : Window
         new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
         new("GIF Maker", "Convert video clips to high-quality animated GIFs", "gif-maker"),
         new("Image Converter", "Convert HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP", "image-converter"),
+        new("Auto Reframe", "Convert horizontal video to 9:16 / 1:1 / 4:5 with optional face tracking", "auto-reframe"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -110,6 +111,7 @@ public sealed partial class MainWindow : Window
             "lip-reading" => typeof(LipReadingPage),
             "gif-maker" => typeof(GifMakerPage),
             "image-converter" => typeof(ImageConverterPage),
+            "auto-reframe" => typeof(AutoReframePage),
             _ => typeof(PlaceholderPage)
         };
 

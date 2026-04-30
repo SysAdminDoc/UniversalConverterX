@@ -60,6 +60,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #5 HEICShift / Image Converter — new `heicshift` Pillow+pillow_heif sidecar, `ImageConverterPage` with format/quality/metadata controls, route + Toolbox tile wired (JXL/RAW deferred).
 - ✓ #7 edge-tts Text-to-Speech — new `edge-tts` async sidecar (322 voices, MIT, no API key), TextToSpeechPage rebuilt with voice picker/rate/pitch/format controls + Save-to picker, ToolboxPage tile flipped Future → Ready.
 - ✓ #11 RNNoise Noise Remover — new `rnnoise` sidecar via FFmpeg `arnndn` filter (no Python ML deps), NoiseRemoverPage rewritten with model picker + muxed/audio-only modes, ToolboxPage tile flipped Future → Ready.
+- ✓ #3 Vertigo Auto-Reframe — new `vertigo` sidecar with FFmpeg static centre-crop + optional MediaPipe smart face-tracking, new `AutoReframePage`, route + Toolbox tile wired. Reframes to 9:16 / 1:1 / 4:5 / 3:4. Broader Vertigo pipeline tracked as UC item M.
 
 ---
 
@@ -75,8 +76,8 @@ ORT 1.25.1 patches heap out-of-bounds read/write, Pad Reflect vulnerability, tra
 
 ### Missing Sidecar / Route Wiring
 
-#### 3. Vertigo Auto-Reframe sidecar
-Source code exists in `tools/vertigo/`; no `sidecar.py` yet. MediaPipe face/body tracking → center-of-interest crop → output 9:16, 1:1, or 4:5. Wire to AutoReframePage. **Impact 4 / Effort 3.** [plan]
+#### 3. Vertigo Auto-Reframe sidecar ✓ Shipped v2.4
+Source code exists in `tools/vertigo/`; no `sidecar.py` yet. MediaPipe face/body tracking → center-of-interest crop → output 9:16, 1:1, or 4:5. Wire to AutoReframePage. **Impact 4 / Effort 3.** [plan] Shipped: new [`tools/vertigo/sidecar.py`](tools/vertigo/sidecar.py) with `reframe` + `list-aspects` ops. Two modes: `static` is pure FFmpeg centred-crop (zero deps); `smart` samples frames at 1 Hz with MediaPipe face detection, smooths the largest-face track over a 5-frame window, and drives a piecewise-linear `crop=W:H:'<x_expr>'` over time. Falls back to static if MediaPipe / OpenCV not bundled or no faces found. Aspects: 9:16, 1:1, 4:5, 3:4. [`tools/vertigo/build.ps1`](tools/vertigo/build.ps1) bundles cv2 + mediapipe by default with `-NoSmart` switch for a lean static-only build. New [`Views/Pages/AutoReframePage`](src/UniversalConverterX.UI/Views/Pages/AutoReframePage.xaml) with aspect combo, static/smart radio group, CRF slider, batch queue. Route `auto-reframe` wired in `MainWindow.xaml.cs`, ToolboxPage tile flipped Planned → Ready ("Powered by Vertigo"). Note: this sidecar deliberately ships only the reframe op; the broader Vertigo editor pipeline (animated captions, B-roll, hook scoring, scene detection) remains under-consideration as roadmap item M.
 
 #### 4. GifStudio route wiring ✓ Shipped v2.4
 WebView2-hosted GIF editor source exists. Wire route in `MainWindow.xaml.cs` and add `sidecar.py` for FFmpeg → palette optimization → GIF pipeline with loop count and delay controls. **Impact 3 / Effort 2.** [plan] Shipped: new [`tools/gifstudio/sidecar.py`](tools/gifstudio/sidecar.py) two-pass FFmpeg `palettegen`+`paletteuse` pipeline with `make` + `list-presets` ops, [`tools/gifstudio/build.ps1`](tools/gifstudio/build.ps1) PyInstaller freeze, [`Views/Pages/GifMakerPage.xaml`](src/UniversalConverterX.UI/Views/Pages/GifMakerPage.xaml) batch queue UI with width / fps / loop / start / duration controls, route `gif-maker` wired in `MainWindow.xaml.cs`, ToolboxPage tile flipped Planned → Ready. Contract test KNOWN_EVENTS extended with `preset`.
