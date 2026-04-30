@@ -28,7 +28,7 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center" Spacing="1">
                         <TextBlock Text="UCX" Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Universal Converter"
+                        <TextBlock Text="Local media tools"
                                    Style="{StaticResource SubtleTextStyle}"
                                    Foreground="{StaticResource TextMutedBrush}"/>
                     </StackPanel>
@@ -37,7 +37,7 @@
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Name="NavSearchBox"
-                                PlaceholderText="Search modules and tools..."
+                                PlaceholderText="Search tasks and tools"
                                 QueryIcon="Find"
                                 TextChanged="NavSearchBox_TextChanged"
                                 SuggestionChosen="NavSearchBox_SuggestionChosen"

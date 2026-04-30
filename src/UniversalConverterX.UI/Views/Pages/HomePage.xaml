@@ -106,25 +106,11 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:Key="PersonaTemplate">
-            <Border Width="244" Height="128" Padding="16" Margin="0,0,12,12"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="{Binding Title}" Style="{StaticResource LabelTextStyle}"/>
-                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedTextStyle}"
-                               TextWrapping="Wrap" MaxLines="3"/>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
         <Grid Padding="32" RowSpacing="26">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -154,18 +140,18 @@
                                            Foreground="{StaticResource AccentPrimaryBrush}"/>
                             </StackPanel>
                         </Border>
-                        <TextBlock Text="The all-in-one media workshop, kept entirely on your machine."
+                        <TextBlock Text="Convert, compress, download, record, and inspect media locally."
                                    Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
-                        <TextBlock Text="Convert, compress, edit, download, record, and inspect — every workflow as a guided queue with clear output, recovery, and status. Files stay on disk unless you opt in."
+                        <TextBlock Text="Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,10,0,0">
-                            <Button Content="Open Converter" Style="{StaticResource PrimaryButtonStyle}"
+                            <Button Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenConverter_Click"/>
                             <Button Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="OpenAiLab_Click"/>
-                            <Button Content="Browse Toolbox" Style="{StaticResource GhostButtonStyle}"
+                            <Button Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
                                     Click="OpenToolbox_Click"/>
                         </StackPanel>
                     </StackPanel>
@@ -176,53 +162,57 @@
                         <StackPanel Spacing="18">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
-                                <TextBlock Text="Workspace status" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <TextBlock Text="Workspace behavior" Style="{StaticResource PanelTitleTextStyle}"/>
                             </StackPanel>
-                            <Grid RowSpacing="14" ColumnSpacing="14">
+                            <Grid RowSpacing="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
+                                <Border Grid.Row="0" Background="{StaticResource SurfaceLightBrush}"
                                         CornerRadius="14" Padding="14,12">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="7" Style="{StaticResource MetricNumberTextStyle}"
-                                                   Foreground="{StaticResource AccentPrimaryBrush}"/>
-                                        <TextBlock Text="MODULES READY" Style="{StaticResource MetricLabelTextStyle}"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
-                                        CornerRadius="14" Padding="14,12">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="29" Style="{StaticResource MetricNumberTextStyle}"
-                                                   Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <TextBlock Text="TOOLS MAPPED" Style="{StaticResource MetricLabelTextStyle}"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="14" Padding="14,12">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Text="1,000+" Style="{StaticResource MetricNumberTextStyle}"
-                                                   Foreground="{StaticResource AccentOrangeBrush}"/>
-                                        <TextBlock Text="FORMATS COVERED" Style="{StaticResource MetricLabelTextStyle}"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
-                                        CornerRadius="14" Padding="14,12">
-                                    <StackPanel Spacing="6">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon Glyph="&#xE83D;" FontSize="14"
-                                                      Foreground="{StaticResource AccentGreenBrush}"
-                                                      VerticalAlignment="Center"/>
-                                            <TextBlock Text="Local" FontSize="20" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource AccentGreenBrush}"
-                                                       VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE73E;" FontSize="15"
+                                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="Local by default" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Text="Files stay on disk unless a workflow says otherwise." Style="{StaticResource MutedTextStyle}"/>
                                         </StackPanel>
-                                        <TextBlock Text="DEFAULT MODE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Background="{StaticResource SurfaceMutedBrush}"
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE8FD;" FontSize="15"
+                                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="Queue based" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Text="Progress, cancellation, and results stay visible." Style="{StaticResource MutedTextStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="2" Background="{StaticResource SurfaceLightBrush}"
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE946;" FontSize="15"
+                                                  Foreground="{StaticResource AccentOrangeBrush}"/>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="Readiness shown" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Text="Unavailable tools explain what is missing." Style="{StaticResource MutedTextStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="3" Background="{StaticResource SurfaceMutedBrush}"
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <FontIcon Glyph="&#xE72E;" FontSize="15"
+                                                  Foreground="{StaticResource AccentGreenBrush}"/>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="No telemetry" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Text="No usage tracking is sent from the app." Style="{StaticResource MutedTextStyle}"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -234,7 +224,7 @@
             <Border Grid.Row="1" Style="{StaticResource CardStyle}"
                     CornerRadius="20" Padding="14,8">
                 <AutoSuggestBox x:Name="TaskSearchBox"
-                                PlaceholderText="Search a task: convert, compress, record, inspect, extract frames..."
+                                PlaceholderText="Search tasks: convert, compress, record, inspect, frames"
                                 QueryIcon="Find"
                                 TextChanged="TaskSearchBox_TextChanged"
                                 SuggestionChosen="TaskSearchBox_SuggestionChosen"
@@ -254,7 +244,7 @@
             <StackPanel Grid.Row="2" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Ready to use" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -265,7 +255,7 @@
             <StackPanel Grid.Row="3" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Local intelligence" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Availability shown" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -275,7 +265,7 @@
 
             <StackPanel Grid.Row="4" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Professional Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
                     <TextBlock Text="Specialized utilities" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
@@ -284,18 +274,7 @@
                           ItemTemplate="{StaticResource ClusterTemplate}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="5" Spacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Choose Your Scenario" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Workflow guidance" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom"/>
-                </StackPanel>
-                <GridView x:Name="PersonasGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          ItemClick="PersonaTile_Click"
-                          ItemTemplate="{StaticResource PersonaTemplate}"/>
-            </StackPanel>
-
-            <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="12"
+            <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="12"
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>

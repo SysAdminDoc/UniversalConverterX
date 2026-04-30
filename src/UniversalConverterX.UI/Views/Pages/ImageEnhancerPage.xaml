@@ -14,7 +14,7 @@
             <!-- Header -->
             <StackPanel Spacing="6">
                 <TextBlock Text="Image Enhancer" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Sharpen, denoise, upscale, and restore photos without cloud processing."
+                <TextBlock Text="Planned image upscaling, denoise, sharpening, and restoration."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
 
@@ -34,7 +34,7 @@
                     <StackPanel Grid.Column="1" Spacing="6">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="WAVE 2" Style="{StaticResource EyebrowTextStyle}"
+                                <TextBlock Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
                                            Foreground="{StaticResource TextInverseBrush}"/>
                             </Border>
                             <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource AccentCyanBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Image Enhancer is not yet available in this build."
+                        <TextBlock Text="Image Enhancer is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: Real-ESRGAN image sidecar, standalone workflow (no video pipeline), face enhancement mode, and batch export UI."
+                        <TextBlock Text="Required before enabling: standalone image pipeline, preview, batch export, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -54,7 +54,8 @@
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
-                    AllowDrop="True"
+                    AllowDrop="False"
+                    Opacity="0.72"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -66,18 +67,19 @@
                                   Foreground="{StaticResource AccentCyanBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop image files here or click Browse"
+                               Text="Input is disabled until this workflow is ready."
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"/>
                     <Button Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
                             HorizontalAlignment="Center"
                             Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -138,7 +140,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Enhance Images"

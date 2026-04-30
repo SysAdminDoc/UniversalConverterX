@@ -350,7 +350,7 @@ public sealed partial class DownloaderPage : Page
     }
 
     private static string QualityLabel(string quality)
-        => quality == "best" ? "Best" : $"{quality}p";
+        => quality == "best" ? "Highest available" : $"{quality}p";
 
     private static void OpenContainingFolder(string? path)
     {

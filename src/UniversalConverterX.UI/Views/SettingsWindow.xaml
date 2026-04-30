@@ -27,7 +27,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Spacing="5">
                     <TextBlock Text="Settings" Style="{StaticResource TitleTextStyle}"/>
-                    <TextBlock Text="Tune defaults, local tools, Explorer integration, and appearance without changing your files."
+                    <TextBlock Text="Set defaults, local tool paths, Explorer integration, and appearance."
                                Style="{StaticResource SubtitleTextStyle}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
@@ -41,7 +41,7 @@
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE83D;" FontSize="15"
                                   Foreground="{StaticResource AccentGreenBrush}"/>
-                        <TextBlock Text="Offline-first defaults"
+                        <TextBlock Text="Local defaults"
                                    Style="{StaticResource PillTextStyle}"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                     </StackPanel>
@@ -77,7 +77,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="OutputDirectoryTextBox"
-                                     Header="Default Output Directory"
+                                     Header="Default output folder"
                                      PlaceholderText="Same as input file"
                                      Style="{StaticResource PremiumTextBoxStyle}"
                                      IsReadOnly="True"/>
@@ -156,7 +156,7 @@
                             <ComboBoxItem Content="Low"/>
                             <ComboBoxItem Content="Medium - Balanced"/>
                             <ComboBoxItem Content="High - Recommended"/>
-                            <ComboBoxItem Content="Highest - Best quality"/>
+                            <ComboBoxItem Content="Highest - Largest files"/>
                             <ComboBoxItem Content="Lossless - No quality loss"/>
                         </ComboBox>
 
@@ -356,7 +356,7 @@
                         <!-- Register/Unregister Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
                             <Button x:Name="RegisterShellButton"
-                                    Content="Register Context Menu"
+                                    Content="Register"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="RegisterShell_Click"/>
                             <Button x:Name="UnregisterShellButton"
@@ -470,7 +470,7 @@
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 
-                        <TextBlock Text="A powerful file conversion tool with Windows shell integration. Supports 1000+ formats via FFmpeg, ImageMagick, Pandoc, and other CLI tools."
+                        <TextBlock Text="A local file conversion workspace with optional Windows Explorer integration."
                                    TextWrapping="Wrap"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
 
@@ -486,7 +486,7 @@
                                 Click="CheckUpdates_Click"/>
 
                         <!-- Credits -->
-                        <TextBlock Text="Built with:" Margin="0,16,0,0"/>
+                        <TextBlock Text="Local engines:" Margin="0,16,0,0"/>
                         <TextBlock Text="• FFmpeg - Video/Audio processing (LGPL/GPL)&#x0a;• ImageMagick - Image processing (Apache 2.0)&#x0a;• Pandoc - Document conversion (GPL)&#x0a;• LibreOffice - Office documents (MPL)&#x0a;• Ghostscript - PDF processing (AGPL)&#x0a;• Inkscape - Vector graphics (GPL)&#x0a;• Calibre - Ebook conversion (GPL)"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="12"/>
@@ -508,7 +508,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Button x:Name="ResetButton"
-                        Content="Reset to Defaults"
+                        Content="Reset Defaults"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="ResetSettings_Click"/>
 

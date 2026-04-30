@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Title="Converting - UniversalConverter X">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="24">
+    <Grid Background="{StaticResource BackgroundBrush}" Padding="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,12 +19,11 @@
         <!-- Header -->
         <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
             <TextBlock x:Name="TitleText" 
-                       Text="Converting Files" 
-                       Style="{StaticResource TitleTextBlockStyle}"/>
+                       Text="Converting files"
+                       Style="{StaticResource TitleTextStyle}"/>
             <TextBlock x:Name="StatusText" 
-                       Text="Preparing..."
-                       Style="{StaticResource BodyTextBlockStyle}"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                       Text="Preparing queue..."
+                       Style="{StaticResource SubtitleTextStyle}"/>
         </StackPanel>
 
         <!-- File List -->
@@ -32,6 +31,7 @@
                   Grid.Row="1"
                   SelectionMode="None"
                   IsItemClickEnabled="False"
+                  Background="Transparent"
                   Margin="0,0,0,16">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -59,15 +59,14 @@
                         <TextBlock Grid.Column="1" 
                                    Grid.Row="0"
                                    Text="{Binding FileName}"
-                                   Style="{StaticResource BodyStrongTextBlockStyle}"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
 
                         <!-- Status Text -->
                         <TextBlock Grid.Column="1" 
                                    Grid.Row="1"
                                    Text="{Binding StatusMessage}"
-                                   Style="{StaticResource CaptionTextBlockStyle}"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Style="{StaticResource MutedTextStyle}"
                                    Visibility="{Binding ShowStatus}"/>
 
                         <!-- Progress Bar -->
@@ -85,12 +84,10 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right">
                             <TextBlock Text="{Binding SizeInfo}"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Style="{StaticResource MutedTextStyle}"
                                        HorizontalAlignment="Right"/>
                             <TextBlock Text="{Binding TimeInfo}"
-                                       Style="{StaticResource CaptionTextBlockStyle}"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Style="{StaticResource MutedTextStyle}"
                                        HorizontalAlignment="Right"/>
                         </StackPanel>
                     </Grid>
@@ -107,12 +104,11 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock x:Name="OverallProgressText" 
                            Text="0 of 0 files"
-                           Style="{StaticResource BodyTextBlockStyle}"/>
+                           Style="{StaticResource BodyTextStyle}"/>
                 <TextBlock x:Name="EtaText" 
                            Grid.Column="1"
                            Text=""
-                           Style="{StaticResource BodyTextBlockStyle}"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                           Style="{StaticResource MutedTextStyle}"/>
             </Grid>
             <ProgressBar x:Name="OverallProgressBar"
                          Value="0"
@@ -126,17 +122,20 @@
                     HorizontalAlignment="Right">
             <Button x:Name="OpenFolderButton"
                     Content="Open Output Folder"
+                    Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenFolder_Click"
                     Visibility="Collapsed"/>
             <Button x:Name="PauseButton"
                     Content="Pause"
+                    Style="{StaticResource SecondaryButtonStyle}"
                     Click="Pause_Click"/>
             <Button x:Name="CancelButton"
                     Content="Cancel"
+                    Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"/>
             <Button x:Name="CloseButton"
                     Content="Close"
-                    Style="{StaticResource AccentButtonStyle}"
+                    Style="{StaticResource PrimaryButtonStyle}"
                     Click="Close_Click"
                     Visibility="Collapsed"/>
         </StackPanel>
