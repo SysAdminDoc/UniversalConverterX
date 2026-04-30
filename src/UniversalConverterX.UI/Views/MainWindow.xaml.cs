@@ -28,6 +28,7 @@ public sealed partial class MainWindow : Window
         new("Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution", "ai-video-enhancer"),
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
+        new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -129,6 +130,7 @@ public sealed partial class MainWindow : Window
             "image-converter" => typeof(ImageConverterPage),
             "auto-reframe" => typeof(AutoReframePage),
             "chapter-marks" => typeof(ChapterMarksPage),
+            "watch-folders" => typeof(WatchFoldersPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -234,7 +236,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

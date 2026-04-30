@@ -210,8 +210,8 @@ Add/remove audio, subtitle, and data tracks from a video container without re-en
 
 ### Library & Automation
 
-#### 25. Watch Folder Automation
-Monitor a folder via `FileSystemWatcher`; apply a user-defined conversion profile to new files automatically. Queue fed into existing conversion pipeline. Unmanic and Tdarr prove sustained demand for this pattern. **Impact 4 / Effort 3.** [R-9, R-10]
+#### 25. Watch Folder Automation ✓ Shipped v2.4
+Monitor a folder via `FileSystemWatcher`; apply a user-defined conversion profile to new files automatically. Queue fed into existing conversion pipeline. Unmanic and Tdarr prove sustained demand for this pattern. **Impact 4 / Effort 3.** [R-9, R-10] Shipped: `IWatchFolderService` (`src/UniversalConverterX.UI/Services/WatchFolderService.cs`) — singleton, eager-resolved at app launch so saved profiles begin watching immediately. Each profile (name / folder / glob filter / action / preset / output dir / enabled) persists to `%LocalAppData%\UniversalConverterX\watches.json`. Per-profile `FileSystemWatcher`; debounced via 3-sample stable-size detection + exclusive-open probe before processing (rejects files still being written). Maps Compress action -> videocrush sidecar, Convert action -> clipforge `rewrap`. New `WatchFoldersPage` with profile cards (toggle switch / edit / remove), New Watch ContentDialog form, recent activity log (200-event ring). New Toolbox tile under "Other tools" + nav search entry. PowerShell side covered by `Watch-MediaFolder` cmdlet shipped with #27.
 
 #### 26. Conversion History Dashboard
 Persistent SQLite log of every job (timestamp, source, target, engine, duration, size delta, exit code). History page with search, filter, re-run, and aggregate "space saved" display. **Impact 3 / Effort 2.** [R-10, R-13]

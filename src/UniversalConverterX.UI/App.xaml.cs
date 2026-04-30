@@ -41,6 +41,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
+        services.AddSingleton<IWatchFolderService, WatchFolderService>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();
@@ -59,6 +60,11 @@ public partial class App : Application
         };
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
+
+        // Eagerly resolve so any saved watch profiles start watching at launch,
+        // even before the user opens the Watch Folders page.
+        _ = Services.GetRequiredService<IWatchFolderService>();
+
         _ = ConfigureJumpListAsync();
     }
 
