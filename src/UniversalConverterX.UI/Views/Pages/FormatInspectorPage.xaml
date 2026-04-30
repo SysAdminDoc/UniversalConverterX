@@ -162,9 +162,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Trust Check"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="ToolStatusText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -193,9 +191,7 @@
                                     Visibility="Collapsed"
                                     Spacing="12">
                             <TextBlock x:Name="ReportTitle"
-                                       FontSize="18"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Style="{StaticResource SectionHeaderTextStyle}"
                                        TextTrimming="CharacterEllipsis"/>
                             <TextBlock x:Name="ReportSummary"
                                        Style="{StaticResource MutedTextStyle}"
@@ -206,9 +202,7 @@
                                           Padding="10"
                                           CornerRadius="8">
                                 <TextBlock x:Name="ReportDetails"
-                                           Style="{StaticResource MutedTextStyle}"
-                                           FontFamily="Cascadia Mono, Consolas"
-                                           FontSize="11"
+                                           Style="{StaticResource CodeTextStyle}"
                                            TextWrapping="Wrap"/>
                             </ScrollViewer>
                         </StackPanel>

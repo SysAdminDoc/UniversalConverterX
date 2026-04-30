@@ -20,7 +20,7 @@
 
             <!-- Dev status banner -->
             <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource AccentOrangeBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="20">
@@ -72,7 +72,7 @@
                             Background="{StaticResource SurfaceLightBrush}"
                             HorizontalAlignment="Center">
                         <FontIcon Glyph="&#xE7B3;" FontSize="32"
-                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                                  Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
                                Text="Drop video files here or click Browse"
@@ -94,8 +94,7 @@
 
                 <Border Grid.Column="0" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Upscale" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Upscale" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Scale Factor" Style="{StaticResource MutedTextStyle}"/>
                             <ComboBox HorizontalAlignment="Stretch">
@@ -126,8 +125,7 @@
 
                 <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Frame Interpolation" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Frame Interpolation" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ToggleSwitch Header="RIFE frame interpolation"
                                       OffContent="Off" OnContent="On"/>
                         <StackPanel Spacing="6">
@@ -162,7 +160,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Video Enhancer is coming in Wave 2."
+                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Enhance Video"

@@ -41,10 +41,8 @@
                 </Border>
 
                 <TextBlock x:Name="HeadlineText" Text="Module under construction"
+                           Style="{StaticResource TitleTextStyle}"
                            TextAlignment="Center"
-                           FontSize="24" FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           LineHeight="30"
                            TextWrapping="Wrap"/>
 
                 <TextBlock x:Name="DescriptionText"
