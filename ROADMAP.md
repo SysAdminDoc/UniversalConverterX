@@ -55,6 +55,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #49 Sidecar NDJSON contract conformance test (`tests/sidecar_contract/check_contract.py`) — frozen-guard, error-code-field, known-events checks
 - ✓ #50 Unified `tools/build-all.ps1` orchestrator with build report (`artifacts/build-reports/build-report.{json,md}`)
 - ✓ #51 SidecarRunner no-progress watchdog — `stuck_sidecar` error code after `silenceTimeout` (default 10 min)
+- ✓ #10 + #23 verified already shipped in v2.3 (lossless trim default-on; ClipForge rewrap op) — roadmap entries reclassified.
 
 ---
 
@@ -95,8 +96,8 @@ ImageUpscalerPage and VideoEnhancerPage stubs exist. Use `realesrgan-ncnn-vulkan
 
 ### AI Engine Quality
 
-#### 10. Lossless Trim Mode (stream copy, no re-encode)
-Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy`. Expose as a "Lossless Cut" toggle — default for trim-only operations. Zero quality loss, 10–100× faster than transcoding. **Impact 5 / Effort 2.** [R-3]
+#### 10. Lossless Trim Mode (stream copy, no re-encode) ✓ Shipped v2.3 (verified v2.4)
+Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy`. Expose as a "Lossless Cut" toggle — default for trim-only operations. Zero quality loss, 10–100× faster than transcoding. **Impact 5 / Effort 2.** [R-3] Already in tree: `tools/clipforge/sidecar.py:133` runs `ffmpeg ... -c copy`; `EditorPage.xaml:272` exposes `LosslessCheck` defaulted to `IsChecked="True"`; `EditorPage.xaml.cs:524` passes `--lossless` through.
 
 #### 11. RNNoise Noise Remover sidecar
 NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes broadband background noise from speech audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute. **Impact 4 / Effort 2.** [R-9]
@@ -181,8 +182,8 @@ ClipForge needs a visual waveform + keyframe thumbnail strip below the seek bar 
 #### 22. Chapter Marks Editor (MKV/MP4)
 Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose as a toolbox workspace (MetadataEditor stub adjacent). LosslessCut's most-used feature class for podcast/long-form audiences. **Impact 3 / Effort 2.** [R-3]
 
-#### 23. Rewrap Without Re-encode (Container Swap)
-`ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in both Converter and Toolbox. **Impact 4 / Effort 1.** [R-3]
+#### 23. Rewrap Without Re-encode (Container Swap) ✓ Shipped v2.3
+`ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in both Converter and Toolbox. **Impact 4 / Effort 1.** [R-3] Shipped: `tools/clipforge/sidecar.py:331` `op_rewrap`; ClipForge editor exposes a "Rewrap" operation tile with target-extension picker (mp4/mkv/mov/ts). Future polish: surface in the Converter's main format picker too (separate item if demand).
 
 #### 24. Multi-Track Stream Management
 Add/remove audio, subtitle, and data tracks from a video container without re-encoding. LosslessCut's most-requested feature class. Expose as a track manager panel in ClipForge sidebar. **Impact 4 / Effort 3.** [R-3]
