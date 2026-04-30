@@ -78,6 +78,7 @@ public sealed partial class ToolboxPage : Page
         // Other
         OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));
         OtherTools.Add(new ToolboxTile("chapter-marks", "Chapter Marks", "Edit embedded MKV / MP4 chapter markers (no re-encode)", "\uE8B7", blue, "Ready", green, false, "FFmpeg"));
+        OtherTools.Add(new ToolboxTile("watch-folders", "Watch Folders", "Auto-process files dropped into a watched folder", "\uED25", green, "Ready", green, false, "UCX"));
         OtherTools.Add(new ToolboxTile("batch-rename", "Batch Rename", "Rename files with patterns", "\uE8AC", blue, "Future", yellow, false, null));
     }
 
