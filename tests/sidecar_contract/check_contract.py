@@ -47,6 +47,7 @@ KNOWN_EVENTS = {
     "vmaf_summary",  # clipforge.vmaf — pooled mean / harmonic / min / pct<70
     "scene",         # scenedetect — detected scene cut (start/end timecodes)
     "thumb",         # clipforge.timeline — generated thumbnail in the strip
+    "track",         # clipforge.track-list — enumerated container stream
 }
 
 

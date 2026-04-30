@@ -46,6 +46,7 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Detect highlight ranges and trim", "\uE71D", green, "Planned", orange, true, "ClipForge"));
         VideoTools.Add(new ToolboxTile("scene-detect", "Scene Detection", "Find cuts via PySceneDetect; export to CSV / EDL CMX 3600", "\uE71D", blue, "Ready", green, false, "PySceneDetect"));
         VideoTools.Add(new ToolboxTile("timeline-preview", "Timeline Preview", "Thumbnail strip + audio waveform image for any video", "\uE71D", blue, "Ready", green, false, "ClipForge"));
+        VideoTools.Add(new ToolboxTile("track-manager", "Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "\uE93F", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5 (static or smart face track)", "\uE740", blue, "Ready", green, true, "Vertigo"));
         VideoTools.Add(new ToolboxTile("auto-crop", "Auto Crop", "Detect subject and crop accordingly", "\uE7A8", blue, "Future", yellow, true, null));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Ready", blue, false, "VideoSubtitleRemover"));

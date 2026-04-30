@@ -205,8 +205,8 @@ Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose a
 #### 23. Rewrap Without Re-encode (Container Swap) ✓ Shipped v2.3
 `ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in both Converter and Toolbox. **Impact 4 / Effort 1.** [R-3] Shipped: `tools/clipforge/sidecar.py:331` `op_rewrap`; ClipForge editor exposes a "Rewrap" operation tile with target-extension picker (mp4/mkv/mov/ts). Future polish: surface in the Converter's main format picker too (separate item if demand).
 
-#### 24. Multi-Track Stream Management
-Add/remove audio, subtitle, and data tracks from a video container without re-encoding. LosslessCut's most-requested feature class. Expose as a track manager panel in ClipForge sidebar. **Impact 4 / Effort 3.** [R-3]
+#### 24. Multi-Track Stream Management ✓ Shipped v2.4
+Add/remove audio, subtitle, and data tracks from a video container without re-encoding. LosslessCut's most-requested feature class. Expose as a track manager panel in ClipForge sidebar. **Impact 4 / Effort 3.** [R-3] Shipped: three new clipforge ops -- `track-list` (ffprobe enumeration; emits one `track` event per stream with codec / language / title / channels / dimensions / default flag), `track-remove` (builds an `-map 0:N` chain that includes every stream EXCEPT the comma-separated drop list, with `-c copy -map_metadata 0` for lossless mux; refuses to strip every stream), `track-add` (attach an external audio or subtitle file as a new stream via `-map 0 -map 1 -c copy`, with optional ISO-639 `--language` and `--title` metadata applied via `-metadata:s:N`). New `TrackManagerPage` with file picker, track list cards (#index | colored codec_type chip | codec/dimensions/channels/language detail | tick-to-remove checkbox), Apply changes button (Save As... picker, lossless mux), Add track... button (file picker + lang/title ContentDialog form). Toolbox tile under Video tools + nav search entry. Contract test: added `track` to `KNOWN_EVENTS` (19 sidecars conform).
 
 ### Library & Automation
 
