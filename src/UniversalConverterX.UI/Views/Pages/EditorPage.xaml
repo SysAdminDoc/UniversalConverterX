@@ -261,12 +261,14 @@
                                  Header="Start"
                                  PlaceholderText="0"
                                  InputScope="Number"
-                                 TextChanged="TrimText_Changed"/>
+                                 TextChanged="TrimText_Changed"
+                                 LostFocus="TrimText_LostFocus"/>
                         <TextBox x:Name="EndBox"
                                  Header="End"
                                  PlaceholderText="End of clip"
                                  InputScope="Number"
-                                 TextChanged="TrimText_Changed"/>
+                                 TextChanged="TrimText_Changed"
+                                 LostFocus="TrimText_LostFocus"/>
                         <CheckBox x:Name="LosslessCheck"
                                   Content="Lossless stream-copy"
                                   IsChecked="True"
@@ -313,11 +315,13 @@
                             <TextBox x:Name="CropWidthBox" Grid.Column="0"
                                      Header="Width" PlaceholderText="1920"
                                      InputScope="Number"
-                                     TextChanged="TrimText_Changed"/>
+                                     TextChanged="TrimText_Changed"
+                                     LostFocus="TrimText_LostFocus"/>
                             <TextBox x:Name="CropHeightBox" Grid.Column="1"
                                      Header="Height" PlaceholderText="1080"
                                      InputScope="Number"
-                                     TextChanged="TrimText_Changed"/>
+                                     TextChanged="TrimText_Changed"
+                                     LostFocus="TrimText_LostFocus"/>
                         </Grid>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
@@ -327,11 +331,13 @@
                             <TextBox x:Name="CropXBox" Grid.Column="0"
                                      Header="X offset" PlaceholderText="0"
                                      InputScope="Number"
-                                     TextChanged="TrimText_Changed"/>
+                                     TextChanged="TrimText_Changed"
+                                     LostFocus="TrimText_LostFocus"/>
                             <TextBox x:Name="CropYBox" Grid.Column="1"
                                      Header="Y offset" PlaceholderText="0"
                                      InputScope="Number"
-                                     TextChanged="TrimText_Changed"/>
+                                     TextChanged="TrimText_Changed"
+                                     LostFocus="TrimText_LostFocus"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -365,7 +371,8 @@
                                  Header="Target LUFS"
                                  PlaceholderText="-14"
                                  InputScope="Number"
-                                 TextChanged="TrimText_Changed"/>
+                                 TextChanged="TrimText_Changed"
+                                 LostFocus="TrimText_LostFocus"/>
                         <TextBlock Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
@@ -443,6 +450,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText"
                        Grid.Column="0"
@@ -455,13 +464,37 @@
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"/>
             <Button Grid.Column="2"
+                    x:Name="UndoButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    ToolTipService.ToolTip="Undo last setting change"
+                    Click="Undo_Click"
+                    IsEnabled="False"
+                    Margin="0,0,4,0">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE10E;" FontSize="14"/>
+                    <TextBlock Text="Undo"/>
+                </StackPanel>
+            </Button>
+            <Button Grid.Column="3"
+                    x:Name="RedoButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    ToolTipService.ToolTip="Redo last undone change"
+                    Click="Redo_Click"
+                    IsEnabled="False"
+                    Margin="0,0,12,0">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE10C;" FontSize="14"/>
+                    <TextBlock Text="Redo"/>
+                </StackPanel>
+            </Button>
+            <Button Grid.Column="4"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
                     IsEnabled="False"/>
-            <Button Grid.Column="3"
+            <Button Grid.Column="5"
                     Content="Export All"
                     x:Name="ExportButton"
                     Style="{StaticResource PrimaryButtonStyle}"

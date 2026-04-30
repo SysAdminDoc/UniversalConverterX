@@ -29,6 +29,11 @@ public sealed partial class EditorPage : Page
     private CancellationTokenSource? _cts;
     private string? _outputDirectory;
 
+    private readonly Stack<EditorSnapshot> _undoStack = new();
+    private readonly Stack<EditorSnapshot> _redoStack = new();
+    private bool _suppressHistory;
+    private EditorSnapshot _lastSnapshot;
+
     public EditorPage()
     {
         InitializeComponent();
@@ -38,6 +43,7 @@ public sealed partial class EditorPage : Page
         UpdateCrfLabel(18);
         UpdatePanelVisibility();
         UpdateOperationSummaries();
+        _lastSnapshot = CaptureSnapshot();
         UpdateUi();
     }
 
@@ -235,6 +241,7 @@ public sealed partial class EditorPage : Page
     private void TrimOption_Changed(object sender, RoutedEventArgs e)
     {
         if (ExportButton is null) return;
+        RecordUndo();
         UpdatePanelVisibility();
         UpdateOperationSummaries();
         UpdateUi();
@@ -243,6 +250,7 @@ public sealed partial class EditorPage : Page
     private void OperationCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (ExportButton is null) return;
+        RecordUndo();
         UpdatePanelVisibility();
         UpdateOperationSummaries();
         UpdateUi();
@@ -289,9 +297,16 @@ public sealed partial class EditorPage : Page
         UpdateUi();
     }
 
+    private void TrimText_LostFocus(object sender, RoutedEventArgs e)
+    {
+        RecordUndo();
+        UpdateOperationSummaries();
+    }
+
     private void CrfSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (CrfLabel is null) return;
+        RecordUndo();
         UpdateCrfLabel((int)e.NewValue);
         UpdateOperationSummaries();
         UpdateUi();
@@ -574,6 +589,95 @@ public sealed partial class EditorPage : Page
         });
     }
 
+    private void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_undoStack.Count == 0)
+            return;
+
+        var redo = _lastSnapshot;
+        var snap = _undoStack.Pop();
+        _redoStack.Push(redo);
+        ApplySnapshot(snap);
+    }
+
+    private void Redo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_redoStack.Count == 0)
+            return;
+
+        var undo = _lastSnapshot;
+        var snap = _redoStack.Pop();
+        _undoStack.Push(undo);
+        ApplySnapshot(snap);
+    }
+
+    private void RecordUndo()
+    {
+        if (_suppressHistory)
+            return;
+
+        var current = CaptureSnapshot();
+        if (current == _lastSnapshot)
+            return;
+
+        _undoStack.Push(_lastSnapshot);
+        _redoStack.Clear();
+        _lastSnapshot = current;
+        UpdateUndoRedoButtons();
+    }
+
+    private void ApplySnapshot(EditorSnapshot snap)
+    {
+        _suppressHistory = true;
+        try
+        {
+            OperationCombo.SelectedIndex = snap.OperationIndex;
+            StartBox.Text = snap.StartText;
+            EndBox.Text = snap.EndText;
+            LosslessCheck.IsChecked = snap.Lossless;
+            CrfSlider.Value = snap.CrfValue;
+            CropWidthBox.Text = snap.CropWidth;
+            CropHeightBox.Text = snap.CropHeight;
+            CropXBox.Text = snap.CropX;
+            CropYBox.Text = snap.CropY;
+            RotateAngleCombo.SelectedIndex = snap.RotateIndex;
+            LufsBox.Text = snap.LufsText;
+            RewrapFormatCombo.SelectedIndex = snap.RewrapIndex;
+        }
+        finally
+        {
+            _suppressHistory = false;
+        }
+
+        _lastSnapshot = snap;
+        UpdatePanelVisibility();
+        UpdateCrfLabel((int)snap.CrfValue);
+        UpdateOperationSummaries();
+        UpdateUi();
+        UpdateUndoRedoButtons();
+    }
+
+    private EditorSnapshot CaptureSnapshot() => new(
+        OperationCombo?.SelectedIndex ?? 0,
+        StartBox?.Text ?? "",
+        EndBox?.Text ?? "",
+        LosslessCheck?.IsChecked == true,
+        CrfSlider?.Value ?? 18,
+        CropWidthBox?.Text ?? "",
+        CropHeightBox?.Text ?? "",
+        CropXBox?.Text ?? "",
+        CropYBox?.Text ?? "",
+        RotateAngleCombo?.SelectedIndex ?? 0,
+        LufsBox?.Text ?? "",
+        RewrapFormatCombo?.SelectedIndex ?? 0);
+
+    private void UpdateUndoRedoButtons()
+    {
+        if (UndoButton is null) return;
+        UndoButton.IsEnabled = _undoStack.Count > 0 && _cts is null;
+        RedoButton.IsEnabled = _redoStack.Count > 0 && _cts is null;
+    }
+
     private void UpdateUi(bool updateStatus = true)
     {
         var hasFiles = _files.Count > 0;
@@ -584,6 +688,7 @@ public sealed partial class EditorPage : Page
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
         ExportButton.IsEnabled = hasFiles && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
+        UpdateUndoRedoButtons();
 
         QueueCountText.Text = $"{_files.Count} clips queued";
         OperationText.Text = BuildOperationSummary();
@@ -731,6 +836,20 @@ public sealed partial class EditorPage : Page
 
     private readonly record struct TrimOptions(double StartSeconds, double? EndSeconds, bool Lossless, int Crf);
 }
+
+internal sealed record EditorSnapshot(
+    int OperationIndex,
+    string StartText,
+    string EndText,
+    bool Lossless,
+    double CrfValue,
+    string CropWidth,
+    string CropHeight,
+    string CropX,
+    string CropY,
+    int RotateIndex,
+    string LufsText,
+    int RewrapIndex);
 
 public sealed class EditFileItem : INotifyPropertyChanged
 {
