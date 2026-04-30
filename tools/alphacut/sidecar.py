@@ -138,6 +138,12 @@ def run_bgremove(args: argparse.Namespace) -> int:
     emit("log", level="info", message=f"Model: {model_key}  Format: {out_format}  Quality: {args.quality}")
     emit("progress", percent=0.0, stage="Initializing", eta_seconds=None)
 
+    # Resolve shared model cache directory (UCX_MODEL_DIR set by SidecarRunner).
+    model_dir = args.model_dir or os.environ.get("UCX_MODEL_DIR") or None
+    if model_dir:
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+        emit("log", level="info", message=f"Model cache: {model_dir}")
+
     try:
         ProcessingWorker = AlphaCut.ProcessingWorker
     except AttributeError:
@@ -164,6 +170,8 @@ def run_bgremove(args: argparse.Namespace) -> int:
         "resume_from": 0,
         "quality": args.quality,
     }
+    if model_dir:
+        worker_kwargs["model_dir"] = model_dir
 
     try:
         worker = ProcessingWorker(**worker_kwargs)
@@ -257,6 +265,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Background image path to composite over")
     p.add_argument("--no-audio", action="store_true",
                    help="Strip audio from output (video inputs only)")
+    p.add_argument("--model-dir",
+                   help="Shared model cache directory (overrides UCX_MODEL_DIR env var)")
     return p
 
 
