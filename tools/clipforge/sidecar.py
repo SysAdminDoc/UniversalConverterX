@@ -328,6 +328,170 @@ def op_loudnorm(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_track_list(args: argparse.Namespace) -> int:
+    """Enumerate every stream in a container. One `track` event per stream.
+
+    Fields per event:
+      stream_index  Container-level stream index (0,1,2,...)
+      codec_type    video|audio|subtitle|data|attachment
+      codec_name    h264, aac, ass, ...
+      language      ISO-639 code if present, else null
+      title         Stream title tag if present
+      duration      Stream duration in seconds (best-effort)
+      bit_rate      Per-stream bitrate (best-effort)
+      width/height  For video streams
+      channels      For audio streams
+      default       Bool — disposition.default flag
+    """
+    ffprobe = find_ffprobe()
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+
+    info = probe(ffprobe, str(src))
+    if not info:
+        return fail("probe_failed", "ffprobe could not read input.")
+
+    streams = info.get("streams", [])
+    for s in streams:
+        tags = s.get("tags") or {}
+        disp = s.get("disposition") or {}
+        emit("track",
+             stream_index=int(s.get("index", -1)),
+             codec_type=str(s.get("codec_type") or ""),
+             codec_name=str(s.get("codec_name") or ""),
+             language=tags.get("language"),
+             title=tags.get("title"),
+             duration=float(s.get("duration") or 0) or None,
+             bit_rate=int(s.get("bit_rate")) if s.get("bit_rate") else None,
+             width=int(s.get("width") or 0) or None,
+             height=int(s.get("height") or 0) or None,
+             channels=int(s.get("channels") or 0) or None,
+             default=bool(disp.get("default", 0)))
+    emit("complete", output=str(src), size_bytes=src.stat().st_size,
+         track_count=len(streams))
+    return 0
+
+
+def op_track_remove(args: argparse.Namespace) -> int:
+    """Remove one or more streams without re-encoding.
+
+    --remove takes a comma-separated list of container stream indices, e.g. "1,3,5".
+    Builds an ffmpeg -map chain that includes every stream EXCEPT those, with -c copy
+    so no re-encode happens. Output container is taken from --output's extension.
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src))
+    if not info:
+        return fail("probe_failed", "ffprobe could not read input.")
+    duration = float(info.get("format", {}).get("duration", 0)) or 0.0
+
+    try:
+        drop = {int(x.strip()) for x in args.remove.split(",") if x.strip()}
+    except ValueError:
+        return fail("bad_remove_arg",
+                    "--remove must be a comma-separated list of integer stream indices.")
+    if not drop:
+        return fail("nothing_to_remove", "--remove was empty.")
+
+    keep_count = 0
+    cmd: list[str] = [ffmpeg, "-y", "-i", str(src)]
+    for s in info.get("streams", []):
+        idx = int(s.get("index", -1))
+        if idx in drop:
+            continue
+        cmd += ["-map", f"0:{idx}"]
+        keep_count += 1
+    if keep_count == 0:
+        return fail("nothing_to_keep",
+                    f"--remove {sorted(drop)} would strip every stream; refusing.")
+
+    cmd += ["-c", "copy", "-map_metadata", "0"]
+    if out.suffix.lower() in (".mp4", ".m4v", ".mov"):
+        cmd += ["-movflags", "+faststart"]
+    cmd.append(str(out))
+
+    emit("log", level="info",
+         message=f"Removing streams {sorted(drop)}; keeping {keep_count} of "
+                 f"{len(info.get('streams', []))}.")
+    emit("progress", percent=0, stage="track-remove", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "track-remove")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out.is_file():
+        return fail("output_missing", f"Output not produced: {out}")
+    emit("complete", output=str(out), size_bytes=out.stat().st_size)
+    return 0
+
+
+def op_track_add(args: argparse.Namespace) -> int:
+    """Add an external audio (or subtitle) file as a new track without re-encoding.
+
+    Stream-copies the original input plus all streams from --extra. Useful for:
+      * attaching a dubbed audio language
+      * adding an SRT/ASS subtitle into an MKV
+      * attaching a commentary track to a finished cut
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    extra = Path(args.extra)
+    if not extra.is_file():
+        return fail("missing_extra", f"Extra track file not found: {args.extra}")
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src))
+    duration = float((info or {}).get("format", {}).get("duration", 0)) or 0.0
+
+    cmd = [ffmpeg, "-y",
+           "-i", str(src),
+           "-i", str(extra),
+           "-map", "0",          # everything from primary
+           "-map", "1",          # everything from extra
+           "-c", "copy",
+           "-map_metadata", "0"]
+    if args.language:
+        # Apply language to NEW streams only -- the metadata index is the count
+        # of streams in the primary input.
+        new_idx = len((info or {}).get("streams", []))
+        cmd += [f"-metadata:s:{new_idx}", f"language={args.language}"]
+    if args.title:
+        new_idx = len((info or {}).get("streams", []))
+        cmd += [f"-metadata:s:{new_idx}", f"title={args.title}"]
+    if out.suffix.lower() in (".mp4", ".m4v", ".mov"):
+        cmd += ["-movflags", "+faststart"]
+    cmd.append(str(out))
+
+    emit("log", level="info",
+         message=f"Add track from {extra.name} -> {out.name}")
+    emit("progress", percent=0, stage="track-add", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "track-add")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out.is_file():
+        return fail("output_missing", f"Output not produced: {out}")
+    emit("complete", output=str(out), size_bytes=out.stat().st_size)
+    return 0
+
+
 def op_timeline(args: argparse.Namespace) -> int:
     """Extract a thumbnail strip + waveform image so the UI can paint a visual
     scrub bar above the seek slider. Output dir gets:
@@ -623,6 +787,29 @@ def build_parser() -> argparse.ArgumentParser:
     rewrap.add_argument("--input", required=True)
     rewrap.add_argument("--output", required=True)
 
+    # ── tracks ────────────────────────────────────────────────────────────────
+    track_list = sub.add_parser("track-list",
+                                help="Enumerate every stream in a container")
+    track_list.add_argument("--input", required=True)
+
+    track_remove = sub.add_parser("track-remove",
+                                  help="Remove specific streams without re-encoding")
+    track_remove.add_argument("--input", required=True)
+    track_remove.add_argument("--output", required=True)
+    track_remove.add_argument("--remove", required=True,
+                              help="Comma-separated list of stream indices to drop, e.g. '1,3'")
+
+    track_add = sub.add_parser("track-add",
+                               help="Add an external audio/subtitle file as a new track")
+    track_add.add_argument("--input", required=True)
+    track_add.add_argument("--extra", required=True,
+                           help="Audio (.mp3/.aac/.flac/...) or subtitle (.srt/.ass) file to attach")
+    track_add.add_argument("--output", required=True)
+    track_add.add_argument("--language",
+                           help="Optional ISO-639 language code for the new track (e.g. 'eng', 'jpn')")
+    track_add.add_argument("--title",
+                           help="Optional title metadata for the new track")
+
     # ── timeline ──────────────────────────────────────────────────────────────
     timeline = sub.add_parser("timeline",
                               help="Extract a thumbnail strip + waveform image for the UI scrub bar")
@@ -667,6 +854,12 @@ def main(argv: list[str] | None = None) -> int:
             return op_vmaf(args)
         if args.op == "timeline":
             return op_timeline(args)
+        if args.op == "track-list":
+            return op_track_list(args)
+        if args.op == "track-remove":
+            return op_track_remove(args)
+        if args.op == "track-add":
+            return op_track_add(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

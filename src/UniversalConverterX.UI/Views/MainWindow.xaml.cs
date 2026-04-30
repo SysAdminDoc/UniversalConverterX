@@ -33,6 +33,7 @@ public sealed partial class MainWindow : Window
         new("VMAF Quality", "Score a compressed clip against its reference (libvmaf)", "vmaf"),
         new("Scene Detection", "Find scene cuts in a video and export to CSV / EDL", "scene-detect"),
         new("Timeline Preview", "Render a thumbnail strip + audio waveform for any video", "timeline-preview"),
+        new("Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "track-manager"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -139,6 +140,7 @@ public sealed partial class MainWindow : Window
             "vmaf" => typeof(VmafAnalysisPage),
             "scene-detect" => typeof(SceneDetectPage),
             "timeline-preview" => typeof(TimelinePreviewPage),
+            "track-manager" => typeof(TrackManagerPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -244,7 +246,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

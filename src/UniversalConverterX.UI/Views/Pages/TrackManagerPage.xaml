@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.TrackManagerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="TrackRowTemplate" x:DataType="p:TrackRow">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="12"
+                    Margin="0,0,0,8">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="MarkForRemoval"
+                              IsChecked="{x:Bind MarkedForRemoval, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              ToolTipService.ToolTip="Tick to remove this stream when you click Apply"/>
+                    <TextBlock Text="{x:Bind IndexLabel}"
+                               Grid.Column="1"
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center"
+                               FontFamily="Consolas, Cascadia Mono, monospace"/>
+                    <Border Grid.Column="2"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="6"
+                            Padding="6,2"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="{x:Bind CodecType}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"/>
+                    </Border>
+                    <StackPanel Grid.Column="3" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind Title}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind Detail}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Track Manager"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Add or remove audio, subtitle, and data tracks from a video container without re-encoding. Tick streams to drop, then Apply -- or pick an external audio / subtitle file to attach as a new track."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="Open Video"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="OpenFile_Click"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
+            <StackPanel Spacing="3">
+                <TextBlock x:Name="SourceLabel"
+                           Style="{StaticResource LabelTextStyle}"
+                           Text="No file loaded."
+                           TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="SourceMeta"
+                           Style="{StaticResource MutedTextStyle}"
+                           TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="10">
+                    <Border Width="80" Height="80" CornerRadius="20"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE93F;" FontSize="36"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock Text="No tracks loaded"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Open a video to see every audio / video / subtitle / data track inside the container."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center" TextWrapping="Wrap"
+                               MaxWidth="420"/>
+                </StackPanel>
+                <ScrollViewer x:Name="TracksScroll"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="TracksList"
+                                  ItemTemplate="{StaticResource TrackRowTemplate}"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="WorkProgress"
+                         Minimum="0" Maximum="100"
+                         IsIndeterminate="False"
+                         VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    x:Name="AddTrackButton"
+                    Content="Add track..."
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="AddTrack_Click"
+                    IsEnabled="False"/>
+            <Button Grid.Column="2"
+                    x:Name="ApplyButton"
+                    Content="Apply changes..."
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Apply_Click"
+                    IsEnabled="False"/>
+        </Grid>
+
+        <TextBlock Grid.Row="4"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   Text="Open a video to begin."/>
+    </Grid>
+</Page>
