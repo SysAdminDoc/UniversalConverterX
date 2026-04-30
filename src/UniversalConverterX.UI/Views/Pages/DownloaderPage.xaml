@@ -38,8 +38,7 @@
 
                     <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
                         <TextBlock Text="{Binding Title}"
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Url}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -78,9 +77,7 @@
 
                     <TextBlock Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="2"
                                Text="{Binding LogPreview}"
-                               Style="{StaticResource MutedTextStyle}"
-                               FontFamily="Cascadia Mono, Consolas"
-                               FontSize="11"
+                               Style="{StaticResource CodeTextStyle}"
                                TextTrimming="CharacterEllipsis"/>
                 </Grid>
             </Border>
@@ -105,8 +102,8 @@
                                   Foreground="{Binding AccentBrush}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="3">
-                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -213,9 +210,12 @@
                             <StackPanel x:Name="QueueEmpty"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Spacing="10">
-                                <FontIcon Glyph="&#xE896;" FontSize="42"
-                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE896;" FontSize="48"
+                                              Foreground="{StaticResource AccentBlueBrush}"/>
+                                </Border>
                                 <TextBlock Text="Paste a URL above and add it to the queue"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
@@ -237,9 +237,12 @@
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Spacing="10">
-                                <FontIcon Glyph="&#xE73E;" FontSize="42"
-                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                              Foreground="{StaticResource TextMutedBrush}"/>
+                                </Border>
                                 <TextBlock Text="No finished downloads yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>

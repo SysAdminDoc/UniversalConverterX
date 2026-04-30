@@ -39,8 +39,7 @@
                         </Border>
                     </Grid>
                     <StackPanel Grid.Row="1" Spacing="5">
-                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" MaxLines="3"/>
@@ -77,9 +76,7 @@
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                         <TextBlock Text="Plan enhancement workflows with the same discipline as ready tools."
-                                   FontSize="34" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   LineHeight="41"
+                                   Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <TextBlock Text="AI cards are deliberately transparent: each tool shows scope, required engine, and the missing workflow contract before it graduates into a ready queue."
                                    Style="{StaticResource SubtitleTextStyle}"

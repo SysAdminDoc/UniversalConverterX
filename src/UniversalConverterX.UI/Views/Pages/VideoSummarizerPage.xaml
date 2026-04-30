@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Video Summarizer is not yet available in this build."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: Whisper transcript pipeline, local LLM integration (Llama.cpp or Ollama), chapter detection, and export formats."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

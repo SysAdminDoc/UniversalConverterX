@@ -47,8 +47,7 @@
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Speech to Text is planned for a future release."
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource LabelTextStyle}"/>
                         <TextBlock Text="What's needed: Whisper sidecar integration, speaker diarization, real-time word-level timestamps, and SRT/VTT/plain text export."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

@@ -37,8 +37,7 @@
 
                     <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
                         <TextBlock Text="{Binding FileName}"
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding FileSize}"
                                    Style="{StaticResource MutedTextStyle}"/>
@@ -96,8 +95,8 @@
                                   Foreground="{Binding AccentBrush}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="3">
-                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"

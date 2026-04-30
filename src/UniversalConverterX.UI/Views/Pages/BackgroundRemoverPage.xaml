@@ -37,8 +37,7 @@
 
                     <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
                         <TextBlock Text="{Binding FileName}"
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding SourceSummary}"
                                    Style="{StaticResource MutedTextStyle}"/>
@@ -96,8 +95,8 @@
                                   Foreground="{Binding AccentBrush}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="3">
-                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -198,9 +197,12 @@
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Spacing="10">
-                                <FontIcon Glyph="&#xE73E;" FontSize="42"
-                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                              Foreground="{StaticResource TextMutedBrush}"/>
+                                </Border>
                                 <TextBlock Text="No finished jobs yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
@@ -377,8 +379,7 @@
                     <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
                     <ScrollViewer Height="96" VerticalScrollBarVisibility="Auto"
                                   Background="{StaticResource SurfaceLightBrush}" Padding="8" CornerRadius="4">
-                        <TextBlock x:Name="ProgressLog" Style="{StaticResource MutedTextStyle}"
-                                   FontFamily="Cascadia Mono, Consolas" FontSize="11"
+                        <TextBlock x:Name="ProgressLog" Style="{StaticResource CodeTextStyle}"
                                    TextWrapping="Wrap"/>
                     </ScrollViewer>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
