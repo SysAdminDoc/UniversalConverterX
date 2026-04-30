@@ -65,6 +65,9 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #12 whisper.cpp GPU sidecar — new `whisper-cpp` sidecar wrapping `whisper-cli.exe` (Vulkan/CUDA, no Python deps). SpeechToTextPage now has a Backend combo (faster-whisper vs whisper.cpp) and a VAD pre-filter checkbox.
 - ✓ #6 GFPGAN Photo Restoration — new `gfpgan` sidecar (Apache-2.0 face restoration via GFPGAN v1.4). PhotoRestorationPage wired with model picker, upscale 1–4, weight slider, batch queue + Finished pivot. Toolbox tile under AI added.
 - ✓ #9 .NET 10 LTS migration — all 4 C# projects + test project bumped net8.0 → net10.0; WindowsAppSDK 1.5 → 1.7; Microsoft.Extensions.* + System.Text.Json + System.Drawing.Common 8.0.0 → 10.0.0; version 2.3.0 → 2.4.0 synced across all manifests, README badge, and repo CLAUDE.md. Build clean.
+- ✓ #14 JumpList Integration — taskbar/Start menu quick-launch shortcuts to Converter / Compressor / Editor / Downloader / Recorder / Toolbox; activation via `--route <key>` parsed in `MainWindow_Activated`.
+- ✓ #17 VAD Pre-Filter for Whisper STT — already shipped as part of #12 (`VadCheck` toggle in SpeechToTextPage; `--vad` flag passed to whisper-cpp sidecar).
+- ✓ #54 Light + system-following theme — `<ResourceDictionary.ThemeDictionaries>` with Catppuccin Latte-inspired Light variant; SolidColorBrushes switched to `{ThemeResource}` so existing pages get live theme switching with zero per-page edits.
 
 ---
 
@@ -144,11 +147,11 @@ UCX targets WinAppSDK 1.5. WinAppSDK 2.0.1 (released 2026-04-29) ships:
 
 Requires package family name review; migration guide available. **Impact 4 / Effort 3.** [S-5]
 
-#### 14. JumpList Integration
-Windows JumpList provides quick-launch toolbox entries from the taskbar icon without opening the app. WinUI Gallery 2.8 ships a reference implementation. Map most-used tools (Convert, Compress, Trim, Record) to JumpList tasks via `JumpList.LoadCurrentAsync()`. **Impact 3 / Effort 1.** [S-8]
+#### 14. JumpList Integration ✓ Shipped v2.4
+Windows JumpList provides quick-launch toolbox entries from the taskbar icon without opening the app. WinUI Gallery 2.8 ships a reference implementation. Map most-used tools (Convert, Compress, Trim, Record) to JumpList tasks via `JumpList.LoadCurrentAsync()`. **Impact 3 / Effort 1.** [S-8] Shipped: `App.OnLaunched` calls `ConfigureJumpListAsync` once on first activation, populating six tasks (Converter / Compressor / Editor / Downloader / Recorder / Toolbox) under a "UCX shortcuts" group. Each `JumpListItem` carries `--route <key>` arguments; `MainWindow_Activated` parses `Environment.GetCommandLineArgs()` and routes the new instance to the requested page. Best-effort wrapped in try/catch so locked-down profiles or packaged-vs-unpackaged differences never block app launch.
 
-#### 54. Light + system-following theme
-UCX is dark-only (App.xaml `RequestedTheme="Dark"` + brand brushes hard-coded against `BrandSurface*` darks). User CLAUDE.md states "Include a light theme option when practical." Add `Themes/LightTheme.xaml` with a parallel brand palette, drive selection from a Settings option (Dark / Light / System), persist via `SettingsService`, and bind via `RequestedTheme = Application.Current.RequestedTheme`. Pattern reference: [`Images/src/Images/Themes/DarkTheme.xaml`](../Images/src/Images/Themes/DarkTheme.xaml) + Catppuccin variants used in the Images viewer. **Impact 3 / Effort 3.** [internal-images]
+#### 54. Light + system-following theme ✓ Shipped v2.4
+UCX is dark-only (App.xaml `RequestedTheme="Dark"` + brand brushes hard-coded against `BrandSurface*` darks). User CLAUDE.md states "Include a light theme option when practical." Add `Themes/LightTheme.xaml` with a parallel brand palette, drive selection from a Settings option (Dark / Light / System), persist via `SettingsService`, and bind via `RequestedTheme = Application.Current.RequestedTheme`. Pattern reference: [`Images/src/Images/Themes/DarkTheme.xaml`](../Images/src/Images/Themes/DarkTheme.xaml) + Catppuccin variants used in the Images viewer. **Impact 3 / Effort 3.** [internal-images] Shipped via `<ResourceDictionary.ThemeDictionaries>` with `Default` (existing dark) + `Light` (Catppuccin Latte-inspired) keys for every BrandXxx color. SolidColorBrush definitions in `App.xaml` switched from `{StaticResource BrandX}` → `{ThemeResource BrandX}` so the brushes reactively re-resolve their `Color` property when the theme dictionary changes — zero per-page churn (every consumer keeps using `{StaticResource SurfaceBrush}` etc.). Settings already had a Theme combo wired to `App.ApplyTheme(ElementTheme)` which sets `FrameworkElement.RequestedTheme` on the XamlRoot, so live theme switching now propagates through the entire UI immediately.
 
 #### 55. Code signing for release artifacts
 Shipped `UniversalConverterX.exe` is unsigned today, so first launch hits SmartScreen "Unknown publisher" — major trust friction and a hard blocker for #45 (WinGet/Microsoft Store). Acquire a code-signing certificate (DigiCert / Sectigo / SignPath OSS), wire `signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256` into the release workflow before `gh release upload`. Apply to UI exe, console exe, shell extension dll, and each frozen sidecar. **Impact 5 / Effort 2** (cert procurement + workflow plumb; SmartScreen reputation builds once signed releases ship).
@@ -161,8 +164,8 @@ AiSubtitlePage stub exists. Extend whisper-stt sidecar to output SRT/VTT subtitl
 #### 16. Demucs Full Stem Separation (4/6 stem)
 Extend VocalRemoverPage to expose a stem selector: 4-stem (drums/bass/vocals/other) and 6-stem (adds guitar/piano) via `htdemucs_6s` model. Output each stem as a separate WAV/FLAC file with clear names for DAW import. Note: demucs upstream archived 2025-01-01; PyPI package still functional. **Impact 4 / Effort 2.** [R-6]
 
-#### 17. VAD Pre-Filter for Whisper STT
-Integrate Silero VAD v6.2.0 (available in whisper.cpp v1.8.4 and as standalone `silero-vad` pip package) as a pre-processing step before transcription — skips silence regions, reduces hallucinations. Expose as a toggle in SpeechToTextPage. **Impact 3 / Effort 2.** [R-8]
+#### 17. VAD Pre-Filter for Whisper STT ✓ Shipped v2.4 (with #12)
+Integrate Silero VAD v6.2.0 (available in whisper.cpp v1.8.4 and as standalone `silero-vad` pip package) as a pre-processing step before transcription — skips silence regions, reduces hallucinations. Expose as a toggle in SpeechToTextPage. **Impact 3 / Effort 2.** [R-8] Shipped together with the whisper.cpp sidecar in #12 — VadCheck toggle in `SpeechToTextPage.xaml` adds `--vad` to the whisper-cli invocation when checked. The standalone `silero-vad` pip package is still available as a future upgrade for the Python-side `whisper-stt` (faster-whisper) backend if needed.
 
 #### 18. Scene Detection + Smart Split (PySceneDetect sidecar)
 SmartTrimmerPage stub exists. PySceneDetect v0.6.7 as sidecar: detect scene cuts → output timestamped chapter list (CSV/OTIO/EDL CMX 3600). Actions: auto-split into segments, insert as chapter markers, or feed into ClipForge batch trim. OTIO/EDL formats (v0.6.6+) enable direct DaVinci Resolve import. FFmpeg `silencedetect` filter as companion for audio-based splits. **Impact 4 / Effort 3.** [R-18, R-3]

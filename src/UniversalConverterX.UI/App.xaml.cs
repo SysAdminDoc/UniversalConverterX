@@ -59,6 +59,49 @@ public partial class App : Application
         };
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
+        _ = ConfigureJumpListAsync();
+    }
+
+    /// <summary>
+    /// Quick-launch entries on the taskbar icon (right-click) and Start menu
+    /// tile flyout. Maps the most-used UCX modules to a JumpList task each, so
+    /// users can land directly on Convert / Compress / Trim / Record from
+    /// outside the app. Activation goes through `--route &lt;key&gt;` which
+    /// MainWindow already understands.
+    /// </summary>
+    private static async Task ConfigureJumpListAsync()
+    {
+        try
+        {
+            if (!Windows.UI.StartScreen.JumpList.IsSupported())
+                return;
+
+            var list = await Windows.UI.StartScreen.JumpList.LoadCurrentAsync();
+            list.Items.Clear();
+            list.SystemGroupKind = Windows.UI.StartScreen.JumpListSystemGroupKind.Frequent;
+
+            void Add(string routeKey, string display, string description)
+            {
+                var item = Windows.UI.StartScreen.JumpListItem.CreateWithArguments($"--route {routeKey}", display);
+                item.Description = description;
+                item.GroupName = "UCX shortcuts";
+                list.Items.Add(item);
+            }
+
+            Add("converter", "Converter", "Batch convert media to any of 1000+ formats");
+            Add("compressor", "Compressor", "Shrink videos for web, email, and social");
+            Add("editor", "Editor", "Trim, crop, rotate, normalize, rewrap clips");
+            Add("downloader", "Downloader", "Pull video / audio from supported URLs");
+            Add("recorder", "Recorder", "Record screen, webcam, and microphone");
+            Add("toolbox", "Toolbox", "Browse all 30+ specialized media tools");
+
+            await list.SaveAsync();
+        }
+        catch
+        {
+            // Windows JumpList is best-effort; never block app launch on failures
+            // (locked-down profile policies / packaged-vs-unpackaged differences).
+        }
     }
 
     internal static void Register(MainWindow window) => _mainWindow = window;
