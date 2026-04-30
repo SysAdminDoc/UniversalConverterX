@@ -57,6 +57,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #51 SidecarRunner no-progress watchdog — `stuck_sidecar` error code after `silenceTimeout` (default 10 min)
 - ✓ #10 + #23 verified already shipped in v2.3 (lossless trim default-on; ClipForge rewrap op) — roadmap entries reclassified.
 - ✓ #4 GIF Maker — new `gifstudio` sidecar (two-pass `palettegen`+`paletteuse`), `GifMakerPage` batch UI, route + Toolbox tile wired, contract test KNOWN_EVENTS extended.
+- ✓ #5 HEICShift / Image Converter — new `heicshift` Pillow+pillow_heif sidecar, `ImageConverterPage` with format/quality/metadata controls, route + Toolbox tile wired (JXL/RAW deferred).
 
 ---
 
@@ -78,8 +79,8 @@ Source code exists in `tools/vertigo/`; no `sidecar.py` yet. MediaPipe face/body
 #### 4. GifStudio route wiring ✓ Shipped v2.4
 WebView2-hosted GIF editor source exists. Wire route in `MainWindow.xaml.cs` and add `sidecar.py` for FFmpeg → palette optimization → GIF pipeline with loop count and delay controls. **Impact 3 / Effort 2.** [plan] Shipped: new [`tools/gifstudio/sidecar.py`](tools/gifstudio/sidecar.py) two-pass FFmpeg `palettegen`+`paletteuse` pipeline with `make` + `list-presets` ops, [`tools/gifstudio/build.ps1`](tools/gifstudio/build.ps1) PyInstaller freeze, [`Views/Pages/GifMakerPage.xaml`](src/UniversalConverterX.UI/Views/Pages/GifMakerPage.xaml) batch queue UI with width / fps / loop / start / duration controls, route `gif-maker` wired in `MainWindow.xaml.cs`, ToolboxPage tile flipped Planned → Ready. Contract test KNOWN_EVENTS extended with `preset`.
 
-#### 5. HEICShift sidecar
-HEIC/HEIF decode + AVIF/WebP/JPEG output. No `sidecar.py` yet. Uses `Pillow-heif` + FFmpeg for metadata pass-through and ICC profile defaults. Wire to ImageConverterPage. **Impact 3 / Effort 2.** [plan]
+#### 5. HEICShift sidecar ✓ Shipped v2.4
+HEIC/HEIF decode + AVIF/WebP/JPEG output. No `sidecar.py` yet. Uses `Pillow-heif` + FFmpeg for metadata pass-through and ICC profile defaults. Wire to ImageConverterPage. **Impact 3 / Effort 2.** [plan] Shipped: new [`tools/heicshift/sidecar.py`](tools/heicshift/sidecar.py) Pillow + pillow_heif converter with `convert` + `list-formats` ops, alpha-flatten on white when target lacks alpha, ICC + EXIF pass-through with explicit `--strip-icc` / `--strip-exif` opt-outs, and frozen-guard. Build script [`tools/heicshift/build.ps1`](tools/heicshift/build.ps1) bundles `Pillow>=10.0.0` + `pillow-heif>=0.16.0` via PyInstaller `--collect-all pillow_heif`. New page [`Views/Pages/ImageConverterPage.xaml`](src/UniversalConverterX.UI/Views/Pages/ImageConverterPage.xaml) with format combo (jpeg/png/webp/avif/heic/tiff/bmp), quality slider, EXIF/ICC strip checkboxes, batch queue + finished pivot. Route `image-converter` wired in `MainWindow.xaml.cs`, ToolboxPage tile flipped Planned → Ready. JPEG XL + RAW deferred (need libjxl / rawpy build matrix).
 
 #### 6. GFPGAN Photo Restoration sidecar
 PhotoRestorationPage stub exists. GFPGAN v1.4 (Apache 2.0) restores old/degraded photos and enhances faces. Pair with Real-ESRGAN for full-photo restoration pipeline (GFPGAN on faces, Real-ESRGAN on background). `pip install gfpgan` — CPU + GPU. Wire to PhotoRestorationPage. **Impact 4 / Effort 3.** [R-5b]

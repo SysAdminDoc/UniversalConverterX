@@ -37,6 +37,7 @@ KNOWN_EVENTS = {
     "stem",     # demucs — separated audio stems
     "device",   # recordcast — DirectShow device enumeration
     "preset",   # gifstudio — known render presets
+    "format",   # heicshift — supported input/output format inventory
 }
 
 
