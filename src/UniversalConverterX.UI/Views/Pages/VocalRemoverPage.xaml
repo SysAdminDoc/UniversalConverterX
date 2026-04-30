@@ -44,7 +44,7 @@
                         </StackPanel>
                         <TextBlock Text="Vocal Remover is not yet available in this build."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="What's needed: Demucs sidecar integration, stem preview playback, and multi-file stem export pipeline."
+                        <TextBlock Text="Planned scope: Demucs sidecar integration, stem preview playback, and multi-file stem export pipeline."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
