@@ -83,12 +83,12 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,8,0,0">
-                    <Button Content="Open Toolbox"
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,0">
+                    <Button Content="Browse Toolbox"
                             Style="{StaticResource PrimaryButtonStyle}"
                             Click="OpenToolbox_Click"/>
-                    <Button Content="Return Home"
-                            Style="{StaticResource SecondaryButtonStyle}"
+                    <Button Content="Back to Home"
+                            Style="{StaticResource GhostButtonStyle}"
                             Click="OpenHome_Click"/>
                 </StackPanel>
             </StackPanel>

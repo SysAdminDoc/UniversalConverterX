@@ -137,43 +137,52 @@
 
             <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="28" Padding="32">
-                <Grid ColumnSpacing="28">
+                    CornerRadius="24" Padding="36,32,32,32">
+                <Grid ColumnSpacing="32">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="328"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Spacing="14" VerticalAlignment="Center">
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
-                                Padding="12,5" HorizontalAlignment="Left">
-                            <TextBlock Text="LOCAL MEDIA WORKSPACE"
-                                       Style="{StaticResource EyebrowTextStyle}"
-                                       Foreground="{StaticResource AccentBlueBrush}"/>
+                    <StackPanel Grid.Column="0" Spacing="16" VerticalAlignment="Center">
+                        <Border Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="999"
+                                Padding="12,6" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
+                                         VerticalAlignment="Center"/>
+                                <TextBlock Text="LOCAL MEDIA WORKSPACE"
+                                           Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource AccentPrimaryBrush}"/>
+                            </StackPanel>
                         </Border>
-                        <TextBlock Text="Convert, compress, record, inspect, and finish media without losing control."
-                                   FontSize="36" FontWeight="SemiBold"
+                        <TextBlock Text="The all-in-one media workshop, kept entirely on your machine."
+                                   FontSize="34" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                   LineHeight="43"
-                                   TextWrapping="Wrap" MaxWidth="760"/>
-                        <TextBlock Text="Start with a file, URL, or capture task. UCX keeps high-volume media work local while presenting each workflow as a guided queue with clear output, recovery, and status."
+                                   LineHeight="42"
+                                   TextWrapping="Wrap" MaxWidth="720"/>
+                        <TextBlock Text="Convert, compress, edit, download, record, and inspect — every workflow as a guided queue with clear output, recovery, and status. Files stay on disk unless you opt in."
                                    Style="{StaticResource SubtitleTextStyle}"
-                                   TextWrapping="Wrap" MaxWidth="760"/>
-                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                            <Button Content="Add files to Converter" Style="{StaticResource PrimaryButtonStyle}"
+                                   TextWrapping="Wrap" MaxWidth="720"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,10,0,0">
+                            <Button Content="Open Converter" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenConverter_Click"/>
                             <Button Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="OpenAiLab_Click"/>
-                            <Button Content="Browse Toolbox" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button Content="Browse Toolbox" Style="{StaticResource GhostButtonStyle}"
                                     Click="OpenToolbox_Click"/>
                         </StackPanel>
                     </StackPanel>
 
                     <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                            CornerRadius="24" Padding="22" VerticalAlignment="Stretch">
-                        <StackPanel Spacing="16">
-                            <TextBlock Text="Readiness Snapshot" Style="{StaticResource PanelTitleTextStyle}"/>
-                            <Grid RowSpacing="12" ColumnSpacing="12">
+                            CornerRadius="20" Padding="22" VerticalAlignment="Stretch">
+                        <StackPanel Spacing="18">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock Text="Workspace status" Style="{StaticResource PanelTitleTextStyle}"/>
+                            </StackPanel>
+                            <Grid RowSpacing="14" ColumnSpacing="14">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -183,35 +192,41 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="16" Padding="14">
-                                    <StackPanel>
-                                        <TextBlock Text="7" FontSize="24" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource AccentBlueBrush}"/>
-                                        <TextBlock Text="Workspaces ready" Style="{StaticResource MutedTextStyle}"/>
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="7" Style="{StaticResource MetricNumberTextStyle}"
+                                                   Foreground="{StaticResource AccentPrimaryBrush}"/>
+                                        <TextBlock Text="MODULES READY" Style="{StaticResource MetricLabelTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
-                                        CornerRadius="16" Padding="14">
-                                    <StackPanel>
-                                        <TextBlock Text="29" FontSize="24" FontWeight="SemiBold"
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="29" Style="{StaticResource MetricNumberTextStyle}"
                                                    Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <TextBlock Text="Tools mapped" Style="{StaticResource MutedTextStyle}"/>
+                                        <TextBlock Text="TOOLS MAPPED" Style="{StaticResource MetricLabelTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="16" Padding="14">
-                                    <StackPanel>
-                                        <TextBlock Text="1000+" FontSize="24" FontWeight="SemiBold"
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="1,000+" Style="{StaticResource MetricNumberTextStyle}"
                                                    Foreground="{StaticResource AccentOrangeBrush}"/>
-                                        <TextBlock Text="Formats covered" Style="{StaticResource MutedTextStyle}"/>
+                                        <TextBlock Text="FORMATS COVERED" Style="{StaticResource MetricLabelTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource SurfaceSoftBrush}"
-                                        CornerRadius="16" Padding="14">
-                                    <StackPanel>
-                                        <TextBlock Text="Local" FontSize="24" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <TextBlock Text="Default mode" Style="{StaticResource MutedTextStyle}"/>
+                                        CornerRadius="14" Padding="14,12">
+                                    <StackPanel Spacing="6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <FontIcon Glyph="&#xE83D;" FontSize="14"
+                                                      Foreground="{StaticResource AccentGreenBrush}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Text="Local" FontSize="20" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource AccentGreenBrush}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <TextBlock Text="DEFAULT MODE" Style="{StaticResource MetricLabelTextStyle}"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -290,9 +305,9 @@
                 </StackPanel>
                 <GridView x:Name="PersonasGrid" SelectionMode="None"
                           ItemTemplate="{StaticResource PersonaTemplate}"/>
-                <TextBlock Text="UniversalConverter X v2.1.0 - local-first processing"
+                <TextBlock Text="UniversalConverter X v2.1.0 — local-first processing, no telemetry"
                            Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"
-                           Margin="0,8,0,0"/>
+                           Margin="0,12,0,0"/>
             </StackPanel>
         </Grid>
     </ScrollViewer>

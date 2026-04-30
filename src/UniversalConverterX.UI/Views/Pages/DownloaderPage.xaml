@@ -271,13 +271,13 @@
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
             <Button x:Name="ClearQueueButton" Grid.Column="1" Content="Clear Queue"
-                    Style="{StaticResource SecondaryButtonStyle}" Click="ClearQueue_Click"
+                    Style="{StaticResource GhostButtonStyle}" Click="ClearQueue_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
             <Button x:Name="DownloadButton" Grid.Column="2" Content="Download All"
                     Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
             <Button x:Name="CancelButton" Grid.Column="3" Content="Cancel"
-                    Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click"
+                    Style="{StaticResource DangerButtonStyle}" Click="Cancel_Click"
                     IsEnabled="False"/>
         </Grid>
     </Grid>
