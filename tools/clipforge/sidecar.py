@@ -328,6 +328,91 @@ def op_loudnorm(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_timeline(args: argparse.Namespace) -> int:
+    """Extract a thumbnail strip + waveform image so the UI can paint a visual
+    scrub bar above the seek slider. Output dir gets:
+       tn_0001.jpg, tn_0002.jpg, ...   (1 fps thumbnails, scaled to ~120px wide)
+       waveform.png                    (showwavespic-rendered audio waveform)
+    Emits one `thumb` event per generated frame so the host can lazy-load."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found.")
+
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    duration = float(info.get("format", {}).get("duration", 0))
+    if duration <= 0:
+        return fail("probe_failed", "Zero / unknown duration.")
+
+    fps = max(0.1, float(args.thumb_fps))
+    thumb_height = int(args.thumb_height)
+    expected = max(1, int(duration * fps))
+
+    emit("log", level="info",
+         message=f"Timeline: {expected} thumbs @ {fps} fps, scaled to h={thumb_height}px")
+    emit("progress", percent=0, stage="thumbnails", eta_seconds=None)
+
+    pattern = str(out_dir / "tn_%05d.jpg")
+    cmd_tn = [
+        ffmpeg, "-y",
+        "-i", str(src),
+        "-vf", f"fps={fps},scale=-2:{thumb_height}:flags=fast_bilinear",
+        "-q:v", "5",   # JPEG quality 1-31, lower=better; 5 keeps strips crisp without bloat
+        pattern,
+    ]
+    rc = run_ffmpeg(cmd_tn, duration, "thumbnails")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"Thumbnail extraction failed (exit {rc})")
+
+    # Enumerate the thumbs that actually landed and emit one event each.
+    files = sorted(out_dir.glob("tn_*.jpg"))
+    for i, f in enumerate(files):
+        ts = i / fps
+        emit("thumb",
+             index=i,
+             timestamp_seconds=round(ts, 3),
+             path=str(f))
+
+    # Waveform image (no failure if no audio track -- skip cleanly).
+    has_audio = any(s.get("codec_type") == "audio" for s in info.get("streams", []))
+    waveform = out_dir / "waveform.png"
+    if has_audio:
+        emit("progress", percent=0, stage="waveform", eta_seconds=None)
+        cmd_wf = [
+            ffmpeg, "-y",
+            "-i", str(src),
+            "-filter_complex",
+            f"showwavespic=s={int(args.waveform_width)}x{int(args.waveform_height)}"
+            f":colors={args.waveform_color}:split_channels=0",
+            "-frames:v", "1",
+            str(waveform),
+        ]
+        rc = run_ffmpeg(cmd_wf, duration, "waveform")
+        if rc != 0:
+            emit("log", level="warn",
+                 message=f"Waveform render failed (exit {rc}); thumbnails still produced")
+
+    emit("progress", percent=100, stage="timeline", eta_seconds=0)
+    emit("complete",
+         output=str(out_dir),
+         size_bytes=sum(p.stat().st_size for p in out_dir.iterdir() if p.is_file()),
+         thumb_count=len(files),
+         duration_seconds=round(duration, 3),
+         waveform_path=str(waveform) if waveform.is_file() else None,
+         fps=fps)
+    return 0
+
+
 def op_vmaf(args: argparse.Namespace) -> int:
     """VMAF quality comparison: distorted vs. reference. Runs ffmpeg `libvmaf`
     with JSON log output, parses the file, emits per-frame `vmaf` events plus a
@@ -538,6 +623,22 @@ def build_parser() -> argparse.ArgumentParser:
     rewrap.add_argument("--input", required=True)
     rewrap.add_argument("--output", required=True)
 
+    # ── timeline ──────────────────────────────────────────────────────────────
+    timeline = sub.add_parser("timeline",
+                              help="Extract a thumbnail strip + waveform image for the UI scrub bar")
+    timeline.add_argument("--input", required=True)
+    timeline.add_argument("--output-dir", required=True, dest="output_dir")
+    timeline.add_argument("--thumb-fps", type=float, default=1.0, dest="thumb_fps",
+                          help="Thumbnails per second (default 1.0).")
+    timeline.add_argument("--thumb-height", type=int, default=72, dest="thumb_height",
+                          help="Thumbnail height in pixels (default 72).")
+    timeline.add_argument("--waveform-width", type=int, default=2400, dest="waveform_width",
+                          help="Waveform image width in pixels (default 2400).")
+    timeline.add_argument("--waveform-height", type=int, default=80, dest="waveform_height",
+                          help="Waveform image height in pixels (default 80).")
+    timeline.add_argument("--waveform-color", default="0x6dd3ff", dest="waveform_color",
+                          help="Waveform fill colour (default brand cyan).")
+
     # ── vmaf ──────────────────────────────────────────────────────────────────
     vmaf = sub.add_parser("vmaf",
                           help="VMAF quality comparison: distorted vs. reference (libvmaf)")
@@ -564,6 +665,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_rewrap(args)
         if args.op == "vmaf":
             return op_vmaf(args)
+        if args.op == "timeline":
+            return op_timeline(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")
