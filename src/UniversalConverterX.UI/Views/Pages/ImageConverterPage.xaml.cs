@@ -21,7 +21,7 @@ public sealed partial class ImageConverterPage : Page
     private static readonly string[] ImageExtensions =
     [
         ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".tif", ".bmp", ".gif",
-        ".heic", ".heif", ".avif"
+        ".heic", ".heif", ".avif", ".jxl"
     ];
 
     private static readonly Dictionary<string, string> FormatExt = new(StringComparer.OrdinalIgnoreCase)
@@ -31,6 +31,7 @@ public sealed partial class ImageConverterPage : Page
         ["webp"] = ".webp",
         ["avif"] = ".avif",
         ["heic"] = ".heic",
+        ["jxl"]  = ".jxl",
         ["tiff"] = ".tiff",
         ["bmp"]  = ".bmp",
     };

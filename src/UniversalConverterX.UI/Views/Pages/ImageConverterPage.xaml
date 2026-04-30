@@ -235,6 +235,7 @@
                             <ComboBoxItem Content="WebP (.webp)" Tag="webp"/>
                             <ComboBoxItem Content="AVIF (.avif)" Tag="avif"/>
                             <ComboBoxItem Content="HEIC (.heic)" Tag="heic"/>
+                            <ComboBoxItem Content="JPEG XL (.jxl)" Tag="jxl"/>
                             <ComboBoxItem Content="TIFF (.tiff)" Tag="tiff"/>
                             <ComboBoxItem Content="BMP (.bmp)"   Tag="bmp"/>
                         </ComboBox>

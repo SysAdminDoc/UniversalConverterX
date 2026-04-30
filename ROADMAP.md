@@ -70,6 +70,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #54 Light + system-following theme — `<ResourceDictionary.ThemeDictionaries>` with Catppuccin Latte-inspired Light variant; SolidColorBrushes switched to `{ThemeResource}` so existing pages get live theme switching with zero per-page edits.
 - ✓ #19 + #31 ProRes / DNxHR / FFV1 — 9 new VideoCrush presets (ProRes 4 tiers + 4444; DNxHR SQ/HQ/HQX/444; FFV1 archival). Sidecar bypasses CRF/two-pass for intermediate codecs; CompressorPage gained "Professional / archival" sub-combo.
 - ✓ #20 D3D12 Hardware Encode — verified shipped in v2.2 (h264/hevc/av1_d3d12va selectable as the `d3d12` accelerator).
+- ✓ #30 JPEG XL — heicshift sidecar gained `.jxl` read/write via opt-in `pillow-jxl-plugin`; ImageConverterPage exposes JXL as an output format with quality slider (100 = lossless).
 
 ---
 
@@ -221,8 +222,8 @@ Persistent SQLite log of every job (timestamp, source, target, engine, duration,
 #### 29. VMAF Quality Analysis Tool
 VMAF comparison workspace in Format Inspector: reference + distorted → per-frame score chart + mean/harmonic-mean. Uses `ffmpeg -vf libvmaf`. Surfaces quality budget signal for VideoCrush. **Impact 3 / Effort 3.** [R-11]
 
-#### 30. JPEG XL Encode/Decode
-Surface JPEG XL as a conversion target in the native Converter with a quality slider (via `libjxl`, planned UCX dependency). Shutter Encoder ships this as a named output option. **Impact 3 / Effort 1.** [R-11]
+#### 30. JPEG XL Encode/Decode ✓ Shipped v2.4
+Surface JPEG XL as a conversion target in the native Converter with a quality slider (via `libjxl`, planned UCX dependency). Shutter Encoder ships this as a named output option. **Impact 3 / Effort 1.** [R-11] Shipped: heicshift sidecar gained `.jxl` input/output via opt-in `pillow-jxl-plugin` (best-effort install in build.ps1 — frozen sidecar degrades to a clean `missing_jxl_plugin` error if the wheel didn't install). Quality slider drives lossy encode (`quality=N, effort=7`); `quality=100` switches to true lossless. ImageConverterPage format combo gained "JPEG XL (.jxl)" entry; ImageExtensions list accepts `.jxl` for input.
 
 #### 31. FFV1 Archival Codec Preset ✓ Shipped v2.4
 Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, checksummed. FFmpeg 8.1 shipped Vulkan FFV1 encode/decode. **Impact 3 / Effort 1.** [R-11, S-3] Shipped via the new `archive-ffv1` preset in `tools/videocrush/sidecar.py` PRESETS dict — uses `-c:v ffv1 -level 3 -coder 1 -context 1 -g 1 -slices 24 -slicecrc 1` (slice-CRC checksums) with FLAC audio. Sidecar warns if the user asked for a non-MKV container. CompressorPage's Professional sub-combo lists "FFV1 + FLAC archival (lossless, MKV)" as a selectable preset.
