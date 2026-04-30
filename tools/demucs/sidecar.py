@@ -50,6 +50,18 @@ def error_exit(code: str, message: str) -> None:
 
 def bootstrap() -> None:
     """Auto-install demucs and torch if not present."""
+    # When frozen with PyInstaller, sys.executable is this sidecar exe — a pip
+    # install would re-spawn this exe and fork-bomb the host. Bundle deps at
+    # build time instead of relying on runtime install.
+    if getattr(sys, "frozen", False):
+        try:
+            import demucs  # noqa: F401
+            return
+        except ImportError:
+            error_exit("missing_dep",
+                       "demucs is not bundled into this frozen sidecar. Rebuild "
+                       "with PyInstaller after `pip install demucs torch`.")
+
     try:
         import demucs  # noqa: F401
         return

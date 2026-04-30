@@ -66,6 +66,24 @@ def _pip_install(*packages: str) -> bool:
 
 def bootstrap() -> str:
     """Install faster-whisper or openai-whisper and return which backend was used."""
+    # When frozen with PyInstaller, sys.executable is this sidecar exe — a pip
+    # install would re-spawn this exe and fork-bomb the host. Bundle deps at
+    # build time instead of relying on runtime install.
+    if getattr(sys, "frozen", False):
+        try:
+            import faster_whisper  # noqa: F401
+            return "faster-whisper"
+        except ImportError:
+            pass
+        try:
+            import whisper  # noqa: F401
+            return "openai-whisper"
+        except ImportError:
+            error_exit("missing_dep",
+                       "Neither faster-whisper nor openai-whisper is bundled into "
+                       "this frozen sidecar. Rebuild with PyInstaller after "
+                       "`pip install faster-whisper`.")
+
     # Try faster-whisper first
     try:
         import faster_whisper  # noqa: F401

@@ -9,9 +9,19 @@ import tempfile
 import shutil
 import subprocess
 import math
+import multiprocessing
+
+# PyInstaller multiprocessing guard must run before any heavy imports — when
+# frozen, child workers re-execute this module and would otherwise re-run main.
+multiprocessing.freeze_support()
 
 # ── Bootstrap ────────────────────────────────────────────────────────────────
 def _bootstrap():
+    # When frozen with PyInstaller, sys.executable is this sidecar exe. Running
+    # `[sys.executable, '-m', 'pip', 'install', ...]` would re-spawn this exe
+    # and fork-bomb the host. Bundle deps at build time instead.
+    if getattr(sys, 'frozen', False):
+        return
     if sys.version_info < (3, 8):
         print("Python 3.8+ required"); sys.exit(1)
     required = ['opencv-python', 'requests', 'numpy']
@@ -74,8 +84,8 @@ def emit_complete(output: str):
     size = os.path.getsize(output) if os.path.exists(output) else 0
     emit({"event": "complete", "output": output, "size_bytes": size})
 
-def emit_error(msg: str):
-    emit({"event": "error", "message": msg})
+def emit_error(msg: str, code: str = "lipsight_error"):
+    emit({"event": "error", "code": code, "message": msg})
 
 
 # ── Face + speech analysis (inline, no GUI deps) ─────────────────────────────
@@ -577,7 +587,7 @@ def main():
     model_dir = args.model_dir or os.environ.get('UCX_MODEL_DIR')
 
     if not os.path.isfile(args.input):
-        emit_error(f"Input file not found: {args.input}")
+        emit_error(f"Input file not found: {args.input}", code="input_not_found")
         sys.exit(1)
 
     backend_name = args.backend
@@ -587,12 +597,14 @@ def main():
         backend = LocalAutoAVSRBackend(model_dir)
     elif backend_name == 'replicate':
         if not args.replicate_token:
-            emit_error("--replicate-token required for replicate backend")
+            emit_error("--replicate-token required for replicate backend",
+                       code="missing_arg")
             sys.exit(1)
         backend = ReplicateBackend(args.replicate_token)
     else:  # custom
         if not args.custom_url:
-            emit_error("--custom-url required for custom backend")
+            emit_error("--custom-url required for custom backend",
+                       code="missing_arg")
             sys.exit(1)
         backend = CustomEndpointBackend(args.custom_url, args.custom_key)
 
@@ -607,12 +619,9 @@ def main():
         emit_progress(100, "Complete")
         emit_complete(args.output)
     except Exception as exc:
-        emit_error(str(exc))
+        emit_error(str(exc), code="transcription_failed")
         sys.exit(1)
 
 
 if __name__ == '__main__':
-    if getattr(sys, 'frozen', False):
-        import multiprocessing
-        multiprocessing.freeze_support()
     main()
