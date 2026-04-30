@@ -36,6 +36,7 @@ public sealed partial class EditorPage : Page
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         UpdateCrfLabel(18);
+        UpdatePanelVisibility();
         UpdateOperationSummaries();
         UpdateUi();
     }
@@ -234,8 +235,51 @@ public sealed partial class EditorPage : Page
     private void TrimOption_Changed(object sender, RoutedEventArgs e)
     {
         if (ExportButton is null) return;
+        UpdatePanelVisibility();
         UpdateOperationSummaries();
         UpdateUi();
+    }
+
+    private void OperationCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ExportButton is null) return;
+        UpdatePanelVisibility();
+        UpdateOperationSummaries();
+        UpdateUi();
+    }
+
+    private void UpdatePanelVisibility()
+    {
+        var op = SelectedOperation();
+        TrimPanel.Visibility = op == "trim" ? Visibility.Visible : Visibility.Collapsed;
+        // Quality panel: show for trim (re-encode), crop, rotate — hidden for lossless trim, loudnorm, rewrap
+        var showQuality = op == "crop" || op == "rotate" || (op == "trim" && LosslessCheck.IsChecked != true);
+        QualityPanel.Visibility = showQuality ? Visibility.Visible : Visibility.Collapsed;
+        CropPanel.Visibility = op == "crop" ? Visibility.Visible : Visibility.Collapsed;
+        RotatePanel.Visibility = op == "rotate" ? Visibility.Visible : Visibility.Collapsed;
+        LoudnormPanel.Visibility = op == "loudnorm" ? Visibility.Visible : Visibility.Collapsed;
+        RewrapPanel.Visibility = op == "rewrap" ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private string SelectedOperation()
+    {
+        if (OperationCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return "trim";
+    }
+
+    private string SelectedRewrapExtension()
+    {
+        if (RewrapFormatCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return ".mp4";
+    }
+
+    private string SelectedRotateAngle()
+    {
+        if (RotateAngleCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return "90";
     }
 
     private void TrimText_Changed(object sender, TextChangedEventArgs e)
@@ -395,6 +439,13 @@ public sealed partial class EditorPage : Page
 
     private bool TryBuildTrimOptions(out TrimOptions options)
     {
+        if (SelectedOperation() != "trim")
+        {
+            // Non-trim ops don't need start/end validation
+            options = new TrimOptions(0, null, Lossless: LosslessCheck.IsChecked == true, Crf: (int)CrfSlider.Value);
+            return true;
+        }
+
         if (!TryParseSeconds(StartBox.Text, out var startSec))
             startSec = 0;
 
@@ -428,6 +479,21 @@ public sealed partial class EditorPage : Page
 
     private List<string> BuildArgs(string inputPath, string outputPath, TrimOptions options)
     {
+        var op = SelectedOperation();
+        var crf = (options.Crf > 0 ? options.Crf : (int)CrfSlider.Value).ToString(CultureInfo.InvariantCulture);
+
+        return op switch
+        {
+            "crop" => BuildCropArgs(inputPath, outputPath, crf),
+            "rotate" => BuildRotateArgs(inputPath, outputPath, crf),
+            "loudnorm" => BuildLoudnormArgs(inputPath, outputPath),
+            "rewrap" => ["rewrap", "--input", inputPath, "--output", outputPath],
+            _ => BuildTrimArgs(inputPath, outputPath, options),
+        };
+    }
+
+    private List<string> BuildTrimArgs(string inputPath, string outputPath, TrimOptions options)
+    {
         var args = new List<string>
         {
             "trim",
@@ -452,6 +518,39 @@ public sealed partial class EditorPage : Page
         }
 
         return args;
+    }
+
+    private List<string> BuildCropArgs(string inputPath, string outputPath, string crf)
+    {
+        if (!int.TryParse(CropWidthBox?.Text?.Trim(), out var w) || w <= 0) w = 1920;
+        if (!int.TryParse(CropHeightBox?.Text?.Trim(), out var h) || h <= 0) h = 1080;
+        if (!int.TryParse(CropXBox?.Text?.Trim(), out var x)) x = 0;
+        if (!int.TryParse(CropYBox?.Text?.Trim(), out var y)) y = 0;
+
+        return ["crop",
+            "--input", inputPath, "--output", outputPath,
+            "--width", w.ToString(), "--height", h.ToString(),
+            "--x", x.ToString(), "--y", y.ToString(),
+            "--crf", crf, "--preset", "medium"];
+    }
+
+    private List<string> BuildRotateArgs(string inputPath, string outputPath, string crf)
+    {
+        var angle = SelectedRotateAngle();
+        return ["rotate",
+            "--input", inputPath, "--output", outputPath,
+            "--angle", angle,
+            "--crf", crf, "--preset", "medium"];
+    }
+
+    private List<string> BuildLoudnormArgs(string inputPath, string outputPath)
+    {
+        var lufsText = LufsBox?.Text?.Trim() ?? "";
+        if (!double.TryParse(lufsText, NumberStyles.Float, CultureInfo.InvariantCulture, out var lufs))
+            lufs = -14.0;
+        return ["loudnorm",
+            "--input", inputPath, "--output", outputPath,
+            "--integrated-lufs", lufs.ToString("F1", CultureInfo.InvariantCulture)];
     }
 
     private void AddFinishedItem(EditFileItem item, SidecarResult result)
@@ -508,6 +607,19 @@ public sealed partial class EditorPage : Page
 
     private string BuildOperationSummary(bool shortLabel = false)
     {
+        var op = SelectedOperation();
+        return op switch
+        {
+            "crop" => shortLabel ? "Crop" : $"Crop {CropWidthBox?.Text?.Trim() ?? "?"} x {CropHeightBox?.Text?.Trim() ?? "?"} at ({CropXBox?.Text?.Trim() ?? "0"}, {CropYBox?.Text?.Trim() ?? "0"})",
+            "rotate" => shortLabel ? $"Rotate {SelectedRotateAngle()}" : $"Rotate / flip: {(RotateAngleCombo?.SelectedItem is ComboBoxItem ri ? ri.Content : SelectedRotateAngle())}",
+            "loudnorm" => shortLabel ? $"Normalize {LufsBox?.Text?.Trim() ?? "-14"} LUFS" : $"EBU R128 normalize to {LufsBox?.Text?.Trim() ?? "-14"} LUFS",
+            "rewrap" => shortLabel ? $"Rewrap → {SelectedRewrapExtension()}" : $"Rewrap container to {SelectedRewrapExtension()} (stream copy)",
+            _ => BuildTrimSummary(shortLabel),
+        };
+    }
+
+    private string BuildTrimSummary(bool shortLabel)
+    {
         var startText = string.IsNullOrWhiteSpace(StartBox?.Text) ? "0" : StartBox.Text.Trim();
         var endText = string.IsNullOrWhiteSpace(EndBox?.Text) ? "end" : EndBox.Text.Trim();
         var mode = LosslessCheck?.IsChecked == true ? "lossless" : $"CRF {(int)(CrfSlider?.Value ?? 18)}";
@@ -532,10 +644,25 @@ public sealed partial class EditorPage : Page
 
     private string BuildOutputPath(string inputPath)
     {
+        var op = SelectedOperation();
         var dir = _outputDirectory ?? Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory;
         var name = Path.GetFileNameWithoutExtension(inputPath);
-        var ext = Path.GetExtension(inputPath);
-        return EnsureUniquePath(Path.Combine(dir, $"{name}_trimmed{ext}"));
+
+        // For rewrap, use the selected target extension; otherwise keep original extension.
+        var ext = op == "rewrap"
+            ? SelectedRewrapExtension()
+            : Path.GetExtension(inputPath);
+
+        var suffix = op switch
+        {
+            "crop" => "_cropped",
+            "rotate" => "_rotated",
+            "loudnorm" => "_normalized",
+            "rewrap" => "_rewrapped",
+            _ => "_trimmed",
+        };
+
+        return EnsureUniquePath(Path.Combine(dir, $"{name}{suffix}{ext}"));
     }
 
     private static string EnsureUniquePath(string path)
