@@ -5,9 +5,9 @@
 | **UCX module** | Toolbox > Subtitle Remover |
 | **Integration phase** | v2.2 |
 | **Source ported** | YES — see this directory |
-| **Entry point** | `VideoSubtitleRemover.py` |
+| **Entry point** | `sidecar.py` |
 | **Runtime** | Python 3.10+ + AI inpainting backend |
-| **NDJSON CLI shim** | not yet — lands at integration phase |
+| **NDJSON CLI shim** | `sidecar.py` — freeze via `build.ps1` |
 
 ## What this engine does
 

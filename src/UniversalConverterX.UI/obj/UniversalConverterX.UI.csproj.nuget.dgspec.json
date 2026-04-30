@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj": {}
+    "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
-      "version": "1.0.0",
+    "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
+      "version": "2.1.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+        "projectUniqueName": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
         "projectName": "UniversalConverterX.Core",
-        "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\obj\\",
+        "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+        "packagesPath": "C:\\Users\\--\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\--\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {}
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
@@ -44,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -64,7 +65,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.6, )"
             }
           },
           "imports": [
@@ -83,24 +84,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj": {
-      "version": "1.0.0",
+    "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj": {
+      "version": "2.1.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+        "projectUniqueName": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
         "projectName": "UniversalConverterX",
-        "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.UI\\obj\\",
+        "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.UI\\UniversalConverterX.UI.csproj",
+        "packagesPath": "C:\\Users\\--\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.UI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\--\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -109,14 +110,15 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {}
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0-windows10.0.19041": {
             "targetAlias": "net8.0-windows10.0.19041.0",
             "projectReferences": {
-              "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
-                "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj"
+              "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
+                "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj"
               }
             }
           }
@@ -131,7 +133,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net8.0-windows10.0.19041": {
@@ -188,19 +190,19 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Runtime.win-arm64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             },
             {
               "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             },
             {
               "name": "Microsoft.NETCore.App.Runtime.win-arm64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             },
             {
               "name": "Microsoft.NETCore.App.Runtime.win-x64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             },
             {
               "name": "Microsoft.Windows.SDK.NET.Ref",
@@ -208,11 +210,11 @@
             },
             {
               "name": "Microsoft.WindowsDesktop.App.Runtime.win-arm64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             },
             {
               "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-              "version": "[8.0.23, 8.0.23]"
+              "version": "[8.0.26, 8.0.26]"
             }
           ],
           "frameworkReferences": {
@@ -223,7 +225,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

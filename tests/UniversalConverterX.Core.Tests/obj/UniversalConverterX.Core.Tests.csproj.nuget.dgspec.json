@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj": {}
+    "C:\\Users\\--\\repos\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
-      "version": "1.0.0",
+    "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
+      "version": "2.1.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+        "projectUniqueName": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
         "projectName": "UniversalConverterX.Core",
-        "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\obj\\",
+        "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj",
+        "packagesPath": "C:\\Users\\--\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\--\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,10 +26,12 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {}
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -44,10 +46,11 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.Extensions.DependencyInjection.Abstractions": {
@@ -64,7 +67,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.6, )"
             }
           },
           "imports": [
@@ -83,24 +86,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj": {
-      "version": "1.0.0",
+    "C:\\Users\\--\\repos\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj": {
+      "version": "2.1.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+        "projectUniqueName": "C:\\Users\\--\\repos\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
         "projectName": "UniversalConverterX.Core.Tests",
-        "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\obj\\",
+        "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\UniversalConverterX.Core.Tests.csproj",
+        "packagesPath": "C:\\Users\\--\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\--\\repos\\UniversalConverterX\\tests\\UniversalConverterX.Core.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\--\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -109,14 +112,16 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {}
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
-                "projectPath": "C:\\Users\\Admin\\Downloads\\UniversalConverterX_Organized\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj"
+              "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj": {
+                "projectPath": "C:\\Users\\--\\repos\\UniversalConverterX\\src\\UniversalConverterX.Core\\UniversalConverterX.Core.csproj"
               }
             }
           }
@@ -131,10 +136,11 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "FluentAssertions": {
@@ -190,7 +196,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
