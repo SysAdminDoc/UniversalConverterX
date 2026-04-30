@@ -1,0 +1,16 @@
+# Drop RNNoise .rnnn model files here.
+#
+# The sidecar resolves the active model in this order:
+#   1. --model <path>           explicit override
+#   2. RNNOISE_MODEL env var    user override
+#   3. UCX_MODEL_DIR/rnnoise/   shared model cache (set by SidecarRunner)
+#   4. tools/rnnoise/models/    this directory (preferred for shipped builds)
+#
+# Filename convention: cb.rnnn is the default broadband model picked
+# automatically when present.
+#
+# Vetted sources:
+#   - github.com/GregorR/rnnoise-models   community-trained models, MIT
+#   - github.com/xiph/rnnoise             upstream training data + tooling
+#
+# Models are intentionally NOT vendored (license + size) — fetch separately.

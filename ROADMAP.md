@@ -59,6 +59,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #4 GIF Maker — new `gifstudio` sidecar (two-pass `palettegen`+`paletteuse`), `GifMakerPage` batch UI, route + Toolbox tile wired, contract test KNOWN_EVENTS extended.
 - ✓ #5 HEICShift / Image Converter — new `heicshift` Pillow+pillow_heif sidecar, `ImageConverterPage` with format/quality/metadata controls, route + Toolbox tile wired (JXL/RAW deferred).
 - ✓ #7 edge-tts Text-to-Speech — new `edge-tts` async sidecar (322 voices, MIT, no API key), TextToSpeechPage rebuilt with voice picker/rate/pitch/format controls + Save-to picker, ToolboxPage tile flipped Future → Ready.
+- ✓ #11 RNNoise Noise Remover — new `rnnoise` sidecar via FFmpeg `arnndn` filter (no Python ML deps), NoiseRemoverPage rewritten with model picker + muxed/audio-only modes, ToolboxPage tile flipped Future → Ready.
 
 ---
 
@@ -102,8 +103,8 @@ ImageUpscalerPage and VideoEnhancerPage stubs exist. Use `realesrgan-ncnn-vulkan
 #### 10. Lossless Trim Mode (stream copy, no re-encode) ✓ Shipped v2.3 (verified v2.4)
 Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy`. Expose as a "Lossless Cut" toggle — default for trim-only operations. Zero quality loss, 10–100× faster than transcoding. **Impact 5 / Effort 2.** [R-3] Already in tree: `tools/clipforge/sidecar.py:133` runs `ffmpeg ... -c copy`; `EditorPage.xaml:272` exposes `LosslessCheck` defaulted to `IsChecked="True"`; `EditorPage.xaml.cs:524` passes `--lossless` through.
 
-#### 11. RNNoise Noise Remover sidecar
-NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes broadband background noise from speech audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute. **Impact 4 / Effort 2.** [R-9]
+#### 11. RNNoise Noise Remover sidecar ✓ Shipped v2.4
+NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes broadband background noise from speech audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute. **Impact 4 / Effort 2.** [R-9] Shipped via FFmpeg's built-in `arnndn` filter (zero Python ML deps, ships with FFmpeg ≥4.4): new [`tools/rnnoise/sidecar.py`](tools/rnnoise/sidecar.py) with `denoise` + `list-models` ops. Model resolution walks `--model` → `RNNOISE_MODEL` env → `UCX_MODEL_DIR/rnnoise/` → bundled `tools/rnnoise/models/`; `cb.rnnn` is the auto-default when present. Output supports muxed (video pass-through, audio replaced) or audio-only modes; codec selection drives off the output extension. NoiseRemoverPage rewritten end-to-end: model picker (auto-discovered + Refresh), mode/format combos, drag-drop batch queue, ProgressBar + cancel. ToolboxPage tile flipped Future → Ready. Models intentionally not vendored — `tools/rnnoise/models/.gitkeep` cites trusted sources (xiph/rnnoise, GregorR/rnnoise-models).
 
 #### 12. whisper.cpp GPU sidecar (Vulkan/CUDA)
 Current Whisper sidecar uses faster-whisper (Python/CUDA). Add secondary path: whisper.cpp v1.8.4 single `.exe`, Vulkan GPU, no Python dependency, 6 model sizes. v1.8.4 adds Silero VAD v6.2.0 (auto-skip silence, reduce hallucinations), GPU device selection (`-g`), and 12× speedup on Intel iGPU. Route: prefer whisper.cpp if CUDA unavailable; prefer faster-whisper if CUDA 12.0+ present. **Impact 3 / Effort 3.** [R-8]
