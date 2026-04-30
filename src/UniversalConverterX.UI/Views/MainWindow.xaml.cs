@@ -75,8 +75,20 @@ public sealed partial class MainWindow : Window
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         Activated -= MainWindow_Activated;
-        // Default landing
-        RequestNavigation("home");
+        // Default landing — JumpList passes `--route <key>` as activation arg
+        // (see App.ConfigureJumpListAsync); honour it on first activate.
+        var route = ParseJumpListRoute(Environment.GetCommandLineArgs());
+        RequestNavigation(route ?? "home");
+    }
+
+    private static string? ParseJumpListRoute(string[] argv)
+    {
+        for (int i = 0; i < argv.Length - 1; i++)
+        {
+            if (argv[i] == "--route")
+                return argv[i + 1];
+        }
+        return null;
     }
 
     public void RequestNavigation(string routeKey)
