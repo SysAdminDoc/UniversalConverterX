@@ -8,150 +8,367 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="32" Spacing="20">
-
-            <!-- Header -->
-            <StackPanel Spacing="6">
-                <TextBlock Text="Watermark Remover" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Detect logos, captions, static overlays, or objects and inpaint the region with surrounding content."
-                           Style="{StaticResource SubtitleTextStyle}"/>
-            </StackPanel>
-
-            <!-- Dev status banner -->
-            <Border Style="{StaticResource CardStyle}">
-                <Grid ColumnSpacing="16">
+    <Page.Resources>
+        <DataTemplate x:Key="WmrQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="44"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xE71B;" FontSize="22"
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.RowSpan="2" Grid.Column="0"
+                            Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE71B;" FontSize="20"
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource TextInverseBrush}"/>
-                            </Border>
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="Engine: VideoSubtitleRemover" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentOrangeBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="Watermark Remover is not available yet."
-                                   Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Required before enabling: region selector, preview, export path, cancellation, and failure recovery."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding SourceSummary}"
+                                   Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
+                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10" Padding="10,5">
+                        <TextBlock Text="{Binding ModeSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"/>
+                    </Border>
+                    <Button Grid.Column="3" Grid.Row="0"
+                            Style="{StaticResource IconButtonStyle}"
+                            ToolTipService.ToolTip="Remove from queue"
+                            Click="RemoveFile_Click" Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar Grid.Column="0" Minimum="0" Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6" CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="92" TextAlignment="Right"/>
+                    </Grid>
                 </Grid>
             </Border>
+        </DataTemplate>
 
-            <!-- Input area -->
-            <Border Style="{StaticResource CardStyle}"
-                    MinHeight="160"
-                    AllowDrop="False"
-                    Opacity="0.72"
-                    DragOver="DropZone_DragOver"
-                    Drop="DropZone_Drop">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <Border Width="72" Height="72" CornerRadius="18"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE71B;" FontSize="32"
-                                  Foreground="{StaticResource AccentOrangeBrush}"/>
+        <DataTemplate x:Key="WmrFinishedTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceSoftBrush}">
+                        <FontIcon Glyph="{Binding Glyph}" FontSize="19"
+                                  Foreground="{Binding AccentBrush}"/>
                     </Border>
-                    <TextBlock x:Name="DropZoneLabel"
-                               Text="Input is disabled until this workflow is ready."
-                               Style="{StaticResource BodyTextStyle}"
-                               HorizontalAlignment="Center"/>
-                    <Button Content="Browse Files"
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Details}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OutputPath}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            IsEnabled="False"
-                            HorizontalAlignment="Center"
-                            Click="Browse_Click"/>
-                </StackPanel>
+                            Padding="14,8"
+                            Click="OpenFinishedFolder_Click"
+                            Tag="{Binding OutputPath}"
+                            IsEnabled="{Binding CanOpenFolder}"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="6">
+                <TextBlock Text="Watermark &amp; Subtitle Remover" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Detect and inpaint logos, captions, static overlays, and subtitle text using AI reconstruction."
+                           Style="{StaticResource SubtitleTextStyle}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Browse_Click"/>
+                <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BrowseFolder_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main content -->
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Drop zone + queue -->
+            <Border x:Name="DropZone" Grid.Column="0"
+                    Style="{StaticResource CardStyle}"
+                    CornerRadius="22"
+                    Padding="18"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop"
+                    PointerPressed="DropZone_PointerPressed">
+                <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
+                    <PivotItem Header="Queue">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="EmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE71B;" FontSize="48"
+                                              Foreground="{StaticResource AccentOrangeBrush}"/>
+                                </Border>
+                                <TextBlock Text="Drop video or image files"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="MP4, MOV, MKV, WebM, PNG, JPG, WEBP, and more."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <Button Content="Browse Files"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="Browse_Click"
+                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FileList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource WmrQueueTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+
+                    <PivotItem Header="Finished">
+                        <Grid MinHeight="430" Padding="0,8,0,0">
+                            <StackPanel x:Name="FinishedEmptyState"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                              Foreground="{StaticResource TextMutedBrush}"/>
+                                </Border>
+                                <TextBlock Text="No finished jobs yet"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Completed, failed, and cancelled jobs appear here."
+                                           Style="{StaticResource MutedTextStyle}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <ListView x:Name="FinishedList"
+                                      Visibility="Collapsed"
+                                      Background="Transparent"
+                                      SelectionMode="None"
+                                      ItemTemplate="{StaticResource WmrFinishedTemplate}"/>
+                        </Grid>
+                    </PivotItem>
+                </Pivot>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Spacing="14">
 
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
+                <!-- Inpainting mode -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Inpainting Algorithm" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="ModeCombo" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="STTN (temporal, default)" Tag="sttn" IsSelected="True"/>
+                            <ComboBoxItem Content="LaMa (single-frame, fast)" Tag="lama"/>
+                            <ComboBoxItem Content="ProPainter (high quality)" Tag="propainter"/>
+                            <ComboBoxItem Content="Auto (TBE + LaMa routing)" Tag="auto"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Device -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Compute Device" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="DeviceCombo" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="CPU" Tag="cpu" IsSelected="True"/>
+                            <ComboBoxItem Content="DirectML (AMD / Intel)" Tag="directml"/>
+                            <ComboBoxItem Content="CUDA GPU 0" Tag="cuda:0"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Detection options -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
                         <TextBlock Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Watermark Type" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="Static logo / bug" IsSelected="True"/>
-                                <ComboBoxItem Content="Subtitle / text overlay"/>
-                                <ComboBoxItem Content="Semi-transparent logo"/>
-                                <ComboBoxItem Content="Auto-detect all"/>
+                            <TextBlock Text="OCR Language" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="LangCombo" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="English" Tag="en" IsSelected="True"/>
+                                <ComboBoxItem Content="Chinese (Simplified)" Tag="ch"/>
+                                <ComboBoxItem Content="Japanese" Tag="ja"/>
+                                <ComboBoxItem Content="Korean" Tag="ko"/>
+                                <ComboBoxItem Content="French" Tag="fr"/>
+                                <ComboBoxItem Content="German" Tag="de"/>
+                                <ComboBoxItem Content="Spanish" Tag="es"/>
+                                <ComboBoxItem Content="Russian" Tag="ru"/>
                             </ComboBox>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Detection Mode" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="Auto (AI detection)" IsSelected="True"/>
-                                <ComboBoxItem Content="Manual region select"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Confidence Threshold" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="10" Maximum="99" Value="60"
-                                    TickFrequency="10"/>
+                            <TextBlock Text="Region (optional): x1,y1,x2,y2" Style="{StaticResource MutedTextStyle}"/>
+                            <TextBox x:Name="AreaBox"
+                                     PlaceholderText="e.g. 0,900,1920,1080"
+                                     HorizontalAlignment="Stretch"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Inpainting" Style="{StaticResource PanelTitleTextStyle}"/>
+                <!-- Quality -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Output Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Inpainting Strength" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="0" Maximum="100" Value="75"
-                                    TickFrequency="10"/>
+                            <Grid>
+                                <TextBlock Text="CRF (video re-encode)" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock x:Name="QualityValueText" Text="23"
+                                           HorizontalAlignment="Right"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           FontWeight="SemiBold"/>
+                            </Grid>
+                            <Slider x:Name="QualitySlider" Minimum="0" Maximum="51" Value="23"
+                                    TickFrequency="1" StepFrequency="1"/>
                         </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Mask Expansion (px)" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="0" Maximum="20" Value="2"
-                                    TickFrequency="1"/>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="MP4 (H.264)" IsSelected="True"/>
-                                <ComboBoxItem Content="MKV"/>
-                                <ComboBoxItem Content="Preserve source"/>
-                            </ComboBox>
+                        <ToggleSwitch x:Name="KeepAudioToggle"
+                                      Header="Preserve audio track"
+                                      IsOn="True"/>
+                        <ToggleSwitch x:Name="NoHwEncodeToggle"
+                                      Header="Disable HW encoder (NVENC/QSV)"
+                                      IsOn="False"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Output folder -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
+                                 IsReadOnly="True" HorizontalAlignment="Stretch"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"/>
+                            <Button Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="SameAsSource_Click"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-            </Grid>
 
-            <!-- Action bar -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
-                               Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Remove Watermarks"
+            </StackPanel>
+        </Grid>
+
+        <!-- Action bar -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusText"
+                               Text="Add video or image files to start a removal queue."
+                               Style="{StaticResource MutedTextStyle}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button x:Name="ClearButton" Content="Clear Queue"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
+                            Click="Clear_Click"/>
+                    <Button Content="Open Output Folder"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="OpenOutputFolder_Click"/>
+                    <Button x:Name="RunButton" Content="Remove"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"/>
-                </Grid>
-            </Border>
+                            IsEnabled="False"
+                            Click="Run_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+        <!-- Progress overlay -->
+        <Border x:Name="ProgressOverlay"
+                Grid.Row="0" Grid.RowSpan="3"
+                Background="{StaticResource OverlayBrush}"
+                CornerRadius="20"
+                Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14" MaxWidth="480">
+                <TextBlock x:Name="ProgressTitle" Text="Processing..."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0"
+                             Width="380" Height="8" CornerRadius="4"/>
+                <TextBlock x:Name="ProgressStage" Text="Starting..."
+                           Style="{StaticResource MutedTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ProgressEta" Text=""
+                           Style="{StaticResource MutedTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <ScrollViewer MaxHeight="130" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="ProgressLog" Text=""
+                               Style="{StaticResource MutedTextStyle}"
+                               FontFamily="Consolas"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                </ScrollViewer>
+                <Button x:Name="CancelButton" Content="Cancel"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        HorizontalAlignment="Center"
+                        Click="Cancel_Click"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
 </Page>
+
