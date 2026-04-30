@@ -80,6 +80,9 @@ public sealed partial class FrameSnapshotPage : Page
 
     private void DropZone_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Mouse &&
+            !e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
+            return;
         if (_queue.Count == 0 && QueuePivot.SelectedIndex == 0)
             BrowseFiles();
     }
@@ -223,10 +226,15 @@ public sealed partial class FrameSnapshotPage : Page
         UpdateUi();
     }
 
-    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUi();
+    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PlanSummaryText is null) return;
+        UpdateUi();
+    }
 
     private void Option_Changed(object sender, SelectionChangedEventArgs e)
     {
+        if (PlanSummaryText is null) return;
         UpdatePlanSummary();
         foreach (var item in _queue.Where(item => !item.IsComplete))
             item.PlanSummary = CurrentPlanLabel();
@@ -235,6 +243,7 @@ public sealed partial class FrameSnapshotPage : Page
 
     private void Option_TextChanged(object sender, TextChangedEventArgs e)
     {
+        if (PlanSummaryText is null) return;
         UpdatePlanSummary();
         foreach (var item in _queue.Where(item => !item.IsComplete))
             item.PlanSummary = CurrentPlanLabel();

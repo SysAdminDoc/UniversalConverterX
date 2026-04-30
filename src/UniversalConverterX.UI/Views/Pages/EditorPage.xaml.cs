@@ -70,6 +70,9 @@ public sealed partial class EditorPage : Page
 
     private void DropZone_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Mouse &&
+            !e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
+            return;
         if (_files.Count == 0 && QueuePivot.SelectedIndex == 0)
             BrowseFiles();
     }
@@ -222,22 +225,29 @@ public sealed partial class EditorPage : Page
         UpdateUi();
     }
 
-    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUi();
+    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ExportButton is null) return;
+        UpdateUi();
+    }
 
     private void TrimOption_Changed(object sender, RoutedEventArgs e)
     {
+        if (ExportButton is null) return;
         UpdateOperationSummaries();
         UpdateUi();
     }
 
     private void TrimText_Changed(object sender, TextChangedEventArgs e)
     {
+        if (ExportButton is null) return;
         UpdateOperationSummaries();
         UpdateUi();
     }
 
     private void CrfSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
+        if (CrfLabel is null) return;
         UpdateCrfLabel((int)e.NewValue);
         UpdateOperationSummaries();
         UpdateUi();

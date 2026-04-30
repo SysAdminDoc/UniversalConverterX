@@ -97,9 +97,17 @@ public sealed partial class RecorderPage : Page
         UpdateUi();
     }
 
-    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUi();
+    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (QueueSummaryText is null) return;
+        UpdateUi();
+    }
 
-    private void Option_Changed(object sender, SelectionChangedEventArgs e) => UpdateUi();
+    private void Option_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (QueueSummaryText is null) return;
+        UpdateUi();
+    }
 
     private async void Record_Click(object sender, RoutedEventArgs e)
     {
