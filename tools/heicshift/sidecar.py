@@ -87,10 +87,11 @@ def _ensure_deps() -> None:
 
 # ── Format inventory ─────────────────────────────────────────────────────────
 
-# Input extensions the sidecar can decode reliably (Pillow + pillow_heif).
+# Input extensions the sidecar can decode reliably (Pillow + pillow_heif + optional pillow-jxl).
 INPUT_EXTS = {
     ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".tif", ".bmp", ".gif",
     ".heic", ".heif", ".avif",
+    ".jxl",   # JPEG XL — decoded only when pillow-jxl-plugin is installed
 }
 
 # Output formats and their Pillow save() parameter conventions.
@@ -102,7 +103,21 @@ OUTPUT_FORMATS: dict[str, dict] = {
     "bmp":  {"ext": ".bmp",  "pil": "BMP",   "supports_alpha": False},
     "heic": {"ext": ".heic", "pil": "HEIF",  "supports_alpha": True},
     "avif": {"ext": ".avif", "pil": "AVIF",  "supports_alpha": True},
+    "jxl":  {"ext": ".jxl",  "pil": "JXL",   "supports_alpha": True},
 }
+
+
+def _try_register_jxl() -> bool:
+    """Best-effort import of pillow-jxl-plugin so .jxl read/write works.
+
+    Returns True if registered, False otherwise. Callers can degrade to a
+    helpful error rather than a blanket "decode_failed" if JXL was the target.
+    """
+    try:
+        import pillow_jxl  # type: ignore  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 def op_list_formats(_: argparse.Namespace) -> int:
@@ -141,6 +156,17 @@ def op_convert(args: argparse.Namespace) -> int:
     import pillow_heif  # type: ignore
 
     pillow_heif.register_heif_opener()
+    has_jxl = _try_register_jxl()
+
+    # JXL needs an explicit dep — bail with a clear hint rather than a generic
+    # decode/encode error when the plugin isn't installed.
+    if not has_jxl and (in_path.suffix.lower() == ".jxl" or fmt == "jxl"):
+        return fail(
+            "missing_jxl_plugin",
+            "JPEG XL support requires `pillow-jxl-plugin`. Install with "
+            "`pip install pillow-jxl-plugin` (the heicshift build.ps1 already "
+            "bundles it for frozen builds).",
+        )
 
     try:
         img = Image.open(in_path)
@@ -179,6 +205,14 @@ def op_convert(args: argparse.Namespace) -> int:
         save_kwargs.update(optimize=True, compress_level=6)
     elif fmt == "tiff":
         save_kwargs.update(compression="tiff_lzw")
+    elif fmt == "jxl":
+        # pillow-jxl-plugin honours `quality` (1-100) and a `lossless` toggle.
+        # We expose lossless via quality=100; users who want strict lossless
+        # can also pass --strip-icc=False --strip-exif=False --quality=100.
+        if quality >= 100:
+            save_kwargs.update(lossless=True)
+        else:
+            save_kwargs.update(quality=quality, effort=7)
 
     # ICC profile pass-through (preserves colour fidelity across colour spaces).
     if not args.strip_icc and "icc_profile" in img.info:

@@ -24,8 +24,15 @@ if ($Clean) {
 # Bundle Pillow + pillow_heif into the freeze so the frozen sidecar can run
 # without runtime pip install (frozen-guard short-circuits at runtime).
 Write-Host '[heicshift] Ensuring runtime deps...'
+# pillow-jxl-plugin is opt-in: succeed even if it fails to install (some
+# environments lack libjxl prebuilt wheels). The sidecar degrades gracefully.
 & $Python -m pip install --quiet 'Pillow>=10.0.0' 'pillow-heif>=0.16.0' pyinstaller
 if ($LASTEXITCODE -ne 0) { throw 'pip install failed.' }
+
+& $Python -m pip install --quiet 'pillow-jxl-plugin>=1.3.0' 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning '[heicshift] pillow-jxl-plugin install failed — frozen sidecar will refuse JXL with a helpful error.'
+}
 
 Write-Host '[heicshift] Freezing sidecar.py...'
 
@@ -38,6 +45,7 @@ Write-Host '[heicshift] Freezing sidecar.py...'
     --workpath $BuildDir `
     --specpath $SpecDir `
     --collect-all pillow_heif `
+    --collect-all pillow_jxl `
     --hidden-import PIL.ImageCms `
     $Sidecar
 
