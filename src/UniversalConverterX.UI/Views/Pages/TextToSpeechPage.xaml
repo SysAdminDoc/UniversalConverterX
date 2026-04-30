@@ -75,7 +75,7 @@
                                    Text="0 characters"
                                    Style="{StaticResource MutedTextStyle}"
                                    VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="ProgressBar"
+                        <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
                                      Grid.Column="1"
                                      Width="220"
                                      Height="6"

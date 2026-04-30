@@ -33,7 +33,7 @@
                     <Button Grid.Column="3"
                             VerticalAlignment="Bottom"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTipService.ToolTip="Remove chapter"
+                            AutomationProperties.Name="Remove chapter" ToolTipService.ToolTip="Remove chapter"
                             Click="RemoveRow_Click"
                             Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"

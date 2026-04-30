@@ -130,7 +130,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="WorkProgress"
+            <ProgressBar AutomationProperties.Name="Progress" x:Name="WorkProgress"
                          Minimum="0" Maximum="100"
                          IsIndeterminate="False"
                          VerticalAlignment="Center"/>

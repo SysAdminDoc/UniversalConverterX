@@ -59,7 +59,7 @@
                             Tag="{x:Bind Id}"/>
                     <Button Grid.Column="4"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTipService.ToolTip="Forget this entry"
+                            AutomationProperties.Name="Forget this entry" ToolTipService.ToolTip="Forget this entry"
                             Click="Delete_Click"
                             Tag="{x:Bind Id}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"

@@ -54,7 +54,7 @@
 
                     <Button Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTipService.ToolTip="Remove from queue"
+                            AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -65,7 +65,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar Grid.Column="0" Minimum="0" Maximum="100"
+                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
                                      VerticalAlignment="Center"/>
@@ -361,7 +361,7 @@
                     <TextBlock x:Name="ProgressTitle" Text="Converting..."
                                Style="{StaticResource TitleTextStyle}"/>
 
-                    <ProgressBar x:Name="ConversionProgress"
+                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ConversionProgress"
                                  Height="8"
                                  CornerRadius="4"
                                  Minimum="0"

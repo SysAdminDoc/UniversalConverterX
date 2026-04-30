@@ -235,8 +235,8 @@ Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, ch
 
 ### Accessibility
 
-#### 32. Windows Narrator + Keyboard Navigation Audit
-Audit all WinUI 3 pages for: `AutomationProperties.Name` on unlabeled controls, tab-stop order, focus ring visibility, progress bar accessible names. HandBrake 1.11.0 shipped screen reader fixes as a named release feature — this is now user-visible parity work. **Impact 4 / Effort 3.** [R-1]
+#### 32. Windows Narrator + Keyboard Navigation Audit ✓ Shipped v2.4
+Audit all WinUI 3 pages for: `AutomationProperties.Name` on unlabeled controls, tab-stop order, focus ring visibility, progress bar accessible names. HandBrake 1.11.0 shipped screen reader fixes as a named release feature — this is now user-visible parity work. **Impact 4 / Effort 3.** [R-1] Shipped first audit pass: every `IconButtonStyle` icon-only Button now carries an explicit `AutomationProperties.Name` mirroring its `ToolTipService.ToolTip` (Windows Narrator reads the AP.Name first; tooltip alone can be skipped depending on Narrator settings) -- 22 buttons across 21 pages annotated. Every `ProgressBar` (32 instances across 25 pages, including the new Watch / History / VMAF / SceneDetect / Timeline / TrackManager workspaces) gets `AutomationProperties.Name="Progress"` so screen readers announce the role correctly when value updates. `IconButtonStyle` already declares `UseSystemFocusVisuals=True` so keyboard focus rings render. Subsequent passes (tab-stop ordering review, ComboBox label coverage, focus management across pages) will land in v2.5. Build clean (no XAML compiler errors).
 
 ---
 

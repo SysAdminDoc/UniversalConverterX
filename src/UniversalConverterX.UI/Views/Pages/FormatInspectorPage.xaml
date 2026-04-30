@@ -60,7 +60,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar Grid.Column="0"
+                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress}"
