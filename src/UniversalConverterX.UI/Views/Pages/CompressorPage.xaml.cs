@@ -213,10 +213,17 @@ public sealed partial class CompressorPage : Page
         UpdateUi();
     }
 
-    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateUi();
+    private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (EmptyState is null) return;
+        UpdateUi();
+    }
 
     private void Preset_Checked(object sender, RoutedEventArgs e)
     {
+        // IsChecked="True" on PresetWeb fires this during InitializeComponent() before
+        // all Connect() cases have run — bail out until the visual tree is complete.
+        if (PresetEmail is null) return;
         UpdatePresetSummaries();
         UpdateStatusText();
     }
