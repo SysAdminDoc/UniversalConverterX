@@ -40,6 +40,11 @@ public class Program
                 .WithExample("tools", "list")
                 .WithExample("tools", "check")
                 .WithExample("tools", "download", "ffmpeg");
+
+            config.AddCommand<ServeCommand>("serve")
+                .WithDescription("Bind a localhost HTTP API for headless integration")
+                .WithExample("serve")
+                .WithExample("serve", "--port", "17654");
         });
 
         return app.Run(args);
