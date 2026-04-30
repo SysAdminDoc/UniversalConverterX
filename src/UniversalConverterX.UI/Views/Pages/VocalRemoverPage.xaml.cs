@@ -242,6 +242,11 @@ public sealed partial class VocalRemoverPage : Page
 
         var model = SelectedComboTag(ModelCombo) ?? "htdemucs_ft";
         var stems = SelectedComboTag(StemCombo) ?? "2stem";
+        // 6-stem requires the htdemucs_6s model — silently override the model
+        // so users don't get a confusing "no guitar/piano" output if they left
+        // the default htdemucs_ft selected.
+        if (stems == "6stem" && !model.Contains("6s", StringComparison.OrdinalIgnoreCase))
+            model = "htdemucs_6s";
         var format = SelectedComboTag(FormatCombo) ?? "wav";
         var shifts = ShiftsToggle.IsOn ? 1 : 0;
 

@@ -71,6 +71,8 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #19 + #31 ProRes / DNxHR / FFV1 — 9 new VideoCrush presets (ProRes 4 tiers + 4444; DNxHR SQ/HQ/HQX/444; FFV1 archival). Sidecar bypasses CRF/two-pass for intermediate codecs; CompressorPage gained "Professional / archival" sub-combo.
 - ✓ #20 D3D12 Hardware Encode — verified shipped in v2.2 (h264/hevc/av1_d3d12va selectable as the `d3d12` accelerator).
 - ✓ #30 JPEG XL — heicshift sidecar gained `.jxl` read/write via opt-in `pillow-jxl-plugin`; ImageConverterPage exposes JXL as an output format with quality slider (100 = lossless).
+- ✓ #15 Auto-Subtitle — AiSubtitlePage rewritten end-to-end (Backend + Model + Language + Format + burn-in toggle); FFmpeg `subtitles=` filter for hard-coded captions; ToolboxPage tile flipped Future → Ready.
+- ✓ #16 Demucs 6-stem — VocalRemoverPage gained 6-stem option; sidecar handles `6stem` arg; auto-overrides to `htdemucs_6s` model.
 
 ---
 
@@ -161,11 +163,11 @@ Shipped `UniversalConverterX.exe` is unsigned today, so first launch hits SmartS
 
 ### AI Features
 
-#### 15. Auto-Subtitle sidecar (Whisper → SRT/VTT)
-AiSubtitlePage stub exists. Extend whisper-stt sidecar to output SRT/VTT subtitle files alongside transcripts. Optional burn-in path: `ffmpeg -vf subtitles=...` for hard-coded subtitles. Optional LibreTranslate post-pass for translated subtitles. **Impact 5 / Effort 2.** [R-7, R-8]
+#### 15. Auto-Subtitle sidecar (Whisper → SRT/VTT) ✓ Shipped v2.4
+AiSubtitlePage stub exists. Extend whisper-stt sidecar to output SRT/VTT subtitle files alongside transcripts. Optional burn-in path: `ffmpeg -vf subtitles=...` for hard-coded subtitles. Optional LibreTranslate post-pass for translated subtitles. **Impact 5 / Effort 2.** [R-7, R-8] Shipped: AiSubtitlePage rewritten end-to-end with Backend (whisper-stt / whisper-cpp) + Model + Language + Format combos. Both whisper sidecars already produce SRT/VTT — page wires the right arg shape per backend. Optional burn-in checkbox runs `ffmpeg -vf subtitles='<path>' -c:v libx264 ...` after transcription with proper Windows path escaping for the FFmpeg filter graph. ToolboxPage tile flipped Future → Ready ("Powered by Whisper"). LibreTranslate post-pass remains under-consideration for v2.5.
 
-#### 16. Demucs Full Stem Separation (4/6 stem)
-Extend VocalRemoverPage to expose a stem selector: 4-stem (drums/bass/vocals/other) and 6-stem (adds guitar/piano) via `htdemucs_6s` model. Output each stem as a separate WAV/FLAC file with clear names for DAW import. Note: demucs upstream archived 2025-01-01; PyPI package still functional. **Impact 4 / Effort 2.** [R-6]
+#### 16. Demucs Full Stem Separation (4/6 stem) ✓ Shipped v2.4
+Extend VocalRemoverPage to expose a stem selector: 4-stem (drums/bass/vocals/other) and 6-stem (adds guitar/piano) via `htdemucs_6s` model. Output each stem as a separate WAV/FLAC file with clear names for DAW import. Note: demucs upstream archived 2025-01-01; PyPI package still functional. **Impact 4 / Effort 2.** [R-6] Shipped: StemCombo gained "6-stem (+guitar / piano — needs htdemucs_6s)" option; demucs sidecar's `resolve_stems()` handles `6stem` arg explicitly. VocalRemoverPage auto-overrides the model to `htdemucs_6s` when 6-stem is selected (otherwise the user would silently miss the guitar/piano stems with a default htdemucs_ft).
 
 #### 17. VAD Pre-Filter for Whisper STT ✓ Shipped v2.4 (with #12)
 Integrate Silero VAD v6.2.0 (available in whisper.cpp v1.8.4 and as standalone `silero-vad` pip package) as a pre-processing step before transcription — skips silence regions, reduces hallucinations. Expose as a toggle in SpeechToTextPage. **Impact 3 / Effort 2.** [R-8] Shipped together with the whisper.cpp sidecar in #12 — VadCheck toggle in `SpeechToTextPage.xaml` adds `--vad` to the whisper-cli invocation when checked. The standalone `silero-vad` pip package is still available as a future upgrade for the Python-side `whisper-stt` (faster-whisper) backend if needed.

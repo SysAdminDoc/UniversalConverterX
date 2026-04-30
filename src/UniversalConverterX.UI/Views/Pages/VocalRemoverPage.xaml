@@ -240,6 +240,7 @@
                             <ComboBoxItem Content="Vocals only" Tag="vocals"/>
                             <ComboBoxItem Content="Instrumentals only" Tag="accompaniment"/>
                             <ComboBoxItem Content="4-stem (vocals / drums / bass / other)" Tag="4stem"/>
+                            <ComboBoxItem Content="6-stem (+guitar / piano — needs htdemucs_6s)" Tag="6stem"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
