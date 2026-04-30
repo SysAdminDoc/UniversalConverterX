@@ -328,6 +328,114 @@ def op_loudnorm(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_vmaf(args: argparse.Namespace) -> int:
+    """VMAF quality comparison: distorted vs. reference. Runs ffmpeg `libvmaf`
+    with JSON log output, parses the file, emits per-frame `vmaf` events plus a
+    final `complete` event carrying mean / harmonic-mean / min scores."""
+    import math
+    import tempfile
+
+    ffmpeg = find_ffmpeg()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install FFmpeg or set FFMPEG_PATH.")
+
+    ref = Path(args.reference)
+    dist = Path(args.distorted)
+    if not ref.is_file():
+        return fail("missing_input", f"Reference not found: {args.reference}")
+    if not dist.is_file():
+        return fail("missing_input", f"Distorted not found: {args.distorted}")
+
+    with tempfile.NamedTemporaryFile(prefix="ucx_vmaf_", suffix=".json",
+                                     delete=False, mode="w") as tmp:
+        log_path = tmp.name
+
+    # libvmaf options: log_path uses Windows-friendly forward slashes; embedded
+    # colons in log_fmt require escaping per ffmpeg filter quoting rules.
+    safe_log = log_path.replace("\\", "/").replace(":", "\\:")
+    cmd = [
+        ffmpeg, "-y",
+        "-i", str(dist),
+        "-i", str(ref),
+        "-lavfi", f"libvmaf=log_path='{safe_log}':log_fmt=json",
+        "-f", "null", "-",
+    ]
+    emit("log", level="info",
+         message=f"VMAF: distorted={dist.name} ref={ref.name}")
+    emit("progress", percent=0, stage="vmaf", eta_seconds=None)
+
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, bufsize=1)
+    # ffmpeg writes progress to stderr for libvmaf runs (no -progress here so we
+    # just count frames -- best-effort, no ETA).
+    if proc.stderr is not None:
+        for line in proc.stderr:
+            line = line.rstrip()
+            if line.startswith("frame="):
+                # Cheap progress: we don't know total frame count up front
+                # without an extra probe pass, so just parrot the frame counter.
+                emit("log", level="debug", message=line)
+    rc = proc.wait()
+    if rc != 0:
+        try: os.unlink(log_path)
+        except OSError: pass
+        return fail("ffmpeg_failed", f"FFmpeg/libvmaf exited with code {rc}")
+
+    try:
+        with open(log_path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+    except (OSError, json.JSONDecodeError) as ex:
+        try: os.unlink(log_path)
+        except OSError: pass
+        return fail("vmaf_parse_failed", f"Could not read VMAF report: {ex}")
+    finally:
+        try: os.unlink(log_path)
+        except OSError: pass
+
+    frames = doc.get("frames", [])
+    pooled = doc.get("pooled_metrics", {}).get("vmaf", {})
+    scores: list[float] = []
+    total = max(1, len(frames))
+    sample_every = max(1, total // 200)  # cap to ~200 vmaf events for huge clips
+    for i, frame in enumerate(frames):
+        s = frame.get("metrics", {}).get("vmaf")
+        if s is None:
+            continue
+        scores.append(float(s))
+        if i % sample_every == 0:
+            emit("vmaf", frame=i, score=round(float(s), 3))
+            emit("progress",
+                 percent=round(i / total * 100, 1),
+                 stage="vmaf",
+                 eta_seconds=None)
+
+    if not scores:
+        return fail("vmaf_no_scores", "VMAF report contained no frame scores.")
+
+    mean = sum(scores) / len(scores)
+    minv = min(scores)
+    maxv = max(scores)
+    # Harmonic mean is the metric Netflix recommends for pooled VMAF, since it
+    # penalizes worst-frame outliers more than arithmetic mean does.
+    eps = 1e-9
+    harmonic = len(scores) / sum(1.0 / max(s, eps) for s in scores)
+    pct_below_70 = 100.0 * sum(1 for s in scores if s < 70) / len(scores)
+    summary = {
+        "frames":            len(scores),
+        "mean":              round(mean, 3),
+        "harmonic_mean":     round(harmonic, 3),
+        "min":               round(minv, 3),
+        "max":               round(maxv, 3),
+        "pooled_mean":       round(float(pooled.get("mean", mean)), 3) if pooled else None,
+        "pooled_harmonic":   round(float(pooled.get("harmonic_mean", harmonic)), 3) if pooled else None,
+        "below_70_percent":  round(pct_below_70, 2),
+    }
+    emit("vmaf_summary", **summary)
+    emit("progress", percent=100, stage="vmaf", eta_seconds=0)
+    emit("complete", output="", size_bytes=0, summary=summary)
+    return 0
+
+
 def op_rewrap(args: argparse.Namespace) -> int:
     """Stream-copy into a new container — no re-encode, instant remux."""
     ffmpeg = find_ffmpeg()
@@ -430,6 +538,14 @@ def build_parser() -> argparse.ArgumentParser:
     rewrap.add_argument("--input", required=True)
     rewrap.add_argument("--output", required=True)
 
+    # ── vmaf ──────────────────────────────────────────────────────────────────
+    vmaf = sub.add_parser("vmaf",
+                          help="VMAF quality comparison: distorted vs. reference (libvmaf)")
+    vmaf.add_argument("--reference", required=True,
+                      help="Reference (high-quality master) video.")
+    vmaf.add_argument("--distorted", required=True,
+                      help="Distorted (compressed / re-encoded) video to score.")
+
     return p
 
 
@@ -446,6 +562,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_loudnorm(args)
         if args.op == "rewrap":
             return op_rewrap(args)
+        if args.op == "vmaf":
+            return op_vmaf(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

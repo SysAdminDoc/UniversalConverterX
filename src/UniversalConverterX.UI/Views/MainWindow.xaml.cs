@@ -30,6 +30,7 @@ public sealed partial class MainWindow : Window
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
         new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
+        new("VMAF Quality", "Score a compressed clip against its reference (libvmaf)", "vmaf"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -133,6 +134,7 @@ public sealed partial class MainWindow : Window
             "chapter-marks" => typeof(ChapterMarksPage),
             "watch-folders" => typeof(WatchFoldersPage),
             "history" => typeof(HistoryPage),
+            "vmaf" => typeof(VmafAnalysisPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -238,7 +240,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

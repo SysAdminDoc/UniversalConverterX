@@ -43,6 +43,8 @@ KNOWN_EVENTS = {
     "aspect",   # vertigo — target aspect-ratio presets
     "backend",  # whisper-cpp — compiled-in feature probe
     "chapter",  # chaptermark — discovered chapter markers
+    "vmaf",          # clipforge.vmaf — per-frame VMAF scores
+    "vmaf_summary",  # clipforge.vmaf — pooled mean / harmonic / min / pct<70
 }
 
 
