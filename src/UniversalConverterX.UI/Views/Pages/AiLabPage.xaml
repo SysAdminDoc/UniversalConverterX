@@ -91,7 +91,7 @@
 
                     <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                            CornerRadius="24" Padding="22">
+                            CornerRadius="20" Padding="22">
                         <StackPanel Spacing="14">
                             <TextBlock Text="Release waves" Style="{StaticResource PanelTitleTextStyle}"/>
                             <StackPanel Spacing="10">

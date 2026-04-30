@@ -148,9 +148,7 @@
             </Grid.ColumnDefinitions>
 
             <Border x:Name="DropZone" Grid.Column="0"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
+                    Style="{StaticResource CardStyle}"
                     CornerRadius="22"
                     Padding="18"
                     AllowDrop="True"
