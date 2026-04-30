@@ -44,7 +44,7 @@ public sealed partial class ToolboxPage : Page
 
         // Video
         VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Detect highlight ranges and trim", "\uE71D", green, "Planned", orange, true, "ClipForge"));
-        VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5", "\uE740", blue, "Planned", orange, true, "Vertigo"));
+        VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5 (static or smart face track)", "\uE740", blue, "Ready", green, true, "Vertigo"));
         VideoTools.Add(new ToolboxTile("auto-crop", "Auto Crop", "Detect subject and crop accordingly", "\uE7A8", blue, "Future", yellow, true, null));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Ready", blue, false, "VideoSubtitleRemover"));
         VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect strong clip candidates", "\uE7C9", blue, "Future", yellow, true, null));

@@ -40,6 +40,7 @@ KNOWN_EVENTS = {
     "format",   # heicshift — supported input/output format inventory
     "voice",    # edge-tts — voice catalog enumeration
     "model",    # rnnoise — discoverable .rnnn model files
+    "aspect",   # vertigo — target aspect-ratio presets
 }
 
 
