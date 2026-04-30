@@ -29,6 +29,7 @@ public sealed partial class MainWindow : Window
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
+        new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -131,6 +132,7 @@ public sealed partial class MainWindow : Window
             "auto-reframe" => typeof(AutoReframePage),
             "chapter-marks" => typeof(ChapterMarksPage),
             "watch-folders" => typeof(WatchFoldersPage),
+            "history" => typeof(HistoryPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -236,7 +238,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"
