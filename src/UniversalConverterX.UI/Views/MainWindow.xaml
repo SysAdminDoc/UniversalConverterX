@@ -104,36 +104,6 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <NavigationView.FooterMenuItems>
-                <NavigationViewItem Tag="account" Content="Account">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE77B;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.FooterMenuItems>
-
-            <NavigationView.PaneFooter>
-                <Border Margin="12,8,12,12"
-                        Padding="14,12"
-                        Background="{StaticResource ShellGradientBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="14">
-                    <StackPanel Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE83D;" FontSize="13"
-                                      Foreground="{StaticResource AccentGreenBrush}"
-                                      VerticalAlignment="Center"/>
-                            <TextBlock Text="PRIVATE BY DEFAULT"
-                                       Style="{StaticResource MetricLabelTextStyle}"
-                                       Foreground="{StaticResource AccentGreenBrush}"/>
-                        </StackPanel>
-                        <TextBlock Text="Your files never leave this machine unless you explicitly choose an online workflow."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
-            </NavigationView.PaneFooter>
 
             <Frame x:Name="ContentFrame" Background="{StaticResource BackgroundBrush}"/>
         </NavigationView>

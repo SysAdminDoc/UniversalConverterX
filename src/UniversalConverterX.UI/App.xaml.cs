@@ -52,6 +52,13 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        UnhandledException += (_, e) =>
+        {
+            var log = Path.Combine(AppContext.BaseDirectory, "ucx_crash.log");
+            File.AppendAllText(log,
+                $"[{DateTime.Now:o}] {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}\n---\n");
+            e.Handled = false;
+        };
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
     }
@@ -62,6 +69,12 @@ public partial class App : Application
 
     public static void RequestPlaceholderNavigation(PlaceholderInfo info) =>
         _mainWindow?.NavigateToPlaceholder(info);
+
+    public static void ApplyTheme(ElementTheme theme)
+    {
+        if (_mainWindow?.Content is Microsoft.UI.Xaml.FrameworkElement root)
+            root.RequestedTheme = theme;
+    }
 
     private static string GetDefaultToolsPath()
     {

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.SpeechToTextPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="32" Spacing="20">
+
+            <!-- Header -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="Speech to Text" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Transcribe audio and video into editable transcript files using local Whisper inference."
+                           Style="{StaticResource SubtitleTextStyle}"/>
+            </StackPanel>
+
+            <!-- Dev status banner -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource AccentBlueBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="20">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            VerticalAlignment="Top">
+                        <FontIcon Glyph="&#xE720;" FontSize="22"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="FUTURE" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource AccentOrangeBrush}"/>
+                            </Border>
+                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
+                                <TextBlock Text="Engine: Whisper" Style="{StaticResource EyebrowTextStyle}"
+                                           Foreground="{StaticResource AccentBlueBrush}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Speech to Text is planned for a future release."
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="What's needed: Whisper sidecar integration, speaker diarization, real-time word-level timestamps, and SRT/VTT/plain text export."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Input area -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="20"
+                    MinHeight="160"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                    <Border Width="72" Height="72" CornerRadius="18"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE720;" FontSize="32"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock x:Name="DropZoneLabel"
+                               Text="Drop audio or video files here or click Browse"
+                               Style="{StaticResource BodyTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <Button x:Name="BrowseButton" Content="Browse Files"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Center"
+                            Click="Browse_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Settings panel -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Transcription" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Language" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Auto-detect" IsSelected="True"/>
+                                <ComboBoxItem Content="English"/>
+                                <ComboBoxItem Content="Spanish"/>
+                                <ComboBoxItem Content="French"/>
+                                <ComboBoxItem Content="German"/>
+                                <ComboBoxItem Content="Japanese"/>
+                                <ComboBoxItem Content="Chinese (Simplified)"/>
+                                <ComboBoxItem Content="Portuguese"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Whisper Model" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="base (fast, good accuracy)" IsSelected="True"/>
+                                <ComboBoxItem Content="small (balanced)"/>
+                                <ComboBoxItem Content="medium (high accuracy)"/>
+                                <ComboBoxItem Content="large-v3 (best accuracy)"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Output" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Format" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Plain text (.txt)" IsSelected="True"/>
+                                <ComboBoxItem Content="SubRip (.srt) with timestamps"/>
+                                <ComboBoxItem Content="WebVTT (.vtt)"/>
+                                <ComboBoxItem Content="Speaker-labeled transcript"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <ToggleSwitch Header="Word-level timestamps" OffContent="Off" OnContent="On"/>
+                        <ToggleSwitch Header="Speaker diarization" OffContent="Off" OnContent="On"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Action bar -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Speech to Text is planned for a future release."
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="Transcribe"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            IsEnabled="False"/>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
