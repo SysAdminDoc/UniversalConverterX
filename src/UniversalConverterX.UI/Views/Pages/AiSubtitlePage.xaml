@@ -20,7 +20,7 @@
 
             <!-- Dev status banner -->
             <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource AccentOrangeBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="20">
@@ -93,8 +93,7 @@
 
                 <Border Grid.Column="0" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Recognition" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Recognition" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Source Language" Style="{StaticResource MutedTextStyle}"/>
                             <ComboBox HorizontalAlignment="Stretch">
@@ -125,8 +124,7 @@
 
                 <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Output" FontSize="15" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
                             <ComboBox HorizontalAlignment="Stretch">
@@ -165,7 +163,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="AI Subtitle &amp; Translation is coming in Wave 2."
+                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Generate Subtitles"

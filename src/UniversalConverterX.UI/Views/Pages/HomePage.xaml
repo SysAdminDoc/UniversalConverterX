@@ -133,6 +133,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
@@ -237,37 +238,29 @@
 
             <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="20" Padding="18">
-                <Grid ColumnSpacing="14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <FontIcon Grid.Column="0" Glyph="&#xE721;" FontSize="18"
-                              Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                    <AutoSuggestBox x:Name="TaskSearchBox" Grid.Column="1"
-                                    PlaceholderText="Search a task: convert, compress, record, inspect, extract frames..."
-                                    QueryIcon="Find"
-                                    TextChanged="TaskSearchBox_TextChanged"
-                                    SuggestionChosen="TaskSearchBox_SuggestionChosen"
-                                    QuerySubmitted="TaskSearchBox_QuerySubmitted">
-                        <AutoSuggestBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Padding="4">
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Subtitle}" FontSize="11"
-                                               Foreground="{StaticResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </AutoSuggestBox.ItemTemplate>
-                    </AutoSuggestBox>
-                </Grid>
+                    CornerRadius="20" Padding="14,8">
+                <AutoSuggestBox x:Name="TaskSearchBox"
+                                PlaceholderText="Search a task: convert, compress, record, inspect, extract frames..."
+                                QueryIcon="Find"
+                                TextChanged="TaskSearchBox_TextChanged"
+                                SuggestionChosen="TaskSearchBox_SuggestionChosen"
+                                QuerySubmitted="TaskSearchBox_QuerySubmitted">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Padding="4">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
             </Border>
 
             <StackPanel Grid.Row="2" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Begin" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Ready workflows" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Ready to use" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -278,7 +271,7 @@
             <StackPanel Grid.Row="3" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="AI features" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="Local intelligence" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -306,9 +299,25 @@
                 <GridView x:Name="PersonasGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="PersonaTile_Click"
                           ItemTemplate="{StaticResource PersonaTemplate}"/>
-                <TextBlock Text="UniversalConverter X v2.1.0 — local-first processing, no telemetry"
-                           Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"
-                           Margin="0,12,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="12"
+                        HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
+                         VerticalAlignment="Center"/>
+                <TextBlock Text="UniversalConverter X v2.1.0"
+                           Style="{StaticResource MutedTextStyle}"
+                           VerticalAlignment="Center"/>
+                <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"
+                        VerticalAlignment="Center"/>
+                <TextBlock Text="Local-first processing"
+                           Style="{StaticResource MutedTextStyle}"
+                           VerticalAlignment="Center"/>
+                <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"
+                        VerticalAlignment="Center"/>
+                <TextBlock Text="No telemetry"
+                           Style="{StaticResource MutedTextStyle}"
+                           VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
     </ScrollViewer>

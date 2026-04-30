@@ -64,8 +64,7 @@
 
                     <Button Grid.Column="3"
                             Grid.Row="0"
-                            Background="Transparent"
-                            BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveQueued_Click"
                             Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;"
@@ -257,9 +256,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Engine"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="FfmpegStatusText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -269,9 +266,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Snapshot Plan"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   Header="Image format"
                                   SelectedIndex="0"
@@ -327,9 +322,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="File Location"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  IsReadOnly="True"/>
@@ -353,9 +346,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Queue Summary"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
