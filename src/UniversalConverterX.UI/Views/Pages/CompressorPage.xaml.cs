@@ -67,6 +67,9 @@ public sealed partial class CompressorPage : Page
 
     private void DropZone_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (e.Pointer.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Mouse &&
+            !e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
+            return;
         if (_files.Count == 0 && QueuePivot.SelectedIndex == 0)
             BrowseFiles();
     }
@@ -230,7 +233,7 @@ public sealed partial class CompressorPage : Page
 
     private async void Compress_Click(object sender, RoutedEventArgs e)
     {
-        if (_files.Count == 0)
+        if (_files.Count == 0 || _cts is not null)
             return;
 
         if (_outputDirectory is not null)
@@ -386,7 +389,7 @@ public sealed partial class CompressorPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
         CompressButton.IsEnabled = hasFiles && _cts is null;
-        ClearButton.IsEnabled = hasFiles;
+        ClearButton.IsEnabled = hasFiles && _cts is null;
         UpdateTotals();
         UpdateStatusText();
     }
