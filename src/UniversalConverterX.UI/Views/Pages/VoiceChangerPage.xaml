@@ -32,7 +32,7 @@
                     <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
                             Background="{StaticResource SurfaceLightBrush}"
                             VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xE720;" FontSize="22"
+                        <FontIcon Glyph="&#xED28;" FontSize="22"
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="6">
@@ -70,7 +70,7 @@
                     <Border Width="72" Height="72" CornerRadius="18"
                             Background="{StaticResource SurfaceLightBrush}"
                             HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE720;" FontSize="32"
+                        <FontIcon Glyph="&#xED28;" FontSize="32"
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"

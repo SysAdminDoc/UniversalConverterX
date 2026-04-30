@@ -54,7 +54,7 @@
                     </Border>
 
                     <Button Grid.Column="3" Grid.Row="0"
-                            Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveFile_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="12"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -224,8 +224,7 @@
                 <!-- Model -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="AI Model" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="AI Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo" HorizontalAlignment="Stretch"
                                   SelectionChanged="ModelCombo_SelectionChanged">
                             <ComboBoxItem Content="Human Segmentation (u2net_human_seg)" Tag="u2net_human_seg" IsSelected="True"/>
@@ -240,8 +239,7 @@
                 <!-- Output format -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Format" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch">
                             <ComboBoxItem Content="MP4 (H.264 + alpha composite)" Tag="mp4" IsSelected="True"/>
                             <ComboBoxItem Content="MOV (ProRes alpha)" Tag="mov"/>
@@ -263,8 +261,7 @@
                 <!-- Edge &amp; mask -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Edge &amp; Mask" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Edge &amp; Mask" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Edge Softness" Style="{StaticResource MutedTextStyle}"/>
                             <Slider x:Name="EdgeSlider" Minimum="0" Maximum="100" Value="0"
@@ -280,8 +277,7 @@
                 <!-- Background -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Background" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Background" Style="{StaticResource PanelTitleTextStyle}"/>
                         <RadioButton x:Name="BgTransparent" Content="Transparent / alpha"
                                      GroupName="BgType" IsChecked="True"
                                      Foreground="{StaticResource TextPrimaryBrush}"
@@ -317,8 +313,7 @@
                 <!-- Output folder -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
@@ -367,7 +362,7 @@
 
         <!-- Progress overlay -->
         <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
-              Background="#80000000">
+              Background="{StaticResource OverlayBrush}">
             <Border Style="{StaticResource CardStyle}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"

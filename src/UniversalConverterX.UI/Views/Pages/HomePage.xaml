@@ -278,7 +278,7 @@
             <StackPanel Grid.Row="3" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Enhancement roadmap" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="AI features" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -303,7 +303,8 @@
                     <TextBlock Text="Workflow guidance" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
-                <GridView x:Name="PersonasGrid" SelectionMode="None"
+                <GridView x:Name="PersonasGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          ItemClick="PersonaTile_Click"
                           ItemTemplate="{StaticResource PersonaTemplate}"/>
                 <TextBlock Text="UniversalConverter X v2.1.0 — local-first processing, no telemetry"
                            Style="{StaticResource MutedTextStyle}" HorizontalAlignment="Center"

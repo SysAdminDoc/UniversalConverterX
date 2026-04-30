@@ -54,7 +54,7 @@
                     </Border>
 
                     <Button Grid.Column="3" Grid.Row="0"
-                            Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveFile_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="12"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -218,8 +218,7 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Preset Profile" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Preset Profile" Style="{StaticResource PanelTitleTextStyle}"/>
                         <RadioButton x:Name="PresetWeb" Content="Web upload (1080p, CRF 23)"
                                      GroupName="Preset"
                                      Tag="web-1080p"
@@ -241,8 +240,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
@@ -263,18 +261,30 @@
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Source size" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="SourceSizeText" Text="0 B" FontSize="20" FontWeight="SemiBold"
-                                   Foreground="{StaticResource AccentBlueBrush}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Result size" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="ResultSizeText" Text="0 B" FontSize="20" FontWeight="SemiBold"
-                                   Foreground="{StaticResource AccentGreenBrush}"/>
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Size comparison" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="3">
+                                <TextBlock Text="SOURCE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Name="SourceSizeText" Text="0 B"
+                                           Style="{StaticResource MetricNumberTextStyle}"
+                                           Foreground="{StaticResource AccentBlueBrush}"/>
+                            </StackPanel>
+                            <FontIcon Grid.Column="1" Glyph="&#xE8AB;" FontSize="14"
+                                      Foreground="{StaticResource TextMutedBrush}"
+                                      VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                            <StackPanel Grid.Column="2" Spacing="3">
+                                <TextBlock Text="RESULT" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Name="ResultSizeText" Text="0 B"
+                                           Style="{StaticResource MetricNumberTextStyle}"
+                                           Foreground="{StaticResource AccentGreenBrush}"/>
+                            </StackPanel>
+                        </Grid>
                         <TextBlock x:Name="SavingsText" Text="Savings appear after compression."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
@@ -307,7 +317,7 @@
         </Grid>
 
         <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
-              Background="#80000000">
+              Background="{StaticResource OverlayBrush}">
             <Border Style="{StaticResource CardStyle}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"

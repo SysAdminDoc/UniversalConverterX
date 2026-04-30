@@ -55,8 +55,7 @@
                     </Border>
 
                     <Button Grid.Column="3" Grid.Row="0"
-                            Background="Transparent"
-                            BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveFile_Click"
                             Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="12"
@@ -144,7 +143,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Video Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Editor" Style="{StaticResource TitleTextStyle}"/>
                 <TextBlock Text="Batch-trim clips with local ClipForge processing, progress, and finished results."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
@@ -237,9 +236,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Trim"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="Times in seconds. Leave end blank to export through the end of each clip."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -269,9 +266,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Re-encode Quality"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <Slider x:Name="CrfSlider"
                                 Minimum="0"
                                 Maximum="51"
@@ -287,9 +282,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="File Location"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
@@ -314,9 +307,7 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Queue Summary"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueCountText"
                                    Text="0 clips queued"
                                    Style="{StaticResource BodyTextStyle}"/>
@@ -368,7 +359,7 @@
         <Grid x:Name="ProgressOverlay"
               Grid.RowSpan="3"
               Visibility="Collapsed"
-              Background="#80000000">
+              Background="{StaticResource OverlayBrush}">
             <Border Style="{StaticResource CardStyle}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"

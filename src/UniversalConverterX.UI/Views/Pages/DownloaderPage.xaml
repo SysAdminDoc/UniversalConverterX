@@ -56,7 +56,7 @@
                     </Border>
 
                     <Button Grid.Column="3" Grid.Row="0"
-                            Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveQueued_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="12"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -197,8 +197,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="Activity" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Activity" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueSummaryText"
                                    Style="{StaticResource MutedTextStyle}"
                                    VerticalAlignment="Bottom"/>

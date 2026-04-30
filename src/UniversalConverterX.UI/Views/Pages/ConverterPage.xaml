@@ -54,7 +54,7 @@
                     </Border>
 
                     <Button Grid.Column="3" Grid.Row="0"
-                            Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource IconButtonStyle}"
                             Click="RemoveFile_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="12"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -195,9 +195,12 @@
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Spacing="10">
-                                <FontIcon Glyph="&#xE73E;" FontSize="42"
-                                          Foreground="{StaticResource TextMutedBrush}"/>
+                                        Spacing="12">
+                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Background="{StaticResource SurfaceLightBrush}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                              Foreground="{StaticResource TextMutedBrush}"/>
+                                </Border>
                                 <TextBlock Text="No finished conversions yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
@@ -218,8 +221,7 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Smart Recommendations" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Format Shortcuts" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="RecommendationText"
                                    Text="Add files to receive a local output recommendation."
                                    Style="{StaticResource MutedTextStyle}"
@@ -260,8 +262,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Profile" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Output Profile" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatSelector"
                                   Header="Convert all files to"
                                   PlaceholderText="Select format"
@@ -294,8 +295,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
@@ -317,8 +317,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Batch Summary" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Batch Summary" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueSummaryText" Text="0 queued"
                                    FontSize="22" FontWeight="SemiBold"
                                    Foreground="{StaticResource AccentBlueBrush}"/>
@@ -354,7 +353,7 @@
         </Grid>
 
         <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
-              Background="#80000000">
+              Background="{StaticResource OverlayBrush}">
             <Border Style="{StaticResource CardStyle}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
