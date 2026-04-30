@@ -75,10 +75,10 @@
                                        Style="{StaticResource EyebrowTextStyle}"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="Plan enhancement workflows with the same discipline as ready tools."
+                        <TextBlock Text="AI tools show readiness before you start."
                                    Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
-                        <TextBlock Text="AI cards are deliberately transparent: each tool shows scope, required engine, and the missing workflow contract before it graduates into a ready queue."
+                        <TextBlock Text="Ready tools open directly. Planned tools stay clear about missing engine, preview, export, and recovery work."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
@@ -93,7 +93,7 @@
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                             CornerRadius="20" Padding="22">
                         <StackPanel Spacing="14">
-                            <TextBlock Text="Release waves" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock Text="Availability" Style="{StaticResource PanelTitleTextStyle}"/>
                             <StackPanel Spacing="10">
                                 <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
@@ -104,11 +104,11 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource AccentGreenBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Wave 1 — Background Remover"
+                                    <TextBlock Grid.Column="1" Text="Ready - Background Remover"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock Text="In progress" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentGreenBrush}"/>
                                     </Border>
                                 </Grid>
@@ -121,7 +121,7 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource AccentOrangeBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Wave 2 — 8 AI tools"
+                                    <TextBlock Grid.Column="1" Text="Planned - engine and UI work"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
@@ -138,7 +138,7 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource TextMutedBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Future — 4 tools"
+                                    <TextBlock Grid.Column="1" Text="Future - scope not final"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
@@ -147,7 +147,7 @@
                                     </Border>
                                 </Grid>
                             </StackPanel>
-                            <TextBlock Text="Each wave ships only when model cache, preview, batch export, and failure recovery are all explicit."
+                            <TextBlock Text="A tool is marked Ready only when import, preview, batch export, and failure recovery are explicit."
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -156,8 +156,8 @@
 
             <StackPanel Grid.Row="1" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Featured AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Click any tool to open its workflow" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="Open status or ready workflow" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -176,12 +176,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="8">
                         <TextBlock Text="1. Import" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Drop media, inspect streams, detect duration, codec, subtitles, and target workflow."
+                        <TextBlock Text="Drop media, inspect streams, detect duration, codec, subtitles, and workflow fit."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="8">
                         <TextBlock Text="2. Preview" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Show before/after frames, estimated storage, model cost, and fallback behavior before processing."
+                        <TextBlock Text="Show before/after frames, estimated storage, model requirements, and fallback behavior."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Spacing="8">

@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource AccentBlueBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Speech to Text is planned for a future release."
+                        <TextBlock Text="Speech to Text is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: Whisper sidecar integration, speaker diarization, real-time word-level timestamps, and SRT/VTT/plain text export."
+                        <TextBlock Text="Required before enabling: Whisper pipeline, speaker labels, preview, export path, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -54,7 +54,8 @@
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
-                    AllowDrop="True"
+                    AllowDrop="False"
+                    Opacity="0.72"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -65,18 +66,19 @@
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop audio or video files here or click Browse"
+                               Text="Input is disabled until this workflow is ready."
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"/>
                     <Button x:Name="BrowseButton" Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
                             HorizontalAlignment="Center"
                             Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -104,7 +106,7 @@
                                 <ComboBoxItem Content="base (fast, good accuracy)" IsSelected="True"/>
                                 <ComboBoxItem Content="small (balanced)"/>
                                 <ComboBoxItem Content="medium (high accuracy)"/>
-                                <ComboBoxItem Content="large-v3 (best accuracy)"/>
+                                <ComboBoxItem Content="large-v3 (highest accuracy)"/>
                             </ComboBox>
                         </StackPanel>
                     </StackPanel>
@@ -135,7 +137,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Transcribe"

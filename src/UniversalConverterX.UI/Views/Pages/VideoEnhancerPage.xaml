@@ -14,7 +14,7 @@
             <!-- Header -->
             <StackPanel Spacing="6">
                 <TextBlock Text="Video Enhancer" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Upscale footage to 4K/8K, denoise, sharpen faces and anime, and smooth frame rate with AI interpolation."
+                <TextBlock Text="Planned upscaling, denoise, detail recovery, and frame interpolation."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
 
@@ -34,7 +34,7 @@
                     <StackPanel Grid.Column="1" Spacing="6">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="WAVE 2" Style="{StaticResource EyebrowTextStyle}"
+                                <TextBlock Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
                                            Foreground="{StaticResource TextInverseBrush}"/>
                             </Border>
                             <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource AccentOrangeBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Video Enhancer is not yet available in this build."
+                        <TextBlock Text="Video Enhancer is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: Real-ESRGAN sidecar integration, RIFE frame interpolation pipeline, per-scene model switching, and preview contract."
+                        <TextBlock Text="Required before enabling: model cache, preview frames, export path, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -54,7 +54,8 @@
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
-                    AllowDrop="True"
+                    AllowDrop="False"
+                    Opacity="0.72"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -66,18 +67,19 @@
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop video files here or click Browse"
+                               Text="Input is disabled until this workflow is ready."
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"/>
                     <Button x:Name="BrowseButton" Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
                             HorizontalAlignment="Center"
                             Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -147,7 +149,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Enhance Video"

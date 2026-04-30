@@ -24,18 +24,18 @@ public sealed partial class AiLabPage : Page
         var orange = (Brush)Application.Current.Resources["AccentOrangeBrush"];
         var red = (Brush)Application.Current.Resources["AccentRedBrush"];
 
-        Tools.Add(new AiLabToolTile("Video Enhancer", "Upscale footage to 4K/8K, denoise, sharpen faces/anime, and smooth frame rate.", "\uE7B3", blue, "Wave 2", "Model cache + preview needed", "Real-ESRGAN / RIFE"));
-        Tools.Add(new AiLabToolTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos without cloud processing.", "\uEB9F", cyan, "Wave 2", "Standalone workflow needed", "Real-ESRGAN"));
-        Tools.Add(new AiLabToolTile("Background Remover", "Remove or replace video/image backgrounds and preserve alpha exports.", "\uE91B", green, "Wave 1", "Sidecar staged", "AlphaCut"));
-        Tools.Add(new AiLabToolTile("Watermark Remover", "Detect selected logos, captions, objects, or people and inpaint the region.", "\uE71B", orange, "Wave 2", "Region UI needed", "VideoSubtitleRemover"));
-        Tools.Add(new AiLabToolTile("AI Subtitle & Translation", "Generate, edit, translate, burn, or export SRT/VTT/ASS captions.", "\uED1E", green, "Wave 2", "Whisper pipeline needed", "Whisper"));
-        Tools.Add(new AiLabToolTile("Video Summarizer", "Extract chapters, highlights, and written summaries from long recordings.", "\uE8D2", blue, "Wave 2", "Transcript pipeline needed", "Whisper + local LLM"));
-        Tools.Add(new AiLabToolTile("Noise Remover", "Clean voice and camera audio with configurable denoise strength.", "\uE767", cyan, "Wave 2", "Audio model needed", "RNNoise / Demucs"));
-        Tools.Add(new AiLabToolTile("Vocal Remover", "Split vocals and instrumentals for music and editing workflows.", "\uEC4F", red, "Wave 2", "Stem preview needed", "Demucs"));
+        Tools.Add(new AiLabToolTile("Video Enhancer", "Upscale footage, reduce noise, sharpen detail, and smooth frame rate.", "\uE7B3", blue, "Planned", "Needs model cache and preview", "Real-ESRGAN / RIFE"));
+        Tools.Add(new AiLabToolTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos without cloud processing.", "\uEB9F", cyan, "Planned", "Needs standalone workflow", "Real-ESRGAN"));
+        Tools.Add(new AiLabToolTile("Background Remover", "Remove or replace video/image backgrounds and preserve alpha exports.", "\uE91B", green, "Ready", "Workflow available", "AlphaCut"));
+        Tools.Add(new AiLabToolTile("Watermark Remover", "Inpaint selected logos, captions, objects, or people.", "\uE71B", orange, "Planned", "Needs region selection UI", "VideoSubtitleRemover"));
+        Tools.Add(new AiLabToolTile("AI Subtitle & Translation", "Generate, edit, translate, burn, or export SRT/VTT/ASS captions.", "\uED1E", green, "Planned", "Needs Whisper pipeline", "Whisper"));
+        Tools.Add(new AiLabToolTile("Video Summarizer", "Extract chapters, highlights, and written summaries from long recordings.", "\uE8D2", blue, "Planned", "Needs transcript pipeline", "Whisper + local LLM"));
+        Tools.Add(new AiLabToolTile("Noise Remover", "Reduce steady noise in speech and camera audio.", "\uE767", cyan, "Planned", "Needs audio model", "RNNoise / Demucs"));
+        Tools.Add(new AiLabToolTile("Vocal Remover", "Split vocals and instrumentals for music and editing workflows.", "\uEC4F", red, "Planned", "Needs stem preview", "Demucs"));
         Tools.Add(new AiLabToolTile("Voice Changer", "Transform narration tone while preserving timing.", "\uED28", orange, "Future", "Model choice open", null));
-        Tools.Add(new AiLabToolTile("Text-to-Speech", "Generate voiceover audio from script text.", "\uEC4F", green, "Future", "Voice catalog needed", null));
+        Tools.Add(new AiLabToolTile("Text-to-Speech", "Generate voiceover audio from script text.", "\uEC4F", green, "Future", "Needs voice catalog", null));
         Tools.Add(new AiLabToolTile("Speech-to-Text", "Transcribe audio/video into editable transcript files.", "\uE720", blue, "Future", "Can share subtitle pipeline", "Whisper"));
-        Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Future", "Photo-specific presets needed", null));
+        Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Future", "Needs photo presets", null));
     }
 
     private static readonly Dictionary<string, string> _titleToRoute = new(StringComparer.OrdinalIgnoreCase)
@@ -93,8 +93,8 @@ public sealed class AiLabToolTile
         PoweredBy = poweredBy;
         PhaseBrush = phase switch
         {
-            "Wave 1" => (Brush)Application.Current.Resources["AccentGreenBrush"],
-            "Wave 2" => (Brush)Application.Current.Resources["AccentOrangeBrush"],
+            "Ready" => (Brush)Application.Current.Resources["AccentGreenBrush"],
+            "Planned" => (Brush)Application.Current.Resources["AccentOrangeBrush"],
             _        => (Brush)Application.Current.Resources["TextMutedBrush"],
         };
     }

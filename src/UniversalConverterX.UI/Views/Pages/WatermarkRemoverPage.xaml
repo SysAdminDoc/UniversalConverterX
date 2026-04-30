@@ -34,7 +34,7 @@
                     <StackPanel Grid.Column="1" Spacing="6">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="WAVE 2" Style="{StaticResource EyebrowTextStyle}"
+                                <TextBlock Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
                                            Foreground="{StaticResource TextInverseBrush}"/>
                             </Border>
                             <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource AccentOrangeBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Watermark Remover is not yet available in this build."
+                        <TextBlock Text="Watermark Remover is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: VideoSubtitleRemover sidecar, region selector UI overlay, multi-region support, and detection confidence threshold."
+                        <TextBlock Text="Required before enabling: region selector, preview, export path, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -54,7 +54,8 @@
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
-                    AllowDrop="True"
+                    AllowDrop="False"
+                    Opacity="0.72"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -65,18 +66,19 @@
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop video or image files here or click Browse"
+                               Text="Input is disabled until this workflow is ready."
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"/>
                     <Button Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
                             HorizontalAlignment="Center"
                             Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -141,7 +143,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Remove Watermarks"

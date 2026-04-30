@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource TextMutedBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Text to Speech is planned for a future release."
+                        <TextBlock Text="Text to Speech is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: local TTS engine integration (Coqui TTS / Piper), voice catalog, SSML support, and audio export pipeline."
+                        <TextBlock Text="Required before enabling: voice catalog, script validation, preview, export path, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -52,7 +52,7 @@
             </Border>
 
             <!-- Script input -->
-            <Border Style="{StaticResource CardStyle}">
+            <Border Style="{StaticResource CardStyle}" IsHitTestVisible="False" Opacity="0.72">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Script" Style="{StaticResource PanelTitleTextStyle}"/>
                     <TextBox x:Name="ScriptBox"
@@ -69,7 +69,7 @@
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -124,7 +124,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Generate Audio"

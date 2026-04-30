@@ -12,7 +12,6 @@ public sealed partial class HomePage : Page
     public ObservableCollection<HomeActionTile> Actions { get; } = [];
     public ObservableCollection<HomeAiFeatureTile> AiFeatures { get; } = [];
     public ObservableCollection<HomeClusterTile> Clusters { get; } = [];
-    public ObservableCollection<HomePersonaTile> Personas { get; } = [];
 
     public HomePage()
     {
@@ -23,7 +22,6 @@ public sealed partial class HomePage : Page
         ActionsGrid.ItemsSource = Actions;
         AiGrid.ItemsSource = AiFeatures;
         ClustersGrid.ItemsSource = Clusters;
-        PersonasGrid.ItemsSource = Personas;
         TaskSearchBox.ItemsSource = _allSuggestions;
     }
 
@@ -38,29 +36,23 @@ public sealed partial class HomePage : Page
         var blueSurface = (Brush)Application.Current.Resources["SurfaceLightBrush"];
         var greenSurface = (Brush)Application.Current.Resources["SurfaceSoftBrush"];
 
-        Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, PDFs, and 3D files.", "\uE895", green, greenSurface, "Ready", "Open converter", "converter"));
-        Actions.Add(new HomeActionTile("Video Enhancer", "AI upscaling, denoise, face/anime detail, and frame interpolation workflow.", "\uE7B3", blue, blueSurface, "AI Lab", "Plan enhancement", "ai-lab"));
-        Actions.Add(new HomeActionTile("Compressor", "Preserve quality while targeting web, email, and archive size budgets.", "\uE91F", cyan, blueSurface, "Ready", "Compress video", "compressor"));
-        Actions.Add(new HomeActionTile("Downloader", "Paste a URL, choose quality, merge audio, and save to the local queue.", "\uE896", blue, blueSurface, "Ready", "Download media", "downloader"));
+        Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, PDFs, and 3D files.", "\uE895", green, greenSurface, "Ready", "Convert files", "converter"));
+        Actions.Add(new HomeActionTile("Video Enhancer", "Planned upscaling, denoise, and frame interpolation workflow.", "\uE7B3", blue, blueSurface, "Planned", "View status", "ai-lab"));
+        Actions.Add(new HomeActionTile("Compressor", "Compress video for web, email, and archive targets.", "\uE91F", cyan, blueSurface, "Ready", "Compress video", "compressor"));
+        Actions.Add(new HomeActionTile("Downloader", "Paste URLs, choose quality, and save to the local queue.", "\uE896", blue, blueSurface, "Ready", "Download media", "downloader"));
         Actions.Add(new HomeActionTile("Recorder", "Capture fixed-duration desktop recordings with local FFmpeg processing.", "\uE7C8", red, blueSurface, "Ready", "Record screen", "recorder"));
-        Actions.Add(new HomeActionTile("Toolbox", "Open specialized tools for subtitles, watermark, audio, discs, metadata, and more.", "\uE713", orange, greenSurface, "29 tools", "Browse tools", "toolbox"));
+        Actions.Add(new HomeActionTile("Toolbox", "Open utilities for subtitles, watermarks, audio, discs, and metadata.", "\uE713", orange, greenSurface, "Mapped", "Browse tools", "toolbox"));
 
-        AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Condense long videos into searchable recaps.", "\uE8D2", blue, "Roadmap", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Generate editable captions and bilingual subtitles.", "\uED1E", green, "Roadmap", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Watermark Remover", "Remove logos, text, or objects from selected regions.", "\uE71B", orange, "Roadmap", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Roadmap", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Noise Remover", "Clean voice, music, and camera audio with AI models.", "\uE767", blue, "Roadmap", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Vocal Remover", "Split vocals and instrumentals for reuse.", "\uEC4F", red, "Roadmap", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Create transcript-backed summaries from long recordings.", "\uE8D2", blue, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Generate editable caption files and translations.", "\uED1E", green, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Watermark Remover", "Inpaint selected logos, text, or objects.", "\uE71B", orange, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Noise Remover", "Reduce background noise in speech and camera audio.", "\uE767", blue, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Vocal Remover", "Split vocals and instrumentals for editing.", "\uEC4F", red, "Planned", "ai-lab"));
 
-        Clusters.Add(new HomeClusterTile("Creation Tools", "Edit and generate", "Video editor, text-to-speech, subtitles, metadata repair, chapters, intros, and highlight reels.", "\uE70F", green, greenSurface, "toolbox"));
-        Clusters.Add(new HomeClusterTile("Enhancement Tools", "Fix and improve", "Noise removal, background removal, image/video enhancement, vocal isolation, and restoration workflows.", "\uE950", blue, blueSurface, "ai-lab"));
-        Clusters.Add(new HomeClusterTile("Export & Conversion", "Deliver anywhere", "Format conversion, compression, merger, DVD/CD, snapshots, GIF, social aspect ratios, and web presets.", "\uE8AB", orange, greenSurface, "toolbox"));
-
-        Personas.Add(new HomePersonaTile("Content Creator", "Batch convert camera files, download references, compress for upload, and generate captions.", "converter"));
-        Personas.Add(new HomePersonaTile("Video Lover", "Convert 4K/8K libraries to player-ready formats while preserving quality.", "converter"));
-        Personas.Add(new HomePersonaTile("Social Publisher", "Compress clips for platform limits and reframe to 9:16, 1:1, or 4:5.", "compressor"));
-        Personas.Add(new HomePersonaTile("Educator", "Record lessons, clean audio, create subtitles, and export LMS-friendly files.", "recorder"));
-        Personas.Add(new HomePersonaTile("Business Team", "Reuse saved presets for recurring conversion, compression, and delivery workflows.", "toolbox"));
+        Clusters.Add(new HomeClusterTile("Create", "Edit and generate", "Trim clips, create subtitles, repair metadata, generate speech, and prepare chapters.", "\uE70F", green, greenSurface, "toolbox"));
+        Clusters.Add(new HomeClusterTile("Repair", "Clean up media", "Remove noise, isolate vocals, restore photos, and remove selected backgrounds or watermarks.", "\uE950", blue, blueSurface, "ai-lab"));
+        Clusters.Add(new HomeClusterTile("Export", "Prepare output", "Convert formats, compress files, extract frames, build GIFs, and prepare delivery presets.", "\uE8AB", orange, greenSurface, "toolbox"));
     }
 
     private void SeedSearch()
@@ -71,11 +63,11 @@ public sealed partial class HomePage : Page
             new("Trim a clip", "Open video editor trim workflow", "editor"),
             new("Download from URL", "Open downloader", "downloader"),
             new("Record screen", "Open desktop screen recorder", "recorder"),
-            new("Video enhancer", "Open AI Lab", "ai-lab"),
-            new("Subtitle generator", "Open AI Lab", "ai-lab"),
-            new("Watermark remover", "Open AI Lab", "ai-lab"),
-            new("Background remover", "Open AI Lab", "ai-lab"),
-            new("Vocal remover", "Open AI Lab", "ai-lab"),
+            new("Video enhancer", "View AI Lab status", "ai-lab"),
+            new("Subtitle generator", "View AI Lab status", "ai-lab"),
+            new("Watermark remover", "View AI Lab status", "ai-lab"),
+            new("Background remover", "Open background remover", "ai-bgremove"),
+            new("Vocal remover", "View AI Lab status", "ai-lab"),
             new("Inspect file format", "Probe codecs, streams, and conversion targets", "format-inspector"),
             new("Extract video frames", "Open Frame Snapshot", "frame-snapshot"),
             new("Toolbox", "Browse all specialized tools", "toolbox"),
@@ -130,12 +122,6 @@ public sealed partial class HomePage : Page
     private void ClusterTile_Click(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is HomeClusterTile tile)
-            App.RequestNavigation(tile.RouteKey);
-    }
-
-    private void PersonaTile_Click(object sender, ItemClickEventArgs e)
-    {
-        if (e.ClickedItem is HomePersonaTile tile)
             App.RequestNavigation(tile.RouteKey);
     }
 
@@ -215,20 +201,6 @@ public sealed class HomeClusterTile
         Glyph = glyph;
         AccentBrush = accentBrush;
         AccentSurfaceBrush = accentSurfaceBrush;
-        RouteKey = routeKey;
-    }
-}
-
-public sealed class HomePersonaTile
-{
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string RouteKey { get; set; }
-
-    public HomePersonaTile(string title, string description, string routeKey)
-    {
-        Title = title;
-        Description = description;
         RouteKey = routeKey;
     }
 }

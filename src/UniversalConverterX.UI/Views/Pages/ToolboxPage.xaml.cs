@@ -30,23 +30,24 @@ public sealed partial class ToolboxPage : Page
     {
         var blue = (Brush)Application.Current.Resources["AccentBlueBrush"];
         var green = (Brush)Application.Current.Resources["AccentGreenBrush"];
+        var orange = (Brush)Application.Current.Resources["AccentOrangeBrush"];
         var yellow = (Brush)Application.Current.Resources["AccentYellowBrush"];
         var red = (Brush)Application.Current.Resources["AccentRedBrush"];
 
         // Image
-        ImageTools.Add(new ToolboxTile("image-converter", "Image Converter", "JPEG, PNG, HEIC, AVIF, JPEG XL, WebP, RAW, TIFF", "\uEB9F", blue, "Planned", green, false, "HEICShift"));
-        ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Planned", green, false, "GifStudio"));
-        ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "AI super-resolution up to 4x", "\uE799", blue, "Planned", green, true, "Real-ESRGAN"));
+        ImageTools.Add(new ToolboxTile("image-converter", "Image Converter", "JPEG, PNG, HEIC, AVIF, JPEG XL, WebP, RAW, TIFF", "\uEB9F", blue, "Planned", orange, false, "HEICShift"));
+        ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Planned", orange, false, "GifStudio"));
+        ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Super-resolution up to 4x", "\uE799", blue, "Planned", orange, true, "Real-ESRGAN"));
         ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "Apply portrait stylization filters", "\uE77B", blue, "Future", yellow, true, null));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Stitch images into a video slideshow", "\uE786", blue, "Future", yellow, false, null));
         ImageTools.Add(new ToolboxTile("metadata-editor", "Metadata Editor", "View and edit EXIF / XMP / IPTC tags", "\uE8B7", blue, "Future", yellow, false, null));
 
         // Video
-        VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Auto-detect highlights and trim", "\uE71D", green, "Planned", green, true, "ClipForge"));
-        VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5", "\uE740", blue, "Planned", green, true, "Vertigo"));
+        VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Detect highlight ranges and trim", "\uE71D", green, "Planned", orange, true, "ClipForge"));
+        VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5", "\uE740", blue, "Planned", orange, true, "Vertigo"));
         VideoTools.Add(new ToolboxTile("auto-crop", "Auto Crop", "Detect subject and crop accordingly", "\uE7A8", blue, "Future", yellow, true, null));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Future", yellow, false, null));
-        VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect best clips automatically", "\uE7C9", blue, "Future", yellow, true, null));
+        VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect strong clip candidates", "\uE7C9", blue, "Future", yellow, true, null));
         VideoTools.Add(new ToolboxTile("intro-outro", "Intro & Outro", "Apply branded intros and outros", "\uE7AD", green, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("lens-correction", "Lens Correction", "Fix distortion, rolling shutter, stabilize", "\uE71E", blue, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("vr-converter", "VR Converter", "Equirectangular, fisheye, 360° to 2D", "\uE787", blue, "Future", yellow, false, null));
@@ -54,26 +55,26 @@ public sealed partial class ToolboxPage : Page
 
         // AI
         AiTools.Add(new ToolboxTile("ai-bgremove", "Background Remover", "Remove or replace video background", "\uE91B", green, "Ready", green, true, "AlphaCut"));
-        AiTools.Add(new ToolboxTile("subtitle-remover", "Subtitle Remover", "AI-powered hard-coded subtitle removal", "\uE93B", blue, "Planned", green, true, "VideoSubtitleRemover"));
+        AiTools.Add(new ToolboxTile("subtitle-remover", "Subtitle Remover", "Remove hard-coded subtitles from selected regions", "\uE93B", blue, "Planned", orange, true, "VideoSubtitleRemover"));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Subtitle Editor", "Create and edit SRT/VTT/ASS subtitles", "\uED1E", blue, "Future", yellow, false, null));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Caption Generator", "Auto-generate captions with Whisper", "\uE8D2", blue, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "AI voice transformation", "\uE720", red, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-tts", "Text-to-Speech", "Generate voiceovers from text", "\uEC4F", green, "Future", yellow, true, null));
         AiTools.Add(new ToolboxTile("ai-stt", "Speech-to-Text", "Transcribe audio to text", "\uE720", green, "Future", yellow, true, null));
-        AiTools.Add(new ToolboxTile("lip-reading", "Lip Reading", "Visual speech recognition", "\uE909", blue, "Planned", green, true, "LipSight"));
+        AiTools.Add(new ToolboxTile("lip-reading", "Lip Reading", "Visual speech recognition", "\uE909", blue, "Planned", orange, true, "LipSight"));
 
         // Audio
-        AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, OPUS", "\uEC4F", green, "Planned", green, false, "FFmpeg"));
+        AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, OPUS", "\uEC4F", green, "Planned", orange, false, "FFmpeg"));
         AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Reduce audio file size", "\uE91F", blue, "Future", yellow, false, null));
-        AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "AI-powered noise reduction", "\uE767", blue, "Future", yellow, true, null));
+        AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "Reduce steady background noise", "\uE767", blue, "Future", yellow, true, null));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));
         DiscTools.Add(new ToolboxTile("dvd-copy", "DVD Copy", "Copy or backup DVDs", "\uE958", red, "Future", yellow, false, null));
         DiscTools.Add(new ToolboxTile("cd-burner", "CD Burner", "Burn audio CDs", "\uE958", red, "Future", yellow, false, null));
 
-        // Other (already covered above; placeholder for parity expansions)
+        // Other
         OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));
         OtherTools.Add(new ToolboxTile("batch-rename", "Batch Rename", "Rename files with patterns", "\uE8AC", blue, "Future", yellow, false, null));
     }
@@ -88,22 +89,15 @@ public sealed partial class ToolboxPage : Page
                 return;
             }
 
-            var statusText = tile.StatusBadge switch
-            {
-                "Planned" => "Coming Soon",
-                "Future" => "Coming Soon",
-                _ => tile.StatusBadge
-            };
-
             var info = new PlaceholderInfo(
                 Title: tile.Title,
                 Subtitle: tile.Description,
                 IconGlyph: tile.Glyph,
-                Headline: $"{tile.Title} arrives in a future release.",
+                Headline: $"{tile.Title} is not available yet.",
                 Description: tile.PoweredBy is not null
-                    ? $"This tool will be powered by the {tile.PoweredBy} engine, integrated as a UCX sidecar."
-                    : "This tool is on the roadmap. Functionality lands in a future v2.x release.",
-                StatusBadge: statusText,
+                    ? $"Planned engine: {tile.PoweredBy}. Import, preview, export, and recovery are not wired yet."
+                    : "This tool is tracked, but the runnable workflow is not wired into this build.",
+                StatusBadge: tile.StatusBadge,
                 PoweredBy: tile.PoweredBy);
 
             App.RequestPlaceholderNavigation(info);

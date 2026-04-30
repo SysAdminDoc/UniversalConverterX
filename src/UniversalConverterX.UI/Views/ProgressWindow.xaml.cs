@@ -60,7 +60,7 @@ public sealed partial class ProgressWindow : Window
                 Status = ConversionItemStatus.Pending,
                 StatusIcon = "\uE768", // Clock
                 StatusColor = new SolidColorBrush(Colors.Gray),
-                StatusMessage = "Waiting...",
+                StatusMessage = "Waiting",
                 ShowProgress = Visibility.Collapsed,
                 ShowStatus = Visibility.Visible
             });
@@ -77,7 +77,7 @@ public sealed partial class ProgressWindow : Window
         _cancelledCount = 0;
 
         TitleText.Text = $"Converting to {_targetFormat.ToUpperInvariant()}";
-        StatusText.Text = "Starting conversions...";
+        StatusText.Text = "Starting queue...";
 
         try
         {
@@ -120,7 +120,7 @@ public sealed partial class ProgressWindow : Window
         item.Status = ConversionItemStatus.Converting;
         item.StatusIcon = "\uE896"; // Sync
         item.StatusColor = new SolidColorBrush(Colors.DodgerBlue);
-        item.StatusMessage = "Converting...";
+        item.StatusMessage = "Converting";
         item.ShowProgress = Visibility.Visible;
         item.IsIndeterminate = true;
 
@@ -249,24 +249,24 @@ public sealed partial class ProgressWindow : Window
         
         if (wasCancelled)
         {
-            TitleText.Text = "Conversion Cancelled";
+            TitleText.Text = "Conversion cancelled";
             StatusText.Text = _completedCount > 0
                 ? $"Converted {_completedCount} file(s), cancelled {_cancelledCount} in {FormatTimeSpan(elapsed)}"
                 : $"Cancelled {_cancelledCount} file(s)";
         }
         else if (_failedCount == 0)
         {
-            TitleText.Text = "Conversion Complete";
-            StatusText.Text = $"Successfully converted {_completedCount} file(s) in {FormatTimeSpan(elapsed)}";
+            TitleText.Text = "Conversion complete";
+            StatusText.Text = $"Converted {_completedCount} file(s) in {FormatTimeSpan(elapsed)}";
         }
         else if (_completedCount == 0)
         {
-            TitleText.Text = "Conversion Failed";
+            TitleText.Text = "Conversion failed";
             StatusText.Text = $"Failed to convert {_failedCount} file(s)";
         }
         else
         {
-            TitleText.Text = "Conversion Complete";
+            TitleText.Text = "Conversion complete";
             StatusText.Text = $"Converted {_completedCount} file(s), {_failedCount} failed in {FormatTimeSpan(elapsed)}";
         }
 
@@ -315,7 +315,7 @@ public sealed partial class ProgressWindow : Window
 
         _isPaused = !_isPaused;
         PauseButton.Content = _isPaused ? "Resume" : "Pause";
-        StatusText.Text = _isPaused ? "Paused" : "Converting...";
+        StatusText.Text = _isPaused ? "Paused" : "Converting";
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

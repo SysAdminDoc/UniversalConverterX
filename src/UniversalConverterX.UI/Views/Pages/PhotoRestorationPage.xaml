@@ -14,7 +14,7 @@
             <!-- Header -->
             <StackPanel Spacing="6">
                 <TextBlock Text="Old Photo Restoration" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Repair scratches, fading, stains, and soft detail in legacy images using local AI restoration models."
+                <TextBlock Text="Planned repair for scratches, fading, stains, and soft detail in legacy images."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
 
@@ -42,9 +42,9 @@
                                            Foreground="{StaticResource TextMutedBrush}"/>
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Old Photo Restoration is planned for a future release."
+                        <TextBlock Text="Old Photo Restoration is not available yet."
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Planned scope: scratch/stain detection model, fading colorization pipeline (DeOldify), GFPGAN face enhancement, and before/after preview UI."
+                        <TextBlock Text="Required before enabling: restoration models, before/after preview, export path, cancellation, and failure recovery."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -54,7 +54,8 @@
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
-                    AllowDrop="True"
+                    AllowDrop="False"
+                    Opacity="0.72"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -65,18 +66,19 @@
                                   Foreground="{StaticResource AccentCyanBrush}"/>
                     </Border>
                     <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop image files here or click Browse"
+                               Text="Input is disabled until this workflow is ready."
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"/>
                     <Button x:Name="BrowseButton" Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
                             HorizontalAlignment="Center"
                             Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -140,7 +142,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Settings preview the planned interface."
+                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Restore Photos"

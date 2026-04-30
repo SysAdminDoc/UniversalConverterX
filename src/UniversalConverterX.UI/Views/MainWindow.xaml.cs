@@ -11,14 +11,14 @@ public sealed partial class MainWindow : Window
 
     private readonly List<NavSearchSuggestion> _searchSuggestions =
     [
-        new("Home", "Dashboard, recent work, and recommended workflows", "home"),
+        new("Home", "Start a workflow or search tools", "home"),
         new("Converter", "Batch convert video, audio, image, document, and archive formats", "converter"),
-        new("AI Lab", "Video enhancer, subtitles, noise removal, background tools, and more", "ai-lab"),
+        new("AI Lab", "AI tool status and planned workflows", "ai-lab"),
         new("Compressor", "Shrink videos for web, email, archive, and social delivery", "compressor"),
         new("Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
         new("Downloader", "Download video or audio from supported URLs", "downloader"),
         new("Recorder", "Screen recording plus planned webcam and audio capture", "recorder"),
-        new("Toolbox", "Specialized creation, enhancement, export, audio, and disc tools", "toolbox"),
+        new("Toolbox", "Specialized media utilities and availability", "toolbox"),
         new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
         new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),

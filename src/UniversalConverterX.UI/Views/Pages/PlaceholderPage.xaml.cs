@@ -30,7 +30,7 @@ public sealed partial class PlaceholderPage : Page
 
         if (!string.IsNullOrWhiteSpace(info.PoweredBy))
         {
-            PoweredByText.Text = $"Powered by {info.PoweredBy}";
+            PoweredByText.Text = $"Planned engine: {info.PoweredBy}";
             PoweredByBox.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
     }
@@ -48,5 +48,5 @@ public sealed record PlaceholderInfo(
     string IconGlyph,
     string Headline,
     string Description,
-    string StatusBadge = "Coming Soon",
+    string StatusBadge = "Not available yet",
     string? PoweredBy = null);

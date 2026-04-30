@@ -74,7 +74,7 @@
                                    Style="{StaticResource TitleTextStyle}"
                                    TextWrapping="Wrap"
                                    MaxWidth="720"/>
-                        <TextBlock Text="Ready tools open directly. Planned tools explain their engine and implementation path, so the roadmap stays discoverable without pretending unfinished work is complete."
+                        <TextBlock Text="Ready tools open directly. Planned tools stay disabled and explain what is missing."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap"
                                    MaxWidth="760"/>
@@ -85,36 +85,36 @@
                             BorderThickness="1"
                             CornerRadius="20"
                             Padding="22">
-                        <Grid ColumnSpacing="12" RowSpacing="12">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
-                                <TextBlock Text="2" Style="{StaticResource MetricNumberTextStyle}"
-                                           Foreground="{StaticResource AccentGreenBrush}"/>
-                                <TextBlock Text="READY TOOLS" Style="{StaticResource MetricLabelTextStyle}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
-                                <TextBlock Text="29" Style="{StaticResource MetricNumberTextStyle}"
-                                           Foreground="{StaticResource AccentBlueBrush}"/>
-                                <TextBlock Text="MAPPED TOOLS" Style="{StaticResource MetricLabelTextStyle}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="2">
-                                <TextBlock Text="Local" Style="{StaticResource MetricNumberTextStyle}"
-                                           Foreground="{StaticResource AccentGreenBrush}"/>
-                                <TextBlock Text="PROCESSING" Style="{StaticResource MetricLabelTextStyle}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Spacing="2">
-                                <TextBlock Text="AI" Style="{StaticResource MetricNumberTextStyle}"
-                                           Foreground="{StaticResource AccentOrangeBrush}"/>
-                                <TextBlock Text="CLEARLY MARKED" Style="{StaticResource MetricLabelTextStyle}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Status key" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <Grid RowSpacing="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Ready opens a runnable workflow" Style="{StaticResource MutedTextStyle}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource AccentOrangeBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Planned has a defined implementation path" Style="{StaticResource MutedTextStyle}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource AccentYellowBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Future still needs scope decisions" Style="{StaticResource MutedTextStyle}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10">
+                                    <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="8" Padding="6,2">
+                                        <TextBlock Text="AI" FontSize="10" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentBlueBrush}"/>
+                                    </Border>
+                                    <TextBlock Text="Model-backed tool" Style="{StaticResource MutedTextStyle}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Border>

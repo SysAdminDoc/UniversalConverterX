@@ -164,7 +164,7 @@
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
                     <ComboBox x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0">
-                        <ComboBoxItem Content="Best (video + audio)" Tag="best"/>
+                        <ComboBoxItem Content="Highest available (video + audio)" Tag="best"/>
                         <ComboBoxItem Content="1080p" Tag="1080"/>
                         <ComboBoxItem Content="720p" Tag="720"/>
                         <ComboBoxItem Content="480p" Tag="480"/>
