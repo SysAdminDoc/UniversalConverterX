@@ -22,6 +22,7 @@ public sealed partial class CompressorPage : Page
     ];
 
     private readonly ISidecarRunner _runner;
+    private readonly IHistoryService _history;
     private readonly ObservableCollection<CompressionFileItem> _files = [];
     private readonly ObservableCollection<CompressionFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
@@ -31,6 +32,7 @@ public sealed partial class CompressorPage : Page
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _history = App.Services.GetRequiredService<IHistoryService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         UpdatePresetSummaries();
@@ -312,6 +314,7 @@ public sealed partial class CompressorPage : Page
                     ProgressLog.Text += $"[{l.Level}] {l.Message}\n";
                 }));
 
+                var jobStartedAt = DateTime.UtcNow;
                 var result = await _runner.RunAsync("videocrush", args, progress, log, _cts.Token);
                 if (result.Success)
                 {
@@ -328,6 +331,29 @@ public sealed partial class CompressorPage : Page
                 }
 
                 AddFinishedItem(item, result);
+
+                // Persist every job to the history dashboard. We skip pure cancellations
+                // (user-driven) so the failed-count stat stays meaningful.
+                if (result.ErrorCode != "cancelled")
+                {
+                    long? srcBytes = null;
+                    try { srcBytes = new FileInfo(item.Path).Length; } catch { /* deleted mid-job */ }
+                    _ = _history.LogAsync(new HistoryRecord
+                    {
+                        Timestamp        = jobStartedAt,
+                        Engine           = "videocrush",
+                        Action           = "compress",
+                        SourcePath       = item.Path,
+                        OutputPath       = result.Success ? outputPath : null,
+                        SourceBytes      = srcBytes,
+                        OutputBytes      = result.Success ? result.SizeBytes : null,
+                        DurationSeconds  = (DateTime.UtcNow - jobStartedAt).TotalSeconds,
+                        Success          = result.Success,
+                        ErrorCode        = result.ErrorCode,
+                        ErrorMessage     = result.ErrorMessage,
+                        Profile          = preset,
+                    });
+                }
 
                 if (result.ErrorCode == "cancelled")
                     break;

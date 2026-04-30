@@ -66,6 +66,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private static readonly TimeSpan StableTimeout = TimeSpan.FromMinutes(15);
 
     private readonly ISidecarRunner _runner;
+    private readonly IHistoryService _history;
     private readonly DispatcherQueue _ui;
     private readonly string _configPath;
     private readonly Dictionary<string, FileSystemWatcher> _watchers = [];
@@ -75,9 +76,10 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     public ObservableCollection<WatchProfile> Profiles { get; } = [];
     public ObservableCollection<WatchEvent> Recent { get; } = [];
 
-    public WatchFolderService(ISidecarRunner runner)
+    public WatchFolderService(ISidecarRunner runner, IHistoryService history)
     {
         _runner = runner;
+        _history = history;
         // Marshal back to whichever thread constructed this service (typically UI).
         _ui = DispatcherQueue.GetForCurrentThread()
               ?? throw new InvalidOperationException(
@@ -240,11 +242,32 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                 }
 
                 PostEvent(profile, path, WatchEventStatus.Running, $"{tool} -> {Path.GetFileName(output)}");
+                var startedAt = DateTime.UtcNow;
                 var result = await _runner.RunAsync(tool, args!, null, null, CancellationToken.None);
                 PostEvent(profile, path,
                           result.Success ? WatchEventStatus.Done : WatchEventStatus.Failed,
                           result.Success ? Path.GetFileName(output)
                                          : (result.ErrorMessage ?? result.ErrorCode));
+
+                // Append to the persistent history log so the dashboard can show
+                // every job the watcher fired off, with size deltas for the savings counter.
+                long? srcBytes = TryFileSize(path);
+                long? outBytes = result.Success ? (result.SizeBytes ?? TryFileSize(output)) : null;
+                _ = _history.LogAsync(new HistoryRecord
+                {
+                    Timestamp        = startedAt,
+                    Engine           = tool,
+                    Action           = profile.Action == WatchAction.Compress ? "compress" : "convert",
+                    SourcePath       = path,
+                    OutputPath       = result.Success ? output : null,
+                    SourceBytes      = srcBytes,
+                    OutputBytes      = outBytes,
+                    DurationSeconds  = (DateTime.UtcNow - startedAt).TotalSeconds,
+                    Success          = result.Success,
+                    ErrorCode        = result.ErrorCode,
+                    ErrorMessage     = result.ErrorMessage,
+                    Profile          = profile.Action == WatchAction.Compress ? profile.Preset : profile.TargetFormat,
+                });
             }
             catch (Exception ex)
             {
@@ -255,6 +278,12 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                 _processing.TryRemove(path, out _);
             }
         });
+    }
+
+    private static long? TryFileSize(string path)
+    {
+        try { return new FileInfo(path).Length; }
+        catch { return null; }
     }
 
     private static bool MatchesFilter(string filter, string path)

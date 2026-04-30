@@ -41,6 +41,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
+        services.AddSingleton<IHistoryService, HistoryService>();
         services.AddSingleton<IWatchFolderService, WatchFolderService>();
 
         services.AddTransient<MainViewModel>();
@@ -61,8 +62,11 @@ public partial class App : Application
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
 
-        // Eagerly resolve so any saved watch profiles start watching at launch,
-        // even before the user opens the Watch Folders page.
+        // Eagerly resolve singletons that need to start before any page is opened:
+        //   * HistoryService: SQLite warm-up + initial Recent[] load on background thread.
+        //   * WatchFolderService: saved profiles begin watching folders immediately.
+        // WatchFolderService also depends on HistoryService for job logging, so order matters.
+        _ = Services.GetRequiredService<IHistoryService>();
         _ = Services.GetRequiredService<IWatchFolderService>();
 
         _ = ConfigureJumpListAsync();
