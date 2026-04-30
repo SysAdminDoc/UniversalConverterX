@@ -16,3 +16,7 @@ tools/**/*.exe
 tools/**/*.dll
 tools/**/models/
 tools/**/__pycache__/
+
+# Shared AI model cache — track the placeholder, not the model weights
+tools/_models/*
+!tools/_models/.gitkeep

@@ -2,17 +2,17 @@
 
 <!-- Researched and updated 2026-04-30. Sources in Appendix. -->
 
-UniversalConverterX (UCX) v2.1.0 — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
+UniversalConverterX (UCX) v2.2.0 — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
 
 ---
 
-## Current State (v2.1.0)
+## Current State (v2.2.0)
 
-**Wired end-to-end:** Native Converter (1000+ formats, magic-byte routing), VideoCrush compressor (CRF + 2-pass, AV1/H.265/H.264), ClipForge editor (trim only), StreamKeep downloader (yt-dlp, 1000+ sites), RecordCast screen recorder, AlphaCut background remover (ONNX), FrameSnap (batch frame extraction), Format Inspector (FFprobe), CLI (`ucx`), Shell Extension (right-click).
+**Wired end-to-end:** Native Converter (1000+ formats, magic-byte routing), VideoCrush compressor (CRF + 2-pass, AV1/H.265/H.264, HW accel NVENC/AMF/QSV/D3D12), ClipForge editor (trim, crop, rotate, loudnorm, rewrap), StreamKeep downloader (yt-dlp, 1000+ sites), RecordCast screen recorder, AlphaCut background remover (ONNX, shared model cache), FrameSnap (batch frame extraction), Format Inspector (FFprobe), CLI (`ucx`), Shell Extension (right-click).
 
 **Stubbed / placeholder (page exists, no sidecar):** VideoEnhancer, ImageEnhancer, NoiseRemover, PhotoRestoration, WatermarkRemover, VideoSummarizer, VocalRemover, VoiceChanger, SpeechToText, TextToSpeech, AiSubtitle, VideoStabilizer, SmartTrimmer, AutoReframe, AutoCrop, WatermarkEditor, AutoHighlight, IntroOutro, LensCorrection, VRConverter, ImageConverter, GifMaker, ImageUpscaler, AiPortrait, SlideshowMaker, MetadataEditor, AudioCompressor, BatchRename, DVD/CD.
 
-**Editor gaps (ClipForge):** Only trim is wired; crop, rotate, upscale, filter, audio adjust deferred.
+**Editor gaps (ClipForge):** Upscale and audio filter ops deferred to v2.3.
 
 **Recorder gaps (RecordCast):** Only desktop screen capture; webcam, microphone, system audio deferred.
 

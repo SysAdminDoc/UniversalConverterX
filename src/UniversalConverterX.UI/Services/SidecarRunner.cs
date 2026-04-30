@@ -89,6 +89,16 @@ public sealed class SidecarRunner : ISidecarRunner
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
 
+        // Inject the shared model cache directory as an environment variable.
+        // ONNX-based sidecars can read UCX_MODEL_DIR to locate/store models in a
+        // single location instead of per-tool subdirectories.
+        var modelCacheDir = ResolveModelCacheDirectory();
+        if (modelCacheDir is not null)
+        {
+            psi.EnvironmentVariables["UCX_MODEL_DIR"] = modelCacheDir;
+            Directory.CreateDirectory(modelCacheDir);
+        }
+
         using var process = new Process { StartInfo = psi };
 
         string? finalOutput = null;
@@ -188,5 +198,31 @@ public sealed class SidecarRunner : ISidecarRunner
             ErrorCode: success ? null : (errorCode ?? "exit_nonzero"),
             ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {process.ExitCode}"),
             ExitCode: process.ExitCode);
+    }
+
+    /// <summary>
+    /// Returns the shared model cache directory for ONNX/AI sidecars, or null
+    /// if no known tools/ root can be found.
+    /// Resolves to tools/_models/ adjacent to the tools/ directory discovered
+    /// by the same walk used in <see cref="Locate"/>.
+    /// </summary>
+    private static string? ResolveModelCacheDirectory()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var toolsDir = Path.Combine(dir.FullName, "tools");
+            if (Directory.Exists(toolsDir))
+                return Path.Combine(toolsDir, "_models");
+            dir = dir.Parent;
+        }
+
+        var localApp = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "UniversalConverterX", "tools");
+        if (Directory.Exists(localApp))
+            return Path.Combine(localApp, "_models");
+
+        return null;
     }
 }
