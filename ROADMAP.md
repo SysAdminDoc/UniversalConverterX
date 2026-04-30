@@ -49,6 +49,8 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 ## v2.4.0 Shipped ✓ (in progress)
 
 - ✓ Sidecar bootstraps hardened against PyInstaller fork-bomb (frozen guard in demucs/whisper-stt/lipsight)
+- ✓ #1 Security: yt-dlp pinned `≥2026.03.17` (was `≥2026.02.21`)
+- ✓ #2 Security: ONNX Runtime pinned `≥1.25.1` in alphacut + videosubtitleremover (15+ CPU-kernel CVEs vs 1.25.0)
 - ✓ #48 Stop tracking `obj/` — already in `.gitignore`; one-time `git rm -r --cached`
 - ✓ #49 Sidecar NDJSON contract conformance test (`tests/sidecar_contract/check_contract.py`) — frozen-guard, error-code-field, known-events checks
 - ✓ #50 Unified `tools/build-all.ps1` orchestrator with build report (`artifacts/build-reports/build-report.{json,md}`)
@@ -60,11 +62,11 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 
 ### Security / Dependency Pins
 
-#### 1. Pin yt-dlp ≥ 2026.03.17
-2026-03-17 release includes extractor fixes and is current stable. Current pin is `≥2026.02.21`. Bump in `sidecar/streamkeep/requirements.txt` and installer manifest. **Impact 3 / Effort 1.** [S-1]
+#### 1. Pin yt-dlp ≥ 2026.03.17 ✓ Shipped v2.4
+2026-03-17 release includes extractor fixes and is current stable. Current pin is `≥2026.02.21`. Bump in `sidecar/streamkeep/requirements.txt` and installer manifest. **Impact 3 / Effort 1.** [S-1] Shipped at [`tools/streamkeep/requirements.txt`](tools/streamkeep/requirements.txt) — installer manifests carry no version pin so no other change required.
 
-#### 2. Pin ONNX Runtime ≥ 1.25.1
-ORT 1.25.1 patches heap out-of-bounds read/write, Pad Reflect vulnerability, transpose optimizer bug, and 12 additional CPU kernel CVEs present in 1.25.0. CUDA 12.0+ is now the minimum GPU compute requirement (CUDA 11.x support dropped). Update `requirements.txt` in all ONNX-using sidecars (alphacut, lipsight, videosubtitleremover). **Impact 4 / Effort 1.** [S-2]
+#### 2. Pin ONNX Runtime ≥ 1.25.1 ✓ Shipped v2.4
+ORT 1.25.1 patches heap out-of-bounds read/write, Pad Reflect vulnerability, transpose optimizer bug, and 12 additional CPU kernel CVEs present in 1.25.0. CUDA 12.0+ is now the minimum GPU compute requirement (CUDA 11.x support dropped). Update `requirements.txt` in all ONNX-using sidecars (alphacut, lipsight, videosubtitleremover). **Impact 4 / Effort 1.** [S-2] Shipped: alphacut bumped from `>=1.25.0`; videosubtitleremover got a new explicit `onnxruntime>=1.25.1` floor (it pulls ORT transitively via `rapidocr-onnxruntime`); lipsight has no ORT path so no action needed there.
 
 ### Missing Sidecar / Route Wiring
 
