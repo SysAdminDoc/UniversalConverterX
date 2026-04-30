@@ -21,6 +21,7 @@ public sealed partial class MainWindow : Window
         new("Toolbox", "Specialized media utilities and availability", "toolbox"),
         new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
         new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
+        new("GIF Maker", "Convert video clips to high-quality animated GIFs", "gif-maker"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -106,6 +107,7 @@ public sealed partial class MainWindow : Window
             "ai-stt" => typeof(SpeechToTextPage),
             "ai-photo-restore" => typeof(PhotoRestorationPage),
             "lip-reading" => typeof(LipReadingPage),
+            "gif-maker" => typeof(GifMakerPage),
             _ => typeof(PlaceholderPage)
         };
 

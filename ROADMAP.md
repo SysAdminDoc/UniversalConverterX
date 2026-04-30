@@ -56,6 +56,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #50 Unified `tools/build-all.ps1` orchestrator with build report (`artifacts/build-reports/build-report.{json,md}`)
 - ✓ #51 SidecarRunner no-progress watchdog — `stuck_sidecar` error code after `silenceTimeout` (default 10 min)
 - ✓ #10 + #23 verified already shipped in v2.3 (lossless trim default-on; ClipForge rewrap op) — roadmap entries reclassified.
+- ✓ #4 GIF Maker — new `gifstudio` sidecar (two-pass `palettegen`+`paletteuse`), `GifMakerPage` batch UI, route + Toolbox tile wired, contract test KNOWN_EVENTS extended.
 
 ---
 
@@ -74,8 +75,8 @@ ORT 1.25.1 patches heap out-of-bounds read/write, Pad Reflect vulnerability, tra
 #### 3. Vertigo Auto-Reframe sidecar
 Source code exists in `tools/vertigo/`; no `sidecar.py` yet. MediaPipe face/body tracking → center-of-interest crop → output 9:16, 1:1, or 4:5. Wire to AutoReframePage. **Impact 4 / Effort 3.** [plan]
 
-#### 4. GifStudio route wiring
-WebView2-hosted GIF editor source exists. Wire route in `MainWindow.xaml.cs` and add `sidecar.py` for FFmpeg → palette optimization → GIF pipeline with loop count and delay controls. **Impact 3 / Effort 2.** [plan]
+#### 4. GifStudio route wiring ✓ Shipped v2.4
+WebView2-hosted GIF editor source exists. Wire route in `MainWindow.xaml.cs` and add `sidecar.py` for FFmpeg → palette optimization → GIF pipeline with loop count and delay controls. **Impact 3 / Effort 2.** [plan] Shipped: new [`tools/gifstudio/sidecar.py`](tools/gifstudio/sidecar.py) two-pass FFmpeg `palettegen`+`paletteuse` pipeline with `make` + `list-presets` ops, [`tools/gifstudio/build.ps1`](tools/gifstudio/build.ps1) PyInstaller freeze, [`Views/Pages/GifMakerPage.xaml`](src/UniversalConverterX.UI/Views/Pages/GifMakerPage.xaml) batch queue UI with width / fps / loop / start / duration controls, route `gif-maker` wired in `MainWindow.xaml.cs`, ToolboxPage tile flipped Planned → Ready. Contract test KNOWN_EVENTS extended with `preset`.
 
 #### 5. HEICShift sidecar
 HEIC/HEIF decode + AVIF/WebP/JPEG output. No `sidecar.py` yet. Uses `Pillow-heif` + FFmpeg for metadata pass-through and ICC profile defaults. Wire to ImageConverterPage. **Impact 3 / Effort 2.** [plan]
