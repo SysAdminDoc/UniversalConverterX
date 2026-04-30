@@ -20,3 +20,10 @@ tools/**/__pycache__/
 # Shared AI model cache — track the placeholder, not the model weights
 tools/_models/*
 !tools/_models/.gitkeep
+
+# tools/build-all.ps1 build reports
+artifacts/build-reports/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
