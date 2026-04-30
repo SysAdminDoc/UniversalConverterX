@@ -42,8 +42,22 @@ public sealed partial class MainWindow : Window
 
         if (appWindow.TitleBar is not null)
         {
-            appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-            appWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Tall;
+            var titleBar = appWindow.TitleBar;
+            titleBar.ExtendsContentIntoTitleBar = true;
+            titleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Tall;
+
+            // Match design system: transparent title-bar background, primary text,
+            // surface-light hover/pressed for system buttons.
+            titleBar.BackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
+            titleBar.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(0xff, 0x6d, 0x7d, 0x96);
+            titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x1f, 0x23, 0x38);
+            titleBar.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
+            titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x25, 0x2a, 0x38);
+            titleBar.ButtonPressedForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
         }
 
         App.Register(this);
