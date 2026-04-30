@@ -1,8 +1,8 @@
 # ROADMAP
 
-<!-- Researched and updated 2026-04-30. Sources in Appendix. -->
+<!-- Researched and updated 2026-05-26. Sources in Appendix. -->
 
-UniversalConverterX (UCX) v2.3.0 — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
+UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desktop app. Local-first, no telemetry, no account required. Replaces Wondershare UniConverter without the paywall. Strategy pattern (13 native backends) + NDJSON sidecar pattern for Python AI engines.
 
 ---
 
@@ -12,7 +12,9 @@ UniversalConverterX (UCX) v2.3.0 — WinUI 3 / .NET 8 / Windows-only desktop app
 
 **Stubbed / placeholder (page exists, no sidecar):** VideoEnhancer, ImageEnhancer, NoiseRemover, PhotoRestoration, VideoSummarizer, VoiceChanger, TextToSpeech, AiSubtitle, VideoStabilizer, SmartTrimmer, AutoReframe, AutoCrop, WatermarkEditor, AutoHighlight, IntroOutro, LensCorrection, VRConverter, ImageConverter, GifMaker, ImageUpscaler, AiPortrait, SlideshowMaker, MetadataEditor, AudioCompressor, BatchRename, DVD/CD.
 
-**Editor gaps (ClipForge):** Upscale and audio filter ops deferred to v2.4.
+**Source exists, no sidecar.py / route wired:** Vertigo (auto-reframe), GifStudio (WebView2 GIF editor), HEICShift (HEIC/AVIF/WebP converter).
+
+**Editor gaps (ClipForge):** Upscale op and audio filter ops deferred to v2.4.
 
 ---
 
@@ -20,17 +22,15 @@ UniversalConverterX (UCX) v2.3.0 — WinUI 3 / .NET 8 / Windows-only desktop app
 
 | Tier | Meaning |
 |------|---------|
-| **Now** | v2.3 — either already stubbed and needs sidecar, or security/regression critical |
-| **Next** | v2.4–v2.6 — high-value, scoped, no blocking dependency |
+| **Now** | v2.4 — security pins, missing sidecar.py files, stub pages ready to wire, .NET EOL deadline |
+| **Next** | v2.5–v2.6 — high-value, scoped, no blocking dependency |
 | **Later** | v3.x — meaningful but requires significant new infrastructure |
 | **Under Consideration** | Needs more validation before committing resources |
 | **Rejected** | Explicitly out of scope — reason given |
 
 ---
 
-## NOW (v2.3) — All v2.2 NOW items shipped ✓
-
-The following items were completed in v2.2 and v2.3:
+## v2.3.0 Shipped ✓
 
 - ✓ Security: yt-dlp CVE-2026-26331 pin (`≥2026.02.21`)
 - ✓ Security: ONNX Runtime upgrade to 1.25.x
@@ -44,163 +44,221 @@ The following items were completed in v2.2 and v2.3:
 - ✓ Whisper STT sidecar (faster-whisper) + SpeechToTextPage wired
 - ✓ RecordCast: webcam (DirectShow) + microphone capture
 
-### Next NOW items:
+---
 
-### 1. Lossless Trim Mode (stream copy, no re-encode)
-Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy` instead of re-encoding. Huge quality and speed win for cut-to-post workflows. Expose as a "Lossless Cut" toggle in the editor — default for trim-only operations. **Impact 5 / Effort 2.** [R-3]
+## NOW (v2.4)
 
-### 2. RNNoise Noise Remover sidecar
-NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes background noise from audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute of audio. **Impact 4 / Effort 2.**
+### Security / Dependency Pins
 
-### 3. Real-ESRGAN Image/Video Upscaler sidecar
-ImageUpscalerPage and VideoEnhancerPage stubs exist. Real-ESRGAN (BSD-3) does 2× / 4× upscale via ONNX. Share model cache. Batch-capable for images. **Impact 5 / Effort 3.** [R-5]
+#### 1. Pin yt-dlp ≥ 2026.03.17
+2026-03-17 release includes extractor fixes and is current stable. Current pin is `≥2026.02.21`. Bump in `sidecar/streamkeep/requirements.txt` and installer manifest. **Impact 3 / Effort 1.** [S-1]
 
-### 4. whisper.cpp C++ STT sidecar (GPU via Vulkan)
-Current Whisper sidecar uses faster-whisper (Python). Add a secondary whisper.cpp path: single `.exe`, Vulkan GPU, no Python dependency, ships 6 model sizes. Route based on what's available. **Impact 3 / Effort 3.** [R-7, R-8]
+#### 2. Pin ONNX Runtime ≥ 1.25.1
+ORT 1.25.1 patches heap out-of-bounds read/write, Pad Reflect vulnerability, transpose optimizer bug, and 12 additional CPU kernel CVEs present in 1.25.0. CUDA 12.0+ is now the minimum GPU compute requirement (CUDA 11.x support dropped). Update `requirements.txt` in all ONNX-using sidecars (alphacut, lipsight, videosubtitleremover). **Impact 4 / Effort 1.** [S-2]
+
+### Missing Sidecar / Route Wiring
+
+#### 3. Vertigo Auto-Reframe sidecar
+Source code exists in `tools/vertigo/`; no `sidecar.py` yet. MediaPipe face/body tracking → center-of-interest crop → output 9:16, 1:1, or 4:5. Wire to AutoReframePage. **Impact 4 / Effort 3.** [plan]
+
+#### 4. GifStudio route wiring
+WebView2-hosted GIF editor source exists. Wire route in `MainWindow.xaml.cs` and add `sidecar.py` for FFmpeg → palette optimization → GIF pipeline with loop count and delay controls. **Impact 3 / Effort 2.** [plan]
+
+#### 5. HEICShift sidecar
+HEIC/HEIF decode + AVIF/WebP/JPEG output. No `sidecar.py` yet. Uses `Pillow-heif` + FFmpeg for metadata pass-through and ICC profile defaults. Wire to ImageConverterPage. **Impact 3 / Effort 2.** [plan]
+
+#### 6. GFPGAN Photo Restoration sidecar
+PhotoRestorationPage stub exists. GFPGAN v1.4 (Apache 2.0) restores old/degraded photos and enhances faces. Pair with Real-ESRGAN for full-photo restoration pipeline (GFPGAN on faces, Real-ESRGAN on background). `pip install gfpgan` — CPU + GPU. Wire to PhotoRestorationPage. **Impact 4 / Effort 3.** [R-5b]
+
+#### 7. edge-tts Text-to-Speech sidecar
+TextToSpeechPage stub exists. `edge-tts` 7.2.8 (MIT) provides 100+ neural voices in 50+ languages via Microsoft Edge TTS — no API key, voices cached locally after first use. Expose: voice selection, speed ×0.5–2.0, pitch, output format (MP3/WAV/OGG). **Impact 4 / Effort 2.** [S-7]
+
+#### 8. Real-ESRGAN Image/Video Upscaler sidecar
+ImageUpscalerPage and VideoEnhancerPage stubs exist. Use `realesrgan-ncnn-vulkan` portable binary (Intel/AMD/NVIDIA GPU via Vulkan, no Python, ships in `tools/`). Models on first use → `tools/_models/`: `RealESRGAN_x4plus` (photo 4×), `RealESRGAN_x4plus_anime_6B` (anime 4×), `realesr-general-x4v3` (fast general). SHA-256 verified. **Impact 5 / Effort 3.** [R-5]
+
+### Platform Migration
+
+#### 9. .NET 10 LTS Migration
+.NET 8 mainstream support ends **2026-11-10** — hard deadline. .NET 10 (GA, LTS, supported until 2028-11) is the successor. HandBrake 1.11 already requires .NET 10 Desktop Runtime on Windows. Steps: update `<TargetFramework>` in all `.csproj` files, audit WinAppSDK compatibility, update CI workflow. **Impact 5 / Effort 3.** [R-1, S-NET10]
+
+### AI Engine Quality
+
+#### 10. Lossless Trim Mode (stream copy, no re-encode)
+Add a `--lossless` flag to ClipForge that routes trim through `ffmpeg -c copy`. Expose as a "Lossless Cut" toggle — default for trim-only operations. Zero quality loss, 10–100× faster than transcoding. **Impact 5 / Effort 2.** [R-3]
+
+#### 11. RNNoise Noise Remover sidecar
+NoiseRemoverPage stub exists. RNNoise (Mozilla, BSD-licensed) removes broadband background noise from speech audio. Python sidecar via `rnnoise_python` or ONNX export. Single-pass, <1 s overhead per minute. **Impact 4 / Effort 2.** [R-9]
+
+#### 12. whisper.cpp GPU sidecar (Vulkan/CUDA)
+Current Whisper sidecar uses faster-whisper (Python/CUDA). Add secondary path: whisper.cpp v1.8.4 single `.exe`, Vulkan GPU, no Python dependency, 6 model sizes. v1.8.4 adds Silero VAD v6.2.0 (auto-skip silence, reduce hallucinations), GPU device selection (`-g`), and 12× speedup on Intel iGPU. Route: prefer whisper.cpp if CUDA unavailable; prefer faster-whisper if CUDA 12.0+ present. **Impact 3 / Effort 3.** [R-8]
 
 ---
 
-## NEXT (v2.4–v2.6)
+## NEXT (v2.5–v2.6)
 
-### 14. Vertigo Auto-Reframe sidecar (v2.3)
-Already in CLAUDE.md schedule. 9:16/1:1/4:5 output with MediaPipe face tracking. Wires to AutoReframePage. **Impact 4 / Effort 3.**
+### Platform Upgrades
 
-### 15. GifStudio (v2.3)
-WebView2 host, already in CLAUDE.md. Palette optimization, loop control, delay editor. **Impact 3 / Effort 2.**
+#### 13. WinAppSDK 2.0 Upgrade
+UCX targets WinAppSDK 1.5. WinAppSDK 2.0.1 (released 2026-04-29) ships:
+- **`SystemBackdropElement`**: place Mica/Acrylic anywhere in XAML layout — closes the major WinUI 3 in-content backdrop gap UCX works around today
+- **Storage Pickers v2**: file type grouping, persistent `SettingsIdentifier` per tool (remembers last folder), multi-folder picking, `SuggestedStartFolder`, `Title`
+- **Windows ML refactor**: `Microsoft.Windows.AI.MachineLearning` base package, ORT 1.24.5 bundled, new `AIFeatureReadyState` values for Copilot+ PC NPU detection
+- **WebView2 drag support**: drag text/HTML/images out of WebView2 (useful for GifStudio)
+- **`PopupAnchor`** relative popup positioning
 
-### 16. HEICShift (v2.3)
-HEIC/HEIF decode + metadata/ICC profile defaults. Absorbed into libvips/libjxl strategy chain. **Impact 3 / Effort 2.**
+Requires package family name review; migration guide available. **Impact 4 / Effort 3.** [S-5]
 
-### 17. WinAppSDK 2.0 Upgrade
-UCX targets WinAppSDK 1.5. WinAppSDK 2.0 (released 2026-04-29) ships: `SystemBackdropElement` for in-app Mica/Acrylic anywhere in XAML layout, updated Storage Pickers (multi-folder select, file type grouping, persistent session ID, suggested start folders), Windows ML refactor to `Microsoft.Windows.AI.MachineLearning`, WebView2 drag support, and various WinUI 3 bug fixes. Upgrade requires package family name change. **Impact 4 / Effort 3.** [S-5]
+#### 14. JumpList Integration
+Windows JumpList provides quick-launch toolbox entries from the taskbar icon without opening the app. WinUI Gallery 2.8 ships a reference implementation. Map most-used tools (Convert, Compress, Trim, Record) to JumpList tasks via `JumpList.LoadCurrentAsync()`. **Impact 3 / Effort 1.** [S-8]
 
-### 18. Real-ESRGAN Image Upscaler sidecar
-ImageUpscalerPage stub exists. Use `realesrgan-ncnn-vulkan` executable (Intel/AMD/NVIDIA GPU via Vulkan, no Python, portable binary). Models: `RealESRGAN_x4plus` (photo), `RealESRGAN_x4plus_anime_6B` (anime), `realesr-general-x4v3` (tiny, general). Download on first use to `tools/_models/`. **Impact 5 / Effort 3.** [R-5]
+### AI Features
 
-### 19. GFPGAN Face Restoration sidecar
-PhotoRestorationPage stub exists. GFPGAN v1.4 (Apache 2.0) restores old/degraded photos and enhances faces. Combine with Real-ESRGAN background enhancement for full-photo restoration pipeline. **Impact 4 / Effort 3.** [R-5]
+#### 15. Auto-Subtitle sidecar (Whisper → SRT/VTT)
+AiSubtitlePage stub exists. Extend whisper-stt sidecar to output SRT/VTT subtitle files alongside transcripts. Optional burn-in path: `ffmpeg -vf subtitles=...` for hard-coded subtitles. Optional LibreTranslate post-pass for translated subtitles. **Impact 5 / Effort 2.** [R-7, R-8]
 
-### 20. Demucs Full Stem Separation
-Extend Vocal Remover sidecar (item 10) to expose 4-stem (drums/bass/vocals/other) and experimental 6-stem (adds guitar/piano) separation. Output each stem as a separate WAV/FLAC file. Name stems clearly for DAW import. **Impact 4 / Effort 2.** (builds on #10)
+#### 16. Demucs Full Stem Separation (4/6 stem)
+Extend VocalRemoverPage to expose a stem selector: 4-stem (drums/bass/vocals/other) and 6-stem (adds guitar/piano) via `htdemucs_6s` model. Output each stem as a separate WAV/FLAC file with clear names for DAW import. Note: demucs upstream archived 2025-01-01; PyPI package still functional. **Impact 4 / Effort 2.** [R-6]
 
-### 21. VMAF Quality Analysis Tool
-Shutter Encoder ships VMAF analysis as a built-in function. UCX already has Format Inspector. Add a VMAF comparison workspace: reference + distorted → per-frame VMAF score chart + mean/harmonic-mean summary. Uses `ffmpeg -vf libvmaf`. Surfaces quality budget signal for the compressor. **Impact 3 / Effort 3.** [R-11]
+#### 17. VAD Pre-Filter for Whisper STT
+Integrate Silero VAD v6.2.0 (available in whisper.cpp v1.8.4 and as standalone `silero-vad` pip package) as a pre-processing step before transcription — skips silence regions, reduces hallucinations. Expose as a toggle in SpeechToTextPage. **Impact 3 / Effort 2.** [R-8]
 
-### 22. Scene Detection + Auto-Split
-Add `ffmpeg -vf select='gt(scene\,0.3)'` scene change detection to the editor toolbox. Output: timestamped chapter list or batch-split files. Silence detection (`silencedetect` filter) as companion feature. Both map to existing SmartTrimmer stub. **Impact 4 / Effort 2.** [R-3]
+#### 18. Scene Detection + Smart Split (PySceneDetect sidecar)
+SmartTrimmerPage stub exists. PySceneDetect v0.6.7 as sidecar: detect scene cuts → output timestamped chapter list (CSV/OTIO/EDL CMX 3600). Actions: auto-split into segments, insert as chapter markers, or feed into ClipForge batch trim. OTIO/EDL formats (v0.6.6+) enable direct DaVinci Resolve import. FFmpeg `silencedetect` filter as companion for audio-based splits. **Impact 4 / Effort 3.** [R-18, R-3]
 
-### 23. Editor: Timeline Waveform + Thumbnail Strip
-ClipForge UI needs a visual waveform + keyframe thumbnail strip below the seek bar before feature expansion beyond trim. Without this, crop/filter/split UX is unusable. Use FFmpeg to pre-extract thumbnails at 1 fps and waveform via `showwavespic`. **Impact 5 / Effort 3.** [R-3]
+### Encoder Improvements
 
-### 24. Chapter Marks Editor (MKV/MP4)
-Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose as a toolbox workspace. LosslessCut ships this — high usage for long-form video/podcast audiences. **Impact 3 / Effort 2.** [R-3]
+#### 19. ProRes / DNxHR Export Presets
+HandBrake 1.11 and FFmpeg 8.1 both added ProRes and DNxHR (Avid) encoders. Add professional-tier presets to VideoCrush and the native Converter: ProRes 422, ProRes 4444, DNxHR HQ, DNxHR SQ. Target audience: video editors who need intermediate codecs for NLE handoff. **Impact 3 / Effort 2.** [R-1, S-3]
 
-### 25. Rewrap Without Re-encode (Container Swap)
-`ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in Converter and Toolbox (MetadataEditor stub is adjacent). **Impact 4 / Effort 1.** [R-3]
+#### 20. D3D12 Hardware Encode (H.264 + AV1)
+FFmpeg 8.1 added `h264_d3d12va` and `av1_d3d12va` encoders alongside the existing `hevc_d3d12va`. VideoCrush already uses D3D12 for GPU-accelerated resize (`scale_d3d12`). Expose D3D12 encode as a selectable hardware accelerator alongside NVENC/AMF/QSV. Also surfaces AMD VCN AV1 10-bit encode option from HandBrake 1.11. **Impact 3 / Effort 2.** [S-3, R-1]
 
-### 26. Multi-track Stream Management
-Add/remove audio, subtitle, and data tracks from a video container without re-encoding. LosslessCut's most-requested feature class. Expose as a track manager panel in the editor. **Impact 4 / Effort 3.** [R-3]
+### Editor & Toolbox
 
-### 27. Watch Folder Automation
-Monitor a folder; apply a user-defined conversion profile to any new file. Unmanic and Tdarr prove this pattern has sustained user demand. Windows integration: `FileSystemWatcher` in the host process or as a background service. Queue fed into existing conversion pipeline. **Impact 4 / Effort 3.** [R-9, R-10]
+#### 21. Timeline Waveform + Thumbnail Strip
+ClipForge needs a visual waveform + keyframe thumbnail strip below the seek bar before editor feature expansion. Pre-extract thumbnails at 1 fps via `ffmpeg -vf fps=1` and waveform image via `ffmpeg -vf showwavespic`. Display in a `ScrollViewer` → `Image` strip bound to seek position. **Impact 5 / Effort 3.** [R-3]
 
-### 28. Whisper Auto-Subtitle + Translation
-Extend whisper.cpp sidecar (item 11) to auto-generate SRT/VTT subtitle files. Add optional DeepL/LibreTranslate post-processing pass for multilingual output. Wires to AiSubtitlePage stub. **Impact 5 / Effort 2.** (builds on #11)
+#### 22. Chapter Marks Editor (MKV/MP4)
+Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose as a toolbox workspace (MetadataEditor stub adjacent). LosslessCut's most-used feature class for podcast/long-form audiences. **Impact 3 / Effort 2.** [R-3]
 
-### 29. Text-to-Speech sidecar
-TextToSpeechPage stub exists. Use `edge-tts` (Microsoft Edge Neural TTS, free Python package, no API key, no network dependency beyond first use — voices cached locally) for high-quality voices in 100+ languages. Expose: voice selection, speed, pitch, output format (MP3/WAV/OGG). **Impact 4 / Effort 2.** [R-12, S-7]
+#### 23. Rewrap Without Re-encode (Container Swap)
+`ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in both Converter and Toolbox. **Impact 4 / Effort 1.** [R-3]
 
-### 30. PowerShell Module (`ucx.psm1`)
-Expose conversion pipeline via `Convert-MediaFile`, `Compress-MediaFile`, `Get-MediaInfo`, `Watch-Folder` cmdlets. Each cmdlet wraps `ucx` CLI with typed parameters and progress-bar output. Target: sysadmin batch-processing workflows. **Impact 3 / Effort 2.**
+#### 24. Multi-Track Stream Management
+Add/remove audio, subtitle, and data tracks from a video container without re-encoding. LosslessCut's most-requested feature class. Expose as a track manager panel in ClipForge sidebar. **Impact 4 / Effort 3.** [R-3]
 
-### 31. REST API Server Mode (local loopback)
-Bind `ucx serve` to `127.0.0.1:PORT`. OpenAPI-documented endpoints: `POST /convert`, `GET /jobs/{id}`, `GET /tools`. Enables integration with n8n, PowerAutomate desktop, and custom scripts without shell subprocess. LosslessCut and Transmute both ship HTTP APIs for this reason. **Impact 3 / Effort 3.** [R-2, R-3]
+### Library & Automation
 
-### 32. Conversion History Dashboard
-Persistent SQLite log of every conversion job (timestamp, source, target, engine, duration, size-before/after, exit code). Surfaces in a History page with search, filter, re-run, and "files saved" aggregate. File_Converter_Pro (SQLite gamification) and Tdarr (job reports) validate user demand for this data. **Impact 3 / Effort 2.** [R-13, R-10]
+#### 25. Watch Folder Automation
+Monitor a folder via `FileSystemWatcher`; apply a user-defined conversion profile to new files automatically. Queue fed into existing conversion pipeline. Unmanic and Tdarr prove sustained demand for this pattern. **Impact 4 / Effort 3.** [R-9, R-10]
 
-### 33. JPEG XL Encode/Decode
-libjxl is already a planned UCX dependency. Surface JPEG XL as a conversion target in the native Converter with a quality slider and metadata strip control. Shutter Encoder ships this as a named output option. **Impact 3 / Effort 1.** [R-11]
+#### 26. Conversion History Dashboard
+Persistent SQLite log of every job (timestamp, source, target, engine, duration, size delta, exit code). History page with search, filter, re-run, and aggregate "space saved" display. **Impact 3 / Effort 2.** [R-10, R-13]
 
-### 34. FFV1 Archival Codec Preset
-Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, bit-exact, checksummed. Target audience: digital archivists who currently convert from Shutter Encoder. FFmpeg 8.1 shipped Vulkan-based FFV1 encode/decode. **Impact 3 / Effort 1.** [R-3, R-11]
+#### 27. PowerShell Module (`ucx.psm1`)
+`Convert-MediaFile`, `Compress-MediaFile`, `Get-MediaInfo`, `Watch-Folder` cmdlets. Each wraps `ucx` CLI with typed parameters and `Write-Progress` output. Target: sysadmin batch workflows. **Impact 3 / Effort 2.**
 
-### 35. Accessibility: Windows Narrator + Keyboard Nav
-HandBrake 1.11.0 shipped screen reader fixes as a named release feature — this is now user-visible parity work. Audit all WinUI 3 pages for: `AutomationProperties.Name` on unlabeled controls, tab-stop order, focus ring visibility, progress bar accessible names. **Impact 4 / Effort 3.** [R-1]
+#### 28. REST API Server Mode
+`ucx serve` binds to `127.0.0.1:PORT`. OpenAPI endpoints: `POST /convert`, `GET /jobs/{id}`, `GET /tools`. Enables integration with n8n, Power Automate Desktop, and custom scripts without shell subprocess. LosslessCut and Transmute both ship HTTP APIs. **Impact 3 / Effort 3.** [R-2, R-3]
+
+### Quality & Reliability
+
+#### 29. VMAF Quality Analysis Tool
+VMAF comparison workspace in Format Inspector: reference + distorted → per-frame score chart + mean/harmonic-mean. Uses `ffmpeg -vf libvmaf`. Surfaces quality budget signal for VideoCrush. **Impact 3 / Effort 3.** [R-11]
+
+#### 30. JPEG XL Encode/Decode
+Surface JPEG XL as a conversion target in the native Converter with a quality slider (via `libjxl`, planned UCX dependency). Shutter Encoder ships this as a named output option. **Impact 3 / Effort 1.** [R-11]
+
+#### 31. FFV1 Archival Codec Preset
+Add an "Archive (FFV1 + FLAC in MKV)" preset to VideoCrush. FFV1 is lossless, checksummed. FFmpeg 8.1 shipped Vulkan FFV1 encode/decode. **Impact 3 / Effort 1.** [R-11, S-3]
+
+### Accessibility
+
+#### 32. Windows Narrator + Keyboard Navigation Audit
+Audit all WinUI 3 pages for: `AutomationProperties.Name` on unlabeled controls, tab-stop order, focus ring visibility, progress bar accessible names. HandBrake 1.11.0 shipped screen reader fixes as a named release feature — this is now user-visible parity work. **Impact 4 / Effort 3.** [R-1]
 
 ---
 
 ## LATER (v3.x)
 
-### 36. Gyroflow Video Stabilization
-Gyroflow uses embedded gyroscope data from cameras (GoPro, Sony, DJI, Insta360, Canon, Blackmagic, RED) for precision digital stabilization. It ships as a portable `.exe` with GPU rendering. Integration: spawn as sidecar, expose camera model selection and smoothness slider. More accurate than optical-flow-only stabilizers. **Impact 4 / Effort 4.** [R-14]
+### 33. Gyroflow Video Stabilization
+Gyroflow uses gyroscope data embedded by cameras (GoPro, Sony, DJI, Insta360, Canon, Blackmagic, RED) for precision digital stabilization. Integration: spawn as sidecar, expose camera model selection and smoothness slider. More accurate than optical-flow-only stabilizers. **Impact 4 / Effort 4.** [R-14]
 
-### 37. GPU-Accelerated Whisper (whisper.cpp Vulkan/CUDA)
-whisper.cpp supports Vulkan and CUDA GPU inference. Enables real-time or faster-than-realtime transcription on consumer hardware. Build or bundle GPU-enabled whisper.cpp binary as an optional upgrade to the CPU-only sidecar from #11. **Impact 4 / Effort 3.** [R-8]
+### 34. Conditional Transcode Rules (Plugin Stack)
+Tdarr-style rule editor: user builds a conditional chain ("only transcode if not H.265", "add stereo AAC if absent"). Implemented as a Watch Folder extension with a composable rule DSL. **Impact 4 / Effort 5.** [R-10]
 
-### 38. Conditional Transcode Rules (Plugin Stack)
-Tdarr's plugin stack model: user builds a conditional chain (e.g., "only transcode if not H.265", "remove subs", "add stereo AAC if absent"). Each rule is a composable unit. For UCX: implement as a Watch Folder extension — a rule editor that maps file properties → conversion actions. **Impact 4 / Effort 5.** [R-10]
+### 35. Word-Level Transcript Editor
+Cap 0.4.82 ships a word-level transcript editor with ripple-delete. UCX could add this to SpeechToTextPage: each word is a clickable span; selecting and deleting ripple-trims the underlying audio/video. Requires significant XAML editor component work. **Impact 3 / Effort 4.** [R-19]
 
-### 39. OCR: Image/PDF → Searchable PDF / TXT
-Tesseract OCR wrapper. Input: image files or scanned PDFs. Output: searchable PDF (hOCR overlay) or plain TXT. Use existing PDF backend infrastructure. **Impact 3 / Effort 3.**
+### 36. OCR: Image/PDF → Searchable PDF / TXT
+Tesseract OCR wrapper. Input: image files or scanned PDFs. Output: searchable PDF (hOCR overlay) or plain TXT. **Impact 3 / Effort 3.**
 
-### 40. DICOM → PNG/JPG/NIfTI
-`dcmtk` wrapper for radiology/medical imaging workflows. Native use case given the developer's PACS domain. DICOM frames → PNG sequence or NIfTI volume. **Impact 2 / Effort 3.**
+### 37. DICOM → PNG/JPG/NIfTI
+`dcmtk` wrapper for radiology/medical imaging workflows. DICOM frames → PNG sequence or NIfTI volume. **Impact 2 / Effort 3.**
 
-### 41. Font Conversion (TTF ↔ OTF ↔ WOFF ↔ WOFF2)
-`fonttools` Python wrapper. Existing planned item. **Impact 2 / Effort 2.**
+### 38. Font Conversion (TTF ↔ OTF ↔ WOFF ↔ WOFF2)
+`fonttools` Python wrapper. **Impact 2 / Effort 2.**
 
-### 42. i18n / Localization Framework
-FileConverter ships 25+ languages via `.resx` resource files. UCX has no localization layer. Add `Resources.resw` per-language files, switch WinUI 3 text bindings to resource lookups. Priority languages: English (done), French, German, Spanish, Chinese Simplified, Japanese. **Impact 4 / Effort 4.** [R-15]
+### 39. i18n / Localization Framework
+Add `Resources.resw` per-language files; switch WinUI 3 text bindings to resource lookups. Priority languages: French, German, Spanish, Chinese Simplified, Japanese. FileConverter ships 25+ languages as a reference. **Impact 4 / Effort 4.** [R-15]
 
-### 43. H.266 / VVC Encoding
-Shutter Encoder already ships H.266 output. VVC offers 50% bitrate reduction vs H.265 at equivalent quality. FFmpeg integration via `libvvenc`. Encoding is CPU-heavy (no GPU path yet); position as "archive/archival streaming" tier. **Impact 2 / Effort 3.** [R-11]
+### 40. H.266 / VVC Encoding
+VVC offers ~50% bitrate reduction vs H.265 at equivalent quality. FFmpeg integration via `libvvenc`. CPU-only (no GPU path yet); position as archival tier. Shutter Encoder already ships this. **Impact 2 / Effort 3.** [R-11]
 
-### 44. ProRes RAW Decode + Encode
-FFmpeg 8.0 shipped ProRes RAW decode (Vulkan). Encode is in review for 8.1.x. Target: professional camera workflows (Sony FX series, Canon Cinema). **Impact 2 / Effort 3.** [S-3]
+### 41. ProRes RAW Decode + Encode
+FFmpeg 8.0 shipped ProRes RAW decode (Vulkan); encode is in review for 8.1.x. Target: professional camera workflows (Sony FX series, Canon Cinema). **Impact 2 / Effort 3.** [S-3]
 
-### 45. FunASR / SenseVoice Streaming STT
-SenseVoice supports 31 languages and real-time streaming transcription. Alternative to Whisper for non-English-primary users. Consider as a configurable backend selector in the STT page alongside whisper.cpp. **Impact 3 / Effort 4.** [R-16]
+### 42. FunASR / SenseVoice Streaming STT
+SenseVoice supports 31 languages and real-time streaming transcription. Alternative to Whisper for non-English-primary users. Configurable backend selector in SpeechToTextPage. **Impact 3 / Effort 4.** [R-16]
 
-### 46. MV-HEVC / Stereoscopic Output
-FFmpeg 7.1 added MV-HEVC decode for VR headsets (Apple Vision Pro, Quest). Future-leaning: expose MV-HEVC muxing for side-by-side stereoscopic input. VR Converter stub exists in Toolbox. **Impact 2 / Effort 4.** [S-3]
+### 43. MV-HEVC / Stereoscopic Output
+FFmpeg 7.1 added MV-HEVC decode for Apple Vision Pro, Quest. Expose MV-HEVC muxing for side-by-side stereoscopic input. VR Converter stub exists. **Impact 2 / Effort 4.** [S-3]
 
-### 47. IAMF Spatial Audio Support
-FFmpeg 8.1 added IAMF Ambisonic Audio muxing/demuxing. Spatial audio for next-gen streaming/VR. Low immediate demand but zero competition in the Windows desktop converter space. **Impact 2 / Effort 3.** [S-3]
+### 44. IAMF Spatial Audio Support
+FFmpeg 8.1 added IAMF Ambisonic Audio mux/demux. Spatial audio for next-gen streaming/VR. Zero competition in Windows desktop converter space. **Impact 2 / Effort 3.** [S-3]
 
-### 48. Winget / MSIX Distribution
-Publish UCX to Windows Package Manager (`winget install UCX`) and optionally Microsoft Store. WinAppSDK 2.0 ships an improved `IPackageValidator` framework. Chocolatey/Scoop packages as complementary distribution. **Impact 3 / Effort 3.** [S-5]
+### 45. WinGet / MSIX Distribution
+Publish UCX to `winget install UCX` and optionally Microsoft Store. WinAppSDK 2.0 ships an improved MSIX validator. Chocolatey/Scoop as complementary channels. Prerequisite: WinAppSDK 2.0 upgrade (#13). **Impact 3 / Effort 3.** [S-5]
 
-### 49. .NET 10 LTS Migration
-.NET 8 LTS support ends 2026-11-10. .NET 10 LTS targets late 2025 with support until 2027. HandBrake is already migrating from .NET 4.8 to .NET 10. Target this for UCX v3.0 alongside WinAppSDK 2.x compatibility audit. **Impact 3 / Effort 3.** [R-1]
+### 46. Integration Test Suite
+End-to-end tests for conversion pipelines: reference input → expected output format detection + FFprobe metadata roundtrip. CLI + sidecar contract only (no UI tests). Target: CI gatekeeping for backend regressions. **Impact 3 / Effort 3.**
 
-### 50. Integration Test Suite
-Add automated end-to-end tests for conversion pipelines: reference input → expected output format detection + spot-check on output validity (FFprobe metadata roundtrip). No UI tests — CLI + sidecar contract only. Target: CI gatekeeping for backend regressions. **Impact 3 / Effort 3.**
-
-### 51. User Documentation / Wiki
-In-app help overlay or GitHub Wiki covering: quick-start per module, supported format matrix, sidecar requirements, CLI reference, common workflows. Currently zero user docs beyond README. **Impact 3 / Effort 2.**
+### 47. User Documentation / Wiki
+In-app help overlay or GitHub Wiki: quick-start per module, supported format matrix, sidecar requirements, CLI reference, common workflows. Zero user docs beyond README today. **Impact 3 / Effort 2.**
 
 ---
 
 ## UNDER CONSIDERATION
 
-### A. Pandoc Document Converter Integration
-Pandoc 3.9 converts 50+ markup formats (DOCX, ODT, LaTeX, Markdown, EPUB, PPTX, HTML, etc.). Would fill the non-image, non-AV document gap in UCX's format matrix. Complexity: Pandoc requires Haskell runtime or a ~100 MB self-contained binary. Already listed as a native backend candidate. Validate demand via user feedback before committing. [S-6]
+### A. Windows AI / Phi Silica Integration
+WinAppSDK 2.0 exposes `AIFeatureReadyState` to detect Copilot+ NPU hardware. If present, Phi Silica (on-device LLM, NPU-optimized, ~3B param) enables: VideoSummarizer (Whisper transcript → structured summary), caption polish, intelligent preset selection. `TextSummarizer`, `TextRewriter`, `TextToTable` are built-in WinRT skills — zero inference setup. Leapfrog opportunity: no OSS competitor does NPU-native summarization. Prerequisite: WinAppSDK 2.0 upgrade (#13). Limitation: Copilot+ PC hardware required — needs graceful fallback for non-Copilot+ users. [S-5, S-PHI]
 
-### B. Calibre Ebook Pipeline (EPUB ↔ MOBI ↔ AZW3)
-`ebook-convert` CLI. Adds a format category UCX currently lacks. Calibre binary is 300 MB. Demand signal unclear for this user base. [S-6]
+### B. Parakeet TDT Transcription Engine
+Cap 0.4.82 ships NVIDIA Parakeet TDT as a Whisper alternative — reportedly faster on compatible hardware. Less community validation than Whisper; limited language coverage vs Whisper's 100 languages. Validate before committing. [R-19]
 
-### C. 3D Format Conversion (glTF / OBJ / STL)
-Via Assimp + Blender headless. Already listed in original roadmap. Very niche. Validate before v3.x work begins.
+### C. "What's New" Onboarding Dialog
+LosslessCut shows a "what's new" modal after each update, surfacing new tools to users who don't read changelogs. UCX has no onboarding. Worth adding for major releases (v2.4, v2.5) to surface stub-to-live tool transitions. Low effort; high discoverability payoff. [R-3]
 
-### D. Library Statistics Dashboard
-File count, codec distribution, total space saved, conversion trends over time — visualized (Matplotlib in a WebView2 pane or WinUI 3 charts). Tdarr and File_Converter_Pro validate the UX. Prerequisite: History dashboard (#32) must be live first. [R-10, R-13]
+### D. Pandoc Document Converter Integration
+Pandoc 3.9 converts 50+ markup formats (DOCX, ODT, LaTeX, Markdown, EPUB, PPTX, HTML, etc.). Fills the non-AV document gap. Complexity: ~100 MB self-contained binary; Haskell runtime or static build required. Validate demand before committing. [S-6]
 
-### E. Windows AI / Phi Silica Integration
-WinAppSDK 2.0 ships `AICapabilities.HasAICapability` to detect Copilot+ PCs with NPU hardware. If hardware is present, Phi Silica (on-device LLM) could power Video Summarizer, caption polish, and intelligent preset selection. This is a leapfrog opportunity — no competitor does this. Prerequisite: WinAppSDK 2.0 upgrade (#17). [S-5]
+### E. Calibre Ebook Pipeline (EPUB ↔ MOBI ↔ AZW3)
+`ebook-convert` CLI. Adds an ebook format category UCX currently lacks. Binary is ~300 MB. Demand signal unclear for this user base. [S-6]
 
-### F. Gyroflow NLE Plugins
-Gyroflow ships plugins for Adobe Premiere, DaVinci Resolve, and Final Cut Pro. A UCX-to-Gyroflow handoff (export `.gcsv` metadata, launch Gyroflow) would be lower effort than full stabilization integration. Assess before committing to #36.
+### F. 3D Format Conversion (glTF / OBJ / STL)
+Via Assimp + Blender headless. Very niche. Validate before v3.x work begins.
+
+### G. Library Statistics Dashboard
+File count, codec distribution, space saved over time — visualized in a WebView2 pane. Prerequisite: History dashboard (#26) must be live. Tdarr and File_Converter_Pro validate the UX. [R-10, R-13]
+
+### H. Gyroflow NLE Plugin Handoff
+Export `.gcsv` metadata for Gyroflow + launch Gyroflow from UCX — lower effort than full stabilization integration (#33). Assess before committing to full integration. [R-14]
+
+### I. AI Voice Changer (VoiceChangerPage)
+VoiceChangerPage stub exists. Requires a real-time or offline voice conversion model: RVC (Retrieval-based Voice Conversion), so-vits-svc, or ONNX-exported RVVC. Real-time path needs low-latency audio I/O (<30 ms buffer). Batch path (file-in → file-out) is feasible with existing sidecar pattern and ONNX/PyTorch. Demand signal: high on YouTube/streaming; model licensing varies. Validate model source + license before committing. [R-9]
+
+### J. AutoHighlight / AutoCrop / AiPortrait
+AutoHighlightPage, AutoCropPage, AiPortrait stubs exist. AutoHighlight: detect interesting moments via audio energy + scene change → extract clips. AutoCrop: AI-based content-aware crop (needs object detection model). AiPortrait: portrait background blur/replacement. All three require additional AI models not yet in the model cache. Evaluate together as a "smart editing" batch during v2.5 scoping.
 
 ---
 
@@ -208,30 +266,37 @@ Gyroflow ships plugins for Adobe Premiere, DaVinci Resolve, and Final Cut Pro. A
 
 | Item | Reason |
 |------|---------|
-| Cloud file processing (upload to Cloudconvert/Convertio/etc.) | Contradicts core philosophy: local processing, no telemetry, no third-party access to files |
+| Cloud file processing (Cloudconvert/Convertio/etc.) | Contradicts core philosophy: local processing, no telemetry, no third-party access to files |
 | OIDC / SSO multi-user server | Desktop-local product; server/multi-user mode contradicts scope |
 | Mobile (Android / iOS) | Windows-only by design; WinUI 3 has no mobile target; not on the table for any version |
 | CD optical ripping | Optical drive ownership is rare in 2026; `cdrtools` GPL-2 license conflict; low demand |
 | Blu-ray rip | CSS/AACS/BDMV circumvention is legally prohibited in most jurisdictions (DMCA §1201, EU Directive) |
 | DRM circumvention of any kind | Legal liability; explicitly refused with error dialog if DRM is detected |
 | Cryptocurrency / blockchain metadata | Irrelevant to domain |
-| Autonomous cloud AI inference (Replicate/Huggingface API calls) | Requires outbound network, API keys, and sends user media to third parties |
+| Autonomous cloud AI inference (Replicate/HuggingFace API calls) | Requires outbound network, API keys, and sends user media to third parties |
+| Scheduled DVR recording | Out of scope for conversion/editing tool; RecordCast is manual-trigger only |
+| Global keyboard shortcuts | Explicitly excluded per project conventions |
 
 ---
 
 ## Architecture Notes
 
-**Offline / resilience:** UCX is 100% offline by design. No network calls are made during conversion. Model downloads and yt-dlp update checks are the only network operations, both opt-in and skippable. All AI inference runs locally via ONNX Runtime or whisper.cpp.
+**Offline / resilience:** UCX is 100% offline by design. No network calls are made during conversion. Model downloads and yt-dlp update checks are the only network operations — both opt-in and skippable. All AI inference runs locally via ONNX Runtime or whisper.cpp.
 
-**Sidecar contract (NDJSON):** All Python AI sidecars communicate via stdout NDJSON lines. Events: `progress` (0–100%), `log` (informational), `complete` (with output path), `error` (with message). SidecarRunner.cs is the C# orchestrator; new sidecars must conform to this contract.
+**Sidecar contract (NDJSON):** All Python AI sidecars communicate via stdout NDJSON lines. Events: `progress` (0–100%), `log` (informational), `complete` (with output path), `error` (with message). `SidecarRunner.cs` is the C# orchestrator; new sidecars must conform to this contract.
 
 **Binary discovery:** `SidecarRunner` walks from `AppContext.BaseDirectory` upward looking for `tools/<name>/<name>.exe`, then falls back to `%LocalAppData%\UniversalConverterX\tools\`. All sidecars are PyInstaller-frozen Windows executables.
 
-**Model cache:** `tools/_models/` is the shared ONNX model directory. Sidecars receive a `--model-dir` CLI argument pointing to this path. Models are downloaded on first use and verified by SHA-256.
+**Model cache:** `tools/_models/` is the shared ONNX model directory. Sidecars receive a `--model-dir` CLI argument. Models are downloaded on first use and verified by SHA-256.
 
-**Platform ceiling:** .NET 8 LTS until 2026-11-10. Target .NET 10 LTS (ships late 2025, mainstream support until 2027) for v3.0. WinAppSDK 1.5 → 2.0 migration is a v2.3+ target.
+**Platform ceiling:**
+- .NET 8 LTS EOL: **2026-11-10** — migration to .NET 10 is NOW-tier (item #9)
+- WinAppSDK 1.5 → 2.0.1 upgrade is NEXT-tier (item #13)
+- CUDA minimum for ONNX Runtime ≥ 1.25.0: **CUDA 12.0+** (CUDA 11.x dropped) — update GPU sidecar setup docs
 
-**Engine versions (current):** FFmpeg static build (tracked in `tools/README.md`), yt-dlp (pin ≥ 2026.02.21 for CVE-2026-26331), ONNX Runtime (upgrade to 1.25.x), ImageMagick 7.1.2-21+, WinAppSDK 1.5.x → target 2.0.1.
+**Demucs maintenance risk:** The `facebookresearch/demucs` GitHub repository was archived (read-only) on 2025-01-01. The PyPI package (`demucs`) remains functional; `python -m demucs` with `htdemucs_ft`/`htdemucs_6s` models still works via PyPI. No active maintainer. Track community fork activity; if no fork emerges by v3.0 planning, evaluate alternative stem separation models (e.g., Demucs community fork, Open-Unmix).
+
+**Engine versions (current):** FFmpeg static build (see `tools/README.md`); yt-dlp pin ≥ 2026.03.17; ONNX Runtime ≥ 1.25.1; ImageMagick 7.1.2-21+; WinAppSDK 1.5.x → target 2.0.1; whisper.cpp v1.8.4 (secondary sidecar, item #12).
 
 ---
 
@@ -239,47 +304,56 @@ Gyroflow ships plugins for Adobe Premiere, DaVinci Resolve, and Final Cut Pro. A
 
 | Component | Current Risk | Remediation |
 |-----------|-------------|-------------|
-| yt-dlp (StreamKeep) | **CVE-2026-26331** command injection via `--netrc-cmd` | Pin ≥ 2026.02.21 (NOW) |
-| ONNX Runtime (all ONNX sidecars) | Heap OOB, integer overflow in CPU kernels | Upgrade to 1.25.x (NOW) |
-| NDJSON IPC contract | Path traversal via `output_path` field | Validate all output paths are under designated output dir (NOW) |
+| yt-dlp (StreamKeep) | Pin drift; extractor bugs | Pin ≥ 2026.03.17 (NOW #1) |
+| ONNX Runtime (all ONNX sidecars) | Heap OOB, integer overflow in CPU kernels; 15+ CVEs in 1.25.0 | Pin ≥ 1.25.1 (NOW #2) |
+| ONNX Runtime GPU path | CUDA 11.x support dropped in 1.25.0 | Require CUDA 12.0+ in GPU setup docs |
+| NDJSON IPC contract | Path traversal via `output_path` field | Validate all output paths are under designated output dir (in progress) |
 | FFmpeg (VideoCrush, ClipForge, RecordCast) | Regular CVE cadence; static build | Pin to vetted stable build; track FFmpeg security advisories |
 | ImageMagick (native Converter) | CVE-active project; frequent memory safety issues | Pin to 7.1.2-21+; do not process untrusted remote input |
-| Process isolation | Sidecars run in-process with user privileges | Evaluate job-object-based sandbox for sidecar processes in v2.3 |
+| Process isolation | Sidecars run in-process with user privileges | Job-object-based sandbox evaluation deferred to v3.x |
 
 ---
 
 ## Appendix: Sources
 
 ### OSS Competitors
-- [R-1] https://github.com/HandBrake/HandBrake/releases — HandBrake v1.11.0 (DNxHR, ProRes, AV1 AMD 10-bit, PCM, MOV, screen reader accessibility)
+- [R-1] https://github.com/HandBrake/HandBrake/releases — HandBrake v1.11.0/1.11.1: ProRes encoder, DNxHR encoder, AMD VCN AV1 10-bit, PCM/MOV support, .NET 10 Desktop Runtime required, screen reader accessibility fixes
 - [R-2] https://github.com/transmute-app/transmute — Transmute: self-hosted Docker converter, REST API, OIDC, 7 themes
-- [R-3] https://github.com/mifi/lossless-cut — LosslessCut: lossless trim, smart cut, multi-track, chapter editor, HTTP API, scene detection
-- [R-4] https://github.com/C4illin/ConvertX — ConvertX: self-hosted TS, VTracer, Markitdown, Dasel, dvisvgm, msgconvert
-- [R-5] https://github.com/xinntao/Real-ESRGAN — Real-ESRGAN: 4x photo + anime upscaler, ncnn-Vulkan portable exe
+- [R-3] https://github.com/mifi/lossless-cut/releases — LosslessCut 3.68.0: expression-based segment selection, overview waveform, system language, reduce-motion setting, 1000-segment limit
+- [R-4] https://github.com/C4illin/ConvertX — ConvertX: self-hosted TypeScript, VTracer, Markitdown, Dasel, dvisvgm
+- [R-5] https://github.com/xinntao/Real-ESRGAN — Real-ESRGAN 0.3.0: 4× photo + anime upscaler, ncnn-Vulkan portable exe; last release April 2022 — model is stable
 - [R-5b] https://github.com/TencentARC/GFPGAN — GFPGAN v1.4: blind face restoration, Apache 2.0
-- [R-6] https://github.com/facebookresearch/demucs — Demucs v4 (htdemucs): 4/6-stem music separation, 9.0 dB SDR, MIT license
+- [R-6] https://github.com/facebookresearch/demucs — Demucs v4 (htdemucs): 4/6-stem music separation, MIT license; **repo archived 2025-01-01, PyPI package still functional**
 - [R-7] https://github.com/openai/whisper — Whisper: multilingual ASR, 6 model sizes (75 MB–2.9 GB), turbo model 8× speed
-- [R-8] https://github.com/ggml-org/whisper.cpp — whisper.cpp: C++ ASR inference, Vulkan/CUDA GPU support, zero-dependency binary
+- [R-8] https://github.com/ggml-org/whisper.cpp/releases — whisper.cpp v1.8.4: Silero VAD v6.2.0, `-g` GPU device selection, 12× Intel iGPU speedup, Vulkan CI
 - [R-9] https://github.com/Unmanic/unmanic — Unmanic: watch-folder library optimiser, FFmpeg plugin system
 - [R-10] https://github.com/HaveAGitGat/Tdarr — Tdarr: distributed conditional transcode, plugin stack, library stats, job reports
-- [R-11] https://www.shutterencoder.com/en/ — Shutter Encoder: VMAF, loudness analysis, H.266, FFV1, JPEG XL, ProRes, AI functions list
+- [R-11] https://www.shutterencoder.com/en/ — Shutter Encoder: VMAF, loudness analysis, H.266, FFV1, JPEG XL, ProRes, AI functions
 - [R-12] https://github.com/staxrip/staxrip — StaxRip: AviSynth/VapourSynth scripting GUI for advanced encoding
-- [R-13] https://github.com/Hyacinthe-primus/File_Converter_Pro — File_Converter_Pro: SQLite gamification/stats, i18n .lang JSON, project files
+- [R-13] https://github.com/Hyacinthe-primus/File_Converter_Pro — File_Converter_Pro: SQLite gamification/stats, i18n .lang JSON
 - [R-14] https://github.com/gyroflow/gyroflow — Gyroflow: gyro-based video stabilization, GPU rendering, 40+ camera sources
 - [R-15] https://github.com/Tichau/FileConverter — FileConverter: 20k+ stars, 25+ languages, SharpShell context menu
 - [R-16] https://github.com/alibaba-damo-academy/FunASR — FunASR/SenseVoice: 31-language ASR, VAD, speaker diarization
 - [R-17] https://github.com/ozmartian/vidcutter — VidCutter: PyQt5 trim/cut tool, cross-platform
+- [R-18] https://github.com/Breakthrough/PySceneDetect/releases — PySceneDetect 0.6.7: EDL CMX 3600 + OTIO export, FFmpeg 8.0 bundled, DaVinci Resolve compatible
+- [R-19] https://github.com/CapSoftware/Cap/releases — Cap 0.4.82–0.4.84: Parakeet TDT transcription, word-level transcript editor, CRF export optimize, HLS segmented upload
 
 ### Platform / Framework
-- [S-1] https://github.com/yt-dlp/yt-dlp/releases — CVE-2026-26331 in 2026.02.21; browser impersonation, extractor fixes in 2026.03.17
-- [S-2] https://github.com/microsoft/onnxruntime/releases — ORT 1.25.0: CUDA minimum → 12.0, CUDA Plugin EP, 15+ security fixes; ORT 1.25.1 patch
-- [S-3] https://ffmpeg.org/index.html#news — FFmpeg 8.0 "Huffman" (ProRes RAW, Vulkan FFv1, D3D12, Whisper filter); FFmpeg 8.1 "Hoare" (D3D12 H.264/AV1 encode, EXIF, IAMF, Vulkan ProRes)
-- [S-4] https://github.com/ImageMagick/ImageMagick/releases — ImageMagick 7.1.2-21 (latest stable, active security fixes)
-- [S-5] https://github.com/microsoft/WindowsAppSDK/releases — WinAppSDK 2.0.1: SystemBackdropElement, Storage Pickers 2.0, Windows ML refactor, ORT 1.24.5 bundled, MSIX validator
+- [S-1] https://github.com/yt-dlp/yt-dlp/releases — CVE-2026-26331 fixed in 2026.02.21; 2026.03.17 is current stable with extractor fixes
+- [S-2] https://github.com/microsoft/onnxruntime/releases — ORT 1.25.0: CUDA ≥ 12.0 minimum, CUDA Plugin EP, 15+ security fixes; ORT 1.25.1: additional heap OOB + Pad Reflect patches
+- [S-3] https://ffmpeg.org/index.html#news — FFmpeg 8.0 "Huffman" (ProRes RAW Vulkan, Vulkan FFV1, D3D12 filters, Whisper filter); FFmpeg 8.1 "Hoare" (D3D12 H.264/AV1 encode, scale_d3d12, Vulkan ProRes encode, EXIF, IAMF, AMD VCN AV1 10-bit)
+- [S-4] https://github.com/ImageMagick/ImageMagick/releases — ImageMagick 7.1.2-21 latest stable
+- [S-5] https://github.com/microsoft/WindowsAppSDK/releases — WinAppSDK 2.0.1: SystemBackdropElement, Storage Pickers v2 (SettingsIdentifier, multi-folder, SuggestedStartFolder), Windows ML refactor, ORT 1.24.5 bundled, WebView2 drag, AIFeatureReadyState
 - [S-6] https://github.com/jgm/pandoc/releases — Pandoc 3.9.0.2: DOCX/ODT/Typst/EPUB/Markdown/HTML/LaTeX universal converter
-- [S-7] https://github.com/rany2/edge-tts — edge-tts: Python client for Microsoft Edge Neural TTS, 100+ voices, MIT license
+- [S-7] https://github.com/rany2/edge-tts — edge-tts 7.2.8: Microsoft Edge Neural TTS client, 100+ voices, MIT license, CBR offset math fixed
+- [S-8] https://github.com/microsoft/WinUI-Gallery/releases — WinUI Gallery 2.8: JumpList reference implementation, .NET 9, nullable reference types enabled
+- [S-NET10] https://dotnet.microsoft.com/en-us/download/dotnet/10.0 — .NET 10.0.7 GA LTS; .NET 8 mainstream support ends 2026-11-10
+- [S-PHI] https://learn.microsoft.com/en-us/windows/ai/apis/phi-silica — Phi Silica NPU API: TextSummarizer, TextRewriter, TextToTable built-in WinRT skills (Copilot+ PC only, via WinAppSDK 2.0)
 
 ### Community Signal
 - https://github.com/topics/file-converter — GitHub topic: OSS landscape survey
 - https://github.com/topics/video-converter?l=c%23 — C# video converter topic
-- https://handbrake.fr/features.php — HandBrake feature reference (queue metaphor, RF slider, HW accel)
+- https://handbrake.fr/features.php — HandBrake feature reference (queue, RF slider, HW accel)
+
+### Internal Sources
+- [plan] — Phase 0 repo reconnaissance: source code confirmed at `tools/vertigo/`, `tools/gifstudio/`, `tools/heicshift/` with no corresponding `sidecar.py`; pages confirmed in `ToolboxPage.xaml.cs` and `MainWindow.xaml.cs` route table
