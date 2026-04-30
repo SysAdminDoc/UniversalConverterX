@@ -318,7 +318,7 @@
                     <StackPanel Spacing="10">
                         <TextBlock Text="Batch Summary" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueSummaryText" Text="0 queued"
-                                   FontSize="22" FontWeight="SemiBold"
+                                   Style="{StaticResource MetricNumberTextStyle}"
                                    Foreground="{StaticResource AccentBlueBrush}"/>
                         <TextBlock x:Name="StatusText"
                                    Text="Add files to start a conversion queue."

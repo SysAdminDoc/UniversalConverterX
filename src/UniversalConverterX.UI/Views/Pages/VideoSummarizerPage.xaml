@@ -19,11 +19,7 @@
             </StackPanel>
 
             <!-- Dev status banner -->
-            <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="14"
-                    Padding="20">
+            <Border Style="{StaticResource CardStyle}">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -56,11 +52,7 @@
             </Border>
 
             <!-- Input area -->
-            <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
-                    Padding="20"
+            <Border Style="{StaticResource CardStyle}"
                     MinHeight="160"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
@@ -152,11 +144,7 @@
             </Grid>
 
             <!-- Action bar -->
-            <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="14"
-                    Padding="16">
+            <Border Style="{StaticResource CardStyle}" Padding="16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
