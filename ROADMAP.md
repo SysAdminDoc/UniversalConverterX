@@ -216,8 +216,8 @@ Monitor a folder via `FileSystemWatcher`; apply a user-defined conversion profil
 #### 26. Conversion History Dashboard
 Persistent SQLite log of every job (timestamp, source, target, engine, duration, size delta, exit code). History page with search, filter, re-run, and aggregate "space saved" display. **Impact 3 / Effort 2.** [R-10, R-13]
 
-#### 27. PowerShell Module (`ucx.psm1`)
-`Convert-MediaFile`, `Compress-MediaFile`, `Get-MediaInfo`, `Watch-Folder` cmdlets. Each wraps `ucx` CLI with typed parameters and `Write-Progress` output. Target: sysadmin batch workflows. **Impact 3 / Effort 2.**
+#### 27. PowerShell Module (`UniversalConverterX.psm1`) ✓ Shipped v2.4
+`Convert-MediaFile`, `Compress-MediaFile`, `Get-MediaInfo`, `Watch-MediaFolder` cmdlets. Each wraps `ucx` CLI with typed parameters and `Write-Progress` output. Target: sysadmin batch workflows. **Impact 3 / Effort 2.** Shipped: `integrations/powershell/UniversalConverterX.psm1` + `.psd1` manifest (v2.4.0) + README. Discovery cmdlets (`Get-UcxRoot`/`Get-UcxExe`/`Get-UcxSidecar`/`Test-Ucx`) resolve install via `$env:UCX_HOME` → module dir → `Program Files` → `LocalAppData`. `Compress-MediaFile` uses an `Invoke-UcxNdjson` helper that parses sidecar NDJSON: `progress` → `Write-Progress` (percent + stage), `log` → `Write-Warning`/`Write-Verbose` by level, `error` → `Write-Error` with sidecar error code; other domain events (`format`/`voice`/`chapter`) forward to the pipeline. `Watch-MediaFolder` is a `FileSystemWatcher`-backed watcher with `-Action Convert|Compress` (covers W-25 via PowerShell). Strict-mode clean, ASCII-only (no unicode dashes), array-of-`Join-Path` cells parenthesised for PS 5.1 parser.
 
 #### 28. REST API Server Mode
 `ucx serve` binds to `127.0.0.1:PORT`. OpenAPI endpoints: `POST /convert`, `GET /jobs/{id}`, `GET /tools`. Enables integration with n8n, Power Automate Desktop, and custom scripts without shell subprocess. LosslessCut and Transmute both ship HTTP APIs. **Impact 3 / Effort 3.** [R-2, R-3]
