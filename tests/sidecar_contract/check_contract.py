@@ -42,6 +42,7 @@ KNOWN_EVENTS = {
     "model",    # rnnoise — discoverable .rnnn model files
     "aspect",   # vertigo — target aspect-ratio presets
     "backend",  # whisper-cpp — compiled-in feature probe
+    "chapter",  # chaptermark — discovered chapter markers
 }
 
 

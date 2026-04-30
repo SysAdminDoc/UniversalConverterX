@@ -24,6 +24,8 @@ public sealed partial class RecorderPage : Page
     private bool _useWebcam;
     private string? _selectedWebcam;
     private string? _selectedAudio;
+    private string? _selectedSystemAudio;
+    private string? _selectedRegion;
 
     public RecorderPage()
     {
@@ -137,6 +139,22 @@ public sealed partial class RecorderPage : Page
             AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = dev, Tag = dev });
         AudioDeviceCombo.SelectedIndex = 0;
 
+        // System-audio combo: pre-fill any audio devices that look like loopback
+        // sources (Stereo Mix / What U Hear / virtual-audio-capturer / Wave Out).
+        SystemAudioCombo.Items.Clear();
+        SystemAudioCombo.Items.Add(new ComboBoxItem { Content = "Auto (Stereo Mix / virtual)", Tag = "" });
+        foreach (var dev in audioDevices)
+        {
+            var lower = dev.ToLowerInvariant();
+            if (lower.Contains("stereo mix") || lower.Contains("what u hear") ||
+                lower.Contains("virtual-audio") || lower.Contains("wave out") ||
+                lower.Contains("loopback"))
+            {
+                SystemAudioCombo.Items.Add(new ComboBoxItem { Content = dev, Tag = dev });
+            }
+        }
+        SystemAudioCombo.SelectedIndex = 0;
+
         _selectedWebcam = videoDevices.Count > 0 ? videoDevices[0] : null;
         _selectedAudio = null;
     }
@@ -195,8 +213,44 @@ public sealed partial class RecorderPage : Page
             _selectedWebcam = wci.Tag as string;
         if (ReferenceEquals(sender, AudioDeviceCombo) && AudioDeviceCombo.SelectedItem is ComboBoxItem aci)
             _selectedAudio = (aci.Tag as string)?.Length > 0 ? aci.Tag as string : null;
+        if (ReferenceEquals(sender, SystemAudioCombo) && SystemAudioCombo.SelectedItem is ComboBoxItem sci)
+            _selectedSystemAudio = sci.Tag as string ?? "";
+
+        if (ReferenceEquals(sender, RegionCombo) && RegionCombo.SelectedItem is ComboBoxItem rci)
+        {
+            var tag = rci.Tag as string ?? "";
+            if (CustomRegionGrid is not null)
+                CustomRegionGrid.Visibility = tag == "custom" ? Visibility.Visible : Visibility.Collapsed;
+            _selectedRegion = tag == "custom" ? BuildCustomRegion() : (string.IsNullOrEmpty(tag) ? null : tag);
+        }
 
         UpdateUi();
+    }
+
+    private void Option_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (RegionCombo?.SelectedItem is ComboBoxItem rci && (rci.Tag as string) == "custom")
+            _selectedRegion = BuildCustomRegion();
+    }
+
+    private void Option_BoolChanged(object sender, RoutedEventArgs e)
+    {
+        if (SystemAudioCombo is null) return;
+        var enabled = SystemAudioCheck.IsChecked == true;
+        SystemAudioCombo.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        if (!enabled) _selectedSystemAudio = null;
+        else if (string.IsNullOrEmpty(_selectedSystemAudio))
+            _selectedSystemAudio = "";  // sentinel for "use default loopback"
+    }
+
+    private string? BuildCustomRegion()
+    {
+        if (RegionXBox is null) return null;
+        if (!int.TryParse(RegionXBox.Text, out var x)) x = 0;
+        if (!int.TryParse(RegionYBox.Text, out var y)) y = 0;
+        if (!int.TryParse(RegionWBox.Text, out var w) || w <= 0) return null;
+        if (!int.TryParse(RegionHBox.Text, out var h) || h <= 0) return null;
+        return $"{x},{y},{w},{h}";
     }
 
     private async void Record_Click(object sender, RoutedEventArgs e)
@@ -349,6 +403,19 @@ public sealed partial class RecorderPage : Page
         {
             args.Add("--audio");
             args.Add(job.AudioDevice);
+        }
+
+        if (SystemAudioCheck?.IsChecked == true)
+        {
+            // Empty string = sentinel for the sidecar's "auto-default loopback".
+            args.Add("--system-audio");
+            args.Add(_selectedSystemAudio ?? "");
+        }
+
+        if (!string.IsNullOrEmpty(_selectedRegion) && job.Source == "screen")
+        {
+            args.Add("--region");
+            args.Add(_selectedRegion);
         }
 
         return args;

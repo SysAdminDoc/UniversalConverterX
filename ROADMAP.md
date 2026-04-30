@@ -73,6 +73,9 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #30 JPEG XL — heicshift sidecar gained `.jxl` read/write via opt-in `pillow-jxl-plugin`; ImageConverterPage exposes JXL as an output format with quality slider (100 = lossless).
 - ✓ #15 Auto-Subtitle — AiSubtitlePage rewritten end-to-end (Backend + Model + Language + Format + burn-in toggle); FFmpeg `subtitles=` filter for hard-coded captions; ToolboxPage tile flipped Future → Ready.
 - ✓ #16 Demucs 6-stem — VocalRemoverPage gained 6-stem option; sidecar handles `6stem` arg; auto-overrides to `htdemucs_6s` model.
+- ✓ #22 Chapter Marks Editor — new `chaptermark` sidecar (read via ffprobe + write via FFMETADATA1 codec-copy mux); new ChapterMarksPage with editable rows + Add/Remove/Save As; Toolbox tile under "Other tools".
+- ✓ #52 RecordCast system audio — `--system-audio` flag + device combo; auto-mixes mic + loopback with `amix=2`.
+- ✓ #53 RecordCast region capture — `--region "x,y,w,h"` flag + preset & custom region UI. Pause/resume + drag-to-select overlay deferred to v2.5.
 
 ---
 
@@ -177,11 +180,11 @@ SmartTrimmerPage stub exists. PySceneDetect v0.6.7 as sidecar: detect scene cuts
 
 ### Recorder & Capture
 
-#### 52. RecordCast system-audio loopback (WASAPI)
-RecordCast captures microphone via DirectShow but cannot record desktop audio — every screencast that wants narration over a video/game/Zoom playback needs system loopback. FFmpeg supports it via `-f dshow -i audio=virtual-audio-capturer` or, preferred, WASAPI loopback (no virtual driver install). Detect Windows version, prefer WASAPI on Windows 10+, fall back to dshow. Expose an "Include system audio" toggle on RecorderPage alongside the existing mic combo, and a "Mic + system" mix mode. Most-requested gap-filler in screen-recorder competitor reviews. **Impact 4 / Effort 2.**
+#### 52. RecordCast system-audio loopback (WASAPI) ✓ Shipped v2.4
+RecordCast captures microphone via DirectShow but cannot record desktop audio — every screencast that wants narration over a video/game/Zoom playback needs system loopback. FFmpeg supports it via `-f dshow -i audio=virtual-audio-capturer` or, preferred, WASAPI loopback (no virtual driver install). Detect Windows version, prefer WASAPI on Windows 10+, fall back to dshow. Expose an "Include system audio" toggle on RecorderPage alongside the existing mic combo, and a "Mic + system" mix mode. Most-requested gap-filler in screen-recorder competitor reviews. **Impact 4 / Effort 2.** Shipped: recordcast sidecar gained `--system-audio <device>` (empty string = `virtual-audio-capturer` default). When both mic + loopback are present, FFmpeg `-filter_complex amix=inputs=2:duration=longest:dropout_transition=2[a]` mixes them into a single AAC track. RecorderPage gained a "Capture system audio (loopback)" checkbox + a system-audio device combo populated with detected loopback devices (Stereo Mix / What U Hear / virtual-audio-capturer / loopback).
 
-#### 53. RecordCast region capture + pause/resume
-Screen recorder is full-screen-only today. (a) Region capture: `gdigrab -offset_x N -offset_y N -video_size WxH` already supports rect; add a region picker overlay (transparent `Window` with adornment for drag-to-select), persist last region in settings. (b) Pause/resume: stop the active ffmpeg process on Pause, write segment to `_part01.mp4`, restart on Resume into `_part02.mp4`, on Stop run `ffmpeg -f concat -i list.txt -c copy` to merge — lossless join, no re-encode. **Impact 4 / Effort 3.**
+#### 53. RecordCast region capture + pause/resume ✓ Shipped v2.4 (region; pause/resume deferred)
+Screen recorder is full-screen-only today. (a) Region capture: `gdigrab -offset_x N -offset_y N -video_size WxH` already supports rect; add a region picker overlay (transparent `Window` with adornment for drag-to-select), persist last region in settings. (b) Pause/resume: stop the active ffmpeg process on Pause, write segment to `_part01.mp4`, restart on Resume into `_part02.mp4`, on Stop run `ffmpeg -f concat -i list.txt -c copy` to merge — lossless join, no re-encode. **Impact 4 / Effort 3.** Region shipped: recordcast sidecar gained `--region "x,y,w,h"` flag passed through to gdigrab. RecorderPage gained Region card with three preset sizes (1920×1080 / 1280×720 / 800×600 at origin) plus a Custom... mode revealing X/Y/W/H text boxes. Drag-to-select overlay window remains a v2.5 polish task. Pause/resume is also deferred — the current API surface (queue → start → stop) makes pause non-trivial; tracking as a v2.5 follow-up.
 
 ### Encoder Improvements
 
@@ -196,8 +199,8 @@ FFmpeg 8.1 added `h264_d3d12va` and `av1_d3d12va` encoders alongside the existin
 #### 21. Timeline Waveform + Thumbnail Strip
 ClipForge needs a visual waveform + keyframe thumbnail strip below the seek bar before editor feature expansion. Pre-extract thumbnails at 1 fps via `ffmpeg -vf fps=1` and waveform image via `ffmpeg -vf showwavespic`. Display in a `ScrollViewer` → `Image` strip bound to seek position. **Impact 5 / Effort 3.** [R-3]
 
-#### 22. Chapter Marks Editor (MKV/MP4)
-Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose as a toolbox workspace (MetadataEditor stub adjacent). LosslessCut's most-used feature class for podcast/long-form audiences. **Impact 3 / Effort 2.** [R-3]
+#### 22. Chapter Marks Editor (MKV/MP4) ✓ Shipped v2.4
+Edit embedded chapter markers in MKV and MP4 files via FFmpeg metadata. Expose as a toolbox workspace (MetadataEditor stub adjacent). LosslessCut's most-used feature class for podcast/long-form audiences. **Impact 3 / Effort 2.** [R-3] Shipped: new `chaptermark` sidecar with `read` (ffprobe `-show_chapters` → NDJSON `chapter` events) + `write` (build FFMETADATA1 chapter file → `ffmpeg -i src -i chapters.ffmeta -map_metadata 1 -codec copy out` — fast lossless mux, no re-encode). New `ChapterMarksPage` with file picker, editable list of chapter rows (start, end, title), Add Chapter / Remove buttons, Save As... picker. New Toolbox tile under "Other tools" + nav search entry.
 
 #### 23. Rewrap Without Re-encode (Container Swap) ✓ Shipped v2.3
 `ffmpeg -c copy` container remux — MKV↔MP4↔MOV↔TS without quality loss. 10–100× faster than transcoding. Expose as a "Rewrap" option in both Converter and Toolbox. **Impact 4 / Effort 1.** [R-3] Shipped: `tools/clipforge/sidecar.py:331` `op_rewrap`; ClipForge editor exposes a "Rewrap" operation tile with target-extension picker (mp4/mkv/mov/ts). Future polish: surface in the Converter's main format picker too (separate item if demand).

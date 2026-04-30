@@ -27,6 +27,7 @@ public sealed partial class MainWindow : Window
         new("Image Upscaler", "Real-ESRGAN super-resolution up to 4× for photos / illustrations", "ai-image-enhancer"),
         new("Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution", "ai-video-enhancer"),
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
+        new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -127,6 +128,7 @@ public sealed partial class MainWindow : Window
             "gif-maker" => typeof(GifMakerPage),
             "image-converter" => typeof(ImageConverterPage),
             "auto-reframe" => typeof(AutoReframePage),
+            "chapter-marks" => typeof(ChapterMarksPage),
             _ => typeof(PlaceholderPage)
         };
 
