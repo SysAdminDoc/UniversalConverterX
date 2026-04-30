@@ -46,7 +46,7 @@
                     </StackPanel>
                     <Button Grid.Column="2"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTipService.ToolTip="Edit profile"
+                            AutomationProperties.Name="Edit profile" ToolTipService.ToolTip="Edit profile"
                             Click="EditProfile_Click"
                             Tag="{x:Bind Id}">
                         <FontIcon Glyph="&#xE70F;" FontSize="14"
@@ -54,7 +54,7 @@
                     </Button>
                     <Button Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
-                            ToolTipService.ToolTip="Remove profile"
+                            AutomationProperties.Name="Remove profile" ToolTipService.ToolTip="Remove profile"
                             Click="RemoveProfile_Click"
                             Tag="{x:Bind Id}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"

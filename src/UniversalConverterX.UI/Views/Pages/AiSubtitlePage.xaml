@@ -70,7 +70,7 @@
                                HorizontalAlignment="Center"
                                TextAlignment="Center"
                                MaxWidth="460"/>
-                    <ProgressBar x:Name="ProgressBar"
+                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
                                  Width="380" Height="6" CornerRadius="3"
                                  Minimum="0" Maximum="100"
                                  Visibility="Collapsed"/>
