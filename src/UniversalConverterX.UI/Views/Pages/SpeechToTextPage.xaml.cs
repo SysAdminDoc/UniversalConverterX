@@ -234,10 +234,12 @@ public sealed partial class SpeechToTextPage : Page
     {
         if (_files.Count == 0 || _cts is not null) return;
 
+        var backend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
         var model = SelectedComboTag(ModelCombo) ?? "base";
         var language = SelectedComboTag(LanguageCombo) ?? "auto";
         var format = SelectedComboTag(FormatCombo) ?? "srt";
         var wordTs = WordTimestampsToggle.IsOn;
+        var useVad = VadCheck?.IsChecked == true;
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -254,15 +256,51 @@ public sealed partial class SpeechToTextPage : Page
                 if (_cts.IsCancellationRequested) break;
 
                 var outputPath = BuildOutputPath(item.Path, format);
-                var args = new List<string>
+
+                // Per-backend arg shape:
+                //   whisper-stt (faster-whisper):  no subcommand, flat flags.
+                //   whisper-cpp:                   `transcribe` subcommand,
+                //                                  output extension drives format,
+                //                                  --vad flag is whisper.cpp-only.
+                List<string> args;
+                if (backend == "whisper-cpp")
                 {
-                    "--input",    item.Path,
-                    "--output",   outputPath,
-                    "--model",    model,
-                    "--language", language,
-                    "--format",   format,
-                };
-                if (wordTs) args.Add("--word-timestamps");
+                    // whisper-cpp wants the format encoded in the output extension.
+                    // Replace whatever we built with the format-driven extension.
+                    var ext = format switch
+                    {
+                        "vtt" => ".vtt",
+                        "txt" => ".txt",
+                        "json" => ".json",
+                        _ => ".srt",
+                    };
+                    var dir = Path.GetDirectoryName(outputPath);
+                    var stem = Path.GetFileNameWithoutExtension(outputPath);
+                    outputPath = Path.Combine(dir ?? "", stem + ext);
+
+                    args =
+                    [
+                        "transcribe",
+                        "--input",    item.Path,
+                        "--output",   outputPath,
+                        "--model",    model,           // sidecar accepts bare 'base' / 'large-v3' / etc.
+                        "--language", language,
+                    ];
+                    if (wordTs) args.Add("--word-timestamps");
+                    if (useVad) args.Add("--vad");
+                }
+                else
+                {
+                    args =
+                    [
+                        "--input",    item.Path,
+                        "--output",   outputPath,
+                        "--model",    model,
+                        "--language", language,
+                        "--format",   format,
+                    ];
+                    if (wordTs) args.Add("--word-timestamps");
+                }
 
                 item.Progress = 0;
                 item.StatusText = "Transcribing";
@@ -280,7 +318,7 @@ public sealed partial class SpeechToTextPage : Page
                 var logHandler = new Progress<SidecarLog>(_ => { });
 
                 var result = await _runner.RunAsync(
-                    "whisper-stt", args, progressHandler, logHandler, _cts.Token);
+                    backend, args, progressHandler, logHandler, _cts.Token);
 
                 if (result.Success)
                 {

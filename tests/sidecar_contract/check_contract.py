@@ -41,6 +41,7 @@ KNOWN_EVENTS = {
     "voice",    # edge-tts — voice catalog enumeration
     "model",    # rnnoise — discoverable .rnnn model files
     "aspect",   # vertigo — target aspect-ratio presets
+    "backend",  # whisper-cpp — compiled-in feature probe
 }
 
 

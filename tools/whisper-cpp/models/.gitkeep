@@ -1,0 +1,16 @@
+# Drop GGUF whisper.cpp models here.
+#
+# Filename convention: ggml-<size>[.lang].bin
+#   ggml-tiny.bin       75 MB
+#   ggml-base.bin       142 MB
+#   ggml-small.bin      466 MB
+#   ggml-medium.bin     1.5 GB
+#   ggml-large-v3.bin   2.9 GB
+#   ggml-large-v3-turbo.bin   1.5 GB (8× speed of large-v3)
+#
+# Quantized variants (smaller + faster, slight quality drop):
+#   ggml-<size>-q5_0.bin
+#   ggml-<size>-q8_0.bin
+#
+# Canonical source: huggingface.co/ggerganov/whisper.cpp
+# Models are intentionally NOT vendored (license + size).
