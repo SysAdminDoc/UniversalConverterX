@@ -58,6 +58,7 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 - ✓ #10 + #23 verified already shipped in v2.3 (lossless trim default-on; ClipForge rewrap op) — roadmap entries reclassified.
 - ✓ #4 GIF Maker — new `gifstudio` sidecar (two-pass `palettegen`+`paletteuse`), `GifMakerPage` batch UI, route + Toolbox tile wired, contract test KNOWN_EVENTS extended.
 - ✓ #5 HEICShift / Image Converter — new `heicshift` Pillow+pillow_heif sidecar, `ImageConverterPage` with format/quality/metadata controls, route + Toolbox tile wired (JXL/RAW deferred).
+- ✓ #7 edge-tts Text-to-Speech — new `edge-tts` async sidecar (322 voices, MIT, no API key), TextToSpeechPage rebuilt with voice picker/rate/pitch/format controls + Save-to picker, ToolboxPage tile flipped Future → Ready.
 
 ---
 
@@ -85,8 +86,8 @@ HEIC/HEIF decode + AVIF/WebP/JPEG output. No `sidecar.py` yet. Uses `Pillow-heif
 #### 6. GFPGAN Photo Restoration sidecar
 PhotoRestorationPage stub exists. GFPGAN v1.4 (Apache 2.0) restores old/degraded photos and enhances faces. Pair with Real-ESRGAN for full-photo restoration pipeline (GFPGAN on faces, Real-ESRGAN on background). `pip install gfpgan` — CPU + GPU. Wire to PhotoRestorationPage. **Impact 4 / Effort 3.** [R-5b]
 
-#### 7. edge-tts Text-to-Speech sidecar
-TextToSpeechPage stub exists. `edge-tts` 7.2.8 (MIT) provides 100+ neural voices in 50+ languages via Microsoft Edge TTS — no API key, voices cached locally after first use. Expose: voice selection, speed ×0.5–2.0, pitch, output format (MP3/WAV/OGG). **Impact 4 / Effort 2.** [S-7]
+#### 7. edge-tts Text-to-Speech sidecar ✓ Shipped v2.4
+TextToSpeechPage stub exists. `edge-tts` 7.2.8 (MIT) provides 100+ neural voices in 50+ languages via Microsoft Edge TTS — no API key, voices cached locally after first use. Expose: voice selection, speed ×0.5–2.0, pitch, output format (MP3/WAV/OGG). **Impact 4 / Effort 2.** [S-7] Shipped: new [`tools/edge-tts/sidecar.py`](tools/edge-tts/sidecar.py) async wrapper around `edge-tts.Communicate.stream()` with `list-voices` (locale-filterable) + `speak` ops; native MP3 output, ffmpeg transcode pipeline for WAV/FLAC/OGG/Opus/M4A targets when ffmpeg is on `PATH`; frozen-guard. [`tools/edge-tts/build.ps1`](tools/edge-tts/build.ps1) PyInstaller freeze with `--collect-all edge_tts`. [`Views/Pages/TextToSpeechPage`](src/UniversalConverterX.UI/Views/Pages/TextToSpeechPage.xaml) rebuilt: locale filter combo, voice picker populated from sidecar enumeration, rate/pitch sliders with live labels, format combo, Save-to picker, char counter, ProgressBar + cancel. ToolboxPage tile flipped Future → Ready ("Powered by edge-tts").
 
 #### 8. Real-ESRGAN Image/Video Upscaler sidecar
 ImageUpscalerPage and VideoEnhancerPage stubs exist. Use `realesrgan-ncnn-vulkan` portable binary (Intel/AMD/NVIDIA GPU via Vulkan, no Python, ships in `tools/`). Models on first use → `tools/_models/`: `RealESRGAN_x4plus` (photo 4×), `RealESRGAN_x4plus_anime_6B` (anime 4×), `realesr-general-x4v3` (fast general). SHA-256 verified. **Impact 5 / Effort 3.** [R-5]

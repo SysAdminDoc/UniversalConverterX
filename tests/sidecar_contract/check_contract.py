@@ -38,6 +38,7 @@ KNOWN_EVENTS = {
     "device",   # recordcast — DirectShow device enumeration
     "preset",   # gifstudio — known render presets
     "format",   # heicshift — supported input/output format inventory
+    "voice",    # edge-tts — voice catalog enumeration
 }
 
 
