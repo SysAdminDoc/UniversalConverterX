@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.EbookConverterPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="EbookFileTemplate" x:DataType="p:EbookFileItem">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="12" Padding="12"
+                    Margin="0,0,0,8">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE82D;" FontSize="22"
+                              Foreground="{StaticResource AccentBlueBrush}"
+                              VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind Path}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2"
+                               Text="{x:Bind StatusText, Mode=OneWay}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextAlignment="Right"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="3"
+                            Style="{StaticResource IconButtonStyle}"
+                            AutomationProperties.Name="Remove from queue"
+                            ToolTipService.ToolTip="Remove from queue"
+                            Click="RemoveFile_Click"
+                            Tag="{x:Bind}">
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="eBook Converter"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX / HTML and more via Calibre's ebook-convert. Optional metadata overrides for title / authors / language."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button Content="Add eBooks"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="AddFiles_Click"/>
+                <Button x:Name="ConvertButton"
+                        Content="Convert"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Convert_Click"
+                        IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="FormatCombo"
+                          Header="Target format"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="EPUB" Tag="epub"/>
+                    <ComboBoxItem Content="MOBI" Tag="mobi"/>
+                    <ComboBoxItem Content="AZW3 (Kindle)" Tag="azw3"/>
+                    <ComboBoxItem Content="PDF" Tag="pdf"/>
+                    <ComboBoxItem Content="FB2" Tag="fb2"/>
+                    <ComboBoxItem Content="DOCX" Tag="docx"/>
+                    <ComboBoxItem Content="ODT" Tag="odt"/>
+                    <ComboBoxItem Content="HTML" Tag="html"/>
+                    <ComboBoxItem Content="HTMLZ" Tag="htmlz"/>
+                    <ComboBoxItem Content="RTF" Tag="rtf"/>
+                    <ComboBoxItem Content="TXT" Tag="txt"/>
+                    <ComboBoxItem Content="LIT" Tag="lit"/>
+                    <ComboBoxItem Content="LRF" Tag="lrf"/>
+                    <ComboBoxItem Content="PDB" Tag="pdb"/>
+                    <ComboBoxItem Content="CBZ" Tag="cbz"/>
+                </ComboBox>
+                <TextBox Grid.Column="1"
+                         x:Name="OutputDirBox"
+                         Header="Output directory"
+                         IsReadOnly="True"
+                         PlaceholderText="(same as source)"/>
+                <Button Grid.Column="2"
+                        Content="Browse..."
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        VerticalAlignment="Bottom"
+                        Click="BrowseOutputDir_Click"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="TitleBox"
+                         Header="Title (optional)"
+                         PlaceholderText="(keep source)"/>
+                <TextBox Grid.Column="1"
+                         x:Name="AuthorsBox"
+                         Header="Authors (optional)"
+                         PlaceholderText='Asimov, Isaac &amp; Clarke, Arthur'/>
+                <TextBox Grid.Column="2"
+                         x:Name="LanguageBox"
+                         Header="Language (ISO-639)"
+                         PlaceholderText="en"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="10">
+                    <Border Width="80" Height="80" CornerRadius="20"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE82D;" FontSize="36"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock Text="Add eBooks"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="EPUB, MOBI, AZW3, PDF, FB2, DOCX, HTML, RTF, TXT. Pick a target format and run."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center" TextWrapping="Wrap"
+                               MaxWidth="420"/>
+                </StackPanel>
+                <ScrollViewer x:Name="FilesScroll" Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="FilesList"
+                                  ItemTemplate="{StaticResource EbookFileTemplate}"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <ProgressBar AutomationProperties.Name="Progress"
+                     Grid.Row="4"
+                     x:Name="WorkProgress"
+                     Minimum="0" Maximum="100"
+                     IsIndeterminate="False"/>
+
+        <ScrollViewer Grid.Row="5" Height="80"
+                      VerticalScrollBarVisibility="Auto">
+            <TextBlock x:Name="LogText"
+                       Style="{StaticResource MutedTextStyle}"
+                       FontFamily="Consolas, Cascadia Mono, monospace"
+                       FontSize="11"
+                       TextWrapping="Wrap"/>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="6"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   Text="Add eBooks to begin."/>
+    </Grid>
+</Page>
