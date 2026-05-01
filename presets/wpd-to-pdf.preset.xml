@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>WordPerfect / AmiPro / Works / Publisher -> PDF</Name>
+    <Folder>Documents/Legacy</Folder>
+    <InputTypes>
+        <Extension>wpd</Extension>
+        <Extension>wpt</Extension>
+        <Extension>wpg</Extension>
+        <Extension>sam</Extension>
+        <Extension>smm</Extension>
+        <Extension>wps</Extension>
+        <Extension>pub</Extension>
+        <Extension>sxw</Extension>
+        <Extension>sxc</Extension>
+        <Extension>sxi</Extension>
+        <Extension>kwd</Extension>
+        <Extension>abw</Extension>
+        <Extension>cwk</Extension>
+        <Extension>mw</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pdf</OutputExtension>
+    <Engine>legacyoffice</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>pdf</Arg>
+    </Args>
+</Preset>

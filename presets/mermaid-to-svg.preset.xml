@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Mermaid / PlantUML / Graphviz -> SVG</Name>
+    <Folder>Diagrams</Folder>
+    <InputTypes>
+        <Extension>mmd</Extension>
+        <Extension>mermaid</Extension>
+        <Extension>puml</Extension>
+        <Extension>plantuml</Extension>
+        <Extension>uml</Extension>
+        <Extension>iuml</Extension>
+        <Extension>dot</Extension>
+        <Extension>gv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>svg</OutputExtension>
+    <Engine>diagram</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--format</Arg>
+        <Arg>svg</Arg>
+    </Args>
+</Preset>

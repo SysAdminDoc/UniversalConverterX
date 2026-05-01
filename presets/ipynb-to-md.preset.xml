@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Jupyter ipynb -> Markdown</Name>
+    <Folder>Notebooks</Folder>
+    <InputTypes>
+        <Extension>ipynb</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>md</OutputExtension>
+    <Engine>notebooks</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>md</Arg>
+    </Args>
+</Preset>

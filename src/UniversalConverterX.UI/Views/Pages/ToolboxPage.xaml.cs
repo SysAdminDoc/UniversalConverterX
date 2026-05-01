@@ -126,6 +126,22 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.13 wave (Office + Diagrams + Sysadmin)
+        DocumentTools.Add(new ToolboxTile("presets:legacyoffice", "Legacy Office Documents", "WordPerfect / AmiPro / Works / Publisher / StarOffice / KOffice / AbiWord", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
+        DocumentTools.Add(new ToolboxTile("presets:applepro", "Apple iWork", "Pages / Numbers / Keynote -> DOCX / XLSX / PPTX / PDF", "\uE8A5", blue, "Ready", green, false, "LibreOffice + iWork XML"));
+        DocumentTools.Add(new ToolboxTile("presets:hwpkit", "Korean Hangul HWP", "HWP / HWPX -> PDF / DOCX / ODT / HTML / TXT", "\uE8A5", blue, "Ready", green, false, "pyhwp + LibreOffice"));
+        DocumentTools.Add(new ToolboxTile("presets:diagram", "Diagrams", "Mermaid / PlantUML / Graphviz / Visio / draw.io / Excalidraw -> SVG / PNG / PDF", "\uE9B6", blue, "Ready", green, false, "mermaid-cli + plantuml + dot"));
+        DocumentTools.Add(new ToolboxTile("presets:notebooks", "Jupyter Notebooks", "ipynb <-> py / md / Rmd / qmd / html / pdf / slides", "\uE7C3", green, "Ready", green, false, "nbconvert + jupytext"));
+        DocumentTools.Add(new ToolboxTile("presets:helpkit", "Compiled Help (CHM)", "CHM extraction + CHM -> single PDF", "\uE897", blue, "Ready", green, false, "7z + weasyprint"));
+        DocumentTools.Add(new ToolboxTile("presets:comic", "Comic Books", "CBZ / CBR / CBT / CB7 mutual conversion + CBZ -> PDF / EPUB", "\uE82D", orange, "Ready", green, false, "rarfile + img2pdf + EbookLib"));
+        AudioTools.Add(new ToolboxTile("presets:playlist", "Playlists", "M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S / iTunes XML mutual conversion", "\uEC4F", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:tlskit", "TLS Certificates", "X.509 PEM / DER / PKCS#7 / PKCS#12 conversion + cert metadata probe", "\uE72E", blue, "Ready", green, false, "cryptography"));
+        OtherTools.Add(new ToolboxTile("presets:sshkit", "SSH Keys", "OpenSSH / PEM PKCS#8 / PuTTY .ppk / RFC 4716 conversion", "\uE72E", blue, "Ready", green, false, "cryptography + puttygen"));
+        OtherTools.Add(new ToolboxTile("presets:timefmt", "Timestamps", "ISO 8601 / Unix epoch / Excel / FILETIME / cocoa / RFC 822 / cron explain", "\uE823", blue, "Ready", green, false, "stdlib + croniter"));
+        OtherTools.Add(new ToolboxTile("presets:coordfmt", "Coordinates", "DD / DMS / DDM / UTM / MGRS / Geohash / Plus Codes batch conversion", "\uE707", blue, "Ready", green, false, "utm + mgrs + olc"));
+        OtherTools.Add(new ToolboxTile("presets:config", "DevOps Config", "HCL / HOCON / properties / INI / systemd / JSON / YAML / TOML", "\uE943", blue, "Ready", green, false, "python-hcl2 + pyhocon"));
+        OtherTools.Add(new ToolboxTile("presets:dnskit", "DNS Zone Files", "BIND zone <-> JSON / YAML / CSV + zone validation", "\uE968", blue, "Ready", green, false, "dnspython"));
+
         // v2.12 wave (Domain-specific & exotic)
         OtherTools.Add(new ToolboxTile("presets:chemkit", "Chemistry", "SMILES / MOL / SDF / MOL2 / PDB / XYZ / CIF / InChI", "\uE7C2", green, "Ready", green, false, "RDKit + Open Babel"));
         OtherTools.Add(new ToolboxTile("presets:biokit", "Bioinformatics", "FASTA / FASTQ / GenBank / EMBL / VCF / BAM / SAM / Newick", "\uE7C2", green, "Ready", green, false, "Biopython + pysam"));

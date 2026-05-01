@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Apple Pages -> DOCX</Name>
+    <Folder>Documents/Apple</Folder>
+    <InputTypes>
+        <Extension>pages</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>docx</OutputExtension>
+    <Engine>applepro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>docx</Arg>
+    </Args>
+</Preset>

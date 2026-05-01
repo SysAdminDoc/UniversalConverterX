@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Mermaid / PlantUML / Graphviz / Visio / draw.io -> PNG</Name>
+    <Folder>Diagrams</Folder>
+    <InputTypes>
+        <Extension>mmd</Extension>
+        <Extension>mermaid</Extension>
+        <Extension>puml</Extension>
+        <Extension>plantuml</Extension>
+        <Extension>uml</Extension>
+        <Extension>dot</Extension>
+        <Extension>gv</Extension>
+        <Extension>vsd</Extension>
+        <Extension>vsdx</Extension>
+        <Extension>vsdm</Extension>
+        <Extension>drawio</Extension>
+        <Extension>excalidraw</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>diagram</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>

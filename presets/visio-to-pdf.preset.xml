@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Visio -> PDF</Name>
+    <Folder>Diagrams</Folder>
+    <InputTypes>
+        <Extension>vsd</Extension>
+        <Extension>vsdx</Extension>
+        <Extension>vsdm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pdf</OutputExtension>
+    <Engine>diagram</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--format</Arg>
+        <Arg>pdf</Arg>
+    </Args>
+</Preset>

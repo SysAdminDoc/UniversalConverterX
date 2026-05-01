@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Python / Markdown / R Markdown -> Jupyter ipynb</Name>
+    <Folder>Notebooks</Folder>
+    <InputTypes>
+        <Extension>py</Extension>
+        <Extension>md</Extension>
+        <Extension>Rmd</Extension>
+        <Extension>qmd</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ipynb</OutputExtension>
+    <Engine>notebooks</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>ipynb</Arg>
+    </Args>
+</Preset>

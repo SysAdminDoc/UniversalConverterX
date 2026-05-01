@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Comic (CBZ / CBR / CBT / CB7) -> PDF</Name>
+    <Folder>Comics</Folder>
+    <InputTypes>
+        <Extension>cbz</Extension>
+        <Extension>cbr</Extension>
+        <Extension>cbt</Extension>
+        <Extension>cb7</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pdf</OutputExtension>
+    <Engine>comic</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-pdf</Arg>
+    </Args>
+</Preset>
