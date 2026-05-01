@@ -1,0 +1,1 @@
+# subocr shells out to FFmpeg + Tesseract; no Python deps required.

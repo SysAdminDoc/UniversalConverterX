@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Normalize line endings -> LF (Unix)</Name>
+    <Folder>Text</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>md</Extension>
+        <Extension>csv</Extension>
+        <Extension>tsv</Extension>
+        <Extension>json</Extension>
+        <Extension>xml</Extension>
+        <Extension>html</Extension>
+        <Extension>js</Extension>
+        <Extension>ts</Extension>
+        <Extension>py</Extension>
+        <Extension>sh</Extension>
+        <Extension>yaml</Extension>
+        <Extension>yml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}{ext}</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>textencode</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>newline</Arg>
+        <Arg>--style</Arg>
+        <Arg>lf</Arg>
+    </Args>
+</Preset>

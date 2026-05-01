@@ -14,7 +14,7 @@
     <Product>UniversalConverter X</Product>
     <Description>Core library for UniversalConverter X file format conversion</Description>
     <Copyright>Copyright © 2026 Maven Imaging</Copyright>
-    <Version>2.10.0</Version>
+    <Version>2.11.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

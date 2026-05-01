@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PSD / XCF -> per-layer PNGs</Name>
+    <Folder>Image</Folder>
+    <InputTypes>
+        <Extension>psd</Extension>
+        <Extension>psb</Extension>
+        <Extension>xcf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_layers</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>psdkit</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>extract</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,2 @@
+music21>=9.1
+guitarpro>=0.7

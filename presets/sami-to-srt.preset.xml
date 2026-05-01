@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SAMI / TTML / SCC / DFXP -> SRT</Name>
+    <Folder>Subtitles</Folder>
+    <InputTypes>
+        <Extension>sami</Extension>
+        <Extension>smi</Extension>
+        <Extension>ttml</Extension>
+        <Extension>dfxp</Extension>
+        <Extension>xml</Extension>
+        <Extension>scc</Extension>
+        <Extension>vtt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>srt</Arg>
+    </Args>
+</Preset>

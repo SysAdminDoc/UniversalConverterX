@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>MusicXML / GuitarPro / MuseScore -> MIDI</Name>
+    <Folder>Music</Folder>
+    <InputTypes>
+        <Extension>musicxml</Extension>
+        <Extension>mxl</Extension>
+        <Extension>abc</Extension>
+        <Extension>mscz</Extension>
+        <Extension>mscx</Extension>
+        <Extension>gp</Extension>
+        <Extension>gp3</Extension>
+        <Extension>gp4</Extension>
+        <Extension>gp5</Extension>
+        <Extension>gpx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mid</OutputExtension>
+    <Engine>music</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>mid</Arg>
+    </Args>
+</Preset>

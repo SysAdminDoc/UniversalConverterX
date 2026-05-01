@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>WMA / AC3 / DTS / AMR -> MP3</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wma</Extension>
+        <Extension>ac3</Extension>
+        <Extension>eac3</Extension>
+        <Extension>dts</Extension>
+        <Extension>amr</Extension>
+        <Extension>awb</Extension>
+        <Extension>ra</Extension>
+        <Extension>rm</Extension>
+        <Extension>au</Extension>
+        <Extension>voc</Extension>
+        <Extension>spx</Extension>
+        <Extension>gsm</Extension>
+        <Extension>mpc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp3</OutputExtension>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>mp3</Arg>
+        <Arg>--bitrate</Arg>
+        <Arg>192k</Arg>
+    </Args>
+</Preset>

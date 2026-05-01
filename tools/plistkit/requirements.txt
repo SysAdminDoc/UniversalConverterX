@@ -1,0 +1,1 @@
+# plistkit is pure stdlib (plistlib).

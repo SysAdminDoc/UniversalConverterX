@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Recode text -> UTF-8 (auto-detect)</Name>
+    <Folder>Text</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>md</Extension>
+        <Extension>csv</Extension>
+        <Extension>tsv</Extension>
+        <Extension>html</Extension>
+        <Extension>htm</Extension>
+        <Extension>xml</Extension>
+        <Extension>json</Extension>
+        <Extension>srt</Extension>
+        <Extension>vtt</Extension>
+        <Extension>log</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}{ext}</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>textencode</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>recode</Arg>
+        <Arg>--to-encoding</Arg>
+        <Arg>utf-8</Arg>
+        <Arg>--errors</Arg>
+        <Arg>replace</Arg>
+    </Args>
+</Preset>

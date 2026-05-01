@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Radiance HDR / EXR -> 16-bit PNG</Name>
+    <Folder>Image/HDR</Folder>
+    <InputTypes>
+        <Extension>hdr</Extension>
+        <Extension>pic</Extension>
+        <Extension>rgbe</Extension>
+        <Extension>exr</Extension>
+        <Extension>pfm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>hdrkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>
