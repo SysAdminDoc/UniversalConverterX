@@ -152,32 +152,26 @@ UniversalConverterX/
 
 - .NET 10 SDK
 - Windows 10 SDK (for UI project)
-- Visual Studio 2022 (recommended)
+- Visual Studio or Build Tools with MSBuild and Windows App SDK build tools (required for the WinUI project)
 
 ### Build
 
 ```bash
-# Restore packages
-dotnet restore
+# Build the full Windows solution
+.\build.ps1 -Target Build -Configuration Release
 
-# Build all projects
-dotnet build
+# Run the focused core test suite
+.\build.ps1 -Target Test -Configuration Release
 
-# Build release
-dotnet build -c Release
-
-# Run tests
-dotnet test
+# CLI/core-only builds can still use dotnet directly
+dotnet build src/UniversalConverterX.Console/UniversalConverterX.Console.csproj -c Release
 ```
 
 ### Publish
 
 ```bash
-# Publish CLI
-dotnet publish src/UniversalConverterX.Console -c Release -o publish/cli
-
-# Publish UI (self-contained)
-dotnet publish src/UniversalConverterX.UI -c Release -r win-x64 --self-contained -o publish/ui
+# Publish CLI and WinUI output
+.\build.ps1 -Target Publish -Configuration Release
 ```
 
 ## Architecture

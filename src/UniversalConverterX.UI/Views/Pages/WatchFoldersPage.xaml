@@ -5,12 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:svc="using:UniversalConverterX.UI.Services"
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
     <Page.Resources>
-        <DataTemplate x:Key="ProfileRowTemplate" x:DataType="svc:WatchProfile">
+        <DataTemplate x:Key="ProfileRowTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1" CornerRadius="14" Padding="14"
@@ -22,33 +21,33 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <ToggleSwitch IsOn="{x:Bind IsEnabled, Mode=OneWay}"
+                    <ToggleSwitch IsOn="{Binding IsEnabled, Mode=OneWay}"
                                   OnContent="" OffContent=""
                                   VerticalAlignment="Center"
                                   Toggled="ProfileToggled"
-                                  Tag="{x:Bind Id}"/>
+                                  Tag="{Binding Id}"/>
                     <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind Name}"
+                        <TextBlock Text="{Binding Name}"
                                    Style="{StaticResource LabelTextStyle}"
                                    FontWeight="SemiBold"/>
-                        <TextBlock Text="{x:Bind Path}"
+                        <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
                                    FontSize="12"
                                    TextTrimming="CharacterEllipsis">
                             <Run Text="filter:"/>
-                            <Run Text="{x:Bind Filter}"/>
+                            <Run Text="{Binding Filter}"/>
                             <Run Text=" |"/>
                             <Run Text="action:"/>
-                            <Run Text="{x:Bind Action}"/>
+                            <Run Text="{Binding Action}"/>
                         </TextBlock>
                     </StackPanel>
                     <Button Grid.Column="2"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Edit profile" ToolTipService.ToolTip="Edit profile"
                             Click="EditProfile_Click"
-                            Tag="{x:Bind Id}">
+                            Tag="{Binding Id}">
                         <FontIcon Glyph="&#xE70F;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
@@ -56,7 +55,7 @@
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove profile" ToolTipService.ToolTip="Remove profile"
                             Click="RemoveProfile_Click"
-                            Tag="{x:Bind Id}">
+                            Tag="{Binding Id}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource AccentRedBrush}"/>
                     </Button>
@@ -64,11 +63,11 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:Key="EventRowTemplate" x:DataType="svc:WatchEvent">
+        <DataTemplate x:Key="EventRowTemplate">
             <Border Background="{StaticResource SurfaceLightBrush}"
                     CornerRadius="10" Padding="10,6"
                     Margin="0,0,0,4">
-                <TextBlock Text="{x:Bind Display}"
+                <TextBlock Text="{Binding Display}"
                            Style="{StaticResource MutedTextStyle}"
                            FontFamily="Consolas, Cascadia Mono, monospace"
                            TextTrimming="CharacterEllipsis"/>
