@@ -1,2 +1,6 @@
-pymupdf4llm>=0.0.15
+pymupdf4llm>=0.0.17
 pymupdf>=1.24
+marker-pdf>=1.0
+docling>=2.5
+docling-core>=2.5
+# magic-pdf is heavy; install on-demand by users who want MinerU.

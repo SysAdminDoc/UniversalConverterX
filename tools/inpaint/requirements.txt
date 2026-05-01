@@ -1,0 +1,5 @@
+simple-lama-inpainting>=0.1.2
+ultralytics>=8.3
+torch>=2.4
+Pillow>=10.3
+numpy>=1.24

@@ -1,0 +1,6 @@
+kokoro>=0.7
+f5-tts>=0.3
+TTS>=0.22
+torch>=2.4
+numpy>=1.24
+soundfile>=0.12

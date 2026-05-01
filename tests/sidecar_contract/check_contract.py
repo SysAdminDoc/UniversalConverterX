@@ -106,6 +106,19 @@ KNOWN_EVENTS = {
     "disk_image",      # diskimage — produced VM disk image
     "disk_image_info", # diskimage.info — qemu-img probe
     "email_index",     # mailimport.list — PST folder inventory
+    # v2.10 wave (Latest & Greatest AI refresh)
+    "matte_image",     # bgremove — produced RGBA cut-out
+    "matte_model",     # bgremove.models — supported segmentation backend
+    "upscale_image",   # superres — produced super-res image (spandrel path)
+    "upscale_model",   # superres.models — downloadable checkpoint catalog
+    "face_restore",    # facerestore — restored face image (CodeFormer / GFPGAN)
+    "ocr_pro",         # ocrpro — Surya text/layout output
+    "tts_audio",       # premiumtts — synthesized speech audio
+    "tts_voice",       # premiumtts.voices — voice catalog entry
+    "translation",     # translatekit — translated text/file/srt
+    "translation_lang",# translatekit.langs — supported language code
+    "inpaint_image",   # inpaint — produced inpainted PNG
+    "master_audio",    # audiomastering — mastered / loudnorm audio
 }
 
 

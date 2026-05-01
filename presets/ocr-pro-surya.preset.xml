@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>OCR Pro -> Markdown (Surya)</Name>
+    <Folder>Documents/OCR</Folder>
+    <InputTypes>
+        <Extension>pdf</Extension>
+        <Extension>png</Extension>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>tif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>webp</Extension>
+        <Extension>bmp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>md</OutputExtension>
+    <Engine>ocrpro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>text</Arg>
+        <Arg>--format</Arg>
+        <Arg>markdown</Arg>
+        <Arg>--languages</Arg>
+        <Arg>en</Arg>
+    </Args>
+</Preset>

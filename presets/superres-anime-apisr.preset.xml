@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Upscale anime 4x (APISR)</Name>
+    <Folder>AI/Image</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>webp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_apisr</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>superres</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>upscale</Arg>
+        <Arg>--model</Arg>
+        <Arg>apisr-x4</Arg>
+    </Args>
+</Preset>

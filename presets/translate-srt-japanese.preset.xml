@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Translate SRT -> Japanese</Name>
+    <Folder>AI/Translation</Folder>
+    <InputTypes>
+        <Extension>srt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ja</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>translatekit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>srt</Arg>
+        <Arg>--source</Arg>
+        <Arg>en</Arg>
+        <Arg>--target</Arg>
+        <Arg>ja</Arg>
+    </Args>
+</Preset>
