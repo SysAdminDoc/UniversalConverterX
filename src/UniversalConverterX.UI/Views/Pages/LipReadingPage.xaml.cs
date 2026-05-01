@@ -325,7 +325,13 @@ public sealed partial class LipReadingPage : Page
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
                 {
-                    ProgressLog.Text += $"[{l.Level}] {l.Message}\n";
+                    var combined = ProgressLog.Text + $"[{l.Level}] {l.Message}\n";
+                    if (combined.Length > 64_000)
+                    {
+                        var nl = combined.IndexOf('\n', combined.Length - 64_000);
+                        combined = nl >= 0 ? combined[(nl + 1)..] : combined[(combined.Length - 64_000)..];
+                    }
+                    ProgressLog.Text = combined;
                 }));
 
                 var result = await _runner.RunAsync("lipsight", args, progress, log, _cts.Token);

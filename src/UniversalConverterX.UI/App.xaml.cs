@@ -43,6 +43,8 @@ public partial class App : Application
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
         services.AddSingleton<IHistoryService, HistoryService>();
         services.AddSingleton<IWatchFolderService, WatchFolderService>();
+        services.AddSingleton<IPresetExecutor, PresetExecutor>();
+        services.AddSingleton<IUiPresetCache, UiPresetCache>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();

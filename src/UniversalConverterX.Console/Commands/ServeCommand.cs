@@ -88,7 +88,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             var path = req.Url?.AbsolutePath ?? "";
             if (path == "/healthz" && req.HttpMethod == "GET")
             {
-                await WriteJson(resp, 200, new { ok = true, version = "2.20.1" });
+                await WriteJson(resp, 200, new { ok = true, version = Program.GetAssemblyVersion() });
             }
             else if (path == "/tools" && req.HttpMethod == "GET")
             {
@@ -194,29 +194,59 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 
     private static IReadOnlyList<object> ListTools()
     {
+        // Build the list dynamically from whichever tools/<name>/ folders exist
+        // in the bundled or %LocalAppData% layout. Hard-coding 19 sidecar names
+        // (the prior behaviour) was misleading once the project shipped 170+.
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var list = new List<object>();
-        var sidecars = new[]
+
+        void Scan(string toolsDir)
         {
-            "videocrush", "clipforge", "framesnap", "gifstudio", "heicshift",
-            "demucs", "edge-tts", "rnnoise", "vertigo", "realesrgan",
-            "whisper-cpp", "whisper-stt", "gfpgan", "chaptermark",
-            "alphacut", "lipsight", "recordcast", "videosubtitleremover", "streamkeep",
-        };
-        foreach (var name in sidecars)
-        {
-            var path = ResolveSidecar(name);
-            list.Add(new { name, available = path is not null, path });
+            if (!Directory.Exists(toolsDir)) return;
+            foreach (var sub in Directory.EnumerateDirectories(toolsDir))
+            {
+                var name = Path.GetFileName(sub);
+                // Skip private subdirs like _models that hold shared state, not a sidecar.
+                if (string.IsNullOrEmpty(name) || name.StartsWith('_') || name.StartsWith('.')) continue;
+                if (!seen.Add(name)) continue;
+                var path = ResolveSidecar(name);
+                list.Add(new { name, available = path is not null, path });
+            }
         }
+
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            Scan(Path.Combine(dir.FullName, "tools"));
+            dir = dir.Parent;
+        }
+        Scan(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "UniversalConverterX", "tools"));
+
+        list.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(
+            ((dynamic)a).name, ((dynamic)b).name));
         return list;
     }
 
     private static string? ResolveSidecar(string name)
     {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        // Reject input that could escape the tools/ root via traversal — the
+        // /convert endpoint takes engine names from arbitrary HTTP clients.
+        if (name.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || name == "." || name == "..")
+            return null;
+
         var exe = name + ".exe";
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {
-            foreach (var rel in new[] { $"tools/{name}/dist/{exe}", $"tools/{name}/{exe}", $"tools/{name}/bin/{exe}" })
+            foreach (var rel in new[]
+            {
+                Path.Combine("tools", name, "dist", exe),
+                Path.Combine("tools", name, exe),
+                Path.Combine("tools", name, "bin", exe),
+            })
             {
                 var c = Path.Combine(dir.FullName, rel);
                 if (File.Exists(c)) return c;
@@ -232,10 +262,16 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 
 internal sealed class JobManager
 {
+    private static readonly TimeSpan FinishedTtl = TimeSpan.FromHours(1);
+
     private readonly ConcurrentDictionary<string, JobRecord> _jobs = new();
 
     public string Start(string engine, string exe, IList<string> args)
     {
+        // Sweep first so a long-running serve session can't hold every finished
+        // job forever (each carries up to MaxRetainedEvents lines).
+        SweepFinished();
+
         var id = Guid.NewGuid().ToString("N");
         var psi = new ProcessStartInfo
         {
@@ -262,27 +298,55 @@ internal sealed class JobManager
             try { if (r.IsRunning) r.Kill(); } catch { }
         }
     }
+
+    private void SweepFinished()
+    {
+        var cutoff = DateTime.UtcNow - FinishedTtl;
+        foreach (var (id, r) in _jobs)
+        {
+            if (r.FinishedUtc is DateTime f && f < cutoff)
+                _jobs.TryRemove(id, out _);
+        }
+    }
 }
 
 internal sealed class JobRecord
 {
+    /// <summary>
+    /// A long-running sidecar (a 4 GB transcode emitting per-frame events) used
+    /// to grow the in-memory list unbounded. We now keep the full count for the
+    /// /jobs/{id} API but trim the actual stored lines once we cross this cap,
+    /// so the server can't OOM on a chatty engine.
+    /// </summary>
+    private const int MaxRetainedEvents = 5_000;
+
     private readonly Process _proc;
-    private readonly List<string> _events = [];
+    // Use a deque-shape list so the trim path is O(1) instead of O(n).
+    private readonly LinkedList<string> _events = new();
+    private int _droppedEvents;
+    private int _totalEvents;
     private readonly object _lock = new();
+    private volatile bool _hasExited;
 
     public string Id { get; }
     public string Engine { get; }
     public DateTime StartedUtc { get; private set; }
     public DateTime? FinishedUtc { get; private set; }
     public int? ExitCode { get; private set; }
-    public bool IsRunning => !_proc.HasExited;
+    /// <summary>
+    /// `Process.HasExited` throws if the process hasn't been started yet and is
+    /// expensive on Windows (a kernel call per access). Mirror it via the
+    /// <c>Exited</c> event so the /jobs/{id} endpoint can answer cheaply and
+    /// without crashing if accessed mid-startup.
+    /// </summary>
+    public bool IsRunning => !_hasExited;
 
     public JobRecord(string id, string engine, Process proc)
     {
         Id = id; Engine = engine; _proc = proc;
     }
 
-    public int EventCount { get { lock (_lock) return _events.Count; } }
+    public int EventCount { get { lock (_lock) return _totalEvents; } }
 
     public void Start()
     {
@@ -290,7 +354,7 @@ internal sealed class JobRecord
         _proc.OutputDataReceived += (_, e) =>
         {
             if (e.Data is null) return;
-            lock (_lock) _events.Add(e.Data);
+            AppendEvent(e.Data);
         };
         _proc.ErrorDataReceived += (_, e) =>
         {
@@ -298,12 +362,14 @@ internal sealed class JobRecord
             // Wrap stderr lines in NDJSON envelope so consumers don't have to
             // distinguish stream sources.
             var json = JsonSerializer.Serialize(new { @event = "log", level = "stderr", message = e.Data });
-            lock (_lock) _events.Add(json);
+            AppendEvent(json);
         };
         _proc.Exited += (_, _) =>
         {
+            try { ExitCode = _proc.ExitCode; }
+            catch { ExitCode = -1; }
             FinishedUtc = DateTime.UtcNow;
-            ExitCode = _proc.ExitCode;
+            _hasExited = true;
         };
         _proc.EnableRaisingEvents = true;
         _proc.Start();
@@ -311,12 +377,37 @@ internal sealed class JobRecord
         _proc.BeginErrorReadLine();
     }
 
+    private void AppendEvent(string line)
+    {
+        lock (_lock)
+        {
+            _events.AddLast(line);
+            _totalEvents++;
+            while (_events.Count > MaxRetainedEvents)
+            {
+                _events.RemoveFirst();
+                _droppedEvents++;
+            }
+        }
+    }
+
     public IReadOnlyList<string> EventsSince(int cursor)
     {
         lock (_lock)
         {
-            if (cursor >= _events.Count) return Array.Empty<string>();
-            return _events.GetRange(cursor, _events.Count - cursor);
+            // Translate the absolute cursor into our retained window. Anything
+            // older than what we've evicted is unrecoverable; clients that
+            // poll faster than the eviction rate see a continuous stream.
+            var firstStored = _totalEvents - _events.Count;
+            if (cursor < firstStored) cursor = firstStored;
+            var skip = cursor - firstStored;
+            if (skip >= _events.Count) return Array.Empty<string>();
+
+            var result = new List<string>(_events.Count - skip);
+            var node = _events.First;
+            for (int i = 0; i < skip && node is not null; i++) node = node.Next;
+            while (node is not null) { result.Add(node.Value); node = node.Next; }
+            return result;
         }
     }
 

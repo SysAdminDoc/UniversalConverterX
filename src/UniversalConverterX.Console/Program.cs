@@ -1,3 +1,4 @@
+using System.Reflection;
 using Spectre.Console.Cli;
 using UniversalConverterX.Console.Commands;
 
@@ -5,6 +6,23 @@ namespace UniversalConverterX.Console;
 
 public class Program
 {
+    /// <summary>
+    /// Read the version from the assembly's InformationalVersion (or AssemblyVersion
+    /// as a fallback) so a single Directory.Build.props bump propagates here without
+    /// a literal-string update. Strips the "+commitsha" suffix that the SDK appends.
+    /// </summary>
+    internal static string GetAssemblyVersion()
+    {
+        var asm = typeof(Program).Assembly;
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(info))
+        {
+            var plus = info!.IndexOf('+');
+            return plus < 0 ? info : info[..plus];
+        }
+        return asm.GetName().Version?.ToString(3) ?? "0.0.0";
+    }
+
     public static int Main(string[] args)
     {
         var app = new CommandApp();
@@ -12,7 +30,7 @@ public class Program
         app.Configure(config =>
         {
             config.SetApplicationName("ucx");
-            config.SetApplicationVersion("2.1.0");
+            config.SetApplicationVersion(GetAssemblyVersion());
 
             config.AddCommand<ConvertCommand>("convert")
                 .WithDescription("Convert one or more files to a different format")

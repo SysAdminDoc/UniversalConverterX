@@ -70,8 +70,15 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private readonly DispatcherQueue _ui;
     private readonly string _configPath;
     private readonly Dictionary<string, FileSystemWatcher> _watchers = [];
+    private readonly Dictionary<string, CancellationTokenSource> _profileCts = [];
     private readonly ConcurrentDictionary<string, byte> _processing = new();
     private readonly object _saveLock = new();
+    /// <summary>
+    /// Trips when the whole service is being shut down. Linked into every
+    /// per-profile CTS so disposing the service cancels any running sidecar
+    /// rather than leaving orphan processes after app exit.
+    /// </summary>
+    private readonly CancellationTokenSource _shutdownCts = new();
 
     public ObservableCollection<WatchProfile> Profiles { get; } = [];
     public ObservableCollection<WatchEvent> Recent { get; } = [];
@@ -117,15 +124,31 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
     public void Save()
     {
-        lock (_saveLock)
+        // Snapshot under the UI thread (where Profiles lives) and serialize on a
+        // worker so a noisy Watch Folder profile add/remove storm doesn't stutter
+        // the navigation animation.
+        var snapshot = Profiles.ToList();
+        Task.Run(() =>
         {
-            try
+            lock (_saveLock)
             {
-                var json = JsonSerializer.Serialize(Profiles.ToList(), JsonOpts);
-                File.WriteAllText(_configPath, json);
+                try
+                {
+                    var json = JsonSerializer.Serialize(snapshot, JsonOpts);
+                    // Atomic write so a crash mid-Save doesn't leave a half-empty
+                    // watches.json that the next launch can't parse.
+                    var tmp = _configPath + ".tmp";
+                    File.WriteAllText(tmp, json);
+                    try { File.Move(tmp, _configPath, overwrite: true); }
+                    catch
+                    {
+                        File.WriteAllText(_configPath, json);
+                        try { File.Delete(tmp); } catch { }
+                    }
+                }
+                catch { /* best-effort persistence */ }
             }
-            catch { /* best-effort persistence */ }
-        }
+        });
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -179,12 +202,18 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
     public void Dispose()
     {
+        try { _shutdownCts.Cancel(); } catch { }
         foreach (var w in _watchers.Values)
         {
-            w.EnableRaisingEvents = false;
-            w.Dispose();
+            try { w.EnableRaisingEvents = false; w.Dispose(); } catch { }
         }
         _watchers.Clear();
+        foreach (var cts in _profileCts.Values)
+        {
+            try { cts.Cancel(); cts.Dispose(); } catch { }
+        }
+        _profileCts.Clear();
+        _shutdownCts.Dispose();
     }
 
     // ── Watcher lifecycle ───────────────────────────────────────────────────
@@ -200,23 +229,54 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             return;
         }
 
-        var fsw = new FileSystemWatcher(profile.Path)
+        FileSystemWatcher fsw;
+        try
         {
-            IncludeSubdirectories = false,
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
-            EnableRaisingEvents = true,
-        };
+            fsw = new FileSystemWatcher(profile.Path)
+            {
+                IncludeSubdirectories = false,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
+                EnableRaisingEvents = true,
+            };
+        }
+        catch (Exception ex)
+        {
+            // FileSystemWatcher throws on UNC paths without permission, on
+            // certain network drives, and when the path is a CD/DVD root —
+            // surface the failure in the event log instead of crashing.
+            PostEvent(profile, profile.Path, WatchEventStatus.Failed,
+                      $"Could not watch folder: {ex.Message}");
+            return;
+        }
         fsw.Created += (_, e) => OnArrival(profile, e.FullPath);
         fsw.Renamed += (_, e) => OnArrival(profile, e.FullPath);
+        // The Error event fires when the buffer overflows (too many fast
+        // events) — log it so the user knows files may have been missed.
+        fsw.Error += (_, e) =>
+        {
+            PostEvent(profile, profile.Path, WatchEventStatus.Failed,
+                      $"Watcher buffer overflow: {e.GetException().Message}. Some files may have been missed.");
+        };
         _watchers[profile.Id] = fsw;
+
+        // Per-profile CTS lets SetEnabled(false) abort any running sidecar
+        // for this profile rather than leaving the job running until natural
+        // completion. Linked to _shutdownCts so app exit also cancels.
+        _profileCts[profile.Id] = CancellationTokenSource.CreateLinkedTokenSource(_shutdownCts.Token);
     }
 
     private void StopWatcher(string id)
     {
-        if (!_watchers.TryGetValue(id, out var fsw)) return;
-        fsw.EnableRaisingEvents = false;
-        fsw.Dispose();
-        _watchers.Remove(id);
+        if (_watchers.TryGetValue(id, out var fsw))
+        {
+            try { fsw.EnableRaisingEvents = false; fsw.Dispose(); } catch { }
+            _watchers.Remove(id);
+        }
+        if (_profileCts.TryGetValue(id, out var cts))
+        {
+            try { cts.Cancel(); cts.Dispose(); } catch { }
+            _profileCts.Remove(id);
+        }
     }
 
     private void OnArrival(WatchProfile profile, string path)
@@ -243,7 +303,14 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
                 PostEvent(profile, path, WatchEventStatus.Running, $"{tool} -> {Path.GetFileName(output)}");
                 var startedAt = DateTime.UtcNow;
-                var result = await _runner.RunAsync(tool, args!, null, null, CancellationToken.None);
+                // Use the per-profile cancellation token so disabling or
+                // removing the watch profile aborts the in-flight job instead
+                // of letting it run to completion. Falls back to the shutdown
+                // token if the profile was already removed (race).
+                var ct = _profileCts.TryGetValue(profile.Id, out var profCts)
+                    ? profCts.Token
+                    : _shutdownCts.Token;
+                var result = await _runner.RunAsync(tool, args!, null, null, ct);
                 PostEvent(profile, path,
                           result.Success ? WatchEventStatus.Done : WatchEventStatus.Failed,
                           result.Success ? Path.GetFileName(output)
@@ -298,10 +365,20 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
         return false;
     }
 
+    // Glob -> compiled regex cache. A hot folder (e.g. a Watch Folder picking
+    // up a 1000-frame image sequence) used to recompile the same pattern per
+    // file; we now build it once and reuse.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Text.RegularExpressions.Regex> _globCache = new();
+
     /// <summary>Glob match supporting '*' and '?' (case-insensitive).</summary>
     private static bool LikeMatch(string text, string pattern)
     {
-        // Translate glob to regex once and run it.
+        var rx = _globCache.GetOrAdd(pattern, BuildGlob);
+        return rx.IsMatch(text);
+    }
+
+    private static System.Text.RegularExpressions.Regex BuildGlob(string pattern)
+    {
         var sb = new System.Text.StringBuilder("^");
         foreach (var c in pattern)
         {
@@ -313,9 +390,13 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             });
         }
         sb.Append('$');
-        return System.Text.RegularExpressions.Regex.IsMatch(
-            text, sb.ToString(),
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        return new System.Text.RegularExpressions.Regex(
+            sb.ToString(),
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase
+            | System.Text.RegularExpressions.RegexOptions.Compiled,
+            // Bound runtime so a pathological pattern like "**?**" can't pin a CPU
+            // core for an unbounded time on hostile filenames.
+            TimeSpan.FromMilliseconds(250));
     }
 
     /// <summary>Wait until file size hasn't changed for several samples or timeout.</summary>

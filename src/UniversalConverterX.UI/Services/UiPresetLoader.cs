@@ -2,6 +2,48 @@ using System.Xml.Linq;
 
 namespace UniversalConverterX.UI.Services;
 
+/// <summary>
+/// Caches the result of <see cref="UiPresetLoader.LoadAll"/> so the Preset
+/// browser, the Universal Convert page, and anything else that needs the full
+/// catalogue doesn't re-walk the preset directory tree on every interaction.
+/// Cache TTL is short (10 s) so a user dropping a new *.preset.xml into the
+/// directory still sees it without restarting the app.
+/// </summary>
+public interface IUiPresetCache
+{
+    IReadOnlyList<UiPreset> Get();
+    void Invalidate();
+}
+
+public sealed class UiPresetCache : IUiPresetCache
+{
+    private static readonly TimeSpan Ttl = TimeSpan.FromSeconds(10);
+    private readonly object _gate = new();
+    private IReadOnlyList<UiPreset>? _cached;
+    private DateTime _cachedAt = DateTime.MinValue;
+
+    public IReadOnlyList<UiPreset> Get()
+    {
+        lock (_gate)
+        {
+            if (_cached is not null && DateTime.UtcNow - _cachedAt < Ttl)
+                return _cached;
+            _cached = UiPresetLoader.LoadAll();
+            _cachedAt = DateTime.UtcNow;
+            return _cached;
+        }
+    }
+
+    public void Invalidate()
+    {
+        lock (_gate)
+        {
+            _cached = null;
+            _cachedAt = DateTime.MinValue;
+        }
+    }
+}
+
 public enum PresetInvocationMode { PerFile, BatchOutputDir, BatchSingleOutput, ExtractEach }
 
 public sealed record UiPreset(
@@ -72,7 +114,11 @@ public static class UiPresetLoader
 
     public static IReadOnlyList<UiPreset> LoadAll()
     {
-        var byName = new Dictionary<string, UiPreset>(StringComparer.Ordinal);
+        // Case-insensitive so a user override at the same name (regardless of
+        // capitalization) shadows the installer-shipped version. The previous
+        // ordinal comparer let "Convert to MP4" and "convert to mp4" coexist,
+        // confusing the Toolbox preset list.
+        var byName = new Dictionary<string, UiPreset>(StringComparer.OrdinalIgnoreCase);
         foreach (var dir in ResolvePresetDirs())
         {
             string[] files;

@@ -19,6 +19,18 @@ public sealed partial class ToolboxPage : Page
     {
         InitializeComponent();
         SeedTiles();
+        // The wave-by-wave SeedTiles() body has accreted over 20+ releases and
+        // a few tiles end up with the same RouteKey across waves (e.g.
+        // presets:codeformat, presets:audiotag, presets:gisconvert). Dedupe
+        // before binding so the user doesn't see two identical cards.
+        DedupeTiles(ImageTools);
+        DedupeTiles(VideoTools);
+        DedupeTiles(AiTools);
+        DedupeTiles(AudioTools);
+        DedupeTiles(DocumentTools);
+        DedupeTiles(DiscTools);
+        DedupeTiles(OtherTools);
+
         ImageGrid.ItemsSource = ImageTools;
         VideoGrid.ItemsSource = VideoTools;
         AiGrid.ItemsSource = AiTools;
@@ -26,6 +38,19 @@ public sealed partial class ToolboxPage : Page
         DocumentGrid.ItemsSource = DocumentTools;
         DiscGrid.ItemsSource = DiscTools;
         OtherGrid.ItemsSource = OtherTools;
+    }
+
+    private static void DedupeTiles(ObservableCollection<ToolboxTile> tiles)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < tiles.Count; i++)
+        {
+            if (!seen.Add(tiles[i].RouteKey))
+            {
+                tiles.RemoveAt(i);
+                i--;
+            }
+        }
     }
 
     private void SeedTiles()

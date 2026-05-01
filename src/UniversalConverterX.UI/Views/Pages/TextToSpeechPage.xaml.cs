@@ -234,13 +234,25 @@ public sealed partial class TextToSpeechPage : Page
         var output = _outputPath;
         if (string.IsNullOrEmpty(output))
         {
-            // Default: drop next to MyMusic with a generated filename.
+            // Default: drop next to MyMusic with a generated filename. If the
+            // music library is on a redirected/locked-down folder, fall back
+            // to %TEMP% so the user still gets audio out.
             var ext = SelectedFormatExt();
             var dir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyMusic),
                 "UniversalConverterX",
                 "Voiceovers");
-            Directory.CreateDirectory(dir);
+            try { Directory.CreateDirectory(dir); }
+            catch
+            {
+                dir = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Voiceovers");
+                try { Directory.CreateDirectory(dir); }
+                catch (Exception ex)
+                {
+                    StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                    return;
+                }
+            }
             output = EnsureUniquePath(Path.Combine(dir, $"voiceover_{DateTime.Now:yyyyMMdd_HHmmss}{ext}"));
             _outputPath = output;
             OutputPathText.Text = $"Output: {_outputPath}";

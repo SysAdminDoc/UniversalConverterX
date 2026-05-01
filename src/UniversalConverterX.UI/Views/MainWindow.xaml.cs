@@ -187,26 +187,30 @@ public sealed partial class MainWindow : Window
 
     private void SelectMenuItem(string tag)
     {
-        foreach (var item in MainNav.MenuItems)
+        // Search both the main pane and the footer pane (Settings, downloads,
+        // etc. live in FooterMenuItems). The previous version walked only
+        // MenuItems, so the selection chevron silently desynced for any nav
+        // item that lived in the footer.
+        if (TrySelectIn(MainNav.MenuItems, tag)) return;
+        TrySelectIn(MainNav.FooterMenuItems, tag);
+    }
+
+    private bool TrySelectIn(IList<object> items, string tag)
+    {
+        foreach (var item in items)
         {
-            if (item is NavigationViewItem nvi && (nvi.Tag as string) == tag)
+            if (item is not NavigationViewItem nvi) continue;
+            if ((nvi.Tag as string) != tag) continue;
+            if (ReferenceEquals(MainNav.SelectedItem, nvi)) return true;
+            try
             {
-                if (ReferenceEquals(MainNav.SelectedItem, nvi))
-                    return;
-
-                try
-                {
-                    _isSelectingNavigationItem = true;
-                    MainNav.SelectedItem = nvi;
-                }
-                finally
-                {
-                    _isSelectingNavigationItem = false;
-                }
-
-                return;
+                _isSelectingNavigationItem = true;
+                MainNav.SelectedItem = nvi;
             }
+            finally { _isSelectingNavigationItem = false; }
+            return true;
         }
+        return false;
     }
 
     private void MainNav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

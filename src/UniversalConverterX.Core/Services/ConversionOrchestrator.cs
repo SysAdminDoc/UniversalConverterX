@@ -126,38 +126,77 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
         try
         {
+            // Validate inputs at the orchestrator boundary so callers get a clean
+            // error instead of a NullReferenceException deep inside a strategy.
+            if (string.IsNullOrWhiteSpace(job.InputPath))
+            {
+                job.Status = ConversionStatus.Failed;
+                job.CompletedAt = DateTime.UtcNow;
+                return ConversionResult.Failed(job, "Input path is required.", DateTime.UtcNow - startedAt);
+            }
+            if (string.IsNullOrWhiteSpace(job.OutputPath))
+            {
+                job.Status = ConversionStatus.Failed;
+                job.CompletedAt = DateTime.UtcNow;
+                return ConversionResult.Failed(job, "Output path is required.", DateTime.UtcNow - startedAt);
+            }
+
             // Detect format if not specified
             if (job.SourceFormat == null)
             {
                 job.SourceFormat = await DetectFormatAsync(job.InputPath, cancellationToken);
             }
 
-            // Find the best converter
-            var converter = GetBestConverter(job.InputExtension, job.OutputExtension);
-            if (converter == null)
-            {
-                _logger?.LogError("No converter found for {Input} → {Output}",
-                    job.InputExtension, job.OutputExtension);
+            IConverterStrategy? converter;
 
-                job.Status = ConversionStatus.Failed;
-                job.CompletedAt = DateTime.UtcNow;
-
-                return ConversionResult.Failed(
-                    job,
-                    $"No converter available for {job.InputExtension} → {job.OutputExtension}",
-                    DateTime.UtcNow - startedAt);
-            }
-
-            // Use forced converter if specified
+            // Honour ForceConverter first — but verify it can actually do the
+            // requested conversion. Silently substituting a different converter
+            // (the prior behaviour) hid bugs where the user's `--converter ffmpeg`
+            // ended up running ImageMagick.
             if (!string.IsNullOrEmpty(job.Options.ForceConverter))
             {
-                var forcedConverter = _converters.FirstOrDefault(c =>
+                var forced = _converters.FirstOrDefault(c =>
                     c.Id.Equals(job.Options.ForceConverter, StringComparison.OrdinalIgnoreCase));
-
-                if (forcedConverter != null)
+                if (forced is null)
                 {
-                    converter = forcedConverter;
-                    _logger?.LogDebug("Using forced converter: {Converter}", converter.Id);
+                    job.Status = ConversionStatus.Failed;
+                    job.CompletedAt = DateTime.UtcNow;
+                    return ConversionResult.Failed(
+                        job,
+                        $"Forced converter '{job.Options.ForceConverter}' is not registered. " +
+                        $"Available: {string.Join(", ", _converters.Select(c => c.Id))}",
+                        DateTime.UtcNow - startedAt);
+                }
+                var src = job.SourceFormat ?? new FileFormat(job.InputExtension, GetMimeType(job.InputExtension), DetermineCategory(job.InputExtension));
+                var tgt = new FileFormat(job.OutputExtension, GetMimeType(job.OutputExtension), DetermineCategory(job.OutputExtension));
+                if (!forced.CanConvert(src, tgt))
+                {
+                    job.Status = ConversionStatus.Failed;
+                    job.CompletedAt = DateTime.UtcNow;
+                    return ConversionResult.Failed(
+                        job,
+                        $"Forced converter '{forced.Id}' cannot convert {job.InputExtension} → {job.OutputExtension}.",
+                        DateTime.UtcNow - startedAt);
+                }
+                converter = forced;
+                _logger?.LogDebug("Using forced converter: {Converter}", converter.Id);
+            }
+            else
+            {
+                // Find the best converter
+                converter = GetBestConverter(job.InputExtension, job.OutputExtension);
+                if (converter == null)
+                {
+                    _logger?.LogError("No converter found for {Input} → {Output}",
+                        job.InputExtension, job.OutputExtension);
+
+                    job.Status = ConversionStatus.Failed;
+                    job.CompletedAt = DateTime.UtcNow;
+
+                    return ConversionResult.Failed(
+                        job,
+                        $"No converter available for {job.InputExtension} → {job.OutputExtension}",
+                        DateTime.UtcNow - startedAt);
                 }
             }
 
@@ -189,21 +228,29 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
         _logger?.LogInformation("Starting batch conversion of {Count} files", jobList.Count);
 
+        // Defensive floors: a misconfigured Options.MaxParallelConversions of 0
+        // (or a caller passing 0) would otherwise produce a runtime exception.
+        var hardCap   = Math.Max(1, _options.MaxParallelConversions);
+        var requested = Math.Max(1, maxParallelism);
+        var degree    = Math.Min(hardCap, requested);
+
         await Parallel.ForEachAsync(
             jobList,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = Math.Clamp(maxParallelism, 1, _options.MaxParallelConversions),
+                MaxDegreeOfParallelism = degree,
                 CancellationToken = cancellationToken
             },
             async (job, ct) =>
             {
                 var jobProgress = new Progress<ConversionProgress>(p =>
                 {
+                    // Volatile reads so per-job updates aren't reporting stale
+                    // counters when other workers race ahead.
                     progress?.Report(new BatchProgress(
-                        completed,
+                        Volatile.Read(ref completed),
                         jobList.Count,
-                        failed,
+                        Volatile.Read(ref failed),
                         job,
                         p));
                 });
@@ -211,20 +258,20 @@ public class ConversionOrchestrator : IConversionOrchestrator
                 var result = await ConvertAsync(job, jobProgress, ct);
                 results.Add(result);
 
-                Interlocked.Increment(ref completed);
                 if (!result.Success)
                     Interlocked.Increment(ref failed);
+                Interlocked.Increment(ref completed);
 
                 progress?.Report(new BatchProgress(
-                    completed,
+                    Volatile.Read(ref completed),
                     jobList.Count,
-                    failed,
+                    Volatile.Read(ref failed),
                     null,
                     null));
             });
 
         var duration = DateTime.UtcNow - startTime;
-        
+
         _logger?.LogInformation(
             "Batch conversion complete: {Success}/{Total} succeeded in {Duration:F1}s",
             results.Count(r => r.Success),
@@ -252,6 +299,8 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
     public IConverterStrategy? GetBestConverter(string inputExtension, string outputExtension)
     {
+        if (string.IsNullOrWhiteSpace(inputExtension) || string.IsNullOrWhiteSpace(outputExtension))
+            return null;
         var inputExt = inputExtension.ToLowerInvariant().TrimStart('.');
         var outputExt = outputExtension.ToLowerInvariant().TrimStart('.');
         var source = new FileFormat(inputExt, GetMimeType(inputExt), DetermineCategory(inputExt));
@@ -294,6 +343,9 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
     public bool CanConvert(string inputExtension, string outputExtension)
     {
+        if (string.IsNullOrWhiteSpace(inputExtension) || string.IsNullOrWhiteSpace(outputExtension))
+            return false;
+
         var inputExt = inputExtension.ToLowerInvariant().TrimStart('.');
         var outputExt = outputExtension.ToLowerInvariant().TrimStart('.');
 

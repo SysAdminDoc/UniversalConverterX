@@ -94,8 +94,8 @@ public static class PresetLoader
 
     public static IReadOnlyList<ConversionPreset> LoadAll()
     {
-        // User dirs come first; later duplicates by Name lose.
-        var byName = new Dictionary<string, ConversionPreset>(StringComparer.Ordinal);
+        // User dirs come first; later duplicates by Name (case-insensitive) lose.
+        var byName = new Dictionary<string, ConversionPreset>(StringComparer.OrdinalIgnoreCase);
         foreach (var dir in ResolvePresetDirs())
         {
             foreach (var path in Directory.EnumerateFiles(dir, "*.preset.xml"))

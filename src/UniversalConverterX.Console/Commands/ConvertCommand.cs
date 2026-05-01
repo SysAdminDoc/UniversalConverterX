@@ -104,13 +104,24 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
         var orchestrator = new ConversionOrchestrator(options);
 
-        // Check if conversion is supported
-        var sampleExt = Path.GetExtension(inputFiles[0]).TrimStart('.').ToLowerInvariant();
-        if (!orchestrator.CanConvert(sampleExt, settings.OutputFormat))
+        // Validate every distinct extension in the batch — otherwise a mixed
+        // selection like "*.png *.jpg -o webp" would silently skip whichever
+        // type the orchestrator can't handle while still claiming success.
+        var distinctExts = inputFiles
+            .Select(f => Path.GetExtension(f).TrimStart('.').ToLowerInvariant())
+            .Where(e => !string.IsNullOrEmpty(e))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var unsupported = distinctExts
+            .Where(e => !orchestrator.CanConvert(e, settings.OutputFormat!))
+            .ToList();
+        if (unsupported.Count > 0)
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] Cannot convert from [yellow]{sampleExt}[/] to [yellow]{settings.OutputFormat}[/]");
-            
-            var availableFormats = orchestrator.GetOutputFormatsFor(inputFiles[0]);
+            AnsiConsole.MarkupLine(
+                $"[red]Error:[/] Cannot convert from [yellow]{string.Join(", ", unsupported)}[/] to " +
+                $"[yellow]{settings.OutputFormat}[/]");
+            var sampleExt = unsupported[0];
+            var availableFormats = orchestrator.GetOutputFormatsFor(sampleExt);
             if (availableFormats.Count > 0)
             {
                 AnsiConsole.MarkupLine($"[dim]Available output formats for {sampleExt}:[/] {string.Join(", ", availableFormats.Take(20))}");
@@ -379,29 +390,54 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
     private static List<string> ExpandFiles(string[] patterns)
     {
+        // Always emit absolute paths so downstream output-dir computation and
+        // de-duplication don't disagree based on whether the pattern was given
+        // relative or absolute. On Windows we also normalise case for de-dup
+        // since `image.PNG` and `image.png` refer to the same file.
+        var seen = new HashSet<string>(OperatingSystem.IsWindows()
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal);
         var files = new List<string>();
+
+        void Add(string path)
+        {
+            try
+            {
+                var full = Path.GetFullPath(path);
+                if (seen.Add(full)) files.Add(full);
+            }
+            catch
+            {
+                // GetFullPath throws on bizarre inputs (very long paths, NUL
+                // bytes). Skip silently so a single bad pattern doesn't kill
+                // the whole batch.
+            }
+        }
 
         foreach (var pattern in patterns)
         {
+            if (string.IsNullOrWhiteSpace(pattern)) continue;
             if (pattern.Contains('*') || pattern.Contains('?'))
             {
                 var dir = Path.GetDirectoryName(pattern);
                 if (string.IsNullOrEmpty(dir)) dir = ".";
-                
+
                 var filePattern = Path.GetFileName(pattern);
-                
+                if (string.IsNullOrEmpty(filePattern)) continue;
+
                 if (Directory.Exists(dir))
                 {
-                    files.AddRange(Directory.GetFiles(dir, filePattern));
+                    foreach (var f in Directory.EnumerateFiles(dir, filePattern))
+                        Add(f);
                 }
             }
             else if (File.Exists(pattern))
             {
-                files.Add(Path.GetFullPath(pattern));
+                Add(pattern);
             }
         }
 
-        return files.Distinct().ToList();
+        return files;
     }
 
     private static string GetDefaultToolsPath()

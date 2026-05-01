@@ -10,6 +10,8 @@ using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
+#nullable enable
+
 public sealed class PresetCardItem : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -42,12 +44,18 @@ public sealed class PresetCardItem : INotifyPropertyChanged
 
 public sealed partial class PresetsPage : Page
 {
-    private readonly ISidecarRunner _runner;
+    private readonly IPresetExecutor _executor;
     private readonly IHistoryService _history;
+    private readonly IUiPresetCache _presetCache;
     private readonly ObservableCollection<PresetCardItem> _displayed = [];
     private List<PresetCardItem> _all = [];
     private string? _engineFilter;
     private string? _searchTerm;
+
+    /// <summary>Per-card lock so the same Run button can't double-fire if the user double-clicks.</summary>
+    private readonly HashSet<string> _running = new(StringComparer.Ordinal);
+    /// <summary>Cancels the in-flight search debounce when the user keeps typing.</summary>
+    private CancellationTokenSource? _searchDebounce;
 
     /// <summary>Optional nav parameter: filter to a specific engine on first load.</summary>
     public string? InitialEngineFilter { get; set; }
@@ -55,8 +63,9 @@ public sealed partial class PresetsPage : Page
     public PresetsPage()
     {
         InitializeComponent();
-        _runner = App.Services.GetRequiredService<ISidecarRunner>();
-        _history = App.Services.GetRequiredService<IHistoryService>();
+        _executor    = App.Services.GetRequiredService<IPresetExecutor>();
+        _history     = App.Services.GetRequiredService<IHistoryService>();
+        _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
         PresetList.ItemsSource = _displayed;
     }
 
@@ -70,7 +79,11 @@ public sealed partial class PresetsPage : Page
 
     private void Reload()
     {
-        var presets = UiPresetLoader.LoadAll();
+        // Force-refresh from disk on explicit reload — the user clicking the
+        // refresh button is a clear signal they expect a fresh scan even if
+        // the TTL hasn't expired.
+        _presetCache.Invalidate();
+        var presets = _presetCache.Get();
         _all = presets.Select(p => new PresetCardItem
         {
             Preset = p,
@@ -105,8 +118,13 @@ public sealed partial class PresetsPage : Page
         }
 
         ApplyFilter();
+        var dirs = UiPresetLoader.ResolvePresetDirs();
+        // GetFileName returns empty for trailing-slash paths — fall back to the
+        // last directory segment so the status line never shows ", , ,".
         StatusText.Text = $"Loaded {_all.Count} preset(s) from "
-                        + string.Join(", ", UiPresetLoader.ResolvePresetDirs().Select(Path.GetFileName));
+                        + string.Join(", ", dirs.Select(d =>
+                              Path.GetFileName(d.TrimEnd(Path.DirectorySeparatorChar,
+                                                        Path.AltDirectorySeparatorChar))));
     }
 
     private void ApplyFilter()
@@ -129,10 +147,21 @@ public sealed partial class PresetsPage : Page
 
     private void Reload_Click(object sender, RoutedEventArgs e) => Reload();
 
-    private void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
         _searchTerm = sender.Text;
+
+        // Debounce so a fast typist doesn't trigger 200 ItemsSource resets in a
+        // row — the filter itself is in-memory but each rebuild thrashes the
+        // UI virtualization.
+        _searchDebounce?.Cancel();
+        _searchDebounce?.Dispose();
+        var cts = new CancellationTokenSource();
+        _searchDebounce = cts;
+        try { await Task.Delay(TimeSpan.FromMilliseconds(120), cts.Token); }
+        catch (OperationCanceledException) { return; }
+        if (cts.IsCancellationRequested) return;
         ApplyFilter();
     }
 
@@ -150,49 +179,61 @@ public sealed partial class PresetsPage : Page
         if (card is null) return;
         var preset = card.Preset;
 
-        // 1) File picker (filtered by preset's input extensions, or wildcard).
-        var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
-        if (preset.InputTypes.Count == 0)
-            picker.FileTypeFilter.Add("*");
-        else
-            foreach (var ext in preset.InputTypes) picker.FileTypeFilter.Add("." + ext);
-
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-        var files = await picker.PickMultipleFilesAsync();
-        if (files is null || files.Count == 0) return;
-
-        var inputs = files.Select(f => f.Path).ToList();
-
-        // 2) Output dir for batch / extract-each modes; per-file mode resolves
-        // each output via the preset's template, so we just need the parent dir.
-        string? outDir = null;
-        if (preset.Mode != PresetInvocationMode.PerFile)
+        // Per-card guard — multiple clicks on the same Run button while the
+        // first invocation is still in flight used to spawn parallel sidecars.
+        if (!_running.Add(preset.Name))
         {
-            var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
-            folderPicker.FileTypeFilter.Add("*");
-            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
-            var folder = await folderPicker.PickSingleFolderAsync();
-            if (folder is null) return;
-            outDir = folder.Path;
+            card.StatusText = "Already running...";
+            return;
         }
 
-        card.StatusText = "Running...";
-        var startedAt = DateTime.UtcNow;
-        var result = await RunSidecarAsync(preset, inputs, outDir);
-        card.StatusText = result.success ? "Done" : $"Failed ({result.code})";
-
-        StatusText.Text = result.success
-            ? $"{preset.Name} -- {inputs.Count} input(s), exit {result.exit}."
-            : $"{preset.Name} -- {result.code}: {result.message ?? ""}";
-
-        if (result.success && inputs.Count > 0)
+        try
         {
+            // 1) File picker (filtered by preset's input extensions, or wildcard).
+            var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+            if (preset.InputTypes.Count == 0)
+                picker.FileTypeFilter.Add("*");
+            else
+                foreach (var ext in preset.InputTypes) picker.FileTypeFilter.Add("." + ext);
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            var files = await picker.PickMultipleFilesAsync();
+            if (files is null || files.Count == 0) return;
+
+            var inputs = files.Select(f => f.Path).ToList();
+
+            // 2) Output dir for batch / extract-each modes; per-file mode resolves
+            // each output via the preset's template, so we just need the parent dir.
+            string? outDir = null;
+            if (preset.Mode != PresetInvocationMode.PerFile)
+            {
+                var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+                folderPicker.FileTypeFilter.Add("*");
+                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+                var folder = await folderPicker.PickSingleFolderAsync();
+                if (folder is null) return;
+                outDir = folder.Path;
+            }
+
+            card.StatusText = "Running...";
+            var startedAt = DateTime.UtcNow;
+            using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
+            var result = await _executor.RunAsync(preset, inputs, outDir, cancellationToken: cts.Token);
+            card.StatusText = result.Success ? "Done" : $"Failed ({result.ErrorCode})";
+
+            StatusText.Text = result.Success
+                ? $"{preset.Name} -- {inputs.Count} input(s), exit {result.ExitCode}."
+                : $"{preset.Name} -- {result.ErrorCode}: {result.ErrorMessage ?? ""}";
+
+            // Always log the attempt — distinguishing success from failure in
+            // the History dashboard is exactly what the user needs to debug a
+            // recurring sidecar problem.
             var firstInput = inputs[0];
-            string? firstOut = preset.Mode == PresetInvocationMode.PerFile
+            string? firstOut = !result.Success ? null : (preset.Mode == PresetInvocationMode.PerFile
                 ? UiPresetLoader.ResolveOutputPath(preset, firstInput)
                 : (outDir is null ? null : Path.Combine(outDir,
-                       Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension));
+                    Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension)));
             _ = _history.LogAsync(new HistoryRecord
             {
                 Timestamp = startedAt,
@@ -203,84 +244,20 @@ public sealed partial class PresetsPage : Page
                 SourceBytes = TryFileSize(firstInput),
                 OutputBytes = firstOut is null ? null : TryFileSize(firstOut),
                 DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds,
-                Success = true,
+                Success = result.Success,
+                ErrorCode = result.ErrorCode,
+                ErrorMessage = result.ErrorMessage,
                 Profile = preset.Name,
             });
-        }
-    }
-
-    private async Task<(bool success, string? code, string? message, int exit)> RunSidecarAsync(
-        UiPreset preset, IReadOnlyList<string> inputs, string? outDir)
-    {
-        try
-        {
-            // Build args per invocation mode.
-            var args = new List<string>(preset.Args);
-            using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
-
-            switch (preset.Mode)
-            {
-                case PresetInvocationMode.PerFile:
-                    {
-                        int exit = 0;
-                        foreach (var input in inputs)
-                        {
-                            var output = UiPresetLoader.ResolveOutputPath(preset, input);
-                            var dir = Path.GetDirectoryName(output);
-                            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-                            var perArgs = new List<string>(preset.Args)
-                            { "--input", input, "--output", output };
-                            var r = await _runner.RunAsync(preset.Engine, perArgs, null, null, cts.Token);
-                            if (!r.Success) return (false, r.ErrorCode, r.ErrorMessage, r.ExitCode);
-                            exit = r.ExitCode;
-                        }
-                        return (true, null, null, exit);
-                    }
-                case PresetInvocationMode.BatchOutputDir:
-                    {
-                        Directory.CreateDirectory(outDir!);
-                        args.AddRange(["--output-dir", outDir!, "--input"]);
-                        args.AddRange(inputs);
-                        var r = await _runner.RunAsync(preset.Engine, args, null, null, cts.Token);
-                        return (r.Success, r.ErrorCode, r.ErrorMessage, r.ExitCode);
-                    }
-                case PresetInvocationMode.BatchSingleOutput:
-                    {
-                        var first = inputs[0];
-                        var output = outDir is null
-                            ? UiPresetLoader.ResolveOutputPath(preset, first)
-                            : Path.Combine(outDir, Path.GetFileNameWithoutExtension(first) + "." + preset.OutputExtension);
-                        var dir = Path.GetDirectoryName(output);
-                        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-                        args.AddRange(["--output", output, "--input"]);
-                        args.AddRange(inputs);
-                        var r = await _runner.RunAsync(preset.Engine, args, null, null, cts.Token);
-                        return (r.Success, r.ErrorCode, r.ErrorMessage, r.ExitCode);
-                    }
-                case PresetInvocationMode.ExtractEach:
-                    {
-                        int exit = 0;
-                        foreach (var input in inputs)
-                        {
-                            var perOut = outDir is null
-                                ? UiPresetLoader.ResolveOutputPath(preset, input)
-                                : Path.Combine(outDir, Path.GetFileNameWithoutExtension(input));
-                            Directory.CreateDirectory(perOut);
-                            var perArgs = new List<string>(preset.Args)
-                            { "--input", input, "--output-dir", perOut };
-                            var r = await _runner.RunAsync(preset.Engine, perArgs, null, null, cts.Token);
-                            if (!r.Success) return (false, r.ErrorCode, r.ErrorMessage, r.ExitCode);
-                            exit = r.ExitCode;
-                        }
-                        return (true, null, null, exit);
-                    }
-            }
-            return (false, "unknown_mode", null, -1);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"PresetRun: {ex}");
-            return (false, "internal", ex.Message, -1);
+            card.StatusText = $"Failed ({ex.GetType().Name})";
+        }
+        finally
+        {
+            _running.Remove(preset.Name);
         }
     }
 

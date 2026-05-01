@@ -46,18 +46,35 @@ public sealed class SidecarRunner : ISidecarRunner
 {
     public string? Locate(string toolName)
     {
+        if (string.IsNullOrWhiteSpace(toolName)) return null;
+        // Reject any input that could escape the tools/ root via traversal.
+        if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
+            return null;
+
         var exeName = toolName + ".exe";
 
-        // 1) Walk up from BaseDirectory looking for tools/<name>/<name>.exe
+        // Walk up from BaseDirectory checking the three layouts a frozen sidecar
+        // can take: PyInstaller one-folder builds drop to dist/, classic builds
+        // place the exe alongside sidecar.py, and the old tools-bin convention
+        // groups everything under bin/. PresetRunner / ServeCommand mirror this
+        // search order so the UI and CLI agree on which binary to run.
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {
-            var candidate = Path.Combine(dir.FullName, "tools", toolName, exeName);
-            if (File.Exists(candidate)) return candidate;
+            foreach (var rel in new[]
+            {
+                Path.Combine("tools", toolName, "dist", exeName),
+                Path.Combine("tools", toolName, exeName),
+                Path.Combine("tools", toolName, "bin", exeName),
+            })
+            {
+                var candidate = Path.Combine(dir.FullName, rel);
+                if (File.Exists(candidate)) return candidate;
+            }
             dir = dir.Parent;
         }
 
-        // 2) %LocalAppData%/UniversalConverterX/tools/<name>/<name>.exe
+        // Fall back to %LocalAppData%/UniversalConverterX/tools/<name>/<name>.exe.
         var localApp = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "UniversalConverterX", "tools", toolName, exeName);
@@ -96,8 +113,16 @@ public sealed class SidecarRunner : ISidecarRunner
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // Closing stdin lets sidecars that accidentally read stdin (e.g. a Python
+            // input() during a debug build) fail fast instead of hanging forever.
+            RedirectStandardInput = true,
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden,
+            // Force UTF-8 on stdout/stderr so non-ASCII messages from sidecars
+            // (file paths, language names, error text) survive the pipe round-trip
+            // without mojibake on the typical Windows codepage.
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding  = System.Text.Encoding.UTF8,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
 
@@ -107,8 +132,17 @@ public sealed class SidecarRunner : ISidecarRunner
         var modelCacheDir = ResolveModelCacheDirectory();
         if (modelCacheDir is not null)
         {
-            psi.EnvironmentVariables["UCX_MODEL_DIR"] = modelCacheDir;
-            Directory.CreateDirectory(modelCacheDir);
+            try
+            {
+                Directory.CreateDirectory(modelCacheDir);
+                psi.EnvironmentVariables["UCX_MODEL_DIR"] = modelCacheDir;
+            }
+            catch
+            {
+                // Locked-down profile / disk full / non-writable parent — fall back
+                // to letting each sidecar pick its own location. Never fail the run
+                // just because we couldn't seed the shared cache hint.
+            }
         }
 
         using var process = new Process { StartInfo = psi };
@@ -125,7 +159,6 @@ public sealed class SidecarRunner : ISidecarRunner
         using var watchdogCts = new CancellationTokenSource();
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, watchdogCts.Token);
         var lct = linkedCts.Token;
-        var stuckByWatchdog = false;
 
         void ResetWatchdog()
         {
@@ -134,17 +167,51 @@ public sealed class SidecarRunner : ISidecarRunner
         }
         ResetWatchdog();
 
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            return new SidecarResult(
+                Success: false,
+                OutputPath: null,
+                SizeBytes: null,
+                ErrorCode: "spawn_failed",
+                ErrorMessage: $"Could not launch '{toolName}': {ex.Message}",
+                ExitCode: -1);
+        }
 
-        // Stream stdout line-by-line, parsing NDJSON.
+        // Close stdin: the sidecar will see EOF on read and abort cleanly rather
+        // than blocking on input that will never arrive.
+        try { process.StandardInput.Close(); } catch { /* never fatal */ }
+
+        // Stream stdout line-by-line, parsing NDJSON. Use ReadLineAsync(lct) and
+        // exit on null (true EOF) — the EndOfStream property issues a synchronous
+        // peek that ignores the cancellation token and was the source of stuck
+        // shutdowns when a sidecar wedged mid-pipe.
         var stdoutTask = Task.Run(async () =>
         {
             try
             {
-                while (!process.StandardOutput.EndOfStream)
+                var reader = process.StandardOutput;
+                while (true)
                 {
-                    lct.ThrowIfCancellationRequested();
-                    var line = await process.StandardOutput.ReadLineAsync(lct).ConfigureAwait(false);
+                    string? line;
+                    try
+                    {
+                        line = await reader.ReadLineAsync(lct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        // Pipe closed underneath us (process killed). EOF.
+                        break;
+                    }
+                    if (line is null) break;
                     if (string.IsNullOrWhiteSpace(line)) continue;
 
                     // Any output (NDJSON or otherwise) means the sidecar is alive.
@@ -154,65 +221,87 @@ public sealed class SidecarRunner : ISidecarRunner
                     {
                         using var doc = JsonDocument.Parse(line);
                         var root = doc.RootElement;
+                        if (root.ValueKind != JsonValueKind.Object) continue;
                         if (!root.TryGetProperty("event", out var ev)) continue;
                         var evName = ev.GetString();
 
                         // Notify raw event subscriber before processing known events
                         if (onRawEvent is not null && evName is not null)
-                            onRawEvent(evName, root.Clone());
+                        {
+                            try { onRawEvent(evName, root.Clone()); }
+                            catch { /* never let a subscriber kill the parse loop */ }
+                        }
 
                         switch (evName)
                         {
                             case "progress":
                                 progress?.Report(new SidecarProgress(
                                     Percent: root.TryGetProperty("percent", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetDouble() : 0,
-                                    Stage: root.TryGetProperty("stage", out var s) ? s.GetString() ?? "" : "",
+                                    Stage: root.TryGetProperty("stage", out var s) && s.ValueKind == JsonValueKind.String ? s.GetString() ?? "" : "",
                                     EtaSeconds: root.TryGetProperty("eta_seconds", out var e) && e.ValueKind == JsonValueKind.Number ? e.GetInt32() : null));
                                 break;
 
                             case "log":
                                 log?.Report(new SidecarLog(
-                                    Level: root.TryGetProperty("level", out var lv) ? lv.GetString() ?? "info" : "info",
-                                    Message: root.TryGetProperty("message", out var m) ? m.GetString() ?? "" : ""));
+                                    Level: root.TryGetProperty("level", out var lv) && lv.ValueKind == JsonValueKind.String ? lv.GetString() ?? "info" : "info",
+                                    Message: root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String ? m.GetString() ?? "" : ""));
                                 break;
 
                             case "complete":
-                                finalOutput = root.TryGetProperty("output", out var o) ? o.GetString() : null;
-                                finalSize = root.TryGetProperty("size_bytes", out var sb) && sb.ValueKind == JsonValueKind.Number ? sb.GetInt64() : null;
+                                if (root.TryGetProperty("output", out var o) && o.ValueKind == JsonValueKind.String)
+                                    finalOutput = o.GetString();
+                                if (root.TryGetProperty("size_bytes", out var sb) && sb.ValueKind == JsonValueKind.Number && sb.TryGetInt64(out var sbVal))
+                                    finalSize = sbVal;
                                 break;
 
                             case "error":
-                                errorCode = root.TryGetProperty("code", out var c) ? c.GetString() : "unknown";
-                                errorMessage = root.TryGetProperty("message", out var em) ? em.GetString() : null;
+                                errorCode = root.TryGetProperty("code", out var c) && c.ValueKind == JsonValueKind.String
+                                    ? c.GetString() ?? "unknown"
+                                    : "unknown";
+                                if (root.TryGetProperty("message", out var em) && em.ValueKind == JsonValueKind.String)
+                                    errorMessage = em.GetString();
                                 break;
                         }
                     }
                     catch (JsonException)
                     {
-                        // Sidecar wrote a non-JSON line — surface as a log entry.
-                        log?.Report(new SidecarLog("debug", line));
+                        // Sidecar wrote a non-JSON line — surface as a log entry. Cap
+                        // the noise: a sidecar dumping megabytes of warnings would
+                        // otherwise spam the UI's log panel.
+                        log?.Report(new SidecarLog(
+                            "debug",
+                            line.Length > 4096 ? line[..4096] + "…" : line));
                     }
                 }
             }
             catch (OperationCanceledException) { /* propagated below */ }
-        }, ct);
+        }, CancellationToken.None);
 
         // Drain stderr too — sidecars shouldn't write here, but capture anything that leaks.
         var stderrTask = Task.Run(async () =>
         {
             try
             {
-                var stderr = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(stderr))
+                using var er = process.StandardError;
+                while (true)
                 {
-                    foreach (var ln in stderr.Split('\n'))
-                        if (!string.IsNullOrWhiteSpace(ln))
-                            log?.Report(new SidecarLog("stderr", ln.TrimEnd('\r')));
+                    string? ln;
+                    try
+                    {
+                        ln = await er.ReadLineAsync(lct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) { break; }
+                    catch (IOException) { break; }
+                    if (ln is null) break;
+                    if (string.IsNullOrWhiteSpace(ln)) continue;
+                    log?.Report(new SidecarLog("stderr", ln.TrimEnd('\r')));
                 }
             }
             catch { /* swallow — best-effort */ }
-        }, ct);
+        }, CancellationToken.None);
 
+        var stuckByWatchdog = false;
+        var cancelledByUser = false;
         try
         {
             await process.WaitForExitAsync(lct).ConfigureAwait(false);
@@ -221,40 +310,64 @@ public sealed class SidecarRunner : ISidecarRunner
         {
             // Determine which side of the linked CTS fired: watchdog vs. user.
             stuckByWatchdog = watchdogCts.IsCancellationRequested && !ct.IsCancellationRequested;
+            cancelledByUser = ct.IsCancellationRequested;
             try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { /* swallow */ }
 
-            if (stuckByWatchdog)
+            // Wait for the process to actually exit so its pipes flush, then drain
+            // both reader tasks before the using-scope disposes the streams under
+            // them. Bound the wait so a wedged kernel handle can't hang the UI.
+            try
             {
-                log?.Report(new SidecarLog(
-                    "warn",
-                    $"{toolName} emitted no output for " +
-                    $"{(int)effectiveTimeout.TotalSeconds}s — killed as stuck"));
-                return new SidecarResult(
-                    Success: false,
-                    OutputPath: null,
-                    SizeBytes: null,
-                    ErrorCode: "stuck_sidecar",
-                    ErrorMessage:
-                        $"{toolName} produced no output for " +
-                        $"{(int)effectiveTimeout.TotalSeconds}s and was terminated. " +
-                        $"Pass a larger silenceTimeout to RunAsync if this sidecar " +
-                        $"runs quietly during long network or model-load phases.",
-                    ExitCode: -1);
+                using var graceCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await process.WaitForExitAsync(graceCts.Token).ConfigureAwait(false);
             }
-
-            return new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", -1);
+            catch { /* either timed out or already exited — proceed to drain */ }
         }
 
-        await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+        // Always drain the reader tasks before returning so we don't leak threads
+        // or read from a stream that the using-scope is about to dispose.
+        try
+        {
+            await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+        }
+        catch { /* both tasks swallow internally; this is paranoia */ }
 
-        var success = process.ExitCode == 0 && errorCode is null;
+        if (stuckByWatchdog)
+        {
+            log?.Report(new SidecarLog(
+                "warn",
+                $"{toolName} emitted no output for " +
+                $"{(int)effectiveTimeout.TotalSeconds}s — killed as stuck"));
+            return new SidecarResult(
+                Success: false,
+                OutputPath: null,
+                SizeBytes: null,
+                ErrorCode: "stuck_sidecar",
+                ErrorMessage:
+                    $"{toolName} produced no output for " +
+                    $"{(int)effectiveTimeout.TotalSeconds}s and was terminated. " +
+                    $"Pass a larger silenceTimeout to RunAsync if this sidecar " +
+                    $"runs quietly during long network or model-load phases.",
+                ExitCode: -1);
+        }
+
+        if (cancelledByUser)
+            return new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", -1);
+
+        // process.ExitCode requires HasExited; if the kill grace timed out it may
+        // not have updated. Treat that as a failure with a synthetic exit code.
+        int exitCode;
+        try { exitCode = process.ExitCode; }
+        catch (InvalidOperationException) { exitCode = -1; }
+
+        var success = exitCode == 0 && errorCode is null;
         return new SidecarResult(
             Success: success,
             OutputPath: finalOutput,
             SizeBytes: finalSize,
             ErrorCode: success ? null : (errorCode ?? "exit_nonzero"),
-            ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {process.ExitCode}"),
-            ExitCode: process.ExitCode);
+            ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {exitCode}"),
+            ExitCode: exitCode);
     }
 
     /// <summary>

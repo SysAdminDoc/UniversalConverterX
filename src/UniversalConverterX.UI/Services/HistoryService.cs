@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
 using Microsoft.UI.Dispatching;
+using UniversalConverterX.Core.Configuration;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -79,17 +81,37 @@ public interface IHistoryService
 public sealed class HistoryService : IHistoryService
 {
     private const int RecentCap = 100;
+
+    /// <summary>Lower bound on the row cap so a misconfigured options blob
+    /// (Max=0) can't reduce retention to zero and silently drop every job.</summary>
+    private const int MinRetentionRows = 100;
+
+    /// <summary>Default when no options provider is registered (tests, CLI scaffolds).</summary>
+    private const int DefaultRetentionRows = 10_000;
+
+    private readonly int _retentionMaxRows;
+    private readonly int _retentionDays;
     private readonly DispatcherQueue _ui;
     private readonly string _dbPath;
     private readonly SemaphoreSlim _writeLock = new(1, 1);
+    private int _writesSinceLastPrune;
 
     public ObservableCollection<HistoryRecord> Recent { get; } = [];
 
-    public HistoryService()
+    public HistoryService() : this(null) { }
+
+    public HistoryService(IOptions<ConverterXOptions>? options)
     {
         _ui = DispatcherQueue.GetForCurrentThread()
               ?? throw new InvalidOperationException(
                      "HistoryService must be constructed on a UI thread.");
+
+        // Honour the user-configured cap when present; clamp to a sane floor
+        // so a hostile config can't disable retention entirely.
+        var opts = options?.Value;
+        _retentionMaxRows = Math.Max(MinRetentionRows,
+            opts?.MaxHistoryEntries > 0 ? opts.MaxHistoryEntries : DefaultRetentionRows);
+        _retentionDays = opts?.HistoryRetentionDays > 0 ? opts.HistoryRetentionDays : 0;
 
         var dir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -100,12 +122,20 @@ public sealed class HistoryService : IHistoryService
         EnsureSchema();
         _ = Task.Run(async () =>
         {
-            var initial = await QueryAsync(search: null, limit: RecentCap);
-            _ui.TryEnqueue(() =>
+            try
             {
-                Recent.Clear();
-                foreach (var r in initial) Recent.Add(r);
-            });
+                var initial = await QueryAsync(search: null, limit: RecentCap);
+                _ui.TryEnqueue(() =>
+                {
+                    Recent.Clear();
+                    foreach (var r in initial) Recent.Add(r);
+                });
+            }
+            catch
+            {
+                // Failing to load initial history must never crash the app —
+                // empty Recent[] is a recoverable state.
+            }
         });
     }
 
@@ -113,6 +143,15 @@ public sealed class HistoryService : IHistoryService
     {
         var conn = new SqliteConnection($"Data Source={_dbPath}");
         conn.Open();
+        // WAL improves concurrency between the main-thread inserts and the
+        // background QueryAsync reader without requiring a process-wide lock.
+        // synchronous=NORMAL trades a small durability window for ~3-5x faster
+        // writes and is appropriate for a non-critical UX log.
+        using (var pragma = conn.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
+            try { pragma.ExecuteNonQuery(); } catch { /* WAL unsupported on some drives */ }
+        }
         return conn;
     }
 
@@ -138,8 +177,44 @@ public sealed class HistoryService : IHistoryService
             );
             CREATE INDEX IF NOT EXISTS idx_history_ts     ON history(timestamp_utc);
             CREATE INDEX IF NOT EXISTS idx_history_engine ON history(engine);
+            CREATE INDEX IF NOT EXISTS idx_history_id     ON history(id DESC);
             """;
         cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Trim the oldest rows back to the configured retention cap, and (if
+    /// HistoryRetentionDays is set) drop anything older than that age. Called
+    /// from the write path under the write lock; cheap when no rows need
+    /// removing (single COUNT(*) + zero-row DELETEs).
+    /// </summary>
+    private void PruneIfNeeded(SqliteConnection conn)
+    {
+        // Date-based prune first so the row-count prune doesn't have to chase
+        // a moving target.
+        if (_retentionDays > 0)
+        {
+            using var ageCmd = conn.CreateCommand();
+            var cutoff = DateTime.UtcNow.AddDays(-_retentionDays).ToString("O");
+            ageCmd.CommandText = "DELETE FROM history WHERE timestamp_utc < @cut;";
+            ageCmd.Parameters.AddWithValue("@cut", cutoff);
+            ageCmd.ExecuteNonQuery();
+        }
+
+        using var cnt = conn.CreateCommand();
+        cnt.CommandText = "SELECT COUNT(*) FROM history;";
+        var total = (long)(cnt.ExecuteScalar() ?? 0L);
+        if (total <= _retentionMaxRows) return;
+
+        using var prune = conn.CreateCommand();
+        prune.CommandText = """
+            DELETE FROM history
+            WHERE id IN (
+                SELECT id FROM history ORDER BY id ASC LIMIT @cull
+            );
+            """;
+        prune.Parameters.AddWithValue("@cull", total - _retentionMaxRows);
+        prune.ExecuteNonQuery();
     }
 
     public async Task LogAsync(HistoryRecord record)
@@ -149,32 +224,47 @@ public sealed class HistoryService : IHistoryService
         {
             long newId;
             using (var conn = Open())
-            using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = """
-                    INSERT INTO history
-                        (timestamp_utc, engine, action, source_path, output_path,
-                         source_bytes, output_bytes, duration_sec, success,
-                         error_code, error_message, profile)
-                    VALUES
-                        (@ts, @engine, @action, @src, @out,
-                         @sb, @ob, @dur, @ok,
-                         @ec, @em, @prof);
-                    SELECT last_insert_rowid();
-                    """;
-                cmd.Parameters.AddWithValue("@ts",     record.Timestamp.ToString("O"));
-                cmd.Parameters.AddWithValue("@engine", record.Engine);
-                cmd.Parameters.AddWithValue("@action", record.Action);
-                cmd.Parameters.AddWithValue("@src",    record.SourcePath);
-                cmd.Parameters.AddWithValue("@out",    (object?)record.OutputPath  ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@sb",     (object?)record.SourceBytes ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@ob",     (object?)record.OutputBytes ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@dur",    record.DurationSeconds);
-                cmd.Parameters.AddWithValue("@ok",     record.Success ? 1 : 0);
-                cmd.Parameters.AddWithValue("@ec",     (object?)record.ErrorCode    ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@em",     (object?)record.ErrorMessage ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@prof",   (object?)record.Profile      ?? DBNull.Value);
-                newId = (long)(cmd.ExecuteScalar() ?? 0L);
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = """
+                        INSERT INTO history
+                            (timestamp_utc, engine, action, source_path, output_path,
+                             source_bytes, output_bytes, duration_sec, success,
+                             error_code, error_message, profile)
+                        VALUES
+                            (@ts, @engine, @action, @src, @out,
+                             @sb, @ob, @dur, @ok,
+                             @ec, @em, @prof);
+                        SELECT last_insert_rowid();
+                        """;
+                    // Always store timestamps in UTC so local-zone shifts (DST,
+                    // travel) don't reorder the displayed history.
+                    var tsUtc = record.Timestamp.Kind == DateTimeKind.Utc
+                        ? record.Timestamp
+                        : record.Timestamp.ToUniversalTime();
+                    cmd.Parameters.AddWithValue("@ts",     tsUtc.ToString("O"));
+                    cmd.Parameters.AddWithValue("@engine", record.Engine);
+                    cmd.Parameters.AddWithValue("@action", record.Action);
+                    cmd.Parameters.AddWithValue("@src",    record.SourcePath);
+                    cmd.Parameters.AddWithValue("@out",    (object?)record.OutputPath  ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@sb",     (object?)record.SourceBytes ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ob",     (object?)record.OutputBytes ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@dur",    record.DurationSeconds);
+                    cmd.Parameters.AddWithValue("@ok",     record.Success ? 1 : 0);
+                    cmd.Parameters.AddWithValue("@ec",     (object?)record.ErrorCode    ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@em",     (object?)record.ErrorMessage ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@prof",   (object?)record.Profile      ?? DBNull.Value);
+                    newId = (long)(cmd.ExecuteScalar() ?? 0L);
+                }
+
+                // Amortise the prune COUNT(*) over many writes so a hot batch
+                // doesn't pay for it on every insert.
+                if (Interlocked.Increment(ref _writesSinceLastPrune) >= 100)
+                {
+                    Interlocked.Exchange(ref _writesSinceLastPrune, 0);
+                    try { PruneIfNeeded(conn); } catch { /* prune is best-effort */ }
+                }
             }
 
             var stamped = record with { Id = newId };
@@ -212,11 +302,18 @@ public sealed class HistoryService : IHistoryService
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
+                // Hostile timestamps from a hand-edited DB shouldn't crash the
+                // entire load — fall back to UnixEpoch so the row is still
+                // visible (and obvious as broken) instead of disappearing.
+                DateTime ts;
+                if (!DateTime.TryParse(rdr.GetString(1), null,
+                        System.Globalization.DateTimeStyles.RoundtripKind, out ts))
+                    ts = DateTime.UnixEpoch;
+
                 list.Add(new HistoryRecord
                 {
                     Id              = rdr.GetInt64(0),
-                    Timestamp       = DateTime.Parse(rdr.GetString(1), null,
-                                          System.Globalization.DateTimeStyles.RoundtripKind),
+                    Timestamp       = ts,
                     Engine          = rdr.GetString(2),
                     Action          = rdr.GetString(3),
                     SourcePath      = rdr.GetString(4),

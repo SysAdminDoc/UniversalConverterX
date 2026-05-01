@@ -81,7 +81,18 @@ public sealed partial class TimelinePreviewPage : Page
 
         _outputDir = Path.Combine(Path.GetTempPath(),
                                   $"ucx_timeline_{Guid.NewGuid():N}");
-        Directory.CreateDirectory(_outputDir);
+        try { Directory.CreateDirectory(_outputDir); }
+        catch (Exception ex)
+        {
+            EmptyState.Visibility = Visibility.Visible;
+            TimelineRoot.Visibility = Visibility.Collapsed;
+            GenerateButton.IsEnabled = true;
+            // Disk full / locked TEMP — keep the page recoverable. Surface
+            // the failure in the debug log; the empty-state panel stays
+            // generic since it's a designer-set composition.
+            System.Diagnostics.Debug.WriteLine($"TimelinePreview: scratch dir failed: {ex.Message}");
+            return;
+        }
 
         var fps = ThumbFpsBox.Value.ToString("0.##", CultureInfo.InvariantCulture);
         var height = ((int)ThumbHeightBox.Value).ToString(CultureInfo.InvariantCulture);
