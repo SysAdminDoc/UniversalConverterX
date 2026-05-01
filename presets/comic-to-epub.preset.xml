@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Comic -> EPUB</Name>
+    <Folder>Comics</Folder>
+    <InputTypes>
+        <Extension>cbz</Extension>
+        <Extension>cbr</Extension>
+        <Extension>cbt</Extension>
+        <Extension>cb7</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>epub</OutputExtension>
+    <Engine>comic</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-epub</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SSH key -> PKCS#8 PEM</Name>
+    <Folder>Security/SSH</Folder>
+    <InputTypes>
+        <Extension>ppk</Extension>
+        <Extension>pub</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pem</OutputExtension>
+    <Engine>sshkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-pem</Arg>
+    </Args>
+</Preset>

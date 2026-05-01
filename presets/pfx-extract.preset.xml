@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PFX / P12 -> PEM cert + key</Name>
+    <Folder>Security/TLS</Folder>
+    <InputTypes>
+        <Extension>pfx</Extension>
+        <Extension>p12</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_extracted</OutputFileNameTemplate>
+    <OutputExtension>pem</OutputExtension>
+    <Engine>tlskit</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>bundle-extract</Arg>
+    </Args>
+</Preset>

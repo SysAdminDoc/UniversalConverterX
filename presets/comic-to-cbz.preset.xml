@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Comic -> CBZ (re-pack to ZIP)</Name>
+    <Folder>Comics</Folder>
+    <InputTypes>
+        <Extension>cbr</Extension>
+        <Extension>cbt</Extension>
+        <Extension>cb7</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>cbz</OutputExtension>
+    <Engine>comic</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>cbz</Arg>
+    </Args>
+</Preset>

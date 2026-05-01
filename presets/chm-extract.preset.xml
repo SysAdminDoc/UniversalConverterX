@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Extract CHM -> HTML folder</Name>
+    <Folder>Documents/Help</Folder>
+    <InputTypes>
+        <Extension>chm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_chm</OutputFileNameTemplate>
+    <OutputExtension>folder</OutputExtension>
+    <Engine>helpkit</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>extract</Arg>
+    </Args>
+</Preset>

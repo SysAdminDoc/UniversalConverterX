@@ -2,6 +2,35 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.13.0] - 2026-05-01
+
+### Added — 14 new pure-format conversion sidecars (Office + Diagrams + Sysadmin)
+
+- **legacyoffice** — WordPerfect (.wpd/.wpt/.wpg) / AmiPro (.sam) / Microsoft Works (.wps) / Microsoft Publisher (.pub) / StarOffice 1-5 (.sxw/.sxc/.sxi) / KOffice (.kwd) / AbiWord (.abw) / AppleWorks (.cwk) / MacWrite (.mw) -> PDF / DOCX / ODT / RTF / HTML / TXT via LibreOffice CLI.
+- **applepro** — Apple Pages / Numbers / Keynote (.pages/.numbers/.key) -> DOCX / XLSX / PPTX / PDF / ODT / RTF / HTML / TXT. LibreOffice path for older iWork; embedded `Preview.pdf` extraction fallback for modern (post-2013) bundles.
+- **hwpkit** — Korean Hangul HWP / HWPX -> PDF / DOCX / ODT / RTF / HTML / TXT. LibreOffice primary path; pyhwp text/HTML extraction fallback.
+- **diagram** — Render text-based and binary diagrams: Mermaid (.mmd) via mmdc, PlantUML (.puml) via plantuml.jar, Graphviz (.dot) via dot, Visio (.vsd/.vsdx) via LibreOffice + libvisio, draw.io (.drawio) via drawio CLI, Excalidraw (.excalidraw) via excalidraw-cli. Outputs SVG / PNG / PDF / HTML.
+- **playlist** — M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S / iTunes Library .xml mutual conversion. Normalizes track metadata (path/title/artist/album/length) through a unified intermediate; CSV + JSON output also supported.
+- **comic** — CBZ / CBR / CBT / CB7 mutual re-pack + CBZ-to-PDF (img2pdf) + CBZ-to-EPUB (EbookLib). RAR support via the rarfile package + unrar binary.
+- **notebooks** — Jupyter ipynb <-> py / md / Rmd / qmd / html / pdf / tex / rst / slides via nbconvert and jupytext. `execute` op runs notebook + saves outputs.
+- **helpkit** — Compiled HTML Help (.chm): `extract` op cracks open the bundle to a directory of HTML, `to-pdf` stitches the pages into a single PDF via weasyprint.
+- **tlskit** — X.509 certificate + key conversion: PEM <-> DER <-> PKCS#7 (.p7b) cert conversion, PKCS#12 (.p12 / .pfx) bundle extract + create, private key PEM <-> DER. `cert-info` op probes subject/issuer/validity/SAN/SHA-256+SHA-1 fingerprints.
+- **sshkit** — SSH key format conversion: OpenSSH <-> PKCS#8 PEM, PEM/OpenSSH <-> PuTTY .ppk (via puttygen), OpenSSH .pub -> RFC 4716 wrapped public key. Encrypted output supported via `--out-password`.
+- **timefmt** — Timestamp conversion: ISO 8601 / RFC 822 / Unix epoch (s + ms) / Excel serial date / Apple Cocoa epoch / Microsoft FILETIME / HFS+ / mainframe Julian / .NET ticks. `cron-explain` op shows next N runs + human-readable description for any cron expression.
+- **coordfmt** — Geographic coordinate conversion: DD <-> DMS <-> DDM <-> UTM <-> MGRS <-> Geohash <-> Plus Codes (Open Location Code). CSV bulk transform appends all representations as columns.
+- **config** — DevOps configuration formats: HCL (Terraform .tf / .hcl) / HOCON (Typesafe .conf) / Java .properties / INI (.ini/.cfg) / systemd unit files <-> JSON / YAML / TOML / properties / INI. Round-trips through normalized JSON middle representation.
+- **dnskit** — DNS zone file conversion: BIND zone (.zone/.db) <-> JSON / YAML / CSV via dnspython. `validate` op reports findings (missing SOA, missing NS, etc.). `emit` op rebuilds a BIND zone from JSON/YAML/CSV.
+
+### Added — 25+ new presets
+
+`wpd-to-pdf`, `pages-to-docx`, `numbers-to-xlsx`, `keynote-to-pptx`, `hwp-to-pdf`, `mermaid-to-svg`, `diagram-to-png`, `visio-to-pdf`, `playlist-to-m3u`, `playlist-to-xspf`, `comic-to-pdf`, `comic-to-epub`, `comic-to-cbz`, `ipynb-to-html`, `ipynb-to-md`, `py-to-ipynb`, `chm-extract`, `chm-to-pdf`, `cert-pem-to-der`, `cert-der-to-pem`, `pfx-extract`, `ssh-to-pem`, `ssh-to-ppk`, `hcl-to-json`, `properties-to-yaml`, `zone-to-json`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 17 new event types: `legacy_doc`, `iwork_doc`, `hwp_doc`, `diagram_doc`, `diagram_tool_status`, `playlist_doc`, `comic_book`, `notebook_doc`, `help_doc`, `tls_cert`, `ssh_key`, `time_value`, `cron_explain`, `coord`, `coord_csv`, `config_doc`, `dns_record`, `dns_zone_check`. Contract test: 102 sidecars conforming.
+- 14 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.12.0 → 2.13.0 across all manifests.
+
 ## [v2.12.0] - 2026-05-01
 
 ### Added — 10 new domain-specific raw-conversion sidecars

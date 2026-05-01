@@ -1,0 +1,3 @@
+nbconvert>=7.16
+jupytext>=1.16
+nbformat>=5.10

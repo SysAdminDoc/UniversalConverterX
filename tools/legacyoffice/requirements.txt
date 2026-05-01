@@ -1,0 +1,1 @@
+# legacyoffice shells out to LibreOffice; no Python deps required.

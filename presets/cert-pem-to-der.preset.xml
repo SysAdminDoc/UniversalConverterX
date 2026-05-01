@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Certificate PEM -> DER</Name>
+    <Folder>Security/TLS</Folder>
+    <InputTypes>
+        <Extension>pem</Extension>
+        <Extension>crt</Extension>
+        <Extension>cer</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>der</OutputExtension>
+    <Engine>tlskit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cert-convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>der</Arg>
+    </Args>
+</Preset>

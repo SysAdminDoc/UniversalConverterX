@@ -1,0 +1,2 @@
+# diagram shells out to mmdc / plantuml / dot / soffice / drawio / excalidraw-cli.
+# Python deps not required.

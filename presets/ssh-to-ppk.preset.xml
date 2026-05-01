@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SSH / PEM key -> PuTTY .ppk</Name>
+    <Folder>Security/SSH</Folder>
+    <InputTypes>
+        <Extension>pem</Extension>
+        <Extension>key</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ppk</OutputExtension>
+    <Engine>sshkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-ppk</Arg>
+    </Args>
+</Preset>

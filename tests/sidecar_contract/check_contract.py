@@ -155,6 +155,25 @@ KNOWN_EVENTS = {
     "bookmark_doc",        # bookmark — converted browser bookmark file
     "eng_cad",             # engcad — STEP/IGES/BREP/STL converted
     "anim_scene",          # animkit — BVH/Alembic/USD/FBX produced
+    # v2.13 wave (Office + Diagrams + Sysadmin)
+    "legacy_doc",          # legacyoffice — WordPerfect/AmiPro/Works/Publisher converted
+    "iwork_doc",           # applepro — Pages/Numbers/Keynote converted
+    "hwp_doc",             # hwpkit — Korean Hangul converted
+    "diagram_doc",         # diagram — Mermaid/PlantUML/Graphviz/Visio rendered
+    "diagram_tool_status", # diagram.check — diagram CLI availability
+    "playlist_doc",        # playlist — M3U/PLS/XSPF/WPL/B4S converted
+    "comic_book",          # comic — CBZ/CBR/CBT/CB7/PDF/EPUB converted
+    "notebook_doc",        # notebooks — ipynb/py/md/Rmd/qmd produced
+    "help_doc",            # helpkit — CHM extracted / PDF
+    "tls_cert",            # tlskit — X.509/PKCS conversion
+    "ssh_key",             # sshkit — SSH key format conversion
+    "time_value",          # timefmt — timestamp representation set
+    "cron_explain",        # timefmt.cron-explain — cron description
+    "coord",               # coordfmt — single coordinate representation set
+    "coord_csv",           # coordfmt.csv — bulk CSV with appended cols
+    "config_doc",          # config — HCL/HOCON/properties/INI converted
+    "dns_record",          # dnskit — zone-file <-> JSON/YAML/CSV
+    "dns_zone_check",      # dnskit.validate — sanity findings
 }
 
 

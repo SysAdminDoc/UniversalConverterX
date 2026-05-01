@@ -1,0 +1,5 @@
+python-hcl2>=4.3
+pyhocon>=0.3
+jproperties>=2.1
+PyYAML>=6.0
+tomli-w>=1.0
