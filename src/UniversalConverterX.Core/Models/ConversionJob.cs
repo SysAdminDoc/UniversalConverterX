@@ -1,3 +1,5 @@
+using UniversalConverterX.Core.Utilities;
+
 namespace UniversalConverterX.Core.Models;
 
 /// <summary>
@@ -117,7 +119,7 @@ public class ConversionJob
     {
         var dir = Path.GetDirectoryName(inputPath) ?? ".";
         var name = Path.GetFileNameWithoutExtension(inputPath);
-        var ext = outputExtension.TrimStart('.');
+        var ext = PathSafety.NormalizeExtensionOrThrow(outputExtension, nameof(outputExtension));
         var outputPath = Path.Combine(dir, $"{name}.{ext}");
         
         return Create(inputPath, outputPath, options);

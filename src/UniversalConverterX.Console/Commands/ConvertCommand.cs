@@ -6,6 +6,7 @@ using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Commands;
 
@@ -91,6 +92,15 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             return 1;
         }
 
+        if (!PathSafety.TryNormalizeExtension(settings.OutputFormat, out var normalizedOutputFormat))
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]Error:[/] Invalid output format [yellow]{Esc(settings.OutputFormat)}[/]. " +
+                "Use a filename-safe extension such as [cyan]mp4[/], [cyan]png[/], or [cyan]tar.gz[/].");
+            return 1;
+        }
+        settings.OutputFormat = normalizedOutputFormat;
+
         // Expand glob patterns and find files
         var inputFiles = ExpandFiles(settings.Files);
         if (inputFiles.Count == 0)
@@ -118,13 +128,14 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         if (unsupported.Count > 0)
         {
             AnsiConsole.MarkupLine(
-                $"[red]Error:[/] Cannot convert from [yellow]{string.Join(", ", unsupported)}[/] to " +
-                $"[yellow]{settings.OutputFormat}[/]");
+                $"[red]Error:[/] Cannot convert from [yellow]{EscList(unsupported)}[/] to " +
+                $"[yellow]{Esc(settings.OutputFormat)}[/]");
             var sampleExt = unsupported[0];
             var availableFormats = orchestrator.GetOutputFormatsFor(sampleExt);
             if (availableFormats.Count > 0)
             {
-                AnsiConsole.MarkupLine($"[dim]Available output formats for {sampleExt}:[/] {string.Join(", ", availableFormats.Take(20))}");
+                AnsiConsole.MarkupLine(
+                    $"[dim]Available output formats for {Esc(sampleExt)}:[/] {EscList(availableFormats.Take(20))}");
             }
             return 1;
         }
@@ -135,7 +146,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         // Create jobs
         var jobs = inputFiles.Select(f => CreateJob(f, settings, conversionOptions)).ToList();
 
-        AnsiConsole.MarkupLine($"[green]Converting[/] {jobs.Count} file(s) to [cyan]{settings.OutputFormat}[/]");
+        AnsiConsole.MarkupLine($"[green]Converting[/] {jobs.Count} file(s) to [cyan]{Esc(settings.OutputFormat)}[/]");
         AnsiConsole.WriteLine();
 
         // Single file conversion
@@ -171,14 +182,14 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                     new SpinnerColumn())
                 .StartAsync(async ctx =>
                 {
-                    var task = ctx.AddTask($"[cyan]{job.InputFileName}[/]", maxValue: 100);
+                    var task = ctx.AddTask(FileTaskDescription(job.InputFileName), maxValue: 100);
 
                     var progress = new Progress<ConversionProgress>(p =>
                     {
                         if (p.IsIndeterminate)
                         {
                             task.IsIndeterminate = true;
-                            task.Description = $"[cyan]{job.InputFileName}[/] - {p.StatusMessage}";
+                            task.Description = $"{FileTaskDescription(job.InputFileName)} - {Esc(p.StatusMessage)}";
                         }
                         else
                         {
@@ -187,7 +198,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
                             if (p.EstimatedTimeRemaining.HasValue)
                             {
-                                task.Description = $"[cyan]{job.InputFileName}[/] - ETA: {p.EstimatedTimeRemaining.Value:mm\\:ss}";
+                                task.Description = $"{FileTaskDescription(job.InputFileName)} - ETA: {p.EstimatedTimeRemaining.Value:mm\\:ss}";
                             }
                         }
                     });
@@ -227,11 +238,11 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             {
                 if (result.Success)
                 {
-                    AnsiConsole.MarkupLine($"[green]✓[/] {result.Job.InputFileName} → {result.Job.OutputFileName}");
+                    AnsiConsole.MarkupLine($"[green]✓[/] {Esc(result.Job.InputFileName)} → {Esc(result.Job.OutputFileName)}");
                 }
                 else
                 {
-                    AnsiConsole.MarkupLine($"[red]✗[/] {result.Job.InputFileName}: {result.ErrorMessage}");
+                    AnsiConsole.MarkupLine($"[red]✗[/] {Esc(result.Job.InputFileName)}: {Esc(result.ErrorMessage)}");
                 }
             }
         }
@@ -256,7 +267,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
                         if (p.CurrentJob != null)
                         {
-                            currentTask.Description = $"[cyan]{p.CurrentJob.InputFileName}[/]";
+                            currentTask.Description = FileTaskDescription(p.CurrentJob.InputFileName);
                             
                             if (p.CurrentJobProgress != null)
                             {
@@ -277,7 +288,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                     AnsiConsole.WriteLine();
                     foreach (var result in batchResult.Results.Where(r => !r.Success))
                     {
-                        AnsiConsole.MarkupLine($"[red]✗[/] {result.Job.InputFileName}: {result.ErrorMessage}");
+                        AnsiConsole.MarkupLine($"[red]✗[/] {Esc(result.Job.InputFileName)}: {Esc(result.ErrorMessage)}");
                     }
                 });
         }
@@ -305,7 +316,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         table.AddColumn("Value");
 
         table.AddRow("[green]Status[/]", "[green]Success[/]");
-        table.AddRow("Output", result.OutputPath ?? "N/A");
+        table.AddRow("Output", Esc(result.OutputPath ?? "N/A"));
         table.AddRow("Duration", $"{result.Duration.TotalSeconds:F2}s");
         table.AddRow("Input Size", FormatSize(result.Job.InputFileSize));
         table.AddRow("Output Size", FormatSize(result.OutputSize));
@@ -317,7 +328,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             table.AddRow("Size Change", $"[{color}]{reduction:+0.0;-0.0}%[/]");
         }
 
-        table.AddRow("Converter", result.ConverterUsed ?? "N/A");
+        table.AddRow("Converter", Esc(result.ConverterUsed ?? "N/A"));
 
         AnsiConsole.Write(table);
     }
@@ -325,7 +336,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
     private static void PrintError(ConversionResult result)
     {
         AnsiConsole.MarkupLine($"[red]✗ Conversion failed[/]");
-        AnsiConsole.MarkupLine($"[red]Error:[/] {result.ErrorMessage}");
+        AnsiConsole.MarkupLine($"[red]Error:[/] {Esc(result.ErrorMessage)}");
 
         if (!string.IsNullOrEmpty(result.StandardError))
         {
@@ -382,7 +393,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
     {
         var outputDir = settings.OutputDirectory ?? Path.GetDirectoryName(inputPath) ?? ".";
         var baseName = Path.GetFileNameWithoutExtension(inputPath);
-        var outputExt = settings.OutputFormat!.TrimStart('.');
+        var outputExt = PathSafety.NormalizeExtensionOrThrow(settings.OutputFormat, nameof(settings.OutputFormat));
         var outputPath = Path.Combine(outputDir, $"{baseName}.{outputExt}");
 
         return ConversionJob.Create(inputPath, outputPath, options);
@@ -471,4 +482,10 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         return $"{size:F2} {suffixes[i]}";
     }
+
+    private static string Esc(string? value) => Markup.Escape(value ?? string.Empty);
+
+    private static string EscList(IEnumerable<string> values) => string.Join(", ", values.Select(Esc));
+
+    private static string FileTaskDescription(string fileName) => $"[cyan]{Esc(fileName)}[/]";
 }

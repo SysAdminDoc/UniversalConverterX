@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
@@ -12,6 +11,7 @@ namespace UniversalConverterX.Core.Services;
 /// </summary>
 public class ToolManager : IToolManager
 {
+    private static readonly TimeSpan VersionProbeTimeout = TimeSpan.FromSeconds(10);
     private readonly ILogger<ToolManager>? _logger;
     private readonly ConverterXOptions _options;
     private readonly Dictionary<string, ToolDefinition> _toolDefinitions;
@@ -87,9 +87,14 @@ public class ToolManager : IToolManager
         var path = GetToolPath(toolName);
         var def = _toolDefinitions[toolName.ToLowerInvariant()];
 
+        Process? process = null;
         try
         {
-            using var process = new Process
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(VersionProbeTimeout);
+            var probeToken = timeoutCts.Token;
+
+            process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -103,10 +108,12 @@ public class ToolManager : IToolManager
             };
 
             process.Start();
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var error = await process.StandardError.ReadToEndAsync(cancellationToken);
+            var outputTask = process.StandardOutput.ReadToEndAsync(probeToken);
+            var errorTask = process.StandardError.ReadToEndAsync(probeToken);
             
-            await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(probeToken);
+            var output = await outputTask;
+            var error = await errorTask;
 
             var allOutput = output + error;
             var version = ExtractVersion(allOutput);
@@ -114,11 +121,23 @@ public class ToolManager : IToolManager
             
             return version;
         }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+            _logger?.LogWarning("Timed out while getting version for {Tool}", toolName);
+            _versionCache[toolName] = null;
+            return null;
+        }
         catch (Exception ex)
         {
+            try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
             _logger?.LogWarning(ex, "Failed to get version for {Tool}", toolName);
             _versionCache[toolName] = null;
             return null;
+        }
+        finally
+        {
+            process?.Dispose();
         }
     }
 

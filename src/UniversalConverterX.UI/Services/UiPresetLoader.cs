@@ -1,5 +1,6 @@
 using System.Xml;
 using System.Xml.Linq;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -162,9 +163,13 @@ public static class UiPresetLoader
 
             var folder = Get("Folder");
             var template = Get("OutputFileNameTemplate");
-            var ext = Get("OutputExtension").TrimStart('.');
+            var rawExt = Get("OutputExtension").Trim();
+            var ext = string.Empty;
             var engine = Get("Engine");
-            if (!IsSafeToolName(engine) || !IsSafeOutputExtension(ext))
+            if (!string.IsNullOrEmpty(rawExt) &&
+                !PathSafety.TryNormalizeExtension(rawExt, out ext, allowDirectorySentinel: true))
+                return null;
+            if (!IsSafeToolName(engine))
                 return null;
 
             var inputTypesElem =
@@ -214,27 +219,24 @@ public static class UiPresetLoader
         return value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
     }
 
-    private static bool IsSafeOutputExtension(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value) || value == "__dir__") return true;
-        return value.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
-            && value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
-    }
-
     public static string ResolveOutputPath(UiPreset preset, string source)
     {
         var stem = Path.GetFileNameWithoutExtension(source);
         var dir = Path.GetDirectoryName(source) ?? Environment.CurrentDirectory;
-        var safeName = string.Concat(preset.Name.Select(
-            c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+        var safeName = PathSafety.SanitizeFileNameComponent(preset.Name, "preset");
 
         var resolved = preset.OutputFileNameTemplate
             .Replace("{stem}", stem)
             .Replace("{dir}", dir)
             .Replace("{preset}", safeName);
 
-        if (preset.OutputExtension == "__dir__" || string.IsNullOrEmpty(preset.OutputExtension))
+        if (preset.OutputExtension == PathSafety.DirectoryOutputSentinel || string.IsNullOrEmpty(preset.OutputExtension))
             return resolved;
-        return resolved + "." + preset.OutputExtension;
+
+        var ext = PathSafety.NormalizeExtensionOrThrow(
+            preset.OutputExtension,
+            nameof(preset.OutputExtension),
+            allowDirectorySentinel: true);
+        return resolved + "." + ext;
     }
 }

@@ -21,7 +21,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <PackageReference Include="System.Text.Json" Version="10.0.0" />
   </ItemGroup>
 
   <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->

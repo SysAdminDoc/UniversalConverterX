@@ -3,7 +3,6 @@ using System.IO.Compression;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,6 +16,7 @@ namespace UniversalConverterX.Core.Services;
 /// </summary>
 public class ToolDownloader : IToolDownloader
 {
+    private static readonly TimeSpan VersionProbeTimeout = TimeSpan.FromSeconds(10);
     private readonly ILogger<ToolDownloader>? _logger;
     private readonly ConverterXOptions _options;
     private readonly HttpClient _httpClient;
@@ -37,8 +37,7 @@ public class ToolDownloader : IToolDownloader
         
         // Ensure tools directory exists
         var binDir = Path.Combine(_options.ToolsBasePath, "bin");
-        if (!Directory.Exists(binDir))
-            Directory.CreateDirectory(binDir);
+        Directory.CreateDirectory(binDir);
     }
 
     /// <summary>
@@ -93,9 +92,10 @@ public class ToolDownloader : IToolDownloader
                     var actualChecksum = await ComputeFileChecksumAsync(downloadPath, cancellationToken);
                     if (!string.Equals(actualChecksum, downloadInfo.ExpectedChecksum, StringComparison.OrdinalIgnoreCase))
                     {
-                        _logger?.LogWarning("Checksum mismatch for {Tool}. Expected: {Expected}, Got: {Actual}",
+                        _logger?.LogError("Checksum mismatch for {Tool}. Expected: {Expected}, Got: {Actual}",
                             toolName, downloadInfo.ExpectedChecksum, actualChecksum);
-                        // Continue anyway with warning - checksums change between versions
+                        throw new InvalidDataException(
+                            $"Checksum mismatch for {toolName}. Expected {downloadInfo.ExpectedChecksum}, got {actualChecksum}.");
                     }
                 }
 
@@ -305,6 +305,8 @@ public class ToolDownloader : IToolDownloader
         ToolDownloadInfo downloadInfo,
         CancellationToken cancellationToken)
     {
+        Directory.CreateDirectory(installPath);
+
         var extension = Path.GetExtension(archivePath).ToLowerInvariant();
 
         switch (extension)
@@ -312,27 +314,33 @@ public class ToolDownloader : IToolDownloader
             case ".zip":
                 await ExtractZipAsync(archivePath, installPath, downloadInfo, cancellationToken);
                 break;
-            case ".gz":
+            case ".gz" when archivePath.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase):
             case ".tgz":
                 await ExtractTarGzAsync(archivePath, installPath, downloadInfo, cancellationToken);
+                break;
+            case ".xz" when archivePath.EndsWith(".tar.xz", StringComparison.OrdinalIgnoreCase):
+                await ExtractTarXzAsync(archivePath, installPath, downloadInfo, cancellationToken);
                 break;
             case ".7z":
                 await Extract7zAsync(archivePath, installPath, downloadInfo, cancellationToken);
                 break;
             case ".exe":
-            case ".msi":
-                // For installers, we might need to run them silently
-                await RunInstallerAsync(archivePath, downloadInfo, cancellationToken);
+                if (!CopyDirectExecutableIfExpected(archivePath, installPath, downloadInfo))
+                    throw new NotSupportedException(
+                        "Automatic execution of downloaded installers is disabled. Install this tool manually or provide a portable executable.");
                 break;
+            case ".msi":
+                throw new NotSupportedException(
+                    "Automatic execution of downloaded MSI installers is disabled. Install this tool manually or provide a portable executable.");
             default:
-                // Assume it's a direct executable
-                var destPath = Path.Combine(installPath, downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : ""));
-                File.Copy(archivePath, destPath, overwrite: true);
+                if (!CopyDirectExecutableIfExpected(archivePath, installPath, downloadInfo))
+                    throw new NotSupportedException(
+                        $"Unsupported download archive type '{extension}'. Refusing to install it as an executable.");
                 break;
         }
     }
 
-    private async Task ExtractZipAsync(
+    private Task ExtractZipAsync(
         string zipPath,
         string installPath,
         ToolDownloadInfo downloadInfo,
@@ -340,43 +348,55 @@ public class ToolDownloader : IToolDownloader
     {
         using var archive = ZipFile.OpenRead(zipPath);
 
-        // Find the executable in the archive
-        var exeName = downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : "");
-        var entry = archive.Entries.FirstOrDefault(e => 
-            e.Name.Equals(exeName, StringComparison.OrdinalIgnoreCase) ||
-            e.FullName.EndsWith("/" + exeName, StringComparison.OrdinalIgnoreCase) ||
-            e.FullName.EndsWith("\\" + exeName, StringComparison.OrdinalIgnoreCase));
+        var extracted = false;
+        foreach (var entry in archive.Entries)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
-        if (entry != null)
-        {
-            // Extract just the executable
-            var destPath = Path.Combine(installPath, exeName);
-            entry.ExtractToFile(destPath, overwrite: true);
-        }
-        else
-        {
-            // Extract all contents (might be nested in a folder)
-            foreach (var e in archive.Entries)
+            if (string.IsNullOrEmpty(entry.Name))
+                continue;
+
+            // Extract only the expected executable and declared companion files,
+            // flattening nested archive folders so zip entries cannot write
+            // outside the tools/bin install directory.
+            if (ShouldExtractFile(entry.Name, downloadInfo))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (string.IsNullOrEmpty(e.Name))
-                    continue;
-
-                // Check if this looks like an executable we need
-                if (ShouldExtractFile(e.Name, downloadInfo))
-                {
-                    var destPath = Path.Combine(installPath, e.Name);
-                    e.ExtractToFile(destPath, overwrite: true);
-                }
+                var destPath = Path.Combine(installPath, Path.GetFileName(entry.Name));
+                entry.ExtractToFile(destPath, overwrite: true);
+                extracted = true;
             }
         }
+
+        if (!extracted)
+            throw new InvalidDataException($"Archive did not contain {downloadInfo.ExecutableName}.");
+
+        return Task.CompletedTask;
     }
 
     private async Task ExtractTarGzAsync(
         string tarGzPath,
         string installPath,
         ToolDownloadInfo downloadInfo,
+        CancellationToken cancellationToken)
+    {
+        await ExtractTarAsync(tarGzPath, installPath, downloadInfo, "-xzf", "tar.gz", cancellationToken);
+    }
+
+    private async Task ExtractTarXzAsync(
+        string tarXzPath,
+        string installPath,
+        ToolDownloadInfo downloadInfo,
+        CancellationToken cancellationToken)
+    {
+        await ExtractTarAsync(tarXzPath, installPath, downloadInfo, "-xJf", "tar.xz", cancellationToken);
+    }
+
+    private async Task ExtractTarAsync(
+        string archivePath,
+        string installPath,
+        ToolDownloadInfo downloadInfo,
+        string tarExtractFlag,
+        string archiveLabel,
         CancellationToken cancellationToken)
     {
         // Use tar command on Unix systems
@@ -394,8 +414,8 @@ public class ToolDownloader : IToolDownloader
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
-                startInfo.ArgumentList.Add("-xzf");
-                startInfo.ArgumentList.Add(tarGzPath);
+                startInfo.ArgumentList.Add(tarExtractFlag);
+                startInfo.ArgumentList.Add(archivePath);
                 startInfo.ArgumentList.Add("-C");
                 startInfo.ArgumentList.Add(tempExtract);
 
@@ -409,13 +429,9 @@ public class ToolDownloader : IToolDownloader
                 if (process.ExitCode != 0)
                     throw new InvalidOperationException($"tar exited with code {process.ExitCode}: {error.Trim()}");
 
-                // Find and copy the executable
-                var exeName = downloadInfo.ExecutableName;
-                var files = Directory.GetFiles(tempExtract, exeName, SearchOption.AllDirectories);
-                if (files.Length > 0)
-                {
-                    File.Copy(files[0], Path.Combine(installPath, exeName), overwrite: true);
-                }
+                var copied = CopyExtractedToolFiles(tempExtract, installPath, downloadInfo);
+                if (copied == 0)
+                    throw new InvalidDataException($"Archive did not contain {downloadInfo.ExecutableName}.");
             }
             finally
             {
@@ -426,8 +442,8 @@ public class ToolDownloader : IToolDownloader
         else
         {
             // On Windows, use SharpCompress or 7-Zip
-            _logger?.LogWarning("tar.gz extraction on Windows requires 7-Zip or manual extraction");
-            throw new NotSupportedException("tar.gz extraction on Windows requires additional tools");
+            _logger?.LogWarning("{ArchiveLabel} extraction on Windows requires 7-Zip or manual extraction", archiveLabel);
+            throw new NotSupportedException($"{archiveLabel} extraction on Windows requires additional tools");
         }
     }
 
@@ -474,13 +490,9 @@ public class ToolDownloader : IToolDownloader
             if (process.ExitCode != 0)
                 throw new InvalidOperationException($"7-Zip exited with code {process.ExitCode}: {(error + output).Trim()}");
 
-            // Find and copy the executable
-            var exeName = downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : "");
-            var files = Directory.GetFiles(tempExtract, exeName, SearchOption.AllDirectories);
-            if (files.Length > 0)
-            {
-                File.Copy(files[0], Path.Combine(installPath, exeName), overwrite: true);
-            }
+            var copied = CopyExtractedToolFiles(tempExtract, installPath, downloadInfo);
+            if (copied == 0)
+                throw new InvalidDataException($"Archive did not contain {downloadInfo.ExecutableName}.");
         }
         finally
         {
@@ -489,33 +501,38 @@ public class ToolDownloader : IToolDownloader
         }
     }
 
-    private async Task RunInstallerAsync(
-        string installerPath,
-        ToolDownloadInfo downloadInfo,
-        CancellationToken cancellationToken)
+    private static bool CopyDirectExecutableIfExpected(
+        string sourcePath,
+        string installPath,
+        ToolDownloadInfo downloadInfo)
     {
-        _logger?.LogWarning("Running installer for {Tool}. This may require elevation.", downloadInfo.ToolName);
+        var expectedName = downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : "");
+        var actualName = Path.GetFileName(sourcePath);
+        var hasExtension = !string.IsNullOrEmpty(Path.GetExtension(actualName));
+        if (hasExtension && !actualName.Equals(expectedName, StringComparison.OrdinalIgnoreCase))
+            return false;
 
-        var args = downloadInfo.InstallerArgs ?? "/S"; // Silent install
+        var destPath = Path.Combine(installPath, expectedName);
+        File.Copy(sourcePath, destPath, overwrite: true);
+        return true;
+    }
 
-        var startInfo = new ProcessStartInfo
+    private static int CopyExtractedToolFiles(
+        string extractedRoot,
+        string installPath,
+        ToolDownloadInfo downloadInfo)
+    {
+        var copied = 0;
+        foreach (var file in Directory.EnumerateFiles(extractedRoot, "*", SearchOption.AllDirectories))
         {
-            FileName = installerPath,
-            Arguments = args,
-            UseShellExecute = true,
-            Verb = "runas" // Request elevation on Windows
-        };
+            var name = Path.GetFileName(file);
+            if (!ShouldExtractFile(name, downloadInfo))
+                continue;
 
-        using var process = Process.Start(startInfo);
-        if (process != null)
-        {
-            await process.WaitForExitAsync(cancellationToken);
-
-            if (process.ExitCode != 0)
-            {
-                throw new Exception($"Installer exited with code {process.ExitCode}");
-            }
+            File.Copy(file, Path.Combine(installPath, name), overwrite: true);
+            copied++;
         }
+        return copied;
     }
 
     private static bool ShouldExtractFile(string fileName, ToolDownloadInfo downloadInfo)
@@ -527,7 +544,9 @@ public class ToolDownloader : IToolDownloader
         if (OperatingSystem.IsWindows())
         {
             return name.Equals(exeName + ".exe", StringComparison.OrdinalIgnoreCase) ||
-                   (downloadInfo.AdditionalFiles?.Any(f => name.Equals(f, StringComparison.OrdinalIgnoreCase)) ?? false);
+                   (downloadInfo.AdditionalFiles?.Any(f =>
+                       name.Equals(f, StringComparison.OrdinalIgnoreCase) ||
+                       name.Equals(f + ".exe", StringComparison.OrdinalIgnoreCase)) ?? false);
         }
         
         return name.Equals(exeName, StringComparison.OrdinalIgnoreCase) ||
@@ -645,8 +664,13 @@ public class ToolDownloader : IToolDownloader
         if (!_toolDownloadInfo.TryGetValue(toolName, out var downloadInfo))
             return null;
 
+        Process? process = null;
         try
         {
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(VersionProbeTimeout);
+            var probeToken = timeoutCts.Token;
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = exePath,
@@ -657,20 +681,32 @@ public class ToolDownloader : IToolDownloader
             };
             startInfo.ArgumentList.Add(downloadInfo.VersionArg ?? "--version");
 
-            using var process = Process.Start(startInfo);
+            process = Process.Start(startInfo);
             if (process == null)
                 return null;
 
-            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var error = await process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
+            var outputTask = process.StandardOutput.ReadToEndAsync(probeToken);
+            var errorTask = process.StandardError.ReadToEndAsync(probeToken);
+            await process.WaitForExitAsync(probeToken);
+            var output = await outputTask;
+            var error = await errorTask;
 
             var fullOutput = output + error;
             return ExtractVersion(fullOutput);
         }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+            return null;
+        }
         catch
         {
+            try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
             return null;
+        }
+        finally
+        {
+            process?.Dispose();
         }
     }
 
@@ -734,7 +770,12 @@ public class ToolDownloader : IToolDownloader
     private static string GetFilenameFromUrl(string url)
     {
         var uri = new Uri(url);
-        return Path.GetFileName(uri.LocalPath);
+        var fileName = Path.GetFileName(uri.LocalPath);
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new InvalidOperationException($"Download URL does not include a filename: {url}");
+        if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            throw new InvalidOperationException($"Download URL includes an unsafe filename: {url}");
+        return fileName;
     }
 
     private static string? Find7ZipExecutable()

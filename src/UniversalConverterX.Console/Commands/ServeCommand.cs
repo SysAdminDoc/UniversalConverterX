@@ -179,6 +179,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                     var since = 0;
                     var sinceQ = req.QueryString["since"];
                     if (sinceQ is not null) int.TryParse(sinceQ, out since);
+                    if (since < 0) since = 0;
                     var events = job.EventsSince(since);
                     resp.StatusCode = 200;
                     resp.ContentType = "application/x-ndjson";
@@ -475,6 +476,7 @@ internal sealed class JobRecord : IDisposable
     {
         lock (_lock)
         {
+            if (cursor < 0) cursor = 0;
             // Translate the absolute cursor into our retained window. Anything
             // older than what we've evicted is unrecoverable; clients that
             // poll faster than the eviction rate see a continuous stream.

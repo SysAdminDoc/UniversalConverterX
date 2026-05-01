@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.UI.Dispatching;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -74,6 +75,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private readonly ConcurrentDictionary<string, byte> _processing = new(
         OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     private readonly object _saveLock = new();
+    private Task _lastSaveTask = Task.CompletedTask;
     /// <summary>
     /// Trips when the whole service is being shut down. Linked into every
     /// per-profile CTS so disposing the service cancels any running sidecar
@@ -119,37 +121,56 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
         }
         catch
         {
-            // Corrupt config -- start fresh; user can re-add. Never block app launch.
+            PreserveCorruptConfig();
+            Profiles.Clear();
         }
     }
 
     public void Save()
     {
         // Snapshot under the UI thread (where Profiles lives) and serialize on a
-        // worker so a noisy Watch Folder profile add/remove storm doesn't stutter
-        // the navigation animation.
+        // worker so profile edits don't stutter navigation. Queue writes in the
+        // same order Save was called; otherwise an older background write can
+        // race and overwrite a newer profile list.
         var snapshot = Profiles.ToList();
-        Task.Run(() =>
+        lock (_saveLock)
         {
-            lock (_saveLock)
+            _lastSaveTask = _lastSaveTask.ContinueWith(
+                _ => WriteProfilesSnapshot(snapshot),
+                CancellationToken.None,
+                TaskContinuationOptions.None,
+                TaskScheduler.Default);
+        }
+    }
+
+    private void WriteProfilesSnapshot(IReadOnlyList<WatchProfile> snapshot)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(snapshot, JsonOpts);
+            // Atomic write so a crash mid-Save doesn't leave a half-empty
+            // watches.json that the next launch can't parse.
+            var tmp = _configPath + ".tmp";
+            File.WriteAllText(tmp, json);
+            try { File.Move(tmp, _configPath, overwrite: true); }
+            catch
             {
-                try
-                {
-                    var json = JsonSerializer.Serialize(snapshot, JsonOpts);
-                    // Atomic write so a crash mid-Save doesn't leave a half-empty
-                    // watches.json that the next launch can't parse.
-                    var tmp = _configPath + ".tmp";
-                    File.WriteAllText(tmp, json);
-                    try { File.Move(tmp, _configPath, overwrite: true); }
-                    catch
-                    {
-                        File.WriteAllText(_configPath, json);
-                        try { File.Delete(tmp); } catch { }
-                    }
-                }
-                catch { /* best-effort persistence */ }
+                File.WriteAllText(_configPath, json);
+                try { File.Delete(tmp); } catch { }
             }
-        });
+        }
+        catch { /* best-effort persistence */ }
+    }
+
+    private void PreserveCorruptConfig()
+    {
+        try
+        {
+            if (!File.Exists(_configPath)) return;
+            var backup = _configPath + ".corrupt." + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "." + Guid.NewGuid().ToString("N")[..8];
+            File.Copy(_configPath, backup, overwrite: false);
+        }
+        catch { /* best-effort recovery artifact */ }
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -214,6 +235,9 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             try { cts.Cancel(); cts.Dispose(); } catch { }
         }
         _profileCts.Clear();
+        Task? saveToWait;
+        lock (_saveLock) saveToWait = _lastSaveTask;
+        try { saveToWait.Wait(TimeSpan.FromSeconds(2)); } catch { }
         _shutdownCts.Dispose();
     }
 
@@ -483,13 +507,11 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
     private static string NormalizeExtension(string? extension, string fallback)
     {
-        var value = string.IsNullOrWhiteSpace(extension) ? fallback : extension.Trim().TrimStart('.');
-        if (string.IsNullOrWhiteSpace(value)) return fallback;
-
-        var invalid = Path.GetInvalidFileNameChars();
-        if (value.IndexOfAny(invalid) >= 0 || value.IndexOfAny(['/', '\\', ':', '\0']) >= 0)
-            return fallback;
-        return value;
+        if (PathSafety.TryNormalizeExtension(extension, out var normalized))
+            return normalized;
+        return PathSafety.TryNormalizeExtension(fallback, out var normalizedFallback)
+            ? normalizedFallback
+            : "mp4";
     }
 
     // ── Event log ───────────────────────────────────────────────────────────
