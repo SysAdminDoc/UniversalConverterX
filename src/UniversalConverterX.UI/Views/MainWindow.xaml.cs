@@ -35,6 +35,7 @@ public sealed partial class MainWindow : Window
         new("Timeline Preview", "Render a thumbnail strip + audio waveform for any video", "timeline-preview"),
         new("Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "track-manager"),
         new("Document Converter", "Convert DOCX / PDF / ODT / XLSX / PPTX / EPUB / HTML and friends", "document-converter"),
+        new("Archive Tool", "Pack / unpack 7z / ZIP / TAR / RAR (read) / ISO via 7-Zip", "archive"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -143,6 +144,7 @@ public sealed partial class MainWindow : Window
             "timeline-preview" => typeof(TimelinePreviewPage),
             "track-manager" => typeof(TrackManagerPage),
             "document-converter" => typeof(DocumentConverterPage),
+            "archive" => typeof(ArchivePage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -248,7 +250,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"
