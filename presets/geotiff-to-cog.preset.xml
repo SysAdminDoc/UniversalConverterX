@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>GeoTIFF -> Cloud Optimized GeoTIFF</Name>
+    <Folder>GIS/Tiles</Folder>
+    <InputTypes>
+        <Extension>tif</Extension>
+        <Extension>tiff</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_cog</OutputFileNameTemplate>
+    <OutputExtension>tif</OutputExtension>
+    <Engine>gistiles</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cog</Arg>
+        <Arg>--compress</Arg>
+        <Arg>DEFLATE</Arg>
+    </Args>
+</Preset>

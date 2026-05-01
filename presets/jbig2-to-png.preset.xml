@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>JBIG2 / PICT / IFF / Atari -> PNG</Name>
+    <Folder>Image/Niche</Folder>
+    <InputTypes>
+        <Extension>jb2</Extension>
+        <Extension>pict</Extension>
+        <Extension>pct</Extension>
+        <Extension>iff</Extension>
+        <Extension>lbm</Extension>
+        <Extension>pi1</Extension>
+        <Extension>pi2</Extension>
+        <Extension>pi3</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>imgmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>

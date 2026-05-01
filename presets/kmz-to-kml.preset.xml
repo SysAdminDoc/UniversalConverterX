@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>KMZ -> KML + assets</Name>
+    <Folder>GIS/Tiles</Folder>
+    <InputTypes>
+        <Extension>kmz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_kml</OutputFileNameTemplate>
+    <OutputExtension>folder</OutputExtension>
+    <Engine>gistiles</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>kmz-to-kml</Arg>
+    </Args>
+</Preset>

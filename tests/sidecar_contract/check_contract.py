@@ -186,6 +186,17 @@ KNOWN_EVENTS = {
     "wallet_keystore",     # wallet.keystore-info — Ethereum keystore probe
     "wallet_descriptor",   # wallet.descriptor — Bitcoin output descriptor parse
     "wallet_psbt",         # wallet.psbt-decode — PSBT heuristic probe
+    # v2.15 wave (Healthcare + Finance + Engineering + Wire formats)
+    "hl7_message",         # hl7 — v2 message parse / emit
+    "fhir_doc",            # hl7 — FHIR JSON <-> XML
+    "finance_doc",         # finance — OFX/QFX/QIF/IIF/MT940/CSV
+    "cad_more",            # cadmore — 3MF / AMF mesh produced
+    "cad_more_info",       # cadmore.gcode-info — G-code probe
+    "genome_doc",          # genome — BCF / BGZF / tabix / peak
+    "gistile",             # gistiles — COG / KMZ / KML produced
+    "gistile_info",        # gistiles.info — MBTiles / PMTiles probe
+    "imgmore",             # imgmore — JBIG2 / FAX / PICT / IFF converted
+    "wire_blob",           # wirefmt — CBOR / msgpack / BSON / Ion converted
 }
 
 

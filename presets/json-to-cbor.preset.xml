@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>JSON -> CBOR</Name>
+    <Folder>Data/Wire</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>cbor</OutputExtension>
+    <Engine>wirefmt</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>from-json</Arg>
+        <Arg>--format</Arg>
+        <Arg>cbor</Arg>
+    </Args>
+</Preset>

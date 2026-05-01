@@ -126,6 +126,15 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.15 wave (Healthcare + Finance + Engineering + Wire formats)
+        DocumentTools.Add(new ToolboxTile("presets:hl7", "HL7 Healthcare", "HL7 v2 messages <-> JSON + FHIR R4/R5 JSON <-> XML", "\uE8A1", red, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:finance", "Finance / Accounting", "OFX / QFX / QIF / IIF / MT940 -> CSV / JSON / QIF (transaction-aware)", "\uE9D9", blue, "Ready", green, false, "ofxparse + mt-940"));
+        OtherTools.Add(new ToolboxTile("presets:cadmore", "3D Printing CAD", "STL / OBJ / PLY / GLB / 3MF / AMF mutual conversion + G-code probe", "\uF158", green, "Ready", green, false, "trimesh + custom 3MF/AMF"));
+        OtherTools.Add(new ToolboxTile("presets:genome", "Genomics Binary", "VCF <-> BCF + bgzip / tabix index + ENCODE peak -> BED", "\uE7C2", green, "Ready", green, false, "pysam"));
+        OtherTools.Add(new ToolboxTile("presets:gistiles", "GIS Tiles + COG", "MBTiles / PMTiles probe + KMZ / KML round-trip + GeoTIFF -> COG", "\uE707", blue, "Ready", green, false, "GDAL + sqlite"));
+        ImageTools.Add(new ToolboxTile("presets:imgmore", "Niche Images Plus", "JBIG2 / FAX TIFF / Mac PICT / Amiga IFF / Atari Degas / layered TIFF", "\uEB9F", orange, "Ready", green, false, "ImageMagick + jbig2dec + tifffile"));
+        DocumentTools.Add(new ToolboxTile("presets:wirefmt", "Binary Wire Formats", "CBOR / MessagePack / BSON / Ion <-> JSON (the formats every modern API uses)", "\uE943", blue, "Ready", green, false, "cbor2 + msgpack + bson + amazon.ion"));
+
         // v2.14 wave (Streaming + Crypto + Niche A/V)
         VideoTools.Add(new ToolboxTile("presets:videopro", "Specialty Video", "VOB / MTS / DV / 3GP / F4V / SWF / H.264-H.265-AV1 elementary streams", "\uE714", green, "Ready", green, false, "FFmpeg"));
         VideoTools.Add(new ToolboxTile("presets:streaming", "Streaming Manifests", "MP4 -> HLS / DASH / CMAF + manifest -> MP4 round-trip", "\uE968", blue, "Ready", green, false, "shaka-packager + FFmpeg"));

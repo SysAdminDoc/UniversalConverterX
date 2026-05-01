@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>BSON -> JSON</Name>
+    <Folder>Data/Wire</Folder>
+    <InputTypes>
+        <Extension>bson</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>wirefmt</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-json</Arg>
+        <Arg>--format</Arg>
+        <Arg>bson</Arg>
+    </Args>
+</Preset>

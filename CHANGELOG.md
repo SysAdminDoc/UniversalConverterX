@@ -2,6 +2,28 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.15.0] - 2026-05-01
+
+### Added — 7 new pure-format conversion sidecars (Healthcare + Finance + Engineering + Wire)
+
+- **hl7** — HL7 healthcare messaging conversion. `v2-to-json` parses HL7 v2 pipe-delimited messages into structured JSON honouring all five delimiters (field / component / repetition / escape / subcomponent). `json-to-v2` re-emits cleanly. `fhir-to-xml` and `fhir-to-json` round-trip FHIR R4 / R5 resources. All pure stdlib (no fhir.resources / hl7apy dependency).
+- **finance** — Personal finance / accounting interchange: OFX / QFX (Quicken / banks) via ofxparse, QIF (Quicken Interchange) via custom parser, IIF (QuickBooks Desktop) tab-delimited, MT940 / MT942 (European banking) via mt-940. Normalized Transaction record (date / amount / payee / memo / category / account / type / fitid). Outputs CSV / JSON / QIF.
+- **cadmore** — 3D-printing / additive-manufacturing CAD: STL / OBJ / PLY / GLB / GLTF / DAE / OFF mutual conversion + 3MF (3D Manufacturing Format ZIP-based) + AMF (Additive Manufacturing Format XML). Custom 3MF emitter writes `[Content_Types].xml` + `_rels/.rels` + `3D/3dmodel.model`. `gcode-info` op probes G-code line / layer count + extrusion / travel mm + max Z height.
+- **genome** — Genomics binary formats: VCF <-> BCF round-trip via pysam, BGZF (block-gzip) compress / decompress, tabix .tbi index generation for VCF / GFF / BED / SAM, ENCODE narrowPeak / broadPeak / gappedPeak -> BED6.
+- **gistiles** — GIS raster + tile-pyramid conversion: GeoTIFF -> Cloud Optimized GeoTIFF via `gdal_translate -of COG`, KMZ -> KML + assets (zip extract), KML -> KMZ (zip), MBTiles SQLite metadata probe, PMTiles header probe.
+- **imgmore** — Niche image conversion (extends `rasterimg`): JBIG2 (.jb2) via jbig2dec, Mac PICT / Amiga IFF / Atari Degas via ImageMagick, Adobe layered TIFF preserved via tifffile (one PNG per IFD page).
+- **wirefmt** — Binary wire-format conversion: CBOR (RFC 8949) / MessagePack / BSON (MongoDB) / Apache Ion <-> JSON. Decodes from any of the four to JSON, encodes JSON to any of the four. Handles bytes / dates safely through round-trip.
+
+### Added — 14 new presets
+
+`hl7-v2-to-json`, `fhir-json-to-xml`, `ofx-to-csv`, `finance-to-qif`, `stl-to-3mf`, `stl-to-amf`, `vcf-to-bcf`, `bcf-to-vcf`, `geotiff-to-cog`, `kmz-to-kml`, `jbig2-to-png`, `cbor-to-json`, `msgpack-to-json`, `bson-to-json`, `json-to-cbor`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 10 new event types: `hl7_message`, `fhir_doc`, `finance_doc`, `cad_more`, `cad_more_info`, `genome_doc`, `gistile`, `gistile_info`, `imgmore`, `wire_blob`. Contract test: 116 sidecars conforming.
+- 7 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.14.0 → 2.15.0 across all manifests.
+
 ## [v2.14.0] - 2026-05-01
 
 ### Added — 7 new pure-format conversion sidecars (Streaming + Crypto + Niche A/V)
