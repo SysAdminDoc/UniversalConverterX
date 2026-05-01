@@ -2,6 +2,27 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.20.1] - 2026-05-01
+
+### Fixed — Universal-converter audit cleanup
+
+Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-reference) revealed orphan engines that existed on disk but weren't surfaced through the UI. This release closes those gaps so every shipping sidecar is reachable from both the Toolbox grid and the preset browser.
+
+### Added
+
+- **`tools/framesnap/sidecar.py`** — NDJSON wrapper around the existing FrameSnap GUI for headless batch frame extraction. Ops: `every-n-seconds`, `every-n-frames`, `at-time`, `scene-cuts`. Emits `frame` events per extracted image.
+- **31 new presets** linking previously-orphan engines into the preset browser: `bg-remove-video`, `audiotag-read`, `audiotag-strip`, `chaptermark-read`, `codeformat`, `coordfmt-convert`, `demucs-stems`, `ebookconvert-epub`, `edge-tts-speak`, `fontconvert`, `gfpgan-restore`, `gisconvert-vector`, `gisconvert-raster`, `lipsight-transcribe`, `mailbox-mbox-to-maildir`, `mailbox-mbox-split`, `ocr-recognize`, `pdfocr-recognize`, `pdftools-merge`, `pdftools-compress`, `pdftools-split`, `realesrgan-upscale`, `rnnoise-denoise`, `scenedetect-detect`, `timefmt-convert`, `vertigo-9x16`, `videosubtitleremover`, `wallet-bip39-check`, `wallet-keystore`, `whisper-cpp-transcribe`, `whisper-stt-transcribe`, `framesnap-every-n-seconds`.
+- **33 new Toolbox tiles** for previously-orphan engines: `alphacut`, `archive`, `audiotag`, `chaptermark`, `codeformat`, `coordfmt`, `demucs`, `docconvert`, `ebookconvert`, `edge-tts`, `fontconvert`, `framesnap`, `gfpgan`, `gifstudio`, `gisconvert`, `heicshift`, `lipsight`, `mailbox`, `ocr`, `pdfocr`, `pdftools`, `realesrgan`, `recordcast`, `rnnoise`, `scenedetect`, `streamkeep`, `subconvert`, `timefmt`, `vertigo`, `videocrush`, `videosubtitleremover`, `whisper-cpp`, `whisper-stt`.
+- KNOWN_EVENTS gains `frame` for the new framesnap sidecar.
+
+### Changed
+
+- Sidecar count: 175 → **176** (added framesnap).
+- Toolbox tile coverage: 150 → **176 unique engines** — every shipping sidecar now has a tile.
+- Preset coverage: 148 → **174 unique engines** — every shipping conversion sidecar has at least one preset. The two remaining preset-less sidecars (`recordcast` for live screen recording, `streamkeep` for URL-input downloads) are intentional: they take device handles or URLs, not files, so the preset model doesn't apply.
+- Contract test: 175 → **176 sidecars conforming**, 0 broken tile refs, 0 broken preset refs.
+- Version 2.20.0 → 2.20.1 across all manifests.
+
 ## [v2.20.0] - 2026-05-01
 
 ### Added — 13 new pure-format conversion sidecars (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)

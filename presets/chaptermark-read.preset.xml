@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Chapter Markers Read (MP4 / MKV / M4B)</Name>
+    <Folder>Video/Chapters</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>m4b</Extension>
+        <Extension>m4a</Extension>
+        <Extension>mov</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.chapters</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>chaptermark</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>read</Arg>
+    </Args>
+</Preset>

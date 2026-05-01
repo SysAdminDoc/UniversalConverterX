@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Video Background Removal (AlphaCut)</Name>
+    <Folder>Video/AI</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_alpha</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>alphacut</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+    </Args>
+</Preset>

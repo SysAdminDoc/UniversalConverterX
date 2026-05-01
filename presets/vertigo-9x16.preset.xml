@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Video -> 9:16 Vertical (Vertigo Auto-Reframe)</Name>
+    <Folder>Video/AI</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>webm</Extension>
+        <Extension>avi</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_9x16</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>vertigo</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>reframe</Arg>
+    </Args>
+</Preset>

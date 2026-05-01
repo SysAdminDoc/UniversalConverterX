@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Text -> Speech (Microsoft Edge TTS)</Name>
+    <Folder>Audio/TTS</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>md</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp3</OutputExtension>
+    <Engine>edge-tts</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>speak</Arg>
+    </Args>
+</Preset>

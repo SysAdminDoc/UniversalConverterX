@@ -126,6 +126,41 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.20.1 cleanup — surface previously-orphaned sidecars
+        VideoTools.Add(new ToolboxTile("presets:alphacut", "Video Background Removal", "AI matting on video tracks (U2Net / SAM 2 segmentation)", "\uE91F", red, "Ready", green, false, "U2Net + SAM 2"));
+        OtherTools.Add(new ToolboxTile("presets:archive", "Archive Tool", "Pack / unpack / list 7z / zip / tar / rar / iso / cab archives", "\uE7B8", blue, "Ready", green, false, "7-Zip"));
+        AudioTools.Add(new ToolboxTile("presets:audiotag", "Audio Metadata Tags", "Read / write / strip ID3 / FLAC / Vorbis / M4A tags", "\uE189", blue, "Ready", green, false, "mutagen"));
+        VideoTools.Add(new ToolboxTile("presets:chaptermark", "Chapter Markers", "Read / write MP4 / MKV / M4B chapter markers", "\uE7C3", blue, "Ready", green, false, "mutagen + mkvmerge"));
+        DocumentTools.Add(new ToolboxTile("presets:codeformat", "Source Code Formatter", "prettier / black / gofmt / rustfmt / clang-format auto-format", "\uE943", blue, "Ready", green, false, "OSS formatters"));
+        OtherTools.Add(new ToolboxTile("presets:coordfmt", "Coordinate Format", "GPS DD / DMS / UTM / MGRS / Geohash / Plus Codes batch convert", "\uE707", blue, "Ready", green, false, "pyproj + mgrs"));
+        AudioTools.Add(new ToolboxTile("presets:demucs", "Audio Stem Separation", "Demucs htdemucs_ft 4-stem (vocals / drums / bass / other)", "\uE767", red, "Ready", green, false, "Demucs"));
+        DocumentTools.Add(new ToolboxTile("presets:docconvert", "Document Convert", "DOCX / ODT / RTF / HTML / TXT / PDF via LibreOffice headless", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
+        DocumentTools.Add(new ToolboxTile("presets:ebookconvert", "eBook Convert", "EPUB / MOBI / AZW3 / PDF / FB2 / LRF mutual conversion", "\uE82D", blue, "Ready", green, false, "Calibre"));
+        AudioTools.Add(new ToolboxTile("presets:edge-tts", "Microsoft Edge TTS", "Text -> speech via Microsoft Edge TTS voices (free)", "\uE767", blue, "Ready", green, false, "edge-tts"));
+        DocumentTools.Add(new ToolboxTile("presets:fontconvert", "Font Format Convert", "TTF / OTF / WOFF / WOFF2 / EOT / TTC mutual conversion", "\uE8D2", blue, "Ready", green, false, "fontTools"));
+        VideoTools.Add(new ToolboxTile("presets:framesnap", "Video Frame Extract", "Frames every N seconds / N frames / scene cuts -> JPG / PNG / WebP", "\uE91B", blue, "Ready", green, false, "FFmpeg"));
+        ImageTools.Add(new ToolboxTile("presets:gfpgan", "Face Restoration GFPGAN", "Restore old / blurry / damaged faces in photos via GFPGAN v1.4", "\uE91F", red, "Ready", green, false, "GFPGAN"));
+        ImageTools.Add(new ToolboxTile("presets:gifstudio", "GIF Studio", "MP4 / MOV / WebM -> GIF with palette + dithering presets", "\uE909", orange, "Ready", green, false, "FFmpeg"));
+        OtherTools.Add(new ToolboxTile("presets:gisconvert", "GIS Vector + Raster", "Shapefile / KML / GPX / GeoJSON / GeoTIFF / DEM via GDAL", "\uE707", blue, "Ready", green, false, "GDAL"));
+        ImageTools.Add(new ToolboxTile("presets:heicshift", "HEIC Image Converter", "iPhone HEIC -> JPG / PNG / WebP / TIFF batch convert", "\uEB9F", blue, "Ready", green, false, "Pillow + libheif"));
+        VideoTools.Add(new ToolboxTile("presets:lipsight", "Lip-Reading Transcribe", "Transcribe video audio via lip-reading model (HF Space)", "\uE767", red, "Ready", green, false, "HuggingFace"));
+        AudioTools.Add(new ToolboxTile("presets:mailbox", "Email Mailbox Convert", "mbox / EML / Maildir / RFC822 mutual conversion", "\uE715", blue, "Ready", green, false, "stdlib mailbox"));
+        DocumentTools.Add(new ToolboxTile("presets:ocr", "Image OCR (Tesseract)", "Image / multi-page TIFF -> TXT / hOCR / PDF / TSV / ALTO", "\uE8E6", blue, "Ready", green, false, "Tesseract"));
+        DocumentTools.Add(new ToolboxTile("presets:pdfocr", "Scanned PDF -> Searchable PDF", "OCRmyPDF + Poppler scanned-PDF OCR pass", "\uE8E6", blue, "Ready", green, false, "OCRmyPDF"));
+        DocumentTools.Add(new ToolboxTile("presets:pdftools", "PDF Tools", "Merge / split / compress / encrypt / extract / rotate via pikepdf", "\uEA90", orange, "Ready", green, false, "pikepdf"));
+        ImageTools.Add(new ToolboxTile("presets:realesrgan", "Image / Video Upscale", "Real-ESRGAN x4 super-resolution for image + video", "\uE714", red, "Ready", green, false, "Real-ESRGAN"));
+        AudioTools.Add(new ToolboxTile("presets:recordcast", "Screen / Audio Recorder", "Live screen + system-audio + mic capture (DirectShow / FFmpeg)", "\uE714", blue, "Ready", green, false, "FFmpeg + DirectShow"));
+        AudioTools.Add(new ToolboxTile("presets:rnnoise", "Audio Denoise (RNNoise)", "Real-time RNNoise voice denoising for any audio", "\uE767", blue, "Ready", green, false, "RNNoise"));
+        VideoTools.Add(new ToolboxTile("presets:scenedetect", "Scene Detection", "PySceneDetect adaptive + content scene-change detection -> CSV / EDL", "\uE714", blue, "Ready", green, false, "PySceneDetect"));
+        AudioTools.Add(new ToolboxTile("presets:streamkeep", "Stream / VOD Downloader", "yt-dlp wrapper for YouTube / Twitch / TikTok / Vimeo / 1500+ sites", "\uE896", blue, "Ready", green, false, "yt-dlp + FFmpeg"));
+        VideoTools.Add(new ToolboxTile("presets:subconvert", "Subtitle Format Convert", "SRT / VTT / ASS / SSA / SUB / SAMI mutual conversion + retime", "\uED1E", blue, "Ready", green, false, "pysubs2"));
+        OtherTools.Add(new ToolboxTile("presets:timefmt", "Timestamp Format", "ISO 8601 / Epoch / Excel / FILETIME / Cocoa / Mainframe Julian", "\uE787", blue, "Ready", green, false, "stdlib + dateutil"));
+        VideoTools.Add(new ToolboxTile("presets:vertigo", "Auto-Reframe 9:16 Vertical", "Smart 16:9 -> 9:16 vertical reframing for TikTok / Reels / Shorts", "\uE714", red, "Ready", green, false, "Vertigo + OpenCV"));
+        VideoTools.Add(new ToolboxTile("presets:videocrush", "Video Compressor", "SVT-AV1 v2 fast / quality / streaming + size targeting", "\uE714", green, "Ready", green, false, "FFmpeg + SVT-AV1"));
+        VideoTools.Add(new ToolboxTile("presets:videosubtitleremover", "Burned-In Subtitle Remove", "STTN inpainting to erase burned-in subtitles from video", "\uED1E", red, "Ready", green, false, "STTN"));
+        AudioTools.Add(new ToolboxTile("presets:whisper-cpp", "Speech -> Text (whisper.cpp)", "Local CPU Whisper transcription via whisper.cpp (no GPU needed)", "\uE767", blue, "Ready", green, false, "whisper.cpp"));
+        AudioTools.Add(new ToolboxTile("presets:whisper-stt", "Speech -> Text (Whisper Large v3 Turbo)", "GPU-accelerated Whisper Large v3 Turbo + Silero VAD + diarization", "\uE767", red, "Ready", green, false, "Whisper + pyannote"));
+
         // v2.20 wave (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
         OtherTools.Add(new ToolboxTile("presets:mlmodel", "AI/ML Model Interchange", "ONNX + safetensors + GGUF + TFLite + CoreML + .pt header probes", "\uE99A", red, "Ready", green, false, "stdlib + onnx"));
         OtherTools.Add(new ToolboxTile("presets:forensics", "Digital Forensics", "NTFS $MFT + .reg + prefetch + browser history + EWF E01 probe", "\uE72E", orange, "Ready", green, false, "stdlib + sqlite + ewfinfo"));

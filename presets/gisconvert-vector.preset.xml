@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>GIS Vector: SHP / KML / GPX / GeoJSON / GeoPackage</Name>
+    <Folder>Data/GIS</Folder>
+    <InputTypes>
+        <Extension>shp</Extension>
+        <Extension>kml</Extension>
+        <Extension>kmz</Extension>
+        <Extension>gpx</Extension>
+        <Extension>geojson</Extension>
+        <Extension>gpkg</Extension>
+        <Extension>fgb</Extension>
+        <Extension>tab</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>geojson</OutputExtension>
+    <Engine>gisconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>vector</Arg>
+    </Args>
+</Preset>

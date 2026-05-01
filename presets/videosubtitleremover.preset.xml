@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Burned-In Subtitle Remover (STTN inpainting)</Name>
+    <Folder>Video/AI</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>webm</Extension>
+        <Extension>avi</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_nosubs</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videosubtitleremover</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+    </Args>
+</Preset>

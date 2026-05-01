@@ -265,6 +265,8 @@ KNOWN_EVENTS = {
     "iot_doc",             # iotbus — OPC UA / Modbus / KNX / EDS
     "social_archive",      # socialarchives — Twitter / Mastodon / Reddit / Discord exports
     "dev_doc",             # devbuild — npm / Cargo / Composer / Maven / Go / .csproj
+    # v2.20.1 cleanup
+    "frame",               # framesnap — extracted video frame
 }
 
 
