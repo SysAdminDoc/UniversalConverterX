@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To PDF</Name>
+    <Folder>Documents</Folder>
+    <InputTypes>
+        <Extension>docx</Extension>
+        <Extension>doc</Extension>
+        <Extension>odt</Extension>
+        <Extension>rtf</Extension>
+        <Extension>txt</Extension>
+        <Extension>html</Extension>
+        <Extension>htm</Extension>
+        <Extension>xlsx</Extension>
+        <Extension>xls</Extension>
+        <Extension>ods</Extension>
+        <Extension>pptx</Extension>
+        <Extension>ppt</Extension>
+        <Extension>odp</Extension>
+        <Extension>epub</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pdf</OutputExtension>
+    <Engine>docconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>pdf</Arg>
+    </Args>
+</Preset>

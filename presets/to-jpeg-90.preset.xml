@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To JPEG (q=90)</Name>
+    <Folder>Image</Folder>
+    <InputTypes>
+        <Extension>png</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>webp</Extension>
+        <Extension>avif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>bmp</Extension>
+        <Extension>jxl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>jpg</OutputExtension>
+    <Engine>heicshift</Engine>
+    <Args>
+        <Arg>--format</Arg>
+        <Arg>jpeg</Arg>
+        <Arg>--quality</Arg>
+        <Arg>90</Arg>
+    </Args>
+</Preset>

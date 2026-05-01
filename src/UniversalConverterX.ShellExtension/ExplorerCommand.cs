@@ -1,15 +1,24 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using UniversalConverterX.ShellExtension.Presets;
 
 namespace UniversalConverterX.ShellExtension;
 
 /// <summary>
-/// Windows 11 modern context menu implementation using IExplorerCommand
+/// Windows 11 modern context menu root. Hosts a dynamic submenu populated
+/// from the *.preset.xml files installed alongside UCX, filtered to the
+/// presets that accept every selected file's extension.
 /// </summary>
 [ComVisible(true)]
 [Guid(Guids.ExplorerCommand)]
 [ClassInterface(ClassInterfaceType.None)]
 public partial class ConverterExplorerCommand : IExplorerCommand
 {
+    /// <summary>Cached snapshot of selection paths between GetState / EnumSubCommands.</summary>
+    internal static List<string> LastSelectionPaths { get; private set; } = [];
+
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
     {
         ppszName = "Convert with UniversalConverter X";
@@ -18,15 +27,14 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 
     public int GetIcon(IShellItemArray? psiItemArray, out string? ppszIcon)
     {
-        // Path to icon resource
         var exePath = GetExecutablePath();
-        ppszIcon = $"{exePath},0";
+        ppszIcon = string.IsNullOrEmpty(exePath) ? null : $"{exePath},0";
         return HResult.S_OK;
     }
 
     public int GetToolTip(IShellItemArray? psiItemArray, out string? ppszInfotip)
     {
-        ppszInfotip = "Convert file(s) to different formats";
+        ppszInfotip = "Convert / compress / extract via a named preset";
         return HResult.S_OK;
     }
 
@@ -38,152 +46,120 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 
     public int GetState(IShellItemArray? psiItemArray, bool fOkToBeSlow, out uint pCmdState)
     {
-        // ECS_ENABLED = 0, ECS_DISABLED = 1, ECS_HIDDEN = 2, ECS_CHECKBOX = 4, ECS_CHECKED = 8
-        pCmdState = 0; // Enabled
-        
-        if (psiItemArray == null)
-        {
-            pCmdState = 2; // Hidden
-            return HResult.S_OK;
-        }
+        pCmdState = 0; // ECS_ENABLED
+        if (psiItemArray is null) { pCmdState = 2; return HResult.S_OK; }
 
-        // Check if we have any convertible files
         try
         {
-            psiItemArray.GetCount(out var count);
-            if (count == 0)
-            {
-                pCmdState = 2; // Hidden
-            }
+            // Cache the selection so EnumSubCommands can filter presets.
+            LastSelectionPaths = ReadShellItemPaths(psiItemArray);
+            if (LastSelectionPaths.Count == 0) pCmdState = 2; // ECS_HIDDEN
         }
         catch
         {
-            pCmdState = 2; // Hidden on error
+            pCmdState = 2;
         }
-
         return HResult.S_OK;
     }
 
     public int Invoke(IShellItemArray? psiItemArray, IntPtr pbc)
     {
-        if (psiItemArray == null)
-            return HResult.E_INVALIDARG;
-
+        // Top-level click (ignored when subcommands present), so just open the
+        // main UI with the selection.
+        if (psiItemArray is null) return HResult.E_INVALIDARG;
         try
         {
-            // Get selected files
-            var files = GetSelectedFiles(psiItemArray);
-            if (files.Count == 0)
-                return HResult.S_OK;
-
-            // Launch the UI with the selected files
-            LaunchConverterUI(files);
-
+            LaunchConverterUi(ReadShellItemPaths(psiItemArray));
             return HResult.S_OK;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error in Invoke: {ex.Message}");
+            Debug.WriteLine($"Invoke: {ex.Message}");
             return HResult.E_FAIL;
         }
     }
 
     public int GetFlags(out uint pFlags)
     {
-        // ECF_DEFAULT = 0, ECF_HASSUBCOMMANDS = 1, ECF_HASSPLITBUTTON = 2,
-        // ECF_HIDELABEL = 4, ECF_ISSEPARATOR = 8, ECF_HASLUASHIELD = 16,
-        // ECF_SEPARATORBEFORE = 32, ECF_SEPARATORAFTER = 64, ECF_ISDROPDOWN = 128
-        pFlags = 1; // Has subcommands (submenu)
+        pFlags = 1; // ECF_HASSUBCOMMANDS
         return HResult.S_OK;
     }
 
     public int EnumSubCommands(out IEnumExplorerCommand? ppEnum)
     {
-        ppEnum = new ConvertSubCommandEnumerator();
+        ppEnum = new ConvertSubCommandEnumerator(LastSelectionPaths);
         return HResult.S_OK;
     }
 
-    private static List<string> GetSelectedFiles(IShellItemArray psiItemArray)
-    {
-        var files = new List<string>();
+    // ── helpers ────────────────────────────────────────────────────────────
 
+    internal static List<string> ReadShellItemPaths(IShellItemArray array)
+    {
+        var paths = new List<string>();
+        if (array is null) return paths;
         try
         {
-            psiItemArray.GetCount(out var count);
-
+            array.GetCount(out var count);
             for (uint i = 0; i < count; i++)
             {
-                psiItemArray.GetItemAt(i, out var shellItem);
-                if (shellItem != null)
-                {
-                    shellItem.GetDisplayName(SIGDN.FILESYSPATH, out var path);
-                    if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                    {
-                        files.Add(path);
-                    }
-                }
+                array.GetItemAt(i, out var item);
+                if (item is null) continue;
+                item.GetDisplayName(SIGDN.FILESYSPATH, out var p);
+                if (!string.IsNullOrEmpty(p)) paths.Add(p);
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error getting files: {ex.Message}");
+            Debug.WriteLine($"ReadShellItemPaths: {ex.Message}");
         }
-
-        return files;
+        return paths;
     }
 
-    private static void LaunchConverterUI(List<string> files)
+    internal static string GetExecutablePath()
     {
-        var exePath = GetExecutablePath();
-        if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
-        {
-            // Fallback: try to find in program files
-            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            exePath = Path.Combine(programFiles, "UniversalConverterX", "UniversalConverterX.UI.exe");
-        }
-
-        if (!File.Exists(exePath))
-            return;
-
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = exePath,
-            UseShellExecute = false
-        };
-
-        foreach (var file in files)
-            startInfo.ArgumentList.Add(file);
-
-        System.Diagnostics.Process.Start(startInfo);
-    }
-
-    private static string GetExecutablePath()
-    {
-        // Try to get from registry
         try
         {
-            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(
-                @"SOFTWARE\UniversalConverterX");
-            if (key != null)
-            {
-                var path = key.GetValue("InstallPath") as string;
-                if (!string.IsNullOrEmpty(path))
-                {
-                    return Path.Combine(path, "UniversalConverterX.UI.exe");
-                }
-            }
+            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\UniversalConverterX");
+            var path = key?.GetValue("InstallPath") as string;
+            if (!string.IsNullOrEmpty(path))
+                return Path.Combine(path!, "UniversalConverterX.UI.exe");
         }
         catch { }
-
-        // Fallback to local app data
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "UniversalConverterX", "UniversalConverterX.UI.exe");
     }
+
+    internal static string GetCliPath()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\UniversalConverterX");
+            var path = key?.GetValue("InstallPath") as string;
+            if (!string.IsNullOrEmpty(path))
+                return Path.Combine(path!, "ucx.exe");
+        }
+        catch { }
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "UniversalConverterX", "ucx.exe");
+    }
+
+    private static void LaunchConverterUi(List<string> files)
+    {
+        var exe = GetExecutablePath();
+        if (!File.Exists(exe)) return;
+
+        var psi = new ProcessStartInfo { FileName = exe, UseShellExecute = false };
+        foreach (var f in files) psi.ArgumentList.Add(f);
+        try { Process.Start(psi); } catch { }
+    }
 }
 
 /// <summary>
-/// Enumerates subcommands for quick convert presets
+/// Submenu builder. Loads presets from disk, filters by the cached selection's
+/// extensions, and yields one <see cref="PresetSubCommand"/> per match plus a
+/// trailing separator + "More options..." entry.
 /// </summary>
 [ComVisible(true)]
 [Guid(Guids.SubCommandEnumerator)]
@@ -191,96 +167,118 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 {
     private readonly List<IExplorerCommand> _commands;
-    private int _currentIndex = 0;
+    private int _index;
 
-    public ConvertSubCommandEnumerator()
+    public ConvertSubCommandEnumerator() : this(new List<string>()) { }
+
+    public ConvertSubCommandEnumerator(IReadOnlyList<string> selectionPaths)
     {
-        _commands =
-        [
-            new QuickConvertCommand("PNG", "png", "Convert to PNG"),
-            new QuickConvertCommand("JPEG", "jpg", "Convert to JPEG"),
-            new QuickConvertCommand("WebP", "webp", "Convert to WebP"),
-            new QuickConvertCommand("GIF", "gif", "Convert to GIF"),
-            new SeparatorCommand(),
-            new QuickConvertCommand("MP4", "mp4", "Convert to MP4"),
-            new QuickConvertCommand("MP3", "mp3", "Extract audio as MP3"),
-            new QuickConvertCommand("WAV", "wav", "Extract audio as WAV"),
-            new SeparatorCommand(),
-            new QuickConvertCommand("PDF", "pdf", "Convert to PDF"),
-            new SeparatorCommand(),
-            new OpenAppCommand()
-        ];
+        _commands = BuildSubmenu(selectionPaths);
+    }
+
+    private static List<IExplorerCommand> BuildSubmenu(IReadOnlyList<string> selection)
+    {
+        var commands = new List<IExplorerCommand>();
+        var exts = selection
+            .Select(p => Path.GetExtension(p).TrimStart('.').ToLowerInvariant())
+            .Where(s => s.Length > 0)
+            .Distinct()
+            .ToList();
+
+        IReadOnlyList<ShellPreset> presets;
+        try
+        {
+            presets = PresetReader.LoadAll();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"PresetReader: {ex.Message}");
+            presets = [];
+        }
+
+        // Match: every selected extension is in this preset's InputTypes
+        // (or the preset is wildcard / has no InputTypes).
+        var matching = presets
+            .Where(p => p.MatchesAll(exts))
+            .OrderBy(p => p.Folder ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var p in matching)
+            commands.Add(new PresetSubCommand(p, selection));
+
+        if (commands.Count > 0) commands.Add(new SeparatorCommand());
+        commands.Add(new OpenAppCommand());
+        return commands;
     }
 
     public int Next(uint celt, IExplorerCommand[] pUICommand, out uint pceltFetched)
     {
         pceltFetched = 0;
-
-        for (uint i = 0; i < celt && _currentIndex < _commands.Count; i++)
+        for (uint i = 0; i < celt && _index < _commands.Count; i++, _index++)
         {
-            pUICommand[i] = _commands[_currentIndex];
-            _currentIndex++;
+            pUICommand[i] = _commands[_index];
             pceltFetched++;
         }
-
         return pceltFetched == celt ? HResult.S_OK : HResult.S_FALSE;
     }
 
     public int Skip(uint celt)
     {
-        _currentIndex += (int)celt;
-        return _currentIndex < _commands.Count ? HResult.S_OK : HResult.S_FALSE;
+        _index += (int)celt;
+        return _index < _commands.Count ? HResult.S_OK : HResult.S_FALSE;
     }
 
-    public int Reset()
-    {
-        _currentIndex = 0;
-        return HResult.S_OK;
-    }
+    public int Reset() { _index = 0; return HResult.S_OK; }
 
     public int Clone(out IEnumExplorerCommand? ppenum)
     {
-        ppenum = new ConvertSubCommandEnumerator();
+        ppenum = new ConvertSubCommandEnumerator(ConverterExplorerCommand.LastSelectionPaths);
         return HResult.S_OK;
     }
 }
 
 /// <summary>
-/// Quick convert command for specific format
+/// One menu entry per preset. Invokes <c>ucx.exe convert-preset --preset
+/// "Name" file1 file2 ...</c>. Falls back to <c>--input-files &lt;tempfile&gt;</c>
+/// for selections that would overflow the 8 KB Windows command-line limit.
 /// </summary>
 [ComVisible(true)]
 [Guid(Guids.QuickConvertCommand)]
 [ClassInterface(ClassInterfaceType.None)]
-public partial class QuickConvertCommand : IExplorerCommand
+public partial class PresetSubCommand : IExplorerCommand
 {
-    private readonly string _title;
-    private readonly string _format;
-    private readonly string _tooltip;
+    private const int MaxArgListChars = 7000;
+
+    private readonly ShellPreset _preset;
+    private readonly IReadOnlyList<string> _selection;
     private readonly Guid _canonicalName;
 
-    public QuickConvertCommand(string title, string format, string tooltip)
+    public PresetSubCommand(ShellPreset preset, IReadOnlyList<string> selection)
     {
-        _title = title;
-        _format = format;
-        _tooltip = tooltip;
-        _canonicalName = GetCanonicalGuid(format);
+        _preset = preset;
+        _selection = selection;
+        _canonicalName = StableGuidFromName(preset.Name);
     }
 
-    public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
+    public int GetTitle(IShellItemArray? _, out string? ppszName)
     {
-        ppszName = _title;
+        ppszName = _preset.Name;
         return HResult.S_OK;
     }
 
-    public int GetIcon(IShellItemArray? psiItemArray, out string? ppszIcon)
+    public int GetIcon(IShellItemArray? _, out string? ppszIcon)
     {
-        ppszIcon = null;
-        return HResult.E_NOTIMPL;
+        var exe = ConverterExplorerCommand.GetExecutablePath();
+        ppszIcon = File.Exists(exe) ? $"{exe},0" : null;
+        return ppszIcon is null ? HResult.E_NOTIMPL : HResult.S_OK;
     }
 
-    public int GetToolTip(IShellItemArray? psiItemArray, out string? ppszInfotip)
+    public int GetToolTip(IShellItemArray? _, out string? ppszInfotip)
     {
-        ppszInfotip = _tooltip;
+        ppszInfotip = _preset.Folder is null
+            ? _preset.Name
+            : $"{_preset.Folder} / {_preset.Name}";
         return HResult.S_OK;
     }
 
@@ -290,52 +288,66 @@ public partial class QuickConvertCommand : IExplorerCommand
         return HResult.S_OK;
     }
 
-    public int GetState(IShellItemArray? psiItemArray, bool fOkToBeSlow, out uint pCmdState)
+    public int GetState(IShellItemArray? _, bool __, out uint pCmdState)
     {
-        pCmdState = 0; // Enabled
+        pCmdState = 0;
         return HResult.S_OK;
     }
 
     public int Invoke(IShellItemArray? psiItemArray, IntPtr pbc)
     {
-        if (psiItemArray == null)
-            return HResult.E_INVALIDARG;
-
         try
         {
-            // Get selected files and launch CLI for quick convert
-            psiItemArray.GetCount(out var count);
-            var files = new List<string>();
+            var files = _selection;
+            if (files.Count == 0 && psiItemArray is not null)
+                files = ConverterExplorerCommand.ReadShellItemPaths(psiItemArray);
+            if (files.Count == 0) return HResult.S_OK;
 
-            for (uint i = 0; i < count; i++)
+            var cli = ConverterExplorerCommand.GetCliPath();
+            if (!File.Exists(cli)) return HResult.E_FAIL;
+
+            var psi = new ProcessStartInfo
             {
-                psiItemArray.GetItemAt(i, out var shellItem);
-                if (shellItem != null)
+                FileName = cli,
+                UseShellExecute = false,
+                CreateNoWindow = false,
+            };
+            psi.ArgumentList.Add("convert-preset");
+            psi.ArgumentList.Add("--preset");
+            psi.ArgumentList.Add(_preset.Name);
+
+            // Estimate joined arg length; if too big, write a list file instead.
+            var estimate = files.Sum(f => f.Length + 3);
+            if (estimate > MaxArgListChars)
+            {
+                var listPath = Path.Combine(Path.GetTempPath(),
+                    $"ucx-input-{Guid.NewGuid():N}.txt");
+                File.WriteAllLines(listPath, files);
+                psi.ArgumentList.Add("--input-files");
+                psi.ArgumentList.Add(listPath);
+
+                var p = Process.Start(psi);
+                if (p is not null)
                 {
-                    shellItem.GetDisplayName(SIGDN.FILESYSPATH, out var path);
-                    if (!string.IsNullOrEmpty(path))
-                        files.Add(path);
+                    p.EnableRaisingEvents = true;
+                    p.Exited += (_, _) => { try { File.Delete(listPath); } catch { } };
                 }
             }
-
-            if (files.Count > 0)
+            else
             {
-                LaunchQuickConvert(files, _format);
+                foreach (var f in files) psi.ArgumentList.Add(f);
+                Process.Start(psi);
             }
-
             return HResult.S_OK;
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"PresetSubCommand.Invoke: {ex.Message}");
             return HResult.E_FAIL;
         }
     }
 
-    public int GetFlags(out uint pFlags)
-    {
-        pFlags = 0; // No subcommands
-        return HResult.S_OK;
-    }
+    public int GetFlags(out uint pFlags) { pFlags = 0; return HResult.S_OK; }
 
     public int EnumSubCommands(out IEnumExplorerCommand? ppEnum)
     {
@@ -343,222 +355,88 @@ public partial class QuickConvertCommand : IExplorerCommand
         return HResult.E_NOTIMPL;
     }
 
-    private static void LaunchQuickConvert(List<string> files, string targetFormat)
+    /// <summary>
+    /// Derive a deterministic Guid from the preset name so Explorer keeps a
+    /// stable identity across menu rebuilds (otherwise the hover-help and the
+    /// click target can desync mid-render on slow machines).
+    /// </summary>
+    private static Guid StableGuidFromName(string name)
     {
-        var exePath = GetCliPath();
-        if (string.IsNullOrEmpty(exePath))
-            return;
-
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = exePath,
-            UseShellExecute = false,
-            CreateNoWindow = false
-        };
-        startInfo.ArgumentList.Add("convert");
-        foreach (var file in files)
-            startInfo.ArgumentList.Add(file);
-        startInfo.ArgumentList.Add("-o");
-        startInfo.ArgumentList.Add(targetFormat);
-
-        System.Diagnostics.Process.Start(startInfo);
-    }
-
-    private static Guid GetCanonicalGuid(string format) => format.ToLowerInvariant() switch
-    {
-        "png" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740001"),
-        "jpg" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740002"),
-        "webp" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740003"),
-        "gif" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740004"),
-        "mp4" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740005"),
-        "mp3" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740006"),
-        "wav" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740007"),
-        "pdf" => new Guid("D00A1111-6C82-4D56-9A6D-48C2D1740008"),
-        _ => new Guid(Guids.QuickConvertCommand)
-    };
-
-    private static string GetCliPath()
-    {
-        try
-        {
-            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(
-                @"SOFTWARE\UniversalConverterX");
-            if (key != null)
-            {
-                var path = key.GetValue("InstallPath") as string;
-                if (!string.IsNullOrEmpty(path))
-                {
-                    return Path.Combine(path, "ucx.exe");
-                }
-            }
-        }
-        catch { }
-
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "ucx.exe");
+        // Mash the name into 16 bytes via SHA-1 truncated. Set version=5,
+        // variant=RFC4122 so the GUID looks well-formed to Windows.
+        Span<byte> hash = stackalloc byte[20];
+        var ok = SHA1.TryHashData(Encoding.UTF8.GetBytes("ucx-preset:" + name), hash, out _);
+        if (!ok) return Guid.NewGuid();
+        var bytes = hash[..16].ToArray();
+        bytes[7] = (byte)((bytes[7] & 0x0F) | 0x50); // version 5
+        bytes[8] = (byte)((bytes[8] & 0x3F) | 0x80); // RFC 4122
+        return new Guid(bytes);
     }
 }
 
-/// <summary>
-/// Separator command
-/// </summary>
+/// <summary>Visual separator before the trailing "More options..." entry.</summary>
 [ComVisible(true)]
 [Guid(Guids.SeparatorCommand)]
 [ClassInterface(ClassInterfaceType.None)]
 public partial class SeparatorCommand : IExplorerCommand
 {
-    public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
-    {
-        ppszName = null;
-        return HResult.S_OK;
-    }
-
-    public int GetIcon(IShellItemArray? psiItemArray, out string? ppszIcon)
-    {
-        ppszIcon = null;
-        return HResult.E_NOTIMPL;
-    }
-
-    public int GetToolTip(IShellItemArray? psiItemArray, out string? ppszInfotip)
-    {
-        ppszInfotip = null;
-        return HResult.E_NOTIMPL;
-    }
-
-    public int GetCanonicalName(out Guid pguidCommandName)
-    {
-        pguidCommandName = new Guid(Guids.SeparatorCommand);
-        return HResult.S_OK;
-    }
-
-    public int GetState(IShellItemArray? psiItemArray, bool fOkToBeSlow, out uint pCmdState)
-    {
-        pCmdState = 0;
-        return HResult.S_OK;
-    }
-
-    public int Invoke(IShellItemArray? psiItemArray, IntPtr pbc)
-    {
-        return HResult.S_OK;
-    }
-
-    public int GetFlags(out uint pFlags)
-    {
-        pFlags = 8; // ECF_ISSEPARATOR
-        return HResult.S_OK;
-    }
-
-    public int EnumSubCommands(out IEnumExplorerCommand? ppEnum)
-    {
-        ppEnum = null;
-        return HResult.E_NOTIMPL;
-    }
+    public int GetTitle(IShellItemArray? _, out string? n) { n = null; return HResult.S_OK; }
+    public int GetIcon(IShellItemArray? _, out string? i) { i = null; return HResult.E_NOTIMPL; }
+    public int GetToolTip(IShellItemArray? _, out string? t) { t = null; return HResult.E_NOTIMPL; }
+    public int GetCanonicalName(out Guid g) { g = new Guid(Guids.SeparatorCommand); return HResult.S_OK; }
+    public int GetState(IShellItemArray? _, bool __, out uint s) { s = 0; return HResult.S_OK; }
+    public int Invoke(IShellItemArray? _, IntPtr __) { return HResult.S_OK; }
+    public int GetFlags(out uint f) { f = 8; return HResult.S_OK; } // ECF_ISSEPARATOR
+    public int EnumSubCommands(out IEnumExplorerCommand? e) { e = null; return HResult.E_NOTIMPL; }
 }
 
-/// <summary>
-/// Open app command
-/// </summary>
+/// <summary>"More options..." -- opens the full UCX UI with the selection.</summary>
 [ComVisible(true)]
 [Guid(Guids.OpenAppCommand)]
 [ClassInterface(ClassInterfaceType.None)]
 public partial class OpenAppCommand : IExplorerCommand
 {
-    public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
+    public int GetTitle(IShellItemArray? _, out string? n) { n = "More options..."; return HResult.S_OK; }
+
+    public int GetIcon(IShellItemArray? _, out string? i)
     {
-        ppszName = "More options...";
+        var exe = ConverterExplorerCommand.GetExecutablePath();
+        i = File.Exists(exe) ? $"{exe},0" : null;
+        return i is null ? HResult.E_NOTIMPL : HResult.S_OK;
+    }
+
+    public int GetToolTip(IShellItemArray? _, out string? t)
+    {
+        t = "Open UniversalConverter X for the full conversion UI";
         return HResult.S_OK;
     }
 
-    public int GetIcon(IShellItemArray? psiItemArray, out string? ppszIcon)
-    {
-        ppszIcon = null;
-        return HResult.E_NOTIMPL;
-    }
-
-    public int GetToolTip(IShellItemArray? psiItemArray, out string? ppszInfotip)
-    {
-        ppszInfotip = "Open UniversalConverter X for more conversion options";
-        return HResult.S_OK;
-    }
-
-    public int GetCanonicalName(out Guid pguidCommandName)
-    {
-        pguidCommandName = new Guid(Guids.OpenAppCommand);
-        return HResult.S_OK;
-    }
-
-    public int GetState(IShellItemArray? psiItemArray, bool fOkToBeSlow, out uint pCmdState)
-    {
-        pCmdState = 0;
-        return HResult.S_OK;
-    }
+    public int GetCanonicalName(out Guid g) { g = new Guid(Guids.OpenAppCommand); return HResult.S_OK; }
+    public int GetState(IShellItemArray? _, bool __, out uint s) { s = 0; return HResult.S_OK; }
 
     public int Invoke(IShellItemArray? psiItemArray, IntPtr pbc)
     {
-        // Launch main UI
-        var exePath = GetExecutablePath();
-        if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
-        {
-            var files = new List<string>();
-            if (psiItemArray != null)
-            {
-                psiItemArray.GetCount(out var count);
-                for (uint i = 0; i < count; i++)
-                {
-                    psiItemArray.GetItemAt(i, out var item);
-                    if (item == null)
-                        continue;
-
-                    item.GetDisplayName(SIGDN.FILESYSPATH, out var path);
-                    if (!string.IsNullOrEmpty(path))
-                        files.Add(path);
-                }
-            }
-
-            var startInfo = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = exePath,
-                UseShellExecute = false
-            };
-
-            foreach (var file in files)
-                startInfo.ArgumentList.Add(file);
-
-            System.Diagnostics.Process.Start(startInfo);
-        }
-        return HResult.S_OK;
-    }
-
-    public int GetFlags(out uint pFlags)
-    {
-        pFlags = 32; // Separator before
-        return HResult.S_OK;
-    }
-
-    public int EnumSubCommands(out IEnumExplorerCommand? ppEnum)
-    {
-        ppEnum = null;
-        return HResult.E_NOTIMPL;
-    }
-
-    private static string GetExecutablePath()
-    {
         try
         {
-            using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(
-                @"SOFTWARE\UniversalConverterX");
-            if (key != null)
-            {
-                var path = key.GetValue("InstallPath") as string;
-                if (!string.IsNullOrEmpty(path))
-                    return Path.Combine(path, "UniversalConverterX.UI.exe");
-            }
-        }
-        catch { }
+            var exe = ConverterExplorerCommand.GetExecutablePath();
+            if (!File.Exists(exe)) return HResult.E_FAIL;
 
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "UniversalConverterX.UI.exe");
+            var paths = psiItemArray is null
+                ? ConverterExplorerCommand.LastSelectionPaths
+                : ConverterExplorerCommand.ReadShellItemPaths(psiItemArray);
+
+            var psi = new ProcessStartInfo { FileName = exe, UseShellExecute = false };
+            foreach (var p in paths) psi.ArgumentList.Add(p);
+            Process.Start(psi);
+            return HResult.S_OK;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"OpenAppCommand.Invoke: {ex.Message}");
+            return HResult.E_FAIL;
+        }
     }
+
+    public int GetFlags(out uint f) { f = 32; return HResult.S_OK; } // ECF_SEPARATORBEFORE
+    public int EnumSubCommands(out IEnumExplorerCommand? e) { e = null; return HResult.E_NOTIMPL; }
 }

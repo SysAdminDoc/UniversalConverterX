@@ -45,6 +45,12 @@ public class Program
                 .WithDescription("Bind a localhost HTTP API for headless integration")
                 .WithExample("serve")
                 .WithExample("serve", "--port", "17654");
+
+            config.AddCommand<ConvertPresetCommand>("convert-preset")
+                .WithDescription("Run a named conversion preset (used by the right-click shell extension)")
+                .WithExample("convert-preset", "--list")
+                .WithExample("convert-preset", "--preset", "To MP4 (H.264 1080p)", "video.mov")
+                .WithExample("convert-preset", "--preset", "To PNG", "--input-files", "files.txt");
         });
 
         return app.Run(args);

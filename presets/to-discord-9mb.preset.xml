@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To Discord (under 10 MB)</Name>
+    <Folder>Video</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_discord</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--target-mb</Arg>
+        <Arg>9.5</Arg>
+        <Arg>--codec</Arg>
+        <Arg>libx264</Arg>
+    </Args>
+</Preset>

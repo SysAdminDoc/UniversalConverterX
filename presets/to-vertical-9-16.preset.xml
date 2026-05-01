@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To 9:16 Vertical (TikTok / Reels / Shorts)</Name>
+    <Folder>Video</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_9x16</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>social-9x16</Arg>
+    </Args>
+</Preset>

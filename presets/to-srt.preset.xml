@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To SRT</Name>
+    <Folder>Subtitles</Folder>
+    <InputTypes>
+        <Extension>vtt</Extension>
+        <Extension>ass</Extension>
+        <Extension>ssa</Extension>
+        <Extension>sub</Extension>
+        <Extension>tmp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>srt</Arg>
+    </Args>
+</Preset>

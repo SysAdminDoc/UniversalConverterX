@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Pack to 7z</Name>
+    <Folder>Archive</Folder>
+    <!-- Empty InputTypes = match any extension. The shell extension also
+         needs to handle folders, which the runner respects. -->
+    <InputTypes/>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>7z</OutputExtension>
+    <Engine>archive</Engine>
+    <InvocationMode>batch-single-output</InvocationMode>
+    <Args>
+        <Arg>pack</Arg>
+        <Arg>--format</Arg>
+        <Arg>7z</Arg>
+        <Arg>--level</Arg>
+        <Arg>5</Arg>
+    </Args>
+</Preset>
