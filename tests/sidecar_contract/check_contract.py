@@ -53,6 +53,8 @@ KNOWN_EVENTS = {
     "pdf_info",      # pdftools.info — page count + metadata for a PDF
     "pdf_part",      # pdftools.split — produced PDF part (range + path)
     "subtitle",      # subconvert — produced subtitle file (one per input)
+    "font",          # fontconvert — produced font file
+    "font_info",     # fontconvert.info — sfnt / flavor / family probe
 }
 
 

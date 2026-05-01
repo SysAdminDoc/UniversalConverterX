@@ -80,6 +80,7 @@ public sealed partial class ToolboxPage : Page
         DocumentTools.Add(new ToolboxTile("archive", "Archive Tool", "Pack / unpack 7z, ZIP, TAR, RAR (read), ISO, CAB, MSI", "\uE7B8", orange, "Ready", green, false, "7-Zip"));
         DocumentTools.Add(new ToolboxTile("pdf-tools", "PDF Tools", "Merge / split / rotate / extract / encrypt / compress (pikepdf)", "\uEA90", red, "Ready", green, false, "pikepdf"));
         DocumentTools.Add(new ToolboxTile("subtitle-converter", "Subtitle Converter", "SRT / VTT / ASS / SSA / SUB conversion + retime", "\uE93B", blue, "Ready", green, false, "pysubs2"));
+        DocumentTools.Add(new ToolboxTile("font-converter", "Font Converter", "TTF / OTF / WOFF / WOFF2 (fonttools + Brotli)", "\uE8D2", green, "Ready", green, false, "fontTools"));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));

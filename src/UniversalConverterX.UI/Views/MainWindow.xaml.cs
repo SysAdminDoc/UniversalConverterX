@@ -38,6 +38,7 @@ public sealed partial class MainWindow : Window
         new("Archive Tool", "Pack / unpack 7z / ZIP / TAR / RAR (read) / ISO via 7-Zip", "archive"),
         new("PDF Tools", "Merge / split / rotate / extract / encrypt / compress PDFs (pikepdf)", "pdf-tools"),
         new("Subtitle Converter", "Convert SRT / VTT / ASS / SSA / SUB plus shift / retime", "subtitle-converter"),
+        new("Font Converter", "Convert TTF / OTF / WOFF / WOFF2 (fonttools)", "font-converter"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -149,6 +150,7 @@ public sealed partial class MainWindow : Window
             "archive" => typeof(ArchivePage),
             "pdf-tools" => typeof(PdfToolsPage),
             "subtitle-converter" => typeof(SubtitleConverterPage),
+            "font-converter" => typeof(FontConverterPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -254,7 +256,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"
