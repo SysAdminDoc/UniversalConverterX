@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HAR to WARC</Name>
+    <Folder>Web</Folder>
+    <InputTypes>
+        <Extension>har</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>warc</OutputExtension>
+    <Engine>webarchive</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>har-to-warc</Arg>
+    </Args>
+</Preset>

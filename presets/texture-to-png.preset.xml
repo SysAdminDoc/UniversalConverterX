@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Texture (DDS/KTX/EXR) to PNG</Name>
+    <Folder>Image</Folder>
+    <InputTypes>
+        <Extension>dds</Extension>
+        <Extension>ktx</Extension>
+        <Extension>ktx2</Extension>
+        <Extension>exr</Extension>
+        <Extension>tga</Extension>
+        <Extension>hdr</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>texturekit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>
