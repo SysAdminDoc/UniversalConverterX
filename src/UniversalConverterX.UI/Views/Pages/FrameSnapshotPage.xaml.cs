@@ -36,7 +36,16 @@ public sealed partial class FrameSnapshotPage : Page
             "UniversalConverterX",
             "Snapshots");
         _outputDirectory = _defaultOutputDirectory;
-        Directory.CreateDirectory(_defaultOutputDirectory);
+        // Locked-down profiles can have MyPictures redirected to read-only
+        // network shares; never crash the page just because we couldn't
+        // pre-create the default folder.
+        try { Directory.CreateDirectory(_defaultOutputDirectory); }
+        catch
+        {
+            _defaultOutputDirectory = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Snapshots");
+            _outputDirectory = _defaultOutputDirectory;
+            try { Directory.CreateDirectory(_defaultOutputDirectory); } catch { }
+        }
 
         _ffmpegPath = FindExecutable("ffmpeg.exe");
         QueueList.ItemsSource = _queue;
@@ -141,7 +150,12 @@ public sealed partial class FrameSnapshotPage : Page
             return;
 
         _outputDirectory = folder.Path;
-        Directory.CreateDirectory(_outputDirectory);
+        try { Directory.CreateDirectory(_outputDirectory); }
+        catch (Exception ex)
+        {
+            OutputDirectoryBox.Text = $"(unavailable: {ex.Message})";
+            return;
+        }
         OutputDirectoryBox.Text = _outputDirectory;
         UpdateUi();
     }
@@ -263,7 +277,14 @@ public sealed partial class FrameSnapshotPage : Page
         }
 
         if (_outputDirectory is not null)
-            Directory.CreateDirectory(_outputDirectory);
+        {
+            try { Directory.CreateDirectory(_outputDirectory); }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                return;
+            }
+        }
 
         _cts = new CancellationTokenSource();
         ExtractButton.IsEnabled = false;
@@ -340,7 +361,17 @@ public sealed partial class FrameSnapshotPage : Page
         CancellationToken cancellationToken)
     {
         var outputRoot = _outputDirectory ?? Path.GetDirectoryName(job.Path) ?? _defaultOutputDirectory;
-        Directory.CreateDirectory(outputRoot);
+        try { Directory.CreateDirectory(outputRoot); }
+        catch (Exception ex)
+        {
+            return new SnapshotJobResult(
+                Success: false,
+                Cancelled: false,
+                OutputPath: outputRoot,
+                FirstFilePath: "",
+                ExportedCount: 0,
+                ErrorMessage: $"Output folder unavailable: {ex.Message}");
+        }
 
         var exported = 0;
         var firstOutput = "";

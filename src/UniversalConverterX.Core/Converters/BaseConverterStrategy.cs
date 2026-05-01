@@ -238,7 +238,12 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                RedirectStandardInput = true
+                // Redirect stdin so we can immediately close it. Without this, CLI
+                // tools that quietly read from stdin (Ghostscript, Pandoc with no
+                // input, ImageMagick in some interactive flows) block forever.
+                RedirectStandardInput = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding  = Encoding.UTF8,
             },
             EnableRaisingEvents = true
         };
@@ -260,6 +265,8 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         };
 
         process.Start();
+        // Close stdin immediately — see comment on RedirectStandardInput above.
+        try { process.StandardInput.Close(); } catch { /* never fatal */ }
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
 
@@ -269,15 +276,27 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         }
         catch (OperationCanceledException)
         {
+            try { process.Kill(entireProcessTree: true); } catch { }
+            // Give the OS a moment to flush pipes after the kill before we stop
+            // reading. Without this the async readers can swallow the last burst
+            // of stderr that often contains the real failure reason.
             try
             {
-                process.Kill(true);
+                using var graceCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                await process.WaitForExitAsync(graceCts.Token).ConfigureAwait(false);
             }
-            catch { }
+            catch { /* timed out — proceed */ }
             throw;
         }
 
-        var exitCode = process.ExitCode;
+        // Wait for output buffers to drain after natural exit. Without WaitForExit
+        // (no token), BeginOutput/Error subscribers can still be flushing data when
+        // we read process.ExitCode below.
+        try { process.WaitForExit(2_000); } catch { }
+
+        int exitCode;
+        try { exitCode = process.ExitCode; }
+        catch (InvalidOperationException) { exitCode = -1; }
         var success = exitCode == 0 && File.Exists(job.OutputPath) && new FileInfo(job.OutputPath).Length > 0;
 
         return new ProcessResult

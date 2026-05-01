@@ -13,7 +13,10 @@ namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class DownloaderPage : Page
 {
+    private const int FinishedCap = 200;
+
     private readonly ISidecarRunner _runner;
+    private readonly IHistoryService _history;
     private readonly ObservableCollection<DownloadJobItem> _queue = [];
     private readonly ObservableCollection<FinishedDownloadItem> _finished = [];
     private CancellationTokenSource? _cts;
@@ -22,11 +25,21 @@ public sealed partial class DownloaderPage : Page
     public DownloaderPage()
     {
         InitializeComponent();
-        _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _runner  = App.Services.GetRequiredService<ISidecarRunner>();
+        _history = App.Services.GetRequiredService<IHistoryService>();
         _outputDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "Downloads", "UniversalConverterX");
-        Directory.CreateDirectory(_outputDir);
+        // Locked-down profiles, redirected Downloads folders on read-only NAS,
+        // and group-policy-restricted UserProfile paths can all reject this
+        // creation. Don't crash the app — fall back to %TEMP% so the user can
+        // still queue downloads.
+        try { Directory.CreateDirectory(_outputDir); }
+        catch
+        {
+            _outputDir = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Downloads");
+            try { Directory.CreateDirectory(_outputDir); } catch { /* nothing more to do */ }
+        }
 
         QueueList.ItemsSource = _queue;
         FinishedList.ItemsSource = _finished;
@@ -200,6 +213,7 @@ public sealed partial class DownloaderPage : Page
                 }));
 
                 SidecarResult result;
+                var startedAt = DateTime.UtcNow;
                 try
                 {
                     result = await _runner.RunAsync("streamkeep", args, progress, log, _cts.Token);
@@ -223,6 +237,28 @@ public sealed partial class DownloaderPage : Page
                 }
 
                 AddFinishedItem(job, result);
+
+                // Persist to History so the dashboard tracks downloads, just
+                // like Compressor and the preset pages do. Skip user-cancelled
+                // jobs to keep the failed count meaningful.
+                if (result.ErrorCode != "cancelled")
+                {
+                    _ = _history.LogAsync(new HistoryRecord
+                    {
+                        Timestamp       = startedAt,
+                        Engine          = "streamkeep",
+                        Action          = "download",
+                        SourcePath      = job.Url,
+                        OutputPath      = result.Success ? result.OutputPath : null,
+                        SourceBytes     = null,
+                        OutputBytes     = result.Success ? result.SizeBytes : null,
+                        DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds,
+                        Success         = result.Success,
+                        ErrorCode       = result.ErrorCode,
+                        ErrorMessage    = result.ErrorMessage,
+                        Profile         = job.OptionSummary,
+                    });
+                }
 
                 if (result.ErrorCode == "cancelled")
                     break;
@@ -291,6 +327,9 @@ public sealed partial class DownloaderPage : Page
             Glyph = result.Success ? "\uE73E" : "\uE711",
             AccentBrush = result.Success ? successBrush : errorBrush,
         });
+
+        while (_finished.Count > FinishedCap)
+            _finished.RemoveAt(_finished.Count - 1);
     }
 
     private void UpdateUi()

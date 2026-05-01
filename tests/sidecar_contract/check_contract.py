@@ -243,7 +243,8 @@ KNOWN_EVENTS = {
     "scope_doc",           # scope — Tektronix / LeCroy / Keysight oscilloscope
     "retro_image",         # retroimg — Atari ST / ZX Spectrum / Apple II / WBMP
     "retro_disk",          # retrodisks — Apple II / C64 / Atari ATR / ZX TAP
-    "legacy_doc",          # legacydocs — WordStar / MS Write / Lotus Word Pro
+    # legacy_doc is shared by legacyoffice (v2.13) and legacydocs (v2.19); both
+    # emit the same event because the consumer treats them identically.
     "test_report",         # testreports — JUnit / TAP / Allure / Cucumber
     "dbexport_doc",        # dbexport — DB2 IXF / BCP / MySQL dump / SQL*Loader
     "demo_audio",          # demosound — YM / AY / SAP demoscene audio

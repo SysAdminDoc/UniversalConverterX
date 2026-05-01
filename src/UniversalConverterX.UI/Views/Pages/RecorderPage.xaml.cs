@@ -36,7 +36,13 @@ public sealed partial class RecorderPage : Page
             "UniversalConverterX",
             "Recordings");
         _outputDirectory = _defaultOutputDirectory;
-        Directory.CreateDirectory(_outputDirectory);
+        try { Directory.CreateDirectory(_outputDirectory); }
+        catch
+        {
+            _defaultOutputDirectory = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Recordings");
+            _outputDirectory = _defaultOutputDirectory;
+            try { Directory.CreateDirectory(_outputDirectory); } catch { }
+        }
 
         QueueList.ItemsSource = _queue;
         FinishedList.ItemsSource = _finished;
@@ -61,7 +67,15 @@ public sealed partial class RecorderPage : Page
             return;
 
         _outputDirectory = folder.Path;
-        Directory.CreateDirectory(_outputDirectory);
+        try { Directory.CreateDirectory(_outputDirectory); }
+        catch (Exception ex)
+        {
+            // Folder picker can return a path the app no longer has rights to
+            // (network share dropped, drive ejected). Surface the error and
+            // fall back to the prior directory so the next Start succeeds.
+            OutputDirectoryBox.Text = $"(unavailable: {ex.Message})";
+            return;
+        }
         OutputDirectoryBox.Text = _outputDirectory;
         UpdateUi();
     }
@@ -265,7 +279,12 @@ public sealed partial class RecorderPage : Page
         if (pending.Count == 0)
             return;
 
-        Directory.CreateDirectory(_outputDirectory);
+        try { Directory.CreateDirectory(_outputDirectory); }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            return;
+        }
         _cts = new CancellationTokenSource();
         RecordButton.IsEnabled = false;
         ClearQueueButton.IsEnabled = false;

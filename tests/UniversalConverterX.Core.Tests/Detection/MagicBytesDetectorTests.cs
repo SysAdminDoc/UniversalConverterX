@@ -327,6 +327,101 @@ public class MagicBytesDetectorTests
         format!.Extension.Should().Be(expectedExt);
     }
 
+    [Fact]
+    public void DetectFormat_WebmEbml_ShouldDistinguishFromMatroska()
+    {
+        // EBML header (1A 45 DF A3) followed by a DocType element 0x4282
+        // (length-prefix 0x84 = 4 bytes) carrying "webm".
+        var bytes = new byte[]
+        {
+            0x1A, 0x45, 0xDF, 0xA3, 0x9F, 0x42, 0x86, 0x81,
+            0x01, 0x42, 0xF7, 0x81, 0x01, 0x42, 0xF2, 0x81,
+            0x04, 0x42, 0xF3, 0x81, 0x08,
+            0x42, 0x82, 0x84, 0x77, 0x65, 0x62, 0x6D, // 0x4282 + "webm"
+        };
+        var tempFile = CreateTempFileWithContent(bytes, ".webm");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("webm");
+            format.Category.Should().Be(FormatCategory.Video);
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
+    [Fact]
+    public void DetectFormat_MatroskaEbml_ShouldDistinguishFromWebm()
+    {
+        var bytes = new byte[]
+        {
+            0x1A, 0x45, 0xDF, 0xA3, 0x9F, 0x42, 0x86, 0x81,
+            0x01, 0x42, 0xF7, 0x81, 0x01, 0x42, 0xF2, 0x81,
+            0x04, 0x42, 0xF3, 0x81, 0x08,
+            0x42, 0x82, 0x88,
+            0x6D, 0x61, 0x74, 0x72, 0x6F, 0x73, 0x6B, 0x61, // "matroska"
+        };
+        var tempFile = CreateTempFileWithContent(bytes, ".mkv");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("mkv");
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
+    [Fact]
+    public void DetectFormat_GlbBinary_ShouldNotBeMistakenForGltf()
+    {
+        // Binary glTF — 'glTF' magic + version 2 + length placeholder.
+        var bytes = new byte[]
+        {
+            0x67, 0x6C, 0x54, 0x46,
+            0x02, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        };
+        var tempFile = CreateTempFileWithContent(bytes, ".glb");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("glb");
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
+    [Fact]
+    public void DetectFormat_BinaryStl_ShouldDetectViaExtension()
+    {
+        // Binary STL has no leading magic; the heuristic combines minimum size
+        // (84 bytes = 80-byte header + uint32 triangle count) with the
+        // .stl extension.
+        var bytes = new byte[120];
+        var tempFile = CreateTempFileWithContent(bytes, ".stl");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("stl");
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
+    [Fact]
+    public void DetectFormat_AsciiStl_ShouldDetectViaSolidMagic()
+    {
+        var bytes = System.Text.Encoding.ASCII.GetBytes("solid cube\nfacet normal 0 0 0\n");
+        var tempFile = CreateTempFileWithContent(bytes, ".stl");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("stl");
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
     private static string CreateTempFileWithContent(byte[] content, string extension)
     {
         var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}{extension}");

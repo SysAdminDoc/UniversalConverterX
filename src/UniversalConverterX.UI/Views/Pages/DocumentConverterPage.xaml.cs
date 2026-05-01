@@ -167,7 +167,13 @@ public sealed partial class DocumentConverterPage : Page
         var outDir = string.IsNullOrEmpty(_outputDir)
             ? System.IO.Path.GetDirectoryName(_files[0].Path) ?? Environment.CurrentDirectory
             : _outputDir;
-        Directory.CreateDirectory(outDir);
+        try { Directory.CreateDirectory(outDir); }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            ConvertButton.IsEnabled = true;
+            return;
+        }
 
         var args = new List<string>
         {

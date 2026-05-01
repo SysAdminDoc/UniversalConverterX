@@ -21,6 +21,13 @@ public sealed partial class CompressorPage : Page
         ".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".wmv", ".ts", ".mts", ".m4v"
     ];
 
+    /// <summary>Hard cap on chars retained in the inline log panel — without
+    /// this a 4-hour two-pass encode emits enough lines to make the TextBlock
+    /// unresponsive.</summary>
+    private const int ProgressLogMaxChars = 64_000;
+    private const int FinishedCap = 200;
+    private const int FolderAddCap = 500;
+
     private readonly ISidecarRunner _runner;
     private readonly IHistoryService _history;
     private readonly ObservableCollection<CompressionFileItem> _files = [];
@@ -145,31 +152,63 @@ public sealed partial class CompressorPage : Page
     private void AddFolder(string path)
     {
         if (!Directory.Exists(path))
+        {
+            StatusText.Text = $"Folder not found: {path}";
             return;
+        }
+
+        IEnumerable<string> entries;
+        try
+        {
+            entries = Directory.EnumerateFiles(path)
+                .Where(f => VideoExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase));
+        }
+        catch (UnauthorizedAccessException)
+        {
+            StatusText.Text = "Permission denied for that folder.";
+            return;
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Could not read folder: {ex.Message}";
+            return;
+        }
 
         var added = 0;
-        foreach (var file in Directory.EnumerateFiles(path)
-                     .Where(f => VideoExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase))
-                     .Take(500))
+        var truncated = false;
+        foreach (var file in entries)
         {
+            if (added >= FolderAddCap) { truncated = true; break; }
             if (AddFile(file, updateUi: false))
                 added++;
         }
 
-        StatusText.Text = added == 0
-            ? "No supported video files were added from that folder."
-            : $"Added {added} videos from {path}.";
+        if (added == 0)
+            StatusText.Text = "No supported video files were added from that folder.";
+        else if (truncated)
+            StatusText.Text = $"Added {added} videos from {path} (capped at {FolderAddCap}).";
+        else
+            StatusText.Text = $"Added {added} videos from {path}.";
         UpdateUi();
     }
 
     private bool AddFile(string path, bool updateUi = true)
     {
-        if (_files.Any(f => f.Path == path))
+        if (_files.Any(f => string.Equals(f.Path, path, StringComparison.OrdinalIgnoreCase)))
             return false;
 
-        var info = new FileInfo(path);
-        if (!info.Exists)
+        FileInfo info;
+        long size;
+        try
+        {
+            info = new FileInfo(path);
+            if (!info.Exists) return false;
+            size = info.Length;
+        }
+        catch
+        {
             return false;
+        }
 
         if (!VideoExtensions.Contains(info.Extension, StringComparer.OrdinalIgnoreCase))
             return false;
@@ -179,8 +218,8 @@ public sealed partial class CompressorPage : Page
             Path = path,
             FileName = info.Name,
             Extension = info.Extension.TrimStart('.').ToUpperInvariant(),
-            SourceSizeBytes = info.Length,
-            SourceSummary = $"{FormatSize(info.Length)} - {info.Extension.TrimStart('.').ToUpperInvariant()}",
+            SourceSizeBytes = size,
+            SourceSummary = $"{FormatSize(size)} - {info.Extension.TrimStart('.').ToUpperInvariant()}",
             PresetSummary = SelectedPresetLabel(),
             Progress = 0,
             StatusText = "Queued",
@@ -264,7 +303,14 @@ public sealed partial class CompressorPage : Page
             return;
 
         if (_outputDirectory is not null)
-            Directory.CreateDirectory(_outputDirectory);
+        {
+            try { Directory.CreateDirectory(_outputDirectory); }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                return;
+            }
+        }
 
         var preset = SelectedPresetTag();
         var jobs = _files.ToList();
@@ -311,7 +357,18 @@ public sealed partial class CompressorPage : Page
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
                 {
-                    ProgressLog.Text += $"[{l.Level}] {l.Message}\n";
+                    var line = $"[{l.Level}] {l.Message}\n";
+                    var combined = ProgressLog.Text + line;
+                    // Keep the tail when we exceed the cap; the most recent
+                    // lines are what the user is watching anyway.
+                    if (combined.Length > ProgressLogMaxChars)
+                    {
+                        var trimmed = combined.Length - ProgressLogMaxChars;
+                        // Snap to the next newline so we never start mid-line.
+                        var nl = combined.IndexOf('\n', trimmed);
+                        combined = nl >= 0 ? combined[(nl + 1)..] : combined[trimmed..];
+                    }
+                    ProgressLog.Text = combined;
                 }));
 
                 var jobStartedAt = DateTime.UtcNow;
@@ -430,6 +487,9 @@ public sealed partial class CompressorPage : Page
             Glyph = result.Success ? "\uE73E" : "\uE711",
             AccentBrush = result.Success ? successBrush : errorBrush,
         });
+
+        while (_finished.Count > FinishedCap)
+            _finished.RemoveAt(_finished.Count - 1);
     }
 
     private void UpdateUi()

@@ -323,7 +323,14 @@ public sealed partial class EditorPage : Page
         }
 
         if (_outputDirectory is not null)
-            Directory.CreateDirectory(_outputDirectory);
+        {
+            try { Directory.CreateDirectory(_outputDirectory); }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                return;
+            }
+        }
 
         var pending = _files.ToList();
         var completed = 0;
@@ -363,7 +370,13 @@ public sealed partial class EditorPage : Page
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
                 {
-                    ProgressLog.Text += $"[{l.Level}] {l.Message}\n";
+                    var combined = ProgressLog.Text + $"[{l.Level}] {l.Message}\n";
+                    if (combined.Length > 64_000)
+                    {
+                        var nl = combined.IndexOf('\n', combined.Length - 64_000);
+                        combined = nl >= 0 ? combined[(nl + 1)..] : combined[(combined.Length - 64_000)..];
+                    }
+                    ProgressLog.Text = combined;
                 }));
 
                 SidecarResult result;
@@ -587,6 +600,10 @@ public sealed partial class EditorPage : Page
             Glyph = result.Success ? "\uE73E" : "\uE711",
             AccentBrush = result.Success ? successBrush : errorBrush,
         });
+
+        // Bound the in-session list — same rationale as Converter/Compressor.
+        while (_finished.Count > 200)
+            _finished.RemoveAt(_finished.Count - 1);
     }
 
     private void Undo_Click(object sender, RoutedEventArgs e)

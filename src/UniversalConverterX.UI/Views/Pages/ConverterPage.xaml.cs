@@ -2,15 +2,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
-using UniversalConverterX.Core.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -39,6 +37,14 @@ public sealed partial class ConverterPage : Page
         "PDF", "DOC", "DOCX", "ODT", "TXT", "RTF", "MD", "HTML", "EPUB"
     };
 
+    /// <summary>Cap the in-session finished list so a long batch can't pile up
+    /// indefinitely in memory across multiple conversions on the same page.</summary>
+    private const int FinishedCap = 200;
+
+    /// <summary>Soft limit when adding folders so a stray giant directory doesn't
+    /// pin the UI thread building thousands of FileItem rows.</summary>
+    private const int FolderAddCap = 500;
+
     private readonly IConversionOrchestrator _orchestrator;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
@@ -49,10 +55,10 @@ public sealed partial class ConverterPage : Page
     public ConverterPage()
     {
         InitializeComponent();
-
-        var toolsPath = GetDefaultToolsPath();
-        var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
-        _orchestrator = new ConversionOrchestrator(options);
+        // Resolve the singleton orchestrator from DI rather than newing up a
+        // private one — every prior page navigation built a fresh registry of
+        // 13 converter strategies for no reason.
+        _orchestrator = App.Services.GetRequiredService<IConversionOrchestrator>();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
@@ -161,37 +167,75 @@ public sealed partial class ConverterPage : Page
     private void AddFolder(string path)
     {
         if (!Directory.Exists(path))
+        {
+            StatusText.Text = $"Folder not found: {path}";
             return;
+        }
+
+        IEnumerable<string> entries;
+        try { entries = Directory.EnumerateFiles(path); }
+        catch (UnauthorizedAccessException)
+        {
+            StatusText.Text = "Permission denied for that folder.";
+            return;
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Could not read folder: {ex.Message}";
+            return;
+        }
 
         var added = 0;
-        foreach (var file in Directory.EnumerateFiles(path).Take(500))
+        var examined = 0;
+        var truncated = false;
+        foreach (var file in entries)
         {
+            examined++;
+            if (added >= FolderAddCap) { truncated = true; break; }
             if (AddFile(file, updateUi: false))
                 added++;
         }
 
-        StatusText.Text = added == 0
-            ? "No new files were added from that folder."
-            : $"Added {added} files from {path}.";
+        if (added == 0)
+            StatusText.Text = "No new files were added from that folder.";
+        else if (truncated)
+            StatusText.Text = $"Added {added} files from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).";
+        else
+            StatusText.Text = $"Added {added} files from {path}.";
         UpdateUI();
     }
 
     private bool AddFile(string path, bool updateUi = true)
     {
-        if (_files.Any(f => f.Path == path))
+        // Case-insensitive on Windows so dropping the same file with a
+        // different casing doesn't double-queue it. Compare full paths so a
+        // user dragging both `clip.mp4` and `.\clip.mp4` resolves to one.
+        if (_files.Any(f => string.Equals(f.Path, path, StringComparison.OrdinalIgnoreCase)))
             return false;
 
-        var fileInfo = new FileInfo(path);
-        if (!fileInfo.Exists)
+        FileInfo fileInfo;
+        long size;
+        try
+        {
+            fileInfo = new FileInfo(path);
+            if (!fileInfo.Exists)
+                return false;
+            // Capture size in the same try so a delete-between-Exists-and-Length
+            // race is downgraded from an exception to a skipped file.
+            size = fileInfo.Length;
+        }
+        catch (Exception)
+        {
             return false;
+        }
 
         _files.Add(new FileItem
         {
             Path = path,
             FileName = fileInfo.Name,
             Extension = fileInfo.Extension.TrimStart('.').ToUpperInvariant(),
-            FileSize = FormatSize(fileInfo.Length),
-            Size = fileInfo.Length,
+            FileSize = FormatSize(size),
+            Size = size,
             FormatSummary = BuildFormatSummary(fileInfo.Extension),
             StatusText = "Queued",
             Progress = 0,
@@ -368,7 +412,14 @@ public sealed partial class ConverterPage : Page
             return;
 
         if (_outputDirectory is not null)
-            Directory.CreateDirectory(_outputDirectory);
+        {
+            try { Directory.CreateDirectory(_outputDirectory); }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                return;
+            }
+        }
 
         _cancellationTokenSource = new CancellationTokenSource();
         ConvertButton.IsEnabled = false;
@@ -508,6 +559,11 @@ public sealed partial class ConverterPage : Page
             Glyph = result.Success ? "\uE73E" : "\uE711",
             AccentBrush = result.Success ? successBrush : errorBrush,
         });
+
+        // Bound the in-session list. The full audit log lives in History; this
+        // collection just powers the "Finished" tab on the page itself.
+        while (_finishedFiles.Count > FinishedCap)
+            _finishedFiles.RemoveAt(_finishedFiles.Count - 1);
     }
 
     private ConversionJob CreateJob(string inputPath, string outputFormat)
@@ -587,24 +643,6 @@ public sealed partial class ConverterPage : Page
         }
 
         return $"{size:F1} {suffixes[i]}";
-    }
-
-    private static string GetDefaultToolsPath()
-    {
-        var locations = new[]
-        {
-            Path.Combine(AppContext.BaseDirectory, "tools"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "UniversalConverterX", "tools"),
-        };
-
-        foreach (var loc in locations)
-        {
-            if (Directory.Exists(loc))
-                return loc;
-        }
-
-        return locations[0];
     }
 
     private enum FileCategory

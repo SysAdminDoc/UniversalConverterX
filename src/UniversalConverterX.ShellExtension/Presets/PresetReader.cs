@@ -19,8 +19,13 @@ public sealed record ShellPreset(
     {
         if (InputTypes.Count == 0) return true; // wildcard
         if (exts.Count == 0) return false;
+        // Case-insensitive comparison even though both call sites already
+        // lowercase. The shell extension is invoked from arbitrary callers
+        // (Open Shell, third-party launchers) and we don't want a single
+        // upper-case path to silently drop the menu.
+        var allowed = new HashSet<string>(InputTypes, StringComparer.OrdinalIgnoreCase);
         foreach (var e in exts)
-            if (!InputTypes.Contains(e)) return false;
+            if (!allowed.Contains(e)) return false;
         return true;
     }
 }
@@ -80,7 +85,9 @@ public static class PresetReader
 
     public static IReadOnlyList<ShellPreset> LoadAll()
     {
-        var byName = new Dictionary<string, ShellPreset>(StringComparer.Ordinal);
+        // Case-insensitive so a user override at the same "Convert to MP4" name
+        // shadows the installer-provided version regardless of capitalization.
+        var byName = new Dictionary<string, ShellPreset>(StringComparer.OrdinalIgnoreCase);
         foreach (var dir in ResolvePresetDirs())
         {
             string[] files;

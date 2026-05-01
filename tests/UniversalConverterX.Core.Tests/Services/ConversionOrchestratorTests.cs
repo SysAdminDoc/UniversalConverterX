@@ -313,6 +313,58 @@ public class ConversionOrchestratorTests
         }
     }
 
+    [Fact]
+    public async Task ConvertAsync_WithForceConverter_ThatCannotHandleConversion_ShouldReturnFailed()
+    {
+        // Set converter2 as the forced choice but make it unable to handle the
+        // requested format. Previously the orchestrator silently fell back to
+        // an unrelated converter, hiding the user's typo.
+        _converterMock2.Setup(x => x.CanConvert(It.IsAny<FileFormat>(), It.IsAny<FileFormat>())).Returns(false);
+
+        var job = CreateTestJob("input.mp4", "output.png");
+        job.Options.ForceConverter = "converter2";
+
+        var result = await _orchestrator.ConvertAsync(job);
+
+        result.Success.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("converter2");
+        _converterMock2.Verify(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+        _converterMock1.Verify(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConvertAsync_WithUnknownForceConverter_ShouldReturnFailed()
+    {
+        var job = CreateTestJob("input.mp4", "output.png");
+        job.Options.ForceConverter = "does-not-exist";
+
+        var result = await _orchestrator.ConvertAsync(job);
+
+        result.Success.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("does-not-exist");
+    }
+
+    [Fact]
+    public void CanConvert_WithEmptyExtensions_ShouldReturnFalse()
+    {
+        _orchestrator.CanConvert("", "png").Should().BeFalse();
+        _orchestrator.CanConvert("mp4", "").Should().BeFalse();
+        _orchestrator.CanConvert("", "").Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetBestConverter_WithEmptyExtensions_ShouldReturnNull()
+    {
+        _orchestrator.GetBestConverter("", "png").Should().BeNull();
+        _orchestrator.GetBestConverter("mp4", "").Should().BeNull();
+    }
+
     private static ConversionJob CreateTestJob(string input, string output)
     {
         return new ConversionJob

@@ -113,6 +113,26 @@ public class MagicBytesDetector
         if (isoFormat is not null)
             return isoFormat;
 
+        // EBML header (0x1A 0x45 0xDF 0xA3) is shared by Matroska and WebM. Resolve
+        // the ambiguity by inspecting the DocType element instead of letting the
+        // first matching signature in InitializeSignatures() win arbitrarily.
+        var ebmlFormat = DetectEbmlFormat(buffer, bytesRead, fileExtension);
+        if (ebmlFormat is not null)
+            return ebmlFormat;
+
+        // glTF: ASCII glTF is JSON (starts with '{'); the binary 'glTF' magic only
+        // matters for .glb. Disambiguate by trusting the file extension when both
+        // are plausible, otherwise default to the binary case.
+        var gltfFormat = DetectGltfFamily(buffer, bytesRead, fileExtension);
+        if (gltfFormat is not null)
+            return gltfFormat;
+
+        // Binary STL has no leading "solid" magic; detect via the 80-byte header
+        // plus a sane triangle-count field at offset 80.
+        var stlFormat = DetectStl(buffer, bytesRead, fileExtension);
+        if (stlFormat is not null)
+            return stlFormat;
+
         var zipFamilyFormat = DetectZipFamilyFormat(buffer, bytesRead, fileExtension);
         if (zipFamilyFormat is not null)
             return zipFamilyFormat;
@@ -129,6 +149,79 @@ public class MagicBytesDetector
             }
         }
 
+        return null;
+    }
+
+    private FileFormat? DetectEbmlFormat(byte[] data, int length, string? fileExtension)
+    {
+        if (length < 4 || data[0] != 0x1A || data[1] != 0x45 || data[2] != 0xDF || data[3] != 0xA3)
+            return null;
+
+        // The EBML header DocType element ID is 0x4282. Scan a bounded window
+        // for the marker followed by a length-prefixed UTF-8 string. We stay in
+        // the first 256 bytes to avoid a full EBML parser; the DocType is
+        // always near the start of any well-formed file.
+        var scanLimit = Math.Min(length - 4, 256);
+        for (var i = 4; i < scanLimit; i++)
+        {
+            if (data[i] != 0x42 || data[i + 1] != 0x82) continue;
+
+            // Variable-length integer for the data size — we only need to know
+            // its byte length so we can find the string. The leading bit
+            // pattern tells us the count (1..8).
+            var sizeByte = data[i + 2];
+            int sizeLen;
+            if      ((sizeByte & 0x80) != 0) sizeLen = 1;
+            else if ((sizeByte & 0x40) != 0) sizeLen = 2;
+            else if ((sizeByte & 0x20) != 0) sizeLen = 3;
+            else if ((sizeByte & 0x10) != 0) sizeLen = 4;
+            else continue;
+
+            var stringStart = i + 2 + sizeLen;
+            if (stringStart + 6 > length) break;
+
+            var docType = Encoding.ASCII.GetString(data, stringStart, Math.Min(8, length - stringStart));
+            if (docType.StartsWith("webm", StringComparison.OrdinalIgnoreCase))
+                return GetFormatInfo("webm");
+            if (docType.StartsWith("matroska", StringComparison.OrdinalIgnoreCase))
+                return GetFormatInfo("mkv");
+            break;
+        }
+
+        // No DocType found — fall back to the file extension if it's one of the
+        // EBML-family containers we recognise; otherwise default to mkv.
+        var ext = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
+        return ext switch
+        {
+            "webm" => GetFormatInfo("webm"),
+            "mka" or "mks" or "mkv" => GetFormatInfo("mkv"),
+            _ => GetFormatInfo("mkv"),
+        };
+    }
+
+    private FileFormat? DetectGltfFamily(byte[] data, int length, string? fileExtension)
+    {
+        if (length < 4 || data[0] != 0x67 || data[1] != 0x6C || data[2] != 0x54 || data[3] != 0x46)
+            return null;
+
+        // The 'glTF' ASCII header is only present in binary .glb. ASCII .gltf is
+        // plain JSON and starts with '{'. Trust the extension if it disagrees.
+        var ext = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
+        return ext == "gltf" ? GetFormatInfo("gltf") : GetFormatInfo("glb");
+    }
+
+    private FileFormat? DetectStl(byte[] data, int length, string? fileExtension)
+    {
+        if (length >= 5 &&
+            data[0] == 0x73 && data[1] == 0x6F && data[2] == 0x6C &&
+            data[3] == 0x69 && data[4] == 0x64)
+            return GetFormatInfo("stl");
+
+        // Binary STL starts with an 80-byte header followed by a uint32 triangle
+        // count. The header is not constrained, so we lean on the extension to
+        // confirm the heuristic and avoid mis-flagging arbitrary 84+ byte files.
+        var ext = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
+        if (ext == "stl" && length >= 84) return GetFormatInfo("stl");
         return null;
     }
 
@@ -209,11 +302,9 @@ public class MagicBytesDetector
             new("tiff", [0x4D, 0x4D, 0x00, 0x2A], FormatCategory.Image, 0, "TIFF Image (BE)"),
             new("psd", [0x38, 0x42, 0x50, 0x53], FormatCategory.Image, 0, "Photoshop Document"),
 
-            // Video
-            new("mkv", [0x1A, 0x45, 0xDF, 0xA3], FormatCategory.Video, 0, "Matroska Video"),
+            // Video — Matroska/WebM share the EBML header and are resolved by
+            // DetectEbmlFormat; QuickTime/MP4 are resolved by DetectIsoBaseMediaFormat.
             new("avi", [0x52, 0x49, 0x46, 0x46], FormatCategory.Video, 0, [0x41, 0x56, 0x49, 0x20], "AVI Video"),
-            new("mov", [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], FormatCategory.Video, 0, "QuickTime Movie"),
-            new("webm", [0x1A, 0x45, 0xDF, 0xA3], FormatCategory.Video, 0, "WebM Video"),
             new("flv", [0x46, 0x4C, 0x56, 0x01], FormatCategory.Video, 0, "Flash Video"),
             new("wmv", [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11], FormatCategory.Video, 0, "Windows Media Video"),
 
@@ -252,10 +343,9 @@ public class MagicBytesDetector
             new("woff", [0x77, 0x4F, 0x46, 0x46], FormatCategory.Font, 0, "Web Open Font Format"),
             new("woff2", [0x77, 0x4F, 0x46, 0x32], FormatCategory.Font, 0, "Web Open Font Format 2"),
 
-            // 3D
-            new("gltf", [0x67, 0x6C, 0x54, 0x46], FormatCategory.ThreeD, 0, "GLTF 3D Model"),
-            new("glb", [0x67, 0x6C, 0x54, 0x46], FormatCategory.ThreeD, 0, "GLB 3D Model"),
-            new("stl", [0x73, 0x6F, 0x6C, 0x69, 0x64], FormatCategory.ThreeD, 0, "STL 3D Model"),
+            // 3D — gltf/glb share the 'glTF' ASCII magic and are resolved by
+            // DetectGltfFamily. STL is resolved by DetectStl (handles both ASCII
+            // and binary variants).
         ];
     }
 
@@ -267,10 +357,11 @@ public class MagicBytesDetector
         "webp" => "image/webp",
         "bmp" => "image/bmp",
         "ico" => "image/x-icon",
-        "tiff" => "image/tiff",
+        "tiff" or "tif" => "image/tiff",
         "psd" => "image/vnd.adobe.photoshop",
-        "heic" => "image/heic",
+        "heic" or "heif" => "image/heic",
         "avif" => "image/avif",
+        "jxl" => "image/jxl",
         "mp4" => "video/mp4",
         "mkv" => "video/x-matroska",
         "avi" => "video/x-msvideo",

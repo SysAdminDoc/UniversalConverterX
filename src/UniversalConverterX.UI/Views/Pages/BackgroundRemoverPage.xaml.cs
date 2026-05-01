@@ -270,7 +270,14 @@ public sealed partial class BackgroundRemoverPage : Page
             return;
 
         if (_outputDirectory is not null)
-            Directory.CreateDirectory(_outputDirectory);
+        {
+            try { Directory.CreateDirectory(_outputDirectory); }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                return;
+            }
+        }
 
         var modelTag = SelectedModelTag();
         var formatTag = SelectedFormatTag();
@@ -349,7 +356,13 @@ public sealed partial class BackgroundRemoverPage : Page
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
                 {
-                    ProgressLog.Text += $"[{l.Level}] {l.Message}\n";
+                    var combined = ProgressLog.Text + $"[{l.Level}] {l.Message}\n";
+                    if (combined.Length > 64_000)
+                    {
+                        var nl = combined.IndexOf('\n', combined.Length - 64_000);
+                        combined = nl >= 0 ? combined[(nl + 1)..] : combined[(combined.Length - 64_000)..];
+                    }
+                    ProgressLog.Text = combined;
                 }));
 
                 var result = await _runner.RunAsync("alphacut", args, progress, log, _cts.Token);

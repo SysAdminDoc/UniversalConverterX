@@ -11,6 +11,19 @@ public sealed partial class HistoryPage : Page
     private readonly IHistoryService _history;
     private string? _searchTerm;
 
+    /// <summary>
+    /// Bumped on every load request so a slow earlier query (e.g. "a") can't
+    /// overwrite a faster later query ("audio") if both complete out of order.
+    /// </summary>
+    private int _loadEpoch;
+
+    /// <summary>
+    /// Cancels the pending search so we don't re-hit SQLite on every keystroke.
+    /// 200 ms feels instant but absorbs typical typing bursts.
+    /// </summary>
+    private CancellationTokenSource? _searchDebounce;
+    private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(200);
+
     public HistoryPage()
     {
         InitializeComponent();
@@ -20,8 +33,10 @@ public sealed partial class HistoryPage : Page
 
     private async Task LoadAsync()
     {
-        var rows = await _history.QueryAsync(_searchTerm, limit: 500);
+        var epoch = Interlocked.Increment(ref _loadEpoch);
+        var rows    = await _history.QueryAsync(_searchTerm, limit: 500);
         var summary = await _history.SummarizeAsync(_searchTerm);
+        if (epoch != Volatile.Read(ref _loadEpoch)) return; // a newer query landed
 
         ItemsList.ItemsSource = rows;
         EmptyState.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -39,11 +54,23 @@ public sealed partial class HistoryPage : Page
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadAsync();
 
-    private void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
         _searchTerm = string.IsNullOrWhiteSpace(sender.Text) ? null : sender.Text.Trim();
-        _ = LoadAsync();
+
+        _searchDebounce?.Cancel();
+        _searchDebounce?.Dispose();
+        var cts = new CancellationTokenSource();
+        _searchDebounce = cts;
+
+        try
+        {
+            await Task.Delay(SearchDebounce, cts.Token);
+        }
+        catch (OperationCanceledException) { return; }
+        if (cts.IsCancellationRequested) return;
+        await LoadAsync();
     }
 
     private async void Clear_Click(object sender, RoutedEventArgs e)
