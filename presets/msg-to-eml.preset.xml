@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Outlook .msg -> .eml</Name>
+    <Folder>Documents/Email</Folder>
+    <InputTypes>
+        <Extension>msg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>eml</OutputExtension>
+    <Engine>emailpro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>msg-to-eml</Arg>
+    </Args>
+</Preset>

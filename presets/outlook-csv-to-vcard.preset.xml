@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Outlook CSV Contacts -> vCard</Name>
+    <Folder>Documents/Calendar</Folder>
+    <InputTypes>
+        <Extension>csv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>vcf</OutputExtension>
+    <Engine>calmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>outlook-csv-to-vcard</Arg>
+    </Args>
+</Preset>

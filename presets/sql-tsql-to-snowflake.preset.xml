@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SQL: SQL Server -> Snowflake</Name>
+    <Folder>Data/SQL</Folder>
+    <InputTypes>
+        <Extension>sql</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.snowflake</OutputFileNameTemplate>
+    <OutputExtension>sql</OutputExtension>
+    <Engine>dbsql</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>translate</Arg>
+        <Arg>--from</Arg>
+        <Arg>tsql</Arg>
+        <Arg>--to</Arg>
+        <Arg>snowflake</Arg>
+    </Args>
+</Preset>

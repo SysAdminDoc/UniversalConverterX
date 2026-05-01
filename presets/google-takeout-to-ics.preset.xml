@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Google Takeout Calendar JSON -> ICS</Name>
+    <Folder>Documents/Calendar</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ics</OutputExtension>
+    <Engine>calmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>takeout-to-ics</Arg>
+    </Args>
+</Preset>

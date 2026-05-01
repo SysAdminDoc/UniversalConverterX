@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Game Asset Container -> Manifest JSON</Name>
+    <Folder>Games/Assets</Folder>
+    <InputTypes>
+        <Extension>pak</Extension>
+        <Extension>wad</Extension>
+        <Extension>vpk</Extension>
+        <Extension>pck</Extension>
+        <Extension>pk3</Extension>
+        <Extension>pk4</Extension>
+        <Extension>bsa</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.manifest</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>gameasset</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>list</Arg>
+    </Args>
+</Preset>

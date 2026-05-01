@@ -197,6 +197,19 @@ KNOWN_EVENTS = {
     "gistile_info",        # gistiles.info — MBTiles / PMTiles probe
     "imgmore",             # imgmore — JBIG2 / FAX / PICT / IFF converted
     "wire_blob",           # wirefmt — CBOR / msgpack / BSON / Ion converted
+    # v2.16 wave (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
+    "email_extra",         # emailpro — Outlook .msg / Apple .emlx / thread mbox
+    "chat_doc",            # messaging — Telegram/Discord/Slack/iMessage/WhatsApp
+    "calmore_doc",         # calmore — .icbu / Google Takeout calendar / LDIF
+    "subtitle_extra",      # subextra — CEA-608/708 / iTT / ASS karaoke -> LRC
+    "edi_doc",             # edi — X12 / EDIFACT structured decode
+    "swift_mt",            # swift — SWIFT MT banking message decode
+    "asn1_doc",            # asn1 — BER/DER/PEM <-> JSON tree
+    "mobile_doc",          # mobile — iTunes backup / adb .ab backup
+    "sql_doc",             # dbsql — SQL dialect translation / format / AST
+    "spreadsheet_legacy",  # spreadsheet — Lotus / Quattro / Gnumeric / etc.
+    "color_doc",           # colorfmt — color list expansion / CSS / JSON
+    "game_asset",          # gameasset — VPK / WAD / PAK / PCK / PK3 listing
 }
 
 

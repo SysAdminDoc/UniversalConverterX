@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>ASN.1 BER/DER/PEM -> JSON Tree</Name>
+    <Folder>Data/Crypto</Folder>
+    <InputTypes>
+        <Extension>der</Extension>
+        <Extension>cer</Extension>
+        <Extension>crt</Extension>
+        <Extension>pem</Extension>
+        <Extension>p7b</Extension>
+        <Extension>p7c</Extension>
+        <Extension>p8</Extension>
+        <Extension>asn1</Extension>
+        <Extension>ber</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>asn1</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ber-to-json</Arg>
+    </Args>
+</Preset>

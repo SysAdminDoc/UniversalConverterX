@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>iTunes Timed Text .itt -> WebVTT</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>itt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>vtt</OutputExtension>
+    <Engine>subextra</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>itt-to-vtt</Arg>
+    </Args>
+</Preset>

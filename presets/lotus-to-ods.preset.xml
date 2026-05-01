@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Lotus / Quattro Pro / Gnumeric -> ODS</Name>
+    <Folder>Documents/Spreadsheets</Folder>
+    <InputTypes>
+        <Extension>wk1</Extension>
+        <Extension>wk3</Extension>
+        <Extension>wk4</Extension>
+        <Extension>123</Extension>
+        <Extension>wq1</Extension>
+        <Extension>wq2</Extension>
+        <Extension>qpw</Extension>
+        <Extension>gnumeric</Extension>
+        <Extension>cwk</Extension>
+        <Extension>sxc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ods</OutputExtension>
+    <Engine>spreadsheet</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-ods</Arg>
+    </Args>
+</Preset>

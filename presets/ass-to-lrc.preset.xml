@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>ASS Karaoke -> LRC Lyrics</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>ass</Extension>
+        <Extension>ssa</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>lrc</OutputExtension>
+    <Engine>subextra</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ass-to-lrc</Arg>
+    </Args>
+</Preset>

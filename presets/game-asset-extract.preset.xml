@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Game Asset Container -> Extract</Name>
+    <Folder>Games/Assets</Folder>
+    <InputTypes>
+        <Extension>pak</Extension>
+        <Extension>pck</Extension>
+        <Extension>pk3</Extension>
+        <Extension>pk4</Extension>
+        <Extension>bsa</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_extract</OutputFileNameTemplate>
+    <OutputExtension></OutputExtension>
+    <Engine>gameasset</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>extract</Arg>
+    </Args>
+</Preset>

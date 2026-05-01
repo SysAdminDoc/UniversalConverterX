@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Telegram / Discord / Slack / iMessage / WhatsApp -> CSV</Name>
+    <Folder>Documents/Messaging</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+        <Extension>zip</Extension>
+        <Extension>db</Extension>
+        <Extension>txt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>messaging</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-csv</Arg>
+    </Args>
+</Preset>

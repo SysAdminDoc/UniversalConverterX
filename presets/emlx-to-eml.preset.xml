@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Apple Mail .emlx -> .eml</Name>
+    <Folder>Documents/Email</Folder>
+    <InputTypes>
+        <Extension>emlx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>eml</OutputExtension>
+    <Engine>emailpro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>emlx-to-eml</Arg>
+    </Args>
+</Preset>
