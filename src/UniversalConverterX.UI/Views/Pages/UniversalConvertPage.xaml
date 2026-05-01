@@ -29,7 +29,7 @@
                         <FontIcon Glyph="{x:Bind Glyph}" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Name}"
                                    Style="{StaticResource LabelTextStyle}"
                                    FontWeight="SemiBold"
@@ -39,13 +39,18 @@
                                    FontSize="12"
                                    TextWrapping="Wrap"
                                    MaxLines="2"/>
-                        <TextBlock Text="{x:Bind MatchSummary}"
-                                   FontSize="11"
-                                   Foreground="{StaticResource AccentGreenBrush}"
-                                   TextTrimming="CharacterEllipsis"/>
+                        <Border Style="{StaticResource StatusPillStyle}"
+                                HorizontalAlignment="Left"
+                                Padding="8,3">
+                            <TextBlock Text="{x:Bind MatchSummary}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource AccentGreenBrush}"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </Border>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="4">
-                        <Button Content="Convert..."
+                        <Button Content="Run preset"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="RunPreset_Click"
                                 Tag="{x:Bind Name}"/>
@@ -71,7 +76,7 @@
         <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock Text="Universal Convert"
                        Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Drop any file (or click 'Pick files') and UCX shows every conversion preset that accepts it. The fastest way to answer 'what can I do with this file?'."
+            <TextBlock Text="Drop files once and see every compatible preset before running a sidecar."
                        Style="{StaticResource SubtitleTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
@@ -80,24 +85,56 @@
                 AllowDrop="True"
                 Drop="DropZone_Drop"
                 DragOver="DropZone_DragOver">
-            <StackPanel HorizontalAlignment="Center" Spacing="10">
-                <FontIcon Glyph="&#xE7C5;" FontSize="36"
-                          Foreground="{StaticResource AccentBlueBrush}"
-                          HorizontalAlignment="Center"/>
-                <TextBlock x:Name="DropHint"
-                           Text="Drop files here, or pick them"
-                           HorizontalAlignment="Center"
-                           Style="{StaticResource SubtitleTextStyle}"/>
-                <Button Content="Pick files..."
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Click="Pick_Click"
-                        HorizontalAlignment="Center"/>
-                <TextBlock x:Name="SelectedFilesText"
-                           Style="{StaticResource MutedTextStyle}"
-                           FontSize="12"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"/>
-            </StackPanel>
+            <Grid ColumnSpacing="26">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="280"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="12" MaxWidth="520">
+                    <Border Width="88" Height="88" CornerRadius="24"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            HorizontalAlignment="Center">
+                        <FontIcon Glyph="&#xE7C5;" FontSize="38"
+                                  Foreground="{StaticResource AccentBlueBrush}"
+                                  HorizontalAlignment="Center"/>
+                    </Border>
+                    <TextBlock x:Name="DropHint"
+                               Text="Drop files here, or pick them"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock Text="UCX checks preset inputs locally, filters incompatible tools, and keeps your original files untouched."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
+                    <Button Content="Pick files"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="Pick_Click"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="SelectedFilesText"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontSize="12"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
+                    <Border Style="{StaticResource QuietSurfaceStyle}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="SAFE MATCHING" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock Text="No conversion starts until you choose a preset."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource QuietSurfaceStyle}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="BATCH AWARE" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock Text="Mixed selections show partial and full-coverage matches."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="14"
@@ -118,10 +155,31 @@
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="MatchList"
-                          ItemTemplate="{StaticResource MatchCardTemplate}"/>
-        </ScrollViewer>
+        <Grid Grid.Row="3">
+            <StackPanel x:Name="NoMatchesState"
+                        Visibility="Collapsed"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12"
+                        MaxWidth="520">
+                <Border Width="86" Height="86" CornerRadius="22"
+                        Background="{StaticResource SurfaceLightBrush}">
+                    <FontIcon Glyph="&#xE946;" FontSize="38"
+                              Foreground="{StaticResource AccentOrangeBrush}"/>
+                </Border>
+                <TextBlock Text="No compatible presets found"
+                           Style="{StaticResource SectionHeaderTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Try another file type, install a matching sidecar, or add a custom *.preset.xml in your UCX presets folder."
+                           Style="{StaticResource MutedTextStyle}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <ScrollViewer x:Name="MatchScroll" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="MatchList"
+                              ItemTemplate="{StaticResource MatchCardTemplate}"/>
+            </ScrollViewer>
+        </Grid>
 
         <TextBlock Grid.Row="4"
                    x:Name="StatusText"

@@ -58,7 +58,7 @@
                             Click="RemoveProfile_Click"
                             Tag="{x:Bind Id}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
-                                  Foreground="{StaticResource TextMutedBrush}"/>
+                                  Foreground="{StaticResource AccentRedBrush}"/>
                     </Button>
                 </Grid>
             </Border>
@@ -137,7 +137,21 @@
                 <TextBlock Text="Recent activity"
                            Style="{StaticResource LabelTextStyle}"
                            FontWeight="SemiBold"/>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="RecentEmptyState"
+                            Grid.Row="1"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="8">
+                    <Border Width="58" Height="58" CornerRadius="16"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE823;" FontSize="24"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Border>
+                    <TextBlock Text="No activity yet"
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <ScrollViewer x:Name="EventScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="EventList"
                                   ItemTemplate="{StaticResource EventRowTemplate}"/>
                 </ScrollViewer>

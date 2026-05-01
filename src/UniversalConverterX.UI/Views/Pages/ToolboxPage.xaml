@@ -13,7 +13,9 @@
             <Border Width="224" Height="142" Padding="16" Margin="0,0,12,12"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="18">
+                    CornerRadius="18"
+                    AutomationProperties.Name="{Binding Title}"
+                    ToolTipService.ToolTip="{Binding Description}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -122,42 +124,49 @@
             <StackPanel Spacing="12">
                 <TextBlock Text="Image" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="ImageGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="Video" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="VideoGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="Audio" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AudioGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="Documents" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DocumentGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DiscGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock Text="Other" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="OtherGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
         </StackPanel>

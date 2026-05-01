@@ -17,6 +17,7 @@ public sealed partial class WatchFoldersPage : Page
         ProfilesList.ItemsSource = _service.Profiles;
         EventList.ItemsSource    = _service.Recent;
         _service.Profiles.CollectionChanged += (_, _) => UpdateUi();
+        _service.Recent.CollectionChanged += (_, _) => UpdateUi();
         UpdateUi();
     }
 
@@ -24,6 +25,8 @@ public sealed partial class WatchFoldersPage : Page
     {
         EmptyState.Visibility    = _service.Profiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProfilesScroll.Visibility = _service.Profiles.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        RecentEmptyState.Visibility = _service.Recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        EventScroll.Visibility = _service.Recent.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void ProfileToggled(object sender, RoutedEventArgs e)
@@ -47,16 +50,27 @@ public sealed partial class WatchFoldersPage : Page
         if (updated is not null) _service.Update(updated);
     }
 
-    private void RemoveProfile_Click(object sender, RoutedEventArgs e)
+    private async void RemoveProfile_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button b && b.Tag is string id) _service.Remove(id);
+        if (sender is not Button b || b.Tag is not string id) return;
+        var profile = _service.Profiles.FirstOrDefault(p => p.Id == id);
+        var name = profile?.Name ?? "this watch";
+        if (await PageDialogService.ConfirmClearAsync(
+                this,
+                "Remove watch profile?",
+                $"UCX will stop monitoring {name}. Files already converted or compressed are not affected.",
+                primaryButtonText: "Remove",
+                cancelButtonText: "Keep"))
+        {
+            _service.Remove(id);
+        }
     }
 
     private async Task<WatchProfile?> ShowProfileDialogAsync(WatchProfile? source)
     {
         var nameBox   = new TextBox { Header = "Display name", Text = source?.Name ?? "Watch" };
-        var pathBox   = new TextBox { Header = "Folder", Text = source?.Path ?? "", IsReadOnly = true };
-        var browseBtn = new Button  { Content = "Browse..." };
+        var pathBox   = new TextBox { Header = "Folder to monitor", Text = source?.Path ?? "", IsReadOnly = true };
+        var browseBtn = new Button  { Content = "Browse", Style = (Style)Application.Current.Resources["SecondaryButtonStyle"] };
         browseBtn.Click += async (_, __) =>
         {
             var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.VideosLibrary };
@@ -75,7 +89,8 @@ public sealed partial class WatchFoldersPage : Page
         pathRow.Children.Add(pathBox);
         pathRow.Children.Add(browseBtn);
 
-        var filterBox = new TextBox { Header = "File filter (semicolon-delimited)",
+        var filterBox = new TextBox { Header = "File filters",
+                                      PlaceholderText = "*.mp4;*.mkv;*.mov",
                                       Text = source?.Filter ?? "*.mp4;*.mkv;*.mov;*.avi;*.webm;*.m4v" };
 
         var actionCombo = new ComboBox { Header = "Action", SelectedIndex = source?.Action == WatchAction.Convert ? 1 : 0 };
@@ -97,12 +112,13 @@ public sealed partial class WatchFoldersPage : Page
         var idx = Array.FindIndex(compressPresets, t => t.Item1 == (source?.Preset ?? "web-1080p"));
         presetCombo.SelectedIndex = idx >= 0 ? idx : 0;
 
-        var formatBox = new TextBox { Header = "Convert target ext (e.g. mp4)",
+        var formatBox = new TextBox { Header = "Convert target extension",
+                                      PlaceholderText = "mp4",
                                       Text = source?.TargetFormat ?? "mp4" };
 
         var outputBox = new TextBox { Header = "Output folder (optional)",
                                       Text = source?.OutputDir ?? "",
-                                      PlaceholderText = "(same as source)" };
+                                      PlaceholderText = "Same as source folder" };
 
         void OnActionChanged(object? _, SelectionChangedEventArgs __)
         {
@@ -113,7 +129,19 @@ public sealed partial class WatchFoldersPage : Page
         actionCombo.SelectionChanged += OnActionChanged;
         OnActionChanged(null, null!);
 
+        var helper = new Border
+        {
+            Style = (Style)Application.Current.Resources["InfoBannerStyle"],
+            Child = new TextBlock
+            {
+                Text = "UCX waits for files to settle before processing and cancels active work when a watch is disabled.",
+                TextWrapping = TextWrapping.Wrap,
+                Style = (Style)Application.Current.Resources["MutedTextStyle"],
+            }
+        };
+
         var stack = new StackPanel { Spacing = 12, Width = 460 };
+        stack.Children.Add(helper);
         stack.Children.Add(nameBox);
         stack.Children.Add(pathRow);
         stack.Children.Add(filterBox);

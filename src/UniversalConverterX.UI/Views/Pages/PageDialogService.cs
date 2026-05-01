@@ -18,7 +18,7 @@ internal static class PageDialogService
         string cancelButtonText = "Keep")
     {
         if (page.XamlRoot is null)
-            return true;
+            return false;
 
         var dialog = new ContentDialog
         {

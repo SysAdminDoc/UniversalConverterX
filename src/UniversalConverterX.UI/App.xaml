@@ -280,6 +280,38 @@
                 <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
             </Style>
 
+            <Style x:Key="StatusPillStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="999"/>
+                <Setter Property="Padding" Value="10,4"/>
+            </Style>
+
+            <Style x:Key="InfoBannerStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceInfoBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="14"/>
+                <Setter Property="Padding" Value="14,12"/>
+            </Style>
+
+            <Style x:Key="QuietSurfaceStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
+
+            <Style x:Key="MetricTileStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="14"/>
+                <Setter Property="Padding" Value="14,12"/>
+            </Style>
+
             <!-- ════════════════════════════════════════════════════════════════
                  BUTTONS
                  WinUI 3's DefaultButtonStyle handles hover/pressed/focus visuals
@@ -386,6 +418,13 @@
                 <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+
+            <Style TargetType="TextBox" BasedOn="{StaticResource PremiumTextBoxStyle}"/>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource PremiumComboBoxStyle}"/>
+            <Style TargetType="AutoSuggestBox">
+                <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="FontSize" Value="13"/>
             </Style>
 

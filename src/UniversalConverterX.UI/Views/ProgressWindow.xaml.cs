@@ -59,7 +59,7 @@ public sealed partial class ProgressWindow : Window
                 FileName = Path.GetFileName(file),
                 Status = ConversionItemStatus.Pending,
                 StatusIcon = "\uE768", // Clock
-                StatusColor = new SolidColorBrush(Colors.Gray),
+                StatusColor = BrushResource("TextMutedBrush"),
                 StatusMessage = "Waiting",
                 ShowProgress = Visibility.Collapsed,
                 ShowStatus = Visibility.Visible
@@ -119,7 +119,7 @@ public sealed partial class ProgressWindow : Window
     {
         item.Status = ConversionItemStatus.Converting;
         item.StatusIcon = "\uE896"; // Sync
-        item.StatusColor = new SolidColorBrush(Colors.DodgerBlue);
+        item.StatusColor = BrushResource("AccentBlueBrush");
         item.StatusMessage = "Converting";
         item.ShowProgress = Visibility.Visible;
         item.IsIndeterminate = true;
@@ -172,7 +172,7 @@ public sealed partial class ProgressWindow : Window
             {
                 item.Status = ConversionItemStatus.Completed;
                 item.StatusIcon = "\uE73E"; // Checkmark
-                item.StatusColor = new SolidColorBrush(Colors.Green);
+                item.StatusColor = BrushResource("AccentGreenBrush");
                 item.StatusMessage = "Completed";
                 item.Progress = 100;
                 item.TimeInfo = FormatTimeSpan(elapsed);
@@ -189,7 +189,7 @@ public sealed partial class ProgressWindow : Window
             {
                 item.Status = ConversionItemStatus.Failed;
                 item.StatusIcon = "\uE711"; // Error
-                item.StatusColor = new SolidColorBrush(Colors.Red);
+                item.StatusColor = BrushResource("AccentRedBrush");
                 item.StatusMessage = result.ErrorMessage ?? "Failed";
                 item.ShowProgress = Visibility.Collapsed;
 
@@ -200,7 +200,7 @@ public sealed partial class ProgressWindow : Window
         {
             item.Status = ConversionItemStatus.Cancelled;
             item.StatusIcon = "\uE711"; // Error
-            item.StatusColor = new SolidColorBrush(Colors.Orange);
+            item.StatusColor = BrushResource("AccentOrangeBrush");
             item.StatusMessage = "Cancelled";
             item.ShowProgress = Visibility.Collapsed;
             _cancelledCount++;
@@ -210,7 +210,7 @@ public sealed partial class ProgressWindow : Window
         {
             item.Status = ConversionItemStatus.Failed;
             item.StatusIcon = "\uE711"; // Error
-            item.StatusColor = new SolidColorBrush(Colors.Red);
+            item.StatusColor = BrushResource("AccentRedBrush");
             item.StatusMessage = ex.Message;
             item.ShowProgress = Visibility.Collapsed;
 
@@ -299,7 +299,7 @@ public sealed partial class ProgressWindow : Window
         {
             item.Status = ConversionItemStatus.Cancelled;
             item.StatusIcon = "\uE711"; // Error
-            item.StatusColor = new SolidColorBrush(Colors.Orange);
+            item.StatusColor = BrushResource("AccentOrangeBrush");
             item.StatusMessage = "Cancelled";
             item.ShowProgress = Visibility.Collapsed;
             _cancelledCount++;
@@ -371,6 +371,11 @@ public sealed partial class ProgressWindow : Window
         }
         return $"{len:0.##} {sizes[order]}";
     }
+
+    private static SolidColorBrush BrushResource(string key) =>
+        Application.Current.Resources.TryGetValue(key, out var brush) && brush is SolidColorBrush solid
+            ? solid
+            : new SolidColorBrush(Colors.Gray);
 
     private void PlayCompletionSound()
     {

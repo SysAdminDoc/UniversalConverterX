@@ -27,15 +27,17 @@
         </StackPanel>
 
         <!-- File List -->
+        <Border Grid.Row="1"
+                Style="{StaticResource CardStyle}"
+                Padding="12"
+                Margin="0,0,0,16">
         <ListView x:Name="FileListView"
-                  Grid.Row="1"
                   SelectionMode="None"
                   IsItemClickEnabled="False"
-                  Background="Transparent"
-                  Margin="0,0,0,16">
+                  Background="Transparent">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="8,12" ColumnSpacing="12">
+                    <Grid Padding="10,12" ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -94,9 +96,11 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        </Border>
 
         <!-- Overall Progress -->
-        <StackPanel Grid.Row="2" Spacing="8" Margin="0,0,0,16">
+        <Border Grid.Row="2" Style="{StaticResource QuietSurfaceStyle}" Margin="0,0,0,16">
+        <StackPanel Spacing="8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -114,6 +118,7 @@
                          Value="0"
                          Maximum="100"/>
         </StackPanel>
+        </Border>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="3" 

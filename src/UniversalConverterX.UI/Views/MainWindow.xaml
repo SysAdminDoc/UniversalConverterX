@@ -102,6 +102,47 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Tag="universal-convert" Content="Universal Convert">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xED0C;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="watch-folders" Content="Watch Folders">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xED25;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="history" Content="History">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="presets" Content="Presets">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE71D;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <NavigationView.PaneFooter>
+                <Border Margin="12,10,12,14"
+                        Style="{StaticResource QuietSurfaceStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="7" Height="7"
+                                     Fill="{StaticResource AccentGreenBrush}"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock Text="Local-first workspace"
+                                       Style="{StaticResource PillTextStyle}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                        <TextBlock Text="Files stay on this PC unless a workflow clearly uses a network-backed engine."
+                                   Style="{StaticResource SubtleTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </NavigationView.PaneFooter>
 
             <Frame x:Name="ContentFrame" Background="{StaticResource BackgroundBrush}"/>
         </NavigationView>

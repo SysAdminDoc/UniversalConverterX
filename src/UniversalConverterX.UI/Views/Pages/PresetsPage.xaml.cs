@@ -143,6 +143,8 @@ public sealed partial class PresetsPage : Page
         }
         _displayed.Clear();
         foreach (var c in q) _displayed.Add(c);
+        EmptyState.Visibility = _displayed.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PresetScroll.Visibility = _displayed.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void Reload_Click(object sender, RoutedEventArgs e) => Reload();
