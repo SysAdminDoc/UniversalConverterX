@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SDR IQ: cs16 -> cf32 (GNU Radio)</Name>
+    <Folder>Audio/SDR</Folder>
+    <InputTypes>
+        <Extension>cs16</Extension>
+        <Extension>iq16</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>cf32</OutputExtension>
+    <Engine>sdrkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cs16-to-cf32</Arg>
+    </Args>
+</Preset>

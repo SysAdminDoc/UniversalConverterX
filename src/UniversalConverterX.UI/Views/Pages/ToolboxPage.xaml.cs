@@ -126,6 +126,20 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.18 wave (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)
+        DocumentTools.Add(new ToolboxTile("presets:srctranspile", "Code Transpiler", "Python 2 -> 3 + CoffeeScript -> JS + Vue 2 -> 3 + JS -> TS bootstrap + Flow -> TS", "\uE943", blue, "Ready", green, false, "lib2to3 + tsc + npm CLIs"));
+        ImageTools.Add(new ToolboxTile("presets:dicomrt", "DICOM-RT (Radiation Therapy)", "RTSTRUCT contours + RTPLAN beams + RTDOSE 3D grid -> NIfTI / JSON / CSV", "\uE8A1", red, "Ready", green, false, "pydicom + SimpleITK"));
+        DocumentTools.Add(new ToolboxTile("presets:ebookmore", "eBooks Long-Tail", "FictionBook 2 + PalmDoc + iSilo + LRF / TPZ via Calibre fallback", "\uE82D", blue, "Ready", green, false, "stdlib + calibre"));
+        OtherTools.Add(new ToolboxTile("presets:bus", "Automotive Bus", "DBC CAN database + ARXML AUTOSAR + candump + OBD-II PID reference", "\uEC7A", green, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:iata", "Airline Messaging", "IATA NDC airline booking XML + PNR + airport / airline code reference", "\uE709", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:mobilephotos", "Mobile Photo Libraries", "Google Takeout Photos + Apple .photoslibrary + Android MediaStore + iOS .ips", "\uE8B9", blue, "Ready", green, false, "stdlib + sqlite"));
+        DocumentTools.Add(new ToolboxTile("presets:taxkit", "Tax / Accounting", "Swedish SIE 4 + DATEV German + IFX + ELSTER tax filing XML", "\uE9D9", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:datakitmore", "Niche Data Formats", "EDN / KDL / JSON5 / HJSON / RON / NestedText round-trip with JSON", "\uE943", orange, "Ready", green, false, "stdlib + optional libs"));
+        DocumentTools.Add(new ToolboxTile("presets:diagrammore", "Diagrams Long-Tail", "GraphML / yEd -> SVG via Graphviz + Freemind .mm -> Markdown / OPML + Lucidchart .lcc", "\uE9B6", blue, "Ready", green, false, "stdlib + graphviz"));
+        OtherTools.Add(new ToolboxTile("presets:bgpkit", "BGP / Routing Telemetry", "MRT TABLE_DUMP_V2 RIB + BIRD show route + RPKI ROA dump normalization", "\uEC05", blue, "Ready", green, false, "mrtparse"));
+        AudioTools.Add(new ToolboxTile("presets:sdrkit", "SDR IQ Files", "RTL-SDR cu8 / HackRF cs16 / GNU Radio cf32 IQ + SigMF probe", "\uE767", green, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:comicmeta", "Comic Metadata", "ComicInfo.xml read / inject / CSV bulk-edit / scrub for CBZ libraries", "\uE82D", orange, "Ready", green, false, "stdlib"));
+
         // v2.17 wave (Specialty Engineering + Wire / Network / Music / Sci)
         OtherTools.Add(new ToolboxTile("presets:wells", "Oil-Well Logs (LAS / DLIS)", "LAS 2.0/3.0 + DLIS binary log files -> CSV / JSON for petroleum analysis", "\uE9F1", green, "Ready", green, false, "stdlib + dlisio"));
         DocumentTools.Add(new ToolboxTile("presets:datawire", "Protobuf / Avro / Thrift", "Schema-driven binary wire formats -> JSON via protoc + fastavro + IDL parser", "\uE943", blue, "Ready", green, false, "fastavro + protoc"));

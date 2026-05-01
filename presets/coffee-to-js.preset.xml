@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CoffeeScript -> JavaScript</Name>
+    <Folder>Code/Transpile</Folder>
+    <InputTypes>
+        <Extension>coffee</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>js</OutputExtension>
+    <Engine>srctranspile</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>coffee-to-js</Arg>
+    </Args>
+</Preset>

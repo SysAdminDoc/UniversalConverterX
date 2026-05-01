@@ -223,6 +223,21 @@ KNOWN_EVENTS = {
     "playlist_extra",      # playlistmore — iTunes Library / Spotify export
     "netflow_doc",         # netflowkit — NetFlow / IPFIX flow record conversion
     "massspec_doc",        # proteomics — mzML / mzXML / MGF mass spectra
+    # v2.18 wave (Source xform + DICOM-RT + niche eBooks + automotive + airline + tax)
+    "source_xform",        # srctranspile — Py2->3 / CoffeeScript / Vue / JS->TS
+    "rt_struct",           # dicomrt — RTSTRUCT contours
+    "rt_plan",             # dicomrt — RTPLAN beams + control points
+    "rt_dose",             # dicomrt — RTDOSE 3D dose grid
+    "ebook_extra",         # ebookmore — FB2 / PalmDoc / PDB / Calibre fallback
+    "bus_doc",             # bus — DBC CAN / ARXML / candump / OBD-II
+    "airline_doc",         # iata — NDC / PNR / airport+airline codes
+    "photolib_doc",        # mobilephotos — Takeout / Photos library / MediaStore / iOS .ips
+    "tax_doc",             # taxkit — SIE / DATEV / IFX / ELSTER
+    "data_extra",          # datakitmore — EDN / KDL / JSON5 / HJSON / RON / NestedText
+    "diagram_extra",       # diagrammore — GraphML / Freemind / Lucidchart .lcc
+    "bgp_doc",             # bgpkit — MRT RIB / BIRD / RPKI ROA
+    "sdr_iq",              # sdrkit — SDR IQ format conversion
+    "comic_meta",          # comicmeta — ComicInfo.xml inject / scrub / read
 }
 
 

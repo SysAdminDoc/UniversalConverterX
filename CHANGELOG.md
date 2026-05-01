@@ -2,6 +2,33 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.18.0] - 2026-05-01
+
+### Added — 12 new pure-format conversion sidecars (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)
+
+- **srctranspile** — Cross-language source code transpilation: Python 2 -> Python 3 via stdlib lib2to3 (no install required), CoffeeScript -> JS via npm `coffee` CLI, Vue 2 SFC -> Vue 3 via `vue-codemod`, JS -> TypeScript bootstrap via `tsc --allowJs --declaration`, Flow-annotated JS -> TypeScript via `flow-to-ts`.
+- **dicomrt** — DICOM-RT (radiation therapy) decoder extending `dicomkit`/`medkit`: RTSTRUCT structure-set ROI table -> CSV/JSON with full contour data, RTPLAN beam + control point + fraction sequence -> JSON, RTDOSE 3D dose grid -> NIfTI (.nii.gz) with proper spacing/origin via SimpleITK, dose-statistics probe (max/mean/Dx/Vx/p95/p99).
+- **ebookmore** — Niche / legacy ebook formats: FictionBook 2 (.fb2 Russian/Slavic ecosystem) -> HTML / plain text via stdlib XML walker, PalmDoc TEXt/REAd PDB -> plain text via custom LZ77-style decompressor, .pdb header probe distinguishing PalmDoc / iSilo / Mobi6, Calibre `ebook-convert` fallback for LRF/TPZ/PRC.
+- **bus** — Automotive / industrial bus database: DBC (Vector CAN) parser handling BO_/SG_/VAL_ keywords -> JSON / per-signal CSV (no cantools required), AUTOSAR ARXML quick probe (package + ECU count), SocketCAN candump trace -> CSV (timestamp/iface/id/len/payload), built-in OBD-II PID reference dictionary.
+- **iata** — IATA airline messaging: NDC v17.2/v21.3 (AirShoppingRQ/RS, OfferPriceRQ/RS, OrderCreateRQ/RS, OrderViewRS, ItinReshopRQ/RS, ServiceListRS, SeatAvailabilityRQ/RS) XML -> structured JSON via stdlib XML walker, NDC type/version detection, legacy line-based PNR -> JSON, built-in IATA airport (39 codes) + airline (34 codes) reference data.
+- **mobilephotos** — Mobile photo-library exports: Google Takeout Photos directory walker pairs each image with its sidecar `*.json` -> CSV manifest + selective EXIF/mtime re-injection, Apple `.photoslibrary` SQLite probe (handles ZASSET / ZGENERICASSET schema variations), Android MediaStore `.db` SQLite -> CSV (auto-detects images/media table), iOS `.ips` diagnostic archive (header JSON + body JSON) -> JSON.
+- **taxkit** — Tax / accounting interchange: Swedish SIE 4 (BAS chart of accounts via `#KONTO` + voucher `#VER` / `#TRANS` lines, latin-1 encoded) -> CSV / JSON, DATEV German accounting CP1252 CSV with semicolon separator -> normalized UTF-8 CSV, IFX (Interactive Financial Exchange) XML -> JSON via generic walker, ELSTER tax filing XML probe (Verfahren / DatenArt / tax period detection).
+- **datakitmore** — Niche data formats (extends `datakit`): EDN (Clojure's Extensible Data Notation), KDL (Cuddly Data Language) line-oriented parser, JSON5 (relaxed JSON with comments + trailing commas) via regex strip-down fallback when `json5` lib missing, HJSON (Human JSON), RON (Rusty Object Notation) regex transform, NestedText round-trip with JSON.
+- **diagrammore** — Niche diagrams (extends `diagram`): GraphML (yEd / Cytoscape) -> JSON nodes+edges + SVG via Graphviz `dot` shellout, Freemind .mm mind maps -> Markdown bullet outline / OPML, Lucidchart `.lcc` bundle extract.
+- **bgpkit** — BGP / RPKI routing telemetry: MRT TABLE_DUMP_V2 RIB (RFC 6396) via `mrtparse` -> CSV (prefix/next_hop/AS_PATH/origin/MED/local_pref/community) / JSON, BIRD `birdc show route` text output -> CSV, RPKI ROA dump normalization (handles RIPE / Cloudflare / NLnet column variants).
+- **sdrkit** — Software-Defined Radio IQ format conversion: RTL-SDR `.cu8` (unsigned 8-bit) -> HackRF `.cs16` (signed 16-bit) -> GNU Radio `.cf32` (32-bit float) round-trip via stdlib struct + 1 MiB chunked I/O (no OOM on multi-GB captures), IQ-stream statistics (mean/min/max/RMS for I and Q), SigMF `.sigmf-meta` probe.
+- **comicmeta** — Comic Rack ComicInfo.xml metadata for CBZ libraries: bulk read across CBZ collection -> CSV manifest with all 32 ComicInfo fields, inject ComicInfo.xml into existing CBZ files (preserves all other contents), CSV-driven bulk-edit (read manifest, edit, write back), scrub strips ComicInfo.xml + ComicBookInfo JSON.
+
+### Added — 28 new presets
+
+`py2-to-py3`, `coffee-to-js`, `js-to-ts`, `rtstruct-to-csv`, `rtdose-to-nifti`, `rtplan-to-json`, `fb2-to-html`, `fb2-to-text`, `palmdoc-to-text`, `dbc-to-json`, `dbc-to-csv`, `candump-to-csv`, `ndc-to-json`, `takeout-list`, `sie-to-csv`, `datev-to-csv`, `edn-to-json`, `kdl-to-json`, `json5-to-json`, `graphml-to-svg`, `graphml-to-json`, `freemind-to-md`, `mrt-rib-to-csv`, `rpki-roa-fix`, `cu8-to-cs16`, `cs16-to-cf32`, `comicinfo-read`, `comicinfo-scrub`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 14 new event types: `source_xform`, `rt_struct`, `rt_plan`, `rt_dose`, `ebook_extra`, `bus_doc`, `airline_doc`, `photolib_doc`, `tax_doc`, `data_extra`, `diagram_extra`, `bgp_doc`, `sdr_iq`, `comic_meta`. Contract test: 150 sidecars conforming.
+- 12 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.17.0 → 2.18.0 across all manifests.
+
 ## [v2.17.0] - 2026-05-01
 
 ### Added — 10 new pure-format conversion sidecars (Specialty Engineering + Wire / Network / Music / Sci)

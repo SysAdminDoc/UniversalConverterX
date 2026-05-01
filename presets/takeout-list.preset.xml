@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Google Takeout Photos -> CSV Manifest</Name>
+    <Folder>Mobile/Backups</Folder>
+    <InputTypes>
+        <Extension>__takeout-dir</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_manifest</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>mobilephotos</Engine>
+    <InvocationMode>batch-single-output</InvocationMode>
+    <Args>
+        <Arg>takeout-list</Arg>
+    </Args>
+</Preset>

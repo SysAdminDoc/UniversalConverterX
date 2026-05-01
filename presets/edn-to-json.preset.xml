@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>EDN (Clojure) -> JSON</Name>
+    <Folder>Data/Niche</Folder>
+    <InputTypes>
+        <Extension>edn</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>datakitmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>edn-to-json</Arg>
+    </Args>
+</Preset>

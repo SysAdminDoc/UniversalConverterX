@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CAN bus DBC -> JSON</Name>
+    <Folder>Engineering/Bus</Folder>
+    <InputTypes>
+        <Extension>dbc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>bus</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>dbc-to-json</Arg>
+    </Args>
+</Preset>

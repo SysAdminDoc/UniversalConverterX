@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CBZ Strip ComicInfo.xml Metadata</Name>
+    <Folder>Documents/Comics</Folder>
+    <InputTypes>
+        <Extension>cbz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_clean</OutputFileNameTemplate>
+    <OutputExtension>cbz</OutputExtension>
+    <Engine>comicmeta</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>scrub-meta</Arg>
+    </Args>
+</Preset>

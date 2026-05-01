@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>KDL (Cuddly Data Language) -> JSON</Name>
+    <Folder>Data/Niche</Folder>
+    <InputTypes>
+        <Extension>kdl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>datakitmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>kdl-to-json</Arg>
+    </Args>
+</Preset>

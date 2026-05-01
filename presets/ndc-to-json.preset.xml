@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>IATA NDC Airline XML -> JSON</Name>
+    <Folder>Travel/Airline</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>iata</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ndc-to-json</Arg>
+    </Args>
+</Preset>
