@@ -53,10 +53,18 @@ make UCX a one-stop shop beyond media. Every item here pulls in well-trodden
 OSS tooling and exposes it through the same NDJSON sidecar contract + WinUI 3
 workspace pattern that v2.4 established.
 
-- #33 **Document converter** — DOCX / PDF / XLSX / PPTX / ODT / RTF / HTML mutual
+- #33 **Document converter** ✓ Shipped v2.5 — DOCX / PDF / XLSX / PPTX / ODT / RTF / HTML mutual
   conversion via `libreoffice --headless --convert-to`. Sidecar discovers
   LibreOffice on PATH or via standard install dirs; emits `progress` per file
-  in batch. Toolbox tile + dedicated `DocumentConverterPage`.
+  in batch. Toolbox tile + dedicated `DocumentConverterPage`. Shipped:
+  `tools/docconvert/sidecar.py` (pure-Python wrapper; one `subprocess.run` per
+  input to avoid LibreOffice user-profile lock contention) + `build.ps1`
+  (PyInstaller freeze, no third-party deps). New `DocumentConverterPage` with
+  drag-drop card, format combo (pdf/docx/odt/rtf/txt/html/epub/xlsx/ods/csv/pptx/odp/png/svg),
+  per-file status updates from `doc` events, output-dir picker, History
+  integration. Toolbox section "Documents" added (sits between Disc and Other);
+  nav search entry. Contract test: `doc` added to `KNOWN_EVENTS` (20 sidecars
+  conform).
 - #34 **Archive tool** — ZIP / 7Z / TAR / TAR.GZ / RAR (read-only) extraction
   + ZIP/7Z/TAR creation via 7-Zip's `7z.exe` CLI. Single sidecar, two ops:
   `pack` + `unpack`. Auto-locates `7z.exe` (Program Files / PATH). Glob-driven

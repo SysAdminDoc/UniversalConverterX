@@ -144,6 +144,12 @@
             </StackPanel>
 
             <StackPanel Spacing="12">
+                <TextBlock Text="Documents" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <GridView x:Name="DocumentGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+            </StackPanel>
+
+            <StackPanel Spacing="12">
                 <TextBlock Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DiscGrid" SelectionMode="None" IsItemClickEnabled="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>

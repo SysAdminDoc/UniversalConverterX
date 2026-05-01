@@ -11,6 +11,7 @@ public sealed partial class ToolboxPage : Page
     public ObservableCollection<ToolboxTile> VideoTools { get; } = new();
     public ObservableCollection<ToolboxTile> AiTools { get; } = new();
     public ObservableCollection<ToolboxTile> AudioTools { get; } = new();
+    public ObservableCollection<ToolboxTile> DocumentTools { get; } = new();
     public ObservableCollection<ToolboxTile> DiscTools { get; } = new();
     public ObservableCollection<ToolboxTile> OtherTools { get; } = new();
 
@@ -22,6 +23,7 @@ public sealed partial class ToolboxPage : Page
         VideoGrid.ItemsSource = VideoTools;
         AiGrid.ItemsSource = AiTools;
         AudioGrid.ItemsSource = AudioTools;
+        DocumentGrid.ItemsSource = DocumentTools;
         DiscGrid.ItemsSource = DiscTools;
         OtherGrid.ItemsSource = OtherTools;
     }
@@ -72,6 +74,9 @@ public sealed partial class ToolboxPage : Page
         AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, OPUS", "\uEC4F", green, "Planned", orange, false, "FFmpeg"));
         AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Reduce audio file size", "\uE91F", blue, "Future", yellow, false, null));
         AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "RNNoise broadband speech denoise (FFmpeg arnndn)", "\uE767", blue, "Ready", green, true, "RNNoise"));
+
+        // Documents
+        DocumentTools.Add(new ToolboxTile("document-converter", "Document Converter", "DOCX, PDF, ODT, RTF, XLSX, ODS, CSV, PPTX, EPUB, HTML", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));
