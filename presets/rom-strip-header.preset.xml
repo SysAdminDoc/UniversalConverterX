@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Strip ROM header (NES/SNES)</Name>
+    <Folder>Games</Folder>
+    <InputTypes>
+        <Extension>nes</Extension>
+        <Extension>smc</Extension>
+        <Extension>sfc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_stripped</OutputFileNameTemplate>
+    <OutputExtension>nes</OutputExtension>
+    <Engine>gametools</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>rom-strip</Arg>
+    </Args>
+</Preset>

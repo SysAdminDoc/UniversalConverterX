@@ -171,6 +171,7 @@ public sealed partial class MainWindow : Window
             "ebook-converter" => typeof(EbookConverterPage),
             "ocr" => typeof(OcrPage),
             "presets" => typeof(PresetsPage),
+            "universal-convert" => typeof(UniversalConvertPage),
             _ => typeof(PlaceholderPage)
         };
 

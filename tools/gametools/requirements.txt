@@ -1,0 +1,1 @@
+# gametools is pure Python (stdlib only); chdman is shelled out to.

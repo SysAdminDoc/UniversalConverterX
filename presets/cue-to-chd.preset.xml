@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CUE/BIN/ISO to CHD</Name>
+    <Folder>Games</Folder>
+    <InputTypes>
+        <Extension>cue</Extension>
+        <Extension>iso</Extension>
+        <Extension>gdi</Extension>
+        <Extension>toc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>chd</OutputExtension>
+    <Engine>gametools</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>chd-pack</Arg>
+    </Args>
+</Preset>
