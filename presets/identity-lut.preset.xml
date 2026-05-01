@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Identity LUT (33-cube)</Name>
+    <Folder>Color</Folder>
+    <InputTypes>
+        <Extension>cube</Extension>
+        <Extension>3dl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/identity_33</OutputFileNameTemplate>
+    <OutputExtension>cube</OutputExtension>
+    <Engine>lutgen</Engine>
+    <InvocationMode>batch-single-output</InvocationMode>
+    <Args>
+        <Arg>identity</Arg>
+        <Arg>--size</Arg>
+        <Arg>33</Arg>
+        <Arg>--format</Arg>
+        <Arg>cube</Arg>
+        <Arg>--title</Arg>
+        <Arg>identity_33</Arg>
+    </Args>
+</Preset>

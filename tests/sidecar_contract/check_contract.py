@@ -84,6 +84,16 @@ KNOWN_EVENTS = {
     "cad_audit",       # cadkit.audit — DXF auditor findings
     "code_format",     # codeformat — formatted source file
     "formatter_status", # codeformat.check — formatter availability
+    # v2.8 wave
+    "sd_image",        # sdkit — Stable Diffusion produced image
+    "sd_model",        # sdkit.models — discoverable SD model entry
+    "speech_enhance",  # speechenhance — DeepFilterNet output
+    "stem_track",      # stemkit — separated stem (vocals/drums/etc.)
+    "stem_models",     # stemkit.models — supported separator models
+    "pdf_md",          # pdfmarkdown — PDF -> Markdown output
+    "vector_doc",      # vectorkit — converted AI/EPS/SVG/EMF/etc.
+    "lut_cube",        # lutgen — generated 3D LUT (.cube/.3dl)
+    "font_subset",     # fontsubset — subsetted webfont
 }
 
 

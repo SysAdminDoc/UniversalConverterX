@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>4-stem split (Demucs FT)</Name>
+    <Folder>Audio/Stems</Folder>
+    <InputTypes>
+        <Extension>mp3</Extension>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>ogg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_stems</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>stemkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>separate</Arg>
+        <Arg>--model</Arg>
+        <Arg>4stem</Arg>
+        <Arg>--format</Arg>
+        <Arg>wav</Arg>
+    </Args>
+</Preset>

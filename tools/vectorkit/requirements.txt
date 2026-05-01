@@ -1,0 +1,1 @@
+# vectorkit shells out to Inkscape; no Python deps required.

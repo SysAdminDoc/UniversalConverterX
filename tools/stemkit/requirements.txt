@@ -1,0 +1,4 @@
+audio-separator>=0.21
+onnxruntime>=1.17
+torch>=2.2
+numpy>=1.24

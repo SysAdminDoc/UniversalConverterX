@@ -125,6 +125,15 @@ public sealed partial class ToolboxPage : Page
 
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
+
+        // v2.8 OSS engines
+        AiTools.Add(new ToolboxTile("presets:sdkit", "Stable Diffusion", "txt2img / img2img / inpaint / x4 upscale (diffusers)", "\uE790", blue, "Ready", green, true, "diffusers + SD 1.5/2/XL"));
+        AiTools.Add(new ToolboxTile("presets:speechenhance", "Speech Enhancer", "DeepFilterNet 3 SOTA denoise + dereverb for voice", "\uE767", green, "Ready", green, true, "DeepFilterNet"));
+        AudioTools.Add(new ToolboxTile("presets:stemkit", "Stem Separator", "Vocals / drums / bass / other (Roformer / Demucs / MDX)", "\uEC4F", red, "Ready", green, true, "audio-separator"));
+        DocumentTools.Add(new ToolboxTile("presets:pdfmarkdown", "PDF -> Markdown", "Layout-aware Markdown extraction (pymupdf4llm / marker)", "\uE8A5", green, "Ready", green, false, "pymupdf4llm"));
+        ImageTools.Add(new ToolboxTile("presets:vectorkit", "Vector Converter", "AI / EPS / PS / EMF / WMF / SVG / CDR / VSD via Inkscape", "\uE8B7", green, "Ready", green, false, "Inkscape headless"));
+        OtherTools.Add(new ToolboxTile("presets:lutgen", "3D LUT Generator", "Build .cube / .3dl from before/after grading reference frames", "\uE790", orange, "Ready", green, false, "UCX (numpy)"));
+        DocumentTools.Add(new ToolboxTile("presets:fontsubset", "Webfont Subsetter", "Shrink TTF/OTF/WOFF -> WOFF2 to only used glyphs", "\uE8D2", blue, "Ready", green, false, "fontTools.subset"));
     }
 
     private void Tile_Click(object sender, ItemClickEventArgs e)

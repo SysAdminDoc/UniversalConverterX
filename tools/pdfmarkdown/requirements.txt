@@ -1,0 +1,2 @@
+pymupdf4llm>=0.0.15
+pymupdf>=1.24
