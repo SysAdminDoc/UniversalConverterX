@@ -94,6 +94,18 @@ KNOWN_EVENTS = {
     "vector_doc",      # vectorkit — converted AI/EPS/SVG/EMF/etc.
     "lut_cube",        # lutgen — generated 3D LUT (.cube/.3dl)
     "font_subset",     # fontsubset — subsetted webfont
+    # v2.9 wave
+    "rom_patch",       # gametools — patched/byteswapped/stripped ROM
+    "rom_info",        # gametools.rom-info — header probe
+    "disc_image",      # gametools.chd — packed/unpacked disc image
+    "data_table",      # datasci — produced tabular/array data file
+    "data_info",       # datasci.info — schema/shape probe
+    "locale_doc",      # i18nkit — produced PO/MO/XLIFF/TMX/RESX/strings/JSON/YAML/CSV
+    "point_cloud",     # pointcloud — produced PLY/LAS/LAZ/PCD/E57
+    "point_cloud_info",# pointcloud.info — bounds + count probe
+    "disk_image",      # diskimage — produced VM disk image
+    "disk_image_info", # diskimage.info — qemu-img probe
+    "email_index",     # mailimport.list — PST folder inventory
 }
 
 

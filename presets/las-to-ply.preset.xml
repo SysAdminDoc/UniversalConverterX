@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>LAS / LAZ to PLY</Name>
+    <Folder>3D/Point Cloud</Folder>
+    <InputTypes>
+        <Extension>las</Extension>
+        <Extension>laz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ply</OutputExtension>
+    <Engine>pointcloud</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>ply</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>XLIFF / TMX / RESX to PO</Name>
+    <Folder>Localization</Folder>
+    <InputTypes>
+        <Extension>xliff</Extension>
+        <Extension>xlf</Extension>
+        <Extension>tmx</Extension>
+        <Extension>resx</Extension>
+        <Extension>strings</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>po</OutputExtension>
+    <Engine>i18nkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>po</Arg>
+    </Args>
+</Preset>

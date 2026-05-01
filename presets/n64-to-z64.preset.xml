@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>N64 ROM to z64 (big-endian)</Name>
+    <Folder>Games</Folder>
+    <InputTypes>
+        <Extension>n64</Extension>
+        <Extension>v64</Extension>
+        <Extension>z64</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>z64</OutputExtension>
+    <Engine>gametools</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>byteswap</Arg>
+        <Arg>--to</Arg>
+        <Arg>z64</Arg>
+    </Args>
+</Preset>

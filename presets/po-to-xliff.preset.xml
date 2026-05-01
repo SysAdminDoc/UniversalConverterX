@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PO / RESX / strings to XLIFF</Name>
+    <Folder>Localization</Folder>
+    <InputTypes>
+        <Extension>po</Extension>
+        <Extension>pot</Extension>
+        <Extension>resx</Extension>
+        <Extension>strings</Extension>
+        <Extension>json</Extension>
+        <Extension>yaml</Extension>
+        <Extension>yml</Extension>
+        <Extension>csv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>xliff</OutputExtension>
+    <Engine>i18nkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>xliff</Arg>
+    </Args>
+</Preset>

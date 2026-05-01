@@ -126,6 +126,15 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.9 wave (Coverage)
+        OtherTools.Add(new ToolboxTile("presets:gametools", "Game ROM Tools", "IPS/BPS/UPS patches + N64 byteswap + CHD <-> CUE/BIN", "\uE7FC", green, "Ready", green, false, "UCX + chdman"));
+        DocumentTools.Add(new ToolboxTile("presets:datasci", "Scientific Data", "CSV / Parquet / Feather / Avro / ORC / HDF5 / NetCDF / FITS / NPY / MAT", "\uE9D9", blue, "Ready", green, false, "pandas + pyarrow + astropy"));
+        DocumentTools.Add(new ToolboxTile("presets:i18nkit", "Localization", "PO / MO / XLIFF / TMX / RESX / .strings / JSON / YAML / CSV", "\uE774", blue, "Ready", green, false, "Babel"));
+        OtherTools.Add(new ToolboxTile("presets:pointcloud", "Point Clouds", "PLY / PCD / XYZ / PTS / OBJ / LAS / LAZ / E57 (LiDAR / 3D scans)", "\uF158", orange, "Ready", green, false, "Open3D + laspy + pye57"));
+        OtherTools.Add(new ToolboxTile("presets:diskimage", "VM Disk Images", "RAW / QCOW2 / VMDK / VHD / VHDX / VDI / QED conversion", "\uE7C4", blue, "Ready", green, false, "qemu-img"));
+        DocumentTools.Add(new ToolboxTile("presets:mailimport", "Outlook PST/OST", "Convert PST / OST -> MBOX / EML (libpff)", "\uE715", blue, "Ready", green, false, "libpff"));
+        OtherTools.Add(new ToolboxTile("universal-convert", "Universal Convert", "Drop any file -> instantly see every preset that accepts it", "\uED0C", blue, "Ready", green, true, "UCX"));
+
         // v2.8 OSS engines
         AiTools.Add(new ToolboxTile("presets:sdkit", "Stable Diffusion", "txt2img / img2img / inpaint / x4 upscale (diffusers)", "\uE790", blue, "Ready", green, true, "diffusers + SD 1.5/2/XL"));
         AiTools.Add(new ToolboxTile("presets:speechenhance", "Speech Enhancer", "DeepFilterNet 3 SOTA denoise + dereverb for voice", "\uE767", green, "Ready", green, true, "DeepFilterNet"));

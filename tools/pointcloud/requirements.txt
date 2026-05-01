@@ -1,0 +1,4 @@
+numpy>=1.24
+open3d>=0.18
+laspy[lazrs]>=2.5
+pye57>=0.4; sys_platform != 'darwin'

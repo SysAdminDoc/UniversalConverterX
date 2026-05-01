@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Outlook PST / OST to MBOX</Name>
+    <Folder>Email</Folder>
+    <InputTypes>
+        <Extension>pst</Extension>
+        <Extension>ost</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mbox</OutputExtension>
+    <Engine>mailimport</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>to-mbox</Arg>
+    </Args>
+</Preset>

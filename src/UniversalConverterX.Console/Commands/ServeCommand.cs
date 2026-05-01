@@ -88,7 +88,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             var path = req.Url?.AbsolutePath ?? "";
             if (path == "/healthz" && req.HttpMethod == "GET")
             {
-                await WriteJson(resp, 200, new { ok = true, version = "2.8.0" });
+                await WriteJson(resp, 200, new { ok = true, version = "2.9.0" });
             }
             else if (path == "/tools" && req.HttpMethod == "GET")
             {

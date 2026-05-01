@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CHD to CUE/BIN</Name>
+    <Folder>Games</Folder>
+    <InputTypes>
+        <Extension>chd</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>cue</OutputExtension>
+    <Engine>gametools</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>chd-unpack</Arg>
+    </Args>
+</Preset>
