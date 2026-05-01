@@ -49,6 +49,7 @@ KNOWN_EVENTS = {
     "thumb",         # clipforge.timeline — generated thumbnail in the strip
     "track",         # clipforge.track-list — enumerated container stream
     "doc",           # docconvert — produced document file (one per input)
+    "archive_entry", # archive — file entry inside an archive
 }
 
 

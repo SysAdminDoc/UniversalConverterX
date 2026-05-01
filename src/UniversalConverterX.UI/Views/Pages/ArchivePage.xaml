@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.ArchivePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="ArchiveItemTemplate" x:DataType="p:ArchiveItem">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="10,6"
+                    Margin="0,0,0,4">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="{x:Bind Glyph}" FontSize="20"
+                              Foreground="{StaticResource AccentBlueBrush}"
+                              VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{x:Bind DisplayName}"
+                               Style="{StaticResource LabelTextStyle}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{x:Bind SizeLabel}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextAlignment="Right"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="3"
+                            Style="{StaticResource IconButtonStyle}"
+                            AutomationProperties.Name="Remove from list"
+                            ToolTipService.ToolTip="Remove from list"
+                            Click="RemoveItem_Click"
+                            Tag="{x:Bind}">
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Archive Tool"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Create or extract 7z, ZIP, TAR, GZ, BZ2, XZ, WIM. Read-only support for RAR, ISO, CAB, MSI, LZH. Backed by 7-Zip's CLI -- maximum compatibility."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Grid>
+
+        <Pivot Grid.Row="1" x:Name="ModePivot" SelectionChanged="ModePivot_SelectionChanged">
+            <PivotItem Header="Pack">
+                <Border Style="{StaticResource CardStyle}" Padding="14">
+                    <Grid ColumnSpacing="20" RowSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ComboBox x:Name="PackFormatCombo"
+                                  Header="Archive format"
+                                  SelectedIndex="0">
+                            <ComboBoxItem Content="7z (best ratio)" Tag="7z"/>
+                            <ComboBoxItem Content="zip (most compatible)" Tag="zip"/>
+                            <ComboBoxItem Content="tar (no compression)" Tag="tar"/>
+                            <ComboBoxItem Content="tar.gz (-> .tar.gz)" Tag="gz"/>
+                            <ComboBoxItem Content="tar.xz (-> .tar.xz)" Tag="xz"/>
+                            <ComboBoxItem Content="tar.bz2 (-> .tar.bz2)" Tag="bz2"/>
+                        </ComboBox>
+                        <Slider Grid.Column="1"
+                                x:Name="LevelSlider"
+                                Header="Compression level (0 store - 9 ultra)"
+                                Minimum="0" Maximum="9"
+                                StepFrequency="1"
+                                Value="5"
+                                TickPlacement="BottomRight" TickFrequency="1"/>
+                        <PasswordBox Grid.Column="2"
+                                     x:Name="PackPasswordBox"
+                                     Header="Password (optional)"
+                                     PlaceholderText="(none)"/>
+                        <TextBox Grid.Row="1" Grid.ColumnSpan="2"
+                                 x:Name="PackOutputBox"
+                                 Header="Output archive"
+                                 IsReadOnly="True"
+                                 PlaceholderText="(pick where to save)"/>
+                        <Button Grid.Row="1" Grid.Column="2"
+                                Content="Save as..."
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                VerticalAlignment="Bottom"
+                                Click="PickPackOutput_Click"/>
+                    </Grid>
+                </Border>
+            </PivotItem>
+            <PivotItem Header="Unpack">
+                <Border Style="{StaticResource CardStyle}" Padding="14">
+                    <Grid ColumnSpacing="20" RowSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="UnpackArchiveBox"
+                                 Header="Archive"
+                                 IsReadOnly="True"
+                                 Grid.ColumnSpan="2"
+                                 PlaceholderText="(pick an archive to extract)"/>
+                        <Button Grid.Column="2"
+                                Content="Pick archive..."
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                VerticalAlignment="Bottom"
+                                Click="PickUnpackInput_Click"/>
+                        <TextBox Grid.Row="1" Grid.ColumnSpan="2"
+                                 x:Name="UnpackOutputDirBox"
+                                 Header="Extract to"
+                                 IsReadOnly="True"
+                                 PlaceholderText="(pick destination folder)"/>
+                        <Button Grid.Row="1" Grid.Column="2"
+                                Content="Pick folder..."
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                VerticalAlignment="Bottom"
+                                Click="PickUnpackOutput_Click"/>
+                    </Grid>
+                </Border>
+            </PivotItem>
+        </Pivot>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="14"
+                AllowDrop="True"
+                DragOver="DropZone_DragOver"
+                Drop="DropZone_Drop">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="10">
+                    <Border Width="80" Height="80" CornerRadius="20"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE7B8;" FontSize="36"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock Text="Drop files / folders here"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="EmptyHint"
+                               Text="Pack mode: drop the items you want to archive."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center" TextWrapping="Wrap"
+                               MaxWidth="420"/>
+                </StackPanel>
+                <ScrollViewer x:Name="ItemsScroll" Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="ItemsList"
+                                  ItemTemplate="{StaticResource ArchiveItemTemplate}"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar AutomationProperties.Name="Progress"
+                         x:Name="WorkProgress"
+                         Minimum="0" Maximum="100"
+                         IsIndeterminate="False"
+                         VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    x:Name="ListButton"
+                    Content="List contents"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ListContents_Click"
+                    IsEnabled="False"/>
+            <Button Grid.Column="2"
+                    x:Name="GoButton"
+                    Content="Pack"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Go_Click"
+                    IsEnabled="False"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="4" Height="80"
+                      VerticalScrollBarVisibility="Auto">
+            <TextBlock x:Name="LogText"
+                       Style="{StaticResource MutedTextStyle}"
+                       FontFamily="Consolas, Cascadia Mono, monospace"
+                       FontSize="11"
+                       TextWrapping="Wrap"/>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="5"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   Text="Pick mode: Pack to compress, Unpack to extract."/>
+    </Grid>
+</Page>

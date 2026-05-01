@@ -65,10 +65,20 @@ workspace pattern that v2.4 established.
   integration. Toolbox section "Documents" added (sits between Disc and Other);
   nav search entry. Contract test: `doc` added to `KNOWN_EVENTS` (20 sidecars
   conform).
-- #34 **Archive tool** — ZIP / 7Z / TAR / TAR.GZ / RAR (read-only) extraction
-  + ZIP/7Z/TAR creation via 7-Zip's `7z.exe` CLI. Single sidecar, two ops:
-  `pack` + `unpack`. Auto-locates `7z.exe` (Program Files / PATH). Glob-driven
-  include / exclude.
+- #34 **Archive tool** ✓ Shipped v2.5 — ZIP / 7Z / TAR / TAR.GZ / RAR (read-only) extraction
+  + ZIP/7Z/TAR creation via 7-Zip's `7z.exe` CLI. Single sidecar, three ops:
+  `pack` + `unpack` + `list`. Auto-locates `7z.exe` (PATH / Program Files /
+  `$env:SEVENZIP_PATH`). Shipped: `tools/archive/sidecar.py` parses 7-Zip's
+  `-bsp1` percent stream into NDJSON `progress` events; emits one
+  `archive_entry` event per file when listing. Optional password (with header
+  encryption `-mhe` for 7z). New `ArchivePage` is a Pivot UX with Pack and
+  Unpack tabs sharing the same drop-zone. Pack tab: format combo (7z / zip /
+  tar / tar.gz / tar.xz / tar.bz2), compression-level slider (0-9),
+  PasswordBox, output Save-As picker. Unpack tab: archive picker + extract
+  destination + List-contents button (lazy-loads the entry list without
+  extracting). History integration on every successful op. New Toolbox
+  "Documents" tile + nav search entry. Contract test: `archive_entry` added
+  to `KNOWN_EVENTS` (21 sidecars conform).
 - #35 **PDF tools** — merge / split / rotate / extract pages / encrypt /
   decrypt / linearize via pikepdf (built on qpdf). Pure-Python sidecar, no
   external binary required at runtime.
