@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.PresetsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="PresetCardTemplate" x:DataType="p:PresetCardItem">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="14" Padding="16"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="12"
+                            Width="44" Height="44"
+                            VerticalAlignment="Top">
+                        <FontIcon Glyph="{x:Bind Glyph}" FontSize="20"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind Name}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind Subtitle}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   MaxLines="2"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="4">
+                        <Button Content="Run..."
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="RunPreset_Click"
+                                Tag="{x:Bind Name}"/>
+                        <TextBlock Text="{x:Bind StatusText, Mode=OneWay}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11"
+                                   TextAlignment="Right"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Presets"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Every conversion preset shipped with UCX (and any custom *.preset.xml in %LocalAppData%\UniversalConverterX\presets\) -- click Run on any card, pick files, choose an output folder, and UCX dispatches to the right sidecar. Same presets power the right-click context menu and the 'ucx convert-preset' CLI."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="Reload"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Reload_Click"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <AutoSuggestBox x:Name="SearchBox"
+                                PlaceholderText="Filter by name, folder, engine..."
+                                QueryIcon="Find"
+                                TextChanged="Search_TextChanged"/>
+                <ComboBox Grid.Column="1"
+                          x:Name="EngineFilter"
+                          Header="Engine filter"
+                          SelectionChanged="EngineFilter_Changed">
+                    <ComboBoxItem Content="(all engines)" Tag=""/>
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="PresetList"
+                          ItemTemplate="{StaticResource PresetCardTemplate}"/>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   Text="Loading presets..."/>
+    </Grid>
+</Page>

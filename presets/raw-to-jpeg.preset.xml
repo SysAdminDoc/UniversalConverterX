@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>RAW to JPEG (q=92)</Name>
+    <Folder>Image/RAW</Folder>
+    <InputTypes>
+        <Extension>cr2</Extension>
+        <Extension>cr3</Extension>
+        <Extension>nef</Extension>
+        <Extension>arw</Extension>
+        <Extension>raf</Extension>
+        <Extension>rw2</Extension>
+        <Extension>orf</Extension>
+        <Extension>dng</Extension>
+        <Extension>pef</Extension>
+        <Extension>srw</Extension>
+        <Extension>x3f</Extension>
+        <Extension>kdc</Extension>
+        <Extension>nrw</Extension>
+        <Extension>3fr</Extension>
+        <Extension>iiq</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>jpg</OutputExtension>
+    <Engine>rawphoto</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>jpg</Arg>
+        <Arg>--quality</Arg>
+        <Arg>92</Arg>
+        <Arg>--white-balance</Arg>
+        <Arg>camera</Arg>
+    </Args>
+</Preset>
