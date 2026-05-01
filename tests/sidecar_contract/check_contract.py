@@ -238,6 +238,19 @@ KNOWN_EVENTS = {
     "bgp_doc",             # bgpkit — MRT RIB / BIRD / RPKI ROA
     "sdr_iq",              # sdrkit — SDR IQ format conversion
     "comic_meta",          # comicmeta — ComicInfo.xml inject / scrub / read
+    # v2.19 wave (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
+    "lab_doc",             # labkit — LabVIEW LVM/TDMS + Sysinternals/ETW/perfmon
+    "scope_doc",           # scope — Tektronix / LeCroy / Keysight oscilloscope
+    "retro_image",         # retroimg — Atari ST / ZX Spectrum / Apple II / WBMP
+    "retro_disk",          # retrodisks — Apple II / C64 / Atari ATR / ZX TAP
+    "legacy_doc",          # legacydocs — WordStar / MS Write / Lotus Word Pro
+    "test_report",         # testreports — JUnit / TAP / Allure / Cucumber
+    "dbexport_doc",        # dbexport — DB2 IXF / BCP / MySQL dump / SQL*Loader
+    "demo_audio",          # demosound — YM / AY / SAP demoscene audio
+    "legacy_video",        # vidlegacy — RealVideo / Bink / Smacker / OGM
+    "gsplat_doc",          # gsplat — Gaussian Splatting .splat <-> .ply
+    "arcgis_doc",          # arcgis — .gdb file geodatabase + .aprx project
+    "thumb_doc",           # mediathumb — universal thumbnail extraction
 }
 
 

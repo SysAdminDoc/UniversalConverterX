@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Gaussian Splatting .splat -> .ply</Name>
+    <Folder>3D/Splat</Folder>
+    <InputTypes>
+        <Extension>splat</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ply</OutputExtension>
+    <Engine>gsplat</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>splat-to-ply</Arg>
+    </Args>
+</Preset>

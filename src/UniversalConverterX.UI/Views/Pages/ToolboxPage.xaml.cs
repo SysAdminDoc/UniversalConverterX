@@ -126,6 +126,20 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.19 wave (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
+        OtherTools.Add(new ToolboxTile("presets:labkit", "Lab + Windows Trace", "LabVIEW LVM/TDMS + Sysinternals Procmon + ETW .etl + perfmon .blg -> CSV", "\uE9F1", blue, "Ready", green, false, "stdlib + npTDMS + Win tools"));
+        OtherTools.Add(new ToolboxTile("presets:scope", "Oscilloscope Waveforms", "Tektronix .wfm/.isf + LeCroy .trc + Keysight .bin -> CSV", "\uEC03", green, "Ready", green, false, "stdlib"));
+        ImageTools.Add(new ToolboxTile("presets:retroimg", "Retro Computer Images", "Atari ST DEGAS + ZX Spectrum SCR + Apple II HGR + WBMP -> PNG", "\uEB9F", orange, "Ready", green, false, "stdlib + Pillow"));
+        OtherTools.Add(new ToolboxTile("presets:retrodisks", "Retro Disk Images", "Apple II .dsk + C64 D64 + Atari ATR + ZX TAP catalog reader", "\uE7B5", green, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:legacydocs", "DOS Legacy Word Processors", "WordStar + MS Write + Lotus Word Pro -> plain text (string scrape)", "\uE8A5", orange, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:testreports", "Test Result Reports", "JUnit / TAP / Allure / Cucumber / TestNG -> CSV / HTML report", "\uE73E", blue, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:dbexport", "DB Vendor Exports", "DB2 IXF + SQL Server BCP + MySQL dump + SQL*Loader -> CSV", "\uE9D5", blue, "Ready", green, false, "stdlib"));
+        AudioTools.Add(new ToolboxTile("presets:demosound", "Demoscene Chiptune", "Atari ST .YM + ZX AY + Atari 8-bit SAP -> WAV via emulator backends", "\uE767", red, "Ready", green, false, "sc68 / zxtune123 / asap"));
+        VideoTools.Add(new ToolboxTile("presets:vidlegacy", "Legacy Video", "RealVideo .rm/.rmvb + Bink + Smacker + OGM + DivX + Cinepak -> MP4 H.264", "\uE714", orange, "Ready", green, false, "FFmpeg"));
+        OtherTools.Add(new ToolboxTile("presets:gsplat", "Gaussian Splatting", "Antimatter15 .splat <-> 3DGS .ply round-trip + header probe", "\uF158", green, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:arcgis", "ArcGIS File Geodatabase", ".gdb / .gpkg layer list + extract -> GeoJSON / SHP / GPKG / FGB via GDAL", "\uE707", blue, "Ready", green, false, "GDAL ogr2ogr"));
+        ImageTools.Add(new ToolboxTile("presets:mediathumb", "Universal Thumbnails", "Video / PDF / audio cover / EPUB / DOCX / image -> JPG thumbnail", "\uE91B", blue, "Ready", green, false, "FFmpeg + Poppler + mutagen + Pillow"));
+
         // v2.18 wave (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)
         DocumentTools.Add(new ToolboxTile("presets:srctranspile", "Code Transpiler", "Python 2 -> 3 + CoffeeScript -> JS + Vue 2 -> 3 + JS -> TS bootstrap + Flow -> TS", "\uE943", blue, "Ready", green, false, "lib2to3 + tsc + npm CLIs"));
         ImageTools.Add(new ToolboxTile("presets:dicomrt", "DICOM-RT (Radiation Therapy)", "RTSTRUCT contours + RTPLAN beams + RTDOSE 3D grid -> NIfTI / JSON / CSV", "\uE8A1", red, "Ready", green, false, "pydicom + SimpleITK"));

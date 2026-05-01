@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>LeCroy .trc Oscilloscope -> CSV</Name>
+    <Folder>Engineering/Scope</Folder>
+    <InputTypes>
+        <Extension>trc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>scope</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>trc-to-csv</Arg>
+    </Args>
+</Preset>
