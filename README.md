@@ -15,18 +15,19 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
-- **Toolbox** — 29 specialized tools across Image, Video, AI, Audio, Disc, and Other categories.
+- **Toolbox** — 40+ specialized tools across Image, Video, AI, Audio, Documents, Disc, and Other categories.
 
 ## Toolbox highlights
 
 | Category | Tools |
 |---|---|
 | **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
-| **Video** | Smart Trimmer (AI) · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Auto Highlight (AI) · Intro & Outro · Lens Correction · VR Converter · Frame Snapshot |
-| **AI** | Background Remover · Subtitle Remover · Subtitle Editor · Caption Generator · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Lip Reading |
+| **Video** | Smart Trimmer (AI) · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
+| **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · Noise Remover (AI) |
+| **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · OCR (Tesseract) |
 | **Disc** | DVD Burn · DVD Copy · CD Burner |
-| **Other** | Format Inspector · Batch Rename |
+| **Other** | Format Inspector · Chapter Marks · Watch Folders · History · VMAF Quality |
 
 ## Architecture
 
