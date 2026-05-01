@@ -1,3 +1,4 @@
+using System.Xml;
 using System.Xml.Linq;
 
 namespace UniversalConverterX.Console.Presets;
@@ -55,6 +56,11 @@ public sealed record ConversionPreset(
 public static class PresetLoader
 {
     private const string Ns = "https://universalconverterx.io/preset/v1";
+    private static readonly XmlReaderSettings XmlSettings = new()
+    {
+        DtdProcessing = DtdProcessing.Prohibit,
+        XmlResolver = null,
+    };
 
     /// <summary>Resolution order:
     /// 1. <c>%LocalAppData%\UniversalConverterX\presets\</c> (user overrides)
@@ -112,7 +118,8 @@ public static class PresetLoader
     {
         try
         {
-            var doc = XDocument.Load(path);
+            using var reader = XmlReader.Create(path, XmlSettings);
+            var doc = XDocument.Load(reader, LoadOptions.None);
             var root = doc.Root;
             if (root is null || root.Name.LocalName != "Preset") return null;
 
@@ -128,6 +135,8 @@ public static class PresetLoader
             var template = Get("OutputFileNameTemplate");
             var ext = Get("OutputExtension").TrimStart('.');
             var engine = Get("Engine");
+            if (!IsSafeToolName(engine) || !IsSafeOutputExtension(ext))
+                return null;
 
             var inputTypesElem =
                 root.Element(XName.Get("InputTypes", Ns))
@@ -172,6 +181,20 @@ public static class PresetLoader
         {
             return null;
         }
+    }
+
+    private static bool IsSafeToolName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        if (value is "." or "..") return false;
+        return value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
+    }
+
+    private static bool IsSafeOutputExtension(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value == "__dir__") return true;
+        return value.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
+            && value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
     }
 
     /// <summary>

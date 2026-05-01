@@ -104,8 +104,8 @@ public class ConversionJob
     {
         return new ConversionJob
         {
-            InputPath = Path.GetFullPath(inputPath),
-            OutputPath = Path.GetFullPath(outputPath),
+            InputPath = NormalizePath(inputPath),
+            OutputPath = NormalizePath(outputPath),
             Options = options ?? new ConversionOptions()
         };
     }
@@ -121,6 +121,15 @@ public class ConversionJob
         var outputPath = Path.Combine(dir, $"{name}.{ext}");
         
         return Create(inputPath, outputPath, options);
+    }
+
+    private static string NormalizePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return path ?? string.Empty;
+
+        try { return Path.GetFullPath(path); }
+        catch { return path; }
     }
 }
 

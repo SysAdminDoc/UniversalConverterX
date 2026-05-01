@@ -143,6 +143,10 @@ public static class PresetRunner
     /// <summary>Mirror of SidecarRunner.Locate semantics.</summary>
     public static string? ResolveSidecar(string toolName)
     {
+        if (string.IsNullOrWhiteSpace(toolName)) return null;
+        if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
+            return null;
+
         var exeName = toolName + ".exe";
 
         // Walk up from the CLI's BaseDirectory looking for tools/<name>/<name>.exe.

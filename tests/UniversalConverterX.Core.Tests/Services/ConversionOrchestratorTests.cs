@@ -225,6 +225,38 @@ public class ConversionOrchestratorTests
     }
 
     [Fact]
+    public async Task ConvertAsync_WithDetectedSourceFormat_ShouldRouteByDetectedFormatNotFileExtension()
+    {
+        var job = CreateTestJob("misleading.jpg", "output.webp");
+        job.SourceFormat = new FileFormat("png", "image/png", FormatCategory.Image);
+
+        _converterMock1.Setup(x => x.CanConvert(
+                It.Is<FileFormat>(f => f.Extension == "png"),
+                It.Is<FileFormat>(f => f.Extension == "webp")))
+            .Returns(true);
+        _converterMock1.Setup(x => x.CanConvert(
+                It.Is<FileFormat>(f => f.Extension == "jpg"),
+                It.IsAny<FileFormat>()))
+            .Returns(false);
+        _converterMock2.Setup(x => x.CanConvert(It.IsAny<FileFormat>(), It.IsAny<FileFormat>()))
+            .Returns(false);
+        _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
+                ConversionResult.Succeeded(j, j.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
+
+        var result = await _orchestrator.ConvertAsync(job);
+
+        result.Success.Should().BeTrue();
+        _converterMock1.Verify(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task ConvertAsync_WithCancellation_ShouldBeCancelled()
     {
         var job = CreateTestJob("input.mp4", "output.png");

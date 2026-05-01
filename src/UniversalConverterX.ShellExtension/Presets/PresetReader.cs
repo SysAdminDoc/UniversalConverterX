@@ -1,3 +1,4 @@
+using System.Xml;
 using System.Xml.Linq;
 
 namespace UniversalConverterX.ShellExtension.Presets;
@@ -33,6 +34,11 @@ public sealed record ShellPreset(
 public static class PresetReader
 {
     private const string Ns = "https://universalconverterx.io/preset/v1";
+    private static readonly XmlReaderSettings XmlSettings = new()
+    {
+        DtdProcessing = DtdProcessing.Prohibit,
+        XmlResolver = null,
+    };
 
     public static IReadOnlyList<string> ResolvePresetDirs()
     {
@@ -108,7 +114,8 @@ public static class PresetReader
     {
         try
         {
-            var doc = XDocument.Load(path);
+            using var reader = XmlReader.Create(path, XmlSettings);
+            var doc = XDocument.Load(reader, LoadOptions.None);
             var root = doc.Root;
             if (root is null || root.Name.LocalName != "Preset") return null;
 

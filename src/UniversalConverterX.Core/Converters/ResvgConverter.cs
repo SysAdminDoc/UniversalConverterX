@@ -216,10 +216,10 @@ public partial class ResvgConverter : BaseConverterStrategy
             {
                 using var stream = File.OpenRead(job.InputPath);
                 var magic = new byte[2];
-                stream.Read(magic, 0, 2);
+                var bytesRead = stream.ReadAtLeast(magic, 2, throwOnEndOfStream: false);
                 
                 // Check for gzip magic number
-                if (magic[0] != 0x1f || magic[1] != 0x8b)
+                if (bytesRead < 2 || magic[0] != 0x1f || magic[1] != 0x8b)
                 {
                     return ValidationResult.Fail("File does not appear to be a valid SVGZ (gzip-compressed SVG)");
                 }

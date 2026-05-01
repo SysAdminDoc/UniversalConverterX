@@ -217,7 +217,14 @@ public class ConverterXOptions
         };
 
         var json = JsonSerializer.Serialize(this, options);
-        File.WriteAllText(SettingsFilePath, json);
+        var tmp = SettingsFilePath + ".tmp";
+        File.WriteAllText(tmp, json);
+        try { File.Move(tmp, SettingsFilePath, overwrite: true); }
+        catch
+        {
+            File.WriteAllText(SettingsFilePath, json);
+            try { File.Delete(tmp); } catch { }
+        }
     }
 
     /// <summary>
@@ -239,6 +246,12 @@ public class ConverterXOptions
         }
         catch
         {
+            try
+            {
+                var backup = SettingsFilePath + ".corrupt." + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                File.Copy(SettingsFilePath, backup, overwrite: true);
+            }
+            catch { }
             return new ConverterXOptions();
         }
     }
@@ -267,6 +280,7 @@ public class ConverterXOptions
         ShellIntegrationEnabled = defaults.ShellIntegrationEnabled;
         ContextMenuStyle = defaults.ContextMenuStyle;
         QuickConvertPresets = defaults.QuickConvertPresets;
+        ShellExtension = defaults.ShellExtension;
         Theme = defaults.Theme;
         AccentColor = defaults.AccentColor;
         MinimizeToTray = defaults.MinimizeToTray;

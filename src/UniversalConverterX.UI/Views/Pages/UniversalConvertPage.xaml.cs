@@ -131,15 +131,24 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
 
     private void SetFiles(List<string> paths)
     {
-        _selectedFiles = paths;
-        var first = Path.GetFileName(paths[0]);
-        SelectedFilesText.Text = paths.Count == 1
+        _selectedFiles = paths
+            .Where(File.Exists)
+            .Distinct(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
+            .ToList();
+        if (_selectedFiles.Count == 0)
+        {
+            Clear_Click(this, new RoutedEventArgs());
+            StatusText.Text = "No readable files were selected.";
+            return;
+        }
+        var first = Path.GetFileName(_selectedFiles[0]);
+        SelectedFilesText.Text = _selectedFiles.Count == 1
             ? first
-            : $"{first} +{paths.Count - 1} more";
-        DropHint.Text = $"{paths.Count} file(s) selected";
+            : $"{first} +{_selectedFiles.Count - 1} more";
+        DropHint.Text = $"{_selectedFiles.Count} file(s) selected";
 
         // Compute extension list (lowercase, no dot).
-        var exts = paths.Select(p => Path.GetExtension(p).TrimStart('.').ToLowerInvariant())
+        var exts = _selectedFiles.Select(p => Path.GetExtension(p).TrimStart('.').ToLowerInvariant())
                         .Where(e => !string.IsNullOrEmpty(e))
                         .ToList();
 
@@ -148,13 +157,18 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         foreach (var p in presets)
         {
             var allowed = p.InputTypes.Select(s => s.TrimStart('.').ToLowerInvariant()).ToHashSet();
-            var accepted = exts.Where(e => allowed.Count == 0 || allowed.Contains(e)).ToList();
+            var accepted = _selectedFiles.Where(path =>
+            {
+                if (allowed.Count == 0) return true;
+                var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
+                return !string.IsNullOrEmpty(ext) && allowed.Contains(ext);
+            }).ToList();
             if (accepted.Count == 0 && allowed.Count > 0) continue;
             matches.Add(new UniversalMatchItem
             {
                 Preset = p,
                 AcceptedInputs = accepted,
-                AllInputs = exts,
+                AllInputs = _selectedFiles,
                 Glyph = GlyphFor(p.Engine),
             });
         }
@@ -172,11 +186,13 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         ApplyFilter();
         FilterVisibility = matches.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        var extSummary = string.Join(", ", exts.Distinct().Take(6));
-        if (exts.Distinct().Count() > 6) extSummary += "...";
+        var distinctExts = exts.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var extSummary = string.Join(", ", distinctExts.Take(6).Select(e => "." + e));
+        if (distinctExts.Count > 6) extSummary += "...";
+        if (string.IsNullOrWhiteSpace(extSummary)) extSummary = "extensionless files";
         StatusText.Text = matches.Count == 0
-            ? $"No presets accept .{extSummary}. Try installing/wiring a sidecar for this format."
-            : $"Found {matches.Count} preset(s) that accept .{extSummary}.";
+            ? $"No presets accept {extSummary}. Try installing/wiring a sidecar for this format."
+            : $"Found {matches.Count} preset(s) that accept {extSummary}.";
     }
 
     private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -229,11 +245,9 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
 
         try
         {
-            // Reuse the inputs we already collected; only the accepted-by-extension ones.
-            var allowed = preset.InputTypes.Select(s => s.TrimStart('.').ToLowerInvariant()).ToHashSet();
-            var inputs = _selectedFiles.Where(p =>
-                allowed.Count == 0 ||
-                allowed.Contains(Path.GetExtension(p).TrimStart('.').ToLowerInvariant())).ToList();
+            // Reuse the exact file paths matched in SetFiles; wildcard presets
+            // intentionally accept extensionless files.
+            var inputs = card.AcceptedInputs.ToList();
 
             // Output dir prompt for batch modes; per-file infers from template.
             string? outDir = null;
