@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Mastodon Archive -> CSV</Name>
+    <Folder>Social/Archives</Folder>
+    <InputTypes>
+        <Extension>tar</Extension>
+        <Extension>gz</Extension>
+        <Extension>tgz</Extension>
+        <Extension>json</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.mastodon</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>socialarchives</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mastodon-outbox-csv</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>XBRL Filings -> Facts CSV</Name>
+    <Folder>Data/Regulatory</Folder>
+    <InputTypes>
+        <Extension>xbrl</Extension>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.facts</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>sdmx</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>xbrl-facts-to-csv</Arg>
+    </Args>
+</Preset>

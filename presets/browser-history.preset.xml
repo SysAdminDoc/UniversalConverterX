@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Chrome / Firefox History -> CSV</Name>
+    <Folder>System/Forensics</Folder>
+    <InputTypes>
+        <Extension>sqlite</Extension>
+        <Extension>db</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.history</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>forensics</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>browser-history</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Cargo.lock -> CSV</Name>
+    <Folder>Code/Build</Folder>
+    <InputTypes>
+        <Extension>lock</Extension>
+        <Extension>toml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.cargo</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>devbuild</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cargo-lock-csv</Arg>
+    </Args>
+</Preset>

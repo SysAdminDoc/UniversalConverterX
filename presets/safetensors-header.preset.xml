@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HuggingFace safetensors -> JSON Header</Name>
+    <Folder>AI/Models</Folder>
+    <InputTypes>
+        <Extension>safetensors</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.safetensors</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>mlmodel</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>safetensors-header</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Tableau .twb / .twbx -> JSON Probe</Name>
+    <Folder>Data/BI</Folder>
+    <InputTypes>
+        <Extension>twb</Extension>
+        <Extension>twbx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.tableau</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>bireport</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>twb-info</Arg>
+    </Args>
+</Preset>

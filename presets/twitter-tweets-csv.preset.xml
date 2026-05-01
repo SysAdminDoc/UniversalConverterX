@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Twitter / X Archive -> Tweets CSV</Name>
+    <Folder>Social/Archives</Folder>
+    <InputTypes>
+        <Extension>zip</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.tweets</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>socialarchives</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>twitter-tweets-csv</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>ONNX Model Graph -> JSON</Name>
+    <Folder>AI/Models</Folder>
+    <InputTypes>
+        <Extension>onnx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.onnx</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>mlmodel</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>onnx-info</Arg>
+    </Args>
+</Preset>

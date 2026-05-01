@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>DICOM Structured Report -> JSON</Name>
+    <Folder>Bio/Healthcare</Folder>
+    <InputTypes>
+        <Extension>dcm</Extension>
+        <Extension>sr</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.sr</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>medkitex</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>dicom-sr-to-json</Arg>
+    </Args>
+</Preset>

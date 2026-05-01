@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Maven pom.xml -> Dependencies CSV</Name>
+    <Folder>Code/Build</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+        <Extension>pom</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.pom</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>devbuild</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>pom-deps-csv</Arg>
+    </Args>
+</Preset>

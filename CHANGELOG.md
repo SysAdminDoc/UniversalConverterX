@@ -2,6 +2,34 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.20.0] - 2026-05-01
+
+### Added — 13 new pure-format conversion sidecars (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
+
+- **mlmodel** — ML model interchange probes: HuggingFace `.safetensors` JSON header (read 8-byte length-prefix + JSON metadata without loading tensors), GGUF v2/v3 llama.cpp header + KV metadata walker (handles all 13 type IDs + array recursion), ONNX graph summary via `onnx` lib (input/output shapes + op-counts + opset imports), PyTorch `.pt`/`.pth`/`.bin` magic-byte heuristic detection, TFLite / CoreML / TF SavedModel format detection.
+- **forensics** — Digital forensics artifact decoders: NTFS `$MFT` 1024-byte record parser with attribute walking + Windows FILETIME -> ISO-8601 timestamps, Windows `.reg` UTF-16 export -> JSON tree, Windows Prefetch `.pf` SCCA header (executable / path-hash decode), Chrome+Firefox+Edge browser history SQLite -> CSV with proper Chromium 1601-epoch + Firefox 1970-microsecond timestamps, EnCase `.E01` EWF probe via `ewfinfo` shellout.
+- **notetaking** — Knowledge management exports: Evernote `.enex` XML walker with HTML-to-Markdown crude transform + per-note frontmatter, Notion workspace ZIP -> Markdown vault with manifest CSV, Obsidian vault crawler with tag/backlink extraction, Joplin `.jex` tar extraction, Day One JSON journal -> per-entry Markdown, Roam Research recursive block-tree -> Markdown bullet outline.
+- **dawproject** — DAW project probes: Ableton Live `.als` gunzip + XML walk (tracks + plugins), REAPER `.rpp` text parser, Audacity `.aup` XML + `.aup3` SQLite probes, FL Studio `.flp` chunk-header reader, LMMS `.mmp`/`.mmpz` XML, DAWproject open-standard ZIP probe.
+- **vidpost** — Video post-production timelines: FCPXML probe (formats + assets + sequences), `otioconvert` shellout for FCPXML <-> OpenTimelineIO, Premiere Pro `.prproj` gunzip + regex-based version/sequence/bin/clip count, CMX 3600 EDL parser with timecode regex -> CSV.
+- **pcbcad** — Electronics CAD: Gerber RS-274X aperture catalog + command-count probe, Excellon NC drill (T-tool definitions + X/Y hole coordinates), KiCad `.kicad_pro` JSON + `.kicad_pcb` S-expression regex (footprints/tracks/vias/zones), Eagle XML probe, IPC-D-356 fixed-width netlist parser.
+- **bireport** — BI / reporting projects: Tableau `.twb` XML / `.twbx` ZIP probe, Power BI `.pbix` UTF-16-LE DataModelSchema decode (tables + measures + data sources + culture), SSRS `.rdl` XML probe, Looker LookML directory regex, dbt project directory walker.
+- **sdmx** — Regulatory data interchange: XBRL document parser with context + unit + concept resolution -> per-fact CSV, iXBRL inline-XBRL HTML extraction, SDMX-ML 2.1 generic data series + observation walker, SDMX codelist code/name extraction, DDI 2.5 codebook variable list.
+- **lmskit** — Learning Management System: SCORM 1.2 / 2004 `imsmanifest.xml` probe, Common Cartridge `.imscc` ZIP probe, QTI assessment item walker, xAPI Tin Can statement JSON + NDJSON normalization, LTI 1.3 launch JWT decoder (no signature check), Moodle `.mbz` gzipped tar with `moodle_backup.xml` walker.
+- **medkitex** — Healthcare extras: DICOM Structured Report content-sequence recursive walker with concept codes + measured values, DICOM Waveform per-channel CSV with proper sample-rate timing, HL7 CDA R2 / CCD / CCDA section walker, IHE XDS ExtrinsicObject metadata -> CSV, NCPDP SCRIPT e-prescribing -> JSON.
+- **iotbus** — Industrial IoT: OPC UA NodeSet XML node-type counts + namespace + sample listing, Modbus register map JSON -> CSV, KNX ETS `.knxproj` ZIP probe, EDS DeviceNet/EtherNet-IP INI-style sections.
+- **socialarchives** — Social-media exports: Twitter / X archive ZIP `.js`-prefixed JSON tweet decoder -> CSV, Mastodon `.tar`/`.tar.gz` outbox.json ActivityPub walker -> CSV, Reddit data export ZIP CSV bundle extraction, auto-detection of Twitter/Mastodon/Reddit/Discord/Bluesky archive types.
+- **devbuild** — Developer build manifests: npm `package-lock.json` v1+v2 dependency tree -> CSV with depth, Cargo.lock TOML block parser, composer.lock packages + packages-dev, go.sum module/version/hash, Maven pom.xml dependency walker, .NET `.csproj` PackageReferences, auto-detect manifest format.
+
+### Added — 33 new presets
+
+`safetensors-header`, `gguf-header`, `onnx-info`, `mft-to-csv`, `reg-to-json`, `browser-history`, `enex-to-md`, `notion-zip`, `joplin-jex`, `als-info`, `flp-info`, `rpp-info`, `fcpxml-to-otio`, `edl-to-csv`, `gerber-info`, `drill-to-csv`, `kicad-pro`, `twb-info`, `pbix-info`, `rdl-info`, `xbrl-facts-csv`, `sdmx-data-csv`, `scorm-info`, `xapi-to-csv`, `dicom-sr-json`, `ccd-to-json`, `opcua-nodeset-info`, `twitter-tweets-csv`, `mastodon-outbox-csv`, `package-lock-csv`, `cargo-lock-csv`, `pom-deps-csv`, `manifest-info`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 13 new event types: `ml_model`, `forensic_doc`, `note_doc`, `daw_doc`, `vidpost_doc`, `pcb_doc`, `bi_doc`, `regulatory_doc`, `lms_doc`, `medkitex_doc`, `iot_doc`, `social_archive`, `dev_doc`. Contract test: 175 sidecars conforming.
+- 13 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.19.0 → 2.20.0 across all manifests.
+
 ## [v2.19.0] - 2026-05-01
 
 ### Added — 12 new pure-format conversion sidecars (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)

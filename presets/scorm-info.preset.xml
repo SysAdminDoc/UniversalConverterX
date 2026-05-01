@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SCORM Package -> JSON Probe</Name>
+    <Folder>Documents/LMS</Folder>
+    <InputTypes>
+        <Extension>zip</Extension>
+        <Extension>scorm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.scorm</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>lmskit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>scorm-info</Arg>
+    </Args>
+</Preset>

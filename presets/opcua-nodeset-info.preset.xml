@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>OPC UA NodeSet -> JSON</Name>
+    <Folder>Engineering/IoT</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.opcua</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>iotbus</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>opcua-nodeset-info</Arg>
+    </Args>
+</Preset>

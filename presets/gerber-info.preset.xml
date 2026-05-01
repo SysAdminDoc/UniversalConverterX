@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Gerber RS-274X -> JSON Probe</Name>
+    <Folder>Engineering/PCB</Folder>
+    <InputTypes>
+        <Extension>gbr</Extension>
+        <Extension>ger</Extension>
+        <Extension>gtl</Extension>
+        <Extension>gbl</Extension>
+        <Extension>gts</Extension>
+        <Extension>gbs</Extension>
+        <Extension>gko</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.gerber</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>pcbcad</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>gerber-info</Arg>
+    </Args>
+</Preset>

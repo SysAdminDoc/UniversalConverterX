@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Windows .reg Export -> JSON</Name>
+    <Folder>System/Forensics</Folder>
+    <InputTypes>
+        <Extension>reg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.reg</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>forensics</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>reg-to-json</Arg>
+    </Args>
+</Preset>
