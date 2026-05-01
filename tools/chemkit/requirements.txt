@@ -1,0 +1,2 @@
+rdkit>=2024.9
+# Open Babel CLI is shelled out to; install via OS package manager.

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>USD / USDA / USDC -> USDZ (AR Quick Look)</Name>
+    <Folder>3D/Animation</Folder>
+    <InputTypes>
+        <Extension>usd</Extension>
+        <Extension>usda</Extension>
+        <Extension>usdc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>usdz</OutputExtension>
+    <Engine>animkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>usdz</Arg>
+    </Args>
+</Preset>

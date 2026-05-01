@@ -1,0 +1,3 @@
+usd-core>=24.0
+bvh>=0.3
+# Alembic and FBX rely on the assimp CLI being on PATH.

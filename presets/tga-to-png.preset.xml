@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PCX / TGA / DPX / SGI / PCD / Netpbm -> PNG</Name>
+    <Folder>Image/Niche</Folder>
+    <InputTypes>
+        <Extension>pcx</Extension>
+        <Extension>tga</Extension>
+        <Extension>dpx</Extension>
+        <Extension>sgi</Extension>
+        <Extension>rgb</Extension>
+        <Extension>bw</Extension>
+        <Extension>rgba</Extension>
+        <Extension>ras</Extension>
+        <Extension>rast</Extension>
+        <Extension>sun</Extension>
+        <Extension>pcd</Extension>
+        <Extension>pbm</Extension>
+        <Extension>pgm</Extension>
+        <Extension>ppm</Extension>
+        <Extension>pnm</Extension>
+        <Extension>xpm</Extension>
+        <Extension>xbm</Extension>
+        <Extension>palm</Extension>
+        <Extension>wbmp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>rasterimg</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>

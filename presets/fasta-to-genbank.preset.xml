@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>FASTA / FASTQ / EMBL -> GenBank</Name>
+    <Folder>Bioinformatics</Folder>
+    <InputTypes>
+        <Extension>fa</Extension>
+        <Extension>fasta</Extension>
+        <Extension>fna</Extension>
+        <Extension>faa</Extension>
+        <Extension>fq</Extension>
+        <Extension>fastq</Extension>
+        <Extension>embl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>gb</OutputExtension>
+    <Engine>biokit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>genbank</Arg>
+    </Args>
+</Preset>

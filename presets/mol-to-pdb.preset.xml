@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>MOL / SDF / SMILES -> PDB</Name>
+    <Folder>Chemistry</Folder>
+    <InputTypes>
+        <Extension>mol</Extension>
+        <Extension>sdf</Extension>
+        <Extension>mol2</Extension>
+        <Extension>smi</Extension>
+        <Extension>xyz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>pdb</OutputExtension>
+    <Engine>chemkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>pdb</Arg>
+    </Args>
+</Preset>

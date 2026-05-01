@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SMILES / MOL / PDB -> SDF</Name>
+    <Folder>Chemistry</Folder>
+    <InputTypes>
+        <Extension>smi</Extension>
+        <Extension>mol</Extension>
+        <Extension>mol2</Extension>
+        <Extension>pdb</Extension>
+        <Extension>xyz</Extension>
+        <Extension>cif</Extension>
+        <Extension>inchi</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>sdf</OutputExtension>
+    <Engine>chemkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>sdf</Arg>
+    </Args>
+</Preset>

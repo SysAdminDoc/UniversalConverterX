@@ -139,6 +139,22 @@ KNOWN_EVENTS = {
     "score_doc",         # music — produced notation file
     "hex_image",         # hexkit — produced flash image
     "hex_image_info",    # hexkit.info — segment probe
+    # v2.12 wave (Domain-specific & exotic)
+    "molecule",            # chemkit — converted molecular file
+    "molecule_info",       # chemkit.info — formula / MW / SMILES probe
+    "bio_seq",             # biokit — converted sequence / alignment / VCF
+    "bio_stats",           # biokit.fastq-stats — QC stats
+    "medical_volume",      # medkit — produced 3D medical volume
+    "medical_volume_info", # medkit.info — dim / spacing / dtype
+    "net_capture",         # netcap — converted PCAP/PCAPNG or CSV summary
+    "log_record",          # logkit — produced JSONL/EVTX-JSONL log file
+    "raster_image",        # rasterimg — niche raster image converted
+    "archive_extra",       # morearchive — extracted niche archive
+    "archive_extra_entry", # morearchive — file entry inside niche archive
+    "archive_extra_info",  # morearchive.info — APK/IPA/MSIX probe
+    "bookmark_doc",        # bookmark — converted browser bookmark file
+    "eng_cad",             # engcad — STEP/IGES/BREP/STL converted
+    "anim_scene",          # animkit — BVH/Alembic/USD/FBX produced
 }
 
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>NIfTI / Analyze / MHA -> PNG slice stack</Name>
+    <Folder>Medical</Folder>
+    <InputTypes>
+        <Extension>nii</Extension>
+        <Extension>nii.gz</Extension>
+        <Extension>hdr</Extension>
+        <Extension>img</Extension>
+        <Extension>mha</Extension>
+        <Extension>mhd</Extension>
+        <Extension>nrrd</Extension>
+        <Extension>nhdr</Extension>
+        <Extension>mnc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_slices</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>medkit</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>to-png-stack</Arg>
+    </Args>
+</Preset>

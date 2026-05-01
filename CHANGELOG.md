@@ -2,6 +2,31 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.12.0] - 2026-05-01
+
+### Added — 10 new domain-specific raw-conversion sidecars
+
+- **chemkit** — Chemistry / cheminformatics: SMILES, MOL, SDF, MOL2, PDB, XYZ, CIF, InChI mutual conversion via RDKit; falls back to Open Babel CLI for the broader format pool. `info` op probes molecular formula, MW, SMILES, InChI, ring count, heavy-atom count.
+- **biokit** — Bioinformatics: FASTA / FASTQ / GenBank / EMBL / Newick / Stockholm / Clustal / PHYLIP / NEXUS sequence + alignment conversion via Biopython. `fastq-stats` op for QC (read count, GC %, mean Phred Q, length distribution). `vcf-to-tsv` flattens VCF to tab-delimited. `bam-to-fastq` extracts reads from BAM/CRAM via pysam.
+- **medkit** — 3D medical / scientific imaging: NIfTI 1/2 (.nii, .nii.gz), Analyze 7.5, MetaImage (.mha/.mhd), NRRD, MINC, GIPL, VTK ImageData mutual conversion via SimpleITK. `to-png-stack` op renders every Z slice as a normalized PNG. `info` op reports dim / spacing / origin / dtype.
+- **netcap** — Network capture conversion: PCAP <-> PCAPNG via scapy. `to-csv` op flattens each packet into a CSV row (time / src / dst / protocol / port / summary).
+- **logkit** — Log file -> structured JSONL: Apache CLF / Combined / Nginx, syslog (RFC 3164 + RFC 5424), Windows Event Log .evtx (via python-evtx + xmltodict).
+- **rasterimg** — Niche raster image conversion: PCX, Truevision TGA, Cineon, DPX, SGI/RGB, Sun Raster, Wireless Bitmap (.wbmp), Photo CD (.pcd), Netpbm (.pbm/.pgm/.ppm), APNG, MNG (read), FLI/FLC (read), X PixMap (.xpm), XBM, Palm Pixmap. Handled via Pillow with smart mode coercion (auto-drop alpha for formats that lack it).
+- **morearchive** — Long-tail archive / package extraction: SIT/SITX (StuffIt via unar), LHA/LZH, ARJ, ZOO/HA/ARC (legacy DOS via unar), DEB/IPK (Debian), RPM (Red Hat via 7z + cpio), DMG (macOS, read-only via 7z), IPA (iOS), APK/XAPK/APKS (Android), MSIX/APPX (Windows modern app), NUPKG (NuGet). `info` op probes APK/IPA/MSIX manifests.
+- **bookmark** — Cross-browser bookmark conversion: Chromium (Chrome/Edge/Brave/Opera) JSON `Bookmarks` file, Firefox bookmark backup JSON, Safari .plist (binary), Opera classic .adr, Netscape HTML (de-facto export format), CSV / Pinboard / Diigo / Raindrop. Outputs Netscape HTML, CSV, or normalized JSON.
+- **engcad** — Engineering CAD: STEP (ISO 10303), IGES, BREP, STL, OBJ via pythonocc-core (Open CASCADE Technology BREP solid modeling kernel). Falls back to trimesh for mesh-only paths when pythonocc isn't available.
+- **animkit** — 3D animation / scene description: BVH (Biovision Hierarchy motion capture), Alembic (.abc), USD / USDA / USDC / USDZ (Pixar Universal Scene Description), FBX, glTF / GLB, VRM (VRoid), Collada (.dae). USD path via usd-core; FBX/Collada/Alembic via assimp CLI shellout.
+
+### Added — 19 new presets
+
+`smiles-to-sdf`, `mol-to-pdb`, `fasta-to-genbank`, `fastq-to-fasta`, `bam-to-fastq`, `nifti-to-png-stack`, `analyze-to-nifti`, `pcap-to-pcapng`, `pcap-to-csv`, `apache-log-to-jsonl`, `evtx-to-jsonl`, `tga-to-png`, `extract-niche-archive`, `bookmarks-to-html`, `bookmarks-to-csv`, `step-to-stl`, `step-to-iges`, `fbx-to-glb`, `usd-to-usdz`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 15 new event types: `molecule`, `molecule_info`, `bio_seq`, `bio_stats`, `medical_volume`, `medical_volume_info`, `net_capture`, `log_record`, `raster_image`, `archive_extra`, `archive_extra_entry`, `archive_extra_info`, `bookmark_doc`, `eng_cad`, `anim_scene`. Contract test: 88 sidecars conforming.
+- 10 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.11.0 → 2.12.0 across all manifests.
+
 ## [v2.11.0] - 2026-05-01
 
 ### Added — 13 new pure-format conversion sidecars (no AI)

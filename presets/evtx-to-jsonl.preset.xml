@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Windows Event Log (.evtx) -> JSONL</Name>
+    <Folder>Logs</Folder>
+    <InputTypes>
+        <Extension>evtx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>jsonl</OutputExtension>
+    <Engine>logkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>evtx-to-jsonl</Arg>
+    </Args>
+</Preset>

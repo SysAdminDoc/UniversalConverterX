@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>FASTQ -> FASTA</Name>
+    <Folder>Bioinformatics</Folder>
+    <InputTypes>
+        <Extension>fastq</Extension>
+        <Extension>fq</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>fasta</OutputExtension>
+    <Engine>biokit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>fasta</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Browser bookmarks -> CSV</Name>
+    <Folder>Bookmarks</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+        <Extension>plist</Extension>
+        <Extension>html</Extension>
+        <Extension>adr</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_bookmarks</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>bookmark</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>csv</Arg>
+    </Args>
+</Preset>
