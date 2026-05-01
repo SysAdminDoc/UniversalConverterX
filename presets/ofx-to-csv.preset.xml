@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>OFX / QFX / QIF / IIF / MT940 -> CSV</Name>
+    <Folder>Finance</Folder>
+    <InputTypes>
+        <Extension>ofx</Extension>
+        <Extension>qfx</Extension>
+        <Extension>qif</Extension>
+        <Extension>iif</Extension>
+        <Extension>mt940</Extension>
+        <Extension>sta</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>finance</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>csv</Arg>
+    </Args>
+</Preset>

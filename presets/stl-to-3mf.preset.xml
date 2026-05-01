@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>STL / OBJ / PLY -> 3MF</Name>
+    <Folder>3D/Printing</Folder>
+    <InputTypes>
+        <Extension>stl</Extension>
+        <Extension>obj</Extension>
+        <Extension>ply</Extension>
+        <Extension>glb</Extension>
+        <Extension>gltf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>3mf</OutputExtension>
+    <Engine>cadmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>3mf</Arg>
+    </Args>
+</Preset>

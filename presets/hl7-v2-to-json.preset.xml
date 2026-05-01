@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HL7 v2 -> JSON</Name>
+    <Folder>Healthcare/HL7</Folder>
+    <InputTypes>
+        <Extension>hl7</Extension>
+        <Extension>v2</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>hl7</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>v2-to-json</Arg>
+    </Args>
+</Preset>
