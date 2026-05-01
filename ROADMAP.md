@@ -127,9 +127,22 @@ workspace pattern that v2.4 established.
   metadata override row, History integration. Toolbox "Documents" tile + nav
   search entry. Contract test: `ebook` added to `KNOWN_EVENTS` (25 sidecars
   conform).
-- #39 **OCR (Tesseract)** — extract text from images and scanned PDFs to TXT /
-  HOCR / PDF (searchable). Bundles `tesseract.exe` lookup under standard install
-  dirs; downloads language data on demand to `tools/_models/tessdata/`.
+- #39 **OCR (Tesseract)** ✓ Shipped v2.5 — extract text from images to TXT / hOCR /
+  searchable PDF / TSV (per-word coords) / ALTO XML. Shipped:
+  `tools/ocr/{sidecar.py,build.ps1}` (pure-Python wrapper around `tesseract.exe`).
+  Discovers Tesseract via PATH / `$env:TESSERACT_PATH` / standard install dirs;
+  also probes for `tessdata` adjacent to the executable, under
+  `share/tessdata`, or in `UCX_MODEL_DIR/tessdata`. Two ops: `recognize`
+  (multi-image batch with `--lang eng+fra`-style multi-language, `--psm` page
+  segmentation mode 0-13, `--oem` engine mode) and `languages` (enumerate
+  installed packs via `tesseract --list-langs`, emit `ocr_language` events).
+  New `OcrPage` with file queue, language combo (editable; "Reload langs"
+  button populates from sidecar), output-format combo (TXT / hOCR / PDF /
+  TSV / ALTO), PSM NumberBox, output-dir picker, per-file status, History
+  integration. Toolbox "Documents" tile (badge: AI) + nav search entry.
+  Contract test: `ocr_result` and `ocr_language` added to `KNOWN_EVENTS`
+  (26 sidecars conform). Scanned-PDF support deferred -- requires a
+  pdf2image / pdftoppm step that needs Poppler bundled separately; v2.6.
 
 ## v2.4.0 Shipped ✓ (in progress)
 
