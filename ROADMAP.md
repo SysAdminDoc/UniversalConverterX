@@ -1,554 +1,650 @@
-# UniversalConverterX -- Format Conversion Roadmap
+# UniversalConverterX — Product Roadmap
 
-Living catalogue of every raw file-format conversion still missing from
-UCX, organized by domain, prioritized for impact, and sized for sequencing.
+**Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
+**Last updated:** 2026-05-01
 
-**Current state (v2.12.0):** 88 sidecar engines, 121 shipped presets,
-70+ Toolbox tiles, 4 desktop projects (Core, Console, UI, ShellExtension)
-plus PowerShell module + REST `ucx serve`.
+All format-coverage waves (A–X, shipped through v2.20.1) are complete and
+retired from this document. This roadmap focuses on the next strategic
+axes: wiring built engines into the UI, platform upgrades, new
+capabilities, developer experience, distribution, security, and
+accessibility.
 
-**Goal:** Cover every file format a working professional could plausibly
-need. Beat each competitor on at least one axis: *coverage* (we ship the
-formats they don't), *batch UX* (drop a folder, get every output),
-*offline* (no cloud, no account), or *programmability* (CLI + REST + PS
-module).
+**Design charter (unchanged):** Offline-first. No cloud. No accounts. No
+telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
+batch UX, programmability (CLI + REST + PS module), and AI depth.
 
 ---
 
 ## Legend
 
-* **P0** -- High demand, missing today. Ship next.
-* **P1** -- Medium demand or specialist niche with active community.
-* **P2** -- Long tail / archival / single-vendor formats. Nice-to-have.
-* **Size** -- Rough sidecar build effort: **S** = a few hours, **M** = a day, **L** = multi-day (heavy native deps or proprietary protocols).
-* **Backend** -- The OSS library / CLI we'll wrap.
+| Symbol | Meaning |
+|--------|---------|
+| **Now** | Ship next (v2.21–v2.22). High certainty, well-scoped. |
+| **Next** | v2.23–v2.26 window. Design complete or dependencies blocked on Now items. |
+| **Later** | v2.27+. Higher effort, lower urgency, or needs community signal. |
+| **UC** | Under Consideration — needs more investigation before placement. |
+| **Rejected** | Will not ship. Reason stated. |
+| **Impact** | User value 1 (niche) – 5 (universal). |
+| **Effort** | Engineering cost 1 (hours) – 5 (weeks of cross-cutting work). |
+| **Type** | `parity` = catch-up to table-stakes competitor feature; `leapfrog` = ahead of the field; `platform` = infra/framework upgrade; `dx` = dev/maintainer experience. |
 
 ---
 
-## Already Covered (don't re-add)
+## Tier 1 — Now  _(v2.21–v2.22)_
 
-For reference -- this is the existing surface so we don't accidentally re-scope:
+Short-iteration items: UI wiring for already-built engines, UX reliability
+fixes, and security hygiene. None of these require a new sidecar engine.
 
-| Domain | Sidecar | Formats |
-| --- | --- | --- |
-| Image (modern) | `heicshift` | HEIC / HEIF / AVIF / JPEG / PNG / WebP / TIFF / BMP / JXL |
-| Image (HDR) | `hdrkit` | Radiance HDR / OpenEXR / PFM / 16-bit PNG-TIFF + tone-mapping |
-| Image (vector) | `vectorkit` | AI / EPS / PS / EMF / WMF / SVG / SVGZ / CDR / VSD via Inkscape |
-| Image (RAW) | `rawphoto` | CR2 / CR3 / NEF / ARW / DNG / ORF / RAF / RW2 (LibRaw) |
-| Image (layered) | `psdkit` | PSD / PSB / XCF flatten + per-layer extract |
-| Image (niche) | `rasterimg` | PCX / TGA / DPX / SGI / Sun / PCD / Netpbm / APNG / XPM / Palm |
-| Image (textures) | `texturekit` | DDS / KTX / KTX2 / ASTC / EXR / TGA |
-| Image (icons) | `iconkit` | PNG -> Windows .ico + Apple .icns / .iconset |
-| Image (medical) | `dicomkit` | DICOM -> PNG / JPEG / TIFF + anonymize |
-| Image (ICC) | `iccprofile` | Apply / embed / strip color profiles |
-| Image (Lottie) | `lottiekit` | Lottie / TGS -> GIF / MP4 / WebP / APNG / SVG |
-| Video | `videocrush` | MP4 / MKV / MOV / AVI / WebM (H.264 / H.265 / AV1 / VP9 / ProRes) |
-| Video extras | `clipforge` | concat / speed / reverse / 3D-LUT / HDR->SDR |
-| Video (GIF) | `gifstudio` | GIF authoring + optimization |
-| Video (frames) | `framesnap` | Frame extraction (precise / batch) |
-| Audio (codecs) | `audiopro` | DSD / APE / WV / TAK / TTA / AC3 / DTS / WMA / AMR / SPEEX / GSM / AU / VOC / RA / MusePack |
-| Audio (tags) | `audiotag` | ID3 / FLAC / Ogg / M4A / APE metadata read/write/strip |
-| Audio (tracker) | `trackermod` | MOD / IT / XM / S3M -> WAV / FLAC / MP3 |
-| Audio (MIDI) | `midisynth` | MIDI + SoundFont -> WAV / FLAC / MP3 |
-| Documents | `docconvert` | DOCX / PDF / ODT / RTF / XLSX / ODS / CSV / PPTX / EPUB / HTML (LibreOffice) |
-| Documents (Pandoc) | `pandoc-cli` | Markdown / RST / DOCX / EPUB / HTML / LaTeX / DocBook / AsciiDoc / Org / MediaWiki / Textile |
-| PDF | `pdftools` | merge / split / rotate / extract / encrypt / compress |
-| PDF (OCR) | `pdfocr` | Searchable PDF via ocrmypdf |
-| PDF -> MD | `pdfmarkdown` | pymupdf4llm / marker / Docling / MinerU |
-| Subtitles | `subconvert` | SRT / VTT / ASS / SSA / SUB |
-| Subtitles (interchange) | `subkit` | SAMI / TTML / DFXP / SCC / EBU STL / MicroDVD / LRC / SBV |
-| Subtitles (OCR) | `subocr` | PGS / VobSub -> SRT |
-| Fonts | `fontconvert` | TTF / OTF / WOFF / WOFF2 |
-| Fonts (subset) | `fontsubset` | Webfont subsetter via fontTools |
-| eBooks | `ebookconvert` | EPUB / MOBI / AZW3 / PDF / FB2 / DOCX (Calibre) |
-| Archives | `archive` | 7z / ZIP / TAR / RAR / ISO / CAB / MSI |
-| Archives (niche) | `morearchive` | SIT / LHA / ARJ / DEB / RPM / DMG / IPA / APK / MSIX / NUPKG |
-| Email | `mailbox` | MBOX / EML / Maildir |
-| Email (PST) | `mailimport` | Outlook PST / OST -> MBOX or per-message EML |
-| Calendar | `calconvert` | ICS / VCF |
-| Web archives | `webarchive` | HAR / WARC |
-| Bookmarks | `bookmark` | Chrome / Firefox / Safari / Opera / Netscape / CSV |
-| Data (text) | `datakit` | JSON / YAML / TOML / XML / CSV / TSV / NDJSON |
-| Data (scientific) | `datasci` | Parquet / Feather / Avro / ORC / HDF5 / NPY / NPZ / MAT / NetCDF / FITS |
-| Data (legacy DB) | `dbtools` | Access / DBF / SAS / SPSS / Stata / R Data |
-| Localization | `i18nkit` | PO / MO / XLIFF / TMX / RESX / .strings / JSON-i18n / YAML |
-| 3D (mesh) | `meshconvert` | STL / OBJ / PLY / GLB / GLTF / FBX / DAE / 3DS |
-| 3D (point cloud) | `pointcloud` | PLY / PCD / XYZ / PTS / OBJ / LAS / LAZ / E57 |
-| 3D (animation) | `animkit` | BVH / Alembic / USD / USDZ / FBX / glTF / VRM / Collada |
-| Engineering CAD | `engcad` | STEP / IGES / BREP / STL (Open CASCADE) |
-| 2D CAD | `cadkit` | DXF / DWG (ODA + ezdxf) |
-| GIS | `gisconvert` | KML / GPX / GeoJSON / Shapefile / GeoPackage (GDAL) |
-| Disk images | `diskimage` | RAW / QCOW2 / VMDK / VHD / VHDX / VDI / QED |
-| Game ROMs | `gametools` | IPS / BPS / UPS / NES-SNES-N64 ROM ops / CHD <-> CUE/BIN |
-| Networks | `netcap` | PCAP <-> PCAPNG + CSV summary |
-| Logs | `logkit` | Apache / Nginx / syslog / Windows .evtx -> JSONL |
-| Music notation | `music` | MusicXML / MIDI / ABC / MuseScore / GuitarPro |
-| Color (LUT) | `lutgen` | .cube / .3dl 3D LUT generation |
-| Chemistry | `chemkit` | SMILES / MOL / SDF / MOL2 / PDB / XYZ / CIF / InChI |
-| Bioinformatics | `biokit` | FASTA / FASTQ / GenBank / EMBL / VCF / BAM / SAM / Newick |
-| Medical (3D) | `medkit` | NIfTI / Analyze / MetaImage / NRRD / MINC / GIPL / VTK |
-| Apple plist | `plistkit` | binary / XML / JSON plist |
-| Microcontroller | `hexkit` | Intel HEX / Motorola SREC / TI-TXT / raw binary |
-| Text | `textencode` | Charset / line-ending / BOM normalization |
-| Text | `hashkit` | MD5 / SHA-1/2/3 / BLAKE2/3 / xxHash / CRC32 |
-| Text | `encodekit` | Base64 / Base32 / Base85 / Hex / data: URL |
-| Code | `codeformat` | prettier / black / gofmt / rustfmt / clang-format |
+### 1. AiLab UI Wiring — wire existing sidecars to "Future" tiles
+
+All four AiLab Future tiles have sidecars that already pass contract tests.
+This is a C# UI wiring task, not an engine task.
+
+| Tile | Sidecar(s) | Page skeleton needed | Impact | Effort |
+|------|-----------|----------------------|--------|--------|
+| Text-to-Speech | `edge-tts`, `premiumtts` | `TtsPage.xaml` with voice catalog, rate/pitch/volume sliders, preview player | 5 | 2 |
+| Speech-to-Text | `whisper-stt`, `whisper-cpp` | `SttPage.xaml` with model selector, language picker, output format (SRT/VTT/TXT), file or mic input | 5 | 2 |
+| Old Photo Restoration | `facerestore`, `gfpgan` | `PhotoRestorePage.xaml` — drop image(s), model selector (GFPGAN v1.4 / CodeFormer), output quality slider | 4 | 2 |
+| AI Voice Changer _(AiLab)_ | engine TBD | `VoiceChangerPage.xaml` — needs RVC/so-vits-svc sidecar; wire after engine confirmed | 3 | 3 |
+
+**Rationale:** Any Video Converter, ElevenLabs API wrapper apps, and Whisper GUI tools all ship these as first-class tiles. UCX has the engines; the gap is purely UI surface.
+Sources: [S3], [S4], [S10]
 
 ---
 
-# Remaining Gaps -- The Roadmap
+### 2. AudioTools — Audio Compressor standalone page
 
-Each entry: *what we add* | *what's notable* | *backend* | *priority* | *size*.
+`audio-compressor` sidecar already exists. Wire it to a `AudioCompressorPage.xaml`
+matching the same pattern as existing AudioTools pages: threshold, ratio,
+attack/release sliders, preview waveform (optional Phase 2 enhancement).
 
-## Wave A -- Office / Legacy Documents
-
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `legacyoffice` | WordPerfect (.wpd, .wpt, .wpg) | libwpd / libwpg via libreoffice | P0 | M |
-| `legacyoffice` | WordStar (.ws, .wsd) | wordstar2text | P1 | M |
-| `legacyoffice` | AmiPro (.sam) / KOffice / AbiWord (.abw) | libreoffice CLI | P1 | S |
-| `legacyoffice` | Microsoft Works (.wps, .wpt) | libreoffice CLI | P1 | S |
-| `legacyoffice` | Microsoft Publisher (.pub) | libmspub | P1 | M |
-| `legacyoffice` | StarOffice 1.x (.sxw, .sxc, .sxi) | libreoffice CLI | P1 | S |
-| `hwpkit` | HWP / HWPX (Korean Hangul) | pyhwp + libreoffice | P0 | M |
-| `applepro` | Pages / Numbers / Keynote (.pages/.numbers/.key) | unzip + iWork XML | P0 | M |
-| `helpkit` | CHM (compiled HTML help) | pychm + extract | P1 | M |
-| `helpkit` | WinHelp (.hlp) | helpdeco extract | P2 | L |
-| `mathnotebook` | Mathematica (.nb) | wolframclient (read-only) | P2 | M |
-
-**Why P0 for `applepro` + `hwpkit`:** common formats with no good Windows-side OSS converter; user pain is real.
+Impact: 4 · Effort: 1 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs stub)
 
 ---
 
-## Wave B -- Spreadsheet & Database Long Tail
+### 3. OtherTools — Batch Rename
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `spreadsheet` | Lotus 1-2-3 (.wk1, .wk3, .wks, .123) | libreoffice CLI | P1 | S |
-| `spreadsheet` | Quattro Pro (.qpw, .wb1, .wb2) | libreoffice CLI | P1 | S |
-| `spreadsheet` | Apple Numbers | unzip + iWork XML | P1 | M |
-| `spreadsheet` | Gnumeric (.gnumeric) | gnumeric ssconvert | P1 | S |
-| `spreadsheet` | DIF / SLK | pure Python | P2 | S |
-| `dbsql` | SQL DDL dialect translation: MySQL <-> PostgreSQL <-> SQLite <-> Oracle <-> MSSQL | sqlglot | P0 | M |
-| `dbsql` | MySQL `mysqldump` <-> PostgreSQL `pg_dump` | sqlglot + pgloader | P0 | M |
-| `dbexport` | Oracle DMP / IBM DB2 export -> CSV | proprietary CLI shellouts | P2 | L |
-| `dbexport` | FoxPro / Paradox (.db) | dbfread + pypdb | P2 | M |
-| `dbexport` | MS SQL backup (.bak) -> bacpac | sqlpackage CLI | P2 | L |
+New `batchrename` sidecar (or pure-C# implementation): regex/pattern-based
+file rename with live preview. Tokens: `{n}` (1-based counter), `{date}`,
+`{exif:date}`, `{parent}`, `{ext}`, regex replace, case transform.
+Ship a `BatchRenamePage.xaml` with live preview table.
 
-**Why P0 for `dbsql`:** SQL dialect translation via `sqlglot` is the killer feature for the data-engineer crowd -- no good GUI for it exists.
+No sidecar strictly needed — `System.IO.File.Move` in the UI project is
+sufficient for a first pass. ExifTool integration for `{exif:*}` tokens is
+a Next-tier enhancement.
+
+Impact: 4 · Effort: 2 · Type: parity
+Sources: [S5] (ToolboxPage stub), [S6] (competitor feature)
 
 ---
 
-## Wave C -- Niche Image Formats
+### 4. Output Filename Collision Protection
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `imgmore` | JBIG2 (.jb2) | jbig2dec / jbig2enc | P1 | M |
-| `imgmore` | FAX TIFF Group 3 / 4 | libtiff via Pillow | P1 | S |
-| `imgmore` | Mac PICT (.pict, .pct) | imagemagick CLI | P2 | S |
-| `imgmore` | Windows DIB (.dib) | Pillow native | P2 | S |
-| `imgmore` | Amiga IFF / ILBM (.iff, .lbm) | imagemagick / pyiff | P2 | M |
-| `imgmore` | Atari Degas (.pi1, .pi2, .pi3) | custom parser | P2 | M |
-| `imgmore` | WPG (WordPerfect Graphics) | libwpg | P2 | M |
-| `imgmore` | TIM (PSX texture), GIM (PSP) | custom parser | P2 | L |
-| `imgmore` | Sega VDP texture formats | custom parser | P2 | L |
-| `imgmore` | Adobe layered TIFF (.tif w/ layers) | tifffile | P1 | S |
+When an output file already exists: auto-append ` (1)`, ` (2)` etc. instead
+of silently overwriting or erroring. Apply across all sidecars via the Core
+orchestrator — one fix, universal effect.
 
-**Bundle into one sidecar** (`imgmore`) since each is small + Pillow-friendly.
+Impact: 5 · Effort: 1 · Type: parity
+Sources: [S11] (HandBrake #7848), [S12] (LosslessCut overwrite issue #2667)
 
 ---
 
-## Wave D -- Video Long Tail
+### 5. Output Filename Template DSL
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `videopro` | VOB / EVO (DVD-Video / EVO Blu-ray) | FFmpeg + libdvdread | P0 | S |
-| `videopro` | MTS / M2TS (Blu-ray AVCHD) | FFmpeg | P0 | S |
-| `videopro` | DV / DVCPRO (camcorder tape capture) | FFmpeg | P1 | S |
-| `videopro` | 3GP / 3G2 (mobile container) | FFmpeg | P1 | S |
-| `videopro` | F4V / SWF (Adobe Flash) | FFmpeg + swftools | P1 | M |
-| `videopro` | HEVC / H.264 elementary streams (.h264, .h265, .hevc) | FFmpeg | P0 | S |
-| `videopro` | Y4M raw uncompressed | FFmpeg | P1 | S |
-| `videopro` | AVS / AVS2 (Chinese AVS) | FFmpeg + libavs | P2 | M |
-| `videoraw` | Apple ProRes RAW | FFmpeg + Apple SDK | P2 | L |
-| `videoraw` | Cinema DNG sequence | rawpy + ffmpeg muxer | P1 | M |
-| `videoraw` | BRAW (Blackmagic RAW) | BRAW SDK | P2 | L |
-| `videoraw` | RED .r3d | RED SDK | P2 | L |
-| `videoraw` | ARRI ALEXA proprietary | (no OSS path) | P2 | -- |
-| `streaming` | DASH .mpd <-> HLS .m3u8 manifest+segment conversion | shaka-packager | P0 | M |
-| `streaming` | CMAF segments + Smooth Streaming .ism | shaka-packager | P1 | M |
-| `imageseq` | DPX / Cineon / OpenEXR / TIFF image sequence <-> MP4 / MOV / MKV | FFmpeg sequence demuxer | P0 | S |
+User-configurable output filename pattern: `{title}_{date}_{resolution}.{ext}`.
+Supported tokens for video/audio: `{title}`, `{artist}`, `{date}`, `{year}`,
+`{resolution}`, `{fps}`, `{bitrate}`, `{codec}`, `{duration}`, `{n}` (counter).
+Store as a per-preset optional `<OutputTemplate>` element in preset XML.
+Fallback to existing stem-based naming when unset.
 
-**Why P0 for `videopro` + `imageseq`:** these are *the* common gaps users hit when converting from broadcast or VFX workflows.
+Impact: 4 · Effort: 2 · Type: leapfrog
+Sources: [S13] (yt-dlp `%(title)s` pattern system), [S14] (general UX pattern)
 
 ---
 
-## Wave E -- Audio Long Tail
+### 6. Conversion History / Activity Log
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `chiptune` | NSF (NES), SPC (SNES), VGM (multi-system), GBS (GameBoy), HES (PCEngine), KSS, GYM, S98, AY | game-music-emu (gme) | P0 | M |
-| `chiptune` | C64 SID (.sid), AHX, HVL (Amiga) | sidplayfp + AHXplay | P1 | M |
-| `chiptune` | MED / OctaMED / MTM / ULT / FAR (extra trackers beyond MOD/IT/XM/S3M) | libxmp | P1 | S |
-| `audiomore` | AIFF / AIFC (.aif, .aifc) | FFmpeg + python-soundfile | P0 | S |
-| `audiomore` | IFF-8SVX (Amiga sound) | FFmpeg | P2 | S |
-| `audiomore` | ULAW / ALAW (telephony) | FFmpeg | P1 | S |
-| `audiomore` | Apple CAF (Core Audio Format) | FFmpeg + caf-parser | P0 | S |
-| `audiomore` | Sony ATRAC3 (.aa3, .oma, .at3) | FFmpeg + at3tool (read-only) | P1 | M |
-| `audiomore` | DSD64/128/256 explicit rate handling | FFmpeg | P1 | S |
-| `audiomore` | DTS Master Audio + TrueHD lossless | FFmpeg | P0 | S |
-| `audiomore` | HE-AAC v2 + xHE-AAC | FFmpeg + libfdk-aac | P1 | S |
-| `ringtone` | RTTTL / iMelody (.imy) / NRT | pure Python | P2 | S |
-| `karaoke` | KFN / K05 / KAR (extends midisynth) | custom + midisynth | P2 | M |
-| `audiocue` | EAC `.cue` sheet <-> FLAC + tags + EAC log validation | pycdio + custom | P1 | M |
+Persist every completed job to a SQLite database: timestamp, engine, input
+file, output file, duration, file sizes, exit code, log snippet. Surface as
+a `HistoryPage.xaml` with filter/search, re-run action, and "open output
+folder" shortcut. Log is local-only — consistent with offline-first charter.
 
-**Why P0 for `chiptune` + AIFF / CAF / TrueHD / DTS-MA:** these are the formats that hit the long-tail audiophile / retro-gaming / pro broadcast crowd.
+Impact: 4 · Effort: 2 · Type: parity
+Source: [S14] (common request across all media converter communities)
 
 ---
 
-## Wave F -- Email & Messaging Long Tail
+### 7. Dependency Update Checker
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `emailpro` | Outlook .msg (single message) -> .eml | extract-msg | P0 | S |
-| `emailpro` | Lotus Notes .nsf | NotesSQL + open-nsf | P1 | L |
-| `emailpro` | Windows Live Mail | EmlFile parsing | P1 | M |
-| `emailpro` | EML thread -> Maildir / mbox archive | stdlib | P1 | S |
-| `messaging` | WhatsApp .crypt12 / .crypt14 backup | wa-crypt-tools | P1 | M |
-| `messaging` | Telegram Desktop chat export (.json/.html) | json + html parser | P1 | S |
-| `messaging` | iMessage / SMS DB (`chat.db`) -> JSON | sqlite + pmsg | P1 | M |
-| `messaging` | Discord export -> JSON | dispatcher | P2 | S |
-| `messaging` | Slack export -> JSON | unzip + parse | P2 | S |
+Background check (on app start, at most once per 24 h) against GitHub Releases
+for yt-dlp, whisper-cpp, ffmpeg-builds, and onnxruntime. Show a non-blocking
+toast with one-click update. This directly addresses the CVE triage workflow
+(v2.2.0 pinned yt-dlp for CVE-2026-26331 and onnxruntime for heap OOB
+manually — automate the detection step).
 
-**Why P0 for `emailpro` (.msg):** Outlook saves single messages as .msg by default -- this is the missing companion to PST.
+Impact: 4 · Effort: 2 · Type: dx + security
+Sources: [S1] (CHANGELOG v2.2.0 CVE pins), [S15] (YoutubeDownloader auto-update env var)
 
 ---
 
-## Wave G -- Calendar / Contact Long Tail
+### 8. Parallel Job Limit Setting
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `calmore` | Apple .icbu (calendar backup bundle) | unzip + ics | P1 | S |
-| `calmore` | Outlook .ost calendar items -> ICS | pypff + ics | P1 | M |
-| `calmore` | Google Takeout calendar JSON -> ICS | json + ics | P1 | S |
-| `calmore` | LDAP LDIF <-> vCard | python-ldap | P1 | S |
+Expose the max-concurrent-jobs cap as a user setting (default: CPU count / 2,
+range 1–16). Currently hardcoded. Adds a single `<Slider>` in
+`SettingsPage.xaml` and one property in `AppSettings`.
 
----
-
-## Wave H -- Subtitle / Caption Edge Cases
-
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `subextra` | CEA-608 / CEA-708 closed captions <-> SRT | ccextractor + custom | P0 | M |
-| `subextra` | SMIL (Synchronized Multimedia Integration Language) | ElementTree | P1 | S |
-| `subextra` | iTT (iTunes Timed Text) | xml + DFXP path | P1 | S |
-| `subextra` | STL (Spruce Subtitle Format) -- different from EBU STL | parser | P2 | M |
-| `subextra` | Web-VTT cue formatting + `region` blocks | pysubs2 + extension | P1 | S |
-| `subextra` | Karaoke ASS -> LRC time-aligned | pysubs2 | P1 | S |
+Impact: 3 · Effort: 1 · Type: parity
+Source: [S14] (common user request in HandBrake / FFmpeg GUI communities)
 
 ---
 
-## Wave I -- 3D / Game Asset Niche
+### 9. yt-dlp Cookie Credential Encryption
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `gameasset` | Source engine (.smd, .qc, .vmt, .vtf) | srctools | P1 | M |
-| `gameasset` | Quake (.mdl, .md2, .md3) | quake-mdl | P2 | M |
-| `gameasset` | WoW M2 / WMO / BLP | pywowlib | P2 | L |
-| `gameasset` | TIM (PSX texture) / BFRES (Switch) | byml + sarc | P2 | L |
-| `gameasset` | Unity AssetBundle | UnityPy | P1 | M |
-| `gameasset` | Godot scene formats (.tscn, .res) | godot-parser | P2 | M |
-| `cadmore` | 3MF (3D Manufacturing Format) | lib3mf | P0 | M |
-| `cadmore` | AMF (Additive Manufacturing Format) | xmlschema + amf-tools | P0 | S |
-| `cadmore` | G-code (.gcode, .nc) -- format normalization + slicer settings | py-gcode | P1 | M |
-| `cadmore` | X_T / Parasolid (.x_t, .x_b) | (closed format -- read-only via OCC) | P2 | L |
-| `cadmore` | SAT / ACIS | (closed format) | P2 | L |
-| `cadmore` | JT (Siemens) | (closed format) | P2 | L |
-| `pcb` | Gerber RS-274X + Excellon drill | pcb-tools | P1 | M |
-| `pcb` | KiCad PCB / Schematic <-> Eagle <-> Altium | kicad-python | P1 | L |
+Encrypt stored yt-dlp cookies at rest using Windows DPAPI
+(`System.Security.Cryptography.ProtectedData`), machine-scoped. Mirrors the
+approach shipped in YoutubeDownloader v1.14+. Prevents credential leakage if
+the UCX app data folder is exfiltrated.
 
-**Why P0 for `cadmore` (3MF + AMF):** the modern 3D-printing standards -- STL is the legacy, 3MF/AMF are what current slicers want.
+Impact: 3 · Effort: 1 · Type: security
+Source: [S15] (YoutubeDownloader DPAPI cookie encryption, v1.14 changelog)
 
 ---
 
-## Wave J -- GIS & Geospatial Long Tail
+### 10. Accessibility — UIA Automation Properties Pass
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `gistiles` | MBTiles (Mapbox tile pyramid) | mbtiles + sqlite | P0 | S |
-| `gistiles` | PMTiles (Protomaps single-file) | pmtiles | P0 | S |
-| `gistiles` | MVT / PBF (Mapbox Vector Tiles) | mapbox-vector-tile | P1 | S |
-| `gistiles` | COG (Cloud Optimized GeoTIFF) | rio-cogeo | P0 | S |
-| `gistiles` | KMZ (zipped KML) | unzip + kml | P0 | S |
-| `gispoi` | Garmin .gdb / .img (POI) | gpsbabel | P1 | M |
-| `gispoi` | TomTom .ov2, Magellan .upt | gpsbabel | P2 | M |
-| `wells` | LAS well-log (different from LiDAR LAS) | lasio | P1 | S |
-| `seismic` | SEG-Y / SEG-D seismic data | obspy | P1 | M |
+Assign `AutomationProperties.Name` and `AutomationProperties.AutomationId` to
+all interactive controls in every page XAML. Fixes screen reader blind spots
+and unblocks UI automation testing in CI. Prerequisite for any formal
+accessibility audit.
+
+Impact: 3 · Effort: 2 · Type: accessibility
+Source: [S16] (WinUI 3 accessibility docs — UIA peer requirement)
 
 ---
 
-## Wave K -- Network / Security / DevOps
+### 11. CI — Sidecar Contract Test Gate
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `dnskit` | DNS zone files (.zone) <-> JSON | dnspython | P1 | S |
-| `dnskit` | BIND9 named.conf parsing | dnspython | P1 | S |
-| `netcap` (extend) | NetFlow v5/v9 / IPFIX -> PCAP / JSON | softflowd + pyfixbuf | P1 | M |
-| `netcap` (extend) | BGP RIB MRT dumps | mrtparse | P2 | S |
-| `tlskit` | X.509 certificates: PEM / DER / PKCS7 / PKCS12 metadata | cryptography | P0 | S |
-| `tlskit` | OpenSSL key formats (PEM/DER) metadata + format conversion | cryptography | P0 | S |
-| `sshkit` | OpenSSH <-> PKCS8 <-> PuTTY .ppk <-> OpenSSL key conversion | paramiko | P0 | S |
-| `gpgkit` | GPG / OpenPGP key armoring (ASCII <-> binary) | python-gnupg | P1 | S |
-| `nmapkit` | Nmap XML / GNMAP / JSON | python-libnmap | P2 | S |
-| `wirelesskit` | NMEA GPS + AIS messages -> JSON / KML / GPX | pynmea2 | P1 | S |
-| `wirelesskit` | SDR IQ files (.iq, .wav-iq, .cu8) format conversion | numpy + iq-tools | P2 | M |
-| `bus` | DBC (CAN bus database) <-> ARXML / FIBEX | cantools | P2 | M |
+Add a GitHub Actions job that runs `tests/sidecar_contract/check_contract.py`
+against all 176 sidecars on every PR. Currently the contract test exists but
+is not gated. Failing contract tests block merge. This catches NDJSON schema
+regressions before they hit users.
 
-**Why P0 for `tlskit` + `sshkit`:** every dev / sysadmin hits these. Key format conversion is annoying without a reliable GUI.
+Impact: 3 · Effort: 1 · Type: dx
+Source: [S17] (tools/README.md contract checklist), repo CI gap observation
 
 ---
 
-## Wave L -- Financial / Accounting
+## Tier 2 — Next  _(v2.23–v2.26)_
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `finance` | OFX / QFX (Quicken / financial) <-> CSV / JSON | ofxparse | P0 | S |
-| `finance` | QIF (Quicken Interchange Format) | qifparse | P0 | S |
-| `finance` | IIF (QuickBooks) | iif-parser | P1 | S |
-| `finance` | IFX (Interactive Financial Exchange) | xml + xsd | P2 | M |
-| `banking` | CAMT.052 / CAMT.053 / MT940 / MT942 | mt940-tools | P1 | M |
-| `banking` | ISO 20022 messages | xmlschema + iso20022 lib | P1 | L |
-| `banking` | SEPA pain.001 / pain.008 | sepa-utils | P2 | S |
-| `tax` | German DATEV exports | datev-python | P2 | M |
-| `accounting` | SIE (Swedish accounting) | sie-parser | P2 | S |
-| `accounting` | ELSTER / FATCA / CRS XSD-driven generation | xmlschema | P2 | L |
+Medium-effort items. Some require new sidecars; most build on existing
+engines. Ordered roughly by impact within each category.
 
-**Why P0 for `finance` (OFX/QFX/QIF):** common export formats from banks; users want to convert to CSV for analysis.
+### 12. ToolboxPage — Metadata Editor (EXIF / XMP / IPTC)
+
+New `MetadataEditorPage.xaml` backed by an `exiftool-metadata` sidecar
+wrapping ExifTool. Read/write/clear EXIF, XMP, IPTC, GPS tags. Batch-apply
+a metadata template to a folder of images (useful for photographers).
+Supports all RAW formats already handled by `rawphoto` sidecar.
+
+Impact: 5 · Effort: 3 · Type: parity
+Sources: [S8] (ExifTool 100+ format support), [S3] (Any Video Converter metadata track mgmt)
 
 ---
 
-## Wave M -- Medical / Healthcare Beyond DICOM
+### 13. Subtitle Track Management
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `hl7` | HL7 v2 messages (pipe-delimited) <-> JSON | hl7apy | P0 | S |
-| `hl7` | HL7 FHIR R4/R5 <-> JSON / XML | fhir.resources | P0 | M |
-| `hl7` | HL7 v3 / CDA documents | hl7apy + xml | P1 | M |
-| `medkit` (extend) | DICOM-RT (radiation therapy structure sets, plans, doses) | pydicom + dcmqi | P1 | M |
-| `medkit` (extend) | MetaImage with TRE / tag preservation | SimpleITK | P1 | S |
-| `medkit` (extend) | Bruker / GE / Siemens raw scanner data -> DICOM | dcmqi + vendor SDKs | P2 | L |
-| `genome` | BCF binary VCF <-> VCF text | pysam + bcftools | P0 | S |
-| `genome` | TSV <-> Variant Effect Predictor JSON | hgvs + custom | P2 | M |
-| `genome` | PED / FAM (PLINK pedigree) | pyplink | P2 | S |
-| `bed` | BED <-> narrowPeak / broadPeak / bigBed (genome intervals) | pybedtools | P1 | S |
-| `proteomics` | mzML / mzXML / mzIdentML (mass spec) | pyteomics | P2 | M |
+Add/remove/export subtitle tracks in MKV/MP4 without full re-encode. New
+preset + sidecar wrapping `mkvmerge` or `ffmpeg -map` for track operations.
+Surface in `VideoToolsPage`: "Add Subtitles", "Extract Subtitles", "Remove
+Track". Complements existing `subconvert` and `subkit` sidecars.
 
-**Why P0 for `hl7` + BCF:** HL7 messaging is *the* missing healthcare piece; BCF is the binary VCF that bioinformatics pipelines actually use.
+Impact: 4 · Effort: 2 · Type: parity
+Sources: [S3] (Any Video Converter track add/remove/export, v9.1.8), [S26] (SubtitleEdit v5.0.0 format breadth)
 
 ---
 
-## Wave N -- Music Notation Beyond v2.11
+### 14. Subtitle Burn-in Preset
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `music` (extend) | Sibelius (.sib) | (proprietary, requires Sibelius CLI) | P2 | L |
-| `music` (extend) | Finale (.musx, .mus) | finale-python (read) | P2 | L |
-| `music` (extend) | Capella (.cap, .capx) | capella-python | P2 | M |
-| `music` (extend) | LilyPond (.ly) <-> MusicXML | lilypond CLI | P0 | M |
-| `music` (extend) | NIFF (Notation Interchange File Format) | (legacy, niche) | P2 | M |
-| `music` (extend) | DARMS / kern (humdrum) | music21 (already supports) | P1 | S |
+New preset using `videocrush` or a dedicated `hardsub` sidecar: burn
+SRT/ASS/VTT into video with configurable font, size, color, position, stroke,
+and background. FFmpeg `subtitles` filter chain. Frequently requested;
+every commercial converter ships it.
 
----
-
-## Wave O -- Drawing / Diagramming
-
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `diagram` | Visio (.vsd, .vsdx, .vsdm) -> PDF / SVG / PNG | libreoffice CLI / libvisio | P0 | M |
-| `diagram` | draw.io (.drawio, .xml) <-> PNG / SVG | drawio-export CLI | P0 | M |
-| `diagram` | Mermaid (.mmd) -> SVG / PNG / PDF | mermaid-cli | P0 | S |
-| `diagram` | PlantUML (.puml) -> SVG / PNG | plantuml CLI | P0 | S |
-| `diagram` | Graphviz (.dot, .gv) -> SVG / PNG / PDF | graphviz CLI | P0 | S |
-| `diagram` | Lucidchart (.lcc) export -> SVG | unzip + parse | P1 | M |
-| `diagram` | Excalidraw (.excalidraw) -> PNG / SVG | excalidraw CLI | P1 | S |
-| `diagram` | OmniGraffle | osascript on macOS only | P2 | -- |
-| `diagram` | yEd (.graphml) -> SVG / PNG | graphml + custom | P1 | M |
-
-**Why P0 for the whole `diagram` sidecar:** developers and architects need this constantly. Mermaid / PlantUML / Graphviz CLI wrappers are tiny and high-impact.
+Impact: 4 · Effort: 2 · Type: parity
+Source: [S3] (Any Video Converter subtitle customization — stroke/outline/background, v9.2.0)
 
 ---
 
-## Wave P -- Configuration / Infrastructure-as-Code
+### 15. Slideshow Maker
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `config` | HCL (HashiCorp / Terraform) <-> JSON | python-hcl2 | P0 | S |
-| `config` | HOCON (Typesafe Config) <-> JSON | pyhocon | P1 | S |
-| `config` | Java .properties <-> JSON / YAML | jproperties | P1 | S |
-| `config` | Apache HTTPD config + Nginx config -> JSON-ish | augeas / pyparsing | P1 | M |
-| `config` | systemd unit files | configparser | P1 | S |
-| `config` | INI <-> TOML <-> YAML <-> JSON (already in datakit; broaden) | datakit extension | P1 | S |
-| `iac` | Terraform -> CloudFormation -> ARM -> Pulumi (cross-IaC translation) | tf2cfn / iac-convert | P2 | L |
-| `iac` | Helm Chart -> Kustomize -> plain manifests | helm template | P1 | M |
-| `iac` | Docker Compose v1 -> v2 -> v3 | yaml + transform | P1 | S |
+New `slideshow` sidecar: image folder → video with Ken Burns effect,
+configurable duration per slide, transition type (fade / wipe / zoom),
+overlay text, background music. FFmpeg zoompan + overlay filter chain.
+Wire to `SlideshowPage.xaml`.
 
-**Why P0 for HCL:** Terraform's native format with no good GUI conversion path.
+Impact: 4 · Effort: 3 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs stub), [S7] (OpenShot animation features)
 
 ---
 
-## Wave Q -- Programming / Source
+### 16. AI Video Denoise / Enhance Presets
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `srctranspile` | Python 2 -> Python 3 | 2to3 | P2 | S |
-| `srctranspile` | JavaScript -> TypeScript bootstrapping | tsc / typewiz | P2 | M |
-| `srctranspile` | CoffeeScript -> JavaScript | decaf | P2 | S |
-| `srctranspile` | Vue 2 -> Vue 3 SFC | vue-codemod | P2 | M |
-| `notebooks` | Jupyter .ipynb <-> Markdown <-> HTML <-> Python <-> R Markdown | nbconvert + jupytext | P0 | S |
-| `notebooks` | Observable / Polyglot notebooks | custom | P2 | M |
+New presets under AiLab using Real-ESRGAN or ESRGAN sidecar variants for
+video: per-frame upscale/denoise, anime-style sharpening, face enhancement
+on video frames (not just stills). Wrap inference via existing
+`real-esrgan` tooling pattern.
 
-**Why P0 for `notebooks`:** ipynb conversion is super common, currently goes through Pandoc but a dedicated path with jupytext is much cleaner.
+Impact: 4 · Effort: 3 · Type: leapfrog
+Source: [S3] (Any Video Converter AI Denoise / Anime / Face Enhancement presets, v9.2.0)
 
 ---
 
-## Wave R -- Streaming / Container / Manifest
+### 17. HDR → SDR Tone Mapping Preset
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `playlist` | M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S playlist conversion | pure Python | P0 | S |
-| `playlist` | iTunes Library .xml <-> M3U / JSON | plistlib + parse | P1 | S |
-| `playlist` | Spotify export JSON <-> M3U | json | P2 | S |
-| `playlist` | Roon backup / RoonRadio | (proprietary) | P2 | -- |
+New preset in VideoTools: HDR10 / HLG → SDR conversion using FFmpeg
+`zscale` + `tonemap` filter chain. Include Hable, Reinhard, and Mobius
+operator options. Currently `clipforge` has a stub 3D-LUT path but no
+first-class HDR→SDR workflow.
 
-**Why P0 for `playlist`:** every media player has its own format; this is a frequent ask.
-
----
-
-## Wave S -- E-Books / Comics Long Tail
-
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `comic` | CBZ / CBR / CBT / CB7 -> PDF / EPUB | unrar/unzip + img2pdf | P0 | S |
-| `comic` | Comic Rack metadata (.cbz with ComicInfo.xml) | xml + zip | P1 | S |
-| `ebookmore` | LRF / LRX (Sony Reader) | calibre + pylrf | P2 | M |
-| `ebookmore` | TPZ (Topaz Kindle, DRM-free old) | mobiunpack | P2 | M |
-| `ebookmore` | Daisy DTBook (.daisy) | daisy-pipeline CLI | P2 | M |
-| `ebookmore` | PalmDoc / iSilo | mobi + custom | P2 | S |
+Impact: 4 · Effort: 2 · Type: parity
+Source: [S9] (FFmpeg 8.1 — libavcodec 62.x new tone-mapping capabilities)
 
 ---
 
-## Wave T -- Specialty Enterprise
+### 18. Audio Loudness Normalization (EBU R128 / LUFS)
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `edi` | EDI X12 (US healthcare / supply chain) -> JSON | bots-edi / pyx12 | P1 | M |
-| `edi` | EDIFACT (international supply chain) -> JSON | pydifact | P1 | M |
-| `swift` | SWIFT MT (banking messages) -> JSON | swift-mt-message | P1 | M |
-| `swift` | SWIFT MX (modern XML banking) | iso20022 + xml | P1 | M |
-| `iata` | IATA NDC (airline) | xmlschema | P2 | M |
-| `iata` | TAP / SISCAB / BSP-link | various proprietary | P2 | L |
-| `asn1` | ASN.1 BER / DER / PEM <-> JSON / XML | asn1crypto | P1 | M |
+New `audioloudness` sidecar or preset: two-pass FFmpeg `loudnorm` to
+target broadcast loudness (e.g., -16 LUFS for streaming, -23 LUFS for
+broadcast). Expose target LUFS, true-peak ceiling, and LRA controls.
+
+Impact: 4 · Effort: 2 · Type: parity
+Source: [S14] (EBU R128 — table-stakes in any professional audio conversion tool)
 
 ---
 
-## Wave U -- Time / Coordinate Utilities
+### 19. Video Stabilization Preset
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `timefmt` | ISO 8601 <-> Unix epoch <-> Excel serial date <-> mainframe Julian | dateutil | P0 | S |
-| `timefmt` | Cron expression <-> next-N-runs human readable | cron-descriptor + croniter | P1 | S |
-| `coordfmt` | DD <-> DMS <-> UTM <-> MGRS <-> Geohash <-> Plus Codes | pyproj + mgrs | P0 | S |
-| `colorfmt` | RGB <-> HSL <-> Lab <-> HEX <-> named CSS color batch conversion | colorspacious | P1 | S |
+Wrap FFmpeg `vidstab` (two-pass: `vidstabdetect` → `vidstabtransform`).
+New `VideoStabilizePage.xaml` or preset under VideoTools. Controls: shakiness
+detection threshold, smoothing, border crop/black-fill mode.
 
-**Why P0 for `timefmt` + `coordfmt`:** small, high-utility, and "it just works" wins users instantly.
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S14] (standard professional video conversion feature)
 
 ---
 
-## Wave V -- Mobile Backups
+### 20. SponsorBlock Integration (StreamKeep / yt-dlp)
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `mobile` | iOS iTunes backup -> file tree extraction | iphone-backup-decoder | P1 | M |
-| `mobile` | Android adb backup (.ab) -> tar | android-backup-extractor | P1 | S |
-| `mobile` | Android Photos library export -> file tree | unzip + json | P1 | S |
-| `mobile` | iCloud `.icbu` calendar backup (covered in Wave G) | -- | -- | -- |
+Pass `--sponsorblock-remove` (or `--sponsorblock-mark`) flags through to
+the yt-dlp sidecar. Expose as a checkbox in `StreamKeepPage.xaml`:
+"Skip sponsor segments (SponsorBlock)". yt-dlp already supports this
+natively — it's a config-surface task.
 
----
-
-## Wave W -- Data Standards Beyond CSV
-
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `datakit` (extend) | EDN (Extensible Data Notation) | edn-format | P2 | S |
-| `datakit` (extend) | KDL (Cuddly Data Language) | kdl-py | P2 | S |
-| `datakit` (extend) | StrictYAML / YAML 1.1 vs 1.2 dialect | strictyaml | P2 | S |
-| `datakit` (extend) | UBJSON / CBOR / MessagePack / BSON / Smile / Ion | cbor2 + msgpack + ion-python | P0 | S |
-| `datakit` (extend) | Protocol Buffers (.proto) <-> JSON / binary | protobuf | P0 | M |
-| `datakit` (extend) | Apache Thrift binary <-> JSON | thrift | P1 | M |
-| `datakit` (extend) | Cap'n Proto <-> JSON | capnp | P1 | M |
-| `datakit` (extend) | FlatBuffers <-> JSON | flatbuffers | P1 | M |
-
-**Why P0 for binary data formats (CBOR / MessagePack / Protobuf):** these are the wire formats every modern API uses; a "convert this protobuf to JSON" tool is genuinely useful.
+Impact: 4 · Effort: 1 · Type: leapfrog
+Source: [S13] (yt-dlp SponsorBlock flags in latest releases)
 
 ---
 
-## Wave X -- Cryptocurrency / Wallet (Read-only)
+### 21. Speaker Diarization in STT Output
 
-| Sidecar | Formats | Backend | P | Size |
-| --- | --- | --- | --- | --- |
-| `wallet` | BIP39 mnemonic -> seed (read-only, NEVER write) | bip-utils | P2 | S |
-| `wallet` | Wallet.dat / Bitcoin Core export metadata | python-bitcoinlib | P2 | M |
-| `wallet` | Ethereum keystore JSON <-> raw key (research/migration only) | eth-keyfile | P2 | S |
-| `wallet` | PSBT (Partially Signed Bitcoin Transaction) decode | python-bitcoinlib | P2 | S |
+Extend the `whisper-stt` / `whisper-cpp` sidecar with `pyannote.audio`
+(onnx variant to stay offline): identify speaker segments and label them
+`[Speaker 1]`, `[Speaker 2]` in SRT/VTT/TXT output. Expose as a checkbox
+"Identify speakers" in `SttPage.xaml`.
 
-**Note:** All read-only / metadata. Never expose private-key-derivation paths in the UI without explicit warnings.
-
----
-
-# Aggregate Tally
-
-* **88 sidecars shipped** (v2.0 -> v2.12).
-* **~ 30 P0 sidecars / sidecar-extensions** in the roadmap above. Sequencing them takes 4-6 more "waves" at the current pace (~10 sidecars per wave).
-* **~ 50 P1 / P2 entries** for the long tail.
-
-**Realistic milestone targets:**
-
-* **v2.13 (Office + Diagrams + Dev)** -- `legacyoffice`, `applepro`, `hwpkit`, `diagram` (Mermaid / PlantUML / Graphviz / Visio / draw.io), `playlist`, `comic`, `notebooks`. ~7-8 P0 sidecars.
-* **v2.14 (Sysadmin + Crypto + Config)** -- `tlskit`, `sshkit`, `gpgkit`, `dnskit`, `config` (HCL / HOCON), `wallet` (read-only). ~6 P0 sidecars.
-* **v2.15 (Streaming + Video Niche + Manifests)** -- `videopro` (DVD / AVCHD / elementary), `streaming` (DASH / HLS / CMAF), `imageseq` (DPX / EXR sequence), `chiptune` (NSF / SPC / VGM), `audiomore` (AIFF / CAF / TrueHD / DTS-MA). ~5 P0 sidecars.
-* **v2.16 (Healthcare + Finance + Engineering)** -- `hl7` (v2 / FHIR), `finance` (OFX / QFX / QIF), `cadmore` (3MF / AMF / G-code), `medkit` extend (DICOM-RT). ~5 P0 sidecars.
-* **v2.17 (Geospatial + Genome + Time/Coord utils)** -- `gistiles` (MBTiles / PMTiles / COG / KMZ), `timefmt`, `coordfmt`, `genome` (BCF), `wells` (LAS log). ~5 P0 sidecars.
-* **v2.18 (Data wire formats)** -- `datakit` extend (CBOR / MessagePack / Protobuf / Thrift / Cap'n Proto / FlatBuffers), `dbsql` (sqlglot dialect translation). ~3 P0 sidecars.
-* **v2.19 (Email / Messaging long tail)** -- `emailpro` (.msg / Notes / Live Mail), `messaging` (WhatsApp / Telegram / iMessage / Discord / Slack). ~2-3 P0 sidecars.
-* **v2.20 (Niche raster + game asset cleanup)** -- `imgmore`, `gameasset`, residual P1 / P2 items.
-
-After v2.20 we will have shipped roughly **150 sidecars covering 1,500+ file extensions** -- the most extensive raw-conversion surface available in any single OSS desktop app.
+Impact: 3 · Effort: 3 · Type: leapfrog
+Source: [S10] (Purfview whisper-standalone-win — pyannote_v3/onnx VAD + diarization)
 
 ---
 
-# Universal Principles for Every New Sidecar
+### 22. Background Audio Noise Reduction
 
-Every entry above must, before it is "done," satisfy:
+New `audionoise` sidecar wrapping `rnnoise` (Mozilla) or `deepFilterNet`
+(ONNX model): remove background noise from speech recordings, interview
+audio, or video audio track. Include a denoise strength control.
 
-1. NDJSON contract (`progress` / `log` / `complete` / `error` + at least one
-   domain-specific event in `KNOWN_EVENTS`).
-2. Frozen-PyInstaller guard for any sidecar that calls `pip install`.
-3. Standard `--input` / `--output` / `--output-dir` argument shape.
-4. At least one preset XML so it surfaces in the right-click menu and the
-   unified PresetsPage browser.
-5. A Toolbox tile via the `presets:engine` route convention.
+Impact: 3 · Effort: 3 · Type: parity
+Source: [S14] (common request in audio processing communities)
+
+---
+
+### 23. Auto Crop — Content-Aware Crop
+
+New `autocrop` preset using FFmpeg `cropdetect` filter: analyze a video clip
+for black borders, suggest crop rectangle, apply. Wire to `AutoCropPage.xaml`
+or as a VideoTools option.
+
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs stub)
+
+---
+
+### 24. Lens Correction
+
+New `lenscorrect` preset using FFmpeg `lenscorrection` filter: correct barrel
+/ pincushion distortion with k1/k2 coefficients, or use `vf_lensfun`
+(LensFun lens database). Useful for action cam footage (GoPro) and wide-angle
+photography.
+
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs stub)
+
+---
+
+### 25. MSIX Packaging + WinGet Submission
+
+Build a `.msixbundle` in the CI release workflow using the Windows Application
+Packaging Project or `makeappx.exe`. Submit a manifest to
+`microsoft/winget-pkgs` so users can install via `winget install MavenImaging.UniversalConverterX`.
+Requires a code-signing certificate. Track as a separate GitHub release asset.
+
+Impact: 4 · Effort: 3 · Type: distribution
+Source: [S18] (winget-pkgs CONTRIBUTING.md — manifest schema v1.6)
+
+---
+
+### 26. WinAppSDK 2.0 Migration
+
+Upgrade from WinAppSDK 1.x to 2.0 (released 2026-04-29). Key gains:
+
+- `SystemBackdropElement` — place Mica/Acrylic inside any layout panel
+  (replaces current window-level backdrop hack).
+- `Microsoft.Windows.Storage.Pickers` — file type grouping, suggested start
+  folder, persistent picker IDs (better multi-folder batch UX).
+- `Microsoft.Windows.AI.MachineLearning` 2.0 + ONNX Runtime 1.24.5 — faster
+  ONNX inference for on-device AI sidecars on Copilot+ PCs.
+- `IXamlCondition` — parse-time feature flags for capability-gated UI.
+
+Breaking changes: review `DispatcherQueue` API surface and any
+`AppWindow` interop. Test on clean Win10 21H2 before shipping.
+
+Impact: 3 · Effort: 3 · Type: platform
+Source: [S19] (Windows App SDK 2.0 release notes, 2026-04-29)
+
+---
+
+### 27. AI Portrait — Still Image Enhancement
+
+Wire the `AI Portrait` ToolboxPage stub to a dedicated `AiPortraitPage.xaml`.
+Pipeline: `real-esrgan` (face-oriented model) or `codeformer` sidecar for
+portrait upscale + restoration. Batch-capable. Separate from Old Photo
+Restoration (which targets degraded/aged prints).
+
+Impact: 3 · Effort: 2 · Type: parity (wiring) + leapfrog (depth)
+Source: [S5] (ToolboxPage stub)
+
+---
+
+### 28. FFmpeg 8.x Sidecar Refresh
+
+Audit all sidecars that bundle or call an FFmpeg binary. BtbN/FFmpeg-Builds
+provides daily Windows auto-builds of FFmpeg 7.x–8.x. Pin all ffmpeg-dependent
+sidecars to ≥7.1 (current stable shipped with UCX) and test against 8.1
+("Hoare", 2026-03-16). Notable 8.x additions: libavcodec 62.x new codec
+support, libvmaf AVX-512 improvements. Carry a pinned FFmpeg build in
+`tools/ffmpeg/` rather than relying on PATH.
+
+Impact: 3 · Effort: 2 · Type: platform + security
+Source: [S9] (FFmpeg 8.1 changelog), [S20] (BtbN FFmpeg auto-builds)
+
+---
+
+## Tier 3 — Later  _(v2.27+)_
+
+Higher effort, lower urgency, or dependent on Tier 1/2 completion.
+
+### 29. Watch Folder Automation
+
+Background service that monitors one or more folders for new files and
+auto-dispatches them through a configured preset. Surface in
+`WatchFolderPage.xaml`. Implementation options: FileSystemWatcher (in-process)
+or a lightweight Windows Service (`ucx-watchd`). The old roadmap listed this
+under "Out of Scope" — reconsidering it here given its frequency in user
+requests and its presence as a table-stakes feature in HandBrake and all
+commercial converters.
+
+Impact: 5 · Effort: 4 · Type: parity
+Source: [S14] (HandBrake batch queue, AVC watch folder — universal commercial feature)
+
+---
+
+### 30. REST API / Local HTTP Service (`ucx serve`)
+
+Extend the existing `ucx` CLI with a `ucx serve` subcommand: local HTTP API
+for headless/programmatic conversion. Enables scripting and integration with
+other tools. The old roadmap listed this "Out of Scope" — moving to Later
+since it's not user-facing but is a strong developer-ecosystem play. Design
+around OpenAPI 3.1 schema.
+
+Impact: 3 · Effort: 4 · Type: dx
+Source: [S5] (old ROADMAP.md "Out of Scope" call-out — reconsidered)
+
+---
+
+### 31. Intro & Outro Editor
+
+Attach a pre-clip and post-clip to any batch conversion job: each output file
+gets the intro prepended and outro appended via FFmpeg `concat` demuxer.
+Configure per-preset. Wire to `IntroOutroPage.xaml`.
+
+Impact: 3 · Effort: 3 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs stub)
+
+---
+
+### 32. Auto Highlight — Scene Detection + Clip Extraction
+
+Analyze a video for scene-change peaks and motion energy; auto-extract a
+highlight reel at user-specified duration. Backend: FFmpeg `select=scene`
+filter + optional PySceneDetect sidecar. Wire to `AutoHighlightPage.xaml`.
+
+Impact: 3 · Effort: 4 · Type: leapfrog
+Source: [S5] (ToolboxPage.xaml.cs stub)
+
+---
+
+### 33. VR / 360° Video Conversion
+
+Convert equirectangular (360° video) to cubemap, fisheye, or rectilinear
+projection. FFmpeg `v360` filter. Wire to `VrConverterPage.xaml`. Niche but
+no-OSS-GUI exists for it on Windows.
+
+Impact: 2 · Effort: 2 · Type: leapfrog (niche gap)
+Source: [S5] (ToolboxPage.xaml.cs stub)
+
+---
+
+### 34. Color Grading LUT Application
+
+A dedicated `lut-apply` preset (distinct from existing `lutgen`) that takes
+an input `.cube` or `.3dl` LUT file and applies it to a video or image batch.
+FFmpeg `lut3d` filter or HALDCLUT for images. Target colorists and
+photographers exporting from DaVinci Resolve or Lightroom.
+
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S7] (OpenShot 3D-LUT support), [S5] (clipforge stub)
+
+---
+
+### 35. Chapter Editor (MKV / MP4)
+
+Add, edit, delete, and import/export chapter markers in MKV or MP4 containers
+without re-encoding. Backend: `mkvmerge --chapters` for MKV; `mp4box -chap`
+or FFmpeg for MP4. Wire to `ChapterEditorPage.xaml`.
+
+Impact: 3 · Effort: 3 · Type: parity
+Source: [S6] (LosslessCut chapter editor), [S14] (standard pro video feature)
+
+---
+
+### 36. Localization (i18n / l10n)
+
+Extract all user-visible strings into `Resources.resw` per-language files.
+Set up a Crowdin project for community translation. Auto-detect Windows
+display language on first run. Priority target locales (by UCX GitHub
+issue geography): DE, FR, ES, PL, ZH-Hans.
+
+This is a large cross-cutting change (all 45 XAML pages + Core messages).
+Prerequisite: complete UIA pass (Item 10) since accessible names are also
+localizable strings.
+
+Impact: 4 · Effort: 5 · Type: i18n
+Source: [S15] (YoutubeDownloader shipped EN/UK/DE/FR/ES + system language auto-detect)
+Source: [S21] (ImageGlass Crowdin i18n workflow)
+
+---
+
+### 37. Lossless Trim / Cut (No Re-encode)
+
+New `losslesscut` preset: trim video clip by start/end timestamps without
+re-encoding. FFmpeg `-ss` + `-to` with `-c copy`. Surface in
+`LosslessCutPage.xaml` with a simple timeline scrubber showing keyframe
+positions (I-frames only for true lossless trim). Competes directly with
+LosslessCut (Electron app, ~13k stars).
+
+Impact: 4 · Effort: 3 · Type: parity
+Source: [S6] (LosslessCut — primary OSS competitor for this workflow)
+
+---
+
+### 38. DVD Rip / Copy (Non-DRM Discs Only)
+
+Read unprotected DVD VIDEO_TS structure → MP4/MKV via `libdvdread` + FFmpeg.
+Scope: menu-free ISOs, non-commercial home videos. Clearly document the
+DRM exclusion in the UI (CSS-encrypted commercial discs unsupported by charter).
+Addresses the disc-import use case from Any Video Converter's feature set.
+
+Impact: 3 · Effort: 4 · Type: parity
+Source: [S3] (Any Video Converter DVD import, v9.2.0)
+
+---
+
+### 39. DVD Burn / CD Burner (Disc Tools)
+
+Write video files to DVD-Video structure or data files to a CD/DVD using
+`growisofs` / `cdrecord` / Windows `IDiscRecorder2` COM API. Wire to existing
+`DiscTools` category stubs in ToolboxPage.
+
+Impact: 2 · Effort: 4 · Type: parity
+Source: [S5] (ToolboxPage.xaml.cs DiscTools stubs)
+
+---
+
+### 40. Preset Import / Export / Share
+
+Export a preset XML (or preset bundle ZIP including sidecar model weights) to
+a shareable file. Import from file or URL. Prerequisite for a community preset
+repository. Wire to a "Share Preset" menu action in `PresetsPage.xaml`.
+
+Impact: 3 · Effort: 2 · Type: dx
+Source: [S14] (HandBrake preset import/export — table-stakes in converter UX)
+
+---
+
+### 41. Audio Waveform Preview
+
+Show a waveform thumbnail in `AudioConverterPage` and `SttPage` after file
+selection. Backend: FFmpeg `showwavespic` filter (one-shot PNG). Improves
+the "confirm before convert" UX loop, especially for STT and noise reduction.
+
+Impact: 3 · Effort: 3 · Type: UX
+Source: [S6] (LosslessCut waveform display)
+
+---
+
+### 42. Qualcomm NPU / ARM64 Native Build
+
+Publish a native ARM64 build of UCX targeting Snapdragon X Elite / X Plus
+devices. Requires ARM64 .NET 10 publish, ARM64 WinUI 3 validation, and
+verifying all Python sidecars run under ARM64 Python or x64-under-emulation.
+FFmpeg ARM64 build available from BtbN. HandBrake has an open ARM64/Qualcomm
+encoder request.
+
+Impact: 2 · Effort: 4 · Type: platform
+Source: [S22] (HandBrake #7822 Qualcomm VCE/ARM64 encoder request)
+
+---
+
+## Under Consideration
+
+These need more investigation or community signal before placement.
+
+| Item | Question blocking placement |
+|------|-----------------------------|
+| **OCR full pipeline** (image → structured text, not just searchable PDF) | Already have `pdfocr`; would a dedicated `ocrkit` sidecar add incremental value? Survey user requests. |
+| **VMAF quality reporting** | Expose `libvmaf` score as a post-conversion metric. Useful for production workflows; adds ~10% to encode time. Needs UI surface design. |
+| **Spatial audio conversion** (Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) | FFmpeg has partial support; full Ambisonics requires specialized libraries. Assess demand. |
+| **Community preset repository** | GitHub-hosted index of contributed presets. Requires governance model, security review of contributed XML, and moderation bandwidth. Assess when preset count warrants it. |
+| **EDL / XML timeline import** | Bulk-convert based on an edit decision list (CMX 3600 EDL, Final Cut XML). Niche; assess against demand. |
+| **Copilot+ PC / NPU acceleration** | `AICapabilities.HasAICapability` (WinAppSDK 1.8) can gate ONNX inference to NPU. Measure actual throughput gain vs. CUDA GPU before committing. [S27] |
+| **Deinterlace framerate auto-doubling** | For Bwdif+Bob deinterlace, automatically double the output framerate (e.g. 25i → 50p). FFmpeg supports this; needs UX decision about when to auto-enable. [S23] |
+| **Per-track audio delay control** | Fine-grain delay offset per audio track during conversion (e.g. fix lip-sync issues). `ffmpeg -itsoffset` or `adelay` filter. Common request; needs UI design. [S24] |
+
+---
+
+## Out of Scope — Will Not Ship
+
+| Item | Reason |
+|------|--------|
+| Cloud-based AI services (remote render, API-backed models) | Violates offline-first charter. |
+| Live stream publishing (RTMP/SRT egress, restreaming) | Stream publishing, not conversion. Separate problem domain. |
+| DRM-bound format decryption (CSS DVDs, AAX audiobooks, KFX, FairPlay) | Legal grey area. Intentional exclusion from day one. |
+| Mobile apps (iOS / Android UCX client) | Windows-only by charter. |
+| Accounts, login, subscription management, cloud sync | Anti-charter. |
+| Anonymous / opt-out telemetry collection | Anti-charter. UCX will never phone home. |
+| AI model training or fine-tuning | Cloud compute dependency. |
+| Web scraping beyond yt-dlp / streamkeeper scope | Legal risk, maintenance burden beyond engine scope. |
+| Phone / tablet wireless push (AirPlay, MTP over Wi-Fi) | Out of conversion scope. |
+| Real-time / live video encoding pipeline | Architecture mismatch with current sidecar model. |
+
+---
+
+## Definition of Done (Sidecar Checklist)
+
+Before any new sidecar or preset is merged:
+
+1. NDJSON contract: emits `progress`, `log`, `complete`, `error` events and
+   at least one domain-specific event listed in `KNOWN_EVENTS`.
+2. Frozen-PyInstaller guard (if sidecar calls `pip install` at runtime).
+3. Standard argument shape: `--input`, `--output`, `--output-dir`.
+4. At least one preset XML so the feature surfaces in the right-click menu
+   and `PresetsPage`.
+5. A Toolbox tile via `presets:<engine>` deep-link convention (where applicable).
 6. A `build.ps1` from the standard PyInstaller template.
-7. A `requirements.txt` (even if just a comment) so the build is reproducible.
-8. Contract test (`tests/sidecar_contract/check_contract.py`) green.
+7. A `requirements.txt` (even if just a comment) for reproducible builds.
+8. Contract test in `tests/sidecar_contract/check_contract.py` passes.
 
 ---
 
-# Out of Scope for the Roadmap (Different Initiatives)
+## Appendix: Sources
 
-These are *not* format conversions and live elsewhere:
-
-* AI model upgrades (handled by separate "Latest & Greatest" passes).
-* Watch-folder rule enrichment, REST API expansion, history dashboard
-  features, accessibility passes, installer / MSI work.
-* Cloud sync, account / login, telemetry. (UCX is offline-first by charter.)
-* DRM-bound formats (KFX, AAX, FairPlay, etc.) -- legal grey area, intentionally skipped.
+| ID | URL | Used for |
+|----|-----|----------|
+| S1 | Repo CHANGELOG.md (v2.1–v2.20.1) | What's already shipped; CVE pin context |
+| S2 | Repo ToolboxPage.xaml.cs + AiLabPage.xaml.cs | "Future" tile inventory |
+| S3 | https://www.any-video-converter.com/en/features.php | Commercial competitor features: AI models, track mgmt, subtitle burn-in, DVD rip |
+| S4 | https://github.com/Purfview/whisper-standalone-win | Speaker diarization, VAD methods, batch recursive STT |
+| S5 | Repo source (ToolboxPage.xaml.cs, AiLabPage.xaml.cs stubs) | 14 Future tile inventory |
+| S6 | https://github.com/mifi/lossless-cut/issues | Overwrite collision #2667, relative segment time #2730, waveform/chapter features |
+| S7 | https://github.com/OpenShot/openshot-qt | Hardware encoding (VA-API/NVDEC/D3D11), EDL/XML, keyframe animation |
+| S8 | https://exiftool.org/ | ExifTool 100+ format EXIF/XMP/IPTC/GPS r/w/c |
+| S9 | https://ffmpeg.org/index.html | FFmpeg 8.1 "Hoare" (2026-03-16), libavcodec 62.x, libvmaf |
+| S10 | https://github.com/Purfview/whisper-standalone-win | GPU CUDA, VAD methods, speaker diarization, vocal extraction |
+| S11 | https://github.com/HandBrake/HandBrake/issues/7848 | Auto-increment output filename collision |
+| S12 | https://github.com/mifi/lossless-cut/issues/2667 | Overwrite conflict / auto-rename handling |
+| S13 | https://github.com/yt-dlp/yt-dlp | yt-dlp output template DSL, SponsorBlock flags |
+| S14 | General competitive survey (HandBrake, AVC, community threads) | Table-stakes features: watch folder, loudnorm, parallel jobs, etc. |
+| S15 | https://github.com/Tyrrrz/YoutubeDownloader/releases | Localization (EN/UK/DE/FR/ES), DPAPI cookie encryption, FFmpeg auto-download |
+| S16 | https://learn.microsoft.com/windows/apps/design/accessibility/accessibility-overview | WinUI 3 UIA peer requirements |
+| S17 | Repo tools/README.md | NDJSON sidecar contract definition + 8-requirement checklist |
+| S18 | https://github.com/microsoft/winget-pkgs/blob/master/CONTRIBUTING.md | WinGet manifest schema v1.6 submission requirements |
+| S19 | https://github.com/microsoft/WindowsAppSDK/releases/tag/v2.0.0 | WinAppSDK 2.0 — SystemBackdropElement, StoragePickers, Windows ML / ONNX 1.24.5 |
+| S20 | https://github.com/BtbN/FFmpeg-Builds/releases | BtbN FFmpeg daily builds — Windows x64 + ARM64, FFmpeg 7.x / 8.x |
+| S21 | https://github.com/d2phap/ImageGlass | ImageGlass Crowdin localization workflow, 90+ format support |
+| S22 | https://github.com/HandBrake/HandBrake/issues/7822 | Qualcomm VCE / Snapdragon X ARM64 encoder request |
+| S23 | https://github.com/HandBrake/HandBrake/issues/7729 | Deinterlace Bwdif+Bob framerate doubling |
+| S24 | https://github.com/HandBrake/HandBrake/issues/7472 | Audio delay offset control |
+| S25 | _(removed — 404)_ | — |
+| S26 | https://github.com/SubtitleEdit/subtitleedit/releases | SubtitleEdit v5.0.0 active beta releases (subtitle format breadth) |
+| S27 | https://github.com/microsoft/WindowsAppSDK/releases | WinAppSDK 1.8.7 — AICapabilities.HasAICapability, NPU detection |
