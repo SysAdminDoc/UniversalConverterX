@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HLS / DASH manifest -> MP4</Name>
+    <Folder>Video/Streaming</Folder>
+    <InputTypes>
+        <Extension>m3u8</Extension>
+        <Extension>mpd</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>streaming</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-mp4</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>OpenPGP ASCII armor -> binary</Name>
+    <Folder>Security/PGP</Folder>
+    <InputTypes>
+        <Extension>asc</Extension>
+        <Extension>pgp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>gpg</OutputExtension>
+    <Engine>gpgkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>dearmor</Arg>
+    </Args>
+</Preset>

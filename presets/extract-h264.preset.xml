@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Extract H.264 elementary stream</Name>
+    <Folder>Video/Specialty</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>ts</Extension>
+        <Extension>m2ts</Extension>
+        <Extension>flv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>h264</OutputExtension>
+    <Engine>videopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>extract-bitstream</Arg>
+        <Arg>--codec</Arg>
+        <Arg>h264</Arg>
+    </Args>
+</Preset>

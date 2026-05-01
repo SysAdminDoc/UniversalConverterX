@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Image sequence (DPX/EXR/PNG/TIFF) -> ProRes 422 HQ</Name>
+    <Folder>Video/Sequence</Folder>
+    <InputTypes>
+        <Extension>dpx</Extension>
+        <Extension>exr</Extension>
+        <Extension>tif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>png</Extension>
+        <Extension>jpg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_prores</OutputFileNameTemplate>
+    <OutputExtension>mov</OutputExtension>
+    <Engine>imageseq</Engine>
+    <InvocationMode>batch-single-output</InvocationMode>
+    <Args>
+        <Arg>encode</Arg>
+        <Arg>--profile</Arg>
+        <Arg>prores-422-hq</Arg>
+        <Arg>--container</Arg>
+        <Arg>mov</Arg>
+        <Arg>--fps</Arg>
+        <Arg>24</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Video -> PNG image sequence</Name>
+    <Folder>Video/Sequence</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_frames</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>imageseq</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>decode</Arg>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+    </Args>
+</Preset>

@@ -2,6 +2,28 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.14.0] - 2026-05-01
+
+### Added — 7 new pure-format conversion sidecars (Streaming + Crypto + Niche A/V)
+
+- **videopro** — Specialty video container conversion: DVD VOB / EVO / Blu-ray MTS / M2TS / TS / DV / DIF / 3GP / 3G2 / F4V / SWF / Y4M / IVF + AVS / AVS2. `extract-bitstream` op pulls raw H.264 / H.265 / AV1 / VP9 elementary streams from any container.
+- **streaming** — Adaptive streaming manifests: MP4 → HLS (.m3u8 + .ts) and MP4 → DASH (.mpd + .m4s) via FFmpeg or shaka-packager. `to-mp4` op assembles a single MP4 from any HLS / DASH manifest.
+- **imageseq** — VFX image-sequence ↔ video conversion. `encode` takes a DPX / Cineon / OpenEXR / PNG / TIFF / JPEG sequence and produces ProRes 422 / 422 HQ / 4444 / DNxHR HQ / SQ / H.264 / H.265 / AV1 / FFV1 / raw video. `decode` extracts frames from any video as PNG / JPG / TIFF / EXR / DPX with optional FPS override.
+- **chiptune** — Retro game-music renderer: NSF / NSFE (NES), SPC (SNES), VGM / VGZ (multi-system), GBS (Game Boy), HES (PCEngine), KSS (MSX), GYM (Genesis), AY (ZX Spectrum), SID (C64). Backed by `game-music-emu` Python binding + `sidplayfp` for SID. Renders to WAV / FLAC / MP3 / OGG / Opus.
+- **audiomore** — Long-tail audio codec conversion (extends `audiopro`): AIFF / AIFC / IFF-8SVX / Apple CAF / G.711 ulaw / alaw / DTS / DTS-HD MA / Dolby TrueHD / MLP / HE-AAC v2 / xHE-AAC.
+- **gpgkit** — OpenPGP / GnuPG armor codec. `armor` op wraps any binary `.gpg`/`.pgp` blob in RFC 4880 ASCII armor with proper CRC-24, `dearmor` op reverses it. `key-info` op shells out to `gpg` to probe fingerprints + user IDs.
+- **wallet** — Read-only crypto wallet metadata. `bip39-check` validates a BIP39 mnemonic phrase + checksum. `keystore-info` decodes Ethereum keystore JSON v3 header (cipher / KDF / address) without ever exposing the private key. `descriptor` parses Bitcoin output descriptors (`wpkh(...)`, `tr(...)`, `multi(...)`). `psbt-decode` heuristically counts inputs / outputs of a Partially Signed Bitcoin Transaction. **Never** decodes private keys, never signs.
+
+### Added — 12 new presets
+
+`vob-to-mp4`, `extract-h264`, `mp4-to-hls`, `mp4-to-dash`, `hls-to-mp4`, `seq-to-prores`, `video-to-png-seq`, `nsf-to-flac`, `aiff-to-flac`, `to-aiff`, `gpg-armor`, `gpg-dearmor`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 11 new event types: `video_specialty`, `stream_manifest`, `image_seq`, `chiptune_audio`, `audio_long_tail`, `pgp_blob`, `pgp_key`, `wallet_bip39`, `wallet_keystore`, `wallet_descriptor`, `wallet_psbt`. Contract test: 109 sidecars conforming.
+- 7 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.13.0 → 2.14.0 across all manifests.
+
 ## [v2.13.0] - 2026-05-01
 
 ### Added — 14 new pure-format conversion sidecars (Office + Diagrams + Sysadmin)

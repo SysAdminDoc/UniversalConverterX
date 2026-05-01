@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>MP4 -> DASH (.mpd + .m4s segments)</Name>
+    <Folder>Video/Streaming</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_dash</OutputFileNameTemplate>
+    <OutputExtension>mpd</OutputExtension>
+    <Engine>streaming</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>dash-from-mp4</Arg>
+        <Arg>--segment-seconds</Arg>
+        <Arg>6</Arg>
+    </Args>
+</Preset>
