@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Audio Denoise (RNNoise)</Name>
+    <Folder>Audio/AI</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>mp3</Extension>
+        <Extension>m4a</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_denoised</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>rnnoise</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>denoise</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Timestamp Format Convert (ISO / Epoch / Excel / FILETIME / Mainframe)</Name>
+    <Folder>Data/Time</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>csv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.times</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>timefmt</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+    </Args>
+</Preset>

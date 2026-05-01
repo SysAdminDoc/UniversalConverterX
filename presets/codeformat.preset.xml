@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Source Code Auto-Format (prettier / black / gofmt / rustfmt)</Name>
+    <Folder>Code/Format</Folder>
+    <InputTypes>
+        <Extension>js</Extension>
+        <Extension>ts</Extension>
+        <Extension>jsx</Extension>
+        <Extension>tsx</Extension>
+        <Extension>py</Extension>
+        <Extension>go</Extension>
+        <Extension>rs</Extension>
+        <Extension>c</Extension>
+        <Extension>cpp</Extension>
+        <Extension>cs</Extension>
+        <Extension>java</Extension>
+        <Extension>rb</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_fmt</OutputFileNameTemplate>
+    <OutputExtension>{ext}</OutputExtension>
+    <Engine>codeformat</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>format</Arg>
+    </Args>
+</Preset>

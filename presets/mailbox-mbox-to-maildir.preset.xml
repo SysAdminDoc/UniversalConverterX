@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>mbox -> Maildir</Name>
+    <Folder>Documents/Email</Folder>
+    <InputTypes>
+        <Extension>mbox</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_maildir</OutputFileNameTemplate>
+    <OutputExtension></OutputExtension>
+    <Engine>mailbox</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mbox-to-maildir</Arg>
+    </Args>
+</Preset>

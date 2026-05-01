@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Font Convert (TTF / OTF / WOFF / WOFF2)</Name>
+    <Folder>Documents/Fonts</Folder>
+    <InputTypes>
+        <Extension>ttf</Extension>
+        <Extension>otf</Extension>
+        <Extension>woff</Extension>
+        <Extension>woff2</Extension>
+        <Extension>eot</Extension>
+        <Extension>ttc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>woff2</OutputExtension>
+    <Engine>fontconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+    </Args>
+</Preset>

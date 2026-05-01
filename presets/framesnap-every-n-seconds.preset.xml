@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Video -> Frames Every 10 Seconds (FrameSnap)</Name>
+    <Folder>Video/Frames</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_frames</OutputFileNameTemplate>
+    <OutputExtension></OutputExtension>
+    <Engine>framesnap</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>every-n-seconds</Arg>
+    </Args>
+</Preset>

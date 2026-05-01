@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>GIS Raster: GeoTIFF / IMG / DEM / NetCDF</Name>
+    <Folder>Data/GIS</Folder>
+    <InputTypes>
+        <Extension>tif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>img</Extension>
+        <Extension>dem</Extension>
+        <Extension>nc</Extension>
+        <Extension>asc</Extension>
+        <Extension>vrt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>tif</OutputExtension>
+    <Engine>gisconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>raster</Arg>
+    </Args>
+</Preset>

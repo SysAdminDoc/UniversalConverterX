@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Audio Tag Strip (Remove All Metadata)</Name>
+    <Folder>Audio/Metadata</Folder>
+    <InputTypes>
+        <Extension>mp3</Extension>
+        <Extension>flac</Extension>
+        <Extension>ogg</Extension>
+        <Extension>m4a</Extension>
+        <Extension>opus</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_clean</OutputFileNameTemplate>
+    <OutputExtension>{ext}</OutputExtension>
+    <Engine>audiotag</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>strip</Arg>
+    </Args>
+</Preset>
