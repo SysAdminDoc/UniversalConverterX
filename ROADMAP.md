@@ -114,9 +114,19 @@ workspace pattern that v2.4 established.
   per-file size readout. History integration. Toolbox "Documents" tile + nav
   search entry. Contract test: `font` and `font_info` added to `KNOWN_EVENTS`
   (24 sidecars conform).
-- #38 **eBook converter** — EPUB / MOBI / AZW3 / PDF / FB2 / TXT / HTML mutual
-  conversion via Calibre's `ebook-convert`. Sidecar auto-locates the bundled
-  CLI under standard Calibre install dirs.
+- #38 **eBook converter** ✓ Shipped v2.5 — EPUB / MOBI / AZW3 / PDF / FB2 / DOCX /
+  ODT / HTML / RTF / TXT / LIT / LRF / PDB / CBZ via Calibre's `ebook-convert`.
+  Shipped: `tools/ebookconvert/{sidecar.py,build.ps1}` (pure-Python wrapper;
+  Calibre at runtime). Discovers `ebook-convert.exe` on PATH /
+  `$env:CALIBRE_PATH` / standard `Program Files\Calibre2\` install dir.
+  Streams Calibre's percentage output and combines inner-file progress with
+  batch position so the UI bar moves smoothly across the whole queue. Emits
+  `ebook` per produced file. Optional `--title` / `--authors` / `--language`
+  metadata overrides applied per book. New `EbookConverterPage` with
+  multi-file queue, target-format combo (15 formats), output-dir picker,
+  metadata override row, History integration. Toolbox "Documents" tile + nav
+  search entry. Contract test: `ebook` added to `KNOWN_EVENTS` (25 sidecars
+  conform).
 - #39 **OCR (Tesseract)** — extract text from images and scanned PDFs to TXT /
   HOCR / PDF (searchable). Bundles `tesseract.exe` lookup under standard install
   dirs; downloads language data on demand to `tools/_models/tessdata/`.

@@ -55,6 +55,7 @@ KNOWN_EVENTS = {
     "subtitle",      # subconvert — produced subtitle file (one per input)
     "font",          # fontconvert — produced font file
     "font_info",     # fontconvert.info — sfnt / flavor / family probe
+    "ebook",         # ebookconvert — produced eBook file
 }
 
 
