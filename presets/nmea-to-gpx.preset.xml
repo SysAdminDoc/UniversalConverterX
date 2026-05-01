@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>NMEA GPS -> GPX Track</Name>
+    <Folder>Data/Wireless</Folder>
+    <InputTypes>
+        <Extension>nmea</Extension>
+        <Extension>gps</Extension>
+        <Extension>log</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>gpx</OutputExtension>
+    <Engine>wirelesskit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>nmea-to-gpx</Arg>
+    </Args>
+</Preset>

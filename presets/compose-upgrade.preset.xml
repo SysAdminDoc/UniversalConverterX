@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Docker Compose v1 -> v3</Name>
+    <Folder>DevOps/IaC</Folder>
+    <InputTypes>
+        <Extension>yml</Extension>
+        <Extension>yaml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.v3</OutputFileNameTemplate>
+    <OutputExtension>yml</OutputExtension>
+    <Engine>iac</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>compose-upgrade</Arg>
+    </Args>
+</Preset>

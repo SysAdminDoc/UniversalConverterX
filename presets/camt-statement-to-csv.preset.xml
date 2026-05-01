@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>camt.053 Bank Statement -> CSV</Name>
+    <Folder>Documents/Enterprise</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>swiftmx</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>camt-to-csv</Arg>
+    </Args>
+</Preset>

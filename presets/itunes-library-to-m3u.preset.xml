@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>iTunes Library.xml -> M3U Playlists</Name>
+    <Folder>Audio/Playlists</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_all</OutputFileNameTemplate>
+    <OutputExtension>m3u</OutputExtension>
+    <Engine>playlistmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>itunes-to-m3u</Arg>
+    </Args>
+</Preset>

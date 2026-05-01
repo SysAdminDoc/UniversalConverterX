@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Apache Thrift IDL -> Symbol List</Name>
+    <Folder>Data/Wire</Folder>
+    <InputTypes>
+        <Extension>thrift</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.thrift-symbols</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>datawire</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>thrift-list-types</Arg>
+    </Args>
+</Preset>

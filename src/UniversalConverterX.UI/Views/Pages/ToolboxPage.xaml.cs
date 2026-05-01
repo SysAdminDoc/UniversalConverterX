@@ -126,6 +126,18 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.17 wave (Specialty Engineering + Wire / Network / Music / Sci)
+        OtherTools.Add(new ToolboxTile("presets:wells", "Oil-Well Logs (LAS / DLIS)", "LAS 2.0/3.0 + DLIS binary log files -> CSV / JSON for petroleum analysis", "\uE9F1", green, "Ready", green, false, "stdlib + dlisio"));
+        DocumentTools.Add(new ToolboxTile("presets:datawire", "Protobuf / Avro / Thrift", "Schema-driven binary wire formats -> JSON via protoc + fastavro + IDL parser", "\uE943", blue, "Ready", green, false, "fastavro + protoc"));
+        OtherTools.Add(new ToolboxTile("presets:wirelesskit", "GPS NMEA / AIS Marine", "NMEA 0183 sentences -> JSON / CSV / KML / GPX track + AIS marine tracking", "\uE707", blue, "Ready", green, false, "stdlib + pyais"));
+        OtherTools.Add(new ToolboxTile("presets:iac", "Infrastructure as Code", "Docker Compose v1->v3 + CFN YAML<->JSON + Terraform plan summary + Helm/Kustomize render", "\uEC1F", blue, "Ready", green, false, "PyYAML + helm + kustomize"));
+        OtherTools.Add(new ToolboxTile("presets:bed", "Genome Intervals (BED)", "BED / bigBed / GFF3 / GTF / narrowPeak / broadPeak interval conversion", "\uE7C2", green, "Ready", green, false, "stdlib + UCSC bigBedToBed"));
+        DocumentTools.Add(new ToolboxTile("presets:swiftmx", "SWIFT MX (ISO 20022)", "Modern XML banking: pacs.* / pain.* / camt.* / setr.* / remt.* -> JSON / CSV", "\uE9D9", blue, "Ready", green, false, "stdlib"));
+        AudioTools.Add(new ToolboxTile("presets:musicmore", "LilyPond + MuseScore", "LilyPond .ly -> PDF / SVG / MIDI + MusicXML <-> .ly + .mscz -> MIDI / PDF", "\uE767", red, "Ready", green, false, "lilypond + musescore"));
+        AudioTools.Add(new ToolboxTile("presets:playlistmore", "iTunes + Spotify Playlists", "iTunes Library.xml -> M3U / JSON + Spotify export -> M3U / normalized CSV", "\uE93C", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:netflowkit", "NetFlow / IPFIX Flows", "NetFlow v5/v9 + IPFIX v10 router/switch flow records -> JSON", "\uEC05", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:proteomics", "Mass Spec / Proteomics", "mzML / mzXML / MGF mass spectrometry data -> JSON / CSV peak lists", "\uE7C2", green, "Ready", green, false, "stdlib"));
+
         // v2.16 wave (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
         DocumentTools.Add(new ToolboxTile("presets:emailpro", "Email Plus", "Outlook .msg + Apple .emlx + thread mbox bundling", "\uE715", blue, "Ready", green, false, "extract-msg + stdlib"));
         DocumentTools.Add(new ToolboxTile("presets:messaging", "Messaging Exports", "Telegram / Discord / Slack / iMessage / WhatsApp -> CSV / JSON / HTML", "\uE8BD", blue, "Ready", green, false, "stdlib"));

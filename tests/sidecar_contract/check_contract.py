@@ -210,6 +210,19 @@ KNOWN_EVENTS = {
     "spreadsheet_legacy",  # spreadsheet — Lotus / Quattro / Gnumeric / etc.
     "color_doc",           # colorfmt — color list expansion / CSS / JSON
     "game_asset",          # gameasset — VPK / WAD / PAK / PCK / PK3 listing
+    # v2.17 wave (Specialty Engineering + Wire / Network / Music / Sci)
+    "well_log",            # wells — LAS / DLIS oil-well log conversion
+    "datawire_blob",       # datawire — Protobuf / Avro binary blob conversion
+    "datawire_schema",     # datawire — Thrift / FBS schema introspection
+    "nmea_msg",            # wirelesskit — NMEA / AIS GPS message decode
+    "iac_doc",             # iac — IaC translation document output
+    "iac_plan",            # iac — Terraform plan summary
+    "genome_interval",     # bed — BED / bigBed / GFF / GTF interval conversion
+    "swift_mx",            # swiftmx — SWIFT MX (ISO 20022 XML) banking
+    "score_extra",         # musicmore — LilyPond / MuseScore notation conversion
+    "playlist_extra",      # playlistmore — iTunes Library / Spotify export
+    "netflow_doc",         # netflowkit — NetFlow / IPFIX flow record conversion
+    "massspec_doc",        # proteomics — mzML / mzXML / MGF mass spectra
 }
 
 

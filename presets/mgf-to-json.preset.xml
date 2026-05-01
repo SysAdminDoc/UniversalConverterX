@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>MGF Mascot Generic -> JSON</Name>
+    <Folder>Bio/MassSpec</Folder>
+    <InputTypes>
+        <Extension>mgf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>proteomics</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mgf-to-json</Arg>
+    </Args>
+</Preset>

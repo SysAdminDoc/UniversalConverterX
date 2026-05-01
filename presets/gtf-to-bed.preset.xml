@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>GTF Gene Annotations -> BED6</Name>
+    <Folder>Bio/Genomics</Folder>
+    <InputTypes>
+        <Extension>gtf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>bed</OutputExtension>
+    <Engine>bed</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>gtf-to-bed</Arg>
+    </Args>
+</Preset>

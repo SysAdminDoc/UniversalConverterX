@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SWIFT MX (ISO 20022) -> JSON</Name>
+    <Folder>Documents/Enterprise</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>swiftmx</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mx-to-json</Arg>
+    </Args>
+</Preset>
