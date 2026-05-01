@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CBZ ComicInfo.xml -> CSV Manifest</Name>
+    <Folder>Documents/Comics</Folder>
+    <InputTypes>
+        <Extension>cbz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/comicinfo-manifest</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>comicmeta</Engine>
+    <InvocationMode>batch-single-output</InvocationMode>
+    <Args>
+        <Arg>read-meta</Arg>
+    </Args>
+</Preset>

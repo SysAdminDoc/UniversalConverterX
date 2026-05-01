@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SDR IQ: cu8 -> cs16</Name>
+    <Folder>Audio/SDR</Folder>
+    <InputTypes>
+        <Extension>cu8</Extension>
+        <Extension>iq8u</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>iq16</OutputExtension>
+    <Engine>sdrkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cu8-to-cs16</Arg>
+    </Args>
+</Preset>

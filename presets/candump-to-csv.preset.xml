@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SocketCAN candump -> CSV</Name>
+    <Folder>Engineering/Bus</Folder>
+    <InputTypes>
+        <Extension>log</Extension>
+        <Extension>txt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>bus</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>candump-to-csv</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Python 2 -> Python 3</Name>
+    <Folder>Code/Transpile</Folder>
+    <InputTypes>
+        <Extension>py</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_py3</OutputFileNameTemplate>
+    <OutputExtension>py</OutputExtension>
+    <Engine>srctranspile</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>py2-to-py3</Arg>
+    </Args>
+</Preset>

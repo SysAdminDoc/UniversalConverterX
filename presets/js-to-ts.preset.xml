@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>JavaScript -> TypeScript bootstrap</Name>
+    <Folder>Code/Transpile</Folder>
+    <InputTypes>
+        <Extension>js</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>ts</OutputExtension>
+    <Engine>srctranspile</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>js-to-ts</Arg>
+    </Args>
+</Preset>

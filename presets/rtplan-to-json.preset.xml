@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>DICOM RTPLAN -> JSON</Name>
+    <Folder>Bio/Radiation Therapy</Folder>
+    <InputTypes>
+        <Extension>dcm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.rtplan</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>dicomrt</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>rtplan-to-json</Arg>
+    </Args>
+</Preset>

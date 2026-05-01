@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>DATEV German Accounting -> Normalized CSV</Name>
+    <Folder>Documents/Tax</Folder>
+    <InputTypes>
+        <Extension>csv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_normalized</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>taxkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>datev-to-csv</Arg>
+    </Args>
+</Preset>
