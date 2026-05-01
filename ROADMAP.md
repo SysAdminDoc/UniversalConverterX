@@ -104,8 +104,16 @@ workspace pattern that v2.4 established.
   status updates from `subtitle` events with cue count. History integration.
   Toolbox "Documents" tile + nav search entry. Contract test: `subtitle`
   added to `KNOWN_EVENTS` (23 sidecars conform).
-- #37 **Font converter** — TTF ↔ OTF ↔ WOFF ↔ WOFF2 via fonttools + brotli.
-  Subsetting reserved for v2.6.
+- #37 **Font converter** ✓ Shipped v2.5 — TTF ↔ OTF ↔ WOFF ↔ WOFF2 via
+  fonttools + Brotli. Subsetting deferred to v2.6. Shipped:
+  `tools/fontconvert/{sidecar.py,build.ps1}` (fonttools 4.50+, brotli, zopfli).
+  Two ops: `convert` (batch input -> single target format; emits `font` per
+  output) and `info` (sfnt version / flavor / family name / glyph count /
+  table list via `font_info` event). New `FontConverterPage` with multi-file
+  queue, target-format combo (TTF / OTF / WOFF / WOFF2), output-dir picker,
+  per-file size readout. History integration. Toolbox "Documents" tile + nav
+  search entry. Contract test: `font` and `font_info` added to `KNOWN_EVENTS`
+  (24 sidecars conform).
 - #38 **eBook converter** — EPUB / MOBI / AZW3 / PDF / FB2 / TXT / HTML mutual
   conversion via Calibre's `ebook-convert`. Sidecar auto-locates the bundled
   CLI under standard Calibre install dirs.
