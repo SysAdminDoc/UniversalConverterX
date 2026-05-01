@@ -5,12 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
     <Page.Resources>
-        <DataTemplate x:Key="OcrFileTemplate" x:DataType="p:OcrFileItem">
+        <DataTemplate x:Key="OcrFileTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1" CornerRadius="12" Padding="12"
@@ -26,17 +25,17 @@
                               Foreground="{StaticResource AccentBlueBrush}"
                               VerticalAlignment="Center"/>
                     <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                        <TextBlock Text="{x:Bind FileName}"
+                        <TextBlock Text="{Binding FileName}"
                                    Style="{StaticResource LabelTextStyle}"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{x:Bind Path}"
+                        <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <TextBlock Grid.Column="2"
-                               Text="{x:Bind StatusText, Mode=OneWay}"
+                               Text="{Binding StatusText, Mode=OneWay}"
                                Style="{StaticResource MutedTextStyle}"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
@@ -45,7 +44,7 @@
                             AutomationProperties.Name="Remove from queue"
                             ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click"
-                            Tag="{x:Bind}">
+                            Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
