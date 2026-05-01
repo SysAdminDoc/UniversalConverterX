@@ -78,6 +78,7 @@ public sealed partial class ToolboxPage : Page
         // Documents
         DocumentTools.Add(new ToolboxTile("document-converter", "Document Converter", "DOCX, PDF, ODT, RTF, XLSX, ODS, CSV, PPTX, EPUB, HTML", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
         DocumentTools.Add(new ToolboxTile("archive", "Archive Tool", "Pack / unpack 7z, ZIP, TAR, RAR (read), ISO, CAB, MSI", "\uE7B8", orange, "Ready", green, false, "7-Zip"));
+        DocumentTools.Add(new ToolboxTile("pdf-tools", "PDF Tools", "Merge / split / rotate / extract / encrypt / compress (pikepdf)", "\uEA90", red, "Ready", green, false, "pikepdf"));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));

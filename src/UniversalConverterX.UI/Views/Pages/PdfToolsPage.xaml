@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.PdfToolsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="PDF Tools"
+                       Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock Text="Merge, split, extract pages, rotate, encrypt, decrypt, and shrink PDFs. Backed by pikepdf (qpdf under the hood) -- no external binary required."
+                       Style="{StaticResource SubtitleTextStyle}"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
+            <StackPanel Spacing="10">
+                <ComboBox x:Name="OpCombo"
+                          Header="Operation"
+                          SelectedIndex="0"
+                          SelectionChanged="OpCombo_SelectionChanged">
+                    <ComboBoxItem Content="Merge -- combine multiple PDFs into one" Tag="merge"/>
+                    <ComboBoxItem Content="Split -- per page, or by ranges" Tag="split"/>
+                    <ComboBoxItem Content="Extract -- pull a page range into a new PDF" Tag="extract"/>
+                    <ComboBoxItem Content="Rotate -- rotate selected pages 90 / 180 / 270" Tag="rotate"/>
+                    <ComboBoxItem Content="Encrypt -- add password protection (AES-256)" Tag="encrypt"/>
+                    <ComboBoxItem Content="Decrypt -- remove password protection" Tag="decrypt"/>
+                    <ComboBoxItem Content="Compress -- linearise + stream compress" Tag="compress"/>
+                    <ComboBoxItem Content="Info -- show page count + metadata" Tag="info"/>
+                </ComboBox>
+
+                <Grid x:Name="MultiInputRow" ColumnSpacing="10" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="MultiInputBox"
+                             Header="Input PDFs (in merge order)"
+                             IsReadOnly="True"
+                             PlaceholderText="(pick two or more PDFs)"/>
+                    <Button Grid.Column="1"
+                            Content="Pick PDFs..."
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            VerticalAlignment="Bottom"
+                            Click="PickMultiInput_Click"/>
+                </Grid>
+
+                <Grid x:Name="SingleInputRow" ColumnSpacing="10" Visibility="Visible">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SingleInputBox"
+                             Header="Input PDF"
+                             IsReadOnly="True"
+                             PlaceholderText="(pick a PDF)"/>
+                    <Button Grid.Column="1"
+                            Content="Pick PDF..."
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            VerticalAlignment="Bottom"
+                            Click="PickSingleInput_Click"/>
+                </Grid>
+
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="OutputBox"
+                             Header="Output (file or folder)"
+                             IsReadOnly="True"
+                             PlaceholderText="(pick destination)"/>
+                    <Button x:Name="OutputBrowseButton"
+                            Grid.Column="1"
+                            Content="Save as..."
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            VerticalAlignment="Bottom"
+                            Click="PickOutput_Click"/>
+                </Grid>
+
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="PagesBox"
+                             Header="Pages / ranges (e.g. 1,3-5,7)"
+                             PlaceholderText="all"
+                             Visibility="Collapsed"/>
+                    <NumberBox Grid.Column="1"
+                               x:Name="AngleBox"
+                               Header="Angle"
+                               Value="90"
+                               Minimum="-180" Maximum="270"
+                               SmallChange="90" LargeChange="180"
+                               SpinButtonPlacementMode="Inline"
+                               Visibility="Collapsed"/>
+                    <PasswordBox Grid.Column="2"
+                                 x:Name="UserPwdBox"
+                                 Header="User password"
+                                 PlaceholderText="(none)"
+                                 Visibility="Collapsed"/>
+                </Grid>
+
+                <PasswordBox x:Name="ReadPwdBox"
+                             Header="Read password (if source is encrypted)"
+                             PlaceholderText="(none)"
+                             Visibility="Collapsed"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar AutomationProperties.Name="Progress"
+                         x:Name="WorkProgress"
+                         Minimum="0" Maximum="100"
+                         IsIndeterminate="False"
+                         VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    x:Name="RunButton"
+                    Content="Run"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Run_Click"
+                    IsEnabled="False"/>
+        </Grid>
+
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="14">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="ResultsText"
+                           Style="{StaticResource MutedTextStyle}"
+                           FontFamily="Consolas, Cascadia Mono, monospace"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Text="Pick an operation to begin."/>
+            </ScrollViewer>
+        </Border>
+
+        <ScrollViewer Grid.Row="4" Height="80"
+                      VerticalScrollBarVisibility="Auto">
+            <TextBlock x:Name="LogText"
+                       Style="{StaticResource MutedTextStyle}"
+                       FontFamily="Consolas, Cascadia Mono, monospace"
+                       FontSize="11"
+                       TextWrapping="Wrap"/>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="5"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"/>
+    </Grid>
+</Page>
