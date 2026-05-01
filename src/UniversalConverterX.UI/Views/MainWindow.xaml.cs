@@ -40,6 +40,7 @@ public sealed partial class MainWindow : Window
         new("Subtitle Converter", "Convert SRT / VTT / ASS / SSA / SUB plus shift / retime", "subtitle-converter"),
         new("Font Converter", "Convert TTF / OTF / WOFF / WOFF2 (fonttools)", "font-converter"),
         new("eBook Converter", "Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX (Calibre)", "ebook-converter"),
+        new("OCR", "Extract text from images and scans -> TXT / hOCR / PDF (Tesseract)", "ocr"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -153,6 +154,7 @@ public sealed partial class MainWindow : Window
             "subtitle-converter" => typeof(SubtitleConverterPage),
             "font-converter" => typeof(FontConverterPage),
             "ebook-converter" => typeof(EbookConverterPage),
+            "ocr" => typeof(OcrPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -258,7 +260,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

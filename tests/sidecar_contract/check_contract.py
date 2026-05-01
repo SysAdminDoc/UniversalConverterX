@@ -56,6 +56,8 @@ KNOWN_EVENTS = {
     "font",          # fontconvert — produced font file
     "font_info",     # fontconvert.info — sfnt / flavor / family probe
     "ebook",         # ebookconvert — produced eBook file
+    "ocr_result",    # ocr — produced text/hocr/pdf for each input image
+    "ocr_language",  # ocr.languages — discovered Tesseract language pack
 }
 
 
