@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Legacy Video (RealVideo / Bink / Smacker) -> MP4</Name>
+    <Folder>Video/Legacy</Folder>
+    <InputTypes>
+        <Extension>rm</Extension>
+        <Extension>rmvb</Extension>
+        <Extension>bik</Extension>
+        <Extension>bk2</Extension>
+        <Extension>smk</Extension>
+        <Extension>ogm</Extension>
+        <Extension>divx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>vidlegacy</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>legacy-to-mp4</Arg>
+    </Args>
+</Preset>

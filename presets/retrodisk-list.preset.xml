@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Retro Disk Image -> Catalog JSON</Name>
+    <Folder>Image/Retro</Folder>
+    <InputTypes>
+        <Extension>dsk</Extension>
+        <Extension>do</Extension>
+        <Extension>po</Extension>
+        <Extension>d64</Extension>
+        <Extension>atr</Extension>
+        <Extension>tap</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.catalog</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>retrodisks</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>list</Arg>
+    </Args>
+</Preset>

@@ -2,6 +2,33 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.19.0] - 2026-05-01
+
+### Added — 12 new pure-format conversion sidecars (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
+
+- **labkit** — Lab + Windows-trace data: LabVIEW .lvm text Measurement file with `***End_of_Header***` sentinel parsing -> CSV, LabVIEW .tdms binary via npTDMS -> per-group CSV, Sysinternals Procmon .pml -> CSV via `Procmon.exe /OpenLog`, Windows ETW .etl -> CSV via `tracerpt`, Performance Monitor .blg -> CSV via `relog`.
+- **scope** — Oscilloscope vendor formats: Tektronix .isf (curve-array ASCII headers + binary curve data with YMULT/YOFF/YZERO scaling) -> CSV, Tektronix .wfm v3+ binary -> CSV, LeCroy .trc with WAVEDESC descriptor -> CSV, Keysight / Agilent .bin (AG1000/AG1100 magic) -> CSV. Pure stdlib struct unpacking.
+- **retroimg** — Retrocomputing graphics decoders: Atari ST DEGAS (.PI1/.PI2/.PI3/.NEO) with proper interleaved-bitplane unpacking, ZX Spectrum SCR (256x192 with bizarre line-address scrambling + attribute bytes), WBMP (Wireless Bitmap) for OMA mobile, Apple II HGR (8192-byte hi-res with vertical scrambling), all -> PNG via Pillow.
+- **retrodisks** — Retrocomputing disk images: Apple II DOS 3.3 catalog walker (track 17 sector 15) for .dsk/.do/.po (143KB), Commodore 64 D64 catalog (track 18 sector 1) with 5-type file table (DEL/SEQ/PRG/USR/REL), Atari ATR magic header probe, ZX Spectrum .tap block walker (header + data block decoder).
+- **legacydocs** — DOS / early-Windows word processors: WordStar 8th-bit-stripping decoder for .ws/.wsd, Microsoft Write .wri body extraction (after 256-byte OLE header), Lotus Word Pro .lwp last-resort string scrape, format detection by magic-byte heuristics.
+- **testreports** — Test-runner result formats: JUnit XML (Jest/Vitest/Mocha/pytest/Maven/Gradle/MSTest) -> normalized CSV / standalone Catppuccin-themed HTML report, TAP (Test Anything Protocol) line parser, Allure JSON cases, Cucumber JSON (one row per scenario step), format auto-detection.
+- **dbexport** — Database vendor exports: IBM DB2 IXF (record-oriented binary with H/T/C/D/A type prefixes) column metadata + data row decoder, SQL Server BCP character format -> CSV, MySQL .sql dump regex-extraction of `INSERT INTO table VALUES (...)` -> per-table CSV (handles escaped strings + NULL + numeric literals), Oracle SQL*Loader .ctl probe.
+- **demosound** — Demoscene chip-music: Atari ST .YM file probe (YM2/3/4/5/6 magic + LeOnArD! tag check), .YM -> WAV via sc68 / sndh-converter, ZX Spectrum .ay -> WAV via zxtune123, Atari 8-bit SAP -> WAV via asap.
+- **vidlegacy** — Legacy / proprietary video: RealVideo .rm/.rmvb, Bink .bik/.bk2 (RAD), Smacker .smk, OGG Media .ogm, DivX, MS Video 1, Cinepak, Indeo — all -> MP4 H.264 via FFmpeg with explicit codec hints, plus ffprobe-style legacy probe.
+- **gsplat** — 3D Gaussian Splatting: Antimatter15 .splat (32-byte records: position + scales + RGBA + quaternion) <-> 3DGS .ply round-trip with proper PLY binary header emission and ASCII/binary input handling, splat header probe.
+- **arcgis** — ArcGIS file geodatabase via GDAL: .gdb / .gpkg layer enumeration via ogrinfo, per-layer extraction via ogr2ogr to GeoJSON / Shapefile / GeoPackage / FlatGeobuf / GML / KML, extract-all walks every layer, ArcGIS Pro .aprx project ZIP probe.
+- **mediathumb** — Universal media thumbnail extractor: video frame at N seconds via FFmpeg, PDF first page via pdftoppm, audio cover art (ID3 APIC + FLAC/Vorbis embedded picture) via mutagen, EPUB/CBZ/DOCX first image via zipfile, image resize via Pillow. Single `thumb` op auto-detects input type. `bulk-thumb` walks a directory tree preserving structure.
+
+### Added — 23 new presets
+
+`lvm-to-csv`, `tdms-to-csv`, `etl-to-csv`, `blg-to-csv`, `wfm-to-csv`, `isf-to-csv`, `trc-to-csv`, `retro-img-to-png`, `retrodisk-list`, `wordstar-to-text`, `wri-to-text`, `junit-to-csv`, `junit-to-html`, `tap-to-csv`, `ixf-to-csv`, `mysql-dump-csv`, `ym-to-wav`, `ay-to-wav`, `realvideo-to-mp4`, `splat-to-ply`, `ply-to-splat`, `arcgis-list-layers`, `mediathumb`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 12 new event types: `lab_doc`, `scope_doc`, `retro_image`, `retro_disk`, `test_report`, `dbexport_doc`, `demo_audio`, `legacy_video`, `gsplat_doc`, `arcgis_doc`, `thumb_doc` (+ `legacy_doc` reused for legacydocs). Contract test: 162 sidecars conforming.
+- 12 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.18.0 → 2.19.0 across all manifests.
+
 ## [v2.18.0] - 2026-05-01
 
 ### Added — 12 new pure-format conversion sidecars (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)

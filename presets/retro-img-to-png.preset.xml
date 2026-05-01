@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Retro Computer Image -> PNG</Name>
+    <Folder>Image/Retro</Folder>
+    <InputTypes>
+        <Extension>pi1</Extension>
+        <Extension>pi2</Extension>
+        <Extension>pi3</Extension>
+        <Extension>neo</Extension>
+        <Extension>scr</Extension>
+        <Extension>wbmp</Extension>
+        <Extension>hgr</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>retroimg</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-png</Arg>
+    </Args>
+</Preset>

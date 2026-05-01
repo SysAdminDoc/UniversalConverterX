@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>TAP Test Output -> CSV</Name>
+    <Folder>DevOps/Tests</Folder>
+    <InputTypes>
+        <Extension>tap</Extension>
+        <Extension>txt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>testreports</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>tap-to-csv</Arg>
+    </Args>
+</Preset>

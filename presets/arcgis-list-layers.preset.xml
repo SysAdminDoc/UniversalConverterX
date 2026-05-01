@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>ArcGIS .gdb -> Layer List</Name>
+    <Folder>Data/GIS</Folder>
+    <InputTypes>
+        <Extension>gdb</Extension>
+        <Extension>gpkg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.layers</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>arcgis</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>list-layers</Arg>
+    </Args>
+</Preset>

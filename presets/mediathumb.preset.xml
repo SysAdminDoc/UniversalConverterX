@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Any Media -> JPG Thumbnail</Name>
+    <Folder>Image/Thumbnail</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>pdf</Extension>
+        <Extension>mp3</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>cbz</Extension>
+        <Extension>epub</Extension>
+        <Extension>docx</Extension>
+        <Extension>jpg</Extension>
+        <Extension>png</Extension>
+        <Extension>tiff</Extension>
+        <Extension>heic</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>jpg</OutputExtension>
+    <Engine>mediathumb</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>thumb</Arg>
+    </Args>
+</Preset>

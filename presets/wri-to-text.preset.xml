@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Microsoft Write -> Plain Text</Name>
+    <Folder>Documents/Legacy</Folder>
+    <InputTypes>
+        <Extension>wri</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>legacydocs</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>wri-to-text</Arg>
+    </Args>
+</Preset>
