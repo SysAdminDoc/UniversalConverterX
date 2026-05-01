@@ -52,6 +52,7 @@ KNOWN_EVENTS = {
     "archive_entry", # archive — file entry inside an archive
     "pdf_info",      # pdftools.info — page count + metadata for a PDF
     "pdf_part",      # pdftools.split — produced PDF part (range + path)
+    "subtitle",      # subconvert — produced subtitle file (one per input)
 }
 
 
