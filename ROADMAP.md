@@ -46,6 +46,36 @@ UniversalConverterX (UCX) v2.4 planning — WinUI 3 / .NET 8 / Windows-only desk
 
 ---
 
+## v2.5.0 — "Universal" wave (in progress)
+
+Goal: round out the "universal converter" promise by adding the categories that
+make UCX a one-stop shop beyond media. Every item here pulls in well-trodden
+OSS tooling and exposes it through the same NDJSON sidecar contract + WinUI 3
+workspace pattern that v2.4 established.
+
+- #33 **Document converter** — DOCX / PDF / XLSX / PPTX / ODT / RTF / HTML mutual
+  conversion via `libreoffice --headless --convert-to`. Sidecar discovers
+  LibreOffice on PATH or via standard install dirs; emits `progress` per file
+  in batch. Toolbox tile + dedicated `DocumentConverterPage`.
+- #34 **Archive tool** — ZIP / 7Z / TAR / TAR.GZ / RAR (read-only) extraction
+  + ZIP/7Z/TAR creation via 7-Zip's `7z.exe` CLI. Single sidecar, two ops:
+  `pack` + `unpack`. Auto-locates `7z.exe` (Program Files / PATH). Glob-driven
+  include / exclude.
+- #35 **PDF tools** — merge / split / rotate / extract pages / encrypt /
+  decrypt / linearize via pikepdf (built on qpdf). Pure-Python sidecar, no
+  external binary required at runtime.
+- #36 **Subtitle converter** — SRT ↔ VTT ↔ ASS ↔ SSA ↔ MicroDVD via pysubs2.
+  Independent of clipforge's burn-in path; this is pure conversion + offset
+  shift + retime. Pure-Python sidecar.
+- #37 **Font converter** — TTF ↔ OTF ↔ WOFF ↔ WOFF2 via fonttools + brotli.
+  Subsetting reserved for v2.6.
+- #38 **eBook converter** — EPUB / MOBI / AZW3 / PDF / FB2 / TXT / HTML mutual
+  conversion via Calibre's `ebook-convert`. Sidecar auto-locates the bundled
+  CLI under standard Calibre install dirs.
+- #39 **OCR (Tesseract)** — extract text from images and scanned PDFs to TXT /
+  HOCR / PDF (searchable). Bundles `tesseract.exe` lookup under standard install
+  dirs; downloads language data on demand to `tools/_models/tessdata/`.
+
 ## v2.4.0 Shipped ✓ (in progress)
 
 - ✓ Sidecar bootstraps hardened against PyInstaller fork-bomb (frozen guard in demucs/whisper-stt/lipsight)
