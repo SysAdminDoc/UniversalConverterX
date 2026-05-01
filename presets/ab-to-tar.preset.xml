@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Android adb Backup .ab -> .tar</Name>
+    <Folder>Mobile/Backups</Folder>
+    <InputTypes>
+        <Extension>ab</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>tar</OutputExtension>
+    <Engine>mobile</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ab-to-tar</Arg>
+    </Args>
+</Preset>

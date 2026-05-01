@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>LDIF Address Book -> vCard</Name>
+    <Folder>Documents/Calendar</Folder>
+    <InputTypes>
+        <Extension>ldif</Extension>
+        <Extension>ldap</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>vcf</OutputExtension>
+    <Engine>calmore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ldif-to-vcard</Arg>
+    </Args>
+</Preset>

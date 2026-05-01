@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SWIFT MT (Banking) -> JSON</Name>
+    <Folder>Documents/Enterprise</Folder>
+    <InputTypes>
+        <Extension>fin</Extension>
+        <Extension>mt</Extension>
+        <Extension>swift</Extension>
+        <Extension>txt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>swift</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mt-to-json</Arg>
+    </Args>
+</Preset>

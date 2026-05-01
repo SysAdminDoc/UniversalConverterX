@@ -2,6 +2,33 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.16.0] - 2026-05-01
+
+### Added — 12 new pure-format conversion sidecars (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
+
+- **emailpro** — Specialty email format conversion (extends `mailbox`): Outlook .msg via extract-msg → .eml or HTML, Apple Mail .emlx (length-prefix stripping) → .eml, and `thread-mbox` to bundle a directory of .eml files into a single .mbox.
+- **messaging** — Chat / messenger export normalization: Telegram JSON, Discord JSON, Slack workspace ZIP, iMessage chat.db SQLite, WhatsApp text export. Normalized `Message` dataclass per platform → CSV / JSON / browseable HTML.
+- **calmore** — Calendar + address-book extras (extends `calconvert`): Apple `.icbu` calendar-backup unpack, Google Takeout calendar JSON → ICS via icalendar lib, LDIF address books → vCard 3.0, Outlook CSV contacts → vCard 3.0.
+- **subextra** — Subtitle format extras (extends `subkit` / `subocr`): CEA-608 / 708 closed captions via ccextractor CLI shellout, Apple iTunes Timed Text (.itt) → SRT / VTT, ASS karaoke → LRC lyrics (strips `\kNN` tags).
+- **edi** — EDI X12 (US healthcare / supply chain / banking) and EDIFACT (international supply chain) → hierarchical JSON / per-segment CSV. Pure stdlib parser handles ISA / UNA delimiter declarations and EDIFACT release-character escaping.
+- **swift** — SWIFT MT (banking) message decoder: parses {1:...}{2:...}{3:...}{4:...}{5:...} block envelope, extracts message type from block 2, walks block-4 fields by `:TAG:` boundaries → JSON / per-field CSV.
+- **asn1** — ASN.1 BER / DER / PEM converter: structural TLV walk produces JSON tree (handles X.509 / PKCS#7 / CMS / SNMP / Kerberos blobs), human-readable universal tag names, OID dotted-decimal decoding, PEM ↔ DER round-trip.
+- **mobile** — Mobile-device backup decoder: iTunes / Finder iOS backup inventory via Manifest.db SQLite + selective extract by relativePath substring; Android adb backup (.ab) → plain tar via DEFLATE strip.
+- **dbsql** — SQL dialect translation via `sqlglot`: MySQL / Postgres / SQL Server / Oracle / SQLite / BigQuery / Snowflake / DuckDB / ClickHouse / Spark / Hive / Redshift / Databricks / Presto / Trino round-trip + format + AST dump.
+- **spreadsheet** — Legacy spreadsheet conversion via LibreOffice headless: Lotus 1-2-3 (.wk1/.wk3/.wk4/.123), Quattro Pro (.wq1/.wq2/.qpw), Gnumeric, StarOffice .sxc, AppleWorks .cwk → XLSX / ODS / CSV.
+- **colorfmt** — Color-format converter: hex (#RRGGBB[AA]) ↔ RGB ↔ HSL ↔ HSV ↔ CMYK ↔ CIE Lab (D65) ↔ CSS named (147 colors). Outputs CSV / JSON / CSS custom-property block. Pure stdlib (sRGB↔linear↔XYZ↔Lab math inline).
+- **gameasset** — Game-engine asset container reader: Quake .pak (id Software), Doom .wad (IWAD/PWAD), Valve VPK v1/v2 (Source / GoldSrc), Godot .pck, ZIP-style .pk3 / .pk4 / .bsa. List manifest → JSON, extract → directory tree.
+
+### Added — 22 new presets
+
+`msg-to-eml`, `msg-to-html`, `emlx-to-eml`, `messaging-to-csv`, `messaging-to-json`, `messaging-to-html`, `icbu-extract`, `google-takeout-to-ics`, `ldif-to-vcard`, `outlook-csv-to-vcard`, `cea608-to-srt`, `itt-to-srt`, `itt-to-vtt`, `ass-to-lrc`, `edi-x12-to-json`, `edi-x12-to-csv`, `swift-mt-to-json`, `swift-mt-to-csv`, `asn1-to-json`, `ab-to-tar`, `sql-mysql-to-postgres`, `sql-postgres-to-bigquery`, `sql-tsql-to-snowflake`, `lotus-to-xlsx`, `lotus-to-ods`, `colors-expand`, `colors-to-css`, `game-asset-list`, `game-asset-extract`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 12 new event types: `email_extra`, `chat_doc`, `calmore_doc`, `subtitle_extra`, `edi_doc`, `swift_mt`, `asn1_doc`, `mobile_doc`, `sql_doc`, `spreadsheet_legacy`, `color_doc`, `game_asset`. Contract test: 128 sidecars conforming.
+- 12 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.15.0 → 2.16.0 across all manifests.
+
 ## [v2.15.0] - 2026-05-01
 
 ### Added — 7 new pure-format conversion sidecars (Healthcare + Finance + Engineering + Wire)

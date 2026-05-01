@@ -126,6 +126,20 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.16 wave (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
+        DocumentTools.Add(new ToolboxTile("presets:emailpro", "Email Plus", "Outlook .msg + Apple .emlx + thread mbox bundling", "\uE715", blue, "Ready", green, false, "extract-msg + stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:messaging", "Messaging Exports", "Telegram / Discord / Slack / iMessage / WhatsApp -> CSV / JSON / HTML", "\uE8BD", blue, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:calmore", "Calendar + Address Book", ".icbu unpack + Google Takeout calendar JSON -> ICS + LDIF / Outlook CSV -> vCard", "\uE787", blue, "Ready", green, false, "icalendar + vobject"));
+        VideoTools.Add(new ToolboxTile("presets:subextra", "Subtitles Plus", "CEA-608/708 caps via ccextractor + iTunes Timed Text + ASS karaoke -> LRC", "\uED1E", green, "Ready", green, false, "ccextractor + stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:edi", "EDI X12 / EDIFACT", "Healthcare / supply-chain / banking EDI -> hierarchical JSON / per-segment CSV", "\uE943", blue, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:swift", "SWIFT MT (Banking)", "MT103 / MT202 / etc. message families -> structured JSON / CSV", "\uE9D9", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:asn1", "ASN.1 / X.509", "BER / DER / PEM <-> JSON tree (X.509 / PKCS#7 / CMS / SNMP / Kerberos)", "\uE72E", orange, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:mobile", "Mobile Backups", "iTunes iOS backup inventory + extract + Android adb .ab -> tar", "\uE8EA", blue, "Ready", green, false, "stdlib + sqlite"));
+        OtherTools.Add(new ToolboxTile("presets:dbsql", "SQL Dialect Translator", "MySQL / Postgres / SQL Server / Oracle / SQLite / BigQuery / Snowflake / DuckDB", "\uE9D5", blue, "Ready", green, false, "sqlglot"));
+        DocumentTools.Add(new ToolboxTile("presets:spreadsheet", "Legacy Spreadsheets", "Lotus 1-2-3 / Quattro Pro / Gnumeric / StarOffice / AppleWorks -> XLSX / ODS / CSV", "\uE9F9", blue, "Ready", green, false, "LibreOffice"));
+        OtherTools.Add(new ToolboxTile("presets:colorfmt", "Color Formats", "Hex / RGB / HSL / HSV / CMYK / Lab / CSS named -> CSV / JSON / CSS variables", "\uE790", orange, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:gameasset", "Game Asset Containers", "Quake .pak / Doom .wad / Source .vpk / Godot .pck / .pk3 / .bsa", "\uE7FC", green, "Ready", green, false, "stdlib"));
+
         // v2.15 wave (Healthcare + Finance + Engineering + Wire formats)
         DocumentTools.Add(new ToolboxTile("presets:hl7", "HL7 Healthcare", "HL7 v2 messages <-> JSON + FHIR R4/R5 JSON <-> XML", "\uE8A1", red, "Ready", green, false, "stdlib"));
         DocumentTools.Add(new ToolboxTile("presets:finance", "Finance / Accounting", "OFX / QFX / QIF / IIF / MT940 -> CSV / JSON / QIF (transaction-aware)", "\uE9D9", blue, "Ready", green, false, "ofxparse + mt-940"));

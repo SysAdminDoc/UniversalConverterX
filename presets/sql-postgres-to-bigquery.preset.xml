@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SQL: PostgreSQL -> BigQuery</Name>
+    <Folder>Data/SQL</Folder>
+    <InputTypes>
+        <Extension>sql</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.bigquery</OutputFileNameTemplate>
+    <OutputExtension>sql</OutputExtension>
+    <Engine>dbsql</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>translate</Arg>
+        <Arg>--from</Arg>
+        <Arg>postgres</Arg>
+        <Arg>--to</Arg>
+        <Arg>bigquery</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SQL: MySQL -> PostgreSQL</Name>
+    <Folder>Data/SQL</Folder>
+    <InputTypes>
+        <Extension>sql</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.postgres</OutputFileNameTemplate>
+    <OutputExtension>sql</OutputExtension>
+    <Engine>dbsql</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>translate</Arg>
+        <Arg>--from</Arg>
+        <Arg>mysql</Arg>
+        <Arg>--to</Arg>
+        <Arg>postgres</Arg>
+    </Args>
+</Preset>
