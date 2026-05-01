@@ -34,6 +34,7 @@ public sealed partial class MainWindow : Window
         new("Scene Detection", "Find scene cuts in a video and export to CSV / EDL", "scene-detect"),
         new("Timeline Preview", "Render a thumbnail strip + audio waveform for any video", "timeline-preview"),
         new("Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "track-manager"),
+        new("Document Converter", "Convert DOCX / PDF / ODT / XLSX / PPTX / EPUB / HTML and friends", "document-converter"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -141,6 +142,7 @@ public sealed partial class MainWindow : Window
             "scene-detect" => typeof(SceneDetectPage),
             "timeline-preview" => typeof(TimelinePreviewPage),
             "track-manager" => typeof(TrackManagerPage),
+            "document-converter" => typeof(DocumentConverterPage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -246,7 +248,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

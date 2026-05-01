@@ -48,6 +48,7 @@ KNOWN_EVENTS = {
     "scene",         # scenedetect — detected scene cut (start/end timecodes)
     "thumb",         # clipforge.timeline — generated thumbnail in the strip
     "track",         # clipforge.track-list — enumerated container stream
+    "doc",           # docconvert — produced document file (one per input)
 }
 
 
