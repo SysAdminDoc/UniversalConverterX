@@ -345,6 +345,29 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void ValidateJob_WithDetectedSourceFormat_ShouldUseDetectedFormat()
+    {
+        var tempFile = Path.GetTempFileName();
+        var renamed = tempFile + ".jpg";
+        File.Move(tempFile, renamed);
+
+        try
+        {
+            var job = CreateTestJob(renamed, "output.mp3");
+            job.SourceFormat = new FileFormat("mp4", "video/mp4", FormatCategory.Video);
+
+            var result = _converter.ValidateJob(job);
+
+            result.IsValid.Should().BeTrue();
+        }
+        finally
+        {
+            if (File.Exists(renamed))
+                File.Delete(renamed);
+        }
+    }
+
+    [Fact]
     public void ValidateJob_OutputExistsNoOverwrite_ShouldReturnInvalid()
     {
         var inputFile = Path.GetTempFileName();

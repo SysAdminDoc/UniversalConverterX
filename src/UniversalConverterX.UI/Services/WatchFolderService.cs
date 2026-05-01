@@ -71,7 +71,8 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private readonly string _configPath;
     private readonly Dictionary<string, FileSystemWatcher> _watchers = [];
     private readonly Dictionary<string, CancellationTokenSource> _profileCts = [];
-    private readonly ConcurrentDictionary<string, byte> _processing = new();
+    private readonly ConcurrentDictionary<string, byte> _processing = new(
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     private readonly object _saveLock = new();
     /// <summary>
     /// Trips when the whole service is being shut down. Linked into every
@@ -283,15 +284,19 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     {
         if (!MatchesFilter(profile.Filter, path)) return;
         if (!_processing.TryAdd(path, 0)) return; // already in-flight
+        var profileToken = _profileCts.TryGetValue(profile.Id, out var startingCts)
+            ? startingCts.Token
+            : _shutdownCts.Token;
 
         _ = Task.Run(async () =>
         {
             try
             {
-                if (!await WaitForStableAsync(path)) {
+                if (!await WaitForStableAsync(path, profileToken)) {
                     PostEvent(profile, path, WatchEventStatus.Skipped, "file never settled");
                     return;
                 }
+                profileToken.ThrowIfCancellationRequested();
                 PostEvent(profile, path, WatchEventStatus.Picked, null);
 
                 var (tool, args, output) = BuildJob(profile, path);
@@ -307,10 +312,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                 // removing the watch profile aborts the in-flight job instead
                 // of letting it run to completion. Falls back to the shutdown
                 // token if the profile was already removed (race).
-                var ct = _profileCts.TryGetValue(profile.Id, out var profCts)
-                    ? profCts.Token
-                    : _shutdownCts.Token;
-                var result = await _runner.RunAsync(tool, args!, null, null, ct);
+                var result = await _runner.RunAsync(tool, args!, null, null, profileToken);
                 PostEvent(profile, path,
                           result.Success ? WatchEventStatus.Done : WatchEventStatus.Failed,
                           result.Success ? Path.GetFileName(output)
@@ -335,6 +337,11 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                     ErrorMessage     = result.ErrorMessage,
                     Profile          = profile.Action == WatchAction.Compress ? profile.Preset : profile.TargetFormat,
                 });
+            }
+            catch (OperationCanceledException)
+            {
+                if (!_shutdownCts.IsCancellationRequested)
+                    PostEvent(profile, path, WatchEventStatus.Skipped, "watch cancelled");
             }
             catch (Exception ex)
             {
@@ -400,13 +407,14 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     }
 
     /// <summary>Wait until file size hasn't changed for several samples or timeout.</summary>
-    private static async Task<bool> WaitForStableAsync(string path)
+    private static async Task<bool> WaitForStableAsync(string path, CancellationToken ct)
     {
         var lastSize = -1L;
         var sameCount = 0;
         var deadline = DateTime.UtcNow + StableTimeout;
         while (DateTime.UtcNow < deadline)
         {
+            ct.ThrowIfCancellationRequested();
             try
             {
                 var size = new FileInfo(path).Length;
@@ -425,7 +433,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             }
             catch (FileNotFoundException) { return false; }
             catch (IOException)           { sameCount = 0; }
-            await Task.Delay(StableCheckInterval).ConfigureAwait(false);
+            await Task.Delay(StableCheckInterval, ct).ConfigureAwait(false);
         }
         return false;
     }
@@ -454,7 +462,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             }
             case WatchAction.Convert:
             {
-                var fmt = string.IsNullOrWhiteSpace(p.TargetFormat) ? "mp4" : p.TargetFormat!;
+                var fmt = NormalizeExtension(p.TargetFormat, "mp4");
                 var output = Path.Combine(outDir, $"{stem}.{fmt}");
                 // We use clipforge `op_rewrap` for like-codec container swaps; for a
                 // real encode pipeline, the converter sidecar would be a better fit
@@ -471,6 +479,17 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             default:
                 return (null, null, "");
         }
+    }
+
+    private static string NormalizeExtension(string? extension, string fallback)
+    {
+        var value = string.IsNullOrWhiteSpace(extension) ? fallback : extension.Trim().TrimStart('.');
+        if (string.IsNullOrWhiteSpace(value)) return fallback;
+
+        var invalid = Path.GetInvalidFileNameChars();
+        if (value.IndexOfAny(invalid) >= 0 || value.IndexOfAny(['/', '\\', ':', '\0']) >= 0)
+            return fallback;
+        return value;
     }
 
     // ── Event log ───────────────────────────────────────────────────────────

@@ -25,6 +25,8 @@ namespace UniversalConverterX.Console.Commands;
 /// </summary>
 public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 {
+    private const int MaxRequestBodyBytes = 1024 * 1024;
+
     public class Settings : CommandSettings
     {
         [CommandOption("-p|--port <PORT>")]
@@ -40,7 +42,20 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var prefix = $"http://{settings.Host}:{settings.Port}/";
+        if (settings.Port is < 1 or > 65535)
+        {
+            AnsiConsole.MarkupLine("[red]Invalid --port.[/] Use a TCP port between 1 and 65535.");
+            return 2;
+        }
+
+        var host = NormalizeLoopbackHost(settings.Host);
+        if (host is null)
+        {
+            AnsiConsole.MarkupLine("[red]Invalid --host.[/] ucx serve is intentionally loopback-only. Use 127.0.0.1, ::1, or localhost.");
+            return 2;
+        }
+
+        var prefix = $"http://{host}:{settings.Port}/";
         var listener = new HttpListener();
         listener.Prefixes.Add(prefix);
 
@@ -96,7 +111,14 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             }
             else if (path == "/convert" && req.HttpMethod == "POST")
             {
-                var body = await ReadBody(req);
+                string body;
+                try { body = await ReadBody(req); }
+                catch (InvalidDataException)
+                {
+                    await WriteJson(resp, 413, new { error = "request_too_large", max_bytes = MaxRequestBodyBytes });
+                    return;
+                }
+
                 JsonNode? root = null;
                 try { root = JsonNode.Parse(body); } catch { }
                 if (root is null)
@@ -104,10 +126,32 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                     await WriteJson(resp, 400, new { error = "invalid_json" });
                     return;
                 }
-                var engine = root["engine"]?.GetValue<string>() ?? "";
-                var rawArgs = root["args"]?.AsArray() ?? new JsonArray();
+                string engine;
+                JsonArray rawArgs;
+                try
+                {
+                    engine = root["engine"]?.GetValue<string>() ?? "";
+                    rawArgs = root["args"]?.AsArray() ?? new JsonArray();
+                }
+                catch
+                {
+                    await WriteJson(resp, 400, new { error = "invalid_request", message = "engine must be a string and args must be an array." });
+                    return;
+                }
                 var args = new List<string>();
-                foreach (var a in rawArgs) if (a is not null) args.Add(a.GetValue<string>());
+                try
+                {
+                    foreach (var a in rawArgs)
+                    {
+                        if (a is null) continue;
+                        args.Add(a.GetValue<string>());
+                    }
+                }
+                catch
+                {
+                    await WriteJson(resp, 400, new { error = "invalid_args", message = "args must contain only strings." });
+                    return;
+                }
 
                 var exe = ResolveSidecar(engine);
                 if (exe is null)
@@ -188,8 +232,35 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 
     private static async Task<string> ReadBody(HttpListenerRequest req)
     {
-        using var sr = new StreamReader(req.InputStream, req.ContentEncoding);
-        return await sr.ReadToEndAsync();
+        if (req.ContentLength64 > MaxRequestBodyBytes)
+            throw new InvalidDataException("Request body is too large.");
+
+        using var ms = new MemoryStream();
+        var buffer = new byte[8192];
+        var total = 0;
+        while (true)
+        {
+            var read = await req.InputStream.ReadAsync(buffer);
+            if (read == 0) break;
+            total += read;
+            if (total > MaxRequestBodyBytes)
+                throw new InvalidDataException("Request body is too large.");
+            ms.Write(buffer, 0, read);
+        }
+        return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    private static string? NormalizeLoopbackHost(string host)
+    {
+        if (string.IsNullOrWhiteSpace(host)) return null;
+        var trimmed = host.Trim();
+        if (trimmed.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+            return "localhost";
+        if (!IPAddress.TryParse(trimmed.Trim('[', ']'), out var ip) || !IPAddress.IsLoopback(ip))
+            return null;
+        return ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+            ? $"[{ip}]"
+            : ip.ToString();
     }
 
     private static IReadOnlyList<object> ListTools()
@@ -279,13 +350,16 @@ internal sealed class JobManager
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            RedirectStandardInput = true,
             CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
         var proc = new Process { StartInfo = psi };
         var rec = new JobRecord(id, engine, proc);
-        _jobs[id] = rec;
         rec.Start();
+        _jobs[id] = rec;
         return id;
     }
 
@@ -296,7 +370,9 @@ internal sealed class JobManager
         foreach (var r in _jobs.Values)
         {
             try { if (r.IsRunning) r.Kill(); } catch { }
+            r.Dispose();
         }
+        _jobs.Clear();
     }
 
     private void SweepFinished()
@@ -305,12 +381,15 @@ internal sealed class JobManager
         foreach (var (id, r) in _jobs)
         {
             if (r.FinishedUtc is DateTime f && f < cutoff)
-                _jobs.TryRemove(id, out _);
+            {
+                if (_jobs.TryRemove(id, out var removed))
+                    removed.Dispose();
+            }
         }
     }
 }
 
-internal sealed class JobRecord
+internal sealed class JobRecord : IDisposable
 {
     /// <summary>
     /// A long-running sidecar (a 4 GB transcode emitting per-frame events) used
@@ -373,6 +452,7 @@ internal sealed class JobRecord
         };
         _proc.EnableRaisingEvents = true;
         _proc.Start();
+        try { _proc.StandardInput.Close(); } catch { }
         _proc.BeginOutputReadLine();
         _proc.BeginErrorReadLine();
     }
@@ -414,5 +494,10 @@ internal sealed class JobRecord
     public void Kill()
     {
         try { _proc.Kill(entireProcessTree: true); } catch { }
+    }
+
+    public void Dispose()
+    {
+        try { _proc.Dispose(); } catch { }
     }
 }

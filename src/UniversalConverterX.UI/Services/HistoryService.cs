@@ -141,7 +141,11 @@ public sealed class HistoryService : IHistoryService
 
     private SqliteConnection Open()
     {
-        var conn = new SqliteConnection($"Data Source={_dbPath}");
+        var builder = new SqliteConnectionStringBuilder
+        {
+            DataSource = _dbPath,
+        };
+        var conn = new SqliteConnection(builder.ToString());
         conn.Open();
         // WAL improves concurrency between the main-thread inserts and the
         // background QueryAsync reader without requiring a process-wide lock.
@@ -280,6 +284,7 @@ public sealed class HistoryService : IHistoryService
     public Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500)
         => Task.Run<IReadOnlyList<HistoryRecord>>(() =>
         {
+            var rowLimit = Math.Clamp(limit ?? 500, 1, 10_000);
             var list = new List<HistoryRecord>();
             using var conn = Open();
             using var cmd = conn.CreateCommand();
@@ -298,7 +303,7 @@ public sealed class HistoryService : IHistoryService
                 """;
             if (!string.IsNullOrWhiteSpace(search))
                 cmd.Parameters.AddWithValue("@q", $"%{search}%");
-            cmd.Parameters.AddWithValue("@lim", limit ?? int.MaxValue);
+            cmd.Parameters.AddWithValue("@lim", rowLimit);
             using var rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {

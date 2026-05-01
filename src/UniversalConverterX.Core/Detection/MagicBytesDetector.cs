@@ -55,6 +55,10 @@ public class MagicBytesDetector
 
             return DetectFromBuffer(buffer, bytesRead, Path.GetExtension(filePath));
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception)
         {
             // Magic-byte detection is best effort; callers may choose extension fallback.
@@ -240,7 +244,7 @@ public class MagicBytesDetector
 
     private FileFormat? DetectIsoBaseMediaFormat(byte[] data, int length)
     {
-        if (length < 12 || !MatchesAscii(data, 4, "ftyp"))
+        if (length < 12 || !MatchesAscii(data, length, 4, "ftyp"))
             return null;
 
         var brands = GetIsoBrands(data, length).ToArray();
@@ -273,9 +277,9 @@ public class MagicBytesDetector
         }
     }
 
-    private static bool MatchesAscii(byte[] data, int offset, string value)
+    private static bool MatchesAscii(byte[] data, int length, int offset, string value)
     {
-        if (data.Length < offset + value.Length)
+        if (length < offset + value.Length)
             return false;
 
         for (var i = 0; i < value.Length; i++)

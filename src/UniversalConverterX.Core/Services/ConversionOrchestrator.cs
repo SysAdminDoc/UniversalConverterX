@@ -147,6 +147,8 @@ public class ConversionOrchestrator : IConversionOrchestrator
                 job.SourceFormat = await DetectFormatAsync(job.InputPath, cancellationToken);
             }
 
+            var sourceExtension = job.SourceFormat?.Extension ?? job.InputExtension;
+
             IConverterStrategy? converter;
 
             // Honour ForceConverter first — but verify it can actually do the
@@ -167,7 +169,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
                         $"Available: {string.Join(", ", _converters.Select(c => c.Id))}",
                         DateTime.UtcNow - startedAt);
                 }
-                var src = job.SourceFormat ?? new FileFormat(job.InputExtension, GetMimeType(job.InputExtension), DetermineCategory(job.InputExtension));
+                var src = job.SourceFormat ?? new FileFormat(sourceExtension, GetMimeType(sourceExtension), DetermineCategory(sourceExtension));
                 var tgt = new FileFormat(job.OutputExtension, GetMimeType(job.OutputExtension), DetermineCategory(job.OutputExtension));
                 if (!forced.CanConvert(src, tgt))
                 {
@@ -175,7 +177,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
                     job.CompletedAt = DateTime.UtcNow;
                     return ConversionResult.Failed(
                         job,
-                        $"Forced converter '{forced.Id}' cannot convert {job.InputExtension} → {job.OutputExtension}.",
+                        $"Forced converter '{forced.Id}' cannot convert {sourceExtension} → {job.OutputExtension}.",
                         DateTime.UtcNow - startedAt);
                 }
                 converter = forced;
@@ -184,18 +186,18 @@ public class ConversionOrchestrator : IConversionOrchestrator
             else
             {
                 // Find the best converter
-                converter = GetBestConverter(job.InputExtension, job.OutputExtension);
+                converter = GetBestConverter(sourceExtension, job.OutputExtension);
                 if (converter == null)
                 {
                     _logger?.LogError("No converter found for {Input} → {Output}",
-                        job.InputExtension, job.OutputExtension);
+                        sourceExtension, job.OutputExtension);
 
                     job.Status = ConversionStatus.Failed;
                     job.CompletedAt = DateTime.UtcNow;
 
                     return ConversionResult.Failed(
                         job,
-                        $"No converter available for {job.InputExtension} → {job.OutputExtension}",
+                        $"No converter available for {sourceExtension} → {job.OutputExtension}",
                         DateTime.UtcNow - startedAt);
                 }
             }

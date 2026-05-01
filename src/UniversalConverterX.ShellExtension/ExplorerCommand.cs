@@ -326,11 +326,23 @@ public partial class PresetSubCommand : IExplorerCommand
                 psi.ArgumentList.Add("--input-files");
                 psi.ArgumentList.Add(listPath);
 
-                var p = Process.Start(psi);
-                if (p is not null)
+                try
                 {
-                    p.EnableRaisingEvents = true;
-                    p.Exited += (_, _) => { try { File.Delete(listPath); } catch { } };
+                    var p = Process.Start(psi);
+                    if (p is not null)
+                    {
+                        p.EnableRaisingEvents = true;
+                        p.Exited += (_, _) => { try { File.Delete(listPath); } catch { } };
+                    }
+                    else
+                    {
+                        try { File.Delete(listPath); } catch { }
+                    }
+                }
+                catch
+                {
+                    try { File.Delete(listPath); } catch { }
+                    throw;
                 }
             }
             else

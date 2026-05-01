@@ -28,6 +28,9 @@ tools/_models/*
 # tools/build-all.ps1 build reports
 artifacts/build-reports/
 
+# Installer-generated WiX fragments
+installer/wix/PresetFiles.generated.wxs
+
 # Python bytecode cache
 __pycache__/
 *.pyc

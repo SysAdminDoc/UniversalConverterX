@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.5.0.0',
+    [string]$Version = '2.20.1.0',
     
     [switch]$Sign,
     
@@ -19,7 +19,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$rootDir = Split-Path -Parent (Split-Path -Parent $scriptDir)
+$rootDir = Split-Path -Parent $scriptDir
 $publishDir = Join-Path $rootDir "publish"
 $outputDir = Join-Path $rootDir "installer\output"
 
@@ -40,6 +40,44 @@ function Write-Success($text) {
 
 function Write-Error($text) {
     Write-Host "✗ $text" -ForegroundColor Red
+}
+
+function Write-PresetWixFragment {
+    param(
+        [Parameter(Mandatory=$true)][string]$PresetDirectory,
+        [Parameter(Mandatory=$true)][string]$OutputPath
+    )
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add('<?xml version="1.0" encoding="UTF-8"?>')
+    $lines.Add('<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">')
+    $lines.Add('  <Fragment>')
+    $lines.Add('    <ComponentGroup Id="PresetFiles" Directory="PresetsFolder">')
+
+    $index = 0
+    $readme = Join-Path $PresetDirectory 'README.md'
+    if (Test-Path $readme) {
+        $lines.Add('      <Component Id="PresetFile_0000" Guid="*">')
+        $lines.Add('        <File Id="PresetFilePayload_0000" Source="$(var.PublishDir)presets\README.md" KeyPath="yes" />')
+        $lines.Add('      </Component>')
+        $index = 1
+    }
+
+    Get-ChildItem -Path $PresetDirectory -Filter '*.preset.xml' | Sort-Object Name | ForEach-Object {
+        $componentId = 'PresetFile_{0:0000}' -f $index
+        $fileId = 'PresetFilePayload_{0:0000}' -f $index
+        $source = '$(var.PublishDir)presets\{0}' -f $_.Name
+        $escapedSource = [Security.SecurityElement]::Escape($source)
+        $lines.Add("      <Component Id=`"$componentId`" Guid=`"*`">")
+        $lines.Add("        <File Id=`"$fileId`" Source=`"$escapedSource`" KeyPath=`"yes`" />")
+        $lines.Add('      </Component>')
+        $index++
+    }
+
+    $lines.Add('    </ComponentGroup>')
+    $lines.Add('  </Fragment>')
+    $lines.Add('</Wix>')
+    Set-Content -Path $OutputPath -Value $lines -Encoding UTF8
 }
 
 # Ensure output directory exists
@@ -104,6 +142,11 @@ Copy-Item -Path (Join-Path $presetsSrc 'README.md') -Destination $presetsDst -Fo
 $presetCount = (Get-ChildItem -Path $presetsDst -Filter '*.preset.xml' | Measure-Object).Count
 Write-Success "Staged $presetCount preset(s) -> $presetsDst"
 
+$presetFragmentPath = Join-Path $scriptDir 'wix\PresetFiles.generated.wxs'
+Write-Step "Generating WiX preset fragment..."
+Write-PresetWixFragment -PresetDirectory $presetsDst -OutputPath $presetFragmentPath
+Write-Success "Generated $presetFragmentPath"
+
 # Build MSIX
 if ($Type -eq 'msix' -or $Type -eq 'all') {
     Write-Header "Building MSIX Package"
@@ -157,13 +200,13 @@ if ($Type -eq 'msix' -or $Type -eq 'all') {
                 }
                 
                 if ($signTool -and (Test-Path $signTool)) {
-                    $signArgs = "sign /fd SHA256 /f `"$CertificatePath`""
+                    $signArgs = @('sign', '/fd', 'SHA256', '/f', $CertificatePath)
                     if ($CertificatePassword) {
-                        $signArgs += " /p `"$CertificatePassword`""
+                        $signArgs += @('/p', $CertificatePassword)
                     }
-                    $signArgs += " `"$msixOutput`""
-                    
-                    & $signTool $signArgs.Split(' ')
+                    $signArgs += $msixOutput
+
+                    & $signTool $signArgs
                     
                     if ($LASTEXITCODE -eq 0) {
                         Write-Success "MSIX package signed"
@@ -215,7 +258,7 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         
         Push-Location $wixDir
         try {
-            & dotnet tool run wix build Product.wxs `
+            & dotnet tool run wix build Product.wxs $presetFragmentPath `
                 -d "PublishDir=$publishDir\win-x64\" `
                 -d "Version=$Version" `
                 -o $msiOutput
@@ -244,10 +287,16 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
             -d "PublishDir=$publishDir\win-x64\" `
             -d "Version=$Version" `
             -out "$wixObjDir\Product.wixobj"
+        if ($LASTEXITCODE -eq 0) {
+            & $candlePath $presetFragmentPath `
+                -d "PublishDir=$publishDir\win-x64\" `
+                -d "Version=$Version" `
+                -out "$wixObjDir\PresetFiles.generated.wixobj"
+        }
         
         if ($LASTEXITCODE -eq 0) {
             # Link
-            & $lightPath "$wixObjDir\Product.wixobj" `
+            & $lightPath "$wixObjDir\Product.wixobj" "$wixObjDir\PresetFiles.generated.wixobj" `
                 -ext WixUIExtension `
                 -out $msiOutput
             

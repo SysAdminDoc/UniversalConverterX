@@ -81,11 +81,14 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         if (!job.Options.OverwriteExisting && File.Exists(job.OutputPath))
             return ValidationResult.Fail($"Output file already exists: {job.OutputPath}");
 
-        if (!SupportedInputFormats.Contains(job.InputExtension))
-            return ValidationResult.Fail($"Unsupported input format: {job.InputExtension}");
+        var inputExtension = NormalizeExtension(job.SourceFormat?.Extension ?? job.InputExtension);
+        var outputExtension = NormalizeExtension(job.TargetFormat?.Extension ?? job.OutputExtension);
 
-        if (!SupportedOutputFormats.Contains(job.OutputExtension))
-            return ValidationResult.Fail($"Unsupported output format: {job.OutputExtension}");
+        if (!SupportedInputFormats.Contains(inputExtension))
+            return ValidationResult.Fail($"Unsupported input format: {inputExtension}");
+
+        if (!SupportedOutputFormats.Contains(outputExtension))
+            return ValidationResult.Fail($"Unsupported output format: {outputExtension}");
 
         return ValidationResult.Success;
     }
@@ -97,6 +100,13 @@ public abstract class BaseConverterStrategy : IConverterStrategy
     {
         var stopwatch = Stopwatch.StartNew();
         var warnings = new List<string>();
+        using var timeoutCts = job.Options.Timeout is TimeSpan timeout && timeout > TimeSpan.Zero
+            ? new CancellationTokenSource(timeout)
+            : null;
+        using var linkedCts = timeoutCts is null
+            ? null
+            : CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+        var effectiveCancellationToken = linkedCts?.Token ?? cancellationToken;
 
         try
         {
@@ -142,7 +152,7 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                 job,
                 progress,
                 warnings,
-                cancellationToken);
+                effectiveCancellationToken);
 
             stopwatch.Stop();
             job.CompletedAt = DateTime.UtcNow;
@@ -173,6 +183,23 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                     Id,
                     $"{executablePath} {argumentString}");
             }
+        }
+        catch (OperationCanceledException) when (timeoutCts?.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
+        {
+            job.Status = ConversionStatus.Failed;
+            job.CompletedAt = DateTime.UtcNow;
+
+            if (File.Exists(job.OutputPath))
+            {
+                try { File.Delete(job.OutputPath); } catch { }
+            }
+
+            return ConversionResult.Failed(
+                job,
+                $"Conversion timed out after {job.Options.Timeout!.Value}.",
+                stopwatch.Elapsed,
+                exitCode: -1,
+                converter: Id);
         }
         catch (OperationCanceledException)
         {
@@ -357,6 +384,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
 
         return $"\"{arg.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
     }
+
+    protected static string NormalizeExtension(string extension) =>
+        extension.Trim().TrimStart('.').ToLowerInvariant();
 
     protected record ProcessResult
     {

@@ -74,6 +74,9 @@ function Get-UcxExe {
 function Get-UcxSidecar {
     [CmdletBinding()]
     param([Parameter(Mandatory)] [string] $Name)
+    if ($Name -match '[\\/:]' -or $Name -in @('.', '..') -or [string]::IsNullOrWhiteSpace($Name)) {
+        throw "Invalid sidecar name '$Name'."
+    }
     $root = Get-UcxRoot
     if (-not $root) { throw 'UCX install root not found.' }
     foreach ($p in @(
@@ -199,14 +202,25 @@ function Convert-MediaFile {
             if (-not (Test-Path $p)) { Write-Warning "Skip $p -- not found"; continue }
             if (-not $PSCmdlet.ShouldProcess($p, "Convert to $OutputFormat")) { continue }
 
-            $argList = @('convert', '-i', (Resolve-Path $p).Path, '-f', $OutputFormat, '-q', $Quality)
-            if ($OutputDirectory) { $argList += @('-o', $OutputDirectory) }
-            if ($Overwrite)       { $argList += '--overwrite' }
+            $qualityPreset = ConvertTo-UcxQualityPreset -Quality $Quality
+            $argList = @('convert', (Resolve-Path $p).Path, '-o', $OutputFormat, '-q', $qualityPreset)
+            if ($OutputDirectory) { $argList += @('-d', $OutputDirectory) }
+            if ($Overwrite)       { $argList += '--force' }
 
             & $cli @argList
             if ($LASTEXITCODE -ne 0) { Write-Error "Convert failed for $p (exit $LASTEXITCODE)" }
         }
     }
+}
+
+function ConvertTo-UcxQualityPreset {
+    param([int] $Quality)
+    if ($Quality -le 35) { return 'lowest' }
+    if ($Quality -le 55) { return 'low' }
+    if ($Quality -le 75) { return 'medium' }
+    if ($Quality -le 90) { return 'high' }
+    if ($Quality -lt 100) { return 'highest' }
+    return 'lossless'
 }
 
 
