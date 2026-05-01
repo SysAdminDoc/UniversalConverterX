@@ -10,40 +10,82 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly IConversionOrchestrator _orchestrator;
     private CancellationTokenSource? _cancellationTokenSource;
+    private ObservableCollection<FileItemViewModel> _files = [];
+    private ObservableCollection<string> _availableFormats = [];
+    private string? _selectedFormat;
+    private bool _isConverting;
+    private double _overallProgress;
+    private string? _currentFileName;
+    private string? _statusMessage;
+    private int _completedCount;
+    private int _failedCount;
 
     public MainViewModel(IConversionOrchestrator orchestrator)
     {
         _orchestrator = orchestrator;
-        Files = [];
-        AvailableFormats = [];
     }
 
-    [ObservableProperty]
-    private ObservableCollection<FileItemViewModel> _files;
+    public ObservableCollection<FileItemViewModel> Files
+    {
+        get => _files;
+        set => SetProperty(ref _files, value);
+    }
 
-    [ObservableProperty]
-    private ObservableCollection<string> _availableFormats;
+    public ObservableCollection<string> AvailableFormats
+    {
+        get => _availableFormats;
+        set => SetProperty(ref _availableFormats, value);
+    }
 
-    [ObservableProperty]
-    private string? _selectedFormat;
+    public string? SelectedFormat
+    {
+        get => _selectedFormat;
+        set
+        {
+            if (SetProperty(ref _selectedFormat, value))
+                OnPropertyChanged(nameof(CanConvert));
+        }
+    }
 
-    [ObservableProperty]
-    private bool _isConverting;
+    public bool IsConverting
+    {
+        get => _isConverting;
+        set
+        {
+            if (SetProperty(ref _isConverting, value))
+                OnPropertyChanged(nameof(CanConvert));
+        }
+    }
 
-    [ObservableProperty]
-    private double _overallProgress;
+    public double OverallProgress
+    {
+        get => _overallProgress;
+        set => SetProperty(ref _overallProgress, value);
+    }
 
-    [ObservableProperty]
-    private string? _currentFileName;
+    public string? CurrentFileName
+    {
+        get => _currentFileName;
+        set => SetProperty(ref _currentFileName, value);
+    }
 
-    [ObservableProperty]
-    private string? _statusMessage;
+    public string? StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
 
-    [ObservableProperty]
-    private int _completedCount;
+    public int CompletedCount
+    {
+        get => _completedCount;
+        set => SetProperty(ref _completedCount, value);
+    }
 
-    [ObservableProperty]
-    private int _failedCount;
+    public int FailedCount
+    {
+        get => _failedCount;
+        set => SetProperty(ref _failedCount, value);
+    }
 
     public bool CanConvert => Files.Count > 0 && !string.IsNullOrEmpty(SelectedFormat) && !IsConverting;
 
@@ -151,11 +193,6 @@ public partial class MainViewModel : ObservableObject
         _cancellationTokenSource?.Cancel();
     }
 
-    partial void OnSelectedFormatChanged(string? value)
-    {
-        OnPropertyChanged(nameof(CanConvert));
-    }
-
     private void UpdateAvailableFormats()
     {
         AvailableFormats.Clear();
@@ -212,27 +249,60 @@ public partial class MainViewModel : ObservableObject
 
 public partial class FileItemViewModel : ObservableObject
 {
-    [ObservableProperty]
     private string _path = "";
-
-    [ObservableProperty]
     private string _fileName = "";
-
-    [ObservableProperty]
     private string _extension = "";
-
-    [ObservableProperty]
     private string _fileSize = "";
-
-    [ObservableProperty]
     private long _size;
-
-    [ObservableProperty]
     private ConversionStatus _status = ConversionStatus.Pending;
-
-    [ObservableProperty]
     private double _progress;
-
-    [ObservableProperty]
     private string? _errorMessage;
+
+    public string Path
+    {
+        get => _path;
+        set => SetProperty(ref _path, value);
+    }
+
+    public string FileName
+    {
+        get => _fileName;
+        set => SetProperty(ref _fileName, value);
+    }
+
+    public string Extension
+    {
+        get => _extension;
+        set => SetProperty(ref _extension, value);
+    }
+
+    public string FileSize
+    {
+        get => _fileSize;
+        set => SetProperty(ref _fileSize, value);
+    }
+
+    public long Size
+    {
+        get => _size;
+        set => SetProperty(ref _size, value);
+    }
+
+    public ConversionStatus Status
+    {
+        get => _status;
+        set => SetProperty(ref _status, value);
+    }
+
+    public double Progress
+    {
+        get => _progress;
+        set => SetProperty(ref _progress, value);
+    }
+
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _errorMessage, value);
+    }
 }

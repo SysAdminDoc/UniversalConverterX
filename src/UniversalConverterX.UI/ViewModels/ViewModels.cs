@@ -10,35 +10,67 @@ namespace UniversalConverterX.UI.ViewModels;
 public partial class ConversionViewModel : ObservableObject
 {
     private readonly IConversionOrchestrator _orchestrator;
+    private ConversionJob? _currentJob;
+    private double _progress;
+    private string? _statusMessage;
+    private TimeSpan? _estimatedTimeRemaining;
+    private bool _isConverting;
+    private ConversionResult? _result;
 
     public ConversionViewModel(IConversionOrchestrator orchestrator)
     {
         _orchestrator = orchestrator;
     }
 
-    [ObservableProperty]
-    private ConversionJob? _currentJob;
+    public ConversionJob? CurrentJob
+    {
+        get => _currentJob;
+        set => SetProperty(ref _currentJob, value);
+    }
 
-    [ObservableProperty]
-    private double _progress;
+    public double Progress
+    {
+        get => _progress;
+        set => SetProperty(ref _progress, value);
+    }
 
-    [ObservableProperty]
-    private string? _statusMessage;
+    public string? StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
 
-    [ObservableProperty]
-    private TimeSpan? _estimatedTimeRemaining;
+    public TimeSpan? EstimatedTimeRemaining
+    {
+        get => _estimatedTimeRemaining;
+        set => SetProperty(ref _estimatedTimeRemaining, value);
+    }
 
-    [ObservableProperty]
-    private bool _isConverting;
+    public bool IsConverting
+    {
+        get => _isConverting;
+        set => SetProperty(ref _isConverting, value);
+    }
 
-    [ObservableProperty]
-    private ConversionResult? _result;
+    public ConversionResult? Result
+    {
+        get => _result;
+        set => SetProperty(ref _result, value);
+    }
 }
 
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _settingsService;
     private readonly IToolManager _toolManager;
+    private string _toolsPath = "";
+    private int _maxParallelConversions = 4;
+    private bool _enableHardwareAcceleration = true;
+    private bool _preserveMetadata = true;
+    private string _defaultQuality = "High";
+    private bool _overwriteExisting;
+    private string _outputDirectory = "";
+    private bool _useCustomOutputDirectory;
 
     public SettingsViewModel(ISettingsService settingsService, IToolManager toolManager)
     {
@@ -47,29 +79,53 @@ public partial class SettingsViewModel : ObservableObject
         LoadSettings();
     }
 
-    [ObservableProperty]
-    private string _toolsPath = "";
+    public string ToolsPath
+    {
+        get => _toolsPath;
+        set => SetProperty(ref _toolsPath, value);
+    }
 
-    [ObservableProperty]
-    private int _maxParallelConversions = 4;
+    public int MaxParallelConversions
+    {
+        get => _maxParallelConversions;
+        set => SetProperty(ref _maxParallelConversions, value);
+    }
 
-    [ObservableProperty]
-    private bool _enableHardwareAcceleration = true;
+    public bool EnableHardwareAcceleration
+    {
+        get => _enableHardwareAcceleration;
+        set => SetProperty(ref _enableHardwareAcceleration, value);
+    }
 
-    [ObservableProperty]
-    private bool _preserveMetadata = true;
+    public bool PreserveMetadata
+    {
+        get => _preserveMetadata;
+        set => SetProperty(ref _preserveMetadata, value);
+    }
 
-    [ObservableProperty]
-    private string _defaultQuality = "High";
+    public string DefaultQuality
+    {
+        get => _defaultQuality;
+        set => SetProperty(ref _defaultQuality, value);
+    }
 
-    [ObservableProperty]
-    private bool _overwriteExisting;
+    public bool OverwriteExisting
+    {
+        get => _overwriteExisting;
+        set => SetProperty(ref _overwriteExisting, value);
+    }
 
-    [ObservableProperty]
-    private string _outputDirectory = "";
+    public string OutputDirectory
+    {
+        get => _outputDirectory;
+        set => SetProperty(ref _outputDirectory, value);
+    }
 
-    [ObservableProperty]
-    private bool _useCustomOutputDirectory;
+    public bool UseCustomOutputDirectory
+    {
+        get => _useCustomOutputDirectory;
+        set => SetProperty(ref _useCustomOutputDirectory, value);
+    }
 
     public string[] QualityOptions { get; } = ["Lowest", "Low", "Medium", "High", "Highest", "Lossless"];
 
@@ -123,41 +179,90 @@ public partial class SettingsViewModel : ObservableObject
 
 public partial class ProgressViewModel : ObservableObject
 {
-    [ObservableProperty]
     private string _title = "Converting...";
-
-    [ObservableProperty]
     private string _fileName = "";
-
-    [ObservableProperty]
     private double _progress;
-
-    [ObservableProperty]
     private bool _isIndeterminate;
-
-    [ObservableProperty]
     private string _statusMessage = "";
-
-    [ObservableProperty]
     private string _details = "";
-
-    [ObservableProperty]
     private int _completedCount;
-
-    [ObservableProperty]
     private int _totalCount;
-
-    [ObservableProperty]
     private int _failedCount;
-
-    [ObservableProperty]
     private TimeSpan? _estimatedTimeRemaining;
-
-    [ObservableProperty]
     private bool _isComplete;
-
-    [ObservableProperty]
     private bool _isCancelled;
+
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
+    public string FileName
+    {
+        get => _fileName;
+        set => SetProperty(ref _fileName, value);
+    }
+
+    public double Progress
+    {
+        get => _progress;
+        set => SetProperty(ref _progress, value);
+    }
+
+    public bool IsIndeterminate
+    {
+        get => _isIndeterminate;
+        set => SetProperty(ref _isIndeterminate, value);
+    }
+
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
+
+    public string Details
+    {
+        get => _details;
+        set => SetProperty(ref _details, value);
+    }
+
+    public int CompletedCount
+    {
+        get => _completedCount;
+        set => SetProperty(ref _completedCount, value);
+    }
+
+    public int TotalCount
+    {
+        get => _totalCount;
+        set => SetProperty(ref _totalCount, value);
+    }
+
+    public int FailedCount
+    {
+        get => _failedCount;
+        set => SetProperty(ref _failedCount, value);
+    }
+
+    public TimeSpan? EstimatedTimeRemaining
+    {
+        get => _estimatedTimeRemaining;
+        set => SetProperty(ref _estimatedTimeRemaining, value);
+    }
+
+    public bool IsComplete
+    {
+        get => _isComplete;
+        set => SetProperty(ref _isComplete, value);
+    }
+
+    public bool IsCancelled
+    {
+        get => _isCancelled;
+        set => SetProperty(ref _isCancelled, value);
+    }
 
     public void UpdateProgress(ConversionProgress conversionProgress, int completed, int total)
     {
