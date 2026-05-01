@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To WebP (q=85)</Name>
+    <Folder>Image</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>bmp</Extension>
+        <Extension>avif</Extension>
+        <Extension>jxl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>webp</OutputExtension>
+    <Engine>heicshift</Engine>
+    <Args>
+        <Arg>--format</Arg>
+        <Arg>webp</Arg>
+        <Arg>--quality</Arg>
+        <Arg>85</Arg>
+    </Args>
+</Preset>

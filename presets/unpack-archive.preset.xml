@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Extract here</Name>
+    <Folder>Archive</Folder>
+    <InputTypes>
+        <Extension>7z</Extension>
+        <Extension>zip</Extension>
+        <Extension>rar</Extension>
+        <Extension>tar</Extension>
+        <Extension>gz</Extension>
+        <Extension>bz2</Extension>
+        <Extension>xz</Extension>
+        <Extension>iso</Extension>
+        <Extension>cab</Extension>
+        <Extension>tgz</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>__dir__</OutputExtension>
+    <Engine>archive</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>unpack</Arg>
+    </Args>
+</Preset>

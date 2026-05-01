@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To MP3 (192 kbps)</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>aac</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+        <Extension>aiff</Extension>
+        <Extension>wma</Extension>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp3</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--codec</Arg>
+        <Arg>libmp3lame</Arg>
+        <Arg>--audio-bitrate</Arg>
+        <Arg>192</Arg>
+        <Arg>--audio-only</Arg>
+    </Args>
+</Preset>

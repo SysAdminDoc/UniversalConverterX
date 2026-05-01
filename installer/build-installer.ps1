@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.3.0.0',
+    [string]$Version = '2.5.0.0',
     
     [switch]$Sign,
     
@@ -91,6 +91,18 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Success "Build completed"
+
+# Stage preset XML files alongside the published binaries so WiX can pull
+# them via $(var.PublishDir)presets\<file>.preset.xml without traversing
+# back out of publish/.
+Write-Step "Staging presets..."
+$presetsSrc = Join-Path $rootDir 'presets'
+$presetsDst = Join-Path $publishDir 'win-x64\presets'
+if (-not (Test-Path $presetsDst)) { New-Item -ItemType Directory -Path $presetsDst -Force | Out-Null }
+Get-ChildItem -Path $presetsSrc -Filter '*.preset.xml' | Copy-Item -Destination $presetsDst -Force
+Copy-Item -Path (Join-Path $presetsSrc 'README.md') -Destination $presetsDst -Force
+$presetCount = (Get-ChildItem -Path $presetsDst -Filter '*.preset.xml' | Measure-Object).Count
+Write-Success "Staged $presetCount preset(s) -> $presetsDst"
 
 # Build MSIX
 if ($Type -eq 'msix' -or $Type -eq 'all') {
