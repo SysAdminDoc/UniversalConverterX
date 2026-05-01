@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Translate text -> Spanish (NLLB-200)</Name>
+    <Folder>AI/Translation</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>md</Extension>
+        <Extension>srt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_es</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>translatekit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>file</Arg>
+        <Arg>--source</Arg>
+        <Arg>en</Arg>
+        <Arg>--target</Arg>
+        <Arg>es</Arg>
+    </Args>
+</Preset>

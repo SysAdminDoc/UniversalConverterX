@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Remove background (RMBG-2.0)</Name>
+    <Folder>AI/Image</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>webp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_nobg</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>bgremove</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>remove</Arg>
+        <Arg>--backend</Arg>
+        <Arg>rmbg2</Arg>
+    </Args>
+</Preset>

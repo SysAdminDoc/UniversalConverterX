@@ -211,6 +211,9 @@ def transcribe_faster(
     transcribe_kwargs: dict = {"word_timestamps": word_timestamps}
     if language:
         transcribe_kwargs["language"] = language
+    if getattr(model, "_ucx_use_vad", False):
+        transcribe_kwargs["vad_filter"] = True
+        transcribe_kwargs["vad_parameters"] = {"min_silence_duration_ms": 500}
 
     result_segments, info = model.transcribe(str(audio_path), **transcribe_kwargs)
 
@@ -294,9 +297,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="UCX Whisper STT sidecar")
     parser.add_argument("--input", required=True, help="Input audio/video file")
     parser.add_argument("--output", required=True, help="Output transcript file (.srt/.txt/.vtt/.json)")
-    parser.add_argument("--model", default="base",
-                        choices=["tiny", "base", "small", "medium", "large", "large-v2", "large-v3"],
-                        help="Whisper model size")
+    parser.add_argument("--model", default="large-v3-turbo",
+                        choices=[
+                            # Multilingual base
+                            "tiny", "base", "small", "medium",
+                            "large", "large-v2", "large-v3",
+                            # 2024-10: Whisper Large v3 Turbo (8x faster than v3, ~minimal quality loss)
+                            "large-v3-turbo",
+                            # Distil-Whisper (HF, 6x faster than v3, English-mostly)
+                            "distil-large-v3", "distil-large-v2",
+                            "distil-medium.en", "distil-small.en",
+                        ],
+                        help="Whisper model size. Recommended: large-v3-turbo (best speed/quality, multilingual)")
     parser.add_argument("--language", default="auto",
                         help="Language code (auto, en, es, fr, de, ja, zh, pt ...)")
     parser.add_argument("--format", default="srt",
@@ -306,6 +318,10 @@ def main() -> None:
                         help="Enable word-level timestamps")
     parser.add_argument("--model-dir", default=None,
                         help="Directory for cached model weights")
+    parser.add_argument("--vad", action="store_true",
+                        help="Use Silero VAD to skip silence (faster + cleaner segments)")
+    parser.add_argument("--diarize", action="store_true",
+                        help="Speaker diarization via pyannote 3.1 (requires HF token in HF_TOKEN env)")
     args = parser.parse_args()
 
     model_dir_env = os.environ.get("UCX_MODEL_DIR")
@@ -332,6 +348,13 @@ def main() -> None:
 
     try:
         if backend == "faster-whisper":
+            # Stash VAD flag where transcribe_faster can read it.
+            from faster_whisper import WhisperModel  # type: ignore
+            _orig_init = WhisperModel.__init__
+            def _patched_init(self_, *a, **kw):
+                _orig_init(self_, *a, **kw)
+                self_._ucx_use_vad = bool(args.vad)
+            WhisperModel.__init__ = _patched_init  # type: ignore[assignment]
             segments = transcribe_faster(
                 input_path, args.model, language,
                 args.word_timestamps, model_dir, total_duration,
@@ -341,6 +364,32 @@ def main() -> None:
                 input_path, args.model, language,
                 args.word_timestamps, model_dir,
             )
+
+        # Optional speaker diarization via pyannote 3.1.
+        if args.diarize:
+            try:
+                from pyannote.audio import Pipeline as PyaPipeline  # type: ignore
+                token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+                if not token:
+                    log("Diarization skipped: set HF_TOKEN to use pyannote/speaker-diarization-3.1.", "warn")
+                else:
+                    progress(95.0, "Running speaker diarization...")
+                    pipe = PyaPipeline.from_pretrained(
+                        "pyannote/speaker-diarization-3.1", use_auth_token=token)
+                    diar = pipe(str(input_path))
+                    # Assign speaker to each segment by max overlap.
+                    for seg in segments:
+                        best, best_overlap = None, 0.0
+                        for turn, _, speaker in diar.itertracks(yield_label=True):
+                            ov = max(0.0, min(turn.end, seg["end"]) - max(turn.start, seg["start"]))
+                            if ov > best_overlap:
+                                best, best_overlap = speaker, ov
+                        if best:
+                            seg["speaker"] = best
+            except ImportError as ex:
+                log(f"Diarization unavailable: {ex}", "warn")
+            except Exception as ex:
+                log(f"Diarization failed: {ex}", "warn")
     except Exception as exc:
         error_exit("transcription_failed", str(exc))
         return

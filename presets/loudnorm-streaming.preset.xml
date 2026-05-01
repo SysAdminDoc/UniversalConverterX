@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Loudness normalize -14 LUFS (streaming)</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>mp3</Extension>
+        <Extension>flac</Extension>
+        <Extension>aac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_loudnorm</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>audiomastering</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>loudnorm</Arg>
+        <Arg>--lufs</Arg>
+        <Arg>-14</Arg>
+        <Arg>--tp</Arg>
+        <Arg>-1</Arg>
+    </Args>
+</Preset>

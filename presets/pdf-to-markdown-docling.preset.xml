@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PDF to Markdown (Docling, technical PDFs)</Name>
+    <Folder>Documents</Folder>
+    <InputTypes>
+        <Extension>pdf</Extension>
+        <Extension>docx</Extension>
+        <Extension>pptx</Extension>
+        <Extension>html</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>md</OutputExtension>
+    <Engine>pdfmarkdown</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-md</Arg>
+        <Arg>--backend</Arg>
+        <Arg>docling</Arg>
+    </Args>
+</Preset>

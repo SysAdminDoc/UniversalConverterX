@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Restore face (CodeFormer)</Name>
+    <Folder>AI/Image</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>webp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_restored</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>facerestore</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>codeformer</Arg>
+        <Arg>--w</Arg>
+        <Arg>0.7</Arg>
+    </Args>
+</Preset>

@@ -153,6 +153,28 @@ PRESETS = {
         "audio_codec": "libopus",
         "audio_bitrate": 128,
     },
+    # SVT-AV1 v2 (FFmpeg 7.1+) presets -- much faster than the original v1.
+    "archive-av1-fast": {
+        # SVT-AV1 preset 8 is 4-6x faster than preset 4, ~5% file-size penalty.
+        "target_mb": None, "crf": 32,
+        "codec": "libsvtav1", "preset": "8",
+        "resolution": "Original",
+        "audio_codec": "libopus", "audio_bitrate": 96,
+    },
+    "archive-av1-quality": {
+        # SVT-AV1 preset 4 = strong compression, slow but 1080p real-time on modern CPUs.
+        "target_mb": None, "crf": 24,
+        "codec": "libsvtav1", "preset": "4",
+        "resolution": "Original",
+        "audio_codec": "libopus", "audio_bitrate": 160,
+    },
+    "stream-av1-1080p": {
+        # AV1 streaming preset for YouTube / Vimeo upload at 1080p.
+        "target_mb": None, "crf": 30,
+        "codec": "libsvtav1", "preset": "6",
+        "resolution": "1080p",
+        "audio_codec": "libopus", "audio_bitrate": 128,
+    },
     # ── Professional-tier intermediate codecs (HandBrake 1.11 / FFmpeg 8.1) ──
     "prores-422-proxy": {
         "target_mb": None, "crf": None,

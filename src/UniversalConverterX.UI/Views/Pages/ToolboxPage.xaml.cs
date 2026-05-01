@@ -126,6 +126,16 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.10 wave (Latest & Greatest)
+        AiTools.Add(new ToolboxTile("presets:bgremove", "BG Remove (BiRefNet)", "SOTA cutouts via BiRefNet / RMBG-2.0 / IS-Net / U2Net / SAM 2", "\uE91B", green, "Ready", green, true, "BiRefNet + RMBG-2.0"));
+        AiTools.Add(new ToolboxTile("presets:superres", "Image Upscaler Pro", "Modern transformer SR: HAT / DAT / SwinIR / APISR / DRCT (spandrel)", "\uE799", blue, "Ready", green, true, "spandrel"));
+        AiTools.Add(new ToolboxTile("presets:facerestore", "Face Restoration Pro", "CodeFormer + GFPGAN with fidelity / quality slider", "\uE77B", green, "Ready", green, true, "CodeFormer"));
+        AiTools.Add(new ToolboxTile("presets:premiumtts", "Premium TTS", "Kokoro / F5-TTS zero-shot cloning / XTTS v2 multilingual", "\uEC4F", green, "Ready", green, true, "Kokoro + F5-TTS"));
+        AiTools.Add(new ToolboxTile("presets:translatekit", "Translator (200 lang)", "Local NLLB-200 / MADLAD-400 -- text, files, SRT subtitles", "\uE774", blue, "Ready", green, true, "NLLB-200"));
+        AiTools.Add(new ToolboxTile("presets:inpaint", "Object Removal (LaMa)", "LaMa + YOLO auto-detect: 'remove every car / person / bird'", "\uE91B", orange, "Ready", green, true, "LaMa + YOLOv11"));
+        AudioTools.Add(new ToolboxTile("presets:audiomastering", "Audio Mastering", "Matchering reference-based mastering + EBU R128 loudnorm", "\uEC4F", red, "Ready", green, true, "Matchering"));
+        DocumentTools.Add(new ToolboxTile("presets:ocrpro", "OCR Pro (Surya)", "Layout + text + tables + math, 90+ languages", "\uE8A1", blue, "Ready", green, true, "Surya"));
+
         // v2.9 wave (Coverage)
         OtherTools.Add(new ToolboxTile("presets:gametools", "Game ROM Tools", "IPS/BPS/UPS patches + N64 byteswap + CHD <-> CUE/BIN", "\uE7FC", green, "Ready", green, false, "UCX + chdman"));
         DocumentTools.Add(new ToolboxTile("presets:datasci", "Scientific Data", "CSV / Parquet / Feather / Avro / ORC / HDF5 / NetCDF / FITS / NPY / MAT", "\uE9D9", blue, "Ready", green, false, "pandas + pyarrow + astropy"));
