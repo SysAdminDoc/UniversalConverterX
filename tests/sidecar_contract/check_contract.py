@@ -50,6 +50,8 @@ KNOWN_EVENTS = {
     "track",         # clipforge.track-list — enumerated container stream
     "doc",           # docconvert — produced document file (one per input)
     "archive_entry", # archive — file entry inside an archive
+    "pdf_info",      # pdftools.info — page count + metadata for a PDF
+    "pdf_part",      # pdftools.split — produced PDF part (range + path)
 }
 
 

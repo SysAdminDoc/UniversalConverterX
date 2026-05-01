@@ -79,9 +79,20 @@ workspace pattern that v2.4 established.
   extracting). History integration on every successful op. New Toolbox
   "Documents" tile + nav search entry. Contract test: `archive_entry` added
   to `KNOWN_EVENTS` (21 sidecars conform).
-- #35 **PDF tools** — merge / split / rotate / extract pages / encrypt /
-  decrypt / linearize via pikepdf (built on qpdf). Pure-Python sidecar, no
-  external binary required at runtime.
+- #35 **PDF tools** ✓ Shipped v2.5 — merge / split / rotate / extract pages /
+  encrypt / decrypt / compress / info via pikepdf (which embeds qpdf in its
+  wheel -- no external binary required at runtime). Shipped:
+  `tools/pdftools/{sidecar.py,build.ps1}` with 8 ops -- info / merge / split
+  (per-page or by `--ranges "1-3,5,7-9"`) / extract / rotate (90/180/270 with
+  optional page filter) / encrypt (AES-256 via R=6) / decrypt / compress
+  (object-stream + content-stream + linearise). Emits `pdf_info` event for
+  metadata probes, `pdf_part` per output during split. New `PdfToolsPage`
+  with operation combo (each op flips the relevant input rows in/out --
+  PagesBox for split/extract/rotate, AngleBox for rotate, PasswordBoxes for
+  encrypt/decrypt). Output picker switches between FileSavePicker and
+  FolderPicker based on op. History integration. Toolbox "Documents" tile +
+  nav search entry. Contract test: `pdf_info` and `pdf_part` added to
+  `KNOWN_EVENTS` (22 sidecars conform).
 - #36 **Subtitle converter** — SRT ↔ VTT ↔ ASS ↔ SSA ↔ MicroDVD via pysubs2.
   Independent of clipforge's burn-in path; this is pure conversion + offset
   shift + retime. Pure-Python sidecar.
