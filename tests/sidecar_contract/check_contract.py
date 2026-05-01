@@ -119,6 +119,26 @@ KNOWN_EVENTS = {
     "translation_lang",# translatekit.langs — supported language code
     "inpaint_image",   # inpaint — produced inpainted PNG
     "master_audio",    # audiomastering — mastered / loudnorm audio
+    # v2.11 wave (Raw Conversion Coverage)
+    "layered_image",     # psdkit — flattened or per-layer image output
+    "layered_info",      # psdkit.info — PSD/XCF probe
+    "audio_codec",       # audiopro — niche codec output
+    "audio_codec_info",  # audiopro.codecs — FFmpeg codec availability
+    "subtitle_ocr",      # subocr — bitmap subtitle OCR'd to SRT
+    "subtitle_text",     # subkit — interchanged text subtitle (SAMI/TTML/SCC/LRC/...)
+    "dbtable",           # dbtools — produced DB table file
+    "text_encode",       # textencode — recoded / line-end-normalized file
+    "text_encode_info",  # textencode.detect — encoding probe
+    "file_hash",         # hashkit — single file hash event
+    "file_hash_manifest",# hashkit — consolidated SUMS manifest
+    "file_hash_check",   # hashkit.verify — per-file pass/fail
+    "encoded_blob",      # encodekit — Base-N / data-URL encoding
+    "icon_blob",         # iconkit — produced .ico/.icns/.iconset
+    "plist_doc",         # plistkit — plist conversion
+    "hdr_image",         # hdrkit — HDR image converted / tonemapped
+    "score_doc",         # music — produced notation file
+    "hex_image",         # hexkit — produced flash image
+    "hex_image_info",    # hexkit.info — segment probe
 }
 
 

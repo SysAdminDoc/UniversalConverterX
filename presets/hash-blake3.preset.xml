@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Generate BLAKE3 sums (fastest)</Name>
+    <Folder>Hash</Folder>
+    <InputTypes/>
+    <OutputFileNameTemplate>{dir}/BLAKE3SUMS</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>hashkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>generate</Arg>
+        <Arg>--algo</Arg>
+        <Arg>blake3</Arg>
+    </Args>
+</Preset>

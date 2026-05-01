@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Blu-ray PGS subtitle -> SRT (OCR)</Name>
+    <Folder>Subtitles</Folder>
+    <InputTypes>
+        <Extension>sup</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subocr</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>pgs-to-srt</Arg>
+        <Arg>--lang</Arg>
+        <Arg>eng</Arg>
+    </Args>
+</Preset>

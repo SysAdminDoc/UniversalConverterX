@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Raw binary -> Intel HEX</Name>
+    <Folder>Embedded</Folder>
+    <InputTypes>
+        <Extension>bin</Extension>
+        <Extension>raw</Extension>
+        <Extension>img</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>hex</OutputExtension>
+    <Engine>hexkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>hex</Arg>
+    </Args>
+</Preset>

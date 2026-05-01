@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SRT / VTT / ASS -> LRC (karaoke)</Name>
+    <Folder>Subtitles</Folder>
+    <InputTypes>
+        <Extension>srt</Extension>
+        <Extension>vtt</Extension>
+        <Extension>ass</Extension>
+        <Extension>ssa</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>lrc</OutputExtension>
+    <Engine>subkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>lrc</Arg>
+    </Args>
+</Preset>

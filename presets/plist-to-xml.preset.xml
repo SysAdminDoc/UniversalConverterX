@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Apple plist -> XML</Name>
+    <Folder>Apple</Folder>
+    <InputTypes>
+        <Extension>plist</Extension>
+        <Extension>bplist</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>plist</OutputExtension>
+    <Engine>plistkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--target</Arg>
+        <Arg>to-xml</Arg>
+    </Args>
+</Preset>

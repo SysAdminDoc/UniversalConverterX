@@ -126,6 +126,21 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.11 wave (Raw Coverage)
+        ImageTools.Add(new ToolboxTile("presets:psdkit", "Photoshop / GIMP", "PSD / PSB / XCF -> PNG/JPG/TIFF + per-layer extraction", "\uEB9F", blue, "Ready", green, false, "psd-tools + gimpformats"));
+        ImageTools.Add(new ToolboxTile("presets:hdrkit", "HDR Image", "Radiance HDR / OpenEXR / PFM + tone-mapping (Reinhard/Drago/Mantiuk)", "\uEB9F", orange, "Ready", green, false, "imageio + OpenCV"));
+        ImageTools.Add(new ToolboxTile("presets:iconkit", "Icon Generator", "PNG -> Windows .ico (multi-res) + Apple .icns / .iconset", "\uEB9F", blue, "Ready", green, false, "Pillow"));
+        AudioTools.Add(new ToolboxTile("presets:audiopro", "Niche Audio Codec", "DSD / APE / WV / TAK / AC3 / DTS / WMA / AMR / SPEEX / GSM / RA / AU", "\uEC4F", red, "Ready", green, false, "FFmpeg"));
+        DocumentTools.Add(new ToolboxTile("presets:subocr", "Bitmap Subtitle OCR", "Blu-ray PGS / DVD VobSub -> SRT (FFmpeg + Tesseract)", "\uE93B", blue, "Ready", green, false, "Tesseract"));
+        DocumentTools.Add(new ToolboxTile("presets:subkit", "Subtitle Interchange", "SAMI / TTML / DFXP / SCC / EBU STL / MicroDVD / LRC / SBV", "\uE93B", blue, "Ready", green, false, "pycaption + pysubs2"));
+        DocumentTools.Add(new ToolboxTile("presets:dbtools", "Database / Stats", "Access / DBF / SAS / SPSS / Stata / R -> CSV / Parquet / SQLite", "\uE9D9", blue, "Ready", green, false, "pandas + dbfread + pyreadstat + pyreadr"));
+        OtherTools.Add(new ToolboxTile("presets:textencode", "Text Recoder", "Charset (UTF-8 / Shift-JIS / cp1252 / GB18030) + line endings + BOM", "\uE8A5", blue, "Ready", green, false, "stdlib + chardet"));
+        OtherTools.Add(new ToolboxTile("presets:hashkit", "Hash / Checksum", "MD5 / SHA-1/2/3 / BLAKE2 / BLAKE3 / xxHash / CRC32 -- generate + verify", "\uE72E", blue, "Ready", green, false, "hashlib + blake3"));
+        OtherTools.Add(new ToolboxTile("presets:encodekit", "Base64 / Hex Encoder", "Base64 / Base32 / Base85 / Hex / data: URL", "\uE943", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:plistkit", "Apple plist", "Binary / XML / JSON plist mutual conversion", "\uE7B5", blue, "Ready", green, false, "stdlib plistlib"));
+        DocumentTools.Add(new ToolboxTile("presets:music", "Music Notation", "MusicXML / MIDI / ABC / MuseScore / GuitarPro mutual conversion", "\uEC4F", green, "Ready", green, false, "music21 + GuitarPro"));
+        OtherTools.Add(new ToolboxTile("presets:hexkit", "Embedded Flash Image", "Intel HEX / Motorola SREC / TI-TXT / raw binary", "\uE950", blue, "Ready", green, false, "bincopy"));
+
         // v2.10 wave (Latest & Greatest)
         AiTools.Add(new ToolboxTile("presets:bgremove", "BG Remove (BiRefNet)", "SOTA cutouts via BiRefNet / RMBG-2.0 / IS-Net / U2Net / SAM 2", "\uE91B", green, "Ready", green, true, "BiRefNet + RMBG-2.0"));
         AiTools.Add(new ToolboxTile("presets:superres", "Image Upscaler Pro", "Modern transformer SR: HAT / DAT / SwinIR / APISR / DRCT (spandrel)", "\uE799", blue, "Ready", green, true, "spandrel"));

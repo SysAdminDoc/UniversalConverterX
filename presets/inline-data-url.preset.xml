@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Encode as data: URL</Name>
+    <Folder>Encoding</Folder>
+    <InputTypes/>
+    <OutputFileNameTemplate>{dir}/{stem}.dataurl</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>encodekit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>inline</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Access / DBF / SAS / SPSS / Stata / R -> CSV</Name>
+    <Folder>Data</Folder>
+    <InputTypes>
+        <Extension>mdb</Extension>
+        <Extension>accdb</Extension>
+        <Extension>dbf</Extension>
+        <Extension>sas7bdat</Extension>
+        <Extension>xpt</Extension>
+        <Extension>sav</Extension>
+        <Extension>zsav</Extension>
+        <Extension>dta</Extension>
+        <Extension>rda</Extension>
+        <Extension>rdata</Extension>
+        <Extension>rds</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>dbtools</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>csv</Arg>
+    </Args>
+</Preset>
