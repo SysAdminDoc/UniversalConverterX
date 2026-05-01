@@ -41,6 +41,12 @@ public sealed partial class MainWindow : Window
         new("Font Converter", "Convert TTF / OTF / WOFF / WOFF2 (fonttools)", "font-converter"),
         new("eBook Converter", "Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX (Calibre)", "ebook-converter"),
         new("OCR", "Extract text from images and scans -> TXT / hOCR / PDF (Tesseract)", "ocr"),
+        new("Presets", "Browse and run any of the shipped or user-defined conversion presets", "presets"),
+        new("3D Models", "Convert STL / OBJ / PLY / GLB / GLTF / FBX / DAE / 3DS via trimesh", "presets:meshconvert"),
+        new("Pandoc Documents", "Markdown / RST / DOCX / EPUB / HTML / LaTeX / PDF universal markup", "presets:pandoc-cli"),
+        new("RAW Photos", "Develop CR2 / CR3 / NEF / ARW / DNG / RAF -> JPEG / TIFF / PNG", "presets:rawphoto"),
+        new("Scanned PDF OCR", "Add a searchable text layer to scanned PDFs (ocrmypdf)", "presets:pdfocr"),
+        new("GIS Data", "KML / GPX / GeoJSON / Shapefile / GeoPackage via GDAL", "presets:gisconvert"),
         new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
     ];
 
@@ -113,6 +119,15 @@ public sealed partial class MainWindow : Window
 
     public void NavigateTo(string routeKey)
     {
+        // "presets:meshconvert" -> nav to PresetsPage with "meshconvert" engine filter.
+        string? routeParam = null;
+        var colonIdx = routeKey.IndexOf(':');
+        if (colonIdx > 0)
+        {
+            routeParam = routeKey[(colonIdx + 1)..];
+            routeKey = routeKey[..colonIdx];
+        }
+
         Type? pageType = routeKey switch
         {
             "home" => typeof(HomePage),
@@ -155,10 +170,11 @@ public sealed partial class MainWindow : Window
             "font-converter" => typeof(FontConverterPage),
             "ebook-converter" => typeof(EbookConverterPage),
             "ocr" => typeof(OcrPage),
+            "presets" => typeof(PresetsPage),
             _ => typeof(PlaceholderPage)
         };
 
-        object? parameter = null;
+        object? parameter = routeParam;
 
         ContentFrame.Navigate(pageType, parameter, new EntranceNavigationTransitionInfo());
     }
@@ -260,7 +276,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "watch-folders" or "history" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "presets" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

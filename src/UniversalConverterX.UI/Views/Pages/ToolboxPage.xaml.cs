@@ -83,6 +83,16 @@ public sealed partial class ToolboxPage : Page
         DocumentTools.Add(new ToolboxTile("font-converter", "Font Converter", "TTF / OTF / WOFF / WOFF2 (fonttools + Brotli)", "\uE8D2", green, "Ready", green, false, "fontTools"));
         DocumentTools.Add(new ToolboxTile("ebook-converter", "eBook Converter", "EPUB / MOBI / AZW3 / PDF / FB2 / DOCX via Calibre", "\uE82D", red, "Ready", green, false, "Calibre"));
         DocumentTools.Add(new ToolboxTile("ocr", "OCR (Text Recognition)", "Tesseract: extract text -> TXT / hOCR / searchable PDF", "\uE8A1", blue, "Ready", green, true, "Tesseract"));
+        DocumentTools.Add(new ToolboxTile("presets:pandoc-cli", "Pandoc Documents", "Markdown / RST / DOCX / EPUB / HTML / LaTeX / PDF (60+ formats)", "\uE8A5", green, "Ready", green, false, "Pandoc"));
+        DocumentTools.Add(new ToolboxTile("presets:pdfocr", "Scanned PDF OCR", "Add a searchable text layer to scanned PDFs (ocrmypdf)", "\uEA90", blue, "Ready", green, true, "ocrmypdf"));
+
+        // Image RAW
+        ImageTools.Add(new ToolboxTile("presets:rawphoto", "RAW Photo Developer", "CR2 / CR3 / NEF / ARW / DNG / RAF -> JPEG / TIFF / PNG (LibRaw)", "\uEB9F", orange, "Ready", green, false, "rawpy + LibRaw"));
+
+        // 3D models -- new section feels overkill for one tile; group under Other.
+        OtherTools.Add(new ToolboxTile("presets:meshconvert", "3D Model Converter", "STL / OBJ / PLY / GLB / GLTF / FBX / DAE / 3DS (trimesh)", "\uF158", blue, "Ready", green, false, "trimesh + assimp"));
+        OtherTools.Add(new ToolboxTile("presets:gisconvert", "GIS Data Converter", "KML / GPX / GeoJSON / Shapefile / GeoPackage (GDAL ogr2ogr)", "\uE707", green, "Ready", green, false, "GDAL"));
+        OtherTools.Add(new ToolboxTile("presets", "Presets Browser", "Browse + run all shipped presets and any custom *.preset.xml", "\uE71D", blue, "Ready", green, false, "UCX"));
 
         // Disc
         DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));

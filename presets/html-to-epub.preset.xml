@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HTML to EPUB</Name>
+    <Folder>Documents/Pandoc</Folder>
+    <InputTypes>
+        <Extension>html</Extension>
+        <Extension>htm</Extension>
+        <Extension>md</Extension>
+        <Extension>markdown</Extension>
+        <Extension>rst</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>epub</OutputExtension>
+    <Engine>pandoc-cli</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>epub3</Arg>
+        <Arg>--toc</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Markdown to DOCX</Name>
+    <Folder>Documents/Pandoc</Folder>
+    <InputTypes>
+        <Extension>md</Extension>
+        <Extension>markdown</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>docx</OutputExtension>
+    <Engine>pandoc-cli</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>docx</Arg>
+        <Arg>--from-format</Arg>
+        <Arg>gfm</Arg>
+        <Arg>--toc</Arg>
+    </Args>
+</Preset>

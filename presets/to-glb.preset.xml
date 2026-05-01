@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To GLB (web 3D)</Name>
+    <Folder>3D</Folder>
+    <InputTypes>
+        <Extension>obj</Extension>
+        <Extension>stl</Extension>
+        <Extension>ply</Extension>
+        <Extension>fbx</Extension>
+        <Extension>dae</Extension>
+        <Extension>3ds</Extension>
+        <Extension>gltf</Extension>
+        <Extension>off</Extension>
+        <Extension>x3d</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>glb</OutputExtension>
+    <Engine>meshconvert</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>glb</Arg>
+    </Args>
+</Preset>

@@ -58,6 +58,13 @@ KNOWN_EVENTS = {
     "ebook",         # ebookconvert — produced eBook file
     "ocr_result",    # ocr — produced text/hocr/pdf for each input image
     "ocr_language",  # ocr.languages — discovered Tesseract language pack
+    "mesh",          # meshconvert — produced 3D model file
+    "mesh_info",     # meshconvert.info — face / vertex / volume probe
+    "pandoc_doc",    # pandoc-cli — produced markup file
+    "raw_photo",     # rawphoto — developed RAW -> JPEG/TIFF/PNG
+    "pdf_ocr",       # pdfocr — searchable PDF produced via ocrmypdf
+    "gis_layer",     # gisconvert.vector — produced vector layer (ogr2ogr)
+    "gis_raster",    # gisconvert.raster — produced raster (gdal_translate)
 }
 
 
