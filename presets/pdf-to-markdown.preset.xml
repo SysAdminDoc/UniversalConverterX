@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PDF to Markdown</Name>
+    <Folder>Documents</Folder>
+    <InputTypes>
+        <Extension>pdf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>md</OutputExtension>
+    <Engine>pdfmarkdown</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-md</Arg>
+        <Arg>--backend</Arg>
+        <Arg>pymupdf4llm</Arg>
+    </Args>
+</Preset>

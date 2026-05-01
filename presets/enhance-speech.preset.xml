@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Enhance speech (DeepFilterNet)</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>mp3</Extension>
+        <Extension>m4a</Extension>
+        <Extension>flac</Extension>
+        <Extension>ogg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_enhanced</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>speechenhance</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>enhance</Arg>
+        <Arg>--atten</Arg>
+        <Arg>100</Arg>
+    </Args>
+</Preset>

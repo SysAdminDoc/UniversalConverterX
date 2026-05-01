@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>AI/EPS to SVG</Name>
+    <Folder>Vector</Folder>
+    <InputTypes>
+        <Extension>ai</Extension>
+        <Extension>eps</Extension>
+        <Extension>ps</Extension>
+        <Extension>emf</Extension>
+        <Extension>wmf</Extension>
+        <Extension>cdr</Extension>
+        <Extension>vsd</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>svg</OutputExtension>
+    <Engine>vectorkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>svg</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Subset webfont (Latin-1 + WOFF2)</Name>
+    <Folder>Fonts</Folder>
+    <InputTypes>
+        <Extension>ttf</Extension>
+        <Extension>otf</Extension>
+        <Extension>woff</Extension>
+        <Extension>woff2</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>woff2</OutputExtension>
+    <Engine>fontsubset</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>subset</Arg>
+        <Arg>--unicodes</Arg>
+        <Arg>U+0020-007E,U+00A0-00FF,U+2010-2027,U+2030-205E,U+20AC,U+2122</Arg>
+        <Arg>--flavor</Arg>
+        <Arg>woff2</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,4 @@
+deepfilternet>=0.5.6
+soundfile>=0.12
+numpy>=1.24
+torch>=2.2
