@@ -313,6 +313,17 @@
                     </StackPanel>
                 </Border>
 
+                <Border Style="{StaticResource InfoBannerStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE946;" FontSize="16"
+                                  Foreground="{StaticResource AccentBlueBrush}"
+                                  VerticalAlignment="Top"/>
+                        <TextBlock Text="The Convert button enables after files and an output profile are selected. Finished results remain visible after the queue clears."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Batch Summary" Style="{StaticResource PanelTitleTextStyle}"/>

@@ -14,7 +14,9 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="18">
+                    CornerRadius="18"
+                    AutomationProperties.Name="{Binding Title}"
+                    ToolTipService.ToolTip="{Binding Description}">
                 <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -56,7 +58,9 @@
                     Background="{StaticResource AiGradientBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="16">
+                    CornerRadius="16"
+                    AutomationProperties.Name="{Binding Title}"
+                    ToolTipService.ToolTip="{Binding Description}">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -86,7 +90,9 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="18">
+                    CornerRadius="18"
+                    AutomationProperties.Name="{Binding Title}"
+                    ToolTipService.ToolTip="{Binding Description}">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Border Width="38" Height="38" CornerRadius="12"
@@ -248,6 +254,7 @@
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="ActionTile_Click"
                           ItemTemplate="{StaticResource ActionCardTemplate}"/>
             </StackPanel>
@@ -259,6 +266,7 @@
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="AiTile_Click"
                           ItemTemplate="{StaticResource AiFeatureTemplate}"/>
             </StackPanel>
@@ -270,6 +278,7 @@
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ClustersGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="ClusterTile_Click"
                           ItemTemplate="{StaticResource ClusterTemplate}"/>
             </StackPanel>

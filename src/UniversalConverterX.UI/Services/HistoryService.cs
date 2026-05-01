@@ -21,6 +21,8 @@ public sealed record HistoryRecord
     public string? ErrorCode { get; init; }
     public string? ErrorMessage { get; init; }
     public string? Profile { get; init; }            // preset / target format / op tag
+    public string ErrorDetails =>
+        string.IsNullOrWhiteSpace(ErrorMessage) ? "No error details were provided." : ErrorMessage;
 
     public string Display
     {
@@ -40,9 +42,9 @@ public sealed record HistoryRecord
     public Microsoft.UI.Xaml.Visibility SuccessIconVisibility =>
         Success ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
 
-    /// <summary>UI-friendly visibility for the error row (collapsed on success).</summary>
+    /// <summary>UI-friendly visibility for failure indicators (collapsed on success).</summary>
     public Microsoft.UI.Xaml.Visibility ErrorVisibility =>
-        string.IsNullOrEmpty(ErrorMessage) ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
+        Success ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
 
     public static string FormatBytes(long b)
     {

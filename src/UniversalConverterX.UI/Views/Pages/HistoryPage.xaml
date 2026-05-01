@@ -27,6 +27,10 @@
                               Foreground="{StaticResource AccentGreenBrush}"
                               Visibility="{x:Bind SuccessIconVisibility}"
                               VerticalAlignment="Center"/>
+                    <FontIcon Glyph="&#xE711;" FontSize="18"
+                              Foreground="{StaticResource AccentRedBrush}"
+                              Visibility="{x:Bind ErrorVisibility}"
+                              VerticalAlignment="Center"/>
                     <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Display}"
                                    Style="{StaticResource LabelTextStyle}"
@@ -42,7 +46,7 @@
                                    Visibility="{x:Bind ErrorVisibility}"
                                    TextTrimming="CharacterEllipsis">
                             <Run Text="error:"/>
-                            <Run Text="{x:Bind ErrorMessage}" Foreground="{StaticResource AccentRedBrush}"/>
+                            <Run Text="{x:Bind ErrorDetails}" Foreground="{StaticResource AccentRedBrush}"/>
                         </TextBlock>
                     </StackPanel>
                     <Button Grid.Column="2"
@@ -95,8 +99,8 @@
                 <Button Content="Refresh"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Refresh_Click"/>
-                <Button Content="Clear..."
-                        Style="{StaticResource SecondaryButtonStyle}"
+                <Button Content="Clear history"
+                        Style="{StaticResource DangerButtonStyle}"
                         Click="Clear_Click"/>
             </StackPanel>
         </Grid>
@@ -109,25 +113,33 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="3">
                     <TextBlock Text="Total jobs" Style="{StaticResource MutedTextStyle}"/>
                     <TextBlock x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="22"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Spacing="3">
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource MetricTileStyle}">
+                <StackPanel Spacing="3">
                     <TextBlock Text="Succeeded" Style="{StaticResource MutedTextStyle}"/>
                     <TextBlock x:Name="StatOk" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="22" Foreground="{StaticResource AccentGreenBrush}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Spacing="3">
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource MetricTileStyle}">
+                <StackPanel Spacing="3">
                     <TextBlock Text="Failed" Style="{StaticResource MutedTextStyle}"/>
                     <TextBlock x:Name="StatFail" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="22" Foreground="{StaticResource AccentRedBrush}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="3" Spacing="3">
+                </Border>
+                <Border Grid.Column="3" Style="{StaticResource MetricTileStyle}">
+                <StackPanel Spacing="3">
                     <TextBlock Text="Space saved" Style="{StaticResource MutedTextStyle}"/>
                     <TextBlock x:Name="StatSaved" Text="0 B" Style="{StaticResource TitleTextStyle}"
                                FontSize="22" Foreground="{StaticResource AccentBlueBrush}"/>
                 </StackPanel>
+                </Border>
             </Grid>
         </Border>
 

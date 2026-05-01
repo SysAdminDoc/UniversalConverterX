@@ -302,6 +302,17 @@
                     </StackPanel>
                 </Border>
 
+                <Border Style="{StaticResource InfoBannerStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE946;" FontSize="16"
+                                  Foreground="{StaticResource AccentCyanBrush}"
+                                  VerticalAlignment="Top"/>
+                        <TextBlock Text="Compression keeps originals by default and writes finished outputs to the selected folder or beside each source."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Size comparison" Style="{StaticResource PanelTitleTextStyle}"/>

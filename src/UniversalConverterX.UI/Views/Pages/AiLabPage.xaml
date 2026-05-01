@@ -14,7 +14,9 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="18">
+                    CornerRadius="18"
+                    AutomationProperties.Name="{Binding Title}"
+                    ToolTipService.ToolTip="{Binding Description}">
                 <Grid RowSpacing="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -32,8 +34,7 @@
                             <FontIcon Glyph="{Binding Glyph}" FontSize="20"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Padding="8,3" CornerRadius="10"
-                                Background="{StaticResource SurfaceLightBrush}">
+                        <Border Grid.Column="2" Style="{StaticResource StatusPillStyle}" Padding="8,3">
                             <TextBlock Text="{Binding Phase}" FontSize="10" FontWeight="SemiBold"
                                        Foreground="{Binding PhaseBrush}"/>
                         </Border>
@@ -161,6 +162,7 @@
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
                           ItemClick="AiTool_Click"
                           ItemTemplate="{StaticResource AiToolTemplate}"/>
             </StackPanel>

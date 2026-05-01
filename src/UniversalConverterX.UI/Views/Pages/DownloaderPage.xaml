@@ -148,10 +148,11 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBox x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
-                         PlaceholderText="Paste one or more URLs - https://..."
+                         PlaceholderText="Paste one or more URLs, one per line"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          MinHeight="44"
@@ -179,6 +180,18 @@
                     <CheckBox x:Name="SubtitlesCheck" Content="Embed subtitles"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                 </StackPanel>
+
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                        Style="{StaticResource InfoBannerStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE946;" FontSize="16"
+                                  Foreground="{StaticResource AccentBlueBrush}"
+                                  VerticalAlignment="Top"/>
+                        <TextBlock Text="Downloads run through the local sidecar queue. Review site terms before downloading protected or private media."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 

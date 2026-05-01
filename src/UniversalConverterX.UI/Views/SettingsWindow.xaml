@@ -296,7 +296,7 @@
 
                         <!-- Download All Button -->
                         <Button x:Name="DownloadAllToolsButton"
-                                Content="Install Missing Tools"
+                                Content="Install missing tools"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 HorizontalAlignment="Right"
                                 Click="DownloadAllTools_Click"/>
@@ -356,11 +356,11 @@
                         <!-- Register/Unregister Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
                             <Button x:Name="RegisterShellButton"
-                                    Content="Register"
+                                    Content="Register menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="RegisterShell_Click"/>
                             <Button x:Name="UnregisterShellButton"
-                                    Content="Unregister"
+                                    Content="Remove menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="UnregisterShell_Click"/>
                         </StackPanel>
@@ -404,26 +404,31 @@
                                 <Button x:Name="AccentGreenButton" 
                                         Width="40" Height="40" 
                                         Background="#22c55e"
+                                        AutomationProperties.Name="Green accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#22c55e"/>
                                 <Button x:Name="AccentBlueButton" 
                                         Width="40" Height="40" 
                                         Background="#60a5fa"
+                                        AutomationProperties.Name="Blue accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#60a5fa"/>
                                 <Button x:Name="AccentPurpleButton" 
                                         Width="40" Height="40" 
                                         Background="#a78bfa"
+                                        AutomationProperties.Name="Purple accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#a78bfa"/>
                                 <Button x:Name="AccentOrangeButton" 
                                         Width="40" Height="40" 
                                         Background="#fb923c"
+                                        AutomationProperties.Name="Orange accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#fb923c"/>
                                 <Button x:Name="AccentRedButton" 
                                         Width="40" Height="40" 
                                         Background="#f87171"
+                                        AutomationProperties.Name="Red accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#f87171"/>
                             </StackPanel>
@@ -507,10 +512,16 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="ResetButton"
-                        Content="Reset Defaults"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Click="ResetSettings_Click"/>
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Button x:Name="ResetButton"
+                            Content="Reset defaults"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="ResetSettings_Click"/>
+                    <TextBlock x:Name="UnsavedStatusText"
+                               Text="No unsaved changes"
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                     <Button x:Name="CancelButton"
@@ -520,6 +531,7 @@
                     <Button x:Name="SaveButton"
                             Content="Save"
                             Style="{StaticResource PrimaryButtonStyle}"
+                            IsEnabled="False"
                             Click="Save_Click"/>
                 </StackPanel>
             </Grid>

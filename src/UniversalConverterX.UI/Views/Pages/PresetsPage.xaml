@@ -71,7 +71,7 @@
             <StackPanel Spacing="6">
                 <TextBlock Text="Presets"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Every conversion preset shipped with UCX (and any custom *.preset.xml in %LocalAppData%\UniversalConverterX\presets\) -- click Run on any card, pick files, choose an output folder, and UCX dispatches to the right sidecar. Same presets power the right-click context menu and the 'ucx convert-preset' CLI."
+                <TextBlock Text="Browse shipped and user-defined presets, filter by engine, and run the same workflows used by the CLI and Explorer menu."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -96,15 +96,36 @@
                           x:Name="EngineFilter"
                           Header="Engine filter"
                           SelectionChanged="EngineFilter_Changed">
-                    <ComboBoxItem Content="(all engines)" Tag=""/>
+                    <ComboBoxItem Content="All engines" Tag=""/>
                 </ComboBox>
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="PresetList"
-                          ItemTemplate="{StaticResource PresetCardTemplate}"/>
-        </ScrollViewer>
+        <Grid Grid.Row="2">
+            <StackPanel x:Name="EmptyState"
+                        Visibility="Collapsed"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12"
+                        MaxWidth="520">
+                <Border Width="86" Height="86" CornerRadius="22"
+                        Background="{StaticResource SurfaceLightBrush}">
+                    <FontIcon Glyph="&#xE71D;" FontSize="38"
+                              Foreground="{StaticResource AccentOrangeBrush}"/>
+                </Border>
+                <TextBlock Text="No presets match this filter"
+                           Style="{StaticResource SectionHeaderTextStyle}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Clear the search, choose All engines, or add a compatible *.preset.xml file to your UCX presets folder."
+                           Style="{StaticResource MutedTextStyle}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+            <ScrollViewer x:Name="PresetScroll" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="PresetList"
+                              ItemTemplate="{StaticResource PresetCardTemplate}"/>
+            </ScrollViewer>
+        </Grid>
 
         <TextBlock Grid.Row="3"
                    x:Name="StatusText"

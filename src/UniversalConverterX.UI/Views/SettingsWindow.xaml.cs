@@ -87,6 +87,7 @@ public sealed partial class SettingsWindow : Window
         VersionText.Text = $"Version {version?.Major ?? 1}.{version?.Minor ?? 0}.{version?.Build ?? 0}";
 
         _isDirty = false;
+        UpdateDirtyState();
     }
 
     private async void LoadTools()
@@ -123,17 +124,17 @@ public sealed partial class SettingsWindow : Window
     private void SettingsSelection_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (Content is FrameworkElement { IsLoaded: true })
-            _isDirty = true;
+            MarkDirty();
     }
 
-    private void SettingsToggle_Changed(object sender, RoutedEventArgs e) => _isDirty = true;
+    private void SettingsToggle_Changed(object sender, RoutedEventArgs e) => MarkDirty();
 
-    private void SettingsCheck_Changed(object sender, RoutedEventArgs e) => _isDirty = true;
+    private void SettingsCheck_Changed(object sender, RoutedEventArgs e) => MarkDirty();
 
     private void ParallelSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
         if (Content is FrameworkElement { IsLoaded: true })
-            _isDirty = true;
+            MarkDirty();
     }
 
     private async void BrowseOutputDirectory_Click(object sender, RoutedEventArgs e)
@@ -149,7 +150,7 @@ public sealed partial class SettingsWindow : Window
         if (folder != null)
         {
             OutputDirectoryTextBox.Text = folder.Path;
-            _isDirty = true;
+            MarkDirty();
         }
     }
 
@@ -166,7 +167,7 @@ public sealed partial class SettingsWindow : Window
         if (folder != null)
         {
             ToolsPathTextBox.Text = folder.Path;
-            _isDirty = true;
+            MarkDirty();
         }
     }
 
@@ -185,10 +186,9 @@ public sealed partial class SettingsWindow : Window
         var toolVm = _tools.FirstOrDefault(t => t.Id == toolId);
         if (toolVm == null) return;
 
-        // Show progress
+        button.IsEnabled = false;
         toolVm.ActionText = "Downloading...";
         toolVm.StatusText = "Downloading...";
-
         try
         {
             var progress = new Progress<DownloadProgress>(p =>
@@ -220,6 +220,10 @@ public sealed partial class SettingsWindow : Window
         {
             toolVm.StatusText = $"Error: {ex.Message}";
             toolVm.ActionText = "Retry";
+        }
+        finally
+        {
+            button.IsEnabled = true;
         }
     }
 
@@ -273,13 +277,13 @@ public sealed partial class SettingsWindow : Window
         finally
         {
             DownloadAllToolsButton.IsEnabled = true;
-            DownloadAllToolsButton.Content = "Install Missing Tools";
+            DownloadAllToolsButton.Content = "Install missing tools";
         }
     }
 
     private void ContextMenuToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        _isDirty = true;
+        MarkDirty();
     }
 
     private async void RegisterShell_Click(object sender, RoutedEventArgs e)
@@ -299,7 +303,7 @@ public sealed partial class SettingsWindow : Window
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (Content is FrameworkElement { IsLoaded: true })
-            _isDirty = true;
+            MarkDirty();
 
         var theme = ThemeComboBox.SelectedIndex switch
         {
@@ -318,7 +322,7 @@ public sealed partial class SettingsWindow : Window
     {
         if (sender is Button button && button.Tag is string colorHex)
         {
-            _isDirty = true;
+            MarkDirty();
             // Store the selected accent color
             // In a real implementation, this would update the app's accent color resources
         }
@@ -356,6 +360,7 @@ public sealed partial class SettingsWindow : Window
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot
         };
+        ApplyDangerPrimary(dialog);
 
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
@@ -363,7 +368,7 @@ public sealed partial class SettingsWindow : Window
             // Reset to defaults
             _options.ResetToDefaults();
             LoadSettings();
-            _isDirty = true;
+            MarkDirty();
         }
     }
 
@@ -389,6 +394,7 @@ public sealed partial class SettingsWindow : Window
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot
         };
+        ApplyDangerPrimary(dialog);
 
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
@@ -447,6 +453,38 @@ public sealed partial class SettingsWindow : Window
         _options.Save();
 
         _isDirty = false;
+        UpdateDirtyState();
+    }
+
+    private void MarkDirty()
+    {
+        _isDirty = true;
+        UpdateDirtyState();
+    }
+
+    private void UpdateDirtyState()
+    {
+        if (SaveButton is not null)
+            SaveButton.IsEnabled = _isDirty;
+        if (UnsavedStatusText is not null)
+        {
+            UnsavedStatusText.Text = _isDirty
+                ? "Unsaved changes"
+                : "No unsaved changes";
+            UnsavedStatusText.Foreground = (SolidColorBrush)Application.Current.Resources[
+                _isDirty ? "AccentOrangeBrush" : "TextMutedBrush"];
+        }
+        if (CancelButton is not null)
+            CancelButton.Content = _isDirty ? "Cancel" : "Close";
+    }
+
+    private static void ApplyDangerPrimary(ContentDialog dialog)
+    {
+        if (Application.Current.Resources.TryGetValue("DangerButtonStyle", out var style)
+            && style is Style dangerStyle)
+        {
+            dialog.PrimaryButtonStyle = dangerStyle;
+        }
     }
 
     private async Task ShowMessageAsync(string title, string message)

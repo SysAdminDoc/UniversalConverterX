@@ -125,6 +125,8 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         DropHint.Text = "Drop files here, or pick them";
         StatusText.Text = "Drop files above to see matching presets.";
         FilterVisibility = Visibility.Collapsed;
+        NoMatchesState.Visibility = Visibility.Collapsed;
+        MatchScroll.Visibility = Visibility.Visible;
         _all.Clear();
         _displayed.Clear();
     }
@@ -185,6 +187,8 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         _all = matches;
         ApplyFilter();
         FilterVisibility = matches.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        NoMatchesState.Visibility = matches.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        MatchScroll.Visibility = matches.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
         var distinctExts = exts.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var extSummary = string.Join(", ", distinctExts.Take(6).Select(e => "." + e));

@@ -75,16 +75,12 @@ public sealed partial class HistoryPage : Page
 
     private async void Clear_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new ContentDialog
-        {
-            Title = "Clear conversion history?",
-            Content = "This permanently deletes every recorded job. The actual converted files are not affected.",
-            PrimaryButtonText = "Clear",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = this.XamlRoot,
-        };
-        if (await dlg.ShowAsync() == ContentDialogResult.Primary)
+        if (await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear conversion history?",
+                "This permanently deletes every recorded job. Converted files on disk are not affected.",
+                primaryButtonText: "Clear history",
+                cancelButtonText: "Keep history"))
         {
             await _history.ClearAsync();
             await LoadAsync();
