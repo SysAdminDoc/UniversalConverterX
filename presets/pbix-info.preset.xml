@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Power BI .pbix -> JSON Probe</Name>
+    <Folder>Data/BI</Folder>
+    <InputTypes>
+        <Extension>pbix</Extension>
+        <Extension>pbit</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.pbix</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>bireport</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>pbix-info</Arg>
+    </Args>
+</Preset>

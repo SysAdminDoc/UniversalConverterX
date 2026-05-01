@@ -126,6 +126,21 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.20 wave (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
+        OtherTools.Add(new ToolboxTile("presets:mlmodel", "AI/ML Model Interchange", "ONNX + safetensors + GGUF + TFLite + CoreML + .pt header probes", "\uE99A", red, "Ready", green, false, "stdlib + onnx"));
+        OtherTools.Add(new ToolboxTile("presets:forensics", "Digital Forensics", "NTFS $MFT + .reg + prefetch + browser history + EWF E01 probe", "\uE72E", orange, "Ready", green, false, "stdlib + sqlite + ewfinfo"));
+        DocumentTools.Add(new ToolboxTile("presets:notetaking", "Note-Taking Apps", "Notion + Evernote .enex + Obsidian + Joplin + Day One + Roam -> Markdown", "\uE70F", blue, "Ready", green, false, "stdlib"));
+        AudioTools.Add(new ToolboxTile("presets:dawproject", "DAW Project Probes", "Ableton .als + FL .flp + REAPER .rpp + Audacity .aup3 + LMMS + DAWproject", "\uE767", blue, "Ready", green, false, "stdlib + sqlite"));
+        VideoTools.Add(new ToolboxTile("presets:vidpost", "Video Timelines", "FCPXML + OTIO + Premiere .prproj + EDL CMX 3600 -> JSON / CSV", "\uE714", blue, "Ready", green, false, "stdlib + otioconvert"));
+        OtherTools.Add(new ToolboxTile("presets:pcbcad", "Electronics CAD", "Gerber RS-274X + Excellon drill + KiCad + Eagle + IPC-D-356", "\uEC7A", green, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:bireport", "BI / Reporting", "Tableau .twb/.twbx + Power BI .pbix + SSRS .rdl + Looker LookML + dbt", "\uE9D9", blue, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:sdmx", "Regulatory Data", "XBRL + iXBRL + SDMX-ML + DDI codebooks -> CSV / JSON", "\uE9D5", orange, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:lmskit", "Learning Management", "SCORM + Common Cartridge + QTI + xAPI + LTI 1.3 JWT + Moodle .mbz", "\uE73E", blue, "Ready", green, false, "stdlib"));
+        ImageTools.Add(new ToolboxTile("presets:medkitex", "Healthcare Extras", "DICOM SR + DICOM Waveform + HL7 CCD/CCDA + IHE XDS + NCPDP", "\uE8A1", red, "Ready", green, false, "pydicom + numpy"));
+        OtherTools.Add(new ToolboxTile("presets:iotbus", "Industrial IoT", "OPC UA NodeSet + Modbus map + KNX ETS .knxproj + EDS DeviceNet", "\uEC7A", blue, "Ready", green, false, "stdlib"));
+        DocumentTools.Add(new ToolboxTile("presets:socialarchives", "Social Media Archives", "Twitter / X + Mastodon + Reddit + Discord exports -> CSV", "\uE8BD", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:devbuild", "Build Manifests", "npm + Cargo + Composer + Maven + Go + .csproj package manifests -> CSV", "\uE943", blue, "Ready", green, false, "stdlib"));
+
         // v2.19 wave (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
         OtherTools.Add(new ToolboxTile("presets:labkit", "Lab + Windows Trace", "LabVIEW LVM/TDMS + Sysinternals Procmon + ETW .etl + perfmon .blg -> CSV", "\uE9F1", blue, "Ready", green, false, "stdlib + npTDMS + Win tools"));
         OtherTools.Add(new ToolboxTile("presets:scope", "Oscilloscope Waveforms", "Tektronix .wfm/.isf + LeCroy .trc + Keysight .bin -> CSV", "\uEC03", green, "Ready", green, false, "stdlib"));

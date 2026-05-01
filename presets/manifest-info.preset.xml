@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Build Manifest Auto-Detect -> JSON</Name>
+    <Folder>Code/Build</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+        <Extension>toml</Extension>
+        <Extension>xml</Extension>
+        <Extension>lock</Extension>
+        <Extension>mod</Extension>
+        <Extension>sum</Extension>
+        <Extension>gradle</Extension>
+        <Extension>kts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.manifest</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>devbuild</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>manifest-info</Arg>
+    </Args>
+</Preset>

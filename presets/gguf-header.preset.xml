@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>GGUF llama.cpp -> JSON Header + Metadata</Name>
+    <Folder>AI/Models</Folder>
+    <InputTypes>
+        <Extension>gguf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.gguf</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>mlmodel</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>gguf-header</Arg>
+    </Args>
+</Preset>

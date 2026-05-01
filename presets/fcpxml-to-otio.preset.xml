@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>FCPXML -> OpenTimelineIO</Name>
+    <Folder>Video/Timeline</Folder>
+    <InputTypes>
+        <Extension>fcpxml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>otio</OutputExtension>
+    <Engine>vidpost</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>fcpxml-to-otio</Arg>
+    </Args>
+</Preset>

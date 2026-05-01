@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SDMX-ML Statistical Data -> CSV</Name>
+    <Folder>Data/Regulatory</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.sdmx</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>sdmx</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>sdmx-data-to-csv</Arg>
+    </Args>
+</Preset>

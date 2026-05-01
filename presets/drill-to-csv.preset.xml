@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Excellon NC Drill -> CSV</Name>
+    <Folder>Engineering/PCB</Folder>
+    <InputTypes>
+        <Extension>drl</Extension>
+        <Extension>xln</Extension>
+        <Extension>txt</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>pcbcad</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>drill-to-csv</Arg>
+    </Args>
+</Preset>

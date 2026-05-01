@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HL7 CCD / CCDA -> JSON</Name>
+    <Folder>Bio/Healthcare</Folder>
+    <InputTypes>
+        <Extension>xml</Extension>
+        <Extension>ccd</Extension>
+        <Extension>ccda</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.ccd</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>medkitex</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ccd-to-json</Arg>
+    </Args>
+</Preset>

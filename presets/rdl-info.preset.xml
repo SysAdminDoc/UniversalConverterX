@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SSRS .rdl -> JSON Probe</Name>
+    <Folder>Data/BI</Folder>
+    <InputTypes>
+        <Extension>rdl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.rdl</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>bireport</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>rdl-info</Arg>
+    </Args>
+</Preset>

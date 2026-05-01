@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>KiCad Project / Board -> JSON Probe</Name>
+    <Folder>Engineering/PCB</Folder>
+    <InputTypes>
+        <Extension>kicad_pro</Extension>
+        <Extension>kicad_pcb</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.kicad</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>pcbcad</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>kicad-pro</Arg>
+    </Args>
+</Preset>

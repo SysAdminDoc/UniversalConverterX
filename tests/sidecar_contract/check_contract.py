@@ -251,6 +251,20 @@ KNOWN_EVENTS = {
     "gsplat_doc",          # gsplat — Gaussian Splatting .splat <-> .ply
     "arcgis_doc",          # arcgis — .gdb file geodatabase + .aprx project
     "thumb_doc",           # mediathumb — universal thumbnail extraction
+    # v2.20 wave (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
+    "ml_model",            # mlmodel — ONNX / safetensors / GGUF / TFLite / CoreML
+    "forensic_doc",        # forensics — $MFT / .reg / prefetch / browser history / EWF
+    "note_doc",            # notetaking — Notion / Evernote / Obsidian / Bear / Joplin
+    "daw_doc",             # dawproject — Ableton / FL Studio / REAPER / Audacity / LMMS
+    "vidpost_doc",         # vidpost — FCPXML / OTIO / .prproj / EDL
+    "pcb_doc",             # pcbcad — KiCad / Eagle / Gerber / Excellon
+    "bi_doc",              # bireport — Tableau / Power BI / SSRS / Looker / dbt
+    "regulatory_doc",      # sdmx — XBRL / iXBRL / SDMX / DDI
+    "lms_doc",             # lmskit — SCORM / Common Cartridge / QTI / xAPI / LTI / Moodle
+    "medkitex_doc",        # medkitex — DICOM SR / Waveform / CCD / IHE XDS / NCPDP
+    "iot_doc",             # iotbus — OPC UA / Modbus / KNX / EDS
+    "social_archive",      # socialarchives — Twitter / Mastodon / Reddit / Discord exports
+    "dev_doc",             # devbuild — npm / Cargo / Composer / Maven / Go / .csproj
 }
 
 

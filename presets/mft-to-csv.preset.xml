@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>NTFS $MFT -> CSV</Name>
+    <Folder>System/Forensics</Folder>
+    <InputTypes>
+        <Extension>mft</Extension>
+        <Extension>bin</Extension>
+        <Extension>raw</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.mft</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>forensics</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>mft-to-csv</Arg>
+    </Args>
+</Preset>
