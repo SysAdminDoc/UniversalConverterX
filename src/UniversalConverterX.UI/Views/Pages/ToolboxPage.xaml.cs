@@ -106,6 +106,25 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("history", "History", "Search the persistent log of every job + re-run", "\uE81C", blue, "Ready", green, false, "UCX + SQLite"));
         OtherTools.Add(new ToolboxTile("vmaf", "VMAF Quality", "Score a compressed clip against its reference (mean / harmonic / min)", "\uE9D9", blue, "Ready", green, false, "FFmpeg + libvmaf"));
         OtherTools.Add(new ToolboxTile("batch-rename", "Batch Rename", "Rename files with patterns", "\uE8AC", blue, "Future", yellow, false, null));
+
+        // v2.7 OSS engines
+        DocumentTools.Add(new ToolboxTile("presets:datakit", "Data Converter", "JSON / YAML / TOML / XML / CSV / TSV / NDJSON", "\uE8A5", blue, "Ready", green, false, "PyYAML + tomli + xmltodict"));
+        DocumentTools.Add(new ToolboxTile("presets:mailbox", "Email Converter", "MBOX / EML / Maildir mutual conversion", "\uE715", blue, "Ready", green, false, "stdlib mailbox"));
+        DocumentTools.Add(new ToolboxTile("presets:calconvert", "Calendar / vCard", "ICS / VCF -> JSON / CSV (and back)", "\uE787", blue, "Ready", green, false, "icalendar + vobject"));
+        DocumentTools.Add(new ToolboxTile("presets:webarchive", "Web Archive", "HAR <-> WARC + extraction", "\uE774", blue, "Ready", green, false, "warcio"));
+        DocumentTools.Add(new ToolboxTile("presets:codeformat", "Code Formatter", "prettier / black / gofmt / rustfmt / clang-format", "\uE943", blue, "Ready", green, false, "OSS formatters"));
+
+        AudioTools.Add(new ToolboxTile("presets:audiotag", "Audio Metadata", "Read / write / strip ID3 / FLAC / Ogg / M4A tags", "\uE189", blue, "Ready", green, false, "mutagen"));
+        AudioTools.Add(new ToolboxTile("presets:trackermod", "Tracker Modules", "MOD / IT / XM / S3M -> WAV / FLAC / MP3", "\uE767", green, "Ready", green, false, "libopenmpt"));
+        AudioTools.Add(new ToolboxTile("presets:midisynth", "MIDI Renderer", "MIDI + SoundFont -> WAV / FLAC / MP3 (FluidSynth)", "\uEC4F", red, "Ready", green, false, "FluidSynth"));
+
+        ImageTools.Add(new ToolboxTile("presets:iccprofile", "ICC Color Profile", "Apply / embed / strip color profiles (sRGB / AdobeRGB / Lab)", "\uE790", blue, "Ready", green, false, "Pillow ImageCms"));
+        ImageTools.Add(new ToolboxTile("presets:lottiekit", "Lottie Animation", ".json / .tgs / .lottie -> GIF / MP4 / WebP / APNG / SVG", "\uE909", blue, "Ready", green, false, "python-lottie"));
+        ImageTools.Add(new ToolboxTile("presets:texturekit", "GPU Textures", "DDS / KTX / KTX2 / ASTC / EXR / TGA mutual conversion", "\uEB9F", orange, "Ready", green, false, "Pillow + imageio + astcenc"));
+        ImageTools.Add(new ToolboxTile("presets:dicomkit", "DICOM Imaging", "Medical DCM -> PNG / JPEG / TIFF + anonymization", "\uE8A1", red, "Ready", green, false, "pydicom"));
+
+        OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
     }
 
     private void Tile_Click(object sender, ItemClickEventArgs e)

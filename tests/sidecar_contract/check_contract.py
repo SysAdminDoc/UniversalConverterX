@@ -65,6 +65,25 @@ KNOWN_EVENTS = {
     "pdf_ocr",       # pdfocr — searchable PDF produced via ocrmypdf
     "gis_layer",     # gisconvert.vector — produced vector layer (ogr2ogr)
     "gis_raster",    # gisconvert.raster — produced raster (gdal_translate)
+    # v2.7 wave
+    "data_doc",        # datakit — produced JSON/YAML/TOML/XML/CSV
+    "audio_tag",       # audiotag — read/wrote/stripped audio metadata
+    "email_msg",       # mailbox — produced email message (eml/mbox/maildir)
+    "calendar_event",  # calconvert — calendar event record
+    "vcard_contact",   # calconvert — vCard contact record
+    "web_record",      # webarchive — HAR/WARC record
+    "color",           # iccprofile — applied/embedded/stripped ICC
+    "color_info",      # iccprofile.info — image colorspace probe
+    "tracker_song",    # trackermod — rendered MOD/IT/XM/S3M -> audio
+    "lottie_render",   # lottiekit — rendered Lottie animation
+    "texture",         # texturekit — converted GPU texture
+    "midi_render",     # midisynth — rendered MIDI -> audio
+    "dicom_image",     # dicomkit — DICOM -> image / anonymized
+    "dicom_info",      # dicomkit.info — DICOM probe
+    "cad_render",      # cadkit — rendered/saved CAD
+    "cad_audit",       # cadkit.audit — DXF auditor findings
+    "code_format",     # codeformat — formatted source file
+    "formatter_status", # codeformat.check — formatter availability
 }
 
 

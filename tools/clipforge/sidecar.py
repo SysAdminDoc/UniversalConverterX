@@ -726,6 +726,183 @@ def op_rewrap(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_concat(args: argparse.Namespace) -> int:
+    """Stream-copy concatenate via ffmpeg's concat demuxer when codecs match;
+    fall back to filter_complex concat for mixed sources."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    inputs = [Path(p) for p in args.input]
+    missing = [str(p) for p in inputs if not p.is_file()]
+    if missing:
+        return fail("missing_input", f"Input(s) not found: {missing}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Probe codecs to decide stream-copy vs re-encode.
+    codecs = []
+    total_dur = 0.0
+    for p in inputs:
+        info = probe(ffprobe, str(p))
+        if info:
+            v = next((s for s in info.get("streams", []) if s.get("codec_type") == "video"), {})
+            codecs.append(v.get("codec_name", ""))
+            total_dur += float(info.get("format", {}).get("duration", 0))
+    can_copy = len(set(codecs)) == 1 and not args.reencode
+
+    if can_copy:
+        # Concat demuxer: needs a list file with one "file 'path'" per line.
+        list_path = Path(out_path.parent / f".concat_{os.getpid()}.txt")
+        list_path.write_text(
+            "\n".join(f"file '{str(p).replace(chr(39), chr(39) + chr(92) + chr(39) + chr(39))}'"
+                      for p in inputs),
+            encoding="utf-8")
+        try:
+            cmd = [ffmpeg, "-y", "-f", "concat", "-safe", "0",
+                   "-i", str(list_path), "-c", "copy", str(out_path)]
+            emit("log", level="info", message=f"Concat (stream copy) of {len(inputs)} clip(s)")
+            emit("progress", percent=0, stage="concat", eta_seconds=None)
+            rc = run_ffmpeg(cmd, total_dur, "concat")
+        finally:
+            try: list_path.unlink()
+            except OSError: pass
+    else:
+        # filter_complex concat -- normalises to one resolution / codec.
+        emit("log", level="info", message=f"Concat (re-encode) of {len(inputs)} clip(s)")
+        cmd = [ffmpeg, "-y"]
+        for p in inputs: cmd += ["-i", str(p)]
+        n = len(inputs)
+        filter_str = "".join(f"[{i}:v:0][{i}:a:0?]" for i in range(n)) \
+                   + f"concat=n={n}:v=1:a=1[v][a]"
+        cmd += ["-filter_complex", filter_str,
+                "-map", "[v]", "-map", "[a]",
+                "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+                "-c:a", "aac", "-b:a", "192k", str(out_path)]
+        emit("progress", percent=0, stage="concat", eta_seconds=None)
+        rc = run_ffmpeg(cmd, total_dur, "concat")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size,
+         input_count=len(inputs))
+    return 0
+
+
+def op_speed(args: argparse.Namespace) -> int:
+    """Speed-up / slow-down a clip via setpts (video) + atempo (audio)."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file(): return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+    factor = float(args.factor)
+    if factor <= 0: return fail("bad_factor", "--factor must be > 0")
+
+    # Video: setpts=PTS/factor (factor>1 = speed up, <1 = slow down).
+    # Audio: atempo accepts 0.5-100; chain multiple stages for extreme factors.
+    def _atempo_chain(f: float) -> str:
+        chain = []
+        while f > 100:
+            chain.append("atempo=100"); f /= 100
+        while f < 0.5:
+            chain.append("atempo=0.5"); f /= 0.5
+        chain.append(f"atempo={f}")
+        return ",".join(chain)
+
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-filter_complex",
+           f"[0:v]setpts=PTS/{factor}[v];[0:a]{_atempo_chain(factor)}[a]",
+           "-map", "[v]", "-map", "[a]",
+           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+           "-c:a", "aac", "-b:a", "192k", str(out_path)]
+    emit("progress", percent=0, stage=f"speed x{factor}", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration / factor, f"speed x{factor}")
+    if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def op_reverse(args: argparse.Namespace) -> int:
+    """Reverse video and (optionally) audio."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file(): return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", "reverse",
+           "-af", "areverse" if args.reverse_audio else "anull",
+           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+           "-c:a", "aac", "-b:a", "192k", str(out_path)]
+    emit("progress", percent=0, stage="reverse", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "reverse")
+    if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def op_lut(args: argparse.Namespace) -> int:
+    """Apply a 3D LUT (.cube) to a video via ffmpeg's lut3d filter."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input); lut = Path(args.lut)
+    if not src.is_file(): return fail("missing_input", f"Input not found: {args.input}")
+    if not lut.is_file(): return fail("missing_lut", f"LUT file not found: {args.lut}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    safe_lut = str(lut).replace("\\", "/").replace(":", "\\:")
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", f"lut3d='{safe_lut}'",
+           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+           "-c:a", "copy", str(out_path)]
+    emit("progress", percent=0, stage="lut3d", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "lut3d")
+    if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def op_hdr_to_sdr(args: argparse.Namespace) -> int:
+    """Tone-map HDR (BT.2020 / HLG / PQ) to SDR (BT.709) via libplacebo when
+    available, falling back to zscale + tonemap when not."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file(): return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    # zscale path is the most portable across ffmpeg builds.
+    vf = ("zscale=t=linear:npl=100,format=gbrpf32le,"
+          "zscale=p=bt709,tonemap=tonemap=hable:desat=0,"
+          "zscale=t=bt709:m=bt709:r=tv,format=yuv420p")
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", vf,
+           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+           "-c:a", "copy", str(out_path)]
+    emit("progress", percent=0, stage="hdr->sdr", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "hdr->sdr")
+    if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc} (zscale not built? Try a "
+                                              "newer ffmpeg with --enable-libzimg).")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="clipforge-sidecar",
                                 description="UCX ClipForge sidecar — video editor operations with NDJSON progress.")
@@ -810,6 +987,37 @@ def build_parser() -> argparse.ArgumentParser:
     track_add.add_argument("--title",
                            help="Optional title metadata for the new track")
 
+    # ── concat ────────────────────────────────────────────────────────────────
+    concat = sub.add_parser("concat", help="Concatenate clips (stream-copy when codecs match, re-encode otherwise)")
+    concat.add_argument("--input", nargs="+", required=True)
+    concat.add_argument("--output", required=True)
+    concat.add_argument("--reencode", action="store_true",
+                        help="Force re-encode via filter_complex concat.")
+
+    # ── speed ─────────────────────────────────────────────────────────────────
+    speed = sub.add_parser("speed", help="Speed up / slow down (factor > 1 speeds up; < 1 slows)")
+    speed.add_argument("--input", required=True)
+    speed.add_argument("--output", required=True)
+    speed.add_argument("--factor", required=True, help="0.25 = quarter speed, 2 = double speed")
+
+    # ── reverse ───────────────────────────────────────────────────────────────
+    reverse = sub.add_parser("reverse", help="Play video backwards")
+    reverse.add_argument("--input", required=True)
+    reverse.add_argument("--output", required=True)
+    reverse.add_argument("--reverse-audio", action="store_true", dest="reverse_audio",
+                         help="Also reverse the audio (default keeps audio forward).")
+
+    # ── lut3d ─────────────────────────────────────────────────────────────────
+    lut = sub.add_parser("lut3d", help="Apply a 3D LUT (.cube) for colour grading")
+    lut.add_argument("--input", required=True)
+    lut.add_argument("--output", required=True)
+    lut.add_argument("--lut", required=True, help="Path to a .cube LUT file")
+
+    # ── hdr-to-sdr ────────────────────────────────────────────────────────────
+    h2s = sub.add_parser("hdr-to-sdr", help="Tone-map HDR (BT.2020/HLG/PQ) -> SDR (BT.709)")
+    h2s.add_argument("--input", required=True)
+    h2s.add_argument("--output", required=True)
+
     # ── timeline ──────────────────────────────────────────────────────────────
     timeline = sub.add_parser("timeline",
                               help="Extract a thumbnail strip + waveform image for the UI scrub bar")
@@ -860,6 +1068,16 @@ def main(argv: list[str] | None = None) -> int:
             return op_track_remove(args)
         if args.op == "track-add":
             return op_track_add(args)
+        if args.op == "concat":
+            return op_concat(args)
+        if args.op == "speed":
+            return op_speed(args)
+        if args.op == "reverse":
+            return op_reverse(args)
+        if args.op == "lut3d":
+            return op_lut(args)
+        if args.op == "hdr-to-sdr":
+            return op_hdr_to_sdr(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

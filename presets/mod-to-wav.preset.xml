@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Tracker (MOD/IT/XM/S3M) to WAV</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>mod</Extension>
+        <Extension>it</Extension>
+        <Extension>xm</Extension>
+        <Extension>s3m</Extension>
+        <Extension>mtm</Extension>
+        <Extension>okt</Extension>
+        <Extension>med</Extension>
+        <Extension>dbm</Extension>
+        <Extension>669</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>trackermod</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--format</Arg>
+        <Arg>wav</Arg>
+    </Args>
+</Preset>
