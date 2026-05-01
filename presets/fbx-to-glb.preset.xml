@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>FBX / Collada / Alembic -> GLB</Name>
+    <Folder>3D/Animation</Folder>
+    <InputTypes>
+        <Extension>fbx</Extension>
+        <Extension>dae</Extension>
+        <Extension>abc</Extension>
+        <Extension>obj</Extension>
+        <Extension>vrm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>glb</OutputExtension>
+    <Engine>animkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>glb</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Analyze / MHA / NRRD -> NIfTI</Name>
+    <Folder>Medical</Folder>
+    <InputTypes>
+        <Extension>hdr</Extension>
+        <Extension>img</Extension>
+        <Extension>mha</Extension>
+        <Extension>mhd</Extension>
+        <Extension>nrrd</Extension>
+        <Extension>nhdr</Extension>
+        <Extension>mnc</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>nii</OutputExtension>
+    <Engine>medkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>nii</Arg>
+        <Arg>--gzip</Arg>
+    </Args>
+</Preset>

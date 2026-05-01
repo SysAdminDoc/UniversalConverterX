@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>PCAP / PCAPNG -> CSV summary</Name>
+    <Folder>Network</Folder>
+    <InputTypes>
+        <Extension>pcap</Extension>
+        <Extension>pcapng</Extension>
+        <Extension>cap</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>netcap</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-csv</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,2 @@
+python-evtx>=0.7
+xmltodict>=0.13

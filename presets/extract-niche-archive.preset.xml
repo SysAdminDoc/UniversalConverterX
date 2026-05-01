@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Extract SIT / LHA / ARJ / DEB / RPM / DMG / IPA / APK / MSIX</Name>
+    <Folder>Archive</Folder>
+    <InputTypes>
+        <Extension>sit</Extension>
+        <Extension>sitx</Extension>
+        <Extension>lha</Extension>
+        <Extension>lzh</Extension>
+        <Extension>arj</Extension>
+        <Extension>zoo</Extension>
+        <Extension>ha</Extension>
+        <Extension>arc</Extension>
+        <Extension>deb</Extension>
+        <Extension>ipk</Extension>
+        <Extension>rpm</Extension>
+        <Extension>dmg</Extension>
+        <Extension>ipa</Extension>
+        <Extension>apk</Extension>
+        <Extension>xapk</Extension>
+        <Extension>apks</Extension>
+        <Extension>msix</Extension>
+        <Extension>appx</Extension>
+        <Extension>nupkg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_extracted</OutputFileNameTemplate>
+    <OutputExtension>folder</OutputExtension>
+    <Engine>morearchive</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args>
+        <Arg>extract</Arg>
+    </Args>
+</Preset>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>STEP <-> IGES (BREP solid)</Name>
+    <Folder>CAD/Engineering</Folder>
+    <InputTypes>
+        <Extension>step</Extension>
+        <Extension>stp</Extension>
+        <Extension>iges</Extension>
+        <Extension>igs</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>iges</OutputExtension>
+    <Engine>engcad</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>iges</Arg>
+    </Args>
+</Preset>

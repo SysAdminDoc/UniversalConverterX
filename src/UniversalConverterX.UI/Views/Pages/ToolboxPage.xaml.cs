@@ -126,6 +126,18 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.12 wave (Domain-specific & exotic)
+        OtherTools.Add(new ToolboxTile("presets:chemkit", "Chemistry", "SMILES / MOL / SDF / MOL2 / PDB / XYZ / CIF / InChI", "\uE7C2", green, "Ready", green, false, "RDKit + Open Babel"));
+        OtherTools.Add(new ToolboxTile("presets:biokit", "Bioinformatics", "FASTA / FASTQ / GenBank / EMBL / VCF / BAM / SAM / Newick", "\uE7C2", green, "Ready", green, false, "Biopython + pysam"));
+        OtherTools.Add(new ToolboxTile("presets:medkit", "Medical Imaging 3D", "NIfTI / Analyze / MetaImage / NRRD / MINC / GIPL volumes", "\uE8A1", red, "Ready", green, false, "SimpleITK + nibabel"));
+        OtherTools.Add(new ToolboxTile("presets:netcap", "Network Capture", "PCAP <-> PCAPNG + CSV packet summaries", "\uE968", blue, "Ready", green, false, "scapy"));
+        DocumentTools.Add(new ToolboxTile("presets:logkit", "Log Files", "Apache / Nginx / syslog / Windows .evtx -> structured JSONL", "\uE9D9", blue, "Ready", green, false, "stdlib + python-evtx"));
+        ImageTools.Add(new ToolboxTile("presets:rasterimg", "Niche Raster", "PCX / TGA / DPX / SGI / Sun / PCD / Netpbm / APNG / XPM / Palm", "\uEB9F", orange, "Ready", green, false, "Pillow"));
+        DocumentTools.Add(new ToolboxTile("presets:morearchive", "More Archives", "SIT / LHA / ARJ / DEB / RPM / DMG / IPA / APK / MSIX / NUPKG", "\uE7B8", orange, "Ready", green, false, "7z + unar"));
+        OtherTools.Add(new ToolboxTile("presets:bookmark", "Browser Bookmarks", "Chrome / Firefox / Safari / Opera / Netscape / CSV mutual conversion", "\uE74C", blue, "Ready", green, false, "stdlib"));
+        OtherTools.Add(new ToolboxTile("presets:engcad", "Engineering CAD", "STEP / IGES / BREP / STL / OBJ -- BREP solids via Open CASCADE", "\uE8B7", green, "Ready", green, false, "pythonocc"));
+        OtherTools.Add(new ToolboxTile("presets:animkit", "3D Animation", "BVH motion-capture / Alembic / USD / USDZ / FBX / glTF / VRM / Collada", "\uF158", blue, "Ready", green, false, "usd-core + assimp"));
+
         // v2.11 wave (Raw Coverage)
         ImageTools.Add(new ToolboxTile("presets:psdkit", "Photoshop / GIMP", "PSD / PSB / XCF -> PNG/JPG/TIFF + per-layer extraction", "\uEB9F", blue, "Ready", green, false, "psd-tools + gimpformats"));
         ImageTools.Add(new ToolboxTile("presets:hdrkit", "HDR Image", "Radiance HDR / OpenEXR / PFM + tone-mapping (Reinhard/Drago/Mantiuk)", "\uEB9F", orange, "Ready", green, false, "imageio + OpenCV"));
