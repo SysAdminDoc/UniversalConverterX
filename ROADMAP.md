@@ -93,9 +93,17 @@ workspace pattern that v2.4 established.
   FolderPicker based on op. History integration. Toolbox "Documents" tile +
   nav search entry. Contract test: `pdf_info` and `pdf_part` added to
   `KNOWN_EVENTS` (22 sidecars conform).
-- #36 **Subtitle converter** — SRT ↔ VTT ↔ ASS ↔ SSA ↔ MicroDVD via pysubs2.
-  Independent of clipforge's burn-in path; this is pure conversion + offset
-  shift + retime. Pure-Python sidecar.
+- #36 **Subtitle converter** ✓ Shipped v2.5 — SRT ↔ VTT ↔ ASS ↔ SSA ↔ MicroDVD ↔ TMP ↔ JSON
+  via pysubs2. Independent of clipforge's burn-in path; this is pure
+  conversion + offset shift + framerate retime. Shipped:
+  `tools/subconvert/{sidecar.py,build.ps1}` (pysubs2 1.7+). New
+  `SubtitleConverterPage` with multi-file queue, target-format combo, output-dir
+  picker, source/output encoding combos (utf-8 / utf-8-sig / cp1252 / cp1251 /
+  cp932 / gbk -- covers most legacy subtitle drops), millisecond shift
+  NumberBox, source/target FPS NumberBoxes for framerate retiming, per-file
+  status updates from `subtitle` events with cue count. History integration.
+  Toolbox "Documents" tile + nav search entry. Contract test: `subtitle`
+  added to `KNOWN_EVENTS` (23 sidecars conform).
 - #37 **Font converter** — TTF ↔ OTF ↔ WOFF ↔ WOFF2 via fonttools + brotli.
   Subsetting reserved for v2.6.
 - #38 **eBook converter** — EPUB / MOBI / AZW3 / PDF / FB2 / TXT / HTML mutual
