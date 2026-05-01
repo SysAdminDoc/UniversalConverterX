@@ -2,6 +2,31 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [v2.17.0] - 2026-05-01
+
+### Added — 10 new pure-format conversion sidecars (Specialty Engineering + Wire / Network / Music / Sci)
+
+- **wells** — Oil & gas well-log conversion: LAS 2.0/3.0 (CWLS Log ASCII Standard) parser handles section headers (~V/~W/~C/~P/~A) without lasio, plus DLIS binary read via dlisio. Outputs CSV (curves + units row) / JSON (full sections) / LAS round-trip from CSV.
+- **datawire** — Schema-driven binary wire format conversion (extends `wirefmt`): Protocol Buffers binary <-> text-format via protoc CLI shellout, Apache Avro Object Container Format <-> JSON via fastavro, Apache Thrift IDL symbol introspection, FlatBuffers .fbs schema introspection.
+- **wirelesskit** — NMEA 0183 GPS sentences (GGA/RMC/GLL/VTG/GSA/GSV) -> JSON / CSV / KML LineString track / GPX trkpt track. Plus AIS marine tracking (!AIVDM/!AIVDO) decode via pyais. Pure stdlib NMEA parser with checksum validation.
+- **iac** — Infrastructure-as-Code translation: Docker Compose v1 -> v3 (links to depends_on, volumes_from drop, log_driver to logging.driver), CloudFormation YAML <-> JSON (intrinsic-function aware !Ref/!Sub/!GetAtt), Terraform plan JSON -> create/update/delete/replace/no-op summary, Helm template + Kustomize build shellouts.
+- **bed** — Genome interval format conversion: BED3/BED6/BED12 + ENCODE narrowPeak/broadPeak/gappedPeak round-trip + GFF3/GTF -> BED6 (1-based -> 0-based coordinate translation, gene_id/transcript_id pulled from attributes) + bigBed <-> BED via UCSC bigBedToBed/bedToBigBed CLI.
+- **swiftmx** — SWIFT MX (ISO 20022 XML banking) message decoder. Handles pacs.* / pain.* / camt.* / setr.* / remt.* families. Detects family + version from xmlns. Pure stdlib XML walk -> JSON. SEPA pain.001 Credit Transfer -> CSV (EndToEndId/Amount/Currency/Creditor/IBAN/BIC/RemittanceInfo). camt.053 statement entries -> CSV (BookingDate/ValueDate/Amount/CdtDbtInd/BankRef).
+- **musicmore** — Notation conversion (extends `music`): LilyPond .ly -> PDF/SVG/MIDI via lilypond CLI, MusicXML -> LilyPond via musicxml2ly, LilyPond -> MusicXML via MIDI roundtrip + music21, MuseScore .mscz -> MIDI/PDF via mscore CLI.
+- **playlistmore** — Playlist format extras (extends `playlist`): iTunes Library.xml plist -> M3U (whole library + per-playlist subset) + normalized JSON with track metadata + Spotify export JSON/CSV (exportify-style) -> M3U (with #EXTINF) + normalized CSV.
+- **netflowkit** — Network flow telemetry decoder: NetFlow v5 fixed-width PDU parser (24-byte header + 48-byte records), NetFlow v9 + IPFIX (v10) template-aware parser maintaining template cache across flowsets, IPv4/IPv6 address decoding via ipaddress module, IANA IPFIX field names. Pure stdlib.
+- **proteomics** — Mass-spectrometry / proteomics format conversion: mzML (HUPO-PSI XML standard) -> JSON / CSV with base64-encoded m/z + intensity arrays decoded via struct (32/64-bit float, optional zlib compression), mzXML (older ISB format), MGF (Mascot Generic Format) line-based parser. Pure stdlib (xml.etree).
+
+### Added — 28 new presets
+
+`las-to-csv`, `las-to-json`, `dlis-to-csv`, `avro-to-json`, `thrift-list-types`, `fbs-list-types`, `nmea-to-gpx`, `nmea-to-kml`, `ais-to-json`, `compose-upgrade`, `cfn-yaml-to-json`, `cfn-json-to-yaml`, `tf-plan-summary`, `bed-to-csv`, `gff-to-bed`, `gtf-to-bed`, `bigbed-to-bed`, `swift-mx-to-json`, `sepa-pain-to-csv`, `camt-statement-to-csv`, `lilypond-to-pdf`, `lilypond-to-midi`, `musicxml-to-lilypond`, `itunes-library-to-m3u`, `itunes-library-to-json`, `spotify-to-m3u`, `netflow-v5-to-json`, `ipfix-to-json`, `mzml-to-csv`, `mzml-to-json`, `mgf-to-json`.
+
+### Changed
+
+- KNOWN_EVENTS extended with 12 new event types: `well_log`, `datawire_blob`, `datawire_schema`, `nmea_msg`, `iac_doc`, `iac_plan`, `genome_interval`, `swift_mx`, `score_extra`, `playlist_extra`, `netflow_doc`, `massspec_doc`. Contract test: 138 sidecars conforming.
+- 10 new Toolbox tiles route through `presets:engine` deep-link convention.
+- Version 2.16.0 → 2.17.0 across all manifests.
+
 ## [v2.16.0] - 2026-05-01
 
 ### Added — 12 new pure-format conversion sidecars (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)

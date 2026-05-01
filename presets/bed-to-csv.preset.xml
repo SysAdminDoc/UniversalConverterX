@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>BED Genome Intervals -> CSV</Name>
+    <Folder>Bio/Genomics</Folder>
+    <InputTypes>
+        <Extension>bed</Extension>
+        <Extension>narrowpeak</Extension>
+        <Extension>broadpeak</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>csv</OutputExtension>
+    <Engine>bed</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>bed-to-csv</Arg>
+    </Args>
+</Preset>

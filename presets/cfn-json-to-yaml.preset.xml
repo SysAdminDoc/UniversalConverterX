@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CloudFormation JSON -> YAML</Name>
+    <Folder>DevOps/IaC</Folder>
+    <InputTypes>
+        <Extension>json</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>yaml</OutputExtension>
+    <Engine>iac</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>cfn-json-to-yaml</Arg>
+    </Args>
+</Preset>
