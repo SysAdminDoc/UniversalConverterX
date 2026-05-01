@@ -21,7 +21,7 @@
     <Product>UniversalConverter X</Product>
     <Description>All-in-one media tool: convert, compress, edit, download, record, and 25+ AI-powered tools</Description>
     <Copyright>Copyright © 2026 Maven Imaging</Copyright>
-    <Version>2.4.0</Version>
+    <Version>2.5.0</Version>
 
     <!-- Enable unpackaged deployment -->
     <WindowsPackageType>None</WindowsPackageType>
