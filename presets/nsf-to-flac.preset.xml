@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>NSF / SPC / VGM / GBS / SID -> FLAC</Name>
+    <Folder>Audio/Chiptune</Folder>
+    <InputTypes>
+        <Extension>nsf</Extension>
+        <Extension>nsfe</Extension>
+        <Extension>spc</Extension>
+        <Extension>vgm</Extension>
+        <Extension>vgz</Extension>
+        <Extension>gbs</Extension>
+        <Extension>hes</Extension>
+        <Extension>kss</Extension>
+        <Extension>gym</Extension>
+        <Extension>ay</Extension>
+        <Extension>sap</Extension>
+        <Extension>sid</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>flac</OutputExtension>
+    <Engine>chiptune</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--format</Arg>
+        <Arg>flac</Arg>
+        <Arg>--length</Arg>
+        <Arg>180</Arg>
+    </Args>
+</Preset>

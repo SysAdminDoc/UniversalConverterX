@@ -174,6 +174,18 @@ KNOWN_EVENTS = {
     "config_doc",          # config — HCL/HOCON/properties/INI converted
     "dns_record",          # dnskit — zone-file <-> JSON/YAML/CSV
     "dns_zone_check",      # dnskit.validate — sanity findings
+    # v2.14 wave (Streaming + Crypto + Niche A/V)
+    "video_specialty",     # videopro — VOB/MTS/DV/3GP/elementary streams
+    "stream_manifest",     # streaming — DASH/HLS/CMAF manifest output
+    "image_seq",           # imageseq — sequence <-> video conversion
+    "chiptune_audio",      # chiptune — NSF/SPC/VGM/SID/AY rendered to audio
+    "audio_long_tail",     # audiomore — AIFF/CAF/DTS/TrueHD/HE-AAC produced
+    "pgp_blob",            # gpgkit — armored / dearmored output
+    "pgp_key",             # gpgkit.key-info — OpenPGP key metadata
+    "wallet_bip39",        # wallet.bip39-check — mnemonic validation
+    "wallet_keystore",     # wallet.keystore-info — Ethereum keystore probe
+    "wallet_descriptor",   # wallet.descriptor — Bitcoin output descriptor parse
+    "wallet_psbt",         # wallet.psbt-decode — PSBT heuristic probe
 }
 
 

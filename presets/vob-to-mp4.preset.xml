@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>DVD VOB / Blu-ray MTS / DV / 3GP -> MP4</Name>
+    <Folder>Video/Specialty</Folder>
+    <InputTypes>
+        <Extension>vob</Extension>
+        <Extension>evo</Extension>
+        <Extension>mts</Extension>
+        <Extension>m2ts</Extension>
+        <Extension>ts</Extension>
+        <Extension>dv</Extension>
+        <Extension>dif</Extension>
+        <Extension>3gp</Extension>
+        <Extension>3g2</Extension>
+        <Extension>f4v</Extension>
+        <Extension>swf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>mp4</Arg>
+    </Args>
+</Preset>

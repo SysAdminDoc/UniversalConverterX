@@ -126,6 +126,15 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:cadkit", "CAD (DXF/DWG)", "DXF -> SVG / PDF / version-up; DWG -> DXF (ODA)", "\uE8B7", green, "Ready", green, false, "ezdxf + ODA"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Video Extras", "Concat / slow-mo / reverse / LUT-3D / HDR -> SDR", "\uE714", blue, "Ready", green, false, "ClipForge + FFmpeg"));
 
+        // v2.14 wave (Streaming + Crypto + Niche A/V)
+        VideoTools.Add(new ToolboxTile("presets:videopro", "Specialty Video", "VOB / MTS / DV / 3GP / F4V / SWF / H.264-H.265-AV1 elementary streams", "\uE714", green, "Ready", green, false, "FFmpeg"));
+        VideoTools.Add(new ToolboxTile("presets:streaming", "Streaming Manifests", "MP4 -> HLS / DASH / CMAF + manifest -> MP4 round-trip", "\uE968", blue, "Ready", green, false, "shaka-packager + FFmpeg"));
+        VideoTools.Add(new ToolboxTile("presets:imageseq", "Image Sequence", "DPX / EXR / PNG / TIFF sequence <-> ProRes / DNxHR / H.264 / H.265 / AV1", "\uE7C3", blue, "Ready", green, false, "FFmpeg"));
+        AudioTools.Add(new ToolboxTile("presets:chiptune", "Chiptune Audio", "NSF / SPC / VGM / GBS / HES / KSS / SID / AY -> WAV / FLAC / MP3", "\uEC4F", green, "Ready", green, false, "game-music-emu + sidplayfp"));
+        AudioTools.Add(new ToolboxTile("presets:audiomore", "Niche Audio", "AIFF / CAF / DTS-HD MA / TrueHD / HE-AAC v2 / ulaw / alaw / xHE-AAC", "\uEC4F", red, "Ready", green, false, "FFmpeg"));
+        OtherTools.Add(new ToolboxTile("presets:gpgkit", "OpenPGP / GnuPG", "Binary <-> ASCII armor + key metadata probe", "\uE72E", blue, "Ready", green, false, "stdlib + GnuPG CLI"));
+        OtherTools.Add(new ToolboxTile("presets:wallet", "Crypto Wallet (read)", "BIP39 mnemonic check + Ethereum keystore + Bitcoin descriptor + PSBT decode", "\uE7B5", orange, "Ready", green, false, "mnemonic + stdlib"));
+
         // v2.13 wave (Office + Diagrams + Sysadmin)
         DocumentTools.Add(new ToolboxTile("presets:legacyoffice", "Legacy Office Documents", "WordPerfect / AmiPro / Works / Publisher / StarOffice / KOffice / AbiWord", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
         DocumentTools.Add(new ToolboxTile("presets:applepro", "Apple iWork", "Pages / Numbers / Keynote -> DOCX / XLSX / PPTX / PDF", "\uE8A5", blue, "Ready", green, false, "LibreOffice + iWork XML"));
