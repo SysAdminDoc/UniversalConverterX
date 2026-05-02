@@ -28,9 +28,24 @@ jobs:
         # Exits non-zero on any violation; that fails the job + gates merge.
         run: python tests/sidecar_contract/check_contract.py
 
+  uia-contract:
+    name: WinUI 3 AutomationId contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify AutomationId presence on new interactive controls
+        # Stdlib only. Compares current XAML scan against
+        # tests/uia_contract/baseline.txt — only NEW controls without
+        # AutomationId fail the build. Run with --write-baseline locally
+        # to rebaseline after a planned cleanup pass.
+        run: python tests/uia_contract/check_uia.py
+
   build:
     runs-on: windows-latest
-    needs: sidecar-contract
+    needs: [sidecar-contract, uia-contract]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

@@ -153,6 +153,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBox x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
+                         AutomationProperties.AutomationId="DownloaderUrlBox"
                          PlaceholderText="Paste one or more URLs, one per line"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
@@ -160,28 +161,35 @@
                          MaxHeight="96"
                          TextChanged="UrlBox_TextChanged"/>
                 <Button x:Name="PasteButton" Grid.Row="0" Grid.Column="1" Content="Paste"
+                        AutomationProperties.AutomationId="DownloaderPasteButton"
                         Style="{StaticResource SecondaryButtonStyle}" Click="Paste_Click"/>
                 <Button x:Name="AddUrlButton" Grid.Row="0" Grid.Column="2" Content="Add to Queue"
+                        AutomationProperties.AutomationId="DownloaderAddUrlButton"
                         Style="{StaticResource PrimaryButtonStyle}" Click="AddUrl_Click" IsEnabled="False"/>
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
-                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0">
+                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0"
+                              AutomationProperties.AutomationId="DownloaderQualityCombo">
                         <ComboBoxItem Content="Highest available (video + audio)" Tag="best"/>
                         <ComboBoxItem Content="1080p" Tag="1080"/>
                         <ComboBoxItem Content="720p" Tag="720"/>
                         <ComboBoxItem Content="480p" Tag="480"/>
                     </ComboBox>
-                    <ComboBox x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0">
+                    <ComboBox x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0"
+                              AutomationProperties.AutomationId="DownloaderOutputFormatCombo">
                         <ComboBoxItem Content="MP4" Tag="mp4"/>
                         <ComboBoxItem Content="MKV" Tag="mkv"/>
                         <ComboBoxItem Content="WebM" Tag="webm"/>
                     </ComboBox>
                     <CheckBox x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
+                              AutomationProperties.AutomationId="DownloaderAudioOnlyCheck"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                     <CheckBox x:Name="SubtitlesCheck" Content="Embed subtitles"
+                              AutomationProperties.AutomationId="DownloaderSubtitlesCheck"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                     <CheckBox x:Name="SponsorBlockCheck"
                               Content="Skip sponsor segments (SponsorBlock)"
+                              AutomationProperties.AutomationId="DownloaderSponsorBlockCheck"
                               ToolTipService.ToolTip="Removes sponsor / self-promo / interaction segments from the final download. Uses yt-dlp's SponsorBlock postprocessor — pulls segment data from api.sponsor.ajay.app on demand."
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                 </StackPanel>
@@ -364,12 +372,15 @@
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
             <Button x:Name="ClearQueueButton" Grid.Column="1" Content="Clear Queue"
+                    AutomationProperties.AutomationId="DownloaderClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}" Click="ClearQueue_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
             <Button x:Name="DownloadButton" Grid.Column="2" Content="Download All"
+                    AutomationProperties.AutomationId="DownloaderDownloadButton"
                     Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
             <Button x:Name="CancelButton" Grid.Column="3" Content="Cancel"
+                    AutomationProperties.AutomationId="DownloaderCancelButton"
                     Style="{StaticResource DangerButtonStyle}" Click="Cancel_Click"
                     IsEnabled="False"/>
         </Grid>
