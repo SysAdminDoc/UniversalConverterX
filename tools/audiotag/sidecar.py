@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -98,6 +99,123 @@ def op_write(args: argparse.Namespace) -> int:
     return 0
 
 
+# ─── Auto-populate from filename (ROADMAP Item 78) ───────────────────────────
+
+# Default regexes ordered most-specific to most-loose. The first that matches
+# wins; named capture groups feed directly into mutagen tag keys.
+_DEFAULT_FILENAME_PATTERNS: list[str] = [
+    r"^(?P<tracknumber>\d{1,3})[\s._-]+(?P<artist>[^-]+?)\s*-\s*(?P<title>.+)$",
+    r"^(?P<artist>[^-]+?)\s*-\s*(?P<album>[^-]+?)\s*-\s*(?P<tracknumber>\d{1,3})\s*-\s*(?P<title>.+)$",
+    r"^(?P<artist>[^-]+?)\s*-\s*(?P<title>.+)$",
+    r"^(?P<title>.+)$",
+]
+
+# Tag keys mutagen's `easy=True` accepts across all common containers. Anything
+# not in this set is dropped silently rather than emitting per-file errors —
+# users routinely paste creative regex groups that don't map to a real tag.
+_KNOWN_EASY_KEYS = {
+    "title", "artist", "album", "albumartist", "tracknumber", "discnumber",
+    "date", "year", "genre", "composer", "comment", "lyrics",
+}
+
+
+def op_auto_populate(args: argparse.Namespace) -> int:
+    """Auto-populate audio metadata by parsing each input filename against a
+    list of regex patterns, merging the captured groups into mutagen tags.
+    Existing tag values are preserved unless --overwrite is set so a careful
+    user can fill in just the missing slots without trampling good data."""
+    inputs = [Path(p) for p in args.input]
+    missing = [str(p) for p in inputs if not p.is_file()]
+    if missing:
+        return fail("missing_input", f"Audio file(s) not found: {missing}")
+
+    raw_patterns = args.pattern or _DEFAULT_FILENAME_PATTERNS
+    compiled: list[re.Pattern[str]] = []
+    for raw in raw_patterns:
+        try:
+            compiled.append(re.compile(raw))
+        except re.error as ex:
+            return fail("bad_regex", f"Invalid --pattern {raw!r}: {ex}")
+
+    static_overrides: dict[str, str] = {}
+    for kv in (args.set or []):
+        if "=" not in kv:
+            return fail("bad_arg", f"--set expects key=value, got '{kv}'")
+        k, v = kv.split("=", 1)
+        static_overrides[k.strip().lower()] = v.strip()
+
+    overwrite = bool(args.overwrite)
+    total = len(inputs)
+    populated = 0
+    skipped = 0
+    emit("progress", percent=0, stage="auto-populate", eta_seconds=None)
+
+    for i, src in enumerate(inputs):
+        stem = src.stem.strip()
+        match = None
+        match_groups: dict[str, str] = {}
+        for pattern in compiled:
+            m = pattern.match(stem)
+            if m:
+                match = m
+                match_groups = {k: v.strip() for k, v in m.groupdict().items() if v}
+                break
+
+        if match is None:
+            emit("log", level="warn",
+                 message=f"{src.name}: no pattern matched, leaving tags untouched.")
+            skipped += 1
+            emit("progress", percent=round((i + 1) / total * 100, 1),
+                 stage=f"skipped {src.name}", eta_seconds=None)
+            continue
+
+        # Merge: filename-derived keys first, then explicit --set overrides.
+        merged: dict[str, str] = {}
+        for k, v in match_groups.items():
+            key = k.lower()
+            if key in _KNOWN_EASY_KEYS and v:
+                merged[key] = v
+        for k, v in static_overrides.items():
+            if k in _KNOWN_EASY_KEYS:
+                merged[k] = v
+
+        try:
+            f = _open(src)
+            if f.tags is None:
+                f.add_tags()
+            existing = f.tags or {}
+            applied: dict[str, str] = {}
+            for key, value in merged.items():
+                if not overwrite and key in existing and existing.get(key):
+                    # Preserve the existing tag value when not overwriting.
+                    continue
+                try:
+                    f[key] = value
+                    applied[key] = value
+                except Exception:
+                    emit("log", level="warn",
+                         message=f"{src.name}: cannot set '{key}' on this format")
+            if applied:
+                f.save()
+                populated += 1
+            else:
+                skipped += 1
+        except Exception as ex:
+            emit("log", level="error", message=f"{src.name}: {ex}")
+            return fail("write_failed", str(ex))
+
+        emit("audio_tag",
+             path=str(src),
+             matched_pattern=match.re.pattern if match else None,
+             populated=list(applied.keys()) if applied else [])
+        emit("progress", percent=round((i + 1) / total * 100, 1),
+             stage=f"auto-populated {i+1}/{total}", eta_seconds=None)
+
+    emit("complete", output="", size_bytes=0,
+         count=total, populated=populated, skipped=skipped)
+    return 0
+
+
 def op_strip(args: argparse.Namespace) -> int:
     inputs = [Path(p) for p in args.input]
     missing = [str(p) for p in inputs if not p.is_file()]
@@ -135,6 +253,21 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("strip", help="Remove every tag block (ID3 / Vorbis / etc.)")
     s.add_argument("--input", nargs="+", required=True)
 
+    a = sub.add_parser("auto-populate",
+                       help="Auto-populate ID3 / Vorbis / MP4 tags by parsing each input "
+                            "filename against a list of regex patterns (ROADMAP Item 78).")
+    a.add_argument("--input", nargs="+", required=True)
+    a.add_argument("--pattern", action="append",
+                   help="Repeatable regex pattern (named groups -> tag keys: title / "
+                        "artist / album / albumartist / tracknumber / discnumber / "
+                        "date / year / genre / composer / comment / lyrics). "
+                        "Defaults to a small bundled list when omitted.")
+    a.add_argument("--set", action="append",
+                   help="Repeatable static key=value override applied after the "
+                        "pattern match (e.g. --set genre=Rock).")
+    a.add_argument("--overwrite", action="store_true",
+                   help="Replace existing tag values; default preserves them.")
+
     return p
 
 
@@ -144,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.op == "read":  return op_read(args)
         if args.op == "write": return op_write(args)
         if args.op == "strip": return op_strip(args)
+        if args.op == "auto-populate": return op_auto_populate(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         return fail("cancelled", "Cancelled by user.")

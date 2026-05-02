@@ -27,6 +27,33 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Audio metadata auto-populate from filename (ROADMAP Item 78)
+
+- `audiotag` sidecar gains an `auto-populate` op. Each input filename
+  is matched against a list of regex patterns; named capture groups
+  feed mutagen's `easy=True` tag keys (title / artist / album /
+  albumartist / tracknumber / discnumber / date / year / genre /
+  composer / comment / lyrics).
+- Default patterns cover `NN - Artist - Title`, `Artist - Album - NN -
+  Title`, `Artist - Title`, and `Title`-only fallbacks.
+- Repeatable `--pattern` overrides + `--set key=value` static
+  overrides; `--overwrite` flag controls whether existing tag values
+  are replaced (default preserves).
+- New `presets/audiotag-auto-populate.preset.xml` exposes the default
+  flow as a one-click batch preset.
+- Charter-aligned: offline-first, file-local, no cloud metadata service.
+
+### Added — Intro / outro editor (ROADMAP Item 36)
+
+- New `intro-outro` op on `clipforge`. Thin wrapper over the existing
+  `op_concat`: builds the `[intro?, primary, outro?]` list and
+  delegates to the same stream-copy / filter_complex machinery so
+  re-encode only fires when codecs differ. Args: `--input` (primary
+  single file), `--intro` / `--outro` (both optional), `--reencode`.
+- New `presets/intro-outro.preset.xml` ships with
+  `RequiresExtraInput` so the executor prompts for the intro file at
+  run time.
+
 ### Added — Cross-encoder capped-CRF harmonization (ROADMAP Item 91)
 
 - `videocrush` sidecar gains a canonical `--max-bitrate <kbps>` flag

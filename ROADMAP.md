@@ -1376,7 +1376,7 @@ Sources: [S91] (av1-grain Rust crate — film grain synthesis for AV1)
 
 ---
 
-### 78. Metadata Tag Auto-Population from Filename/Content _(new Tier 3)_
+### 78. Metadata Tag Auto-Population from Filename/Content _(new Tier 3)_ — ✅ SHIPPED 2026-05-02
 
 **Context (iter-7 research, 2026-05-02):** `TagStudio` [S96] and `Mutagen` [S98] demonstrate
 that file/audio metadata tagging is user-facing pain point. Currently, batch converters ignore
@@ -1396,6 +1396,21 @@ Use Mutagen library (via Python sidecar) to write tags. Settings: toggle `Preser
 
 Impact: 2 · Effort: 2 · Type: UX
 Sources: [S98] (Mutagen — comprehensive audio metadata library)
+
+**Closing commit:** the existing `audiotag` mutagen sidecar gains an
+`auto-populate` op that runs each input filename through a list of
+regex patterns; named capture groups feed straight into mutagen's
+`easy=True` tag keys (title / artist / album / albumartist /
+tracknumber / discnumber / date / year / genre / composer / comment /
+lyrics — anything else is silently dropped so creative regex doesn't
+fail the batch). Defaults ship four patterns covering
+`NN - Artist - Title`, `Artist - Album - NN - Title`, `Artist - Title`,
+and `Title`-only. Repeatable `--pattern` overrides; repeatable `--set
+key=value` static overrides applied after the match; `--overwrite`
+flag controls whether existing tag values are replaced (default
+preserves them). Charter-aligned: offline-first, file-local, no cloud
+metadata service. New `presets/audiotag-auto-populate.preset.xml`
+exposes the default-pattern flow as a one-click batch preset.
 
 ---
 
@@ -1903,7 +1918,7 @@ version cycle without being crossed off.
 
 ---
 
-### 36. Intro & Outro Editor
+### 36. Intro & Outro Editor — ✅ SHIPPED 2026-05-02
 
 Attach a pre-clip and post-clip to any batch conversion job: each output file
 gets the intro prepended and outro appended via FFmpeg `concat` demuxer.
@@ -1911,6 +1926,17 @@ Configure per-preset. Wire to `IntroOutroPage.xaml`.
 
 Impact: 3 · Effort: 3 · Type: parity
 Source: [S5] (ToolboxPage.xaml.cs stub)
+
+**Closing commit:** new `intro-outro` op on `clipforge` is a thin
+wrapper over the existing `op_concat`: builds the `[intro?, primary,
+outro?]` list and delegates to the same stream-copy / filter_complex
+machinery (re-encode only when codecs differ). Args: `--input`
+(primary, single file), `--intro` / `--outro` (optional), `--reencode`.
+Errors with `nothing_to_concat` if neither intro nor outro is supplied.
+New `presets/intro-outro.preset.xml` ships with `RequiresExtraInput`
+so the executor prompts for the intro file at run time. Dedicated
+`IntroOutroPage.xaml` deferred — the preset path covers the common
+workflow.
 
 ---
 
