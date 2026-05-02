@@ -430,7 +430,7 @@ Source: [S40] (HandBrake #7813 — auto-scroll queue to active job)
 
 ---
 
-### 61. faster-whisper Sidecar Refresh (Batched Inference + New Models)
+### 61. faster-whisper Sidecar Refresh (Batched Inference + New Models) — ⚠️ PARTIAL 2026-05-02
 
 Update the `whisper-stt` sidecar to `faster-whisper>=1.1.0`:
 
@@ -449,6 +449,14 @@ change — only sidecar CLI arg extension and model-list update.
 Impact: 4 · Effort: 2 · Type: platform + performance
 Sources: [S44] (faster-whisper v1.1.0/v1.2.1 — batched inference 4×, large-v3-turbo),
 [S48] (Purfview Whisper-XXL Pro r3.256.1 — silero_v6/nemo_v2/ten VAD models)
+**Closing commit:** sidecar pin bumped to `faster-whisper>=1.1.0`; new
+`--batch-size` arg (default 8) opportunistically uses
+`BatchedInferencePipeline` when available with graceful fallback to the
+streaming path on older installs / CPU-only builds. SttPage model combo
+gains `large-v3-turbo` and `distil-large-v3` entries. **Deferred:** new
+VAD models (`silero_v6`, `nemo_v2`, `ten`) — those live in Purfview's
+Whisper-XXL fork, not upstream `faster-whisper`. Tracked as a follow-up
+item rather than vendoring a fork.
 
 ---
 

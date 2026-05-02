@@ -268,6 +268,8 @@
                             <ComboBoxItem Content="base (fast, good)" Tag="base" IsSelected="True"/>
                             <ComboBoxItem Content="small (balanced)" Tag="small"/>
                             <ComboBoxItem Content="medium (accurate)" Tag="medium"/>
+                            <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
+                            <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
                             <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
                         </ComboBox>
                     </StackPanel>
