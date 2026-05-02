@@ -42,6 +42,12 @@ batch UX, programmability (CLI + REST + PS module), and AI depth.
 Short-iteration items: UI wiring for already-built engines, UX reliability
 fixes, and security hygiene. None of these require a new sidecar engine.
 
+> **Tier 1 promotions from Phase 5 audit (2026-05-02):** Items 20
+> (SponsorBlock) and 30 (Audio VBR Quality Mode) are also Tier 1 Now —
+> both Effort 1 with Impact 3-4. They retain their existing numbering
+> under Tier 2 below to keep cross-references stable, but are scheduled
+> alongside the items in this section.
+
 ### 1. AiLab UI Wiring — ⚠️ PARTIALLY SHIPPED (narrow scope)
 
 Phase 5 audit (2026-05-01) found three of the four "Future" tiles already
@@ -146,6 +152,14 @@ manually — automate the detection step).
 Impact: 4 · Effort: 2 · Type: dx + security
 Sources: [S1] (CHANGELOG v2.2.0 CVE pins), [S15] (YoutubeDownloader auto-update env var)
 
+**Charter note (Phase 5 audit, 2026-05-02):** This item makes outbound
+network requests to GitHub Releases. Charter-aligned because (a) the
+request is one-way (no telemetry sent), (b) it polls only release
+manifests (no user data), (c) it must be opt-out-able via a Settings
+toggle (`CheckForUpdates`, already exists in `ConverterXOptions`).
+Implementation must respect the toggle + show clear network indicator
+in the UI.
+
 ---
 
 ### 8. Parallel Job Limit Setting — ✅ SHIPPED (already)
@@ -177,22 +191,28 @@ Source: [S15] (YoutubeDownloader DPAPI cookie encryption, v1.14 changelog)
 
 ---
 
-### 10. Accessibility — UIA Automation Properties Pass — ⚠️ IN PROGRESS
+### 10. Accessibility — Continue UIA Automation Properties Pass — ⚠️ IN PROGRESS
 
-Assign `AutomationProperties.Name` and `AutomationProperties.AutomationId` to
-all interactive controls in every page XAML. Fixes screen reader blind spots
-and unblocks UI automation testing in CI. Prerequisite for any formal
-accessibility audit.
+**This is the continuation of an audit-in-progress, not a fresh start.**
+22 of 45+ pages already carry `AutomationProperties.Name` annotations.
+Zero pages carry `AutomationProperties.AutomationId`. The remaining work
+is concrete and verifiable:
+
+- (a) Extend `AutomationProperties.Name` to the ~35 unannotated pages
+  for screen-reader coverage parity with the 10 already-annotated pages.
+- (b) Introduce `AutomationProperties.AutomationId` for every interactive
+  control across ALL 45+ pages so UI automation tests (Playwright /
+  Appium / WinAppDriver) can target controls reliably.
+- (c) Land a CI lint that fails the `sidecar-contract` job (or a sibling
+  job) when a new `<Button>` / `<Slider>` / `<ComboBox>` / `<ToggleSwitch>`
+  ships without an `AutomationId`. Prevents regression after the pass.
 
 Impact: 3 · Effort: 2 · Type: accessibility
 Source: [S16] (WinUI 3 accessibility docs — UIA peer requirement)
 
-**Status (2026-05-01 audit):** `AutomationProperties.Name` is present in
-22 occurrences across 10 of 45+ pages — partial coverage. **Zero
-`AutomationProperties.AutomationId`** anywhere in `src/`. The remaining
-work is: (a) extend `Name` to the other ~35 pages, (b) introduce
-`AutomationId` for every interactive control across all pages so UI
-automation tests can target controls reliably.
+**Verified state (Phase 5 audit, 2026-05-02):**
+- `AutomationProperties.Name` — 22 occurrences across 10 of 45+ pages.
+- `AutomationProperties.AutomationId` — 0 occurrences anywhere in `src/`.
 
 ---
 
@@ -668,6 +688,14 @@ repository. Wire to a "Share Preset" menu action in `PresetsPage.xaml`.
 Impact: 3 · Effort: 2 · Type: dx
 Source: [S14] (HandBrake preset import/export — table-stakes in converter UX)
 
+**Charter note (Phase 5 audit, 2026-05-02):** "Import from URL" is a
+user-initiated outbound network request. Charter-aligned because (a) the
+user typed/pasted the URL, (b) the import is to local disk (no cloud
+storage), (c) imported XML must pass a strict allow-list schema validator
+before any sidecar reference is resolved (mitigates malicious-preset
+attack surface). Implementation must show the URL clearly + a "this will
+download from the internet" confirmation step before fetching.
+
 ---
 
 ### 46. Audio Waveform Preview
@@ -708,6 +736,16 @@ Impact: 3 · Effort: 4 · Type: leapfrog
 Sources: [S28] (Shutter Encoder DeOldify integration), [S35] (awesome-video AI
 section — DeOldify, DDeoldify)
 
+**Charter note (Phase 5 audit, 2026-05-02):** The "auto-fetched on first
+use" model download is a user-initiated outbound request (the user must
+have launched the colorization feature). Charter-aligned because (a) the
+download is one-time and cached locally, (b) inference runs entirely
+locally after the fetch, (c) the user must see a clear "this will
+download ~1.5 GB from HuggingFace" confirmation before the fetch starts.
+Implementation must NOT auto-download silently on app start — only on
+explicit feature first-use. Apply the same pattern to any other large-
+model sidecar that lazy-fetches weights.
+
 ---
 
 ### 49. AI Video Background Removal
@@ -737,6 +775,77 @@ extract the captions as a text track.
 Impact: 2 · Effort: 3 · Type: parity
 Sources: [S34] (CCExtractor — open-source broadcast closed-caption extractor),
 [S35] (awesome-video subtitle / caption section)
+
+---
+
+## Audit-Surfaced Coverage Gaps  _(added 2026-05-02 from `iter-1-audit.md`)_
+
+The Phase 5 audit found three categories under-served by the original
+ROADMAP. These items were not in the Round 2 research output because the
+research focused on competitor-feature parity rather than internal
+quality / extensibility / migration concerns. Tier placement reflects
+audit recommendation, not pure user-facing impact.
+
+### 51. Observability — Local Crash Bundle + Structured App Log _(Tier 2)_
+
+A user-toggleable structured log panel inside the app (Catppuccin debug
+console) that streams to `%LocalAppData%/UniversalConverterX/logs/` on
+disk with daily rotation + 30-day retention. On unhandled exception,
+write a crash bundle (last-N-log-lines + system info + active job state
++ stack trace) to a clearly-flagged `crashes/` folder. Surface a
+"Open log folder" / "Export crash bundle for support" UI hook. Gated
+behind the existing `ConverterXOptions.VerboseLogging` flag — silent
+when off, zero-cost. No telemetry — local-only by charter.
+
+Closes the audit's observability gap: today, when a sidecar fails or
+the app crashes, there is no actionable evidence pack the user can hand
+back to a maintainer. History (Item 6) records job outcomes, but not
+the structured log that produced them.
+
+Impact: 3 · Effort: 2 · Type: dx + observability
+Source: standard desktop-app pattern; surfaced by Phase 5 audit.
+
+---
+
+### 52. Plugin — Third-Party Sidecar Manifest _(Tier 3)_
+
+UCX hard-codes 176 sidecars under `tools/<name>/`. The NDJSON contract
+test (Item 11, just shipped) is permissive enough that any sidecar
+following the contract works — but there is no formal extension point.
+Add `tools/<name>/manifest.json` schema (declares input/output formats,
+event types, op list) + a "Discover plugins" sweep at app start that
+indexes any `manifest.json` under `tools/` *or* a user-configurable
+plugin directory (default `%LocalAppData%/UniversalConverterX/plugins/`).
+Plugins surface in PresetsPage and ToolboxPage automatically.
+
+Charter alignment: the user installs plugins by dropping a directory —
+no app store, no remote fetch. Identical to how OSS GUI tools (HandBrake,
+OBS, Audacity) handle local plugin folders.
+
+Impact: 3 · Effort: 4 · Type: leapfrog
+Source: charter emphasizes programmability; surfaced by Phase 5 audit.
+
+---
+
+### 53. Migration — settings.json Schema Versioning _(Tier 2)_
+
+Add a `SchemaVersion` integer to `ConverterXOptions`. Implement a
+migration table keyed by version-pair (e.g. `1 → 2: rename
+"OverwriteBehavior=Ask" to "Prompt"`). On `Load`, if the on-disk
+schema is older than current, run migrations in order, write back the
+upgraded JSON, and emit a one-line log entry. On corrupt read, the
+existing fallback (backup file with `.corrupt.<timestamp>` suffix)
+already exists in `ConverterXOptions.Load()` — keep that path.
+
+Audit motivation: the iter-1 wave flipped `OverwriteBehavior` default
+from `Ask` to `Never` for fresh installs, while preserving persisted
+user preferences. That worked because the deserializer kept the value
+verbatim. But the next time a field is renamed or an enum value is
+removed, that approach silently breaks. A schema migration table is
+the cheap insurance.
+
+Impact: 2 · Effort: 1 · Type: dx + migration
+Source: surfaced by Phase 5 audit's migration coverage gap.
 
 ---
 
