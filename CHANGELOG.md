@@ -27,6 +27,41 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Cross-encoder capped-CRF harmonization (ROADMAP Item 91)
+
+- `videocrush` sidecar gains a canonical `--max-bitrate <kbps>` flag
+  that pairs with `--crf <quality>` and translates per-encoder:
+  libx264 / libx265 / `*_nvenc` / `*_amf` / `*_qsv` -> `-maxrate Nk
+  -bufsize 2Nk`; libsvtav1 -> `-svtav1-params crf=Q:mbr=N`; libvpx-vp9
+  -> `-maxrate / -bufsize`. Honoured only in CRF mode.
+- Three new presets exercise the flag end-to-end:
+  `to-h264-capped-crf-23` (8 Mbps cap), `to-h265-capped-crf-25` (6 Mbps
+  cap), `to-av1-capped-crf-30` (4 Mbps cap). Same "Quality with bitrate
+  cap" concept renders to three different argv shapes — the preset
+  portability moat in action.
+
+### Added — Output size estimator utility (ROADMAP Item 68)
+
+- New `Core/Utilities/OutputSizeEstimator.cs` exposes
+  `ForLosslessCopy`, `ForConstantBitrate`, and `ForVariableBitrate`
+  estimators returning typed `OutputSizeEstimate(Kind, Bytes,
+  DisplayLabel, Caveat)`. Lossless / CBR labels are exact; VBR
+  prefixes with `~` and tags with a ±25% caveat. Scene-complexity
+  multiplier clamped to 0.5..1.8 so unrealistic factors don't blow up.
+- 14 new xUnit tests (195/195 Core suite passing). Queue ListView
+  wiring deferred to land alongside the next queue UX pass.
+
+### Added — AI Portrait wiring (ROADMAP Item 27)
+
+- ToolboxPage tile flipped Future -> Ready (CodeFormer / GFPGAN).
+- `MainWindow.NavigateTo("ai-portrait")` routes to `PresetsPage` with
+  the `facerestore` engine filter so users see both
+  `restore-face-codeformer` (fidelity slider) and `gfpgan-restore`
+  (blind face restoration) presets side-by-side.
+- Nav search adds an "AI Portrait" suggestion alongside "Photo
+  Restoration"; PhotoRestorationPage stays focused on GFPGAN-only
+  blind face restoration.
+
 ### Added — Post-encode output duration validation (ROADMAP Item 72)
 
 - New `Core/Utilities/OutputDurationValidator.cs` — probes input +

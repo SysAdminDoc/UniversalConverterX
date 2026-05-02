@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To AV1 capped CRF 30 (max 4 Mbps)</Name>
+    <Folder>Video/Quality with cap</Folder>
+    <InputTypes>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+        <Extension>flv</Extension>
+        <Extension>wmv</Extension>
+        <Extension>ts</Extension>
+        <Extension>3gp</Extension>
+        <Extension>ogv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_av1-capped</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--codec</Arg>
+        <Arg>libsvtav1</Arg>
+        <Arg>--crf</Arg>
+        <Arg>30</Arg>
+        <Arg>--max-bitrate</Arg>
+        <Arg>4000</Arg>
+        <Arg>--hwaccel</Arg>
+        <Arg>none</Arg>
+    </Args>
+</Preset>

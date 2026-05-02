@@ -27,6 +27,7 @@ public sealed partial class MainWindow : Window
         new("Image Upscaler", "Real-ESRGAN super-resolution up to 4× for photos / illustrations", "ai-image-enhancer"),
         new("Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution", "ai-video-enhancer"),
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
+        new("AI Portrait", "CodeFormer / GFPGAN portrait upscale + restoration with fidelity slider", "ai-portrait"),
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
         new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
@@ -153,6 +154,11 @@ public sealed partial class MainWindow : Window
             "ai-tts" => typeof(TextToSpeechPage),
             "ai-stt" => typeof(SpeechToTextPage),
             "ai-photo-restore" => typeof(PhotoRestorationPage),
+            // ROADMAP Item 27 — AI Portrait wires to PresetsPage with the
+            // facerestore engine filter (CodeFormer fidelity slider +
+            // GFPGAN side-by-side). The fidelity-vs-restoration nuance lives
+            // in the preset args; the page UX is the existing PresetsPage.
+            "ai-portrait" => typeof(PresetsPage),
             "lip-reading" => typeof(LipReadingPage),
             "gif-maker" => typeof(GifMakerPage),
             "image-converter" => typeof(ImageConverterPage),
@@ -178,6 +184,8 @@ public sealed partial class MainWindow : Window
         };
 
         object? parameter = routeParam;
+        if (pageType == typeof(PresetsPage) && parameter is null && routeKey == "ai-portrait")
+            parameter = "facerestore";
 
         ContentFrame.Navigate(pageType, parameter, new EntranceNavigationTransitionInfo());
     }
