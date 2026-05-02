@@ -173,6 +173,7 @@ public sealed partial class MainWindow : Window
             "ocr" => typeof(OcrPage),
             "presets" => typeof(PresetsPage),
             "universal-convert" => typeof(UniversalConvertPage),
+            "batch-rename" => typeof(BatchRenamePage),
             _ => typeof(PlaceholderPage)
         };
 
@@ -282,7 +283,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

@@ -4,6 +4,25 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — Batch Rename utility (ROADMAP Item 3)
+
+- New `Views/Pages/BatchRenamePage.xaml{,.cs}` under Toolbox · OtherTools.
+  Pure-C# rename engine — no sidecar — backed by `System.IO.File.Move`.
+- Drag-drop file list, "Add Files" / "Add Folder" / "Clear" controls.
+- Find/Replace with literal or regex toggle; output-template box that
+  overrides Find/Replace when set; case transform (none / lower / upper /
+  title); configurable counter start + step.
+- Token engine: `{n}`, `{n:N}` (zero-padded width), `{stem}`, `{ext}`,
+  `{parent}`, `{date}`, `{date:format}`. Unknown tokens render literally
+  so users can fix typos.
+- Live preview table with per-row status icons: pending / unchanged /
+  on-disk conflict / in-batch conflict / regex error. Apply button
+  disables until conflicts clear.
+- Two-pass apply with per-row try/catch — one EACCES never aborts the run.
+- Toolbox tile flipped Future→Ready (UCX engine) with updated description.
+  Routed through `MainWindow` nav switch + selection-tag grouping.
+- ExifTool tokens (`{exif:*}`) deferred to Next-tier per original scope.
+
 ### Added — Dependency update checker service (ROADMAP Item 7, Phase 1)
 
 - New `Services/UpdateCheckService.cs` (UI project): fire-and-forget
