@@ -513,7 +513,7 @@ Sources: [S3] (Any Video Converter track add/remove/export, v9.1.8), [S26] (Subt
 
 ---
 
-### 14. Subtitle Burn-in Preset
+### 14. Subtitle Burn-in Preset — ✅ SHIPPED 2026-05-02
 
 New preset using `videocrush` or a dedicated `hardsub` sidecar: burn
 SRT/ASS/VTT into video with configurable font, size, color, position, stroke,
@@ -522,6 +522,18 @@ every commercial converter ships it.
 
 Impact: 4 · Effort: 2 · Type: parity
 Source: [S3] (Any Video Converter subtitle customization — stroke/outline/background, v9.2.0)
+
+**Closing commit:** new `subtitle-burn` op on `clipforge` (FFmpeg
+`subtitles=` filter + libass `force_style` overrides). Args cover font /
+size / primary colour / outline colour / shadow colour / border style /
+outline thickness / shadow offset / vertical margin / 9-point position
+grid (tl/tc/tr/ml/mc/mr/bl/bc/br) / bold / italic. Path escape helper
+handles Windows drive-colon double-escaping for the inner filter parser.
+New `presets/subtitle-burn.preset.xml` with sensible defaults (Arial 24,
+bottom-centre, white-on-black outline). Honours
+`<RequiresExtraInput>true</RequiresExtraInput>` so the executor prompts
+for the subtitle file at run time rather than baking a path into the
+preset. Contract test: 177 sidecars conforming.
 
 ---
 
@@ -549,7 +561,7 @@ Source: [S3] (Any Video Converter AI Denoise / Anime / Face Enhancement presets,
 
 ---
 
-### 17. HDR → SDR Tone Mapping Preset
+### 17. HDR → SDR Tone Mapping Preset — ✅ SHIPPED 2026-05-02
 
 New preset in VideoTools: HDR10 / HLG → SDR conversion using FFmpeg
 `zscale` + `tonemap` filter chain. Include Hable, Reinhard, and Mobius
@@ -558,6 +570,14 @@ first-class HDR→SDR workflow.
 
 Impact: 4 · Effort: 2 · Type: parity
 Source: [S9] (FFmpeg 8.1 — libavcodec 62.x new tone-mapping capabilities)
+
+**Closing commit:** existing `op_hdr_to_sdr` extended with
+`--operator {hable|reinhard|mobius|clip|linear|gamma}` + `--desat` +
+`--peak-nits` + `--crf` flags. Three new presets: `hdr-to-sdr-hable`
+(safest default), `hdr-to-sdr-reinhard` (saturation-faithful),
+`hdr-to-sdr-mobius` (highlight-rolling). Output naming distinguishes
+the three operators (`_sdr-hable` / `_sdr-reinhard` / `_sdr-mobius`)
+so a side-by-side render produces three files instead of overwriting.
 
 ---
 
@@ -590,7 +610,7 @@ Source: [S14] (EBU R128 — table-stakes in any professional audio conversion to
 
 ---
 
-### 19. Video Stabilization Preset
+### 19. Video Stabilization Preset — ✅ SHIPPED 2026-05-02
 
 Wrap FFmpeg `vidstab` (two-pass: `vidstabdetect` → `vidstabtransform`).
 New `VideoStabilizePage.xaml` or preset under VideoTools. Controls: shakiness
@@ -598,6 +618,17 @@ detection threshold, smoothing, border crop/black-fill mode.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S14] (standard professional video conversion feature)
+
+**Closing commit:** new `stabilize` op on `clipforge` runs the
+`vidstabdetect` -> `vidstabtransform` two-pass FFmpeg pipeline with the
+detection `.trf` written to a temp file beside the input and unlinked
+on success. Args: `--shakiness 1..10` / `--smoothing 1..60` /
+`--border {keep|black|crop}` plus standard codec/crf/preset overrides.
+Output passes through an `unsharp` second-pass filter to recover edge
+detail lost to the warp. Reports `vidstab_missing` error code when the
+local FFmpeg lacks `--enable-libvidstab` (BtbN's gpl builds include
+it). New `presets/stabilize.preset.xml` ships with shakiness 5 /
+smoothing 15 / keep-borders defaults.
 
 ---
 
@@ -662,7 +693,7 @@ Sources: [S14] (common request in audio processing communities),
 
 ---
 
-### 23. Auto Crop — Content-Aware Crop
+### 23. Auto Crop — Content-Aware Crop — ✅ SHIPPED 2026-05-02
 
 New `autocrop` preset using FFmpeg `cropdetect` filter: analyze a video clip
 for black borders, suggest crop rectangle, apply. Wire to `AutoCropPage.xaml`
@@ -670,6 +701,16 @@ or as a VideoTools option.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S5] (ToolboxPage.xaml.cs stub)
+
+**Closing commit:** new `auto-crop` op on `clipforge`. Sample-pass runs
+`cropdetect=<threshold>:16:0` over the first `--sample-seconds` (default
+10) of the input, parses the rectangles emitted to stderr, and picks the
+most-frequently observed. The rectangle is then re-injected into a
+single-pass re-encode. `--detect-only` skips the encode and emits the
+detected coordinates as a `complete.detected` payload (for UI preview).
+Errors as `crop_undetected` when no rectangle was reported (suggest
+raising `--threshold` and lengthening the sample window). New
+`presets/auto-crop.preset.xml` with threshold 24 / sample 10 / CRF 20.
 
 ---
 
