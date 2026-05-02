@@ -49,6 +49,13 @@ accessibility.
 > Opus 1.5 DRED neural PLC + 5th-order ambisonics) plus community-signal validation
 > (r/handbrake top-of-year). Net additions: Items 87–92. New appendix sources:
 > S153–S158. Cumulative: ~158 distinct sources, 92 roadmap items.
+>
+> **iter-7 wave 5 extension (2026-05-02 cont'd):** HDR/Dolby Vision tooling
+> (dovi_tool 2.3.2 RPU pass-through, hdr10plus_tool 1.7.2 dynamic metadata),
+> anime upscaling (Real-ESRGAN ncnn-vulkan + Anime4K GLSL), VapourSynth R75
+> scripting bridge, Tdarr V2 conditional-rules competitor analysis, PyAV v17
+> cuvid+dlpack zero-copy. Net additions: Items 93–98. New appendix sources:
+> S159–S165. Cumulative: ~165 distinct sources, 98 roadmap items.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -1448,6 +1455,161 @@ Sources: [S157] (r/handbrake top-of-year community signal)
 
 ---
 
+### 93. Dolby Vision RPU Pass-Through (dovi_tool 2.3.2) _(new T2 / HDR)_
+
+**Context (iter-7 wave 5, 2026-05-02):** **dovi_tool 2.3.2** [S159] (April 2025) is the
+de-facto Dolby Vision metadata Swiss-army knife: `extract` / `inject-rpu` / `mux` /
+`demux` / `editor` / `info` / `plot`. Critical fixes in 2.3.x: RPU now placed as last
+NALU in access unit (corrects FFmpeg-based playback), `--remove-eos` flag, L8 trim
+display fixes. Without RPU pass-through, transcoding a Dolby Vision source flattens it
+to HDR10 and silently destroys per-shot grading.
+
+**Concept:** Wrap dovi_tool as a `dovi-passthrough` sidecar. Default flow:
+(a) on encode start, `dovi_tool extract-rpu` from input → `RPU.bin` sidecar file;
+(b) re-encode video stream while preserving HEVC NALUs;
+(c) `dovi_tool inject-rpu` to put RPU back into the encoded HEVC stream;
+(d) `mux` step into MKV/MP4. Critical edge case: must detect Profile 5 (single-layer
+IPT-PQ-C2) vs Profile 7 (dual-layer FEL/MEL) and refuse Profile 7 → Profile 5 conversion
+(or expose an explicit `--convert-to-p8` flag with warning).
+
+**Why T2:** Dolby Vision is the gold standard HDR for film archival. UCX's video
+preset story is incomplete without this. Competitor pain: HandBrake silently strips
+DV; FFmpeg has it but requires CLI choreography. UCX wraps the whole flow in a preset.
+Synergy with **Item 71** (HDR10 metadata) and **Item 89** (AVIF gain map).
+
+Impact: 5 · Effort: 3 · Type: leapfrog + HDR
+Sources: [S159] (dovi_tool 2.3.2 — RPU extract/inject/mux, Apr 2025)
+
+---
+
+### 94. HDR10+ Dynamic Metadata Pass-Through (hdr10plus_tool 1.7.2) _(new T2 / HDR)_
+
+**Context (iter-7 wave 5, 2026-05-02):** **hdr10plus_tool 1.7.2** [S160] (Dec 2024)
+extract / inject / edit / plot HDR10+ dynamic metadata (SMPTE ST 2094-40, Samsung-
+backed competitor to Dolby Vision). v1.7.1 graduated MKV input out of experimental.
+Same problem as DV: a transcode without explicit pass-through erases the dynamic
+tone-mapping curve and reduces the file to static HDR10.
+
+**Concept:** Symmetric to Item 93. `hdrplus-passthrough` sidecar:
+(a) `hdr10plus_tool extract` from input HEVC → `metadata.json`;
+(b) re-encode video;
+(c) `hdr10plus_tool inject` JSON metadata back into the new HEVC bitstream;
+(d) optional editor pass for trim/level fixups via `editor`. Synergy with **Item 71**
+(HDR10 master metadata) — the static MaxCLL/MaxFALL go in the SEI, the dynamic curve
+goes via this path.
+
+**Why T2:** Less ubiquitous than DV but free of licensing constraints (open spec).
+Many Samsung TVs, recent Apple TV firmware, and YouTube playback honor it. Together
+with Item 93, completes the HDR-archival promise.
+
+Impact: 4 · Effort: 3 · Type: leapfrog + HDR
+Sources: [S160] (hdr10plus_tool 1.7.2 — extract/inject/edit/plot, Dec 2024)
+
+---
+
+### 95. Anime / Animation Upscale Sidecar (Real-ESRGAN + Anime4K) _(new T3 / AI)_
+
+**Context (iter-7 wave 5, 2026-05-02):** Two complementary anime upscalers exist:
+**Real-ESRGAN** [S161] ships an `realesr-animevideov3` model + portable
+`realesrgan-ncnn-vulkan` Windows binary supporting Intel/AMD/Nvidia GPUs (no CUDA
+dependency). **Anime4K** [S162] is a GLSL real-time shader chain optimized for
+1080p H.264/H.265/VC-1 anime, used widely via mpv/Plex. Both target a workflow UCX
+currently lacks: high-quality anime/animation upscaling distinct from photo content.
+
+**Concept:** Add an `anime-upscale` sidecar with two backends:
+(a) **Real-ESRGAN ncnn-vulkan** for batch offline 2× / 4× upscaling
+(works on integrated GPUs, no Python dependency).
+(b) **Anime4K (GLSL)** for a faster lower-quality preview pass via a small
+embedded GLSL renderer (or an mpv-script bridge for users who already have mpv).
+UI: AI Lab tile "Anime/Animation Upscale" with a mode selector and a preview frame
+side-by-side. Synergy with **Item 64** (general video upscaling).
+
+**Why T3:** Niche audience (anime/animation enthusiasts), but it's a clean win —
+Real-ESRGAN ncnn binary is a single-file drop-in and Vulkan is universally available
+on Windows 10 21H2+.
+
+Impact: 3 · Effort: 3 · Type: AI + niche audience
+Sources: [S161] (Real-ESRGAN — ncnn-vulkan portable Windows binary, anime models),
+[S162] (Anime4K — GLSL shader chain for real-time anime upscale)
+
+---
+
+### 96. VapourSynth Scripting Bridge _(new UC / Power-user)_
+
+**Context (iter-7 wave 5, 2026-05-02):** **VapourSynth R75** [S163] (Mar 2026) is the
+modern AviSynth successor: Python-scripted frame-server for video filters, with
+deep encoder-ecosystem support (x265, SVT-AV1, NVEncC consume `vspipe` output natively).
+R75 highlights: portable Windows experience improvements, optimized plugin manifests
+prevent recursive plugin load, `pip install vapoursynth` works on Windows/macOS/Linux.
+
+**Concept:** Add a `vapoursynth-runner` sidecar that takes a user-provided `.vpy`
+script + an input video and pipes the processed frame stream into UCX's encoder
+zoo via `vspipe -c y4m | encoder --y4m -i -`. Surface a "VapourSynth script"
+file picker on the encode page (advanced users only, off by default). This is a
+power-user escape hatch: anyone with a custom VS script (TIVTC inverse-telecine,
+QTGMC deinterlace, KNLMeansCL denoise, vs-mlrt with neural models) can route it
+through UCX without leaving the app.
+
+**Question blocking placement:** UCX's audience overlaps with mpv/encoder forums but
+not as deeply as r/AV1. Survey demand. If positive, promote to T3.
+
+Impact: 3 · Effort: 3 · Type: power-user / leapfrog
+Sources: [S163] (VapourSynth R75 — frame-server scripting framework)
+
+---
+
+### 97. Conditional Rules Engine (Tdarr-style) _(new UC / Automation)_
+
+**Context (iter-7 wave 5, 2026-05-02):** **Tdarr V2** [S164] is a direct adjacent
+competitor: distributed transcoding system with a Server + Nodes architecture,
+**conditional rule engine** ("if codec ≠ HEVC and audio ≠ AAC then transcode to
+HEVC + AAC"), library health checking, and Plex/Sonarr/Radarr integration. UCX has
+**Item 34 (Watch Folder)** but no rules layer — files matching a folder all run the
+same preset, regardless of content.
+
+**Concept:** Layer a rules engine on top of Watch Folders + Item 26 (queue):
+(a) probe each new file with `mediainfo` / `ffprobe`;
+(b) evaluate user-defined rules ("video codec is H.264 AND duration > 60 min →
+transcode SVT-AV1 CRF 32; else skip");
+(c) route matching files to the appropriate preset, mismatching files to "skipped"
+or "needs review" buckets. Persisted as `Profiles/<name>.rules.xml`. Synergy with
+**Item 6** (distributed encoding) — the rules engine is a natural prerequisite for
+any multi-machine batch workflow.
+
+**Why UC, not T2:** Rules engines are a deep design space. Tdarr's plugin model is
+JS-based and unbounded — replicating that scope is a separate product. Start with a
+simple declarative XML rules subset; promote to T2 only after we see real users
+asking for it.
+
+Impact: 4 · Effort: 4 · Type: automation + leapfrog
+Sources: [S164] (Tdarr V2 — distributed conditional transcoding, plugin model)
+
+---
+
+### 98. PyAV v17 Hardware-Memory Zero-Copy Path _(new T3 / Performance)_
+
+**Context (iter-7 wave 5, 2026-05-02):** **PyAV v17.0.0** [S165] (Mar 2026) introduces:
+hardware-memory preservation during cuvid decoding (export/import via **dlpack**),
+zero-copy `Packet` init from buffer, `OutputContainer.add_mux_stream()` for muxing
+pre-encoded packets without re-encoding (a dedicated remux path), and exposed
+`AVIndexEntry` for accurate seek metadata. Several UCX Python sidecars (PySceneDetect,
+faster-whisper preprocessing, image extraction) currently round-trip frames through
+NumPy CPU memory.
+
+**Concept:** Audit Python sidecars that touch hardware-decoded video (SceneDetect,
+preview-frame extraction in **Item 53**, the Whisper preprocessing path). Migrate
+the hot loops to PyAV v17 with `AV_HWDEVICE_TYPE_CUDA` + dlpack export to
+PyTorch/NumPy. Result: avoid CPU↔GPU copies on long-form video, measurable speedup
+on RTX cards. Add a `--no-hwaccel` fallback CLI for users on integrated graphics.
+
+**Trade-off:** PyAV v17 dropped libaom (use dav1d/svt-av1 alternatives) and 3.13t
+free-threading wheels — no impact on UCX's Python 3.11/3.12 frozen sidecars.
+
+Impact: 3 · Effort: 2 · Type: performance + dev-experience
+Sources: [S165] (PyAV v17 — hardware memory zero-copy via cuvid + dlpack, Mar 2026)
+
+---
+
 ### 34. Watch Folder Automation — ✅ SHIPPED (already)
 
 Background service that monitors one or more folders for new files and
@@ -2172,6 +2334,13 @@ Before any new sidecar or preset is merged:
 | S156 | https://github.com/xiph/opus/releases | Opus 1.5 / 1.5.2 — DRED neural packet loss recovery, Deep PLC, 4th/5th order Ambisonics, AVX2 fixes, Sep 2025 |
 | S157 | https://www.reddit.com/r/handbrake/top/ | r/handbrake community signal — top-of-year praise post + recurring complaints (preset confusion, queue fragility, HDR), Dec 2025 |
 | S158 | https://github.com/GyanD/codexffmpeg/releases | gyan.dev FFmpeg Windows builds — current 8.1 release + nightly git builds, regularly refreshed (Mar–Apr 2026) |
+| S159 | https://github.com/quietvoid/dovi_tool/releases | dovi_tool 2.3.2 — Dolby Vision RPU extract/inject/mux/demux/editor; FFmpeg-compat NALU placement; Apr 2025 |
+| S160 | https://github.com/quietvoid/hdr10plus_tool/releases | hdr10plus_tool 1.7.2 — HDR10+ dynamic metadata extract/inject/edit/plot; MKV input stable; Dec 2024 |
+| S161 | https://github.com/xinntao/Real-ESRGAN/releases | Real-ESRGAN — animevideov3 model + ncnn-vulkan portable Windows binary (Intel/AMD/Nvidia GPU) |
+| S162 | https://github.com/bloc97/Anime4K | Anime4K — GLSL real-time shader chain for 1080p anime → 4K via mpv/Plex |
+| S163 | https://github.com/vapoursynth/vapoursynth/releases | VapourSynth R75 — Python-scripted frame-server, _Range H.273 prop, optimized plugin manifests; Mar 2026 |
+| S164 | https://github.com/HaveAGitGat/Tdarr | Tdarr V2 — distributed conditional transcoding, server+node architecture, Sonarr/Radarr/Plex alongside |
+| S165 | https://github.com/PyAV-Org/PyAV/releases | PyAV v17.0.0/v17.0.1 — cuvid hw-memory zero-copy via dlpack, add_mux_stream() remux path; Mar 2026 |
 | S95 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
 | S96 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; Python; user-focused UX; AI image discovery |
 | S97 | https://github.com/meilisearch/meilisearch | Meilisearch — Lightning-fast full-text search with AI-powered hybrid search; Rust backend |
