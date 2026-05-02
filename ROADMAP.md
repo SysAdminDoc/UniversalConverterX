@@ -649,7 +649,7 @@ existing Audio-only / Subtitles cluster; job summary chip shows
 
 ---
 
-### 21. Speaker Diarization in STT Output
+### 21. Speaker Diarization in STT Output — ✅ SHIPPED (already, verified 2026-05-02 audit)
 
 Extend the `whisper-stt` / `whisper-cpp` sidecar with `pyannote.audio`
 (onnx variant to stay offline): identify speaker segments and label them
@@ -665,9 +665,17 @@ Impact: 3 · Effort: 3 · Type: leapfrog
 Sources: [S10] (Purfview whisper-standalone-win — pyannote_v3/onnx VAD + diarization),
 [S44] (faster-whisper v1.1.0 — batched inference, large-v3-turbo)
 
+**Already shipped (verified 2026-05-02 audit):** `tools/whisper-stt/sidecar.py:350`
+exposes `--diarize` flag; `tools/whisper-stt/sidecar.py:399-409` invokes
+`pyannote.audio` 3.1 (`pyannote/speaker-diarization-3.1`) when the user
+sets `HF_TOKEN`. Speaker labels are merged into the transcript output.
+The HF-token requirement is intentional — pyannote's gated model needs
+auth — and is cleanly surfaced as a `warn` log entry when missing.
+Future work: bundle an ONNX-converted variant for fully offline use.
+
 ---
 
-### 22. Background Audio Noise Reduction
+### 22. Background Audio Noise Reduction — ✅ SHIPPED (already, verified 2026-05-02 audit)
 
 New `audionoise` sidecar wrapping `rnnoise` (Mozilla) or `deepFilterNet`
 (ONNX model): remove background noise from speech recordings, interview
@@ -690,6 +698,16 @@ Impact: 3 · Effort: 3 · Type: parity
 Sources: [S14] (common request in audio processing communities),
 [S53] (DeepFilterNet v0.5.0/v0.5.3 — DeepFilterNet3, MVDR, attenuation limit),
 [S79] (DeepFilterNet v0.5.6 latest stable)
+
+**Already shipped (verified 2026-05-02 audit):** UCX ships TWO denoise
+sidecars covering both halves of the requested capability:
+`tools/speechenhance/` runs DeepFilterNet3 (`df.enhance`) with an
+`--atten` strength control (0..100 dB attenuation limit), and
+`tools/rnnoise/` runs Mozilla's RNNoise on lighter / broader signals.
+The README pattern is "DFN3 for noisy / reverberant speech, RNNoise
+for clean broadband noise." NoiseRemoverPage.xaml already wires the
+DFN3 path. DeepFilterNet pin tracks v0.5.6 (latest stable) per the
+iter-7 research note.
 
 ---
 
@@ -2353,7 +2371,7 @@ Sources: [S52] (FFmpeg 8.1 "Hoare" — D3D12 encode/filter, Vulkan ProRes, IAMF 
 
 ---
 
-### 67. ab-av1 VMAF / XPSNR-Guided CRF Auto-Search _(iter-6)_
+### 67. ab-av1 VMAF / XPSNR-Guided CRF Auto-Search _(iter-6)_ — ✅ SHIPPED 2026-05-02
 
 `ab-av1` [S54] is a Rust CLI tool that binary-searches over CRF values to find
 the minimum CRF that achieves a user-specified target VMAF score (or XPSNR as a
@@ -2380,6 +2398,22 @@ r/DataHoarder / Handbrake communities for archival quality.
 
 Impact: 3 · Effort: 3 · Type: leapfrog
 Sources: [S54] (ab-av1 — VMAF/XPSNR CRF auto-search, SVT-AV1/x265/x264 support)
+
+**Closing commit:** new `tools/ab-av1/` sidecar wraps the upstream
+ab-av1 Rust binary with four NDJSON ops: `auto-encode` (search +
+final encode), `crf-search` (search-only, emit recommended CRF
+without encoding), `sample-encode` (single CRF + report VMAF), and
+`probe` (availability + version). Encoder aliasing accepts
+`av1`/`svtav1` → `libsvtav1`, `h265`/`hevc` → `libx265`,
+`h264` → `libx264`. Output transcript parsed for the final CRF + VMAF
+pair so callers see the search result on the `complete` payload.
+ab-av1 binary itself isn't bundled (its v0.10+ Windows .exe is a
+single download from github.com/alexheretic/ab-av1/releases) — drop
+it next to the sidecar or under tools/_bin/ and the sidecar discovers
+it automatically. Three presets ship: `ab-av1-target-vmaf-93`
+(SVT-AV1 default archival), `ab-av1-target-vmaf-95-x265` (x265 high-
+quality), `ab-av1-crf-search-only` (recommendation only). Sidecar
+count: 179.
 
 The Phase 5 audit found three categories under-served by the original
 ROADMAP. These items were not in the Round 2 research output because the

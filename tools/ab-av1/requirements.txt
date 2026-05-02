@@ -1,0 +1,5 @@
+# ab-av1 sidecar (ROADMAP Item 67) — VMAF/XPSNR-guided CRF auto-search.
+#
+# The sidecar itself has no Python dependencies; it shells out to the ab-av1
+# Rust binary. Drop ab-av1.exe (from github.com/alexheretic/ab-av1/releases)
+# next to this sidecar or under tools/_bin/ at build time.

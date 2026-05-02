@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Encode to VMAF 95 (x265, ab-av1 search)</Name>
+    <Folder>Video/Quality target</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_x265_vmaf95</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>ab-av1</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>auto-encode</Arg>
+        <Arg>--encoder</Arg>
+        <Arg>libx265</Arg>
+        <Arg>--target-vmaf</Arg>
+        <Arg>95</Arg>
+        <Arg>--preset</Arg>
+        <Arg>medium</Arg>
+    </Args>
+</Preset>
