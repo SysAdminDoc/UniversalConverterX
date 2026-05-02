@@ -224,6 +224,28 @@ public class ConverterXOptions
 
     #endregion
 
+    #region Output Duration Validation (ROADMAP Item 72)
+
+    /// <summary>
+    /// After every successful media job, probe the output file with FFprobe and
+    /// compare its duration against the input. When the gap is larger than
+    /// <see cref="MinDurationDeltaSeconds"/> (or 1% of the input, whichever is
+    /// smaller), the result is flagged as <c>PARTIAL / TRUNCATED</c> so the
+    /// user notices silent video truncation (HandBrake #7828 class of bug).
+    /// Local-only check via the bundled FFprobe binary.
+    /// </summary>
+    public bool ValidateOutputDuration { get; set; } = true;
+
+    /// <summary>
+    /// Maximum tolerated input/output duration delta in seconds before the job
+    /// is flagged as truncated. Default 2 seconds — generous enough to cover
+    /// container-rounding error but tight enough to surface the seconds-to-
+    /// minutes truncations the validator targets.
+    /// </summary>
+    public double MinDurationDeltaSeconds { get; set; } = 2.0;
+
+    #endregion
+
     #region Methods
 
     /// <summary>
@@ -365,6 +387,8 @@ public class ConverterXOptions
         EnableHistory = defaults.EnableHistory;
         MaxHistoryEntries = defaults.MaxHistoryEntries;
         HistoryRetentionDays = defaults.HistoryRetentionDays;
+        ValidateOutputDuration = defaults.ValidateOutputDuration;
+        MinDurationDeltaSeconds = defaults.MinDurationDeltaSeconds;
     }
 
     private static string GetDefaultToolsPath()

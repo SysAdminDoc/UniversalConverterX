@@ -52,10 +52,12 @@ def _bootstrap():
                 except subprocess.CalledProcessError:
                     continue
 
-    # Optional deps — best-effort install, graceful fallback
+    # Optional deps — best-effort install, graceful fallback.
+    # ROADMAP Item 88: pillow-jxl-plugin pinned to >= 1.3.4 so the bundled
+    # libjxl is >= 0.11.2 (CVE-2025-12474, CVE-2026-1837 fixes).
     optional = {
         "rawpy": "rawpy",
-        "pillow_jxl": "pillow-jxl-plugin",
+        "pillow_jxl": "pillow-jxl-plugin>=1.3.4",
         "qoi": "qoi",
     }
     for module, package in optional.items():
