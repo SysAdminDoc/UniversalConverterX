@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Encode to VMAF 93 (SVT-AV1, ab-av1 search)</Name>
+    <Folder>Video/Quality target</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_av1_vmaf93</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>ab-av1</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>auto-encode</Arg>
+        <Arg>--encoder</Arg>
+        <Arg>libsvtav1</Arg>
+        <Arg>--target-vmaf</Arg>
+        <Arg>93</Arg>
+        <Arg>--preset</Arg>
+        <Arg>6</Arg>
+    </Args>
+</Preset>

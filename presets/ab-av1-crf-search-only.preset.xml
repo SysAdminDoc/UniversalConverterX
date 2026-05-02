@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>CRF search only (ab-av1, no encode)</Name>
+    <Folder>Video/Quality target</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_crf-recommendation</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>ab-av1</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>crf-search</Arg>
+        <Arg>--encoder</Arg>
+        <Arg>libsvtav1</Arg>
+        <Arg>--target-vmaf</Arg>
+        <Arg>93</Arg>
+    </Args>
+</Preset>

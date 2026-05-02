@@ -27,6 +27,40 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — ab-av1 VMAF / XPSNR-guided CRF auto-search (ROADMAP Item 67)
+
+- New `tools/ab-av1/` sidecar wraps the upstream ab-av1 Rust binary
+  with four NDJSON ops:
+  - `auto-encode` — search + produce the final encode at the smallest
+    CRF that hits the target VMAF.
+  - `crf-search` — search-only mode; emit the recommended CRF without
+    encoding (useful for capturing into a preset).
+  - `sample-encode` — encode a single sample at an explicit CRF and
+    report VMAF (verification before committing to a full encode).
+  - `probe` — report ab-av1 availability and version.
+- Encoder aliasing accepts `av1`/`svtav1` -> `libsvtav1`,
+  `h265`/`hevc` -> `libx265`, `h264` -> `libx264`. Search output
+  parsed for final CRF + VMAF; surfaced on the `complete` payload.
+- ab-av1 binary not bundled (single download from
+  github.com/alexheretic/ab-av1/releases); sidecar discovers it next
+  to the sidecar or under tools/_bin/.
+- Three presets ship: `ab-av1-target-vmaf-93` (SVT-AV1 archival),
+  `ab-av1-target-vmaf-95-x265` (x265 high-quality),
+  `ab-av1-crf-search-only` (recommendation only).
+- Sidecar count: 179 (was 178).
+
+### Reconciled — Speaker Diarization + Background Noise Reduction (ROADMAP Items 21, 22)
+
+- Item 21 (Speaker Diarization in STT Output) marked SHIPPED — the
+  whisper-stt sidecar already implements `--diarize` via pyannote
+  3.1 (`pyannote/speaker-diarization-3.1`) gated on the `HF_TOKEN`
+  env var. ONNX-converted offline variant remains as future work.
+- Item 22 (Background Audio Noise Reduction) marked SHIPPED — UCX
+  ships two sidecars covering both ends of the requested capability:
+  `tools/speechenhance/` runs DeepFilterNet3 with `--atten` strength
+  control, and `tools/rnnoise/` covers Mozilla RNNoise for clean
+  broadband noise. NoiseRemoverPage already wires the DFN3 path.
+
 ### Added — Auto-edit silence/motion removal sidecar (ROADMAP Item 73)
 
 - New `tools/auto-edit/` sidecar wraps the auto-editor CLI (>=27.0.0)
