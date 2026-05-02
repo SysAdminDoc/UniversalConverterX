@@ -364,7 +364,7 @@ build job now `needs: sidecar-contract`. 176 sidecars conforming locally.
 
 ---
 
-### 54. AiLabPage — Fix Stale "Future" Status Labels
+### 54. AiLabPage — Fix Stale "Future" Status Labels — ✅ SHIPPED 2026-05-02
 
 Three AiLab tiles (`TextToSpeech`, `SpeechToText`, `OldPhotoRestoration`)
 still display a `"Future"` status chip in `AiLabPage.xaml.cs` (lines 35–38)
@@ -373,12 +373,16 @@ Phase 5 audit). The stale label greys out tiles and suppresses the live
 call-to-action. Fix: change `TileStatus.Future` → `TileStatus.Ready` for
 the three shipped tiles. One-line change per tile; no sidecar involved.
 
+Shipped: `AiLabPage.xaml.cs` lines 36–38 — TTS/STT/OldPhoto chips now
+`Ready` with workflow-available subtitles and engine attributions
+(Kokoro/Piper, Whisper, Real-ESRGAN/GFPGAN). Build verified Release.
+
 Impact: 2 · Effort: 1 · Type: UX
 Source: [S2] (AiLabPage.xaml.cs stale status inspection, Phase 0 recon)
 
 ---
 
-### 60. Batch Queue — Auto-scroll to Active Job
+### 60. Batch Queue — Auto-scroll to Active Job — ✅ SHIPPED 2026-05-02
 
 When the batch queue begins processing a job, the queue `ListView` should
 auto-scroll to keep the active row visible. In deep queues (50+ items) the
@@ -386,6 +390,12 @@ processing row scrolls off-screen and users lose track of progress.
 Implementation: call `ListView.ScrollIntoView(activeItem)` when the
 orchestrator fires `ActiveJobChanged`. WinUI 3 `ListView` supports this
 natively — no custom scroll code required; no sidecar change.
+
+Shipped: `QueueList.ScrollIntoView(job)` invoked at top of the per-job
+loop in the three `QueueList`-bearing pages (`DownloaderPage`,
+`RecorderPage`, `FrameSnapshotPage`). Wrapped in try/catch to absorb
+the rare virtualization race where a container hasn't realized yet.
+Other pages use `QueuePivot` only and are unaffected. Build verified Release.
 
 Impact: 3 · Effort: 1 · Type: UX
 Source: [S40] (HandBrake #7813 — auto-scroll queue to active job)

@@ -302,6 +302,9 @@ public sealed partial class FrameSnapshotPage : Page
                 if (_cts.IsCancellationRequested)
                     break;
 
+                // ROADMAP Item 60 — keep the active job visible in long queues.
+                try { QueueList.ScrollIntoView(job); } catch { /* virtualization race; ignore */ }
+
                 StatusText.Text = $"Extracting snapshots from {job.FileName}...";
                 var result = await ExtractJobAsync(job, plan.Value, _cts.Token);
 

@@ -300,6 +300,9 @@ public sealed partial class RecorderPage : Page
                 if (_cts.IsCancellationRequested)
                     break;
 
+                // ROADMAP Item 60 — keep the active job visible in long queues.
+                try { QueueList.ScrollIntoView(job); } catch { /* virtualization race; ignore */ }
+
                 var outputPath = BuildOutputPath(job);
                 var args = BuildArgs(job, outputPath);
 
