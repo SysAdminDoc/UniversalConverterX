@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Burn-in subtitles (libass)</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_burned</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <RequiresExtraInput>true</RequiresExtraInput>
+    <ExtraInputPrompt>Pick a subtitle file (.srt / .ass / .ssa / .vtt) to burn into the video.</ExtraInputPrompt>
+    <Args>
+        <Arg>subtitle-burn</Arg>
+        <Arg>--font</Arg>
+        <Arg>Arial</Arg>
+        <Arg>--size</Arg>
+        <Arg>24</Arg>
+        <Arg>--position</Arg>
+        <Arg>bc</Arg>
+        <Arg>--margin-v</Arg>
+        <Arg>32</Arg>
+        <Arg>--outline</Arg>
+        <Arg>2.0</Arg>
+        <Arg>--crf</Arg>
+        <Arg>20</Arg>
+    </Args>
+</Preset>

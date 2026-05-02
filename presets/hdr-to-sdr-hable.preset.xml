@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>HDR -> SDR (Hable)</Name>
+    <Folder>Video/HDR</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>ts</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_sdr-hable</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>hdr-to-sdr</Arg>
+        <Arg>--operator</Arg>
+        <Arg>hable</Arg>
+        <Arg>--peak-nits</Arg>
+        <Arg>100</Arg>
+        <Arg>--crf</Arg>
+        <Arg>20</Arg>
+    </Args>
+</Preset>

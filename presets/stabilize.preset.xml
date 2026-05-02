@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Stabilize shaky video (vidstab two-pass)</Name>
+    <Folder>Video/Edit</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>m4v</Extension>
+        <Extension>ts</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_stabilized</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>stabilize</Arg>
+        <Arg>--shakiness</Arg>
+        <Arg>5</Arg>
+        <Arg>--smoothing</Arg>
+        <Arg>15</Arg>
+        <Arg>--border</Arg>
+        <Arg>keep</Arg>
+        <Arg>--crf</Arg>
+        <Arg>20</Arg>
+    </Args>
+</Preset>

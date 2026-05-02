@@ -972,9 +972,15 @@ def op_lut(args: argparse.Namespace) -> int:
     return 0
 
 
+_TONEMAP_OPERATORS = {"hable", "reinhard", "mobius", "clip", "linear", "gamma"}
+
+
 def op_hdr_to_sdr(args: argparse.Namespace) -> int:
-    """Tone-map HDR (BT.2020 / HLG / PQ) to SDR (BT.709) via libplacebo when
-    available, falling back to zscale + tonemap when not."""
+    """Tone-map HDR (BT.2020 / HLG / PQ) to SDR (BT.709) via FFmpeg's
+    `zscale` -> `tonemap` -> `zscale` filter chain. The tonemap operator is
+    user-selectable (Item 17): hable / reinhard / mobius are the three most
+    commonly recommended for SDR delivery; clip / linear / gamma are kept as
+    debug-style escape hatches."""
     ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
     if not ffmpeg or not ffprobe:
         return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
@@ -984,20 +990,259 @@ def op_hdr_to_sdr(args: argparse.Namespace) -> int:
     info = probe(ffprobe, str(src)) or {}
     duration = float(info.get("format", {}).get("duration", 0))
 
-    # zscale path is the most portable across ffmpeg builds.
-    vf = ("zscale=t=linear:npl=100,format=gbrpf32le,"
-          "zscale=p=bt709,tonemap=tonemap=hable:desat=0,"
-          "zscale=t=bt709:m=bt709:r=tv,format=yuv420p")
+    operator = (getattr(args, "operator", None) or "hable").lower()
+    if operator not in _TONEMAP_OPERATORS:
+        return fail("invalid_args",
+                    f"Unknown tonemap operator: {operator}. "
+                    f"Use one of {sorted(_TONEMAP_OPERATORS)}.")
+    desat = max(0.0, min(1.0, getattr(args, "desat", 0.0) or 0.0))
+    peak = getattr(args, "peak_nits", None) or 100
+    crf = getattr(args, "crf", None) or 20
+
+    # zscale path is the most portable across ffmpeg builds. tonemap accepts
+    # an optional desat=… arg to control colour-saturation falloff in highlights.
+    vf = (f"zscale=t=linear:npl={peak},format=gbrpf32le,"
+          f"zscale=p=bt709,tonemap=tonemap={operator}:desat={desat},"
+          f"zscale=t=bt709:m=bt709:r=tv,format=yuv420p")
     cmd = [ffmpeg, "-y", "-i", str(src),
            "-vf", vf,
-           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
+           "-c:v", "libx264", "-crf", str(crf), "-preset", "medium",
            "-c:a", "copy", str(out_path)]
+    emit("log", level="info",
+         message=f"hdr->sdr operator={operator} desat={desat} peak={peak} crf={crf}")
     emit("progress", percent=0, stage="hdr->sdr", eta_seconds=None)
     rc = run_ffmpeg(cmd, duration, "hdr->sdr")
     if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc} (zscale not built? Try a "
                                               "newer ffmpeg with --enable-libzimg).")
     emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
     return 0
+
+
+# ─── Subtitle burn-in (Item 14) ──────────────────────────────────────────────
+
+# 9-point grid -> ASS \an alignment (libass numbering: 1=BL, 2=BC, 3=BR,
+# 4=ML, 5=MC, 6=MR, 7=TL, 8=TC, 9=TR).
+_BURN_POSITION_TO_AN = {
+    "tl": 7, "tc": 8, "tr": 9,
+    "ml": 4, "mc": 5, "mr": 6,
+    "bl": 1, "bc": 2, "br": 3,
+}
+
+
+def _ffmpeg_subfile_arg(path: Path) -> str:
+    """Escape a Windows path so FFmpeg's `subtitles=` filter parses it."""
+    s = str(path).replace("\\", "/")
+    # Drive colon needs to be escaped twice for the inner filter parser.
+    s = s.replace(":", "\\:").replace("'", "\\'")
+    return s
+
+
+def op_subtitle_burn(args: argparse.Namespace) -> int:
+    """Burn an external subtitle file (.srt / .ass / .ssa / .vtt) into the
+    video using FFmpeg's `subtitles=` filter. Honours user font / size /
+    colour / outline / position controls via libass `force_style` overrides."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    sub = Path(args.subtitles)
+    if not sub.is_file():
+        return fail("missing_subtitles", f"Subtitle file not found: {args.subtitles}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    pos = (args.position or "bc").lower()
+    alignment = _BURN_POSITION_TO_AN.get(pos)
+    if alignment is None:
+        return fail("invalid_args", f"Unknown position: {pos}. "
+                                     f"Use one of {sorted(_BURN_POSITION_TO_AN)}.")
+
+    # libass force_style accepts comma-separated key=value pairs. We build the
+    # ones the user actually customised to keep style overrides minimal.
+    style_pairs = [
+        f"FontName={args.font}",
+        f"FontSize={args.size}",
+        f"PrimaryColour=&H{args.color}",
+        f"OutlineColour=&H{args.outline_color}",
+        f"BackColour=&H{args.shadow_color}",
+        f"BorderStyle={args.border_style}",
+        f"Outline={args.outline}",
+        f"Shadow={args.shadow}",
+        f"MarginV={args.margin_v}",
+        f"Alignment={alignment}",
+    ]
+    if args.bold:   style_pairs.append("Bold=-1")
+    if args.italic: style_pairs.append("Italic=-1")
+    style = ",".join(style_pairs)
+
+    sub_arg = _ffmpeg_subfile_arg(sub)
+    vf = f"subtitles='{sub_arg}':force_style='{style}'"
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", vf,
+           "-c:v", "libx264", "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy",
+           "-movflags", "+faststart", str(out_path)]
+    emit("log", level="info", message=f"burn subtitles {sub.name} -> {out_path.name}")
+    emit("progress", percent=0, stage="burn-in", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "burn-in")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited {rc} during subtitle burn-in.")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+# ─── Auto-crop (Item 23) ─────────────────────────────────────────────────────
+
+_CROPDETECT_RE = re.compile(r"crop=(\d+):(\d+):(\d+):(\d+)")
+
+
+def _detect_crop(ffmpeg: str, src: Path, sample_seconds: float, threshold: int) -> str | None:
+    """Run a short cropdetect pass over the first <sample_seconds> seconds
+    and return the most-frequently observed `crop=W:H:X:Y` rectangle. Returns
+    None when no rectangle could be detected."""
+    cmd = [ffmpeg, "-y",
+           "-t", f"{max(1.0, sample_seconds):.1f}",
+           "-i", str(src),
+           "-vf", f"cropdetect={threshold}:16:0",
+           "-f", "null", "-"]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    counts: dict[str, int] = {}
+    for ln in (proc.stderr or "").splitlines():
+        m = _CROPDETECT_RE.search(ln)
+        if not m:
+            continue
+        key = m.group(0)  # "crop=W:H:X:Y"
+        counts[key] = counts.get(key, 0) + 1
+    if not counts:
+        return None
+    return max(counts, key=counts.__getitem__)
+
+
+def op_auto_crop(args: argparse.Namespace) -> int:
+    """Detect black borders via FFmpeg's cropdetect filter and apply the
+    detected rectangle. Useful for letterboxed / pillarboxed content
+    captured from broadcast or DVD."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    emit("progress", percent=0, stage="cropdetect", eta_seconds=None)
+    sample = min(args.sample_seconds, max(1.0, duration))
+    crop = _detect_crop(ffmpeg, src, sample, args.threshold)
+    if crop is None:
+        return fail("crop_undetected",
+                    "cropdetect did not return a stable rectangle. "
+                    "Try --threshold higher (e.g. 36) or a longer --sample-seconds.")
+    emit("log", level="info", message=f"detected {crop}")
+
+    if args.detect_only:
+        # Probe-only mode — print the detected rectangle and exit successfully
+        # without producing an output file.
+        m = _CROPDETECT_RE.search(crop)
+        if m:
+            emit("complete", output=None,
+                 detected={"width": int(m.group(1)), "height": int(m.group(2)),
+                           "x": int(m.group(3)), "y": int(m.group(4))})
+        return 0
+
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", crop,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+    emit("progress", percent=0, stage="auto-crop", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "auto-crop")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited {rc} during auto-crop.")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+# ─── Video stabilization (Item 19) ───────────────────────────────────────────
+
+def op_stabilize(args: argparse.Namespace) -> int:
+    """Two-pass video stabilization via FFmpeg's vidstab filters.
+
+    Pass 1 runs `vidstabdetect` writing motion vectors to a temp `.trf` file.
+    Pass 2 runs `vidstabtransform` consuming that file and crops or fills
+    the borders introduced by the warp."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    border = (args.border or "keep").lower()
+    if border not in ("keep", "black", "crop"):
+        return fail("invalid_args",
+                    f"Unknown --border: {border}. Use keep, black, or crop.")
+    shakiness = max(1, min(10, args.shakiness))
+    smoothing = max(1, min(60, args.smoothing))
+
+    transforms = src.with_suffix(".trf")
+    try:
+        # Pass 1: detect.
+        detect_filter = f"vidstabdetect=shakiness={shakiness}:result={_ffmpeg_subfile_arg(transforms)}"
+        cmd1 = [ffmpeg, "-y", "-i", str(src),
+                "-vf", detect_filter,
+                "-f", "null", "-"]
+        emit("log", level="info",
+             message=f"stabilize pass1 shakiness={shakiness} -> {transforms.name}")
+        emit("progress", percent=0, stage="stabilize-detect", eta_seconds=None)
+        rc = run_ffmpeg(cmd1, duration, "stabilize-detect")
+        if rc != 0:
+            return fail("vidstab_missing",
+                        f"FFmpeg exited {rc}. The vidstab filter requires a "
+                        "build with --enable-libvidstab. BtbN's "
+                        "ffmpeg-master-latest-win64-gpl includes it.")
+
+        # Pass 2: transform.
+        if border == "crop":
+            transform_filter = (
+                f"vidstabtransform=smoothing={smoothing}:input={_ffmpeg_subfile_arg(transforms)}"
+                f":crop=keep,unsharp=5:5:0.8:3:3:0.4")
+        else:
+            crop_arg = "black" if border == "black" else "keep"
+            transform_filter = (
+                f"vidstabtransform=smoothing={smoothing}:input={_ffmpeg_subfile_arg(transforms)}"
+                f":crop={crop_arg},unsharp=5:5:0.8:3:3:0.4")
+        cmd2 = [ffmpeg, "-y", "-i", str(src),
+                "-vf", transform_filter,
+                "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+                "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+        emit("log", level="info",
+             message=f"stabilize pass2 smoothing={smoothing} border={border}")
+        emit("progress", percent=0, stage="stabilize-transform", eta_seconds=None)
+        rc = run_ffmpeg(cmd2, duration, "stabilize-transform")
+        if rc != 0:
+            return fail("ffmpeg_failed",
+                        f"FFmpeg exited {rc} during vidstabtransform pass.")
+        if not out_path.is_file():
+            return fail("output_missing", f"Output not produced: {out_path}")
+        emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+        return 0
+    finally:
+        try: transforms.unlink(missing_ok=True)
+        except OSError: pass
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1124,6 +1369,76 @@ def build_parser() -> argparse.ArgumentParser:
     h2s = sub.add_parser("hdr-to-sdr", help="Tone-map HDR (BT.2020/HLG/PQ) -> SDR (BT.709)")
     h2s.add_argument("--input", required=True)
     h2s.add_argument("--output", required=True)
+    h2s.add_argument("--operator", default="hable",
+                     help="Tonemap operator: hable, reinhard, mobius, clip, linear, gamma. "
+                          "Default 'hable' is the safest default for general SDR delivery.")
+    h2s.add_argument("--desat", type=float, default=0.0,
+                     help="Highlight desaturation 0.0..1.0 (default 0).")
+    h2s.add_argument("--peak-nits", type=int, default=100, dest="peak_nits",
+                     help="Reference SDR peak in nits passed to zscale (default 100).")
+    h2s.add_argument("--crf", type=int, default=20,
+                     help="CRF for the libx264 output (default 20).")
+
+    # ── subtitle-burn ─────────────────────────────────────────────────────────
+    burn = sub.add_parser("subtitle-burn",
+                          help="Burn an external subtitle file into the video (libass)")
+    burn.add_argument("--input", required=True)
+    burn.add_argument("--output", required=True)
+    burn.add_argument("--subtitles", required=True,
+                      help="Path to .srt / .ass / .ssa / .vtt subtitle file")
+    burn.add_argument("--font", default="Arial", help="Font family name (default Arial)")
+    burn.add_argument("--size", type=int, default=24, help="Font size px (default 24)")
+    burn.add_argument("--color", default="00FFFFFF",
+                      help="Primary fill colour as ASS BBGGRR or AABBGGRR hex (default 00FFFFFF = white).")
+    burn.add_argument("--outline-color", dest="outline_color", default="00000000",
+                      help="Outline colour as ASS hex (default 00000000 = black).")
+    burn.add_argument("--shadow-color", dest="shadow_color", default="80000000",
+                      help="Shadow colour as ASS hex (default 80000000 = 50%% black).")
+    burn.add_argument("--border-style", dest="border_style", type=int, default=1,
+                      help="Border style: 1=outline+shadow, 3=opaque box (default 1).")
+    burn.add_argument("--outline", type=float, default=2.0,
+                      help="Outline thickness in pixels (default 2.0).")
+    burn.add_argument("--shadow", type=float, default=0.0,
+                      help="Drop-shadow offset in pixels (default 0).")
+    burn.add_argument("--margin-v", dest="margin_v", type=int, default=24,
+                      help="Vertical margin from edge in pixels (default 24).")
+    burn.add_argument("--position", default="bc",
+                      help="9-point grid: tl tc tr ml mc mr bl bc br (default bc).")
+    burn.add_argument("--bold", action="store_true")
+    burn.add_argument("--italic", action="store_true")
+    burn.add_argument("--codec", default="libx264")
+    burn.add_argument("--crf", type=int, default=20)
+    burn.add_argument("--preset", default="medium")
+
+    # ── auto-crop ─────────────────────────────────────────────────────────────
+    autocrop = sub.add_parser("auto-crop",
+                              help="Detect black borders via cropdetect and apply the rectangle")
+    autocrop.add_argument("--input", required=True)
+    autocrop.add_argument("--output", required=True)
+    autocrop.add_argument("--threshold", type=int, default=24,
+                          help="cropdetect black-pixel threshold (default 24).")
+    autocrop.add_argument("--sample-seconds", dest="sample_seconds", type=float, default=10.0,
+                          help="Seconds of source to sample for detection (default 10).")
+    autocrop.add_argument("--detect-only", dest="detect_only", action="store_true",
+                          help="Detect and report the rectangle without producing an output file.")
+    autocrop.add_argument("--codec", default="libx264")
+    autocrop.add_argument("--crf", type=int, default=20)
+    autocrop.add_argument("--preset", default="medium")
+
+    # ── stabilize ─────────────────────────────────────────────────────────────
+    stab = sub.add_parser("stabilize",
+                          help="Two-pass video stabilization via vidstabdetect + vidstabtransform")
+    stab.add_argument("--input", required=True)
+    stab.add_argument("--output", required=True)
+    stab.add_argument("--shakiness", type=int, default=5,
+                      help="Detection shakiness 1..10 (default 5).")
+    stab.add_argument("--smoothing", type=int, default=15,
+                      help="Smoothing window in frames 1..60 (default 15).")
+    stab.add_argument("--border", default="keep",
+                      help="Border handling: keep | black | crop (default keep).")
+    stab.add_argument("--codec", default="libx264")
+    stab.add_argument("--crf", type=int, default=20)
+    stab.add_argument("--preset", default="medium")
 
     # ── timeline ──────────────────────────────────────────────────────────────
     timeline = sub.add_parser("timeline",
@@ -1187,6 +1502,12 @@ def main(argv: list[str] | None = None) -> int:
             return op_lut(args)
         if args.op == "hdr-to-sdr":
             return op_hdr_to_sdr(args)
+        if args.op == "subtitle-burn":
+            return op_subtitle_burn(args)
+        if args.op == "auto-crop":
+            return op_auto_crop(args)
+        if args.op == "stabilize":
+            return op_stabilize(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

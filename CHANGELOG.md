@@ -4,6 +4,45 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — Local crash bundle + structured app log (ROADMAP Item 51)
+
+- New `Services/StructuredLogger.cs` (`IStructuredLogger`) — NDJSON
+  daily-rotated app log with 500-entry in-memory ring buffer, 30-day
+  retention prune, and Debug/Info/Warning/Error/Crash levels. Verbose
+  off skips disk writes for Debug+Info but still populates the ring
+  buffer so a crash bundle has meaningful tail context.
+- New `Services/CrashBundle.cs` — captures a zip containing
+  `system-info.txt` (OS / runtime / app version / CPU / working set),
+  `exception.txt` (recursive InnerException walk + stack trace),
+  `log-tail.ndjson` (ring buffer snapshot), and `log-today.ndjson`
+  (the day's full file when present) into
+  `%LocalAppData%/UniversalConverterX/crashes/crash_<utc>.zip`.
+- `App.xaml.cs` registers the logger as a singleton, eagerly resolves
+  it in `OnLaunched`, and routes `UnhandledException`,
+  `AppDomain.CurrentDomain.UnhandledException`, and
+  `TaskScheduler.UnobservedTaskException` through both the logger and
+  the bundle capture.
+- `HomePage` Diagnostics card with "Open log folder" + "Export crash
+  bundle" buttons (status-text feedback on success/failure).
+- Local-only by charter: nothing leaves the user's disk unless they
+  manually attach the resulting zip to a bug report.
+
+### Added — Subtitle burn-in / HDR-to-SDR / Auto-crop / Stabilize (ROADMAP Items 14, 17, 19, 23)
+
+- `clipforge` sidecar gains four new ops:
+  - `subtitle-burn`: FFmpeg `subtitles=` + libass `force_style` —
+    font / size / colour / outline / shadow / 9-point position grid.
+  - `hdr-to-sdr` extended with `--operator {hable|reinhard|mobius|
+    clip|linear|gamma}` + `--desat` + `--peak-nits` + `--crf`.
+  - `auto-crop`: cropdetect sample pass picks the most-frequent
+    rectangle, then re-encode applies it. `--detect-only` reports the
+    detected box without producing output.
+  - `stabilize`: two-pass vidstabdetect -> vidstabtransform with
+    shakiness / smoothing / border (keep|black|crop) controls and a
+    final unsharp recovery pass.
+- Six new presets: `subtitle-burn`, `hdr-to-sdr-{hable,reinhard,mobius}`,
+  `auto-crop`, `stabilize`. Contract test still 177 sidecars conforming.
+
 ### Added — Audio loudness preset library expansion (ROADMAP Item 18)
 
 - New `presets/loudnorm-broadcast.preset.xml` — EBU R128 / ATSC A/85
