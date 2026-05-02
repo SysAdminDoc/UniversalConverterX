@@ -268,6 +268,8 @@ KNOWN_EVENTS = {
     "dev_doc",             # devbuild — npm / Cargo / Composer / Maven / Go / .csproj
     # v2.20.1 cleanup
     "frame",               # framesnap — extracted video frame
+    # v2.21 wave (audio dynamic-range compression)
+    "audio_compressed",    # audio-compressor — applied DRC params + before/after sizes
 }
 
 
