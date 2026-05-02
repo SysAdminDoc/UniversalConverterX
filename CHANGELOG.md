@@ -4,6 +4,66 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — SponsorBlock integration in StreamKeep + DownloaderPage (ROADMAP Item 20)
+
+- New `--sponsorblock {mark,remove}` flag in `tools/streamkeep/sidecar.py`
+  plus `--sponsorblock-categories` (default `sponsor,selfpromo,interaction`).
+  When set, populates yt-dlp's `sponsorblock_remove` / `sponsorblock_mark`
+  ydl_opts. Backwards-compatible: omitting the flag is byte-for-byte
+  identical to prior behaviour.
+- DownloaderPage gains a "Skip sponsor segments (SponsorBlock)" checkbox
+  alongside the existing Audio-only / Subtitles cluster. Job summary
+  chip shows "+ sponsor-skip" when active. Tooltip documents the
+  network behaviour (api.sponsor.ajay.app via yt-dlp's postprocessor).
+
+### Added — Audio VBR quality mode in audiopro + videocrush (ROADMAP Item 30)
+
+- Unified `--vbr-quality 0..9` (audiopro) / `--audio-vbr-quality 0..9`
+  (videocrush) flag with codec-specific remapping:
+  - libmp3lame → `-q:a 0..9` directly
+  - libvorbis → `-q:a 9..0` (scale inverted)
+  - libfdk_aac → `-vbr 5..1`
+  - aac (native) → `-q:a 2.0..0.1` interpolated
+  - libopus → `-b:a 192..32` kbps + `-vbr on`
+  - unknown codec → warn + fall back to CBR / format defaults
+- `videocrush` audio command-build refactored into a new `audio_args()`
+  helper. The four inline cmd-build sites (intermediate codec branch,
+  CRF mode, AV1 size-targeted, H.264/265 two-pass) now share one source
+  of truth — eliminates copy-paste behaviour. Behaviour-preserving when
+  `--audio-vbr-quality` is omitted.
+- New presets:
+  - `to-mp3-vbr-q2.preset.xml` — VBR V2 (~190 kbps avg, transparent)
+  - `to-mp3-vbr-q4.preset.xml` — VBR V4 (~165 kbps avg, smaller files)
+  - `to-aac-vbr-q3.preset.xml` — AAC VBR Q3 m4a output
+
+### Added — Subtitle track export (ROADMAP Item 13 narrowed)
+
+- `tools/clipforge/sidecar.py` gains `track-extract` op + argparse
+  subcommand. Auto-picks FFmpeg subtitle codec from output extension
+  (.srt → subrip / .vtt → webvtt / .ass → ass / .ssa → ssa / .lrc → lrc).
+  PGS / DVD bitmap streams stream-copied to `.sup` only; bitmap-to-text
+  OCR is correctly delegated to `subocr` / `subkit` sidecars.
+- `TrackManagerPage` row template adds a per-row "Export..." button on
+  subtitle rows (`IsSubtitle` + `ExportButtonVisibility` helpers on
+  `TrackRow`). FileSavePicker scopes choices by source codec class
+  (text vs bitmap) so users can't pick a transcoding combination the
+  sidecar would refuse.
+
+### Changed — ROADMAP.md (Phase 5 audit follow-through)
+
+- Items 20 and 30 promoted to Tier 1 priority (still numbered under Tier 2
+  for stable cross-references; flagged in the Tier 1 header).
+- Items 7, 45, 48 carry inline Charter notes documenting why each
+  user-initiated network operation aligns with the offline-first charter
+  + which guardrails each must honour.
+- Item 10 (Accessibility UIA) rewritten as "continue an in-progress
+  audit" with the verified state (22 `Name` occurrences across 10 of
+  45+ pages; zero `AutomationId` in `src`) and three concrete remaining
+  steps including a CI lint to prevent regressions.
+- Three new items (51 Observability, 52 Plugin Manifest, 53 Settings
+  Schema Migration) added in a new "Audit-Surfaced Coverage Gaps" section.
+  Total ROADMAP item count: 50 → 53.
+
 ### Added — orchestrator-level output filename collision protection (ROADMAP Item 4)
 
 - **`UniversalConverterX.Core/Utilities/UniqueOutputPath`** — new utility:

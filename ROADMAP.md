@@ -247,7 +247,7 @@ Sources: [S8] (ExifTool 100+ format support), [S3] (Any Video Converter metadata
 
 ---
 
-### 13. Subtitle Track Management — ⚠️ PARTIALLY SHIPPED
+### 13. Subtitle Track Management — ✅ SHIPPED 2026-05-02
 
 Add/remove/export subtitle tracks in MKV/MP4 without full re-encode. New
 preset + sidecar wrapping `mkvmerge` or `ffmpeg -map` for track operations.
@@ -257,11 +257,12 @@ Track". Complements existing `subconvert` and `subkit` sidecars.
 Impact: 4 · Effort: 2 · Type: parity
 Sources: [S3] (Any Video Converter track add/remove/export, v9.1.8), [S26] (SubtitleEdit v5.0.0 format breadth)
 
-**Already shipped (verified 2026-05-01 audit):**
-`TrackManagerPage.xaml{,.cs}` already supports `track-add` and `track-remove`.
-
-**Remaining work** (narrowed): subtitle track *export* path — extract a
-specific subtitle track to an `.srt`/`.vtt`/`.ass` file via `ffmpeg -map 0:s:N`.
+**Closing commits:**
+- track-add and track-remove shipped pre-v2.20.1 (caught by 2026-05-01 audit).
+- track-extract shipped 2026-05-02 in commit `11b7829` — `clipforge`
+  sidecar gains `op_track_extract` (auto-picks codec from output extension:
+  `.srt`/`.vtt`/`.ass`/`.ssa`/`.lrc`/`.sup`); `TrackManagerPage` row
+  template gains a per-row Export button on subtitle rows.
 
 ---
 
@@ -335,7 +336,7 @@ Source: [S14] (standard professional video conversion feature)
 
 ---
 
-### 20. SponsorBlock Integration (StreamKeep / yt-dlp)
+### 20. SponsorBlock Integration (StreamKeep / yt-dlp) — ✅ SHIPPED 2026-05-02
 
 Pass `--sponsorblock-remove` (or `--sponsorblock-mark`) flags through to
 the yt-dlp sidecar. Expose as a checkbox in `StreamKeepPage.xaml`:
@@ -344,6 +345,11 @@ natively — it's a config-surface task.
 
 Impact: 4 · Effort: 1 · Type: leapfrog
 Source: [S13] (yt-dlp SponsorBlock flags in latest releases)
+**Closing commit:** `c338af1` — `streamkeep` sidecar gains
+`--sponsorblock {mark,remove}` and `--sponsorblock-categories`;
+`DownloaderPage` adds a "Skip sponsor segments" checkbox alongside the
+existing Audio-only / Subtitles cluster; job summary chip shows
+"+ sponsor-skip" when active.
 
 ---
 
@@ -472,7 +478,7 @@ of ffmpeg"), [S38] (Videomass advanced FFmpeg panel UX reference)
 
 ---
 
-### 30. Audio VBR Quality Mode
+### 30. Audio VBR Quality Mode — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 Add a "Quality (VBR)" encoding mode toggle alongside the existing fixed-bitrate
 mode in audio conversion presets. libmp3lame: `-q:a 0–9` (0 = highest quality);
@@ -484,6 +490,18 @@ no new sidecar required.
 
 Impact: 3 · Effort: 1 · Type: parity
 Source: [S29] (66HEX/frame v0.28.0 — audio VBR MP3/AAC quality preset)
+
+**Closing commits:**
+- Sidecar + presets shipped 2026-05-02 in commit `0fdfad5` —
+  `tools/audiopro/sidecar.py` and `tools/videocrush/sidecar.py` both
+  gain a unified 0..9 VBR quality flag with codec-specific remapping
+  (libmp3lame / libvorbis / libfdk_aac / aac native / libopus). Three
+  new presets (mp3 V2, mp3 V4, AAC Q3). The `videocrush` audio cmd-build
+  was refactored into a reusable `audio_args()` helper at the same time.
+- **Remaining work**: `AudioConverterPage.xaml` UI surface deferred —
+  the page itself doesn't yet exist (covered by ROADMAP Item 2). When
+  Item 2 lands, surface the VBR controls there. The slider/toggle the
+  ROADMAP describes can land alongside.
 
 ---
 
