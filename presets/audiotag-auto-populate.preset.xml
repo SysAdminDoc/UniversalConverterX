@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Auto-populate audio tags from filename</Name>
+    <Folder>Audio/Tags</Folder>
+    <InputTypes>
+        <Extension>mp3</Extension>
+        <Extension>flac</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+        <Extension>m4a</Extension>
+        <Extension>aac</Extension>
+        <Extension>wav</Extension>
+        <Extension>aiff</Extension>
+        <Extension>ape</Extension>
+        <Extension>wma</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>{ext}</OutputExtension>
+    <Engine>audiotag</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>auto-populate</Arg>
+    </Args>
+</Preset>

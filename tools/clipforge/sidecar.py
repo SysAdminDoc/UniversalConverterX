@@ -1018,6 +1018,42 @@ def op_hdr_to_sdr(args: argparse.Namespace) -> int:
     return 0
 
 
+# ─── Intro/outro editor (Item 36) ────────────────────────────────────────────
+
+def op_intro_outro(args: argparse.Namespace) -> int:
+    """Prepend an intro and/or append an outro to the primary --input video.
+    Thin wrapper over op_concat: builds the [intro?, primary, outro?] list,
+    delegates to the existing concat machinery (stream-copy when codecs match,
+    filter_complex when not), and produces a single output. Keeps the
+    intro/outro UX clean for callers who don't want to think about `nargs="+"`."""
+    primary = Path(args.input)
+    if not primary.is_file():
+        return fail("missing_input", f"Primary input not found: {args.input}")
+    pieces: list[Path] = []
+    if args.intro:
+        ip = Path(args.intro)
+        if not ip.is_file():
+            return fail("missing_intro", f"Intro file not found: {args.intro}")
+        pieces.append(ip)
+    pieces.append(primary)
+    if args.outro:
+        op = Path(args.outro)
+        if not op.is_file():
+            return fail("missing_outro", f"Outro file not found: {args.outro}")
+        pieces.append(op)
+
+    if len(pieces) == 1:
+        return fail("nothing_to_concat",
+                    "intro-outro requires at least one --intro or --outro file.")
+
+    # Synthesise the args namespace op_concat expects.
+    concat_args = argparse.Namespace(
+        input=[str(p) for p in pieces],
+        output=args.output,
+        reencode=bool(args.reencode))
+    return op_concat(concat_args)
+
+
 # ─── 360° / VR projection (Item 38) ──────────────────────────────────────────
 
 _V360_INPUT_PROJECTIONS = {"e", "equirect", "c3x2", "c6x1", "c1x6", "fisheye", "flat", "dfisheye", "barrel", "cube"}
@@ -1584,6 +1620,16 @@ def build_parser() -> argparse.ArgumentParser:
     autocrop.add_argument("--crf", type=int, default=20)
     autocrop.add_argument("--preset", default="medium")
 
+    # ── intro-outro ───────────────────────────────────────────────────────────
+    io_p = sub.add_parser("intro-outro",
+                          help="Prepend an intro and/or append an outro to the primary input")
+    io_p.add_argument("--input", required=True, help="Primary video file")
+    io_p.add_argument("--output", required=True)
+    io_p.add_argument("--intro", help="Optional pre-clip prepended to the primary video")
+    io_p.add_argument("--outro", help="Optional post-clip appended to the primary video")
+    io_p.add_argument("--reencode", action="store_true",
+                      help="Force a filter_complex re-encode even when codecs match.")
+
     # ── v360 ──────────────────────────────────────────────────────────────────
     v360 = sub.add_parser("v360",
                           help="Reproject 360°/VR video between equirectangular, cubemap, fisheye, flat (FFmpeg v360 filter)")
@@ -1729,6 +1775,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_watermark(args)
         if args.op == "v360":
             return op_v360(args)
+        if args.op == "intro-outro":
+            return op_intro_outro(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")
