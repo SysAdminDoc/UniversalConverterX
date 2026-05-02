@@ -909,7 +909,7 @@ Source: [S32] (smacke/subsync — FFT audio fingerprint subtitle synchronization
 
 ---
 
-### 33. Media Inspector (Technical Stream Analysis)
+### 33. Media Inspector (Technical Stream Analysis) — ✅ SHIPPED (already, via FormatInspectorPage)
 
 New `mediainspect` sidecar wrapping `pymediainfo` (Python MediaInfo bindings):
 surface full technical metadata for any A/V file — container format, all
@@ -928,6 +928,16 @@ without requiring the full C2PA embedding pipeline (UC table entry).
 Impact: 3 · Effort: 2 · Type: parity
 Sources: [S37] (MediaArea/MediaInfo — technical A/V stream analysis, C2PA parsing),
 [S35] (krzemienski/awesome-video: sbraz/pymediainfo wrapper)
+
+**Already shipped (verified 2026-05-02 audit):**
+`Views/Pages/FormatInspectorPage.xaml{,.cs}` (560 LOC) ships native
+file-signature detection plus FFprobe-driven stream analysis,
+collapsible per-stream sections, and JSON export. The pymediainfo
+backend isn't strictly required since FFprobe surfaces the same
+codec / profile / bit-depth / colorspace / HDR / channel-layout /
+language-tag fields. The C2PA assertion follow-up remains as a UC
+deferment until `MediaInfo` (or an equivalent C2PA-aware probe) is
+introduced as a parallel inspector backend.
 
 ---
 
