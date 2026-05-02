@@ -167,7 +167,7 @@ useful without it.
 
 ---
 
-### 3. OtherTools — Batch Rename
+### 3. OtherTools — Batch Rename — ✅ SHIPPED 2026-05-02
 
 New `batchrename` sidecar (or pure-C# implementation): regex/pattern-based
 file rename with live preview. Tokens: `{n}` (1-based counter), `{date}`,
@@ -180,6 +180,13 @@ a Next-tier enhancement.
 
 Impact: 4 · Effort: 2 · Type: parity
 Sources: [S5] (ToolboxPage stub), [S6] (competitor feature)
+**Closing commit:** new `BatchRenamePage` (XAML + code-behind) — drag-drop
+file list, regex toggle, case transform, counter start/step, output
+template (`{n}`, `{n:03}`, `{stem}`, `{ext}`, `{parent}`, `{date}`,
+`{date:fmt}`), live preview with conflict detection (in-batch + on-disk),
+two-pass `File.Move` apply with per-row error capture. Toolbox tile
+flipped Future→Ready (UCX engine). ExifTool tokens (`{exif:*}`) deferred
+to Next-tier per original scope note.
 
 ---
 

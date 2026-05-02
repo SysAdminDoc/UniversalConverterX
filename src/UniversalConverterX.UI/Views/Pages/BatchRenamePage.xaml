@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.BatchRenamePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}"
+    AutomationProperties.Name="Batch Rename">
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock Text="Batch Rename"
+                       Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="{StaticResource TextMutedBrush}"
+                       Text="Pattern-based file rename with live preview. Regex supported. Tokens: {n}, {n:padding}, {stem}, {ext}, {parent}, {date}, {date:format}. Nothing renames until you click Apply."/>
+        </StackPanel>
+
+        <!-- File source -->
+        <Border Grid.Row="1"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="14" Padding="16">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center"
+                           Text="Drop files here, or use the buttons →"
+                           Foreground="{StaticResource TextMutedBrush}"
+                           x:Name="DropHint"/>
+                <Button Grid.Column="1" Content="Add Files"
+                        x:Name="AddFilesButton"
+                        AutomationProperties.AutomationId="BatchRename_AddFilesButton"
+                        Click="AddFiles_Click"/>
+                <Button Grid.Column="2" Content="Add Folder"
+                        x:Name="AddFolderButton"
+                        AutomationProperties.AutomationId="BatchRename_AddFolderButton"
+                        Click="AddFolder_Click"/>
+                <Button Grid.Column="3" Content="Clear"
+                        x:Name="ClearButton"
+                        AutomationProperties.AutomationId="BatchRename_ClearButton"
+                        Click="Clear_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Rename rules -->
+        <Border Grid.Row="2"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="14" Padding="16">
+            <StackPanel Spacing="12">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             x:Name="FindBox"
+                             Header="Find"
+                             PlaceholderText="literal text or regex pattern"
+                             AutomationProperties.AutomationId="BatchRename_FindBox"
+                             TextChanged="Rule_Changed"/>
+                    <TextBox Grid.Column="1"
+                             x:Name="ReplaceBox"
+                             Header="Replace with"
+                             PlaceholderText="leave blank to delete matches; supports tokens"
+                             AutomationProperties.AutomationId="BatchRename_ReplaceBox"
+                             TextChanged="Rule_Changed"/>
+                </Grid>
+
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ToggleSwitch Grid.Column="0"
+                                  x:Name="RegexSwitch"
+                                  Header="Regex"
+                                  OffContent="Off" OnContent="On"
+                                  AutomationProperties.AutomationId="BatchRename_RegexSwitch"
+                                  Toggled="RegexSwitch_Toggled"/>
+                    <ComboBox Grid.Column="1"
+                              x:Name="CaseCombo"
+                              Header="Case"
+                              SelectedIndex="0"
+                              MinWidth="120"
+                              AutomationProperties.AutomationId="BatchRename_CaseCombo"
+                              SelectionChanged="Rule_Changed">
+                        <ComboBoxItem Content="No change" Tag="none"/>
+                        <ComboBoxItem Content="lower" Tag="lower"/>
+                        <ComboBoxItem Content="UPPER" Tag="upper"/>
+                        <ComboBoxItem Content="Title Case" Tag="title"/>
+                    </ComboBox>
+                    <NumberBox Grid.Column="2"
+                               x:Name="CounterStartBox"
+                               Header="Counter start"
+                               Value="1"
+                               SpinButtonPlacementMode="Inline"
+                               Minimum="0"
+                               AutomationProperties.AutomationId="BatchRename_CounterStartBox"
+                               ValueChanged="Counter_Changed"/>
+                    <NumberBox Grid.Column="3"
+                               x:Name="CounterStepBox"
+                               Header="Counter step"
+                               Value="1"
+                               SpinButtonPlacementMode="Inline"
+                               Minimum="1"
+                               AutomationProperties.AutomationId="BatchRename_CounterStepBox"
+                               ValueChanged="Counter_Changed"/>
+                    <TextBox Grid.Column="4"
+                             x:Name="TemplateBox"
+                             Header="Output template (overrides Find/Replace if set)"
+                             PlaceholderText="e.g. {n:03}_{stem}{ext}"
+                             AutomationProperties.AutomationId="BatchRename_TemplateBox"
+                             TextChanged="Rule_Changed"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Preview -->
+        <Border Grid.Row="3"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="14" Padding="16">
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="Original"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="1"
+                               Text="New"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Grid.Column="2"
+                               x:Name="ConflictBadge"
+                               Foreground="{StaticResource AccentRedBrush}"
+                               Visibility="Collapsed"
+                               Text="conflicts"/>
+                </Grid>
+                <ListView Grid.Row="1"
+                          x:Name="PreviewList"
+                          SelectionMode="None"
+                          AutomationProperties.AutomationId="BatchRename_PreviewList">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnSpacing="12" Padding="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding OriginalDisplay}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding NewName}"
+                                           Foreground="{Binding NewNameBrush}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <FontIcon Grid.Column="2"
+                                          Glyph="{Binding StatusGlyph}"
+                                          Foreground="{Binding StatusBrush}"
+                                          FontSize="14"
+                                          ToolTipService.ToolTip="{Binding StatusTooltip}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <!-- Apply bar -->
+        <Grid Grid.Row="4" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       x:Name="StatusText"
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextMutedBrush}"
+                       Text="Add files to begin."/>
+            <Button Grid.Column="1"
+                    x:Name="ApplyButton"
+                    Content="Apply rename"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="BatchRename_ApplyButton"
+                    Click="Apply_Click"/>
+        </Grid>
+    </Grid>
+</Page>
