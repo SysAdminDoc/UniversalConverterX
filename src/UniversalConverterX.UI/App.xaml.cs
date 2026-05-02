@@ -45,6 +45,7 @@ public partial class App : Application
         services.AddSingleton<IWatchFolderService, WatchFolderService>();
         services.AddSingleton<IPresetExecutor, PresetExecutor>();
         services.AddSingleton<IUiPresetCache, UiPresetCache>();
+        services.AddSingleton<IUpdateCheckService, UpdateCheckService>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();
@@ -70,6 +71,19 @@ public partial class App : Application
         // WatchFolderService also depends on HistoryService for job logging, so order matters.
         _ = Services.GetRequiredService<IHistoryService>();
         _ = Services.GetRequiredService<IWatchFolderService>();
+
+        // ROADMAP Item 7 — fire-and-forget update probe (24h-throttled,
+        // honours ConverterXOptions.CheckForUpdates opt-out, never blocks
+        // launch). Results land in update-cache.json for the dashboard.
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var checker = Services.GetRequiredService<IUpdateCheckService>();
+                await checker.CheckAsync().ConfigureAwait(false);
+            }
+            catch { /* probe failures must never crash the app */ }
+        });
 
         _ = ConfigureJumpListAsync();
     }
