@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Views;
 
@@ -124,19 +125,15 @@ public sealed partial class ProgressWindow : Window
         item.ShowProgress = Visibility.Visible;
         item.IsIndeterminate = true;
 
-        // Determine output path
+        // Determine output path. The orchestrator's OverwriteBehavior switch
+        // will auto-rename collisions universally, but we resolve here too so
+        // the UI shows the final path before dispatch (and so the policy is
+        // identical in shape: "stem (N).ext", not the legacy "stem_N.ext").
         var outputDir = _outputDirectory ?? Path.GetDirectoryName(item.FilePath) ?? "";
         var outputName = Path.GetFileNameWithoutExtension(item.FilePath) + "." + _targetFormat;
-        var outputPath = Path.Combine(outputDir, outputName);
-
-        // Handle existing files
-        var counter = 1;
-        while (File.Exists(outputPath))
-        {
-            outputName = $"{Path.GetFileNameWithoutExtension(item.FilePath)}_{counter}.{_targetFormat}";
-            outputPath = Path.Combine(outputDir, outputName);
-            counter++;
-        }
+        var outputPath = UniqueOutputPath.TryResolve(Path.Combine(outputDir, outputName), out var resolved)
+            ? resolved
+            : Path.Combine(outputDir, outputName);
 
         var job = new ConversionJob
         {
