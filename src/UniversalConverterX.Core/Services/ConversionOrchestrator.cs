@@ -6,6 +6,7 @@ using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Detection;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Core.Services;
 
@@ -139,6 +140,56 @@ public class ConversionOrchestrator : IConversionOrchestrator
                 job.Status = ConversionStatus.Failed;
                 job.CompletedAt = DateTime.UtcNow;
                 return ConversionResult.Failed(job, "Output path is required.", DateTime.UtcNow - startedAt);
+            }
+
+            // Apply overwrite behavior at the orchestrator boundary so every
+            // converter strategy and CLI/UI caller benefits uniformly. Ask
+            // and Always fall through to the converter unchanged — Ask is a
+            // UI-layer concern (Core has no prompt surface, and silently
+            // remapping it here would change behaviour for upgraders with
+            // OverwriteBehavior=Ask persisted in settings.json).
+            switch (ResolveOverwriteBehavior(job))
+            {
+                case OverwriteBehavior.Skip when File.Exists(job.OutputPath):
+                    _logger?.LogInformation(
+                        "Skipping {Output}: file exists and OverwriteBehavior=Skip",
+                        job.OutputPath);
+                    job.Status = ConversionStatus.Skipped;
+                    job.CompletedAt = DateTime.UtcNow;
+                    return ConversionResult.Skipped(
+                        job,
+                        $"Output already exists at '{job.OutputPath}' and OverwriteBehavior=Skip.",
+                        DateTime.UtcNow - startedAt);
+
+                case OverwriteBehavior.Never when File.Exists(job.OutputPath):
+                    try
+                    {
+                        var renamed = UniqueOutputPath.Resolve(job.OutputPath);
+                        if (!string.Equals(renamed, job.OutputPath, StringComparison.Ordinal))
+                        {
+                            _logger?.LogInformation(
+                                "Output file collision: '{Original}' exists; auto-renamed to '{Renamed}'",
+                                job.OutputPath, renamed);
+                            job.OutputPath = renamed;
+                        }
+                    }
+                    catch (IOException ioex)
+                    {
+                        // Saturation: every (1)..(9999) suffix taken. Surface
+                        // as a normal failed result rather than crashing the
+                        // calling CLI / UI batch loop.
+                        _logger?.LogWarning(ioex,
+                            "UniqueOutputPath saturated for '{Output}'", job.OutputPath);
+                        job.Status = ConversionStatus.Failed;
+                        job.CompletedAt = DateTime.UtcNow;
+                        return ConversionResult.Failed(job, ioex.Message, DateTime.UtcNow - startedAt);
+                    }
+                    break;
+
+                case OverwriteBehavior.Ask:
+                case OverwriteBehavior.Always:
+                default:
+                    break;
             }
 
             // Detect format if not specified
@@ -459,4 +510,25 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
         _ => "application/octet-stream"
     };
+
+    /// <summary>
+    /// Combine the global <see cref="ConverterXOptions.OverwriteBehavior"/>
+    /// with the per-job <see cref="ConversionOptions.OverwriteExisting"/>
+    /// flag. A per-job opt-in to overwrite always wins so callers can short
+    /// circuit auto-rename when they have already negotiated the path with
+    /// the user (e.g. "Save As" dialogs that already confirmed overwrite).
+    /// Ask is preserved as-is — the orchestrator does NOT remap it. UI
+    /// layers that want a true prompt should show one and set
+    /// <see cref="ConversionOptions.OverwriteExisting"/> on the job after
+    /// the user clicks "Yes". CLI / batch contexts get Never as the new
+    /// default for fresh installs (see <see cref="ConverterXOptions"/>),
+    /// while users with persisted Ask preferences keep their behaviour.
+    /// </summary>
+    private OverwriteBehavior ResolveOverwriteBehavior(ConversionJob job)
+    {
+        if (job.Options.OverwriteExisting)
+            return OverwriteBehavior.Always;
+
+        return _options.OverwriteBehavior;
+    }
 }

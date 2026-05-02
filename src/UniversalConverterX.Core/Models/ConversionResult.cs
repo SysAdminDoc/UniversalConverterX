@@ -41,6 +41,14 @@ public class ConversionResult
     public bool WasCancelled { get; init; }
 
     /// <summary>
+    /// Whether the operation was intentionally skipped (e.g. because the output
+    /// already exists and <see cref="Configuration.OverwriteBehavior.Skip"/> is
+    /// configured). Distinct from <see cref="WasCancelled"/> — skip is a
+    /// successful no-op decision, cancel is an interrupted operation.
+    /// </summary>
+    public bool WasSkipped { get; init; }
+
+    /// <summary>
     /// Exit code from the converter process
     /// </summary>
     public int ExitCode { get; init; }
@@ -158,6 +166,25 @@ public class ConversionResult
             Duration = duration,
             ExitCode = -1,
             WasCancelled = true
+        };
+    }
+
+    /// <summary>
+    /// Create a skipped result (e.g. output exists and skip-overwrite is set).
+    /// Skip is a successful policy decision — callers can distinguish it from
+    /// failure via <see cref="WasSkipped"/>.
+    /// </summary>
+    public static ConversionResult Skipped(ConversionJob job, string reason, TimeSpan duration)
+    {
+        return new ConversionResult
+        {
+            Success = false,
+            Job = job,
+            OutputPath = job.OutputPath,
+            ErrorMessage = reason,
+            Duration = duration,
+            ExitCode = 0,
+            WasSkipped = true
         };
     }
 }

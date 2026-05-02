@@ -36,9 +36,13 @@ public class ConverterXOptions
     public string? DefaultOutputDirectory { get; set; }
 
     /// <summary>
-    /// Behavior when output file already exists
+    /// Behavior when output file already exists. Default is <c>Never</c>
+    /// (auto-rename to "stem (1).ext", "stem (2).ext", ...) so jobs never
+    /// silently overwrite existing files. UI surfaces that genuinely prompt
+    /// the user can flip this to <c>Ask</c>; CLI / batch contexts get the
+    /// safer default.
     /// </summary>
-    public OverwriteBehavior OverwriteBehavior { get; set; } = OverwriteBehavior.Ask;
+    public OverwriteBehavior OverwriteBehavior { get; set; } = OverwriteBehavior.Never;
 
     /// <summary>
     /// Delete source files after successful conversion

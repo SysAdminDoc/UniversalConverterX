@@ -18,9 +18,14 @@ public class ConversionJob
     public required string InputPath { get; init; }
 
     /// <summary>
-    /// Path for the output file
+    /// Path for the output file. Construction-required; the orchestrator may
+    /// rewrite this in-place before dispatching to a converter when collision
+    /// protection auto-renames "stem.ext" to "stem (N).ext". Callers that
+    /// display the path before calling ConvertAsync should re-read it from
+    /// the returned <see cref="ConversionResult.OutputPath"/> afterwards
+    /// rather than relying on the original value.
     /// </summary>
-    public required string OutputPath { get; init; }
+    public required string OutputPath { get; set; }
 
     /// <summary>
     /// Source format (detected or specified)
@@ -145,5 +150,6 @@ public enum ConversionStatus
     Running,
     Completed,
     Failed,
-    Cancelled
+    Cancelled,
+    Skipped
 }
