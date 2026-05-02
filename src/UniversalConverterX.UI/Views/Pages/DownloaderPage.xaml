@@ -179,6 +179,10 @@
                               Foreground="{StaticResource TextPrimaryBrush}"/>
                     <CheckBox x:Name="SubtitlesCheck" Content="Embed subtitles"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <CheckBox x:Name="SponsorBlockCheck"
+                              Content="Skip sponsor segments (SponsorBlock)"
+                              ToolTipService.ToolTip="Removes sponsor / self-promo / interaction segments from the final download. Uses yt-dlp's SponsorBlock postprocessor — pulls segment data from api.sponsor.ajay.app on demand."
+                              Foreground="{StaticResource TextPrimaryBrush}"/>
                 </StackPanel>
 
                 <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"

@@ -112,10 +112,13 @@ public sealed partial class DownloaderPage : Page
         var format = SelectedTag(OutputFormatCombo, "mp4");
         var audioOnly = AudioOnlyCheck.IsChecked == true;
         var subtitles = SubtitlesCheck.IsChecked == true;
+        var sponsorBlock = SponsorBlockCheck.IsChecked == true;
         var title = TryBuildTitle(url);
         var mode = audioOnly ? "MP3 audio" : $"{format.ToUpperInvariant()} {QualityLabel(quality)}";
         if (subtitles)
             mode += " + subtitles";
+        if (sponsorBlock)
+            mode += " + sponsor-skip";
 
         return new DownloadJobItem
         {
@@ -125,6 +128,7 @@ public sealed partial class DownloaderPage : Page
             Format = format,
             AudioOnly = audioOnly,
             EmbedSubtitles = subtitles,
+            SponsorBlock = sponsorBlock,
             OptionSummary = mode,
             StatusText = "Queued",
             Progress = 0,
@@ -305,6 +309,9 @@ public sealed partial class DownloaderPage : Page
         if (job.EmbedSubtitles)
             args.AddRange(["--subtitles", "en", "--embed-subtitles"]);
 
+        if (job.SponsorBlock)
+            args.AddRange(["--sponsorblock", "remove"]);
+
         return args;
     }
 
@@ -445,6 +452,7 @@ public sealed class DownloadJobItem : INotifyPropertyChanged
     public string Format { get; set; } = "mp4";
     public bool AudioOnly { get; set; }
     public bool EmbedSubtitles { get; set; }
+    public bool SponsorBlock { get; set; }
     public string OptionSummary { get; set; } = "";
 
     public bool IsComplete

@@ -168,6 +168,23 @@ def op_download(args: argparse.Namespace) -> int:
         ydl_opts["subtitleslangs"] = ["en", "all"] if args.subtitles == "all" else [args.subtitles]
         ydl_opts["embedsubtitles"] = args.embed_subtitles
 
+    # SponsorBlock — yt-dlp natively supports this. The postprocessor reaches
+    # out to api.sponsor.ajay.app for segment data; only fires when the user
+    # explicitly opts in via the flag. Charter-aligned per the user-initiated
+    # network policy in ROADMAP.md (Items 7/45/48 share that pattern).
+    if args.sponsorblock:
+        cats = {c.strip() for c in (args.sponsorblock_categories or "").split(",") if c.strip()}
+        if not cats:
+            cats = {"sponsor", "selfpromo", "interaction"}  # safe default
+        if args.sponsorblock == "remove":
+            ydl_opts["sponsorblock_remove"] = cats
+            emit("log", level="info",
+                 message=f"SponsorBlock: removing categories {sorted(cats)}")
+        else:  # "mark"
+            ydl_opts["sponsorblock_mark"] = cats
+            emit("log", level="info",
+                 message=f"SponsorBlock: marking categories as chapters {sorted(cats)}")
+
     emit("progress", percent=0, stage="resolving", eta_seconds=None)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -214,6 +231,16 @@ def build_parser() -> argparse.ArgumentParser:
     dl.add_argument("--audio-quality", type=int, default=192)
     dl.add_argument("--subtitles", help="Subtitle language ('en', 'all', or a 2-letter code)")
     dl.add_argument("--embed-subtitles", action="store_true")
+    dl.add_argument("--sponsorblock",
+                    choices=["mark", "remove"],
+                    help="Apply SponsorBlock segments to the download — 'mark' adds chapter markers, "
+                         "'remove' cuts the segments out of the final file. Requires network access to "
+                         "api.sponsor.ajay.app via yt-dlp's built-in postprocessor.")
+    dl.add_argument("--sponsorblock-categories", dest="sponsorblock_categories",
+                    default="sponsor,selfpromo,interaction",
+                    help="Comma-separated SponsorBlock categories to mark/remove "
+                         "(default: sponsor,selfpromo,interaction). Available: "
+                         "sponsor, selfpromo, interaction, intro, outro, preview, music_offtopic, filler.")
     return p
 
 
