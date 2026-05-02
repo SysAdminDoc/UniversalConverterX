@@ -240,7 +240,7 @@ HistoryRetentionDays=30}` for retention policy.
 
 ---
 
-### 7. Dependency Update Checker
+### 7. Dependency Update Checker — ⚠️ PARTIAL (service shipped, UI surface next iter)
 
 Background check (on app start, at most once per 24 h) against GitHub Releases
 for yt-dlp, whisper-cpp, ffmpeg-builds, and onnxruntime. Show a non-blocking
@@ -258,6 +258,27 @@ manifests (no user data), (c) it must be opt-out-able via a Settings
 toggle (`CheckForUpdates`, already exists in `ConverterXOptions`).
 Implementation must respect the toggle + show clear network indicator
 in the UI.
+
+**Phase 1 shipped 2026-05-02 — service + cache + DI + opt-out:**
+- New `Services/UpdateCheckService.cs` — polls GitHub Releases for the
+  four tracked tools (yt-dlp, BtbN/FFmpeg-Builds, ggerganov/whisper.cpp,
+  microsoft/onnxruntime). Best-effort installed-version probe via per-tool
+  `<engine>.version` files under `ToolsBasePath`.
+- 24 h throttle window enforced via `LastCheckUtc` field of the cache.
+- Honours `ConverterXOptions.CheckForUpdates` opt-out (returns cached
+  results without hitting the network when toggled off).
+- Atomic JSON cache write to `%LocalAppData%/UniversalConverterX/update-cache.json`
+  (sibling-tmp + Move pattern, mirrors `SettingsService`).
+- `HttpClient` is static + 15 s timeout; `User-Agent: UniversalConverterX-UpdateCheck/1.0`
+  (GitHub API requires a UA header).
+- Registered as singleton in `App.xaml.cs`; fired fire-and-forget on
+  `OnLaunched` after main window activation. Probe failures are swallowed
+  so they can never crash the app.
+- Build verified Release.
+
+**Phase 2 (deferred):** dashboard `InfoBar` surface, "Open release notes"
+links per tool, optional one-click update action (requires per-tool
+download + replace logic; substantial — separate roadmap item).
 
 ---
 
