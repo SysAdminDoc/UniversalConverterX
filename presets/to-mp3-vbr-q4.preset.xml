@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To MP3 (VBR V4 — ~165 kbps avg, smaller files)</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>aac</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+        <Extension>aiff</Extension>
+        <Extension>wma</Extension>
+        <Extension>ape</Extension>
+        <Extension>wv</Extension>
+        <Extension>alac</Extension>
+        <Extension>ac3</Extension>
+        <Extension>dsf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>mp3</OutputExtension>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>mp3</Arg>
+        <Arg>--vbr-quality</Arg>
+        <Arg>4</Arg>
+    </Args>
+</Preset>

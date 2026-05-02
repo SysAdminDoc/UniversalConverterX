@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To AAC (VBR Q3 — high quality, smaller than 192k CBR)</Name>
+    <Folder>Audio</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>mp3</Extension>
+        <Extension>m4a</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+        <Extension>aiff</Extension>
+        <Extension>wma</Extension>
+        <Extension>ape</Extension>
+        <Extension>wv</Extension>
+        <Extension>alac</Extension>
+        <Extension>ac3</Extension>
+        <Extension>dsf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>m4a</OutputExtension>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>aac</Arg>
+        <Arg>--vbr-quality</Arg>
+        <Arg>3</Arg>
+    </Args>
+</Preset>
