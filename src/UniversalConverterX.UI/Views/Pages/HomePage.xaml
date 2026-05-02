@@ -17,7 +17,7 @@
                     CornerRadius="18"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
-                <Grid RowSpacing="12">
+                <Grid RowSpacing="14">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -34,18 +34,18 @@
                             <FontIcon Glyph="{Binding Glyph}" FontSize="20"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Padding="8,3" CornerRadius="10"
+                        <Border Grid.Column="2" Padding="8,4" CornerRadius="10"
                                 Background="{StaticResource SurfaceLightBrush}"
                                 Visibility="{Binding BadgeVisibility}">
                             <TextBlock Text="{Binding Badge}" FontSize="10" FontWeight="SemiBold"
                                        Foreground="{Binding AccentBrush}"/>
                         </Border>
                     </Grid>
-                    <StackPanel Grid.Row="1" Spacing="4">
+                    <StackPanel Grid.Row="1" Spacing="5">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="3"/>
+                                   TextWrapping="Wrap" MaxLines="3" LineHeight="17"/>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Text="{Binding ActionText}" FontSize="12" FontWeight="SemiBold"
                                Foreground="{Binding AccentBrush}"/>
@@ -273,11 +273,11 @@
                 </AutoSuggestBox>
             </Border>
 
-            <StackPanel Grid.Row="2" Spacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="10">
+            <StackPanel Grid.Row="2" Spacing="16">
+                <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
                     <TextBlock Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom"/>
+                               VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
@@ -285,11 +285,11 @@
                           ItemTemplate="{StaticResource ActionCardTemplate}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="3" Spacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="10">
+            <StackPanel Grid.Row="3" Spacing="16">
+                <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
                     <TextBlock Text="Availability shown" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom"/>
+                               VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"

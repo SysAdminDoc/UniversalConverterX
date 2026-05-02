@@ -16,7 +16,7 @@
                     CornerRadius="18"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
-                <Grid>
+                <Grid RowSpacing="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -30,23 +30,23 @@
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Background="{StaticResource SurfaceLightBrush}" CornerRadius="12"
                                 Width="40" Height="40">
-                            <FontIcon Glyph="{Binding Glyph}" FontSize="16"
+                            <FontIcon Glyph="{Binding Glyph}" FontSize="18"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
                         <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}" CornerRadius="10"
-                                Padding="6,2" Visibility="{Binding ShowAi}">
+                                Padding="8,3" Visibility="{Binding ShowAi}">
                             <TextBlock Text="AI" FontSize="10" FontWeight="SemiBold"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                     </Grid>
-                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="5" Margin="0,10,0,0">
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,10,0,0">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource LabelTextStyle}"
                                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Description}" FontSize="11"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="2"/>
+                                   TextWrapping="Wrap" MaxLines="2" LineHeight="16"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="7">
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
                         <Ellipse Width="7" Height="7"
                                  Fill="{Binding StatusBrush}"
                                  VerticalAlignment="Center"/>
@@ -70,14 +70,14 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="320"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Spacing="9">
+                    <StackPanel Grid.Column="0" Spacing="10">
                         <TextBlock Text="TOOLBOX" Style="{StaticResource EyebrowTextStyle}"/>
                         <TextBlock Text="Specialized tools for finishing, repairing, extracting, and preparing media."
                                    Style="{StaticResource TitleTextStyle}"
                                    TextWrapping="Wrap"
-                                   MaxWidth="720"/>
+                                   MaxWidth="720" LineHeight="30"/>
                         <TextBlock Text="Ready tools open directly. Planned tools stay disabled and explain what is missing."
-                                   Style="{StaticResource SubtitleTextStyle}"
+                                   Style="{StaticResource SubtitleTextStyle}" FontSize="13"
                                    TextWrapping="Wrap"
                                    MaxWidth="760"/>
                     </StackPanel>
