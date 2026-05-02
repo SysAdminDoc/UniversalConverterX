@@ -323,6 +323,11 @@ def compress(args: argparse.Namespace) -> int:
     resolution = args.resolution or preset_cfg.get("resolution", "Original")
     audio_codec = args.audio_codec or preset_cfg.get("audio_codec", "aac")
     audio_bitrate = args.audio_bitrate or preset_cfg.get("audio_bitrate", 128)
+    audio_vbr_quality = (
+        args.audio_vbr_quality
+        if args.audio_vbr_quality is not None
+        else preset_cfg.get("audio_vbr_quality")
+    )
 
     # Resolve HW encoder; falls back to software if accelerator is unavailable
     hwaccel = getattr(args, "hwaccel", None)
@@ -380,14 +385,7 @@ def compress(args: argparse.Namespace) -> int:
                     "-g", "1", "-slices", "24", "-slicecrc", "1",
                     "-pix_fmt", "yuv420p"]
 
-        if audio_codec == "an":
-            cmd += ["-an"]
-        elif audio_codec == "copy":
-            cmd += ["-c:a", "copy"]
-        elif audio_codec in ("pcm_s16le", "pcm_s24le", "flac"):
-            cmd += ["-c:a", audio_codec]
-        else:
-            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+        cmd += audio_args(audio_codec, audio_bitrate, audio_vbr_quality)
 
         # Container hint: ProRes/DNxHR → MOV is conventional, FFV1 → MKV.
         # We honour the user's explicit output extension, but warn on unusual combos.
@@ -418,12 +416,7 @@ def compress(args: argparse.Namespace) -> int:
             cmd += ["-preset", fpreset]
         if is_av1:
             cmd += ["-svtav1-params", f"crf={crf}"]
-        if audio_codec == "an":
-            cmd += ["-an"]
-        elif audio_codec == "copy":
-            cmd += ["-c:a", "copy"]
-        else:
-            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+        cmd += audio_args(audio_codec, audio_bitrate, audio_vbr_quality)
         cmd += ["-movflags", "+faststart", str(out_path)]
 
         rc = run_ffmpeg(cmd, duration, "encoding", 0.0, 100.0)
@@ -462,12 +455,7 @@ def compress(args: argparse.Namespace) -> int:
             cmd += ["-vf", ",".join(vf_filters)]
         cmd += ["-c:v", codec, "-b:v", f"{video_kbps}k",
                 "-svtav1-params", f"tbr={video_kbps}"]
-        if audio_codec == "an":
-            cmd += ["-an"]
-        elif audio_codec == "copy":
-            cmd += ["-c:a", "copy"]
-        else:
-            cmd += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+        cmd += audio_args(audio_codec, audio_bitrate, audio_vbr_quality)
         cmd += ["-movflags", "+faststart", str(out_path)]
         rc = run_ffmpeg(cmd, duration, "encoding", 0.0, 100.0)
         if rc != 0:
@@ -503,12 +491,7 @@ def compress(args: argparse.Namespace) -> int:
     elif fpreset:
         pass2 += ["-preset", fpreset]
 
-    if audio_codec == "an":
-        pass2 += ["-an"]
-    elif audio_codec == "copy":
-        pass2 += ["-c:a", "copy"]
-    else:
-        pass2 += ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+    pass2 += audio_args(audio_codec, audio_bitrate, audio_vbr_quality)
     pass2 += ["-movflags", "+faststart", str(out_path)]
 
     emit("log", level="info", message="Pass 2 of 2 — encoding")
@@ -517,6 +500,66 @@ def compress(args: argparse.Namespace) -> int:
     if rc != 0:
         return fail("ffmpeg_failed", f"FFmpeg pass 2 exited with code {rc}")
     return finalize(out_path)
+
+
+def audio_args(audio_codec: str, audio_bitrate: int, vbr_quality: int | None) -> list[str]:
+    """Build the FFmpeg `-c:a` / `-b:a` / `-q:a` argument list for one audio
+    output configuration.
+
+    `audio_codec` accepts the special pseudo-values "an" (drop audio entirely)
+    and "copy" (stream-copy the source). PCM/FLAC variants ignore both bitrate
+    and VBR quality (they're lossless).
+
+    When `vbr_quality` is None, falls back to constant-bitrate (CBR) using
+    `audio_bitrate` in kbps. When set, switches to VBR per codec:
+
+      libmp3lame   -> -q:a 0..9 (0 best, ~245 kbps; 9 worst, ~65 kbps)
+      libvorbis    -> -q:a -2..10 (we accept 0..9 input and remap)
+      libfdk_aac   -> -vbr 1..5  (1 ~32 kbps, 5 ~96 kbps per channel)
+      aac (native) -> -q:a 0.1..2 mapped from 0..9 input
+      libopus      -> -b:a + -vbr on (Opus is VBR by default; treat input as
+                      target bitrate hint, not a quality scale)
+
+    Unknown codec + vbr_quality: emit a log warning and fall back to CBR.
+    """
+    if audio_codec == "an":
+        return ["-an"]
+    if audio_codec == "copy":
+        return ["-c:a", "copy"]
+    if audio_codec in ("pcm_s16le", "pcm_s24le", "flac"):
+        return ["-c:a", audio_codec]
+
+    if vbr_quality is None:
+        return ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
+
+    q = max(0, min(9, int(vbr_quality)))
+
+    if audio_codec == "libmp3lame":
+        return ["-c:a", audio_codec, "-q:a", str(q)]
+    if audio_codec == "libvorbis":
+        # User scale 0=best..9=worst; libvorbis is opposite (10 best, -2 worst).
+        # Map: 0 -> 9, 1 -> 8, ..., 9 -> 0 (so user "0" really is best quality).
+        return ["-c:a", audio_codec, "-q:a", str(9 - q)]
+    if audio_codec == "libfdk_aac":
+        # libfdk_aac VBR is 1..5; map 0..9 -> 5..1 (best to worst).
+        # 0..1 -> 5, 2..3 -> 4, 4..5 -> 3, 6..7 -> 2, 8..9 -> 1.
+        vbr = max(1, min(5, 5 - q // 2))
+        return ["-c:a", audio_codec, "-vbr", str(vbr)]
+    if audio_codec == "aac":
+        # FFmpeg native AAC -q:a 0.1..2.0; tighter than user scale, so
+        # interpolate: 0 -> 2.0, 9 -> 0.1 (linear).
+        v = round(2.0 - (q / 9.0) * 1.9, 2)
+        return ["-c:a", audio_codec, "-q:a", str(v)]
+    if audio_codec == "libopus":
+        # Opus is variable-bit-rate by default; the user-facing "quality"
+        # mapping is bitrate-driven. Approximate: q=0 -> 192, q=9 -> 32.
+        kbps = max(32, 192 - q * 18)
+        return ["-c:a", audio_codec, "-b:a", f"{kbps}k", "-vbr", "on"]
+
+    emit("log", level="warn",
+         message=f"VBR quality requested but codec '{audio_codec}' has no known "
+                 f"mapping; falling back to CBR at {audio_bitrate} kbps.")
+    return ["-c:a", audio_codec, "-b:a", f"{audio_bitrate}k"]
 
 
 def cleanup_pass_logs(pass_log: str) -> None:
@@ -558,7 +601,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--audio-codec",
                    help="Audio codec, or 'copy' / 'an' (none). For ProRes/DNxHR use pcm_s16le or pcm_s24le; "
                         "for FFV1 archival use flac.")
-    p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps (ignored for PCM/FLAC)")
+    p.add_argument("--audio-bitrate", type=int, help="Audio bitrate in kbps (ignored for PCM/FLAC and when --audio-vbr-quality is set)")
+    p.add_argument("--audio-vbr-quality", type=int,
+                   dest="audio_vbr_quality",
+                   help="Variable-bitrate quality target on a unified 0..9 scale "
+                        "(0=highest quality, 9=lowest). Mapped per codec: "
+                        "libmp3lame -> -q:a 0..9 directly; libvorbis -> -q:a 9..0 "
+                        "(scale inverted); libfdk_aac -> -vbr 5..1; aac (native) "
+                        "-> -q:a 2.0..0.1 interpolated; libopus -> -b:a 192..32 "
+                        "kbps + -vbr on. When set, --audio-bitrate is ignored.")
     p.add_argument("--hwaccel",
                    choices=["none", "nvenc", "amf", "qsv", "d3d12"],
                    default="none",

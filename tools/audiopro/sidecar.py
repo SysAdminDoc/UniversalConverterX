@@ -104,12 +104,40 @@ def op_convert(args: argparse.Namespace) -> int:
     started = time.monotonic()
     emit("progress", percent=0, stage="convert", eta_seconds=None)
 
+    # When --vbr-quality is set, REPLACE the format's default fmt_args (which
+    # may carry CBR -b:a values like 128k for opus / 192k for aac) with codec-
+    # appropriate VBR flags. Same 0..9 user scale as videocrush's
+    # --audio-vbr-quality (0=highest quality, 9=lowest), with codec-specific
+    # remapping for libvorbis / libfdk_aac / libopus.
+    vbr_q = getattr(args, "vbr_quality", None)
+    use_vbr = vbr_q is not None
+    if use_vbr:
+        q = max(0, min(9, int(vbr_q)))
+        if codec == "libmp3lame":
+            fmt_args = ["-q:a", str(q)]
+        elif codec == "libopus":
+            kbps = max(32, 192 - q * 18)
+            fmt_args = ["-b:a", f"{kbps}k", "-vbr", "on"]
+        elif codec == "aac":
+            fmt_args = ["-q:a", str(round(2.0 - (q / 9.0) * 1.9, 2))]
+        elif codec == "libfdk_aac":
+            fmt_args = ["-vbr", str(max(1, min(5, 5 - q // 2)))]
+        elif codec == "libvorbis":
+            fmt_args = ["-q:a", str(9 - q)]
+        else:
+            emit("log", level="warn",
+                 message=f"--vbr-quality requested but '{codec}' has no known VBR mapping; "
+                         f"keeping format default flags.")
+
     for i, src in enumerate(inputs):
         out_path = out_dir / (src.stem + out_ext)
         cmd = [ffmpeg, "-y", "-i", str(src)]
         if codec: cmd += ["-c:a", codec]
         cmd += fmt_args
-        if args.bitrate: cmd += ["-b:a", args.bitrate]
+        # --bitrate is incompatible with --vbr-quality. The flag wins by being
+        # explicit; warn once before the loop body if both are set.
+        if args.bitrate and not use_vbr:
+            cmd += ["-b:a", args.bitrate]
         if args.sample_rate: cmd += ["-ar", args.sample_rate]
         if args.channels: cmd += ["-ac", args.channels]
         cmd += [str(out_path)]
@@ -160,7 +188,16 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--format", required=True,
                    help=f"Target: {sorted(TARGETS)}")
     c.add_argument("--bitrate", default=None,
-                   help="Override audio bitrate (e.g. 192k).")
+                   help="Override audio bitrate (e.g. 192k). Mutually exclusive "
+                        "with --vbr-quality (the latter wins when both are set).")
+    c.add_argument("--vbr-quality", default=None, type=int, dest="vbr_quality",
+                   help="Variable-bitrate quality target on a unified 0..9 scale "
+                        "(0=highest quality, 9=lowest). Codec mapping: libmp3lame "
+                        "-> -q:a 0..9 directly; libvorbis -> -q:a 9..0 "
+                        "(scale inverted); libfdk_aac -> -vbr 5..1; aac (native) "
+                        "-> -q:a 2.0..0.1 interpolated; libopus -> -b:a 192..32 "
+                        "kbps + -vbr on. Codecs without a known VBR mapping log "
+                        "a warning and keep their format defaults.")
     c.add_argument("--sample-rate", default=None, dest="sample_rate",
                    help="Override sample rate (e.g. 44100).")
     c.add_argument("--channels", default=None,
