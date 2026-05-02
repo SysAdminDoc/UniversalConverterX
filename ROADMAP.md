@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
 **Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-10 (iter-6 external research refresh — 67+ sources)
+**Last updated:** 2026-05-02 (iter-7 external research refresh — 80+ sources)
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
@@ -31,6 +31,17 @@ accessibility.
 > SubtitleEdit v5 beta20, HandBrake VAAPI PR #7467). Net additions: Items 66–68,
 > UC table extended. Updated: Items 22, 28, 37, 40, 44, UC (VMAF retired,
 > IAMF updated, estimated-size promoted). New appendix sources: S49–S67.
+>
+> **iter-7 external research refresh (2026-05-02):** 80+ sources surveyed
+> (SVT-AV1-HDR (successor to ended PSY, April 2025) tuning presets + community
+> builds, Vship GPU-accelerated SSIMULACRA2/Butteraugli/CVVDP metrics in NVEncC
+> 9.15–9.16, QSVEncC 8.11 deinterlace updates, VCEEnc 9.05 AMF 1.5.0 + AV1,
+> Purfview Whisper-XXL Pro r3.256.1 (4 new VAD models, RTX 50xx CUDA 12.8 support),
+> DeepFilterNet v0.5.6, HandBrake SVT-AV1-HDR community builds, issue #7828 silent
+> video truncation, #7467 VAAPI H.264/AV1 encoder, WinAppSDK 2.0.1 SystemBackdropElement,
+> Uranite HandBrake-SVT-AV1-HDR nightly builds, eac3to v3.36 tsMuxeR replacement).
+> Net additions: Items 69–72 (69 is SVT-AV1-HDR rewrite of iter-6 PSY item).
+> Updated: Items 22, 26, 28, 47. New appendix sources: S68–S83.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -513,9 +524,15 @@ updated. v0.5.3 adds attenuation limiting to prevent speech removal artefacts.
 Prefer DeepFilterNet3 over RNNoise as the default model; expose model selection
 (`dfn2` / `dfn3`) in the UI for CPU-constrained users.
 
+**DeepFilterNet v0.5.6 (iter-7, 2026-05-02):** Latest stable release [S79]
+continues MVDR/Wiener multi-frame architecture; no breaking changes, all prior
+tuning parameters preserved. v0.5.4 added Python 3.11 + macOS aarch64 + Linux
+aarch64 wheels for broader platform coverage.
+
 Impact: 3 · Effort: 3 · Type: parity
 Sources: [S14] (common request in audio processing communities),
-[S53] (DeepFilterNet v0.5.0/v0.5.3 — DeepFilterNet3, MVDR, attenuation limit)
+[S53] (DeepFilterNet v0.5.0/v0.5.3 — DeepFilterNet3, MVDR, attenuation limit),
+[S79] (DeepFilterNet v0.5.6 latest stable)
 
 ---
 
@@ -559,7 +576,9 @@ Source: [S18] (winget-pkgs CONTRIBUTING.md — manifest schema v1.6)
 Upgrade from WinAppSDK 1.x to 2.0 (released 2026-04-29). Key gains:
 
 - `SystemBackdropElement` — place Mica/Acrylic inside any layout panel
-  (replaces current window-level backdrop hack).
+  (replaces current window-level backdrop hack). **Enables in-app acrylic
+  panels** like the Mica/Acrylic theming roadmap item (WinAppSDK 2.0.1 adds
+  `CornerRadius` support [S74]).
 - `Microsoft.Windows.Storage.Pickers` — file type grouping, suggested start
   folder, persistent picker IDs (better multi-folder batch UX).
 - `Microsoft.Windows.AI.MachineLearning` 2.0 + ONNX Runtime 1.24.5 — faster
@@ -573,7 +592,8 @@ Breaking changes: review `DispatcherQueue` API surface and any
 `AppWindow` interop. Test on clean Win10 21H2 before shipping.
 
 Impact: 3 · Effort: 3 · Type: platform
-Source: [S19] (Windows App SDK 2.0 release notes, 2026-04-29)
+Sources: [S19] (Windows App SDK 2.0 release notes, 2026-04-29),
+[S74] (WinAppSDK 2.0.1 SystemBackdropElement + CornerRadius)
 
 ---
 
@@ -613,10 +633,18 @@ Pascal+) without a CUDA driver requirement. Also ships Vulkan ProRes
 encode/decode and the native `whisper` filtergraph filter. The dedicated
 D3D12 pipeline item is tracked as Item 66.
 
+**Hardware encoder updates (iter-7, 2026-05-02):** NVEncC 9.15–9.16 [S69]
+adds Vship GPU-accelerated quality metrics (SSIMULACRA2, Butteraugli, CVVDP)
+for post-encode analysis. QSVEncC 8.11 [S70] adds `--vpp-ivtc` + `--vpp-bwdif`
+deinterlace presets. VCEEnc 9.05 [S71] updates to AMF 1.5.0 (requires AMD
+Adrenalin 25.10.2+) and adds Dolby Vision output + parallel multi-GPU encoding.
+
 Impact: 3 · Effort: 2 · Type: platform + security
 Sources: [S9] (FFmpeg 8.1 changelog), [S20] (BtbN FFmpeg auto-builds),
 [S36] (ONNX Runtime 1.25.0 — CUDA 12.0 minimum, ArmNN EP removal),
-[S52] (FFmpeg 8.1 "Hoare" — D3D12 encode/filter, Vulkan ProRes, whisper filter)
+[S52] (FFmpeg 8.1 "Hoare" — D3D12 encode/filter, Vulkan ProRes, whisper filter),
+[S69] (NVEncC 9.15–9.16 Vship metrics), [S70] (QSVEncC 8.11 deinterlace),
+[S71] (VCEEnc 9.05 AMF 1.5.0)
 
 ---
 
@@ -871,6 +899,119 @@ inherently approximate (VBR, scene complexity) — show as "~X MB" with a
 Impact: 3 · Effort: 1 · Type: UX
 Sources: [S56] (LosslessCut v3.67.2 — segment size estimate in segment list, #2630)
 
+---
+
+### 69. SVT-AV1-HDR Tuning Presets _(replaces SVT-AV1-PSY from iter-6)_
+
+**Context (iter-7 research, 2026-05-02):** The SVT-AV1-PSY project ended
+development in April 2025 [S68]; maintainer Gianni Rosato announced the project
+would wind down in favour of merging features into mainline SVT-AV1. The **official
+successor is SVT-AV1-HDR** [S83], a community fork by Julio (PSY's former lead
+developer) now maintained by the codec team. HDR is not a second "PSY alternative"
+— it is the canonical continuation. Community builds (nightly) available via
+Uranite's HandBrake patch [S83] and FFmpeg-Builds.
+
+**SVT-AV1-HDR feature set:**
+- `--tune 0` (VQ): Prioritize detail retention over artifact prevention.
+- `--tune 5` (Film Grain): Optimize for film-grain preservation, temporal consistency.
+- `--tune 3` (IQ): Still-image coding preset for AVIF or lossless-capable video.
+- `--cdef-scaling` (1–30): Control CDEF filter strength (lower = sharper, ringier; 10–12 recommended).
+- `--noise` (0–200): Generate and inject film-grain noise. ~50 ≈ `--film-grain 50`.
+- `--noise-chroma` (−1–200): Independent chroma noise strength.
+- `--variance-boost-strength` (1–4): Merged to mainline; adaptive AQ control.
+- `--variance-octile` (1–8): Selectivity of variance-based superblock boosting.
+- `PQ-optimized variance boost curve` (--variance-boost-curve 3): Tuned for HDR with Perceptual Quantizer transfer.
+
+**UCX integration:** Add preset family `SVT-AV1-HDR` alongside the existing `SVT-AV1`:
+1. Bundle community-build `svtav1.exe` from Uranite or FFmpeg-Builds in `tools/svtav1-hdr/`.
+2. Expose tuning mode selector in the sidecar UI: VQ (detail), Film Grain, IQ (still), Custom.
+3. For Custom mode, expose sliders for cdef-scaling, noise, and noise-chroma.
+4. Presets XML: add `<SvtAv1HdrTuning>VQ|FilmGrain|IQ|Custom</SvtAv1HdrTuning>` element.
+
+**Effort note:** This is a **parallel sidecar**, not a replacement for the existing `svtav1` 
+(mainline AVX-512 codepath). Users get both options; presets default to mainline for stability,
+with HDR as an opt-in "experimental" preset tier.
+
+Impact: 3 · Effort: 2 · Type: leapfrog
+Sources: [S68] (SVT-AV1-PSY project end announcement), [S83] (SVT-AV1-HDR fork + Uranite
+HandBrake-SVT-AV1-HDR community builds)
+
+---
+
+### 70. SSIMULACRA2 / Butteraugli Quality Metrics _(promote from UC)_
+
+`libvmaf` was the sole quality metric in the VMAF Analysis page (Item 40, shipped).
+But VMAF is optimized for motion video; for still frames, texture, and perceptual
+accuracy, **SSIMULACRA2** and **Butteraugli** outperform VMAF [S75]. Both are
+GPU-accelerated via the **Vship** library (Codeberg, Line-fr/Vship) [S75].
+
+**Precedent:** NVEncC 9.15+ [S69] already ships Vship integration:
+`--vship-ssimulacra2`, `--vship-butteraugli`, `--vship-cvvdp` output.
+
+**UCX integration:**
+1. Extend the existing `VmafAnalysisPage` to offer a metric selector: VMAF (motion-video),
+   SSIMULACRA2 (still/texture), Butteraugli (Google libjxl metric), or all three in parallel.
+2. Call the Vship CLI (or bundle it) to compute scores post-encode.
+3. Display results in the same chart as VMAF for comparison.
+4. Store metric preference in `ConverterXOptions`.
+
+**Technical sketch:** `mediainspect` / `vmafanalyze` sidecar gains `--metrics ssimulacra2,butteraugli`
+flag; emits NDJSON with per-frame scores. Plotted alongside VMAF in the UI.
+
+Impact: 3 · Effort: 2 · Type: leapfrog
+Sources: [S75] (Vship — SSIMULACRA2/Butteraugli/CVVDP GPU metrics),
+[S69] (NVEncC 9.15 Vship integration)
+
+---
+
+### 71. Per-Scene Parallel Encoding (Av1an) _(remains UC)_
+
+`Av1an` [S76] is a Rust CLI that performs:
+1. Scene detection (FFmpeg `scenedetect` or VapourSynth).
+2. Split video into chunks at scene boundaries.
+3. Encode each chunk independently at a per-scene CRF target (constant VMAF mode).
+4. Concatenate results.
+
+**Advantages:** Consistent perceptual quality throughout the video (no quality dips at scene changes);
+natural parallelization (all chunks encode in parallel); better VMAF targeting than global CRF.
+Av1an v0.5.2 [S76] supports SVT-AV1, x265, x264, VP9 with per-scene VMAF/XPSNR targeting.
+
+**Technical blocker:** VapourSynth dependency is significant (Rust toolchain, conditional build).
+Also requires `PySceneDetect` integration. **Effort: 5.**
+
+**Decision:** Keep in UC. This is a leapfrog (no competing Windows converter does per-scene
+parallel encoding), but the dependency footprint is large. Assess demand before committing.
+
+Impact: 4 · Effort: 5 · Type: leapfrog
+Sources: [S76] (Av1an v0.5.2 — scene-split, per-scene CRF, parallel encoding)
+
+---
+
+### 72. Post-Encode Output Duration Validation _(new Tier 2)_
+
+**Problem (HandBrake #7828, iter-7):** HandBrake sometimes reports successful
+conversion when the video track prematurely ends. Example: input audio 1:37,
+output video 0:43 — **silent truncation**. The user doesn't discover the loss
+until playback.
+
+**UCX solution:** After every job completes successfully, run a post-encode check:
+1. Probe output file duration with `ffprobe`.
+2. Compare against input duration from the original probe.
+3. If delta > user-configurable threshold (default 2 seconds or 1%, whichever is smaller):
+   - Mark job as `PARTIAL / TRUNCATED` in History (Item 6).
+   - Show a toast alert: "⚠️ Output duration 0:43 but input was 1:37. Check for truncation."
+   - Optionally quarantine the output file (rename with `_truncated` suffix).
+
+**Implementation:** Pure C# logic in `ConversionOrchestrator.FinalizeJob()`. Calls existing
+`ffprobe` sidecar. No new sidecar required. Settings entry: `ValidateOutputDuration` (toggle)
+and `MinDurationDeltaSeconds` (default 2).
+
+**Charter alignment:** This is **defensive reliability**, not a feature — UCX is offline-first
+and local, so the check is instant and free.
+
+Impact: 3 · Effort: 1 · Type: reliability
+Sources: [S80] (HandBrake #7828 — silent video truncation bug)
+
 Higher effort, lower urgency, or dependent on Tier 1/2 completion.
 
 ### 34. Watch Folder Automation — ✅ SHIPPED (already)
@@ -1107,9 +1248,17 @@ removed the ArmNN Execution Provider entirely. All Qualcomm NPU inference
 must target the **QNN EP** (`onnxruntime.providers.qnn`). Verify QNN EP
 availability on Snapdragon X Elite before committing the ARM64 AI path.
 
+**Purfview Whisper-XXL Pro updates (iter-7, 2026-05-02):** r3.256.1 [S78]
+adds 4 new VAD models (`silero_v6_fw`, `silero_v6` patched, `nemo_v2`, `ten`
+with +0.2 threshold offset — now default). Updated torch 2.8.0+cu128 for
+RTX 50xx (CUDA 12.8) support; ORT GPU 1.21.1 (cuDNN 9.x). Pin
+`whisper_standalone>=r3.256.1` for RTX 50xx compatibility. Faster-Whisper-XXL
+r245.4 adds distil-large-v3.5 model.
+
 Impact: 2 · Effort: 4 · Type: platform
 Sources: [S22] (HandBrake #7822 Qualcomm VCE/ARM64 encoder request),
-[S36] (ONNX Runtime 1.25.0 — ArmNN EP removal, QNN EP as replacement)
+[S36] (ONNX Runtime 1.25.0 — ArmNN EP removal, QNN EP as replacement),
+[S78] (Purfview Whisper-XXL Pro r3.256.1 — 4 VAD models, CUDA 12.8)
 
 ---
 
@@ -1498,3 +1647,22 @@ Before any new sidecar or preset is merged:
 | S65 | https://github.com/SYSTRAN/faster-whisper/releases | faster-whisper v1.1.0–v1.2.1 — batched inference 4×, large-v3-turbo, silero_v6 VAD |
 | S66 | https://github.com/alexheretic/ab-av1/releases | ab-av1 Windows releases — prebuilt .exe, XPSNR support added as VMAF alternative |
 | S67 | https://github.com/HandBrake/HandBrake/issues/7822 | HandBrake #7822 — Qualcomm Snapdragon X Elite ARM64 hardware encoder request |
+| S68 | https://github.com/gianni-rosato/svt-av1-psy | SVT-AV1-PSY end-of-life announcement (April 2025); Gianni Rosato project retirement; successor SVT-AV1-HDR link |
+| S69 | https://github.com/rigaya/NVEnc/releases | NVEncC 9.15–9.16 — Vship SSIMULACRA2/Butteraugli/CVVDP GPU metrics, parallel multi-GPU encoding |
+| S70 | https://github.com/rigaya/QSVEnc/releases | QSVEncC 8.11 — `--vpp-ivtc` / `--vpp-bwdif` deinterlace; msmooth/msharpen filters; libopus layout fix; libvpl 2.16 |
+| S71 | https://github.com/rigaya/VCEEnc/releases | VCEEnc 9.05 — AMF 1.5.0 (Adrenalin 25.10.2+); Dolby Vision output; avcodec encoder (SVT-AV1 with VCE filters); parallel file-split encoding |
+| S72 | https://github.com/MediaArea/MediaInfo/releases | MediaInfo 26.01 — confirmed latest (Feb 4, 2026) |
+| S73 | https://github.com/yt-dlp/yt-dlp/releases | yt-dlp 2026.03.17 — latest release; 3 updates after CVE-2026-26331 fix |
+| S74 | https://github.com/microsoft/WindowsAppSDK/releases/tag/v2.0.1 | WinAppSDK 2.0.1 (April 29, 2026) — `SystemBackdropElement` + `CornerRadius`; storage pickers; ORT 1.24.5 bundled |
+| S75 | https://codeberg.org/Line-fr/Vship | Vship library — GPU-accelerated SSIMULACRA2, Butteraugli, CVVDP metrics; HIP/CUDA/Vulkan; precompiled binaries |
+| S76 | https://github.com/rust-av/Av1an/releases | Av1an v0.5.2 — per-scene quality encoding; scene-change speedup; SVT-AV1/x264/x265/VP9; VapourSynth dependency |
+| S77 | https://github.com/obsproject/obs-studio/releases | OBS Studio 32.1.2 — audio mixer revamp, WebRTC simulcast; limited UCX relevance |
+| S78 | https://github.com/Purfview/whisper-standalone-win/releases | Purfview Whisper-XXL Pro r3.256.1 (Nov 7) — 4 new VAD models (silero_v6_fw, silero_v6, nemo_v2, ten); torch 2.8+cu128; ORT GPU 1.21.1 |
+| S79 | https://github.com/Rikorose/DeepFilterNet/releases | DeepFilterNet v0.5.6 — latest stable; v0.5.4 adds Python 3.11 + macOS/Linux aarch64 wheels; v0.5.3 reverberant attenuation limit |
+| S80 | https://github.com/HandBrake/HandBrake/issues/7828 | HandBrake #7828 — encode success reported when video track truncates 50% through; audio/video duration mismatch silent |
+| S81 | https://github.com/HandBrake/HandBrake/issues/7801 | HandBrake #7801 — Opus LFE channel distortion/clipping (DTS-HD 5.1 conversion); HandBrake-specific, FFmpeg path unaffected |
+| S82 | https://github.com/HandBrake/HandBrake/issues?milestone=5&state=open | HandBrake 1.12.0 milestone open issues (12+ pending) |
+| S83 | https://github.com/Uranite/HandBrake-SVT-AV1-HDR | Uranite HandBrake-SVT-AV1-HDR community build — nightly patches + releases; CI for Windows/macOS/Linux; official FFmpeg-Builds SVT-AV1-HDR integration available |
+| S84 | https://github.com/zbabac/VCT | VCT (Video Converter & Transcoder) v1.11.0 — C# FFmpeg frontend, batch encoding, MKV transcoding, manual ffmpeg command editing, updated Apr 2026 |
+| S85 | https://github.com/Thavarshan/comet | Comet — TypeScript/Electron cross-platform media converter (macOS/Windows/Linux), video/audio/image, bulk conversion, dark mode, Nov 2024 |
+| S86 | https://github.com/LorenzoDePasquale/FF-Video-Converter | Neptune (FF-Video-Converter rebranded) — .NET 5 rewrite, HDR10 encoding, color adjustments (brightness/contrast/saturation), pixel format conversion, integrated player, Reddit downloader |
