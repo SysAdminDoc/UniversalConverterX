@@ -1265,7 +1265,7 @@ true) and `MinDurationDeltaSeconds` (double, default 2.0).
 
 ---
 
-### 73. Automatic Silence Removal (auto-editor Integration) _(new Tier 3)_
+### 73. Automatic Silence Removal (auto-editor Integration) _(new Tier 3)_ — ✅ SHIPPED 2026-05-02
 
 **Context (iter-7 research, 2026-05-02):** `auto-editor` [S87] is a CLI tool written in Nim
 that automatically cuts silence and low-motion segments from video using configurable thresholds
@@ -1282,6 +1282,18 @@ different niche (content optimization). Both address batch / long-form editing p
 
 Impact: 2 · Effort: 2 · Type: UX
 Sources: [S87] (auto-editor — silence/motion cut CLI with DSL)
+
+**Closing commit:** new `tools/auto-edit/` sidecar (NDJSON contract,
+auto-editor>=27.0.0 dep, frozen-PyInstaller guard) wraps the
+`auto-editor` CLI with three ops: `silence-remove` (audio threshold
++ margin), `motion-edit` (audio + motion thresholds combined via
+`--edit (or audio:threshold=… motion:threshold=…)`), `speedup-quiet`
+(keep silent regions but render at high speed), plus a `probe` op
+that reports whether auto-editor is on PATH and its version. stderr
+percent-progress parsed into NDJSON `progress` events. Two new
+presets ship: `auto-edit-silence-remove` (cut quiet regions, 0.04
+threshold + 0.2sec margin) and `auto-edit-motion-cut` (cut quiet +
+motionless regions for tutorials/lectures). Sidecar count: 178.
 
 ---
 
@@ -1623,7 +1635,7 @@ pull the upgraded wrapper.
 
 ---
 
-### 89. AVIF Gain Map HDR (libavif 1.4.x) _(new T3 / Image)_
+### 89. AVIF Gain Map HDR (libavif 1.4.x) _(new T3 / Image)_ — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 **Context (iter-7 wave 4, 2026-05-02):** **libavif 1.4.0–1.4.1** [S155] adds:
 **Apple-style JPEG gain-map import** (HDR-from-SDR base layer + gain delta), **PNG cICP
@@ -1644,9 +1656,21 @@ Add a UI hint and a verification toggle ("show with HDR-aware viewer recommendat
 Impact: 3 · Effort: 2 · Type: format coverage + HDR parity
 Sources: [S155] (libavif 1.4.0–1.4.1 — gain map, Sample Transform, PNG cICP)
 
+**Closing commit (controls layer):** `heicshift` `convert` op gains
+three AVIF tuning flags — `--avif-speed 0..10`, `--avif-subsampling
+{4:0:0|4:2:0|4:2:2|4:4:4}`, `--avif-lossless`. ICC + EXIF pass-through
+(already shipping for AVIF) preserves cICP / colour metadata so
+HDR-tagged sources don't lose their colorimetry on re-encode. Two new
+presets surface the practical use cases: `to-avif-hdr` (Q92 / 4:4:4 /
+speed 4 — best HDR fidelity at reasonable encode time) and
+`to-avif-lossless` (4:4:4 / speed 2 — archival-grade). **Remaining
+work:** full Apple-style JPEG gain-map *writing* requires libavif
+1.4.x bindings that pillow-avif-plugin doesn't yet expose — track as
+follow-up when the wrapper catches up to the upstream feature.
+
 ---
 
-### 90. Opus 1.5 DRED + Higher-Order Ambisonics _(new T3 / Audio)_
+### 90. Opus 1.5 DRED + Higher-Order Ambisonics _(new T3 / Audio)_ — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 **Context (iter-7 wave 4, 2026-05-02):** **Opus 1.5** [S156] introduces **Deep
 Redundancy (DRED)** — neural in-band packet-loss recovery — plus **Deep PLC**, low
@@ -1666,6 +1690,21 @@ Ambisonics is a small audience. But both are credible "we support modern codecs"
 
 Impact: 2 · Effort: 2 · Type: codec coverage + audio
 Sources: [S156] (Opus 1.5/1.5.2 — DRED neural PLC, 5th order ambisonics)
+
+**Closing commit (sub-feature a):** `audiopro convert` exposes two
+new Opus-only flags translating directly to the libopus FFmpeg
+wrapper: `--opus-application {voip|audio|lowdelay}` (voip = speech-
+tuned, DRED-eligible at low bitrates; audio = music; lowdelay = RTC)
+and `--opus-frame-duration {2.5|5|10|20|40|60}` (ms). Both ignored
+silently for non-Opus targets so they can sit on a global preset.
+Three presets ship: `to-opus-voice-32k` (voip / 32 kbps / 20 ms —
+podcast-grade speech), `to-opus-music-128k` (audio / 128 kbps / 20 ms
+— transparent stereo), `to-opus-rtc-lowdelay` (lowdelay / 64 kbps /
+5 ms — RTC tuning). DRED itself is automatic in libopus 1.5+ when the
+build supports it; UCX inherits whatever DRED state the bundled FFmpeg
+ships with. **Remaining work (sub-feature b):** higher-order
+ambisonics channel-layout selector deferred — needs a parallel UI
+pass on the channel-layout combo across multiple sidecars.
 
 ---
 

@@ -1,0 +1,5 @@
+# auto-edit sidecar — wraps the auto-editor CLI for silence / motion-based
+# automatic editing. ROADMAP Item 73.
+#
+# Pin to >=27 because earlier releases used a different `--edit` DSL.
+auto-editor>=27.0.0

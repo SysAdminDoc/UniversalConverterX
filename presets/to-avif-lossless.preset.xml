@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To AVIF lossless (4:4:4 archival)</Name>
+    <Folder>Image/Archival</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>webp</Extension>
+        <Extension>bmp</Extension>
+        <Extension>jxl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_avif_lossless</OutputFileNameTemplate>
+    <OutputExtension>avif</OutputExtension>
+    <Engine>heicshift</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>avif</Arg>
+        <Arg>--avif-lossless</Arg>
+        <Arg>--avif-subsampling</Arg>
+        <Arg>4:4:4</Arg>
+        <Arg>--avif-speed</Arg>
+        <Arg>2</Arg>
+    </Args>
+</Preset>

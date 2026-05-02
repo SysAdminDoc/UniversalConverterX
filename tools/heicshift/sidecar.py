@@ -245,7 +245,20 @@ def op_convert(args: argparse.Namespace) -> int:
     elif fmt == "webp":
         save_kwargs.update(quality=quality, method=4)
     elif fmt == "avif":
+        # ROADMAP Item 89 — AVIF tuning controls. libavif 1.4.x adds gain-map
+        # HDR import for Apple-style JPEG gain maps; full gain-map writing is
+        # not exposed by pillow-avif-plugin yet, but speed / subsampling / ICC
+        # pass-through cover the practical "AVIF as HDR-capable" use case.
         save_kwargs.update(quality=quality)
+        speed = getattr(args, "avif_speed", None)
+        if speed is not None:
+            save_kwargs["speed"] = max(0, min(int(speed), 10))
+        subsampling = (getattr(args, "avif_subsampling", None) or "").strip().lower()
+        if subsampling in ("4:0:0", "4:2:0", "4:2:2", "4:4:4"):
+            save_kwargs["subsampling"] = subsampling
+        if getattr(args, "avif_lossless", False):
+            save_kwargs["quality"] = 100
+            save_kwargs["lossless"] = True
     elif fmt == "heic":
         save_kwargs.update(quality=quality)
     elif fmt == "png":
@@ -308,6 +321,16 @@ def build_parser() -> argparse.ArgumentParser:
                       help="Drop EXIF metadata from the output (default: preserve)")
     conv.add_argument("--strip-icc", action="store_true",
                       help="Drop ICC colour profile from the output (default: preserve)")
+    conv.add_argument("--avif-speed", type=int, default=None, dest="avif_speed",
+                      help="AVIF encoder speed 0..10 (default 6 via pillow-avif-plugin). "
+                           "0 = slowest / best quality; 10 = fastest. Ignored for non-AVIF outputs.")
+    conv.add_argument("--avif-subsampling", default=None, dest="avif_subsampling",
+                      help="AVIF chroma subsampling: 4:0:0 (mono), 4:2:0 (default), "
+                           "4:2:2, or 4:4:4 (best for HDR / gradient-heavy sources). "
+                           "Ignored for non-AVIF outputs.")
+    conv.add_argument("--avif-lossless", action="store_true", dest="avif_lossless",
+                      help="Encode AVIF in lossless mode (overrides --quality, ignored for "
+                           "non-AVIF outputs).")
 
     sub.add_parser("list-formats", help="Emit known input/output formats")
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Auto-edit: cut quiet + motionless regions</Name>
+    <Folder>Video/Auto-edit</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_motiontrim</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>auto-edit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>motion-edit</Arg>
+        <Arg>--audio-threshold</Arg>
+        <Arg>0.04</Arg>
+        <Arg>--motion-threshold</Arg>
+        <Arg>0.02</Arg>
+        <Arg>--margin</Arg>
+        <Arg>0.3sec</Arg>
+    </Args>
+</Preset>

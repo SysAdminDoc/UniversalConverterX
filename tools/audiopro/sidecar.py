@@ -129,6 +129,19 @@ def op_convert(args: argparse.Namespace) -> int:
                  message=f"--vbr-quality requested but '{codec}' has no known VBR mapping; "
                          f"keeping format default flags.")
 
+    # ROADMAP Item 90 — Opus 1.5 advanced controls. Application profile
+    # (voip / audio / lowdelay) and frame duration (2.5..60 ms) are exposed
+    # only when the codec is libopus; ignored silently otherwise so the
+    # flags can live on a global convert preset without erroring on AAC etc.
+    opus_application = (getattr(args, "opus_application", None) or "").lower() or None
+    opus_frame_duration = getattr(args, "opus_frame_duration", None)
+    if opus_application and opus_application not in ("voip", "audio", "lowdelay"):
+        return fail("bad_arg",
+                    f"--opus-application must be voip|audio|lowdelay, got '{opus_application}'.")
+    if opus_frame_duration is not None and opus_frame_duration not in (2.5, 5, 10, 20, 40, 60):
+        return fail("bad_arg",
+                    f"--opus-frame-duration must be 2.5/5/10/20/40/60 ms, got {opus_frame_duration}.")
+
     for i, src in enumerate(inputs):
         out_path = out_dir / (src.stem + out_ext)
         cmd = [ffmpeg, "-y", "-i", str(src)]
@@ -140,6 +153,16 @@ def op_convert(args: argparse.Namespace) -> int:
             cmd += ["-b:a", args.bitrate]
         if args.sample_rate: cmd += ["-ar", args.sample_rate]
         if args.channels: cmd += ["-ac", args.channels]
+
+        if codec == "libopus":
+            if opus_application:
+                cmd += ["-application", opus_application]
+            if opus_frame_duration is not None:
+                cmd += ["-frame_duration", str(opus_frame_duration)]
+        elif opus_application or opus_frame_duration is not None:
+            emit("log", level="info",
+                 message=f"opus-* flags ignored — codec is {codec}, not libopus.")
+
         cmd += [str(out_path)]
         proc = subprocess.run(cmd, capture_output=True, text=True)
         if proc.returncode != 0:
@@ -202,6 +225,16 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Override sample rate (e.g. 44100).")
     c.add_argument("--channels", default=None,
                    help="Override channel count (1 mono, 2 stereo, 6 5.1).")
+    c.add_argument("--opus-application", default=None, dest="opus_application",
+                   help="libopus application profile (voip / audio / lowdelay). "
+                        "voip = speech-tuned (DRED-eligible at low bitrates), "
+                        "audio = music / general, lowdelay = real-time. Ignored "
+                        "for non-Opus targets.")
+    c.add_argument("--opus-frame-duration", default=None, type=float,
+                   dest="opus_frame_duration",
+                   help="libopus packet length in ms: 2.5, 5, 10, 20 (default), "
+                        "40, or 60. Smaller = lower latency (RTC); larger = "
+                        "better compression. Ignored for non-Opus targets.")
     sub.add_parser("codecs", help="Probe which target codecs FFmpeg supports.")
     return p
 

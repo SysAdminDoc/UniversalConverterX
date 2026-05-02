@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To Opus voice 32 kbps (DRED-eligible, podcast-grade)</Name>
+    <Folder>Audio/Opus</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>mp3</Extension>
+        <Extension>m4a</Extension>
+        <Extension>aac</Extension>
+        <Extension>ogg</Extension>
+        <Extension>aiff</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_voice32</OutputFileNameTemplate>
+    <OutputExtension>opus</OutputExtension>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>opus</Arg>
+        <Arg>--bitrate</Arg>
+        <Arg>32k</Arg>
+        <Arg>--opus-application</Arg>
+        <Arg>voip</Arg>
+        <Arg>--opus-frame-duration</Arg>
+        <Arg>20</Arg>
+    </Args>
+</Preset>
