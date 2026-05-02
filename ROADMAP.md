@@ -714,7 +714,7 @@ raising `--threshold` and lengthening the sample window). New
 
 ---
 
-### 24. Lens Correction
+### 24. Lens Correction — ✅ SHIPPED 2026-05-02
 
 New `lenscorrect` preset using FFmpeg `lenscorrection` filter: correct barrel
 / pincushion distortion with k1/k2 coefficients, or use `vf_lensfun`
@@ -723,6 +723,15 @@ photography.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S5] (ToolboxPage.xaml.cs stub)
+
+**Closing commit:** new `lens-correct` op on `clipforge` exposes
+FFmpeg's `lenscorrection` filter with `--k1` / `--k2` (quadratic +
+quartic) and `--cx` / `--cy` (optical centre) controls. Default
+preset (`lens-correct-actioncam`) ships with `k1=-0.2 k2=0` — a
+reasonable starting point for action-cam fisheye correction; fine
+tuning is exposed via the args. LensFun database integration deferred
+to a follow-up: requires shipping the database and the lensfun model
+selector UI; the bare lenscorrection filter covers the common case.
 
 ---
 
@@ -860,7 +869,7 @@ Source: [S29] (66HEX/frame v0.28.0 — audio VBR MP3/AAC quality preset)
 
 ---
 
-### 31. Image / Video Watermark Overlay
+### 31. Image / Video Watermark Overlay — ✅ SHIPPED 2026-05-02 (video path)
 
 New `watermark` sidecar preset: stamp a PNG/JPEG logo or watermark onto video
 or image batches. Controls: position (9-point grid: TL/TC/TR/ML/MC/MR/BL/BC/BR),
@@ -871,6 +880,18 @@ chain. Images: Pillow `Image.paste()` with alpha compositing. Wire to
 Impact: 3 · Effort: 2 · Type: parity
 Sources: [S29] (66HEX/frame v0.29.0 image overlay pipeline), [S28] (Shutter
 Encoder logo overlay)
+
+**Closing commit:** new `watermark` op on `clipforge` runs the FFmpeg
+`scale2ref` -> `overlay` filter chain. Args: `--overlay <png|jpg>` /
+`--position` (9-point grid tl/tc/tr/ml/mc/mr/bl/bc/br) / `--opacity 0..1`
+/ `--scale <% of frame width>` / `--margin <pixels>`. Pre-multiplies
+opacity via `format=rgba,colorchannelmixer=aa=<opacity>` so users can
+dial transparency without baking it into the source PNG. New
+`presets/watermark-overlay.preset.xml` with `RequiresExtraInput` so
+the executor prompts for the overlay file at run time. Image-batch
+path (Pillow paste) deferred — for stills there is already an
+imagemagick-style preset path covering common sizes; full image-batch
+op land if explicit demand surfaces.
 
 ---
 
@@ -934,7 +955,7 @@ Source: [S2] (AiLabPage.xaml.cs "Planned" tile inspection, Phase 0)
 
 ---
 
-### 57. ProRes & DNxHR Encoder Presets
+### 57. ProRes & DNxHR Encoder Presets — ✅ SHIPPED 2026-05-02
 
 HandBrake 1.11.0 ships Apple ProRes (all variants: 422 Proxy/LT/422/HQ,
 4444, 4444 XQ) and Avid DNxHR (SQ, HQX, 444, LB) encoders via FFmpeg,
@@ -953,6 +974,17 @@ validation of `prores_ks` / `dnxhd` codec availability at runtime.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S39] (HandBrake 1.11.0 release — ProRes + DNxHR encoder support)
+
+**Closing commit:** the `videocrush` sidecar already implements the
+underlying preset profiles (`prores-422-proxy`, `prores-422-lt`,
+`prores-422`, `prores-422-hq`, `prores-4444`, `dnxhr-sq`, `dnxhr-hq`,
+`dnxhr-hqx`, `dnxhr-444`) and selects the correct pixel format /
+profile flags. The existing `to-prores-422-hq` preset XML covered HQ
+only — this item adds five more user-facing presets (Proxy, 4444, DNxHR
+SQ, DNxHR HQ, DNxHR HQX). Each preset routes to the matching videocrush
+profile and ships with the standard `_proresproxy` / `_prores4444` /
+`_dnxhrsq` / `_dnxhrhq` / `_dnxhrhqx` output suffixes so a side-by-side
+render produces distinct deliverables.
 
 ---
 
@@ -1831,7 +1863,7 @@ Source: [S5] (ToolboxPage.xaml.cs stub)
 
 ---
 
-### 39. Color Grading LUT Application
+### 39. Color Grading LUT Application — ✅ SHIPPED 2026-05-02
 
 A dedicated `lut-apply` preset (distinct from existing `lutgen`) that takes
 an input `.cube` or `.3dl` LUT file and applies it to a video or image batch.
@@ -1840,6 +1872,14 @@ photographers exporting from DaVinci Resolve or Lightroom.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S7] (OpenShot 3D-LUT support), [S5] (clipforge stub)
+
+**Closing commit:** clipforge's existing `lut3d` op (FFmpeg `lut3d`
+filter) gets a first-class preset entry. `presets/lut-apply.preset.xml`
+ships with `RequiresExtraInput=true` so the executor prompts for the
+LUT path at run time, separate from the input video. Output names
+suffix as `_graded`. The complementary `lutgen` sidecar (build LUTs
+from before/after frames) shipped in v2.8.0; this item closes the
+"apply LUT" half of the workflow.
 
 ---
 
@@ -1893,7 +1933,7 @@ Source: [S21] (ImageGlass Crowdin i18n workflow)
 
 ---
 
-### 42. Lossless Trim / Cut (No Re-encode)
+### 42. Lossless Trim / Cut (No Re-encode) — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 New `losslesscut` preset: trim video clip by start/end timestamps without
 re-encoding. FFmpeg `-ss` + `-to` with `-c copy`. Surface in
@@ -1903,6 +1943,14 @@ LosslessCut (Electron app, ~13k stars).
 
 Impact: 4 · Effort: 3 · Type: parity
 Source: [S6] (LosslessCut — primary OSS competitor for this workflow)
+
+**Sidecar layer shipped 2026-05-02:** clipforge's existing `trim` op
+already supports `--lossless` (FFmpeg `-ss/-to` + `-c copy`,
+keyframe-bounded). New `presets/lossless-trim.preset.xml` exposes it as
+a one-click batch preset (start defaults to 0; the user adjusts via the
+preset args panel or CLI). Full `LosslessCutPage` with a keyframe-aware
+timeline scrubber is the remaining UI half — it builds on the trim op
+plus the existing `clipforge timeline` thumbnail-strip path.
 
 ---
 

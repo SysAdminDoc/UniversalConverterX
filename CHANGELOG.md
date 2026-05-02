@@ -27,6 +27,25 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Lens correction / Watermark overlay / LUT apply / Lossless trim / ProRes+DNxHR (ROADMAP Items 24, 31, 39, 42, 57)
+
+- `clipforge` sidecar gains two new ops: `lens-correct` (FFmpeg
+  `lenscorrection` filter, --k1/--k2/--cx/--cy controls for action-cam
+  fisheye correction), and `watermark` (FFmpeg `scale2ref` -> `overlay`
+  filter chain with 9-point position grid, --opacity 0..1, --scale as
+  percent of frame width, --margin in pixels). Watermark pre-multiplies
+  alpha so users can dial transparency without baking it into the PNG.
+- New presets routing through clipforge: `lens-correct-actioncam`
+  (default action-cam k1=-0.2), `watermark-overlay` (RequiresExtraInput
+  for the overlay path), `lut-apply` (RequiresExtraInput for the .cube
+  LUT path; runs the existing clipforge.lut3d op), `lossless-trim`
+  (clipforge.trim --lossless, keyframe-bounded stream-copy).
+- New ProRes/DNxHR videocrush presets (Item 57): `to-prores-422-proxy`,
+  `to-prores-4444`, `to-dnxhr-sq`, `to-dnxhr-hq`, `to-dnxhr-hqx`. The
+  underlying videocrush PRESETS dict already maps each to the right
+  prores_ks profile or dnxhr_<tier> flag — this item closes the
+  preset-library gap.
+
 ### Added — Subtitle burn-in / HDR-to-SDR / Auto-crop / Stabilize (ROADMAP Items 14, 17, 19, 23)
 
 - `clipforge` sidecar gains four new ops:

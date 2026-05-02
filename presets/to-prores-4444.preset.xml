@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To ProRes 4444 (effects / compositing with alpha)</Name>
+    <Folder>Video/Professional</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+        <Extension>mxf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_prores4444</OutputFileNameTemplate>
+    <OutputExtension>mov</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>prores-4444</Arg>
+    </Args>
+</Preset>

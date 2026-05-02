@@ -1018,6 +1018,110 @@ def op_hdr_to_sdr(args: argparse.Namespace) -> int:
     return 0
 
 
+# ─── Lens correction (Item 24) ───────────────────────────────────────────────
+
+def op_lens_correct(args: argparse.Namespace) -> int:
+    """Apply FFmpeg's `lenscorrection` filter for barrel / pincushion
+    distortion correction. Useful for action cam / wide-angle footage where
+    a vendor lens-distortion model is unavailable. K1 < 0 = pincushion
+    correction; K1 > 0 = barrel correction. Cx/Cy default to centre."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    cx = max(0.0, min(1.0, args.cx))
+    cy = max(0.0, min(1.0, args.cy))
+    vf = f"lenscorrection=cx={cx}:cy={cy}:k1={args.k1}:k2={args.k2}"
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", vf,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+    emit("log", level="info", message=f"lenscorrection k1={args.k1} k2={args.k2}")
+    emit("progress", percent=0, stage="lens-correct", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "lens-correct")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited {rc} during lens correction.")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+# ─── Watermark overlay (Item 31) ─────────────────────────────────────────────
+
+# 9-point grid -> FFmpeg overlay x/y expressions. Anchors derived from main
+# video dimensions (W,H) and overlay dimensions (w,h).
+_WATERMARK_POSITIONS = {
+    "tl": ("(M)", "(M)"),
+    "tc": ("(W-w)/2", "(M)"),
+    "tr": ("W-w-(M)", "(M)"),
+    "ml": ("(M)", "(H-h)/2"),
+    "mc": ("(W-w)/2", "(H-h)/2"),
+    "mr": ("W-w-(M)", "(H-h)/2"),
+    "bl": ("(M)", "H-h-(M)"),
+    "bc": ("(W-w)/2", "H-h-(M)"),
+    "br": ("W-w-(M)", "H-h-(M)"),
+}
+
+
+def op_watermark(args: argparse.Namespace) -> int:
+    """Stamp a PNG/JPEG logo onto the video via FFmpeg's `overlay` filter.
+    9-point position grid + opacity (0..1) + scale (% of frame width).
+    The overlay is alpha-pre-multiplied via the `format=rgba,colorchannelmixer`
+    chain so users can dial opacity without baking it into the source PNG."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    overlay = Path(args.overlay)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    if not overlay.is_file():
+        return fail("missing_overlay", f"Overlay image not found: {args.overlay}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    pos = (args.position or "br").lower()
+    coords = _WATERMARK_POSITIONS.get(pos)
+    if coords is None:
+        return fail("invalid_args", f"Unknown position: {pos}. "
+                                     f"Use one of {sorted(_WATERMARK_POSITIONS)}.")
+    margin = max(0, args.margin)
+    x_expr = coords[0].replace("(M)", str(margin))
+    y_expr = coords[1].replace("(M)", str(margin))
+
+    opacity = max(0.0, min(1.0, args.opacity))
+    scale_pct = max(1.0, min(100.0, args.scale))
+    # scale2ref pegs the overlay width to the main video width % so the stamp
+    # stays proportional regardless of source resolution.
+    fc = (
+        f"[1:v]format=rgba,colorchannelmixer=aa={opacity}[wm0];"
+        f"[wm0][0:v]scale2ref=w=main_w*{scale_pct/100.0}:h=ow/iw*ih[wm][bg];"
+        f"[bg][wm]overlay={x_expr}:{y_expr}"
+    )
+    cmd = [ffmpeg, "-y", "-i", str(src), "-i", str(overlay),
+           "-filter_complex", fc,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+    emit("log", level="info",
+         message=f"watermark {overlay.name} pos={pos} opacity={opacity} scale={scale_pct}%")
+    emit("progress", percent=0, stage="watermark", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "watermark")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited {rc} during watermark overlay.")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
 # ─── Subtitle burn-in (Item 14) ──────────────────────────────────────────────
 
 # 9-point grid -> ASS \an alignment (libass numbering: 1=BL, 2=BC, 3=BR,
@@ -1425,6 +1529,40 @@ def build_parser() -> argparse.ArgumentParser:
     autocrop.add_argument("--crf", type=int, default=20)
     autocrop.add_argument("--preset", default="medium")
 
+    # ── lens-correct ──────────────────────────────────────────────────────────
+    lensc = sub.add_parser("lens-correct",
+                           help="Barrel/pincushion correction via FFmpeg lenscorrection filter")
+    lensc.add_argument("--input", required=True)
+    lensc.add_argument("--output", required=True)
+    lensc.add_argument("--k1", type=float, default=-0.2,
+                       help="Quadratic correction. <0 = pincushion correction (default -0.2 for action cams).")
+    lensc.add_argument("--k2", type=float, default=0.0,
+                       help="Quartic correction (default 0).")
+    lensc.add_argument("--cx", type=float, default=0.5, help="Optical centre X (0..1, default 0.5).")
+    lensc.add_argument("--cy", type=float, default=0.5, help="Optical centre Y (0..1, default 0.5).")
+    lensc.add_argument("--codec", default="libx264")
+    lensc.add_argument("--crf", type=int, default=20)
+    lensc.add_argument("--preset", default="medium")
+
+    # ── watermark ─────────────────────────────────────────────────────────────
+    wm = sub.add_parser("watermark",
+                        help="Overlay a PNG/JPEG logo with 9-point positioning, opacity, and scale")
+    wm.add_argument("--input", required=True)
+    wm.add_argument("--output", required=True)
+    wm.add_argument("--overlay", required=True,
+                    help="Path to a PNG (with alpha) or JPEG logo file")
+    wm.add_argument("--position", default="br",
+                    help="9-point grid: tl tc tr ml mc mr bl bc br (default br).")
+    wm.add_argument("--opacity", type=float, default=0.7,
+                    help="Overlay opacity 0..1 (default 0.7).")
+    wm.add_argument("--scale", type=float, default=15.0,
+                    help="Overlay width as percent of frame width (default 15).")
+    wm.add_argument("--margin", type=int, default=24,
+                    help="Edge margin in pixels (default 24).")
+    wm.add_argument("--codec", default="libx264")
+    wm.add_argument("--crf", type=int, default=20)
+    wm.add_argument("--preset", default="medium")
+
     # ── stabilize ─────────────────────────────────────────────────────────────
     stab = sub.add_parser("stabilize",
                           help="Two-pass video stabilization via vidstabdetect + vidstabtransform")
@@ -1508,6 +1646,10 @@ def main(argv: list[str] | None = None) -> int:
             return op_auto_crop(args)
         if args.op == "stabilize":
             return op_stabilize(args)
+        if args.op == "lens-correct":
+            return op_lens_correct(args)
+        if args.op == "watermark":
+            return op_watermark(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

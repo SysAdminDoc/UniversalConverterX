@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Apply 3D LUT (.cube) for colour grading</Name>
+    <Folder>Video/Color</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>ts</Extension>
+        <Extension>webm</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_graded</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <RequiresExtraInput>true</RequiresExtraInput>
+    <ExtraInputPrompt>Pick a 3D LUT (.cube / .3dl) exported from DaVinci Resolve, Lightroom, etc.</ExtraInputPrompt>
+    <Args>
+        <Arg>lut3d</Arg>
+    </Args>
+</Preset>
