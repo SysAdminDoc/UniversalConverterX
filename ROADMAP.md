@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
 **Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-01 (Phase 5 audit reconciliation)
+**Last updated:** 2026-05-03 (iter-5 external research refresh — 45+ sources)
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
@@ -15,6 +15,13 @@ accessibility.
 > [`docs/research/iter-1-audit.md`](docs/research/iter-1-audit.md) for the
 > full audit (seven dimensions, cross-family signal). Item 6 (Conversion
 > History) is flagged for verification next iteration.
+
+> **iter-5 external research refresh (2026-05-03):** 45+ sources surveyed
+> (HandBrake 1.11 + open issues, faster-whisper 1.1–1.2, PySceneDetect 0.6.7,
+> ONNX Runtime 1.25, CCExtractor 0.96.x, WinAppSDK 2.0, 66HEX/frame,
+> MediaInfo 26.01, OpenShot 3.5.1, SubtitleEdit 5-betas, C2PA Spec 2.0,
+> RVC/voice-changer ecosystem). Net additions: Items 54–65. Updated: Items 1,
+> 21, 28, 33, 40, 43, 47, 50. New appendix sources: S39–S48.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -62,7 +69,11 @@ wired to live pages — only Voice Changer remains.
 
 **Remaining work** (narrowed):
 
-- Voice Changer engine selection — needs sidecar choice (RVC, so-vits-svc, or other), then UI wiring.
+- Voice Changer engine selection — the original RVC project is unmaintained
+  (last release: 2023) [S47]. Current viable engines: **w-okada/voice-changer**
+  (active real-time RVC fork, ONNX-exportable) or **CosyVoice** / **OpenVoice v2**
+  (zero-shot voice style transfer, no training data required). Evaluate and
+  select engine before sidecar work begins.
 
 Impact: 3 · Effort: 3 · Type: leapfrog
 Sources: [S3], [S4], [S10]
@@ -288,6 +299,56 @@ build job now `needs: sidecar-contract`. 176 sidecars conforming locally.
 
 ---
 
+### 54. AiLabPage — Fix Stale "Future" Status Labels
+
+Three AiLab tiles (`TextToSpeech`, `SpeechToText`, `OldPhotoRestoration`)
+still display a `"Future"` status chip in `AiLabPage.xaml.cs` (lines 35–38)
+despite all three pages being fully wired and shipped (verified in Item 1,
+Phase 5 audit). The stale label greys out tiles and suppresses the live
+call-to-action. Fix: change `TileStatus.Future` → `TileStatus.Ready` for
+the three shipped tiles. One-line change per tile; no sidecar involved.
+
+Impact: 2 · Effort: 1 · Type: UX
+Source: [S2] (AiLabPage.xaml.cs stale status inspection, Phase 0 recon)
+
+---
+
+### 60. Batch Queue — Auto-scroll to Active Job
+
+When the batch queue begins processing a job, the queue `ListView` should
+auto-scroll to keep the active row visible. In deep queues (50+ items) the
+processing row scrolls off-screen and users lose track of progress.
+Implementation: call `ListView.ScrollIntoView(activeItem)` when the
+orchestrator fires `ActiveJobChanged`. WinUI 3 `ListView` supports this
+natively — no custom scroll code required; no sidecar change.
+
+Impact: 3 · Effort: 1 · Type: UX
+Source: [S40] (HandBrake #7813 — auto-scroll queue to active job)
+
+---
+
+### 61. faster-whisper Sidecar Refresh (Batched Inference + New Models)
+
+Update the `whisper-stt` sidecar to `faster-whisper>=1.1.0`:
+
+- **Batched inference:** 4× throughput on long-form audio by processing in
+  overlapping chunks (`--batch_size 8` default for GPU; sequential fallback
+  on CPU).
+- **large-v3-turbo model:** Distilled Whisper; quality close to `large-v3`
+  at ~3× the speed. Add as a UI model selection option in `SttPage.xaml`.
+- **New VAD models:** `silero_v6_fw`, `silero_v6`, `nemo_v2`, `ten` —
+  improved silence detection on noisy/music-heavy audio. Update VAD dropdown.
+- **3× faster CPU VAD:** significant benefit for CPU-only installs.
+
+Update `requirements.txt`: pin `faster-whisper>=1.1.0`. No NDJSON contract
+change — only sidecar CLI arg extension and model-list update.
+
+Impact: 4 · Effort: 2 · Type: platform + performance
+Sources: [S44] (faster-whisper v1.1.0/v1.2.1 — batched inference 4×, large-v3-turbo),
+[S48] (Purfview Whisper-XXL Pro r3.256.1 — silero_v6/nemo_v2/ten VAD models)
+
+---
+
 ## Tier 2 — Next  _(v2.23–v2.27)_
 
 Medium-effort items. Some require new sidecars; most build on existing
@@ -418,8 +479,14 @@ Extend the `whisper-stt` / `whisper-cpp` sidecar with `pyannote.audio`
 `[Speaker 1]`, `[Speaker 2]` in SRT/VTT/TXT output. Expose as a checkbox
 "Identify speakers" in `SttPage.xaml`.
 
+**Engine note (iter-5, 2026-05-03):** faster-whisper 1.1.0 [S44] ships
+batched inference (4× throughput) and the `large-v3-turbo` distilled model.
+The STT sidecar refresh (Item 61) should land before this item to avoid
+double-integrating on an older inference path.
+
 Impact: 3 · Effort: 3 · Type: leapfrog
-Source: [S10] (Purfview whisper-standalone-win — pyannote_v3/onnx VAD + diarization)
+Sources: [S10] (Purfview whisper-standalone-win — pyannote_v3/onnx VAD + diarization),
+[S44] (faster-whisper v1.1.0 — batched inference, large-v3-turbo)
 
 ---
 
@@ -513,8 +580,16 @@ sidecars to ≥7.1 (current stable shipped with UCX) and test against 8.1
 support, libvmaf AVX-512 improvements. Carry a pinned FFmpeg build in
 `tools/ffmpeg/` rather than relying on PATH.
 
+**CUDA / ONNX floor (iter-5, 2026-05-03):** ONNX Runtime 1.25.0 [S36] dropped
+CUDA 11.x support — UCX AI sidecars must pin `onnxruntime-gpu>=1.25.1` and
+document `CUDA ≥12.0` as the GPU runtime floor. RTX 50xx (Blackwell, CUDA 12.8)
+is tested by Purfview r3.256.1 [S48]; no sidecar change needed as 12.0 ≤ 12.8.
+**ArmNN EP removed in ORT 1.25.0** — Qualcomm NPU work (Item 47) must target
+QNN EP only.
+
 Impact: 3 · Effort: 2 · Type: platform + security
-Source: [S9] (FFmpeg 8.1 changelog), [S20] (BtbN FFmpeg auto-builds)
+Sources: [S9] (FFmpeg 8.1 changelog), [S20] (BtbN FFmpeg auto-builds),
+[S36] (ONNX Runtime 1.25.0 — CUDA 12.0 minimum, ArmNN EP removal)
 
 ---
 
@@ -601,9 +676,146 @@ atoms). Present as `MediaInspectorPage.xaml` with collapsible per-stream
 sections and a "Copy as JSON" export button. Distinct from the EXIF metadata
 editor (Item 12): read-only technical analysis of A/V streams, not tag editing.
 
+**MediaInfo 26.01 scope note (iter-5, 2026-05-03):** MediaInfo 26.01 [S37]
+adds C2PA assertion parsing for MPEG-4 containers. The `mediainspect` sidecar
+should surface the C2PA `actions` assertion list (author, creation tool,
+processing steps) when present — providing read-only content-provenance display
+without requiring the full C2PA embedding pipeline (UC table entry).
+
 Impact: 3 · Effort: 2 · Type: parity
-Sources: [S37] (MediaArea/MediaInfo — technical A/V stream analysis),
+Sources: [S37] (MediaArea/MediaInfo — technical A/V stream analysis, C2PA parsing),
 [S35] (krzemienski/awesome-video: sbraz/pymediainfo wrapper)
+
+---
+
+### 56. AI Subtitle & Translation Full Pipeline
+
+Extend the existing STT workflow into a complete subtitle production pipeline:
+transcribe → translate → edit → burn-in → export. Stages:
+
+1. **Transcribe:** Whisper (existing `whisper-stt` sidecar) → raw SRT.
+2. **Translate:** Machine-translate the SRT to a target language using a local
+   model (e.g. `Helsinki-NLP/opus-mt-*` ONNX weights via `ctranslate2`) —
+   no external API, charter-aligned.
+3. **Edit (light):** Surface the SRT in a read-only preview panel with a
+   "copy to clipboard / open in Notepad" escape hatch. Full subtitle editing
+   is out of scope for this item.
+4. **Burn-in or export:** Pass the output SRT to the existing subtitle burn-in
+   preset (Item 14) or export as SRT/VTT/ASS.
+
+Wire to an expanded `SttPage.xaml` pipeline view or a new
+`SubtitleStudioPage.xaml`. The AI Subtitle tile in `AiLabPage.xaml.cs` is
+currently `"Planned"` — this item ships it.
+
+Impact: 4 · Effort: 3 · Type: leapfrog
+Source: [S2] (AiLabPage.xaml.cs "Planned" tile inspection, Phase 0)
+
+---
+
+### 57. ProRes & DNxHR Encoder Presets
+
+HandBrake 1.11.0 ships Apple ProRes (all variants: 422 Proxy/LT/422/HQ,
+4444, 4444 XQ) and Avid DNxHR (SQ, HQX, 444, LB) encoders via FFmpeg,
+confirming production-readiness for intermediate-format workflows.
+
+Add presets for:
+
+- `ProRes 422 HQ` — standard production deliverable (MOV container)
+- `ProRes 4444` — effects/compositing with alpha channel support
+- `DNxHR SQ` — Avid Media Composer project-ready intermediate (MXF/MOV)
+- `DNxHR HQX` — 10-bit intermediate for color work
+
+UCX's existing `videocrush` sidecar already exposes FFmpeg codec flags;
+extending it for ProRes/DNxHR is a preset-XML addition + minor sidecar
+validation of `prores_ks` / `dnxhd` codec availability at runtime.
+
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S39] (HandBrake 1.11.0 release — ProRes + DNxHR encoder support)
+
+---
+
+### 58. Audio Encoder Advanced Parameters
+
+Expose per-encoder advanced options beyond bitrate and sample rate. Most
+professional converters expose these; UCX sidecars support the FFmpeg flags
+but the UI surfaces no controls:
+
+- **FDK-AAC:** cutoff frequency (`-cutoff`), afterburner (`-afterburner`).
+- **libopus:** bitrate mode (CVBR/CBR), application profile (voip / audio /
+  lowdelay), frame duration.
+- **libvorbis:** managed bitrate mode toggle.
+- **MP3 (libmp3lame):** psychoacoustic tuning preset (complements the VBR
+  mode already covered by Item 30).
+
+Implementation: add an "Advanced audio…" expansion panel in
+`AudioConverterPage` (when Item 30 VBR surface lands) exposing these as
+optional override fields. Store in preset XML as `<AudioAdvanced>` child
+elements; sidecar parses and maps to FFmpeg flags.
+
+Impact: 3 · Effort: 2 · Type: parity
+Source: [S43] (HandBrake #7336 — audio encoder advanced parameter exposure)
+
+---
+
+### 59. Post-Conversion Source File Management
+
+After a successful conversion, optionally: move the source file to a configured
+archive folder, delete it, or do nothing (default). Surface as a per-preset
+option: "After successful conversion: [Keep / Move to / Delete]".
+
+Implementation:
+
+- Add `PostConversionAction` enum (`Keep`, `Move`, `Delete`) to
+  `ConversionPreset`.
+- The orchestrator executes the action after the `complete` event and
+  verification of output file presence.
+- "Move to" shows a folder picker; resolves relative paths from source parent
+  if the configured path is relative.
+- Delete requires explicit user opt-in (checked setting in the preset editor)
+  and logs the deletion to History (Item 6) before executing.
+
+Impact: 3 · Effort: 2 · Type: UX
+Source: [S41] (HandBrake #7400 — auto-move source files after successful encode)
+
+---
+
+### 62. Lock Preset Dimensions Across Switches
+
+When a user adjusts the crop / resolution / aspect ratio settings in the
+conversion UI and then switches to a different preset, the dimension fields
+currently reset to preset defaults — discarding manual settings. Add a
+per-field lock toggle (lock icon beside each dimension control) that pins
+the value and prevents preset-switch from overwriting it. Pinned fields
+persist until the user explicitly unlocks or resets.
+
+Implementation: `LockedFields` bitmask on the UI ViewModel; preset-apply
+logic skips fields whose bit is set. No preset XML change — purely a
+ViewModel-layer UX pattern.
+
+Impact: 3 · Effort: 2 · Type: UX
+Source: [S42] (HandBrake #7423 — lock crop/resolution settings across preset changes)
+
+---
+
+### 63. VOBSUB + OCR Subtitle Extraction (Standalone Tool)
+
+Wire a dedicated toolbox entry for VOBSUB/PGS image-subtitle → SRT
+conversion. Primary use case: users ripping home-video DVDs whose subtitle
+tracks are stored as VOBSUB image streams rather than text.
+
+Implementation: CCExtractor 0.96.3 [S34] supports VOBSUB OCR output for
+MP4/MKV. Extend the `ccextract` sidecar with:
+
+- `--input-format vobsub` mode
+- OCR output to SRT/VTT
+- Language selection (`--ocr-lang <iso>` passed to Tesseract backend)
+
+Wire to a "VOBSUB → Text Subtitles" entry in VideoToolsPage or the DiscTools
+section alongside DVD Rip (Item 43). Latin-script OCR quality is good; CJK
+degrades — document in UI tooltip.
+
+Impact: 2 · Effort: 2 · Type: parity
+Source: [S34] (CCExtractor 0.96.3 VOBSUB OCR support for MP4/MKV)
 
 ---
 
@@ -697,8 +909,15 @@ Add, edit, delete, and import/export chapter markers in MKV or MP4 containers
 without re-encoding. Backend: `mkvmerge --chapters` for MKV; `mp4box -chap`
 or FFmpeg for MP4. Wire to `ChapterEditorPage.xaml`.
 
+**Precision note (iter-5, 2026-05-03):** HandBrake issue #7339 [S46]
+documents a chapter timestamp offset bug when the source chapter file uses
+non-zero start timestamps. The Chapter Editor must preserve exact PTS values
+during import and must not silently renumber or offset them. Add a
+timestamp-accuracy unit test to the sidecar contract suite.
+
 Impact: 3 · Effort: 3 · Type: parity
-Source: [S6] (LosslessCut chapter editor), [S14] (standard pro video feature)
+Sources: [S6] (LosslessCut chapter editor), [S14] (standard pro video feature),
+[S46] (HandBrake #7339 — chapter timestamp offset on non-zero-start input)
 
 ---
 
@@ -739,8 +958,16 @@ Scope: menu-free ISOs, non-commercial home videos. Clearly document the
 DRM exclusion in the UI (CSS-encrypted commercial discs unsupported by charter).
 Addresses the disc-import use case from Any Video Converter's feature set.
 
+**VOBSUB subtitle scope (iter-5, 2026-05-03):** CCExtractor 0.96.3 [S34]
+adds VOBSUB+OCR extraction (image subtitles → SRT) for MP4/MKV; 0.96.5
+fixes MXF CEA-708 detection. The DVD rip pipeline can extend to converting
+VOBSUB/PGS image subtitles to text-format SRT via the `ccextract` sidecar
+(see also Item 63). Note: Tesseract OCR quality is acceptable for
+Latin-script sources but degrades on CJK tracks — document in the UI.
+
 Impact: 3 · Effort: 4 · Type: parity
-Source: [S3] (Any Video Converter DVD import, v9.2.0)
+Sources: [S3] (Any Video Converter DVD import, v9.2.0),
+[S34] (CCExtractor 0.96.3 VOBSUB OCR support)
 
 ---
 
@@ -793,8 +1020,14 @@ verifying all Python sidecars run under ARM64 Python or x64-under-emulation.
 FFmpeg ARM64 build available from BtbN. HandBrake has an open ARM64/Qualcomm
 encoder request.
 
+**ORT 1.25.0 change (iter-5, 2026-05-03):** ONNX Runtime 1.25.0 [S36]
+removed the ArmNN Execution Provider entirely. All Qualcomm NPU inference
+must target the **QNN EP** (`onnxruntime.providers.qnn`). Verify QNN EP
+availability on Snapdragon X Elite before committing the ARM64 AI path.
+
 Impact: 2 · Effort: 4 · Type: platform
-Source: [S22] (HandBrake #7822 Qualcomm VCE/ARM64 encoder request)
+Sources: [S22] (HandBrake #7822 Qualcomm VCE/ARM64 encoder request),
+[S36] (ONNX Runtime 1.25.0 — ArmNN EP removal, QNN EP as replacement)
 
 ---
 
@@ -848,9 +1081,63 @@ existing subtitle track management tools (Item 13). Primary use case: users with
 OTA/cable DVR recordings saved as raw MPEG-TS or MPEG-2 PS files who need to
 extract the captions as a text track.
 
+**CCExtractor 0.96.x scope expansion (iter-5, 2026-05-03):** CCExtractor
+0.96.3 [S34] adds VOBSUB+OCR for MP4/MKV (image subtitles → SRT); 0.96.5
+fixes MXF persistent CEA-708 decoder context. Expand `ccextract` sidecar
+scope: (a) VOBSUB/PGS image-format subtitle OCR in MKV/MP4, (b) MXF broadcast
+container input, (c) SCC input format. The standalone VOBSUB OCR toolbox entry
+is Item 63; this item focuses on broadcast caption extraction (MPEG-TS, MXF,
+MPEG-2 PS streams).
+
 Impact: 2 · Effort: 3 · Type: parity
-Sources: [S34] (CCExtractor — open-source broadcast closed-caption extractor),
+Sources: [S34] (CCExtractor 0.96.3/0.96.5 — VOBSUB OCR, MXF CEA-708 fix),
 [S35] (awesome-video subtitle / caption section)
+
+---
+
+### 55. Video Summarizer (AI Condensed Highlight) _(depends on Item 61)_
+
+Ships the `"Planned"` Video Summarizer tile in `AiLabPage.xaml.cs`. The
+pipeline:
+
+1. **Transcribe:** Whisper (Item 61 sidecar, `large-v3-turbo` model) → full
+   transcript with timestamps.
+2. **Summarize:** Feed transcript to a local LLM. Two viable paths:
+   - **Phi Silica** (Windows ML / WinAppSDK 2.0, Item 26) — zero additional
+     sidecar if WinAppSDK 2.0 migration is complete.
+   - **llama.cpp sidecar** with a GGUF-quantized Phi-3 Mini — broader
+     compatibility, no WinAppSDK 2.0 gate.
+3. **Identify highlight timestamps:** The summarization output contains
+   key-event references; cross-reference with PySceneDetect (Item 37 or the
+   scene-detect sidecar) to get segment boundaries.
+4. **Produce highlight reel:** Extract + concatenate segments (FFmpeg
+   `concat` demuxer). Output: new file `<source>_highlights.mp4`.
+
+This is a 3-sidecar orchestration (whisper-stt → llm → videocrush). Scope
+carefully and implement stages serially to validate intermediate quality
+before full integration. Distinct from SponsorBlock (Item 20) and the
+Manual Scene Selector (Item 37).
+
+Impact: 3 · Effort: 4 · Type: leapfrog
+Source: [S2] (AiLabPage.xaml.cs "Planned" tile — Video Summarizer)
+
+---
+
+### 64. SystemBackdropElement — In-App Mica / Acrylic Panels _(depends on Item 26)_
+
+Post-WinAppSDK 2.0 migration (Item 26), apply `SystemBackdropElement`
+to specific sub-areas of the UI: the navigation sidebar, the AiLab card
+grid, and the Settings panel. This lets individual panels use Mica or
+Acrylic translucency independently of the window-level backdrop already
+set on `MainWindow`.
+
+Gate behind a runtime capability check: fall back silently to solid fill
+on Windows 10 or when running under WinAppSDK 1.x (item hard-depends
+on Item 26). Surfaced as an optional "Glassmorphism panels" toggle in
+Settings.
+
+Impact: 2 · Effort: 1 · Type: UX post-migration polish
+Source: [S19] (WinAppSDK 2.0 — SystemBackdropElement in-app panels)
 
 ---
 
@@ -956,6 +1243,8 @@ These need more investigation or community signal before placement.
 | **C2PA Content Credentials embedding** | Embed a `c2pa:actions` assertion in output files recording that UCX processed them. C2PA Spec 2.0 is fully published; Adobe, Microsoft, Google, and Sony are all shipping support. Requires `c2pa-python` (Rust-backed FFI sidecar dependency). Question: is the UCX audience large enough to justify a Rust compile dependency in the sidecar chain? [S30] |
 | **IAMF immersive audio pass-through** | Remux IAMF (Immersive Audio Model and Formats, AOMedia) audio streams into MP4/ISOBMFF without transcoding. FFmpeg 7.0+ supports IAMF via `libiamf`. Question: identify at least three concrete user workflows before committing. [S37] |
 | **Commercial / ad detection (Comskip)** | Detect and optionally remove commercial breaks in OTA/DVR recordings using Comskip. Relevant only to users with ATSC tuner or MPEG-TS recordings. Question: is this a UCX use case or a dedicated DVR-management tool problem? Needs community signal. [S35] |
+| **ComfyUI AI Workflow Integration (Item 65)** | OpenShot 3.5.1 [S45] integrates ComfyUI; UCX AiLab could expose a `comfyui-runner` sidecar that submits a JSON workflow to a locally running ComfyUI server (user-managed). Effort 5. Leapfrog candidate if the target audience overlaps with ComfyUI power users. Needs community signal before scoping. |
+| **Estimated output file size in batch queue** | Pre-encode estimate per queue item based on target bitrate × source duration. Surfaces in the batch queue metadata column. Effort 1. Assess accuracy trade-offs (CBR vs. VBR, container overhead) before committing. |
 
 ---
 
@@ -1035,3 +1324,13 @@ Before any new sidecar or preset is merged:
 | S36 | https://github.com/microsoft/onnxruntime/releases | ONNX Runtime v1.25.0/1.25.1 — 10+ security fixes (heap OOB, integer overflows); UCX Python sidecars must pin ≥1.25.1 |
 | S37 | https://github.com/MediaArea/MediaInfo/releases | MediaInfo 26.01 — C2PA parsing, IAMF audio, Spherical Video 2, Gain Map HDR metadata |
 | S38 | https://github.com/jeanslack/Videomass/releases | Videomass v6.1.18 — advanced FFmpeg panel UX reference, waveform display, subtitle stream indexing |
+| S39 | https://github.com/HandBrake/HandBrake/releases/tag/1.11.0 | HandBrake 1.11.0 — ProRes encoder, DNxHR encoder, AMD VCN AV1 10-bit, FFmpeg 8.0.1 |
+| S40 | https://github.com/HandBrake/HandBrake/issues/7813 | HandBrake #7813 — auto-scroll queue list to active job |
+| S41 | https://github.com/HandBrake/HandBrake/issues/7400 | HandBrake #7400 — auto-move source files to folder after successful encode |
+| S42 | https://github.com/HandBrake/HandBrake/issues/7423 | HandBrake #7423 — lock crop/resolution settings across preset changes |
+| S43 | https://github.com/HandBrake/HandBrake/issues/7336 | HandBrake #7336 — audio encoder advanced parameters (FDK-AAC cutoff, afterburner, libopus profile) |
+| S44 | https://github.com/SYSTRAN/faster-whisper/releases | faster-whisper v1.1.0/v1.2.1 — batched inference 4×, large-v3-turbo model, new VAD models |
+| S45 | https://github.com/OpenShot/openshot-qt/releases/tag/v3.5.1 | OpenShot 3.5.1 — ComfyUI AI workflow integration, proxy editing |
+| S46 | https://github.com/HandBrake/HandBrake/issues/7339 | HandBrake #7339 — chapter timestamp offset on non-zero-start chapter input |
+| S47 | https://github.com/w-okada/voice-changer | w-okada/voice-changer — actively maintained real-time RVC fork (original RVC unmaintained since 2023) |
+| S48 | https://github.com/Purfview/whisper-standalone-win/releases | Purfview Whisper-XXL Pro r3.256.1 — silero_v6/nemo_v2/ten VAD models, torch 2.8+CUDA12.8 |
