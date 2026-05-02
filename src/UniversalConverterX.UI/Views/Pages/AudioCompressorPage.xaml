@@ -93,13 +93,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Audio Compressor" Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="AUDIO COMPRESSOR"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Apply dynamic-range compression to audio (or video audio tracks). Tame loud peaks, lift quiet passages, level a podcast guest."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         AutomationProperties.AutomationId="AudioCompressorAddFilesButton"
                         Style="{StaticResource SecondaryButtonStyle}"
