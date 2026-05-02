@@ -1,0 +1,119 @@
+using System.Text.Json.Nodes;
+using FluentAssertions;
+using UniversalConverterX.Core.Configuration;
+
+namespace UniversalConverterX.Core.Tests.Configuration;
+
+public class SettingsMigrationsTests
+{
+    [Fact]
+    public void LoadFromJson_LegacyJsonWithoutSchemaVersion_TreatedAsV1AndUpgraded()
+    {
+        // Pre-Item-53 settings.json had no SchemaVersion key. The migrator
+        // must default it to v1 and stamp the upgraded version after.
+        var legacyJson = """
+        {
+          "OverwriteBehavior": "Ask",
+          "MaxParallelConversions": 4
+        }
+        """;
+
+        var loaded = ConverterXOptions.LoadFromJson(legacyJson, persistMigrated: false);
+
+        loaded.SchemaVersion.Should().Be(ConverterXOptions.CurrentSchemaVersion);
+        loaded.MaxParallelConversions.Should().Be(4);
+        // Persisted user value is preserved — the iter-1 default flip from
+        // Ask to Never only affects fresh installs.
+        loaded.OverwriteBehavior.Should().Be(OverwriteBehavior.Ask);
+    }
+
+    [Fact]
+    public void LoadFromJson_CurrentSchemaVersion_NoMigrationNeeded()
+    {
+        var currentJson = $$"""
+        {
+          "SchemaVersion": {{ConverterXOptions.CurrentSchemaVersion}},
+          "OverwriteBehavior": "Skip",
+          "MaxParallelConversions": 8
+        }
+        """;
+
+        var loaded = ConverterXOptions.LoadFromJson(currentJson, persistMigrated: false);
+
+        loaded.SchemaVersion.Should().Be(ConverterXOptions.CurrentSchemaVersion);
+        loaded.OverwriteBehavior.Should().Be(OverwriteBehavior.Skip);
+        loaded.MaxParallelConversions.Should().Be(8);
+    }
+
+    [Fact]
+    public void LoadFromJson_FutureSchemaVersion_DoesNotCrash()
+    {
+        // A SettingsJson written by a future UCX. The current binary should
+        // load whatever fields it understands and not loop or throw.
+        var futureJson = """
+        {
+          "SchemaVersion": 999,
+          "OverwriteBehavior": "Always",
+          "FutureUnknownField": "ignored"
+        }
+        """;
+
+        var loaded = ConverterXOptions.LoadFromJson(futureJson, persistMigrated: false);
+
+        // The migrator clamps SchemaVersion back to CurrentSchemaVersion on
+        // its way out — the in-memory instance always reports the schema it
+        // can faithfully serialize.
+        loaded.SchemaVersion.Should().Be(ConverterXOptions.CurrentSchemaVersion);
+        loaded.OverwriteBehavior.Should().Be(OverwriteBehavior.Always);
+    }
+
+    [Fact]
+    public void Migrate_StampsTargetVersion_OnLegacyTree()
+    {
+        var root = new JsonObject { ["OverwriteBehavior"] = "Ask" };
+
+        var result = SettingsMigrations.Migrate(root, fromVersion: 1, toVersion: 2,
+                                                out var didMigrate);
+
+        didMigrate.Should().BeTrue();
+        ((int?)result["SchemaVersion"]).Should().Be(2);
+        ((string?)result["OverwriteBehavior"]).Should().Be("Ask");
+    }
+
+    [Fact]
+    public void Migrate_NoOpWhenAlreadyAtTarget()
+    {
+        var root = new JsonObject
+        {
+            ["SchemaVersion"] = 2,
+            ["OverwriteBehavior"] = "Never",
+        };
+
+        SettingsMigrations.Migrate(root, fromVersion: 2, toVersion: 2, out var didMigrate);
+
+        didMigrate.Should().BeFalse();
+    }
+
+    [Fact]
+    public void LoadFromJson_NewInstance_UsesCurrentSchemaVersion()
+    {
+        // A new ConverterXOptions in C# (not loaded from disk) defaults to
+        // CurrentSchemaVersion so freshly-created instances serialize
+        // unambiguously.
+        var fresh = new ConverterXOptions();
+
+        fresh.SchemaVersion.Should().Be(ConverterXOptions.CurrentSchemaVersion);
+    }
+
+    [Fact]
+    public void LoadFromJson_InvalidRoot_Throws()
+    {
+        // The Load() entry point catches this and falls back to defaults; the
+        // internal helper surfaces it so tests can distinguish corruption
+        // from valid empty objects.
+        var notAnObject = "[1, 2, 3]";
+
+        FluentActions.Invoking(() => ConverterXOptions.LoadFromJson(notAnObject, persistMigrated: false))
+            .Should().Throw<System.Text.Json.JsonException>();
+    }
+}
