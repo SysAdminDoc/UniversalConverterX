@@ -4,6 +4,34 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — Dependency update checker service (ROADMAP Item 7, Phase 1)
+
+- New `Services/UpdateCheckService.cs` (UI project): fire-and-forget
+  background probe of GitHub Releases for yt-dlp, BtbN/FFmpeg-Builds,
+  ggerganov/whisper.cpp, and microsoft/onnxruntime.
+- 24 h throttle window enforced through the cache `LastCheckUtc` field.
+  Honours `ConverterXOptions.CheckForUpdates` opt-out (returns cached
+  results without hitting the network when off).
+- Atomic JSON cache write to `%LocalAppData%/UniversalConverterX/update-cache.json`
+  (sibling-tmp + Move pattern, mirrors `SettingsService`). Best-effort
+  installed-version probe via per-tool `<engine>.version` files under
+  `ToolsBasePath`.
+- DI singleton registration in `App.xaml.cs`; fires after main window
+  activation. Probe failures are swallowed.
+- Phase 2 (dashboard InfoBar + one-click update) deferred to follow-up.
+
+### Changed — UX polish (ROADMAP Items 54, 60)
+
+- AiLab tile statuses for Text-to-Speech, Speech-to-Text, and Old Photo
+  Restoration flipped from stale `Future` to `Ready` with engine
+  attributions (Kokoro/Piper, Whisper, Real-ESRGAN/GFPGAN). Pages have
+  been wired and shipped for releases — the chip now matches reality.
+- Batch queue auto-scrolls to the active job in long queues.
+  `QueueList.ScrollIntoView(job)` invoked at the top of the per-job
+  loop in `DownloaderPage`, `RecorderPage`, and `FrameSnapshotPage`
+  (the three `QueueList`-bearing pages). Try/catch absorbs the rare
+  virtualization race when a container hasn't realized yet.
+
 ### Added — Audio Compressor sidecar + standalone page (ROADMAP Item 2)
 
 - New `tools/audio-compressor/sidecar.py` — stdlib-only FFmpeg
