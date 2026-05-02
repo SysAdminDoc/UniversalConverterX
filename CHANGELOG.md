@@ -27,6 +27,56 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Anime upscale sidecar (Real-ESRGAN ncnn-vulkan) (ROADMAP Item 95 partial)
+
+- New `tools/anime-upscale/` sidecar wraps the Real-ESRGAN
+  ncnn-vulkan binary with `image` / `video` / `models` / `probe` ops.
+  Defaults to `realesr-animevideov3` for video and
+  `realesrgan-x4plus-anime` for stills.
+- `video` op extracts frames via FFmpeg, batch-upscales with
+  Real-ESRGAN, then re-muxes with the source audio at the original
+  framerate (CRF + codec configurable).
+- Vulkan-based — runs on Intel Arc / AMD / Nvidia / iGPU without
+  CUDA. Binary not bundled (download from upstream); sidecar
+  discovers it next to itself or under tools/_bin/.
+- Two presets ship: `anime-upscale-still-4x` (4x stills) and
+  `anime-upscale-video-2x` (2x video). Anime4K GLSL backend deferred.
+- Sidecar count: 181 (was 180).
+
+### Added — Metadata Editor (EXIF / XMP / IPTC) sidecar (ROADMAP Item 12)
+
+- New `tools/exiftool-meta/` sidecar wraps Phil Harvey's exiftool CLI
+  with five NDJSON ops: `read` (full tag dictionary as JSON), `write`
+  (repeatable `--set TAG=value` with optional group prefix), `clear`
+  (all metadata or a specific group), `template` (apply a JSON
+  metadata template across a folder for batch-stamping), and
+  `rotate-orient` (rewrite EXIF Orientation 1..8 without re-encoding
+  pixels). `probe` op reports availability + version.
+- exiftool binary not bundled (Windows portable build from
+  exiftool.org); sidecar discovers it next to itself, under
+  tools/_bin/, on PATH, or via `EXIFTOOL_PATH`.
+- Three presets ship: `exif-read` (JSON dump for any image / video /
+  RAW), `exif-clear-all` (privacy scrub), `exif-strip-gps`
+  (location-only strip).
+- New `metadata_record` event registered in `KNOWN_EVENTS`.
+- Sidecar count: 180 (was 179).
+
+### Added — Audio encoder advanced parameters (ROADMAP Item 58 partial)
+
+- `audiopro convert` exposes five new encoder-specific flags (silently
+  ignored on non-matching codecs so a single "Advanced audio" preset
+  ships across formats):
+  - `--fdk-cutoff <Hz>` (libfdk_aac low-pass cap),
+  - `--fdk-afterburner true|false` (libfdk_aac quality knob),
+  - `--fdk-profile {aac_low|aac_he|aac_he_v2|aac_ld|aac_eld}`
+    (profile selector for LC / HE-AAC v1+v2 / LD / ELD),
+  - `--vorbis-managed` (libvorbis ABR-bounded managed bitrate; sets
+    minrate/maxrate to bracket --bitrate).
+- The libopus application + frame-duration controls already shipped
+  under Item 90 also belong to this umbrella.
+- "Advanced audio…" expansion panel in AudioConverterPage deferred
+  until Item 2's broader page lands.
+
 ### Added — ab-av1 VMAF / XPSNR-guided CRF auto-search (ROADMAP Item 67)
 
 - New `tools/ab-av1/` sidecar wraps the upstream ab-av1 Rust binary

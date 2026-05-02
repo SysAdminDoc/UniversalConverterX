@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Read EXIF / XMP / IPTC tags</Name>
+    <Folder>Image/Metadata</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>avif</Extension>
+        <Extension>webp</Extension>
+        <Extension>raw</Extension>
+        <Extension>cr2</Extension>
+        <Extension>cr3</Extension>
+        <Extension>nef</Extension>
+        <Extension>arw</Extension>
+        <Extension>dng</Extension>
+        <Extension>orf</Extension>
+        <Extension>raf</Extension>
+        <Extension>rw2</Extension>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_metadata</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>exiftool-meta</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>read</Arg>
+    </Args>
+</Preset>

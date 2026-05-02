@@ -272,6 +272,8 @@ KNOWN_EVENTS = {
     "audio_compressed",    # audio-compressor — applied DRC params + before/after sizes
     # v2.21 wave (Downloader cookie-store surface)
     "cookie_status",       # streamkeep — cookie store presence/encryption/staleness
+    # iter-5 wave 5 (metadata + auto-edit + ab-av1)
+    "metadata_record",     # exiftool-meta — emitted per file with read/write/clear results
 }
 
 

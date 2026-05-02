@@ -1,0 +1,6 @@
+# exiftool-meta sidecar (ROADMAP Item 12) — read/write/clear EXIF / XMP /
+# IPTC / GPS metadata via Phil Harvey's exiftool CLI.
+#
+# No Python dependencies. The sidecar shells out to the `exiftool` binary;
+# download the Windows portable build from exiftool.org and drop
+# exiftool.exe next to this sidecar or under tools/_bin/.
