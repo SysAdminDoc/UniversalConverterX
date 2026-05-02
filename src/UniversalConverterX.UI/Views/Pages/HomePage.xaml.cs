@@ -1,13 +1,18 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.UI.Services;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class HomePage : Page
 {
     private readonly List<HomeSearchSuggestion> _allSuggestions = [];
+    private string? _primaryUpdateUrl;
 
     public ObservableCollection<HomeActionTile> Actions { get; } = [];
     public ObservableCollection<HomeAiFeatureTile> AiFeatures { get; } = [];
@@ -23,6 +28,54 @@ public sealed partial class HomePage : Page
         AiGrid.ItemsSource = AiFeatures;
         ClustersGrid.ItemsSource = Clusters;
         TaskSearchBox.ItemsSource = _allSuggestions;
+
+        Loaded += HomePage_Loaded;
+    }
+
+    private void HomePage_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Item 7 Phase 2: read the cached update probe — never hits the network from here.
+        // UpdateCheckService writes the cache opportunistically on app start when the
+        // user's CheckForUpdates toggle is on; we just surface what's already there.
+        try
+        {
+            var svc = App.Services?.GetService<IUpdateCheckService>();
+            var cache = svc?.GetCachedResults();
+            if (cache is null) return;
+
+            var pending = cache.Tools.Where(t => t.UpdateAvailable).ToList();
+            if (pending.Count == 0) return;
+
+            var names = string.Join(", ",
+                pending.Select(t => string.IsNullOrEmpty(t.LatestVersion)
+                    ? t.DisplayName
+                    : $"{t.DisplayName} {t.LatestVersion}"));
+            UpdateBanner.Message = $"New release available for: {names}.";
+            _primaryUpdateUrl = pending.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.ReleaseUrl))?.ReleaseUrl;
+            UpdateBannerActionButton.IsEnabled = !string.IsNullOrWhiteSpace(_primaryUpdateUrl);
+            UpdateBanner.IsOpen = true;
+        }
+        catch
+        {
+            // Banner is purely informational; never block the page on a service hiccup.
+        }
+    }
+
+    private void UpdateBannerAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_primaryUpdateUrl)) return;
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = _primaryUpdateUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch
+        {
+            // Shell-launch can fail in locked-down environments — silent is fine here.
+        }
     }
 
     private void SeedDashboard()

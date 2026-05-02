@@ -247,7 +247,7 @@ HistoryRetentionDays=30}` for retention policy.
 
 ---
 
-### 7. Dependency Update Checker — ⚠️ PARTIAL (service shipped, UI surface next iter)
+### 7. Dependency Update Checker — ✅ SHIPPED 2026-05-02 (service + UI banner)
 
 Background check (on app start, at most once per 24 h) against GitHub Releases
 for yt-dlp, whisper-cpp, ffmpeg-builds, and onnxruntime. Show a non-blocking
@@ -282,6 +282,23 @@ in the UI.
   `OnLaunched` after main window activation. Probe failures are swallowed
   so they can never crash the app.
 - Build verified Release.
+
+**Phase 2 shipped 2026-05-02 — Home dashboard banner:**
+- `HomePage.xaml` gains a top-of-page `InfoBar` (`UpdateBanner`), collapsed
+  by default and only opened when `IUpdateCheckService.GetCachedResults()`
+  reports at least one tool with `UpdateAvailable=true`.
+- Banner message lists each pending tool with its latest version
+  (e.g. "New release available for: yt-dlp 2026.05.01, ffmpeg n8.1.").
+- "Open release notes" action button shells out to the first tool's
+  `ReleaseUrl` via `ProcessStartInfo { UseShellExecute = true }` so it
+  honours the user's default browser without bundling an HTTP renderer.
+- Reads cache only — never triggers a network probe from the page; that
+  stays the App-startup path's responsibility.
+- All exceptions are swallowed: a missing service, malformed cache, or
+  shell-launch failure can never block the dashboard from rendering.
+- Build verified Release.
+
+**Closing commit:** Item 7 Phase 2 — Home dashboard InfoBar surfacing UpdateCheckService cached results.
 
 **Phase 2 (deferred):** dashboard `InfoBar` surface, "Open release notes"
 links per tool, optional one-click update action (requires per-tool
@@ -544,7 +561,7 @@ Source: [S9] (FFmpeg 8.1 — libavcodec 62.x new tone-mapping capabilities)
 
 ---
 
-### 18. Audio Loudness Normalization (EBU R128 / LUFS)
+### 18. Audio Loudness Normalization (EBU R128 / LUFS) — ✅ SHIPPED 2026-05-02
 
 New `audioloudness` sidecar or preset: two-pass FFmpeg `loudnorm` to
 target broadcast loudness (e.g., -16 LUFS for streaming, -23 LUFS for
@@ -552,6 +569,24 @@ broadcast). Expose target LUFS, true-peak ceiling, and LRA controls.
 
 Impact: 4 · Effort: 2 · Type: parity
 Source: [S14] (EBU R128 — table-stakes in any professional audio conversion tool)
+
+**Shipped 2026-05-02:**
+- Existing `audiomastering` sidecar already implements two-pass
+  `loudnorm` with `--lufs`, `--tp`, `--lra` arguments — feature surface
+  was a preset library gap, not a missing engine.
+- Existing `loudnorm-streaming.preset.xml` covered -14 LUFS streaming.
+- New `presets/loudnorm-broadcast.preset.xml` — -23 LUFS / -2 dBTP, the
+  EBU R128 / ATSC A/85 broadcast deliverable target.
+- New `presets/loudnorm-podcast.preset.xml` — -16 LUFS / -1.5 dBTP, the
+  Apple Podcasts / Spotify-safe streaming target. (-14 streaming preset
+  remains for YouTube/Netflix-style platforms that re-normalize to that
+  ceiling.)
+- All three presets use distinct output suffixes (`_loudnorm`, `_r128`,
+  `_pod16`) so a side-by-side render of the same source produces three
+  files instead of overwriting.
+- Build verified Release (preset XMLs are XCOPY'd by build.ps1).
+
+**Closing commit:** Item 18 — Add EBU R128 broadcast (-23 LUFS) and podcast (-16 LUFS) loudnorm presets.
 
 ---
 
