@@ -107,17 +107,64 @@ OUTPUT_FORMATS: dict[str, dict] = {
 }
 
 
+# ROADMAP Item 88 — libjxl security floor. pillow-jxl-plugin >= 1.3.4 is the
+# first wrapper release that bundles libjxl 0.11.2, which carries the
+# CVE-2025-12474 (tile dimension flaw) + CVE-2026-1837 (gray-to-gray channel
+# error) fixes. Older bundled libjxls render untrusted JXL bytes — exactly
+# the worst-case threat surface for a converter that accepts arbitrary input.
+_JXL_PLUGIN_MIN_VERSION = (1, 3, 4)
+
+
+def _parse_version(raw: str) -> tuple[int, ...]:
+    parts: list[int] = []
+    for chunk in (raw or "").split("."):
+        digits = ""
+        for ch in chunk:
+            if ch.isdigit():
+                digits += ch
+            else:
+                break
+        if digits:
+            parts.append(int(digits))
+        else:
+            break
+    return tuple(parts) if parts else (0,)
+
+
 def _try_register_jxl() -> bool:
     """Best-effort import of pillow-jxl-plugin so .jxl read/write works.
 
     Returns True if registered, False otherwise. Callers can degrade to a
     helpful error rather than a blanket "decode_failed" if JXL was the target.
+
+    Emits a `log` event at warning level when the installed pillow-jxl-plugin
+    version is below the libjxl security floor (Item 88) so users running
+    older wheels get an audible signal even when no malformed JXL is hit.
     """
     try:
         import pillow_jxl  # type: ignore  # noqa: F401
-        return True
     except ImportError:
         return False
+
+    try:
+        try:
+            from importlib.metadata import version as _pkg_version  # py>=3.8
+        except ImportError:  # pragma: no cover — py<3.8 not supported
+            _pkg_version = None  # type: ignore[assignment]
+        installed_raw = _pkg_version("pillow-jxl-plugin") if _pkg_version else ""
+        installed = _parse_version(installed_raw)
+        if installed and installed < _JXL_PLUGIN_MIN_VERSION:
+            min_str = ".".join(str(p) for p in _JXL_PLUGIN_MIN_VERSION)
+            log("warn",
+                f"pillow-jxl-plugin {installed_raw} is below the libjxl "
+                f"security floor (>= {min_str}). CVE-2025-12474 / "
+                f"CVE-2026-1837 fixes ship in libjxl 0.11.2 — upgrade with "
+                f"`pip install --upgrade 'pillow-jxl-plugin>={min_str}'`.")
+    except Exception:
+        # Probe is best-effort; never break encode/decode because we couldn't
+        # introspect package metadata.
+        pass
+    return True
 
 
 def op_list_formats(_: argparse.Namespace) -> int:

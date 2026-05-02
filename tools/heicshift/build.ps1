@@ -29,9 +29,25 @@ Write-Host '[heicshift] Ensuring runtime deps...'
 & $Python -m pip install --quiet 'Pillow>=10.0.0' 'pillow-heif>=0.16.0' pyinstaller
 if ($LASTEXITCODE -ne 0) { throw 'pip install failed.' }
 
-& $Python -m pip install --quiet 'pillow-jxl-plugin>=1.3.0' 2>&1 | Out-Null
+# ROADMAP Item 88: pin pillow-jxl-plugin to a version that bundles
+# libjxl >= 0.11.2 (CVE-2025-12474 + CVE-2026-1837 fixes; Sep 2025).
+# 1.3.4 is the first wrapper release that ships libjxl 0.11.x.
+& $Python -m pip install --quiet 'pillow-jxl-plugin>=1.3.4' 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Warning '[heicshift] pillow-jxl-plugin install failed — frozen sidecar will refuse JXL with a helpful error.'
+}
+
+# --security-pin guard: refuse to bundle a known-vulnerable libjxl. Verifies the
+# wrapper version reports >= 1.3.4 (which bundles libjxl >= 0.11.2). Skipped
+# when the wrapper isn't installed (the sidecar already degrades gracefully).
+$jxlCheck = & $Python -c "import importlib.metadata as m; print(m.version('pillow-jxl-plugin'))" 2>$null
+if ($LASTEXITCODE -eq 0 -and $jxlCheck) {
+    $jxlVer = [version]($jxlCheck.Trim() -replace '[^\d.]','')
+    $minVer = [version]'1.3.4'
+    if ($jxlVer -lt $minVer) {
+        throw "[heicshift] pillow-jxl-plugin $jxlCheck is below the security floor (>= 1.3.4 required for libjxl 0.11.2 / CVE-2025-12474 / CVE-2026-1837 fixes). Run pip install --upgrade 'pillow-jxl-plugin>=1.3.4' before retrying the build."
+    }
+    Write-Host "[heicshift] libjxl security pin OK: pillow-jxl-plugin $jxlCheck (>= 1.3.4)."
 }
 
 Write-Host '[heicshift] Freezing sidecar.py...'

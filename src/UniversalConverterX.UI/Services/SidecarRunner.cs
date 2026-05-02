@@ -1,5 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
+using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -44,6 +47,14 @@ public interface ISidecarRunner
 
 public sealed class SidecarRunner : ISidecarRunner
 {
+    private readonly ConverterXOptions? _options;
+
+    /// <summary>Default constructor for callers that don't need options injection.</summary>
+    public SidecarRunner() { }
+
+    /// <summary>DI-aware constructor — used by App.xaml.cs ServiceProvider.</summary>
+    public SidecarRunner(IOptions<ConverterXOptions> options) { _options = options?.Value; }
+
     public string? Locate(string toolName)
     {
         if (string.IsNullOrWhiteSpace(toolName)) return null;
@@ -361,6 +372,47 @@ public sealed class SidecarRunner : ISidecarRunner
         catch (InvalidOperationException) { exitCode = -1; }
 
         var success = exitCode == 0 && errorCode is null;
+
+        // ROADMAP Item 72: post-encode duration validation. Only fires on a
+        // successful job whose input/output both look like media files; on
+        // anything else (probe missing, sidecar isn't a media converter, etc.)
+        // the validator silently no-ops. The job result remains Success even
+        // if validation flags truncation — we surface a warn-level log entry
+        // so the History page / status text can pick it up without rejecting
+        // an output the sidecar itself reported as complete.
+        if (success && _options is { ValidateOutputDuration: true } opts)
+        {
+            try
+            {
+                var inputPath = ExtractInputPathFromArgs(args);
+                if (!string.IsNullOrWhiteSpace(inputPath)
+                    && !string.IsNullOrWhiteSpace(finalOutput)
+                    && OutputDurationValidator.LooksLikeMedia(inputPath)
+                    && OutputDurationValidator.LooksLikeMedia(finalOutput))
+                {
+                    var ffprobePath = LocateFfprobe();
+                    if (!string.IsNullOrWhiteSpace(ffprobePath))
+                    {
+                        var validation = await OutputDurationValidator.ValidateAsync(
+                            ffprobePath!, inputPath!, finalOutput!,
+                            opts.MinDurationDeltaSeconds, ct).ConfigureAwait(false);
+                        if (!validation.IsValid)
+                        {
+                            log?.Report(new SidecarLog(
+                                "warn",
+                                $"PARTIAL / TRUNCATED — {validation.Reason}. " +
+                                "Disable in Settings → Advanced if false-positive."));
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Validation is opportunistic — never propagate a probe error
+                // back into the sidecar result.
+            }
+        }
+
         return new SidecarResult(
             Success: success,
             OutputPath: finalOutput,
@@ -368,6 +420,63 @@ public sealed class SidecarRunner : ISidecarRunner
             ErrorCode: success ? null : (errorCode ?? "exit_nonzero"),
             ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {exitCode}"),
             ExitCode: exitCode);
+    }
+
+    /// <summary>
+    /// Scan a sidecar argv for <c>--input &lt;path&gt;</c> and return the path.
+    /// All NDJSON-contract sidecars use this flag (see tools/README.md). When
+    /// the convention isn't followed the validator falls through silently.
+    /// </summary>
+    private static string? ExtractInputPathFromArgs(IEnumerable<string> args)
+    {
+        string? next = null;
+        foreach (var arg in args)
+        {
+            if (next is not null)
+                return arg;
+            if (string.Equals(arg, "--input", StringComparison.OrdinalIgnoreCase))
+                next = arg;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Resolve a bundled FFprobe binary near the tools/ root. Caches the
+    /// first hit on disk for the process lifetime.
+    /// </summary>
+    private static string? _cachedFfprobe;
+    private static string? LocateFfprobe()
+    {
+        if (_cachedFfprobe is not null) return _cachedFfprobe.Length == 0 ? null : _cachedFfprobe;
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            foreach (var rel in new[]
+            {
+                Path.Combine("tools", "ffmpeg", "ffprobe.exe"),
+                Path.Combine("tools", "_bin", "ffprobe.exe"),
+                Path.Combine("tools", "videocrush", "ffprobe.exe"),
+                Path.Combine("tools", "clipforge", "ffprobe.exe"),
+            })
+            {
+                var candidate = Path.Combine(dir.FullName, rel);
+                if (File.Exists(candidate)) { _cachedFfprobe = candidate; return candidate; }
+            }
+            dir = dir.Parent;
+        }
+        var path = Environment.GetEnvironmentVariable("PATH") ?? "";
+        foreach (var p in path.Split(';'))
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(p)) continue;
+                var candidate = Path.Combine(p.Trim(), "ffprobe.exe");
+                if (File.Exists(candidate)) { _cachedFfprobe = candidate; return candidate; }
+            }
+            catch { }
+        }
+        _cachedFfprobe = "";
+        return null;
     }
 
     /// <summary>

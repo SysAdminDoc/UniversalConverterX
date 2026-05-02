@@ -1196,7 +1196,7 @@ Sources: [S76] (Av1an v0.5.2 — scene-split, per-scene CRF, parallel encoding)
 
 ---
 
-### 72. Post-Encode Output Duration Validation _(new Tier 2)_
+### 72. Post-Encode Output Duration Validation _(new Tier 2)_ — ✅ SHIPPED 2026-05-02
 
 **Problem (HandBrake #7828, iter-7):** HandBrake sometimes reports successful
 conversion when the video track prematurely ends. Example: input audio 1:37,
@@ -1220,6 +1220,21 @@ and local, so the check is instant and free.
 
 Impact: 3 · Effort: 1 · Type: reliability
 Sources: [S80] (HandBrake #7828 — silent video truncation bug)
+
+**Closing commit:** new `Core/Utilities/OutputDurationValidator.cs`
+(probes input + output via FFprobe, returns a typed
+`DurationValidationResult` with `IsValid` + `DeltaSeconds` +
+`StatusTag`). Threshold = `min(MinDurationDeltaSeconds, 1% of input)`.
+Wired into `SidecarRunner.RunAsync` success path: only fires when
+`ConverterXOptions.ValidateOutputDuration=true` (default), the input
++ output paths look like media files, and an FFprobe binary is
+discoverable. Probe failures silently no-op so the validator never
+falsely flags a job. Truncation surfaces as a `warn`-level log entry
+("PARTIAL / TRUNCATED — output Xs vs. input Ys (Δ Zs > Ts threshold)")
+that History/toasts can pick up, while the job itself stays Successful
+because the sidecar already reported complete. Two new
+`ConverterXOptions` fields: `ValidateOutputDuration` (bool, default
+true) and `MinDurationDeltaSeconds` (double, default 2.0).
 
 ---
 
@@ -1529,7 +1544,7 @@ Sources: [S153] (vvenc 1.14.0 — capped CQF, film grain, ARM SVE, Jan 2026)
 
 ---
 
-### 88. JPEG XL libjxl Security Floor — Update to v0.11.2 _(new T2 / Security)_
+### 88. JPEG XL libjxl Security Floor — Update to v0.11.2 _(new T2 / Security)_ — ✅ SHIPPED 2026-05-02
 
 **Context (iter-7 wave 4, 2026-05-02):** **libjxl 0.11.2** [S154] (Sep 2025) ships fixes
 for **CVE-2025-12474** (tile dimension flaw in low-memory rendering pipeline) and
@@ -1550,6 +1565,19 @@ the charter calls for.
 
 Impact: 4 · Effort: 1 · Type: security
 Sources: [S154] (libjxl 0.11.2 — CVE-2025-12474, CVE-2026-1837)
+
+**Closing commit:** `tools/heicshift/build.ps1` bumps the
+`pillow-jxl-plugin` install pin from `>=1.3.0` to `>=1.3.4` (the
+first wrapper release that bundles libjxl 0.11.x) and adds a
+`--security-pin` guard that fails the build if the installed wrapper
+is below 1.3.4 — fast feedback when a CI runner has a stale wheel
+cached. `tools/heicshift/sidecar.py._try_register_jxl()` introspects
+the installed wrapper version on import and emits a `warn`-level
+`log` event when it's below the security floor (CVE-2025-12474 +
+CVE-2026-1837 fixes), so users running an old dev install get an
+audible signal even when no malformed JXL is hit. `heicshift.py`'s
+auto-bootstrap dependency map gets the same pin so dev-mode launches
+pull the upgraded wrapper.
 
 ---
 

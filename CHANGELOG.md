@@ -27,6 +27,37 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Post-encode output duration validation (ROADMAP Item 72)
+
+- New `Core/Utilities/OutputDurationValidator.cs` — probes input +
+  output via FFprobe and returns a typed `DurationValidationResult`
+  with `IsValid` / `DeltaSeconds` / `StatusTag`. Threshold is
+  `min(MinDurationDeltaSeconds, 1% of input)`.
+- `SidecarRunner.RunAsync` success path now invokes the validator when
+  `ConverterXOptions.ValidateOutputDuration` is on (default true) and
+  both input + output look like media files. Truncation surfaces as a
+  `warn`-level log entry ("PARTIAL / TRUNCATED — Δ delta s > threshold s")
+  while the job itself stays Successful because the sidecar already
+  reported complete; History / toasts can pick up the warn line.
+- Probe failures silently no-op so the validator never falsely flags
+  a job when ffprobe is missing or the file is non-media.
+- Two new `ConverterXOptions` fields: `ValidateOutputDuration` (bool,
+  default true) and `MinDurationDeltaSeconds` (double, default 2.0).
+
+### Hardened — libjxl security floor pin to 0.11.2 (ROADMAP Item 88)
+
+- `tools/heicshift/build.ps1` bumps `pillow-jxl-plugin` install pin
+  from `>=1.3.0` to `>=1.3.4` (first wrapper release that bundles
+  libjxl 0.11.x with CVE-2025-12474 + CVE-2026-1837 fixes) and adds a
+  `--security-pin`-style guard that fails the build if the installed
+  wrapper is below 1.3.4.
+- `tools/heicshift/sidecar.py._try_register_jxl()` introspects the
+  installed wrapper version and emits a `warn`-level `log` event when
+  it's below the security floor — audible signal even when no
+  malformed JXL is hit.
+- `heicshift.py`'s auto-bootstrap dependency map gets the same pin
+  so dev-mode launches pull the upgraded wrapper.
+
 ### Added — VR / 360° video reprojection (ROADMAP Item 38)
 
 - New `v360` op on `clipforge` exposes FFmpeg's `v360` filter with
