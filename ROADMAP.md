@@ -109,7 +109,7 @@ switch on `OverwriteBehavior`, 11 new xUnit tests, 161/161 Core suite passing.
 
 ---
 
-### 5. Output Filename Template DSL
+### 5. Output Filename Template DSL — ✅ SHIPPED 2026-05-02
 
 User-configurable output filename pattern: `{title}_{date}_{resolution}.{ext}`.
 Supported tokens for video/audio: `{title}`, `{artist}`, `{date}`, `{year}`,
@@ -119,6 +119,18 @@ Fallback to existing stem-based naming when unset.
 
 Impact: 4 · Effort: 2 · Type: leapfrog
 Sources: [S13] (yt-dlp `%(title)s` pattern system), [S14] (general UX pattern)
+
+**Closing commit:** `3ed8f0d` — new
+`Core/Utilities/OutputFilenameTemplate` static class is the single
+source of truth for filename rendering across CLI presets, the
+orchestrator, and (eventually) the Watch Folder service. Full token
+catalogue per the spec above plus built-ins ({stem}, {dir}, {ext},
+{preset}, {date}, {year}). Path-separator-aware sanitization on
+caller-supplied tokens. Yt-dlp-compatible `{{` `}}` brace escaping.
+Unknown tokens render to empty so half-resolved templates can't leak.
+13 new xUnit tests (181/181 passing). `ConversionPreset.ResolveOutputPath`
+gains an optional `mediaTokens` parameter so future orchestrator
+metadata probing can plumb FFprobe data through.
 
 ---
 
@@ -179,7 +191,7 @@ Source: [S14] (common user request in HandBrake / FFmpeg GUI communities)
 
 ---
 
-### 9. yt-dlp Cookie Credential Encryption
+### 9. yt-dlp Cookie Credential Encryption — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 Encrypt stored yt-dlp cookies at rest using Windows DPAPI
 (`System.Security.Cryptography.ProtectedData`), machine-scoped. Mirrors the
@@ -188,6 +200,20 @@ the UCX app data folder is exfiltrated.
 
 Impact: 3 · Effort: 1 · Type: security
 Source: [S15] (YoutubeDownloader DPAPI cookie encryption, v1.14 changelog)
+
+**Closing commit (Python at-rest layer):** `b8058de` — new
+`tools/streamkeep/streamkeep/dpapi.py` module wraps Crypt32.dll via
+`ctypes` (stdlib-only). `cookies.py` writes are encrypted at-rest with a
+`DPAPI1\n` magic header for self-describing format detection. Reads
+detect encrypted blobs and decrypt to a process-private temp file under
+`%TEMP%`, registered for `atexit` cleanup. yt-dlp / curl never see the
+encrypted form. Round-trip verified.
+
+**Remaining work:** UCX C# UI does not yet wire cookie operations
+into DownloaderPage (no cookie import flow exists in the C# layer).
+When that lands (likely as part of the Voice Changer wave or an
+explicit cookie-import item), the encryption layer is already in
+place — defense-in-depth via early foundation work.
 
 ---
 
@@ -845,7 +871,7 @@ Source: charter emphasizes programmability; surfaced by Phase 5 audit.
 
 ---
 
-### 53. Migration — settings.json Schema Versioning _(Tier 2)_
+### 53. Migration — settings.json Schema Versioning _(Tier 2)_ — ✅ SHIPPED 2026-05-02
 
 Add a `SchemaVersion` integer to `ConverterXOptions`. Implement a
 migration table keyed by version-pair (e.g. `1 → 2: rename
@@ -864,6 +890,20 @@ the cheap insurance.
 
 Impact: 2 · Effort: 1 · Type: dx + migration
 Source: surfaced by Phase 5 audit's migration coverage gap.
+
+**Closing commit:** `99015c2` — `ConverterXOptions` gains a
+`SchemaVersion` property (default `CurrentSchemaVersion = 2`) and
+`LoadFromJson(json, persistMigrated)` public entry point. New
+`SettingsMigrations` static class holds an ordered list of
+`Action<JsonObject>` migrations; index N transforms v(N+1) → v(N+2).
+Legacy JSON without `SchemaVersion` is treated as v1 and upgraded
+through the chain. Future-version JSON doesn't crash — older binaries
+load what they understand and clamp `SchemaVersion` back to current
+on the way out. CLI (`ucx config`) routes through `LoadFromJson` too
+(without persisting back, since CLI may inspect read-only files).
+7 new xUnit tests cover legacy / current / future / version stamping
+/ no-op / fresh-instance / invalid-root paths. `InternalsVisibleTo`
+added on Core for test access.
 
 ---
 

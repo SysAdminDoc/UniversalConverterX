@@ -4,6 +4,65 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — DPAPI at-rest encryption for StreamKeep cookies (ROADMAP Item 9 partial)
+
+- New `tools/streamkeep/streamkeep/dpapi.py` — stdlib-only `ctypes`
+  wrapper around `Crypt32.dll` (`CRYPTPROTECT_LOCAL_MACHINE` scope).
+  `encrypt`, `decrypt`, `is_encrypted`, `available` helpers with a
+  self-describing `DPAPI1\n` magic header so callers can detect format
+  on read. `DpapiUnavailable` raised on non-Windows / GPO-locked hosts.
+- `cookies.py` rewired:
+  - `import_from_browser` / `import_from_file` writes encrypted at-rest
+    when DPAPI is available; plaintext fallback otherwise.
+  - `cookies_file_path()` transparently decrypts to a per-process
+    temp file under `%TEMP%` and registers an `atexit` cleanup; yt-dlp
+    / curl never see the encrypted form.
+  - New `is_storage_encrypted()` accessor for any future settings UI.
+- Round-trip verified end-to-end: import → encrypted on-disk →
+  decrypted-on-read → matches input → cleared.
+- Drive-by: `presets/to-mp3-192.preset.xml` migrated from a broken
+  videocrush invocation (referenced a non-existent `--audio-only`
+  flag) to the audiopro engine like the iter-2 VBR presets.
+
+### Added — settings.json schema versioning + migration table (ROADMAP Item 53)
+
+- `ConverterXOptions` gains a `SchemaVersion` field (`CurrentSchemaVersion = 2`)
+  plus a public `LoadFromJson(json, persistMigrated)` entry point.
+- New `SettingsMigrations` class holds an ordered list of
+  `Action<JsonObject>` migrations. Index N transforms v(N+1) → v(N+2).
+  Migrate iterates the table, stamps the target version, surfaces a
+  `didMigrate` flag, and bails on gaps without looping.
+- Legacy JSON without `SchemaVersion` treated as v1 and upgraded.
+  Future-version JSON loads what it understands and clamps `SchemaVersion`
+  back to current on its way out — older binaries don't silently downgrade.
+- Console (`ucx config`) routes through `LoadFromJson` too without
+  persisting (CLI may inspect read-only files).
+- 7 new xUnit tests; `InternalsVisibleTo` on Core for test access.
+- Foundation work for the next default-flip / field-rename — adding a
+  migration is now a one-liner table addition rather than a refactor.
+
+### Added — Output filename template DSL (ROADMAP Item 5)
+
+- New `Core/Utilities/OutputFilenameTemplate` static class — single
+  source of truth for output filename rendering.
+- Token catalogue per the ROADMAP spec:
+  - Built-in path: `{stem}` `{dir}` `{ext}` `{preset}`
+  - Built-in time: `{date}` `{year}`
+  - Caller-supplied media: `{title}` `{artist}` `{resolution}` `{fps}`
+    `{bitrate}` `{codec}` `{duration}` `{n}`
+- Path-separator-aware sanitization on every caller-supplied value
+  (untrusted EXIF / ID3 / yt-dlp probes can't escape the directory).
+  `{dir}` is intentionally NOT sanitised (it's a directory path).
+- yt-dlp-compatible `{{` / `}}` brace escaping for literal braces.
+- Unknown tokens render to empty (NOT left as `{foo}`) so half-resolved
+  templates can't surface in user-visible paths. Strict mode opt-in via
+  `GetSupportedTokens()`.
+- Token names are case-insensitive.
+- `ConversionPreset.ResolveOutputPath` delegates to the new utility and
+  gains an optional `mediaTokens` parameter so future orchestrator
+  metadata probing can plumb FFprobe data through.
+- 13 new xUnit tests; full Core suite at 181 passing.
+
 ### Added — SponsorBlock integration in StreamKeep + DownloaderPage (ROADMAP Item 20)
 
 - New `--sponsorblock {mark,remove}` flag in `tools/streamkeep/sidecar.py`
