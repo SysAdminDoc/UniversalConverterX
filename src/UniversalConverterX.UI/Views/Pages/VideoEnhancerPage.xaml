@@ -102,16 +102,23 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Video Enhancer" Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Spacing="8">
+                <TextBlock Text="VIDEO ENHANCER"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Real-ESRGAN frame-by-frame video upscaler. 2× to 4× super-resolution; longer videos take time."
-                           Style="{StaticResource SubtitleTextStyle}" TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click"/>
-                <Button x:Name="RunButton" Content="Upscale Video"
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Content="Browse Files"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Browse_Click"/>
+                <Button x:Name="RunButton"
+                        Content="Upscale Video"
                         Style="{StaticResource PrimaryButtonStyle}"
-                        Click="Run_Click" IsEnabled="False"/>
+                        Click="Run_Click"
+                        IsEnabled="False"/>
             </StackPanel>
         </Grid>
 
