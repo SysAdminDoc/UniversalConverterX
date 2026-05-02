@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
 **Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-03 (iter-5 external research refresh — 45+ sources)
+**Last updated:** 2026-05-10 (iter-6 external research refresh — 67+ sources)
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
@@ -22,6 +22,15 @@ accessibility.
 > MediaInfo 26.01, OpenShot 3.5.1, SubtitleEdit 5-betas, C2PA Spec 2.0,
 > RVC/voice-changer ecosystem). Net additions: Items 54–65. Updated: Items 1,
 > 21, 28, 33, 40, 43, 47, 50. New appendix sources: S39–S48.
+
+> **iter-6 external research refresh (2026-05-10):** 67+ sources surveyed
+> (FFmpeg 8.1 "Hoare" D3D12/Vulkan pipeline, DeepFilterNet3 MVDR model,
+> whisper.cpp v1.8.4 Silero VAD v6.2 + iGPU speedup, MKVToolNix v91–v98,
+> LosslessCut v3.67–v3.68, Dia-1.6B/Dia2 TTS, Chatterbox voice clone,
+> ab-av1 VMAF CRF search, tsMuxeR archived April 2025, yt-dlp CVE-2026-26331,
+> SubtitleEdit v5 beta20, HandBrake VAAPI PR #7467). Net additions: Items 66–68,
+> UC table extended. Updated: Items 22, 28, 37, 40, 44, UC (VMAF retired,
+> IAMF updated, estimated-size promoted). New appendix sources: S49–S67.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -496,8 +505,17 @@ New `audionoise` sidecar wrapping `rnnoise` (Mozilla) or `deepFilterNet`
 (ONNX model): remove background noise from speech recordings, interview
 audio, or video audio track. Include a denoise strength control.
 
+**DeepFilterNet3 (iter-6, 2026-05-10):** DeepFilterNet v0.5.0+ [S53]
+ships DeepFilterNet3 — a higher-quality noise-suppression model with
+Multi-Frame Filtering (MVDR/Wiener) that improves suppression in
+reverberant environments. The Rust ONNX backend remains; Python bindings
+updated. v0.5.3 adds attenuation limiting to prevent speech removal artefacts.
+Prefer DeepFilterNet3 over RNNoise as the default model; expose model selection
+(`dfn2` / `dfn3`) in the UI for CPU-constrained users.
+
 Impact: 3 · Effort: 3 · Type: parity
-Source: [S14] (common request in audio processing communities)
+Sources: [S14] (common request in audio processing communities),
+[S53] (DeepFilterNet v0.5.0/v0.5.3 — DeepFilterNet3, MVDR, attenuation limit)
 
 ---
 
@@ -587,9 +605,18 @@ is tested by Purfview r3.256.1 [S48]; no sidecar change needed as 12.0 ≤ 12.8.
 **ArmNN EP removed in ORT 1.25.0** — Qualcomm NPU work (Item 47) must target
 QNN EP only.
 
+**FFmpeg 8.1 D3D12 pipeline (iter-6, 2026-05-10):** FFmpeg 8.1 "Hoare"
+[S52] adds `scale_d3d12`, `deinterlace_d3d12`, and `mestimate_d3d12` filters
+plus D3D12 H.264/AV1 hardware encoding. This unlocks GPU-accelerated encode
+and filter chains on any DirectX 12 GPU (Intel Arc, AMD RDNA2/3, Nvidia
+Pascal+) without a CUDA driver requirement. Also ships Vulkan ProRes
+encode/decode and the native `whisper` filtergraph filter. The dedicated
+D3D12 pipeline item is tracked as Item 66.
+
 Impact: 3 · Effort: 2 · Type: platform + security
 Sources: [S9] (FFmpeg 8.1 changelog), [S20] (BtbN FFmpeg auto-builds),
-[S36] (ONNX Runtime 1.25.0 — CUDA 12.0 minimum, ArmNN EP removal)
+[S36] (ONNX Runtime 1.25.0 — CUDA 12.0 minimum, ArmNN EP removal),
+[S52] (FFmpeg 8.1 "Hoare" — D3D12 encode/filter, Vulkan ProRes, whisper filter)
 
 ---
 
@@ -819,7 +846,30 @@ Source: [S34] (CCExtractor 0.96.3 VOBSUB OCR support for MP4/MKV)
 
 ---
 
-## Tier 3 — Later  _(v2.28+)_
+### 68. Per-Job Estimated Output File Size _(promoted from UC — iter-6)_
+
+Show a pre-encode size estimate for each job in the batch queue: target
+bitrate × source duration + container overhead. Surfaces in the queue metadata
+column and in the per-job detail panel.
+
+**Precedent:** LosslessCut v3.67.2 [S56] shipped "Show estimated segment file
+size in segment list" (#2630), proving the UX pattern is feasible and
+user-valued. Their implementation uses a simple `bitrate × duration` model for
+lossless copy (known-exact because no transcode). UCX's transcode path is
+inherently approximate (VBR, scene complexity) — show as "~X MB" with a
+"±25%" caveat for VBR presets and an exact value for CBR or lossless-copy jobs.
+
+**Implementation:** Pure C# UI change. No sidecar required.
+1. `ConversionJob` gains a `EstimatedOutputBytes` computed property that
+   reads `TargetBitrate` × `SourceDuration` from the probed media info.
+2. Queue `ListView` gains an "Est. Size" column (sortable, hidden by default).
+3. For lossless-copy presets (`-c copy`), show exact = source bytes with a
+   tiny container-overhead delta.
+4. For VBR presets, show the estimate with a `~` prefix and tooltip explaining
+   the approximation.
+
+Impact: 3 · Effort: 1 · Type: UX
+Sources: [S56] (LosslessCut v3.67.2 — segment size estimate in segment list, #2630)
 
 Higher effort, lower urgency, or dependent on Tier 1/2 completion.
 
@@ -875,8 +925,15 @@ filter + optional PySceneDetect sidecar. Wire to `AutoHighlightPage.xaml`.
 Additionally export the detected scene list as EDL (CMX 3600) or OTIO for
 direct import into DaVinci Resolve, Premiere Pro, or any OTIO-compatible NLE.
 
+**PySceneDetect 0.6.7 fix (iter-6, 2026-05-10):** v0.6.7 [S61] fixes the
+EDL export end-timestamp being 1 frame short, which caused DaVinci Resolve to
+import clips 1 frame too short. The `scenedetect` sidecar must pin
+`PySceneDetect>=0.6.7` to get correct EDL output. FFmpeg 8.0 is now bundled
+in the Windows PySceneDetect distribution.
+
 Impact: 3 · Effort: 4 · Type: leapfrog
-Sources: [S5] (ToolboxPage.xaml.cs stub), [S33] (PySceneDetect v0.6.6 EDL/OTIO output)
+Sources: [S5] (ToolboxPage.xaml.cs stub), [S33] (PySceneDetect v0.6.6 EDL/OTIO output),
+[S61] (PySceneDetect v0.6.7 — EDL end-timestamp fix for DaVinci Resolve)
 
 ---
 
@@ -915,9 +972,24 @@ non-zero start timestamps. The Chapter Editor must preserve exact PTS values
 during import and must not silently renumber or offset them. Add a
 timestamp-accuracy unit test to the sidecar contract suite.
 
+**MKVToolNix v95–v98 notes (iter-6, 2026-05-10):**
+- v95.0 [S55]: `mkvmerge` gains `--date` argument for explicit output date
+  metadata control; MP4 display-matrix rotation is now translated to
+  MKV roll/yaw values on remux.
+- v97.0 [S55]: TrueHD audio in MP4 containers (FourCC `mlpa`) is now
+  readable — fixes import of newer iPhone and studio MP4 sources.
+- v98.0 [S55]: Chapter editor gains "apply modifications to all open tabs"
+  option — useful for batch chapter normalization in the UCX workflow.
+- v91.0 [S55]: mkvmerge auto-detects "commentary" and "original language"
+  flags from filenames — the Chapter Editor / track manager UI can expose
+  this via `--commentary-track-language` flag.
+
+Pin `mkvmerge ≥ v97.0` for TrueHD-in-MP4 read support.
+
 Impact: 3 · Effort: 3 · Type: parity
 Sources: [S6] (LosslessCut chapter editor), [S14] (standard pro video feature),
-[S46] (HandBrake #7339 — chapter timestamp offset on non-zero-start input)
+[S46] (HandBrake #7339 — chapter timestamp offset on non-zero-start input),
+[S55] (MKVToolNix v91–v98 NEWS.md — TrueHD MP4, --date, rotation, commentary auto-flag)
 
 ---
 
@@ -977,8 +1049,18 @@ Write video files to DVD-Video structure or data files to a CD/DVD using
 `growisofs` / `cdrecord` / Windows `IDiscRecorder2` COM API. Wire to existing
 `DiscTools` category stubs in ToolboxPage.
 
+**tsMuxeR archived (iter-6, 2026-05-10):** tsMuxeR — which was the standard
+Blu-ray TS muxer dependency for Blu-ray authoring — was archived by its
+maintainer (justdan96) in April 2025 with development declared stopped [S57].
+Blu-ray VIDEO_TS-level output (not data-disc burn) was being tracked as a
+stretch goal of this item. That stretch goal must pivot to `eac3to` as the
+TS muxing layer, or limit scope to data-DVD burns only and treat Blu-ray
+authoring as out-of-scope. Document the dependency gap in the item spec before
+implementation begins.
+
 Impact: 2 · Effort: 4 · Type: parity
-Source: [S5] (ToolboxPage.xaml.cs DiscTools stubs)
+Sources: [S5] (ToolboxPage.xaml.cs DiscTools stubs),
+[S57] (tsMuxeR archived April 2025 — Blu-ray TS muxer dependency gone)
 
 ---
 
@@ -1141,7 +1223,67 @@ Source: [S19] (WinAppSDK 2.0 — SystemBackdropElement in-app panels)
 
 ---
 
-## Audit-Surfaced Coverage Gaps  _(added 2026-05-02 from `iter-1-audit.md`)_
+### 66. FFmpeg 8.1 D3D12 Hardware Encode / Filter Pipeline _(iter-6)_
+
+FFmpeg 8.1 "Hoare" [S52] ships a complete Direct3D 12 hardware pipeline:
+`scale_d3d12`, `deinterlace_d3d12`, `mestimate_d3d12` filters, plus D3D12
+H.264 and AV1 hardware encoding. This unlocks GPU-accelerated encode and
+filter chains on any DirectX 12 GPU — Intel Arc, AMD RDNA2/3, and Nvidia —
+without requiring the CUDA driver stack.
+
+**Value over existing paths:**
+- `h264_amf` (AMD) and `h264_nvenc` (Nvidia) already work; this adds **Intel
+  Arc** encode support and a vendor-neutral D3D12 alternative.
+- `scale_d3d12` runs on the GPU zero-copy for resize+deinterlace chains,
+  eliminating the CPU round-trip that `scale_cuda` avoids but `scale` with
+  `hwupload` does not.
+- `deinterlace_d3d12` replaces `yadif` on D3D12 hardware for broadcast
+  interlaced sources.
+
+**Implementation sketch:** Upgrade bundled FFmpeg binary in `tools/ffmpeg/` to
+≥8.1. Add `D3D12` encoder group to the encoder selection UI (alongside NVENC /
+AMF / QuickSync). Gate on runtime D3D12 device enumeration: `d3d12_device_list`
+sidecar helper (one-time probe at first launch, cached).
+
+Also ships: **Vulkan ProRes** encode/decode — relevant to Item 57
+(ProRes presets); the `whisper` native filter (transcription without a Python
+sidecar, informational — see UC table).
+
+**IAMF note:** FFmpeg 8.1 adds Ambisonic Audio Elements IAMF muxing, which
+strengthens the IAMF UC entry below.
+
+Impact: 3 · Effort: 2 · Type: platform + leapfrog
+Sources: [S52] (FFmpeg 8.1 "Hoare" — D3D12 encode/filter, Vulkan ProRes, IAMF mux)
+
+---
+
+### 67. ab-av1 VMAF / XPSNR-Guided CRF Auto-Search _(iter-6)_
+
+`ab-av1` [S54] is a Rust CLI tool that binary-searches over CRF values to find
+the minimum CRF that achieves a user-specified target VMAF score (or XPSNR as a
+compute-lighter alternative). Supports SVT-AV1, x265, and x264. Windows `.exe`
+available as a prebuilt binary.
+
+**Use case in UCX:** Users currently set CRF by guesswork or fixed presets. An
+"Encode to quality target" mode — "achieve VMAF ≥ 93 at the smallest file size"
+— is a leapfrog capability unavailable in any competing Windows converter.
+
+**Implementation sketch:**
+1. Bundle `ab-av1.exe` in `tools/ab-av1/`.
+2. Add a new `quality-target` mode toggle in the AV1 / HEVC preset editor:
+   "Target quality (VMAF)" with a slider 70–97 (default 93) and a
+   "Use XPSNR instead (faster)" checkbox.
+3. The sidecar runs `ab-av1 auto-encode --target-vmaf <score> ...`, streams
+   progress via NDJSON. Estimated time: 5–10 sample encodes before final.
+4. Show a "quality scan" progress indicator distinct from the normal progress
+   bar so users understand the two-phase nature.
+
+Quality-target encoding is already offered by commercial tools like Shutter
+Encoder's VMAF feedback mode and is the dominant approach in the
+r/DataHoarder / Handbrake communities for archival quality.
+
+Impact: 3 · Effort: 3 · Type: leapfrog
+Sources: [S54] (ab-av1 — VMAF/XPSNR CRF auto-search, SVT-AV1/x265/x264 support)
 
 The Phase 5 audit found three categories under-served by the original
 ROADMAP. These items were not in the Round 2 research output because the
@@ -1233,7 +1375,7 @@ These need more investigation or community signal before placement.
 | Item | Question blocking placement |
 |------|-----------------------------|
 | **OCR full pipeline** (image → structured text, not just searchable PDF) | Already have `pdfocr`; would a dedicated `ocrkit` sidecar add incremental value? Survey user requests. |
-| **VMAF quality reporting** _(✅ shipped — `VmafAnalysisPage.xaml` exists; retire from UC list next iteration)_ | Expose `libvmaf` score as a post-conversion metric. Useful for production workflows; adds ~10% to encode time. |
+| **VMAF quality reporting** _(✅ shipped — `VmafAnalysisPage.xaml` exists; retired from UC list)_ | ~~Expose `libvmaf` score as a post-conversion metric.~~ Confirmed shipped. |
 | **Spatial audio conversion** (Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) | FFmpeg has partial support; full Ambisonics requires specialized libraries. Assess demand. |
 | **Community preset repository** | GitHub-hosted index of contributed presets. Requires governance model, security review of contributed XML, and moderation bandwidth. Assess when preset count warrants it. |
 | **EDL / XML timeline import** | Bulk-convert based on an edit decision list (CMX 3600 EDL, Final Cut XML). Niche; assess against demand. |
@@ -1241,10 +1383,13 @@ These need more investigation or community signal before placement.
 | **Deinterlace framerate auto-doubling** | For Bwdif+Bob deinterlace, automatically double the output framerate (e.g. 25i → 50p). FFmpeg supports this; needs UX decision about when to auto-enable. [S23] |
 | **Per-track audio delay control** | Fine-grain delay offset per audio track during conversion (e.g. fix lip-sync issues). `ffmpeg -itsoffset` or `adelay` filter. Common request; needs UI design. [S24] |
 | **C2PA Content Credentials embedding** | Embed a `c2pa:actions` assertion in output files recording that UCX processed them. C2PA Spec 2.0 is fully published; Adobe, Microsoft, Google, and Sony are all shipping support. Requires `c2pa-python` (Rust-backed FFI sidecar dependency). Question: is the UCX audience large enough to justify a Rust compile dependency in the sidecar chain? [S30] |
-| **IAMF immersive audio pass-through** | Remux IAMF (Immersive Audio Model and Formats, AOMedia) audio streams into MP4/ISOBMFF without transcoding. FFmpeg 7.0+ supports IAMF via `libiamf`. Question: identify at least three concrete user workflows before committing. [S37] |
+| **IAMF immersive audio pass-through** | Remux IAMF (Immersive Audio Model and Formats, AOMedia) audio streams into MP4/ISOBMFF without transcoding. FFmpeg 8.1 [S52] now ships IAMF Ambisonic Audio Elements muxing, removing the "not yet in upstream FFmpeg" blocker. Question before promoting: identify at least three concrete user workflows. [S37][S52] |
 | **Commercial / ad detection (Comskip)** | Detect and optionally remove commercial breaks in OTA/DVR recordings using Comskip. Relevant only to users with ATSC tuner or MPEG-TS recordings. Question: is this a UCX use case or a dedicated DVR-management tool problem? Needs community signal. [S35] |
 | **ComfyUI AI Workflow Integration (Item 65)** | OpenShot 3.5.1 [S45] integrates ComfyUI; UCX AiLab could expose a `comfyui-runner` sidecar that submits a JSON workflow to a locally running ComfyUI server (user-managed). Effort 5. Leapfrog candidate if the target audience overlaps with ComfyUI power users. Needs community signal before scoping. |
-| **Estimated output file size in batch queue** | Pre-encode estimate per queue item based on target bitrate × source duration. Surfaces in the batch queue metadata column. Effort 1. Assess accuracy trade-offs (CBR vs. VBR, container overhead) before committing. |
+| **Dia-1.6B / Dia2 next-gen TTS dialogue engine** | Nari Labs Dia-1.6B [S59] is an Apache 2.0, 1.6B-parameter TTS model with two-speaker dialogue synthesis (`[S1]`/`[S2]` speaker tags), voice cloning via audio prompt, and non-verbal sounds (laughs, coughs). Dia2 also released (Nov 2025). More expressive than Kokoro for multi-speaker content. Requires ~6 GB VRAM. Question: does the target user base have GPUs capable of running 1.6B TTS? Assess after Kokoro/F5-TTS sidecar stabilizes. [S59] |
+| **Chatterbox voice cloning (zero-shot)** | Resemble AI Chatterbox v0.1.2 [S60] — Apache 2.0 open-source TTS with 3–7s reference audio zero-shot voice clone + perceptual watermarking. Overlaps Dia voice-clone path; assess after Dia evaluation. Lower VRAM requirement than Dia. [S60] |
+| **whisper.cpp native Windows sidecar** | whisper.cpp v1.8.4 [S58] now has built-in Silero VAD v6.2 and 12× performance improvement on integrated Intel/AMD GPUs. A C++ binary sidecar would eliminate the Python runtime dependency for basic transcription. Trade-off: loses batched inference (faster-whisper only), speaker diarization, and some post-processing options. Architecture decision: is the install-footprint reduction worth capability regression? [S58] |
+| **FFmpeg native `whisper` filter** | FFmpeg 8.0+ includes a built-in `whisper` filtergraph filter for in-pipeline transcription without a Python sidecar. Simpler pipeline but less control than faster-whisper (no batched inference, no speaker diarization, no model selection). Assess as a lightweight fallback path for the subtitle pipeline. [S52] |
 
 ---
 
@@ -1334,3 +1479,22 @@ Before any new sidecar or preset is merged:
 | S46 | https://github.com/HandBrake/HandBrake/issues/7339 | HandBrake #7339 — chapter timestamp offset on non-zero-start chapter input |
 | S47 | https://github.com/w-okada/voice-changer | w-okada/voice-changer — actively maintained real-time RVC fork (original RVC unmaintained since 2023) |
 | S48 | https://github.com/Purfview/whisper-standalone-win/releases | Purfview Whisper-XXL Pro r3.256.1 — silero_v6/nemo_v2/ten VAD models, torch 2.8+CUDA12.8 |
+| S49 | https://github.com/ggml-org/whisper.cpp/releases | whisper.cpp v1.8.3–v1.8.4 — Silero VAD v6.2 built-in, 12× iGPU speedup, GPU device selection |
+| S50 | https://github.com/nari-labs/dia | Nari Labs Dia-1.6B — two-speaker dialogue TTS, voice cloning via audio prompt, Apache 2.0; Dia2 Nov 2025 |
+| S51 | https://github.com/resemble-ai/chatterbox | Chatterbox TTS v0.1.2 — Apache 2.0 open-source TTS, zero-shot voice clone, safetensors |
+| S52 | https://ffmpeg.org/index.html | FFmpeg 8.1 "Hoare" (2026-03-16) — D3D12 encode/filter, scale_d3d12, Vulkan ProRes, IAMF mux, whisper filter |
+| S53 | https://github.com/Rikorose/DeepFilterNet/releases | DeepFilterNet v0.5.0/v0.5.3/v0.5.6 — DeepFilterNet3 model, MVDR/Wiener multi-frame filtering, attenuation limit |
+| S54 | https://github.com/alexheretic/ab-av1 | ab-av1 — Rust CLI VMAF/XPSNR-guided CRF auto-search for SVT-AV1/x265/x264; Windows .exe |
+| S55 | https://mkvtoolnix.download/doc/NEWS.md | MKVToolNix v91–v98 NEWS.md — TrueHD in MP4 (v97), --date arg (v95), display-matrix rotation, commentary auto-flag |
+| S56 | https://github.com/mifi/lossless-cut/releases | LosslessCut v3.67.2–v3.68.0 — estimated segment size (#2630), mutateSegmentsByExpr, FILES template, YT chapters |
+| S57 | https://github.com/justdan96/tsMuxeR | tsMuxeR — archived April 2025; Blu-ray TS muxer dependency declared dead by maintainer |
+| S58 | https://github.com/yt-dlp/yt-dlp/releases | yt-dlp 2026.02.21 — CVE-2026-26331 (--netrc-cmd command injection fixed); browser impersonation |
+| S59 | https://github.com/nari-labs/dia | Dia-1.6B TTS detail source (Nari Labs) — Apache 2.0, voice cloning, non-verbals, dialogue speaker tags |
+| S60 | https://github.com/resemble-ai/chatterbox | Chatterbox detail source — emotion control, perceptual watermarking, Python bindings |
+| S61 | https://github.com/Breakthrough/PySceneDetect/releases | PySceneDetect v0.6.7 — EDL end-timestamp fix (DaVinci Resolve import correct), FFmpeg 8.0 bundled |
+| S62 | https://github.com/HandBrake/HandBrake/issues/7467 | HandBrake PR #7467 — VAAPI H.264/AV1 hardware encoding (AMD Radeon, Mesa 25), milestone 1.12.0 |
+| S63 | https://github.com/HandBrake/HandBrake/issues/7848 | HandBrake #7848 — auto-increment filename collision for batch exports |
+| S64 | https://github.com/SubtitleEdit/subtitleedit/releases | SubtitleEdit v5.0.0-beta20 (April 29 2026) — .NET rewrite actively progressing, 20 betas |
+| S65 | https://github.com/SYSTRAN/faster-whisper/releases | faster-whisper v1.1.0–v1.2.1 — batched inference 4×, large-v3-turbo, silero_v6 VAD |
+| S66 | https://github.com/alexheretic/ab-av1/releases | ab-av1 Windows releases — prebuilt .exe, XPSNR support added as VMAF alternative |
+| S67 | https://github.com/HandBrake/HandBrake/issues/7822 | HandBrake #7822 — Qualcomm Snapdragon X Elite ARM64 hardware encoder request |
