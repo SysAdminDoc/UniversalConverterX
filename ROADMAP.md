@@ -1190,6 +1190,115 @@ Sources: [S99-future] (Qdrant vector database)
 
 Higher effort, lower urgency, or dependent on Tier 1/2 completion.
 
+---
+
+### 81. Structured Logging Framework + Crash Bundle (i18n/a11y/observability) _(new Tier 2)_
+
+**Context (iter-7 research, 2026-05-02):** Phase 5 audit (Item 51 under Tier 2) identified
+observability as table-stakes. Modern observability stacks (Prometheus/Grafana, Loki, SkyWalking)
+use structured logging (JSON lines, OpenTelemetry). UCX currently has no systematic log export.
+
+**Enhancement:** Integrate **Loguru** [S151] (Python) and **spdlog** [S149] (C++) for all
+sidecar + UI logging. Log levels: DEBUG, INFO, WARNING, ERROR. Output: NDJSON to
+`%LocalAppData%/UniversalConverterX/logs/` with rotation (7-day retention). On crash, bundle
+last-100-logs + system info + job state into `crashes/<timestamp>_bundle.zip` for user support.
+
+Gate behind `VerboseLogging` toggle (default off, zero-cost when disabled). No telemetry.
+
+Impact: 3 · Effort: 2 · Type: observability/dx
+Sources: [S149] (spdlog — high-performance C++ logging), [S151] (Loguru — Python logging)
+
+---
+
+### 82. Preset Configuration as Code (Pkl DSL) _(new UC / Research Required)_
+
+**Context (iter-7 research, 2026-05-02):** Apple's **Pkl** [S141] is a configuration-as-code
+language with rich validation. Unlike JSON/YAML, Pkl enforces type correctness and allows
+reusable templates. Currently, UCX presets are hand-written XML; users cannot reason about
+or compose presets programmatically.
+
+**Concept:** Create a Pkl schema for `EncodingPreset` (codec, bitrate, filters, sidecar opts).
+Allow power users to generate presets via Pkl scripts: `encode_preset(codec="av1", quality="hq")`.
+Pkl compiler output → XML that UCX loads. Optional CLI: `ucx preset generate --pkl script.pkl`.
+
+**Risk:** Adds Pkl compiler as a sidecar dependency. Justifies UC pending feasibility study.
+
+Impact: 1 · Effort: 3 · Type: dx + leapfrog
+Sources: [S141] (Apple Pkl — configuration as code language with validation)
+
+---
+
+### 83. Validation Layer + Pydantic Schemas _(new Tier 3)_
+
+**Context (iter-7 research, 2026-05-02):** **Pydantic** [S140] (Python) provides runtime
+validation of config/preset data using type hints. UCX sidecars receive JSON payloads from
+the UI; currently there is no schema validation before sidecar invocation. Malformed presets
+cause silent failures or crashes.
+
+**Enhancement:** Define Pydantic models for each sidecar contract (e.g., `AV1EncodeRequest`,
+`AudioFilterRequest`). Validate input JSON at the Python sidecar entry point before processing.
+Output validation errors as structured warnings in the log bundle (Item 81). Improves reliability
+and error messages.
+
+**Side benefit:** Enables Instructor [S142] integration for LLM-guided preset generation (synergy
+with Item 80, semantic preset search).
+
+Impact: 2 · Effort: 2 · Type: reliability + dx
+Sources: [S140] (Pydantic — data validation using Python type hints), [S142] (Instructor — structured outputs for LLMs)
+
+---
+
+### 84. Fast JSON Serialization (Orjson) _(new Tier 3)_
+
+**Context (iter-7 research, 2026-05-02):** **Orjson** [S148] is a fast Python JSON library
+with native support for dataclasses, datetimes, and numpy arrays. UCX currently uses the
+standard library `json` module, which is slow for large preset/history batches.
+
+**Enhancement:** Replace `json.dumps()` calls in Python sidecars with `orjson.dumps()`.
+Expected speedup: ~3–5x for typical preset export/history serialization. Wire into the
+sidecar contract layer (payload serialization on both input and output).
+
+Impact: 1 · Effort: 1 · Type: performance/platform
+Sources: [S148] (Orjson — fast Python JSON with dataclass/datetime support)
+
+---
+
+### 85. Vector Database for Preset Search (Qdrant) _(new UC / Exploratory)_
+
+**Context (iter-7 research, 2026-05-02):** **Qdrant** [S99-added-S107] is a vector database
+enabling semantic search on embeddings. Combined with **Hugging Face Transformers** [S127],
+users could embed preset descriptions and search semantically ("find presets for livestream")
+instead of keyword matching.
+
+**Concept:** On first launch, embed all ~274 built-in presets using a lightweight embedding
+model (e.g., `all-MiniLM-L6-v2`). Build a local Qdrant index (~50 MB on-disk). Expose a
+"semantic search" pane in PresetsPage. Users type natural language, get ranked presets.
+
+**Challenges:** Model download (~200 MB), inference latency (100–500 ms per query on CPU),
+maintenance (re-embedding on preset updates). Feasibility study needed.
+
+Impact: 1 · Effort: 4 · Type: leapfrog + AI
+Sources: [S99] (Qdrant — vector database), [S127] (Hugging Face Transformers — embedding models)
+
+---
+
+### 86. Batch Job Observability Dashboard (Prometheus + Grafana) _(new UC / Deployment)_
+
+**Context (iter-7 research, 2026-05-02):** For distributed encoding workflows (Item 6 extended),
+users need to monitor job queues, GPU utilization, and encode throughput. **Prometheus** [S115]
++ **Grafana** [S116] enable time-series metrics collection and visualization.
+
+**Concept:** Expose a `/metrics` HTTP endpoint from UCX's REST API (Item 35). Metrics:
+jobs queued/active/completed, average encode speed (FPS), GPU utilization, sidecar errors.
+Users run a local Grafana container (docker-compose) pointed at the UCX metrics endpoint.
+Optional: ship pre-built Grafana dashboard as JSON.
+
+**Scope note:** This is optional telemetry for advanced users running large batch ops on
+multiple machines. Not required for single-user local use. UC pending demand signal.
+
+Impact: 2 · Effort: 3 · Type: observability + platform
+Sources: [S115] (Prometheus — time-series monitoring), [S116] (Grafana — composable observability platform)
+
 ### 34. Watch Folder Automation — ✅ SHIPPED (already)
 
 Background service that monitors one or more folders for new files and
@@ -1850,6 +1959,64 @@ Before any new sidecar or preset is merged:
 | S92 | https://github.com/WyattBlue/auto-editor | auto-editor v0.7+ — CLI for automatic silence/motion removal, Nim language, per-track threshold DSL, margin control, parallel export |
 | S93 | https://github.com/OpenShot/openshot-qt/releases | OpenShot 3.5.1 (Apr 2026) — proxy editing for performance, multi-selection trimming, ComfyUI workflows, UI scaling toggle, DPI-aware rendering |
 | S94 | https://github.com/deezer/spleeter | Spleeter 2.1.0+ — Music source separation (vocals/drums/bass/other), TensorFlow, multi-GPU optional, CPU path available |
+| S95 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
+| S96 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; Python; user-focused UX; AI image discovery |
+| S97 | https://github.com/meilisearch/meilisearch | Meilisearch — Lightning-fast full-text search with AI-powered hybrid search; Rust backend |
+| S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
+| S99 | https://github.com/qdrant/qdrant | Qdrant — Vector database + vector search engine; 1M+ vectors; Rust |
+| S100 | https://github.com/ossrs/srs | SRS (Simple Realtime Server) — RTMP/WebRTC/HLS/SRT/DASH/GB28181; H.264/H.265/AV1/VP9; Opus/G.711; May 2026 |
+| S101 | https://github.com/bluenviron/mediamtx | mediamtx — SRT/WebRTC/RTSP/RTMP/LL-HLS media proxy in Go; 40+ protocol combinations; May 2026 |
+| S102 | https://github.com/ant-media/Ant-Media-Server | Ant Media Server — Ultra-low latency streaming (<0.5s WebRTC); adaptive bitrate; transcoding & scaling; Java |
+| S103 | https://github.com/gpac/gpac | GPAC — Ultramedia toolkit: next-gen transcoding, packaging, delivery; MP4 box, DASH, HLS, ISOM; Apr 2026 |
+| S104 | https://github.com/CasparCG/server | CasparCG — Professional broadcast playback server; 24/7 production since 2006; multi-output support; C++ |
+| S105 | https://github.com/argoproj/argo-workflows | Argo Workflows — Kubernetes workflow orchestration (Netflix Maestro equivalent); May 2026 |
+| S106 | https://github.com/lost-pixel/lost-pixel | Lost Pixel — OSS alternative to Percy/Chromatic/Applitools; visual regression testing; Apr 2026 |
+| S107 | https://github.com/kubeshop/testkube | Testkube — Test orchestration for cloud-native apps; Kubernetes-native; May 2026 |
+| S108 | https://github.com/formatjs/formatjs | FormatJS (react-intl) — i18n/l10n for React; pluralization, date/time formatting, message extraction; May 2026 |
+| S109 | https://github.com/WeblateOrg/weblate | Weblate — Web-based localization platform; version control integration; crowdsourced translation; May 2026 |
+| S110 | https://github.com/caddyserver/caddy | Caddy — HTTP/1-2-3 web server with automatic HTTPS; extensible; May 2026 |
+| S111 | https://github.com/grafana/k6 | k6 (Grafana) — Modern load testing tool in Go/JavaScript; performance benchmarking; May 2026 |
+| S112 | https://github.com/prometheus/prometheus | Prometheus — Time-series monitoring + alerting system; foundational to observability; Apr 2026 |
+| S113 | https://github.com/grafana/grafana | Grafana — Composable observability platform; metrics/logs/traces visualization; May 2026 |
+| S114 | https://github.com/louislam/uptime-kuma | Uptime Kuma — Self-hosted monitoring; lightweight; status page; May 2026 |
+| S115 | https://github.com/n8n-io/n8n | n8n — Workflow automation platform; 400+ integrations; native AI; May 2026 |
+| S116 | https://github.com/hoppscotch/hoppscotch | Hoppscotch — Open-source API development (Postman alternative); offline/on-prem; May 2026 |
+| S117 | https://github.com/neovim/neovim | Neovim — Vim fork with plugin architecture; extensible; May 2026 |
+| S118 | https://github.com/NVIDIA/TensorRT | NVIDIA TensorRT — High-performance deep learning inference on NVIDIA GPUs; C++; Apr 2026 |
+| S119 | https://github.com/NVIDIA/cutlass | NVIDIA CUTLASS — CUDA templates for high-performance linear algebra; Apr 2026 |
+| S120 | https://github.com/Syllo/nvtop | nvtop — GPU monitoring for AMD/Apple/Huawei/Intel/NVIDIA/Qualcomm; Apr 2026 |
+| S121 | https://github.com/dusty-nv/jetson-inference | Jetson Inference — NVIDIA Jetson deep learning inference; TensorRT; Oct 2025 |
+| S122 | https://github.com/optiscaler/OptiScaler | OptiScaler — GPU upscaling/frame gen bridge; DLSS/FSR/XeSS support; May 2026 |
+| S123 | https://github.com/pytorch/pytorch | PyTorch — Tensors + dynamic neural networks in Python with GPU support; May 2026 |
+| S124 | https://github.com/huggingface/transformers | Hugging Face Transformers — Model-definition framework for text/vision/audio/multimodal inference/training; May 2026 |
+| S125 | https://github.com/deepspeedai/DeepSpeed | DeepSpeed — Deep learning optimization library; distributed training/inference; May 2026 |
+| S126 | https://github.com/lz4/lz4 | LZ4 — Extremely fast compression algorithm; C; May 2026 |
+| S127 | https://github.com/borgbackup/borg | Borg — Deduplicating archiver with compression + authenticated encryption; Apr 2026 |
+| S128 | https://github.com/opencv/opencv | OpenCV — Open source computer vision library; C++; Apr 2026 |
+| S129 | https://github.com/roboflow/supervision | Roboflow Supervision — Reusable computer vision tools; Python; Apr 2026 |
+| S130 | https://github.com/GraphiteEditor/Graphite | Graphite — Open-source 2D content creation suite; node-based procedural editing; May 2026 |
+| S131 | https://github.com/puppeteer/puppeteer | Puppeteer — JavaScript API for Chrome/Firefox automation; browser testing; Apr 2026 |
+| S132 | https://github.com/storybookjs/storybook | Storybook — Industry standard workshop for building/documenting/testing UI components; May 2026 |
+| S133 | https://github.com/microsoft/playwright | Playwright — Web testing + automation framework (Chromium/Firefox/WebKit); May 2026 |
+| S134 | https://github.com/jestjs/jest | Jest — Delightful JavaScript testing framework; May 2026 |
+| S135 | https://github.com/pytest-dev/pytest | Pytest — Feature-rich Python testing framework; May 2026 |
+| S136 | https://github.com/avajs/ava | AVA — Node.js test runner with concurrent execution; Apr 2026 |
+| S137 | https://github.com/pydantic/pydantic | Pydantic — Data validation using Python type hints; May 2026 |
+| S138 | https://github.com/apple/pkl | Apple Pkl — Configuration as code language with rich validation + tooling; Apr 2026 |
+| S139 | https://github.com/567-labs/instructor | Instructor (LLM) — Structured outputs for LLMs; validation; Apr 2026 |
+| S140 | https://github.com/twpayne/chezmoi | Chezmoi — Dotfile management across multiple machines (securely); Apr 2026 |
+| S141 | https://github.com/TomWright/dasel | Dasel — Select, filter, map data in JSON/YAML/TOML/CSV; Apr 2026 |
+| S142 | https://github.com/protocolbuffers/protobuf | Protocol Buffers — Google data interchange format; language/platform-neutral; May 2026 |
+| S143 | https://github.com/google/flatbuffers | FlatBuffers — Memory-efficient serialization library (zero-copy); Apr 2026 |
+| S144 | https://github.com/toon-format/toon | TOON — Token-Oriented Object Notation; compact JSON for LLM prompts; Apr 2026 |
+| S145 | https://github.com/ijl/orjson | Orjson — Fast Python JSON with dataclass/datetime/numpy support; Apr 2026 |
+| S146 | https://github.com/gabime/spdlog | spdlog — Fast C++ logging library; structured logging; Apr 2026 |
+| S147 | https://github.com/grafana/loki | Grafana Loki — "Prometheus for logs"; log aggregation system; May 2026 |
+| S148 | https://github.com/Delgan/loguru | Loguru — Python logging made simple; structured logging; Apr 2026 |
+| S149 | https://github.com/apache/skywalking | Apache SkyWalking — APM system; distributed tracing + performance monitoring; Apr 2026 |
+| S150 | https://github.com/ossrs/srs | SRS (Simple Realtime Server) — RTMP/WebRTC/HLS/SRT/DASH; streaming/broadcast reference; May 2026 |
+| S151 | https://github.com/deezer/spleeter | Spleeter — Music source separation (vocals/drums/bass/other); TensorFlow; May 2026 |
+| S152 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; user-focused UX; Apr 2026 |
 | S95 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
 | S96 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; Python; user-focused UX; AI image discovery |
 | S97 | https://github.com/meilisearch/meilisearch | Meilisearch — Lightning-fast full-text search with AI-powered hybrid search; Rust backend |
