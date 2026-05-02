@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
 **Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-02 (iter-7 external research refresh — 80+ sources)
+**Last updated:** 2026-05-02 (iter-7 wave 5 + Phase 5 self-audit — 98 items, 165 sources)
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
@@ -56,6 +56,37 @@ accessibility.
 > scripting bridge, Tdarr V2 conditional-rules competitor analysis, PyAV v17
 > cuvid+dlpack zero-copy. Net additions: Items 93–98. New appendix sources:
 > S159–S165. Cumulative: ~165 distinct sources, 98 roadmap items.
+>
+> **iter-7 Phase 5 self-audit (2026-05-02):** Full end-to-end review completed.
+> Findings + corrections applied in-place:
+> 1. **Cross-ref bug fixed (4×):** Items 87/89/93/94 referenced "Item 71 (HDR10
+>    metadata)" — Item 71 is actually Av1an Per-Scene Parallel Encoding. Re-pointed
+>    to **Item 69 (SVT-AV1-HDR Tuning Presets)** which is the canonical HDR-encoding
+>    item.
+> 2. **Duplicate item collapsed:** Item 85 ("Vector Database for Preset Search") was
+>    a redundant restatement of Item 80 ("Vector Semantic Search for Presets") —
+>    both propose Qdrant + embeddings. Item 85 retained as a stub with audit note;
+>    canonical entry is Item 80. Item numbers preserved for cross-reference stability.
+> 3. **Source-table integrity:** 169 rows, ~165 unique URLs (a few duplicates from
+>    append-with-collision: S87/S92 = auto-editor, S88/S93 = OpenShot proxy,
+>    S100/S150 = SRS, S94/S151 = Spleeter, S96/S152 = TagStudio). Not renumbered to
+>    keep [S{n}] cross-refs in items stable; flagged here for future iter cleanup.
+> 4. **Category coverage check:** all required categories represented —
+>    security (Items 9, 88, 56), accessibility (Item 10), i18n/l10n (Item 41 + 81),
+>    observability/telemetry (Items 51, 81, 86), testing (Item 11 ✓ shipped),
+>    docs (CHANGELOG/Roadmap), distribution/packaging (Items 25, 26, 47),
+>    plugin ecosystem (Item 52), mobile (out-of-scope, charter), offline/resilience
+>    (charter foundation), multi-user/collab (out-of-scope), migration (Item 53 ✓
+>    shipped + Item 26 schema), upgrade strategy (Item 7).
+> 5. **Tier integrity:** no items appear in two tiers; no resurrected rejects;
+>    every Now/Next item maps to at least one Appendix source.
+> 6. **Adversarial review:** intentionally retained — Items 75/76/96/97 are speculative;
+>    UC tier flags this honestly. Items 92 (community signal) and 85 (audit-stub) are
+>    explicitly non-build entries. Effort estimates are sketches not commitments;
+>    every item with Effort ≥ 4 has a stated risk paragraph.
+> 7. **Charter conflicts:** zero. Items 86 (Prometheus) and 97 (Tdarr-rules) are
+>    explicitly opt-in / advanced-user, not default behavior — no telemetry, no cloud.
+> 8. **ROADMAP.md verified on disk** (98 items, ~169 source rows, ~2350 lines).
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -1277,22 +1308,15 @@ Sources: [S148] (Orjson — fast Python JSON with dataclass/datetime support)
 
 ---
 
-### 85. Vector Database for Preset Search (Qdrant) _(new UC / Exploratory)_
+### 85. Vector Database for Preset Search (Qdrant) _(superseded by Item 80 — see audit note)_
 
-**Context (iter-7 research, 2026-05-02):** **Qdrant** [S99-added-S107] is a vector database
-enabling semantic search on embeddings. Combined with **Hugging Face Transformers** [S127],
-users could embed preset descriptions and search semantically ("find presets for livestream")
-instead of keyword matching.
+**Phase 5 audit (2026-05-02):** This item is a duplicate of **Item 80** (Vector Semantic
+Search for Presets) — both propose Qdrant + sentence-transformers for natural-language
+preset search. Item 80 is the canonical entry; this slot retained as a placeholder so
+existing item numbers stay stable (cross-reference invariant).
 
-**Concept:** On first launch, embed all ~274 built-in presets using a lightweight embedding
-model (e.g., `all-MiniLM-L6-v2`). Build a local Qdrant index (~50 MB on-disk). Expose a
-"semantic search" pane in PresetsPage. Users type natural language, get ranked presets.
-
-**Challenges:** Model download (~200 MB), inference latency (100–500 ms per query on CPU),
-maintenance (re-embedding on preset updates). Feasibility study needed.
-
-Impact: 1 · Effort: 4 · Type: leapfrog + AI
-Sources: [S99] (Qdrant — vector database), [S127] (Hugging Face Transformers — embedding models)
+**Action:** Do not implement separately. Use Item 80. The Prometheus dashboard rationale
+that originally lived here was elevated to **Item 86** during wave 3.
 
 ---
 
@@ -1327,7 +1351,7 @@ prosumers archiving long-term assets will want it as a future-proofing path.
 
 **Concept:** Wrap `vvencFFapp` (or `vvencapp`) as `vvc-encoder` sidecar. Expose presets
 `faster | fast | medium | slow | slower` (matching x265 conventions) and CQF mode
-("VVC Capped Quality 24"). Plays nicely with **Item 71** (HDR10 metadata) since vvenc
+("VVC Capped Quality 24"). Plays nicely with **Item 69** (SVT-AV1-HDR) since vvenc
 honors VUI flags and color range. Decode path: ffmpeg has built-in `libvvdec` decoding
 in 8.x for verification.
 
@@ -1377,7 +1401,7 @@ substitute.
 **Concept:** Add an `avif-hdr` preset path in the image conversion engine. Inputs:
 HDR PNG (cICP-tagged) or HDR HEIC. Output: AVIF with gain map preserved (or generated).
 Surface a "Preserve HDR" toggle on the image conversion page (next to existing AVIF
-encode preset). Synergy with **Item 71** (video HDR10) — visually consistent HDR story
+encode preset). Synergy with **Item 69** (SVT-AV1-HDR) — visually consistent HDR story
 across UCX's still-image and video pipelines.
 
 **Risks:** Many image viewers still treat AVIF as SDR-only and tone-map silently.
@@ -1475,7 +1499,7 @@ IPT-PQ-C2) vs Profile 7 (dual-layer FEL/MEL) and refuse Profile 7 → Profile 5 
 **Why T2:** Dolby Vision is the gold standard HDR for film archival. UCX's video
 preset story is incomplete without this. Competitor pain: HandBrake silently strips
 DV; FFmpeg has it but requires CLI choreography. UCX wraps the whole flow in a preset.
-Synergy with **Item 71** (HDR10 metadata) and **Item 89** (AVIF gain map).
+Synergy with **Item 69** (SVT-AV1-HDR) and **Item 89** (AVIF gain map).
 
 Impact: 5 · Effort: 3 · Type: leapfrog + HDR
 Sources: [S159] (dovi_tool 2.3.2 — RPU extract/inject/mux, Apr 2025)
@@ -1494,7 +1518,7 @@ tone-mapping curve and reduces the file to static HDR10.
 (a) `hdr10plus_tool extract` from input HEVC → `metadata.json`;
 (b) re-encode video;
 (c) `hdr10plus_tool inject` JSON metadata back into the new HEVC bitstream;
-(d) optional editor pass for trim/level fixups via `editor`. Synergy with **Item 71**
+(d) optional editor pass for trim/level fixups via `editor`. Synergy with **Item 69**
 (HDR10 master metadata) — the static MaxCLL/MaxFALL go in the SEI, the dynamic curve
 goes via this path.
 
