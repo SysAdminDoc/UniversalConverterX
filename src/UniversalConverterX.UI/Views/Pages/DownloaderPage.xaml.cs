@@ -2,12 +2,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
@@ -44,6 +46,175 @@ public sealed partial class DownloaderPage : Page
         QueueList.ItemsSource = _queue;
         FinishedList.ItemsSource = _finished;
         UpdateUi();
+        // Probe the cookie store on first paint so the user sees real status
+        // instead of the placeholder "Checking..." string. Background-fired so
+        // page activation isn't gated on the sidecar starting up.
+        _ = RefreshCookieStatusAsync();
+    }
+
+    // ─── Cookie Auth (ROADMAP Item 9 UI completion) ─────────────────────────
+    //
+    // The DPAPI at-rest encryption layer shipped in iter-3 (commit b8058de).
+    // These handlers expose the cookies-status / cookies-import / cookies-clear
+    // ops on the streamkeep sidecar so the user can manage cookie auth
+    // without touching %APPDATA%/StreamKeep manually.
+
+    private bool _cookieOpInFlight;
+
+    private async Task RefreshCookieStatusAsync()
+    {
+        if (_cookieOpInFlight) return;
+        await RunCookieOpAsync(["cookies-status"], silentMessage: true);
+    }
+
+    private async void ImportCookiesFromBrowser_Click(object sender, RoutedEventArgs e)
+    {
+        var browser = SelectedTag(BrowserCombo, "chrome");
+        await RunCookieOpAsync(["cookies-import", "--browser", browser]);
+    }
+
+    private async void ImportCookiesFromFile_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker
+        {
+            ViewMode = PickerViewMode.List,
+            SuggestedStartLocation = PickerLocationId.Downloads,
+        };
+        picker.FileTypeFilter.Add(".txt");
+        picker.FileTypeFilter.Add("*");
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+
+        await RunCookieOpAsync(["cookies-import", "--file", file.Path]);
+    }
+
+    private async void ClearCookies_Click(object sender, RoutedEventArgs e)
+    {
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Clear cookie store?",
+                "Delete the on-disk cookies and any process-cached plaintext temp file? You'll need to re-import to authenticate again."))
+        {
+            return;
+        }
+        await RunCookieOpAsync(["cookies-clear"]);
+    }
+
+    private async Task RunCookieOpAsync(IEnumerable<string> args, bool silentMessage = false)
+    {
+        if (_cookieOpInFlight) return;
+        _cookieOpInFlight = true;
+        SetCookieControlsEnabled(false);
+
+        // Capture the most-recent cookie_status payload across all NDJSON events
+        // so we can update the UI once after the sidecar exits.
+        bool? present = null;
+        bool? encrypted = null;
+        long ageSeconds = -1;
+        string? lastAction = null;
+        string? lastMessage = null;
+
+        try
+        {
+            await _runner.RunAsync(
+                "streamkeep",
+                args,
+                progress: null,
+                log: null,
+                ct: default,
+                onRawEvent: (evName, root) =>
+                {
+                    if (evName != "cookie_status") return;
+                    if (root.TryGetProperty("present", out var pEl) && pEl.ValueKind is JsonValueKind.True or JsonValueKind.False)
+                        present = pEl.GetBoolean();
+                    if (root.TryGetProperty("encrypted", out var eEl) && eEl.ValueKind is JsonValueKind.True or JsonValueKind.False)
+                        encrypted = eEl.GetBoolean();
+                    if (root.TryGetProperty("age_seconds", out var aEl) && aEl.ValueKind == JsonValueKind.Number)
+                        ageSeconds = aEl.GetInt64();
+                    if (root.TryGetProperty("action", out var actEl) && actEl.ValueKind == JsonValueKind.String)
+                        lastAction = actEl.GetString();
+                    if (root.TryGetProperty("message", out var msgEl) && msgEl.ValueKind == JsonValueKind.String)
+                        lastMessage = msgEl.GetString();
+                });
+        }
+        finally
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ApplyCookieStatusToUi(present, encrypted, ageSeconds, lastAction,
+                    silentMessage ? null : lastMessage);
+                _cookieOpInFlight = false;
+                SetCookieControlsEnabled(true);
+            });
+        }
+    }
+
+    private void SetCookieControlsEnabled(bool enabled)
+    {
+        BrowserCombo.IsEnabled = enabled;
+        CookieImportBrowserButton.IsEnabled = enabled;
+        CookieImportFileButton.IsEnabled = enabled;
+        // Clear is gated on actual cookie presence — don't re-enable here; the
+        // status apply step decides.
+    }
+
+    private void ApplyCookieStatusToUi(bool? present, bool? encrypted, long ageSeconds,
+        string? action, string? message)
+    {
+        if (present is null)
+        {
+            // Sidecar didn't emit a cookie_status — likely missing streamkeep
+            // package or build. Show the action message if we have one.
+            CookieStatusText.Text = "Cookie store unavailable. " +
+                                    "Build the streamkeep sidecar (`pwsh tools/streamkeep/build.ps1`).";
+            CookieClearButton.IsEnabled = false;
+        }
+        else if (present == true)
+        {
+            var enc = encrypted == true ? "encrypted at rest (DPAPI)" : "plaintext (legacy)";
+            var age = FormatCookieAge(ageSeconds);
+            CookieStatusText.Text = $"Cookies imported · {enc} · {age}";
+            CookieClearButton.IsEnabled = true;
+        }
+        else
+        {
+            CookieStatusText.Text = "No cookies imported. " +
+                                    "Sites that need login (premium, age-gated, region-locked) won't work.";
+            CookieClearButton.IsEnabled = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            CookieMessageText.Visibility = Visibility.Collapsed;
+            CookieMessageText.Text = "";
+        }
+        else
+        {
+            // Distinguish failure vs success in the inline message.
+            var prefix = action switch
+            {
+                "imported"      => "✓ ",
+                "cleared"       => "✓ ",
+                "import_failed" => "✗ ",
+                "clear_failed"  => "✗ ",
+                _ => "",
+            };
+            CookieMessageText.Text = prefix + message;
+            CookieMessageText.Visibility = Visibility.Visible;
+        }
+    }
+
+    private static string FormatCookieAge(long ageSeconds)
+    {
+        if (ageSeconds < 0) return "no timestamp";
+        if (ageSeconds < 60) return $"{ageSeconds}s ago";
+        if (ageSeconds < 3600) return $"{ageSeconds / 60}m ago";
+        if (ageSeconds < 86400) return $"{ageSeconds / 3600}h ago";
+        return $"{ageSeconds / 86400}d ago";
     }
 
     private void UrlBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -270,6 +270,8 @@ KNOWN_EVENTS = {
     "frame",               # framesnap — extracted video frame
     # v2.21 wave (audio dynamic-range compression)
     "audio_compressed",    # audio-compressor — applied DRC params + before/after sizes
+    # v2.21 wave (Downloader cookie-store surface)
+    "cookie_status",       # streamkeep — cookie store presence/encryption/staleness
 }
 
 
