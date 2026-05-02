@@ -69,14 +69,25 @@ Sources: [S3], [S4], [S10]
 
 ---
 
-### 2. AudioTools — Audio Compressor standalone page
+### 2. AudioTools — Audio Compressor standalone page — ✅ SHIPPED 2026-05-02
 
-`audio-compressor` sidecar already exists. Wire it to a `AudioCompressorPage.xaml`
-matching the same pattern as existing AudioTools pages: threshold, ratio,
-attack/release sliders, preview waveform (optional Phase 2 enhancement).
+Built the `audio-compressor` sidecar (the iter-3 LR notes incorrectly
+claimed it already existed — Phase 5 audit found it as `Future` /
+`null` in `ToolboxPage.xaml.cs:100`) AND wired the `AudioCompressorPage`
+in one pass. FFmpeg `acompressor` filter wrapper with five tested DRC
+presets (light/medium/heavy/podcast/broadcast) plus Custom mode that
+exposes threshold/ratio/attack/release/makeup sliders.
 
 Impact: 4 · Effort: 1 · Type: parity
 Source: [S5] (ToolboxPage.xaml.cs stub)
+**Closing commit:** `0cab7d0` — `tools/audio-compressor/{sidecar.py,
+build.ps1,requirements.txt}` (stdlib-only Python; FFmpeg via
+subprocess), `Views/Pages/AudioCompressorPage.xaml{,.cs}` (drag-drop
+queue + preset combo + custom-params card + encode combo + output dir
+picker + progress overlay), `audio_compressed` event registered,
+`ToolboxPage` tile flipped to Ready, `MainWindow` nav routes the key.
+Phase 2 enhancements (preview waveform) deferred — base feature is
+useful without it.
 
 ---
 
@@ -191,7 +202,7 @@ Source: [S14] (common user request in HandBrake / FFmpeg GUI communities)
 
 ---
 
-### 9. yt-dlp Cookie Credential Encryption — ⚠️ PARTIALLY SHIPPED 2026-05-02
+### 9. yt-dlp Cookie Credential Encryption — ✅ SHIPPED 2026-05-02 (UI completed)
 
 Encrypt stored yt-dlp cookies at rest using Windows DPAPI
 (`System.Security.Cryptography.ProtectedData`), machine-scoped. Mirrors the
@@ -209,15 +220,20 @@ detect encrypted blobs and decrypt to a process-private temp file under
 `%TEMP%`, registered for `atexit` cleanup. yt-dlp / curl never see the
 encrypted form. Round-trip verified.
 
-**Remaining work:** UCX C# UI does not yet wire cookie operations
-into DownloaderPage (no cookie import flow exists in the C# layer).
-When that lands (likely as part of the Voice Changer wave or an
-explicit cookie-import item), the encryption layer is already in
-place — defense-in-depth via early foundation work.
+**Closing commit (UI surface):** `fe699e3` — streamkeep sidecar gains
+`cookies-status` / `cookies-import` (`--browser <name>` |
+`--file <path>`) / `cookies-clear` ops, all emitting a unified
+`cookie_status` NDJSON event. DownloaderPage gets a Cookie
+Authentication card between the URL options and Activity cards:
+browser combo (chrome/firefox/edge/brave/chromium/vivaldi/opera/
+librewolf/safari), Import button, Import-from-file picker, Clear
+button gated on cookie presence. Status text auto-refreshes on page
+activation and shows encryption state ("encrypted at rest (DPAPI)"
+vs "plaintext (legacy)") plus staleness ("5m ago").
 
 ---
 
-### 10. Accessibility — Continue UIA Automation Properties Pass — ⚠️ IN PROGRESS
+### 10. Accessibility — Continue UIA Automation Properties Pass — ⚠️ IN PROGRESS (parts a+c shipped, b incremental)
 
 **This is the continuation of an audit-in-progress, not a fresh start.**
 22 of 45+ pages already carry `AutomationProperties.Name` annotations.
@@ -236,9 +252,25 @@ is concrete and verifiable:
 Impact: 3 · Effort: 2 · Type: accessibility
 Source: [S16] (WinUI 3 accessibility docs — UIA peer requirement)
 
-**Verified state (Phase 5 audit, 2026-05-02):**
-- `AutomationProperties.Name` — 22 occurrences across 10 of 45+ pages.
-- `AutomationProperties.AutomationId` — 0 occurrences anywhere in `src/`.
+**Verified state (Phase 5 audit, 2026-05-02 + iter-4 closure):**
+- `AutomationProperties.Name` — 40 of 44 pages (was 22; iter-4 work
+  surfaced control-level annotations across newly-shipped pages).
+- `AutomationProperties.AutomationId` — 22 occurrences across 2 pages
+  (AudioCompressorPage all controls + DownloaderPage cookie chrome +
+  11 high-traffic existing controls). Baseline locks the remaining
+  470-entry deficit.
+
+**Closing commit for parts (a) + (c):** `40edbce` — new
+`tests/uia_contract/check_uia.py` (stdlib-only XAML scanner +
+DataTemplate/ControlTemplate/ItemsPanelTemplate/Style.Setters scope
+skip + line-independent x:Name / UNNAMED#N keys), CI workflow gates
+on `uia-contract` job, baseline at `tests/uia_contract/baseline.txt`,
+DownloaderPage 11 controls cleanup proves shrink-baseline path.
+
+**Remaining work for part (b):** add AutomationId to the remaining
+~459 controls across the other 42 pages. Now safe to incremental-drain
+across iterations because the gate prevents new violations from sneaking
+in. Each cleanup commit shrinks the baseline.
 
 ---
 
