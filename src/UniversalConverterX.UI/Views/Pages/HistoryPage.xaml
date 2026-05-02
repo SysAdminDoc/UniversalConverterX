@@ -13,9 +13,9 @@
         <DataTemplate x:Key="HistoryRowTemplate" x:DataType="svc:HistoryRecord">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="14"
-                    Margin="0,0,0,8">
-                <Grid ColumnSpacing="14">
+                    BorderThickness="1" CornerRadius="12" Padding="16"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -23,26 +23,28 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <FontIcon Glyph="&#xE73E;" FontSize="18"
+                    <FontIcon Glyph="&#xE73E;" FontSize="20"
                               Foreground="{StaticResource AccentGreenBrush}"
                               Visibility="{x:Bind SuccessIconVisibility}"
                               VerticalAlignment="Center"/>
-                    <FontIcon Glyph="&#xE711;" FontSize="18"
+                    <FontIcon Glyph="&#xE711;" FontSize="20"
                               Foreground="{StaticResource AccentRedBrush}"
                               Visibility="{x:Bind ErrorVisibility}"
                               VerticalAlignment="Center"/>
-                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind Display}"
                                    Style="{StaticResource LabelTextStyle}"
                                    FontWeight="SemiBold"
+                                   FontSize="13"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
                                    FontSize="12"
+                                   LineHeight="18"
                                    TextTrimming="CharacterEllipsis">
                             <Run Text="{x:Bind SourcePath}"/>
                         </TextBlock>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="11"
                                    Visibility="{x:Bind ErrorVisibility}"
                                    TextTrimming="CharacterEllipsis">
                             <Run Text="error:"/>
@@ -88,14 +90,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Conversion History"
-                           Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Spacing="8">
+                <TextBlock Text="CONVERSION HISTORY"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Persistent SQLite log of every job. Search, re-run, or forget any entry."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Refresh"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Refresh_Click"/>
@@ -105,8 +108,8 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
-            <Grid ColumnSpacing="14">
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="18">
+            <Grid ColumnSpacing="16" RowSpacing="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -114,30 +117,30 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Border Style="{StaticResource MetricTileStyle}">
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Total jobs" Style="{StaticResource MutedTextStyle}"/>
-                    <TextBlock x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="22"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Total jobs" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="24" FontWeight="SemiBold"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource MetricTileStyle}">
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Succeeded" Style="{StaticResource MutedTextStyle}"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Succeeded" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
                     <TextBlock x:Name="StatOk" Text="0" Style="{StaticResource TitleTextStyle}"
-                               FontSize="22" Foreground="{StaticResource AccentGreenBrush}"/>
+                               FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentGreenBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="2" Style="{StaticResource MetricTileStyle}">
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Failed" Style="{StaticResource MutedTextStyle}"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Failed" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
                     <TextBlock x:Name="StatFail" Text="0" Style="{StaticResource TitleTextStyle}"
-                               FontSize="22" Foreground="{StaticResource AccentRedBrush}"/>
+                               FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentRedBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="3" Style="{StaticResource MetricTileStyle}">
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Space saved" Style="{StaticResource MutedTextStyle}"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Space saved" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
                     <TextBlock x:Name="StatSaved" Text="0 B" Style="{StaticResource TitleTextStyle}"
-                               FontSize="22" Foreground="{StaticResource AccentBlueBrush}"/>
+                               FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}"/>
                 </StackPanel>
                 </Border>
             </Grid>
@@ -147,24 +150,27 @@
                         x:Name="SearchBox"
                         PlaceholderText="Filter by engine, action, file path, preset..."
                         QueryIcon="Find"
+                        Padding="12,8"
                         TextChanged="Search_TextChanged"/>
 
-        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="16">
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="18">
             <Grid>
                 <StackPanel x:Name="EmptyState" Visibility="Collapsed"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Spacing="10">
-                    <Border Width="80" Height="80" CornerRadius="20"
+                            Spacing="12">
+                    <Border Width="88" Height="88" CornerRadius="22"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE81C;" FontSize="36"
+                        <FontIcon Glyph="&#xE81C;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock Text="No history yet"
-                               Style="{StaticResource SubtitleTextStyle}"
-                               HorizontalAlignment="Center"/>
+                               Style="{StaticResource TitleTextStyle}"
+                               HorizontalAlignment="Center" FontSize="18"/>
                     <TextBlock Text="Run a conversion or compression and it will appear here."
                                Style="{StaticResource MutedTextStyle}"
-                               HorizontalAlignment="Center"/>
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="280"/>
                 </StackPanel>
                 <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="ItemsList"
