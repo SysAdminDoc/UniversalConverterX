@@ -147,6 +147,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
@@ -307,7 +308,39 @@
                           ItemTemplate="{StaticResource ClusterTemplate}"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="12"
+            <!-- ROADMAP Item 51: Diagnostics card — local-only crash bundle export and log folder access. -->
+            <Border Grid.Row="5" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="20" Padding="22"
+                    AutomationProperties.AutomationId="HomePage_DiagnosticsCard">
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="6">
+                        <TextBlock Text="DIAGNOSTICS" Style="{StaticResource MetricLabelTextStyle}"/>
+                        <TextBlock Text="Local logs and crash bundles" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Name="DiagnosticsStatusText"
+                                   Text="No issues recorded this session."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button x:Name="OpenLogFolderButton"
+                                Content="Open log folder"
+                                Click="OpenLogFolder_Click"
+                                AutomationProperties.AutomationId="HomePage_OpenLogFolder"/>
+                        <Button x:Name="ExportCrashBundleButton"
+                                Content="Export crash bundle"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="ExportCrashBundle_Click"
+                                AutomationProperties.AutomationId="HomePage_ExportCrashBundle"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="12"
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>

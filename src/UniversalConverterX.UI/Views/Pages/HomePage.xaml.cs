@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -186,6 +187,54 @@ public sealed partial class HomePage : Page
 
     private void OpenToolbox_Click(object sender, RoutedEventArgs e) =>
         App.RequestNavigation("toolbox");
+
+    private void OpenLogFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var logger = App.Services?.GetService<IStructuredLogger>();
+            var dir = logger?.LogDirectory;
+            if (string.IsNullOrWhiteSpace(dir)) return;
+            Directory.CreateDirectory(dir);
+            Process.Start(new ProcessStartInfo { FileName = dir, UseShellExecute = true });
+        }
+        catch
+        {
+            DiagnosticsStatusText.Text = "Couldn't open the log folder. Check %LocalAppData%\\UniversalConverterX\\logs.";
+        }
+    }
+
+    private void ExportCrashBundle_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var logger = App.Services?.GetService<IStructuredLogger>();
+            if (logger is null)
+            {
+                DiagnosticsStatusText.Text = "Logger unavailable; bundle export skipped.";
+                return;
+            }
+            logger.Info("diagnostics", "user-initiated crash bundle export");
+            var path = CrashBundle.Capture(logger, exception: null,
+                note: "User-initiated bundle export from Home dashboard.");
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                DiagnosticsStatusText.Text = "Bundle export failed (disk full or permission denied).";
+                return;
+            }
+            DiagnosticsStatusText.Text = $"Bundle saved: {path}";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{path}\"",
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            DiagnosticsStatusText.Text = $"Bundle export error: {ex.GetType().Name}.";
+        }
+    }
 }
 
 public sealed class HomeActionTile
