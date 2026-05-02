@@ -20,13 +20,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Text to Speech" Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="TEXT TO SPEECH"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Refresh Voices"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="RefreshVoices_Click"/>

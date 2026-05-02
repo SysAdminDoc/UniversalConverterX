@@ -131,13 +131,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Noise Remover" Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="NOISE REMOVER"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="RNNoise broadband speech denoiser via FFmpeg arnndn. Cleans hum, hiss, fan and HVAC noise from voice tracks."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"/>
