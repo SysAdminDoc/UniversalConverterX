@@ -34,3 +34,4 @@ installer/wix/PresetFiles.generated.wxs
 # Python bytecode cache
 __pycache__/
 *.pyc
+.factory/
