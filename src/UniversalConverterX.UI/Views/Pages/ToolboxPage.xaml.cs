@@ -97,7 +97,7 @@ public sealed partial class ToolboxPage : Page
 
         // Audio
         AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, OPUS", "\uEC4F", green, "Planned", orange, false, "FFmpeg"));
-        AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Reduce audio file size", "\uE91F", blue, "Future", yellow, false, null));
+        AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Dynamic-range compression (FFmpeg acompressor) — light/medium/heavy/podcast/broadcast presets", "\uE91F", blue, "Ready", green, false, "FFmpeg acompressor"));
         AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "RNNoise broadband speech denoise (FFmpeg arnndn)", "\uE767", blue, "Ready", green, true, "RNNoise"));
 
         // Documents

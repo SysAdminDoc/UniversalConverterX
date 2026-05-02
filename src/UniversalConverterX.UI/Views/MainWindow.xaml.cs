@@ -134,6 +134,7 @@ public sealed partial class MainWindow : Window
             "converter" => typeof(ConverterPage),
             "ai-lab" => typeof(AiLabPage),
             "compressor" => typeof(CompressorPage),
+            "audio-compressor" => typeof(AudioCompressorPage),
             "editor" => typeof(EditorPage),
             "downloader" => typeof(DownloaderPage),
             "recorder" => typeof(RecorderPage),

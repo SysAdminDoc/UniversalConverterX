@@ -1,0 +1,2 @@
+# audio-compressor sidecar — stdlib only.
+# FFmpeg is invoked via subprocess; no Python dependencies needed at runtime.
