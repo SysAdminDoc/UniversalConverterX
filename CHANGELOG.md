@@ -27,6 +27,47 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — Auto-edit silence/motion removal sidecar (ROADMAP Item 73)
+
+- New `tools/auto-edit/` sidecar wraps the auto-editor CLI (>=27.0.0)
+  with three NDJSON ops: `silence-remove` (audio threshold + margin),
+  `motion-edit` (audio + motion thresholds combined via auto-editor's
+  DSL), `speedup-quiet` (keep silent regions but render high-speed),
+  plus a `probe` op that reports availability + version.
+- stderr percent-progress parsed into NDJSON `progress` events; full
+  PyInstaller frozen-guard so the sidecar can be bundled without the
+  Python runtime.
+- Two presets ship: `auto-edit-silence-remove` (0.04 threshold + 0.2
+  sec margin — talk-head trimming) and `auto-edit-motion-cut`
+  (combined audio + motion 0.02 threshold — tutorials / lectures).
+- Sidecar count: 178 (was 177).
+
+### Added — AVIF tuning controls + HDR / lossless presets (ROADMAP Item 89)
+
+- `heicshift convert` op gains three AVIF flags: `--avif-speed 0..10`
+  (encoder effort), `--avif-subsampling {4:0:0|4:2:0|4:2:2|4:4:4}`
+  (chroma sampling — 4:4:4 best for HDR / gradients),
+  `--avif-lossless` (overrides --quality).
+- ICC + EXIF pass-through (already shipping) preserves cICP / colour
+  metadata for HDR-tagged sources.
+- Two new presets: `to-avif-hdr` (Q92 / 4:4:4 / speed 4) and
+  `to-avif-lossless` (4:4:4 / speed 2 / archival).
+- Remaining: Apple-style gain-map writing waits for pillow-avif-plugin
+  to expose libavif 1.4.x's gain-map API.
+
+### Added — Opus 1.5 application + frame_duration controls (ROADMAP Item 90)
+
+- `audiopro convert` exposes Opus-specific tuning flags:
+  `--opus-application {voip|audio|lowdelay}` and
+  `--opus-frame-duration {2.5|5|10|20|40|60}` ms. Both ignored
+  silently for non-Opus targets.
+- Three Opus presets ship: `to-opus-voice-32k` (voip / 32 kbps / 20
+  ms — podcast-grade), `to-opus-music-128k` (audio / 128 kbps / 20 ms
+  — transparent stereo), `to-opus-rtc-lowdelay` (lowdelay / 64 kbps /
+  5 ms — RTC tuning).
+- DRED in libopus 1.5+ inherited from the bundled FFmpeg; higher-order
+  ambisonics channel-layout selector deferred.
+
 ### Added — Audio metadata auto-populate from filename (ROADMAP Item 78)
 
 - `audiotag` sidecar gains an `auto-populate` op. Each input filename

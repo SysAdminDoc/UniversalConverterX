@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To Opus RTC low-delay 64 kbps (5 ms frames)</Name>
+    <Folder>Audio/Opus</Folder>
+    <InputTypes>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>mp3</Extension>
+        <Extension>m4a</Extension>
+        <Extension>aac</Extension>
+        <Extension>ogg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_opus_rtc</OutputFileNameTemplate>
+    <OutputExtension>opus</OutputExtension>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>opus</Arg>
+        <Arg>--bitrate</Arg>
+        <Arg>64k</Arg>
+        <Arg>--opus-application</Arg>
+        <Arg>lowdelay</Arg>
+        <Arg>--opus-frame-duration</Arg>
+        <Arg>5</Arg>
+    </Args>
+</Preset>

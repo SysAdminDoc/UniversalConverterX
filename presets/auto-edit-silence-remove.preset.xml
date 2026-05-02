@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Auto-edit: cut silent regions (auto-editor)</Name>
+    <Folder>Video/Auto-edit</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+        <Extension>wav</Extension>
+        <Extension>mp3</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>ogg</Extension>
+        <Extension>opus</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_trimmed</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>auto-edit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>silence-remove</Arg>
+        <Arg>--threshold</Arg>
+        <Arg>0.04</Arg>
+        <Arg>--margin</Arg>
+        <Arg>0.2sec</Arg>
+    </Args>
+</Preset>
