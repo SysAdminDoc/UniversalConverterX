@@ -196,22 +196,29 @@ public static class PresetLoader
     }
 
     /// <summary>
-    /// Substitute template tokens against a source file path.
-    /// Supports <c>{stem}</c>, <c>{dir}</c>, <c>{preset}</c>.
+    /// Substitute template tokens against a source file path. Supports the
+    /// full ROADMAP Item 5 token set via
+    /// <see cref="OutputFilenameTemplate.Render"/>: built-in path tokens
+    /// (<c>{stem}</c>, <c>{dir}</c>, <c>{ext}</c>, <c>{preset}</c>),
+    /// time tokens (<c>{date}</c>, <c>{year}</c>), and media tokens
+    /// (<c>{title}</c>, <c>{artist}</c>, <c>{resolution}</c>, <c>{fps}</c>,
+    /// <c>{bitrate}</c>, <c>{codec}</c>, <c>{duration}</c>, <c>{n}</c>)
+    /// supplied via <paramref name="mediaTokens"/>.
+    ///
     /// Returns the absolute output path with the preset's extension appended
     /// (unless the extension is the sentinel <c>__dir__</c>, in which case
     /// the path is returned without an extension).
     /// </summary>
-    public static string ResolveOutputPath(ConversionPreset preset, string source)
+    public static string ResolveOutputPath(
+        ConversionPreset preset,
+        string source,
+        IReadOnlyDictionary<string, string?>? mediaTokens = null)
     {
-        var stem = Path.GetFileNameWithoutExtension(source);
-        var dir = Path.GetDirectoryName(source) ?? Environment.CurrentDirectory;
-        var safePresetName = PathSafety.SanitizeFileNameComponent(preset.Name, "preset");
-
-        var resolved = preset.OutputFileNameTemplate
-            .Replace("{stem}", stem)
-            .Replace("{dir}", dir)
-            .Replace("{preset}", safePresetName);
+        var resolved = OutputFilenameTemplate.Render(
+            preset.OutputFileNameTemplate,
+            sourcePath: source,
+            tokens: mediaTokens,
+            presetName: preset.Name);
 
         if (preset.OutputExtension == PathSafety.DirectoryOutputSentinel || string.IsNullOrEmpty(preset.OutputExtension))
             return resolved;
