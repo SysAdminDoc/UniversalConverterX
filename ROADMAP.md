@@ -1012,6 +1012,182 @@ and local, so the check is instant and free.
 Impact: 3 · Effort: 1 · Type: reliability
 Sources: [S80] (HandBrake #7828 — silent video truncation bug)
 
+---
+
+### 73. Automatic Silence Removal (auto-editor Integration) _(new Tier 3)_
+
+**Context (iter-7 research, 2026-05-02):** `auto-editor` [S87] is a CLI tool written in Nim
+that automatically cuts silence and low-motion segments from video using configurable thresholds
+and a DSL. Supports `--edit audio:threshold=0.04 --edit motion:threshold=0.02` with per-track
+settings.
+
+**UCX integration:** Add a sidecar `auto-editor` wrapper + UI toggle in `AudioConverterPage`:
+"Auto-remove silence (experimental)". Preset XML: `<AutoRemoveSilence>true</AutoRemoveSilence>`
++ threshold slider. Post-process step after primary encoding (can be done in parallel or as a
+second pass for multi-track sources).
+
+**Precedent:** OpenShot 3.5.1 [S88] added proxy editing for performance; auto-editor fills a
+different niche (content optimization). Both address batch / long-form editing pain points.
+
+Impact: 2 · Effort: 2 · Type: UX
+Sources: [S87] (auto-editor — silence/motion cut CLI with DSL)
+
+---
+
+### 74. Proxy File Generation for Faster Preview _(new Tier 3)_
+
+**Context (iter-7 research, 2026-05-02):** OpenShot 3.5.1 [S88] added "Optimize Video"
+to generate proxy files (lower resolution / lower bitrate) for smoother playback during
+editing and preview. Proxy files sit alongside originals and are auto-used during playback,
+while the final export uses the original.
+
+**UCX integration:** Add a preset option "Optimize for Preview" that auto-generates a
+480p / 5 Mbps proxy file placed in a `_proxies/` subfolder next to the source. In
+`VmafAnalysisPage` and `CompressorPage`, add a toggle to preview via proxy instead of
+scanning full source (speeds up quality checking).
+
+**Implementation:** New sidecar `generateProxy.exe` or extend existing `compress` sidecar.
+Settings: `ProxyEnabled`, `ProxyResolution`, `ProxyBitrate`.
+
+Impact: 2 · Effort: 3 · Type: UX + performance
+Sources: [S88] (OpenShot 3.5.1 — proxy editing feature)
+
+---
+
+### 75. Music Source Separation (Spleeter) _(new UC / Lower Priority)_
+
+**Context (iter-7 research, 2026-05-02):** `Spleeter` [S89] is Deezer's ML-based source
+separation library (TensorFlow) that isolates vocals, drums, bass, and other instruments
+from a mono or stereo mix. Multi-GPU optional; GPU-optional CPU path available. Python.
+
+**Use case:** Music producers and streamers often need stems (isolated tracks) for remixing,
+streaming overlays, or backing track creation. This is a niche but high-value workflow.
+
+**UCX integration:** Add sidecar `source-separator` (Python wrapper around Spleeter).
+UI: new `SeparatorPage` in the Converter sidebar. Preset XML:
+`<SeparationMode>vocals|drums|bass|other</SeparationMode>` or `all` (outputs 5 files).
+Output naming: `input_vocal.wav`, `input_drum.wav`, `input_bass.wav`, `input_other.wav`,
+`input_accompaniment.wav` (all instrumental).
+
+**Risk:** Model download size (~100 MB) is non-trivial; GPU inference 4× faster than CPU.
+Justifies marking as UC pending community demand signal.
+
+Impact: 2 · Effort: 4 · Type: leapfrog
+Sources: [S89] (Spleeter — Deezer source separation)
+
+---
+
+### 76. AI Video Metadata Tagging (MediaPipe + Vision) _(new UC / Research Required)_
+
+**Context (iter-7 research, 2026-05-02):** `MediaPipe` [S90] is Google's on-device ML library
+offering vision tasks: object detection, pose estimation, hand detection, gesture recognition,
+and more. Cross-platform (mobile, web, desktop). Supports batch processing.
+
+**Concept (exploratory):** Automatically tag video metadata based on detected content:
+- Frame count where faces/hands detected (for signing language videos)
+- Scene keyframes (for thumbnail generation)
+- Motion intensity (for auto-cut thresholds)
+- Text in-frame OCR for searchability
+
+**Charter concern:** This edges into "video understanding / AI inference", which UCX
+currently doesn't do. MediaPipe is on-device (offline-first ✓), but the integration
+complexity is unclear.
+
+**Recommendation:** Keep in UC pending feasibility spike.
+
+Impact: 1 · Effort: 5 · Type: leapfrog + AI/ML
+Sources: [S90] (MediaPipe — Google on-device ML)
+
+---
+
+### 77. AV1 Film Grain Synthesis (av1-grain Crate) _(new Tier 3, Synergy with Item 69)_
+
+**Context (iter-7 research, 2026-05-02):** The Rust-AV project's `av1-grain` crate [S91]
+provides helpers for generating and parsing AV1 film grain data (photon noise tables). These
+tables are compatible with SVT-AV1, aomenc, and rav1e.
+
+**Integration with Item 69 (SVT-AV1-HDR):** SVT-AV1-HDR's `--noise` / `--noise-chroma` params
+control noise strength, but don't control the underlying grain pattern. The `av1-grain` crate
+allows per-ISO-setting photon noise generation (calibrated to camera ISO values), enabling
+realistic film grain that varies by source characteristics.
+
+**UCX implementation:** Extend the `generate-av1-config` sidecar to offer a "Film Grain"
+preset section with sliders:
+- ISO setting (100–6400, default 800)
+- Chroma grain toggle
+- Transfer function (BT.1886, PQ, HLG, etc.)
+
+Generate `.tbl` noise table, pass to SVT-AV1-HDR via `--grain-table`. Output: artifact-free
+HDR encodes with photorealistic grain.
+
+Impact: 2 · Effort: 2 · Type: leapfrog
+Sources: [S91] (av1-grain Rust crate — film grain synthesis for AV1)
+
+---
+
+### 78. Metadata Tag Auto-Population from Filename/Content _(new Tier 3)_
+
+**Context (iter-7 research, 2026-05-02):** `TagStudio` [S96] and `Mutagen` [S98] demonstrate
+that file/audio metadata tagging is user-facing pain point. Currently, batch converters ignore
+output metadata (artist, album, title, cover art, etc.).
+
+**UCX enhancement:** After encoding audio, parse output filename (common patterns: `Artist - Title`
+or ID3 tags from input if present) and auto-populate metadata:
+- ID3v2 (MP3)
+- Vorbis comments (FLAC/OGG/Opus)
+- MP4 atoms (AAC/ALAC)
+- WavPack / APE
+
+Use Mutagen library (via Python sidecar) to write tags. Settings: toggle `PreserveMetadata`,
+`AutoPopulateFromFilename` (regex pattern).
+
+**Charter alignment:** Offline-first, file-local. No cloud metadata service.
+
+Impact: 2 · Effort: 2 · Type: UX
+Sources: [S98] (Mutagen — comprehensive audio metadata library)
+
+---
+
+### 79. Searchable Output Library (Meilisearch Integration) _(new UC / Research Required)_
+
+**Context (iter-7 research, 2026-05-02):** `Meilisearch` [S97] is a full-text search engine
+with AI-powered hybrid search. Users often lose track of where they saved converted files.
+
+**Concept:** Index all historical conversions (from Item 6: Conversion History) with:
+- Input filename
+- Output filename
+- Conversion presets used
+- Metadata (resolution, bitrate, codec, date)
+- Full-text search across all fields
+
+Add a "Search History" UI pane in the app that queries a local Meilisearch instance.
+
+**Risk:** Adds a heavyweight dependency (Meilisearch server process). Justifies UC pending
+user demand signal.
+
+Impact: 1 · Effort: 3 · Type: UX + convenience
+Sources: [S97] (Meilisearch — lightning-fast search)
+
+---
+
+### 80. Vector Semantic Search for Presets (Qdrant) _(new UC / Exploratory)_
+
+**Context (iter-7 research, 2026-05-02):** `Qdrant` [S99 (not yet added)] is a vector database
+enabling semantic search. Combined with embedding models (e.g., Sentence Transformers), users
+could ask "find presets for removing background noise" or "presets optimized for 4K movies"
+and get results based on preset descriptions, not just keyword matching.
+
+**Concept:** Embed preset descriptions into vectors using a small embedding model. Allow
+users to query presets semantically: "noise reduction", "streaming-friendly encoding", etc.
+
+**Charter concern:** Adds ML inference to preset search — potentially slow on first boot,
+heavy model download. Feasibility unclear.
+
+**Recommendation:** Keep in UC pending community signal and feasibility study.
+
+Impact: 1 · Effort: 4 · Type: leapfrog + AI/ML
+Sources: [S99-future] (Qdrant vector database)
+
 Higher effort, lower urgency, or dependent on Tier 1/2 completion.
 
 ### 34. Watch Folder Automation — ✅ SHIPPED (already)
@@ -1666,3 +1842,15 @@ Before any new sidecar or preset is merged:
 | S84 | https://github.com/zbabac/VCT | VCT (Video Converter & Transcoder) v1.11.0 — C# FFmpeg frontend, batch encoding, MKV transcoding, manual ffmpeg command editing, updated Apr 2026 |
 | S85 | https://github.com/Thavarshan/comet | Comet — TypeScript/Electron cross-platform media converter (macOS/Windows/Linux), video/audio/image, bulk conversion, dark mode, Nov 2024 |
 | S86 | https://github.com/LorenzoDePasquale/FF-Video-Converter | Neptune (FF-Video-Converter rebranded) — .NET 5 rewrite, HDR10 encoding, color adjustments (brightness/contrast/saturation), pixel format conversion, integrated player, Reddit downloader |
+| S87 | https://github.com/WyattBlue/auto-editor | auto-editor v0.7+ — CLI for automatic silence/motion removal, Nim language, per-track threshold DSL, margin control, parallel export |
+| S88 | https://github.com/OpenShot/openshot-qt/releases | OpenShot 3.5.1 (Apr 2026) — proxy editing for performance, multi-selection trimming, ComfyUI workflows, UI scaling toggle, DPI-aware rendering |
+| S89 | https://github.com/deezer/spleeter | Spleeter 2.1.0+ — Music source separation (vocals/drums/bass/other), TensorFlow, multi-GPU optional, CPU path available |
+| S90 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
+| S91 | https://github.com/rust-av/av1-grain | av1-grain Rust crate — AV1 film grain synthesis, photon noise table generation compatible with SVT-AV1/aomenc/rav1e, per-ISO calibration |
+| S92 | https://github.com/WyattBlue/auto-editor | auto-editor v0.7+ — CLI for automatic silence/motion removal, Nim language, per-track threshold DSL, margin control, parallel export |
+| S93 | https://github.com/OpenShot/openshot-qt/releases | OpenShot 3.5.1 (Apr 2026) — proxy editing for performance, multi-selection trimming, ComfyUI workflows, UI scaling toggle, DPI-aware rendering |
+| S94 | https://github.com/deezer/spleeter | Spleeter 2.1.0+ — Music source separation (vocals/drums/bass/other), TensorFlow, multi-GPU optional, CPU path available |
+| S95 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
+| S96 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; Python; user-focused UX; AI image discovery |
+| S97 | https://github.com/meilisearch/meilisearch | Meilisearch — Lightning-fast full-text search with AI-powered hybrid search; Rust backend |
+| S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
