@@ -1852,7 +1852,7 @@ Sources: [S5] (ToolboxPage.xaml.cs stub), [S33] (PySceneDetect v0.6.6 EDL/OTIO o
 
 ---
 
-### 38. VR / 360° Video Conversion
+### 38. VR / 360° Video Conversion — ✅ SHIPPED 2026-05-02
 
 Convert equirectangular (360° video) to cubemap, fisheye, or rectilinear
 projection. FFmpeg `v360` filter. Wire to `VrConverterPage.xaml`. Niche but
@@ -1860,6 +1860,16 @@ no-OSS-GUI exists for it on Windows.
 
 Impact: 2 · Effort: 2 · Type: leapfrog (niche gap)
 Source: [S5] (ToolboxPage.xaml.cs stub)
+
+**Closing commit:** new `v360` op on `clipforge` exposes FFmpeg's
+`v360` filter with input/output projection selection (equirect / cubemap
+3x2 / 6x1 / 1x6 / fisheye / flat / dfisheye / barrel) plus yaw / pitch
+/ roll / h_fov / v_fov / width / height controls. Three presets cover
+the most common flows: `v360-equirect-to-flat` (rectilinear viewport,
+90°×60° FOV), `v360-equirect-to-cubemap` (3x2 layout for game-engine
+import), `v360-fisheye-to-equirect` (insta360 / GoPro Max raw -> equirect).
+Dedicated `VrConverterPage.xaml` deferred — the `PresetsPage` already
+surfaces all three flows via the `Video/360` folder grouping.
 
 ---
 

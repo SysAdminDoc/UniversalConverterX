@@ -27,6 +27,17 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Local-only by charter: nothing leaves the user's disk unless they
   manually attach the resulting zip to a bug report.
 
+### Added — VR / 360° video reprojection (ROADMAP Item 38)
+
+- New `v360` op on `clipforge` exposes FFmpeg's `v360` filter with
+  input/output projection switching (equirect / 3x2 cubemap / 6x1 /
+  1x6 / fisheye / flat / dfisheye / barrel) plus yaw/pitch/roll, fov
+  overrides, and explicit output dimensions.
+- Three new presets: `v360-equirect-to-flat` (rectilinear viewport at
+  90°×60° FOV), `v360-equirect-to-cubemap` (3x2 layout for
+  game-engine import), `v360-fisheye-to-equirect` (insta360 / GoPro
+  Max raw -> equirectangular).
+
 ### Added — Lens correction / Watermark overlay / LUT apply / Lossless trim / ProRes+DNxHR (ROADMAP Items 24, 31, 39, 42, 57)
 
 - `clipforge` sidecar gains two new ops: `lens-correct` (FFmpeg

@@ -1018,6 +1018,61 @@ def op_hdr_to_sdr(args: argparse.Namespace) -> int:
     return 0
 
 
+# ─── 360° / VR projection (Item 38) ──────────────────────────────────────────
+
+_V360_INPUT_PROJECTIONS = {"e", "equirect", "c3x2", "c6x1", "c1x6", "fisheye", "flat", "dfisheye", "barrel", "cube"}
+_V360_OUTPUT_PROJECTIONS = {"e", "equirect", "c3x2", "c6x1", "c1x6", "fisheye", "flat", "dfisheye", "barrel", "cube"}
+
+
+def op_v360(args: argparse.Namespace) -> int:
+    """Convert between 360° / VR projections via FFmpeg's `v360` filter.
+    Common moves: equirectangular -> rectilinear (flat) viewport, equirect
+    -> 6x1 cubemap for game-engine import, fisheye -> equirect, etc."""
+    ffmpeg = find_ffmpeg(); ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output); out_path.parent.mkdir(parents=True, exist_ok=True)
+    info = probe(ffprobe, str(src)) or {}
+    duration = float(info.get("format", {}).get("duration", 0))
+
+    src_proj = (args.input_projection or "equirect").lower()
+    dst_proj = (args.output_projection or "flat").lower()
+    if src_proj not in _V360_INPUT_PROJECTIONS:
+        return fail("invalid_args",
+                    f"Unknown --input-projection: {src_proj}. "
+                    f"Known: {sorted(_V360_INPUT_PROJECTIONS)}.")
+    if dst_proj not in _V360_OUTPUT_PROJECTIONS:
+        return fail("invalid_args",
+                    f"Unknown --output-projection: {dst_proj}. "
+                    f"Known: {sorted(_V360_OUTPUT_PROJECTIONS)}.")
+
+    parts = [f"v360={src_proj}:{dst_proj}",
+             f"yaw={args.yaw}", f"pitch={args.pitch}", f"roll={args.roll}"]
+    if args.h_fov: parts.append(f"h_fov={args.h_fov}")
+    if args.v_fov: parts.append(f"v_fov={args.v_fov}")
+    if args.width and args.height:
+        parts.append(f"w={args.width}")
+        parts.append(f"h={args.height}")
+    vf = ":".join(parts)
+
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-vf", vf,
+           "-c:v", args.codec, "-crf", str(args.crf), "-preset", args.preset,
+           "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+    emit("log", level="info", message=f"v360 {src_proj} -> {dst_proj}")
+    emit("progress", percent=0, stage="v360", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "v360")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited {rc} during v360 conversion.")
+    if not out_path.is_file():
+        return fail("output_missing", f"Output not produced: {out_path}")
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
 # ─── Lens correction (Item 24) ───────────────────────────────────────────────
 
 def op_lens_correct(args: argparse.Namespace) -> int:
@@ -1529,6 +1584,28 @@ def build_parser() -> argparse.ArgumentParser:
     autocrop.add_argument("--crf", type=int, default=20)
     autocrop.add_argument("--preset", default="medium")
 
+    # ── v360 ──────────────────────────────────────────────────────────────────
+    v360 = sub.add_parser("v360",
+                          help="Reproject 360°/VR video between equirectangular, cubemap, fisheye, flat (FFmpeg v360 filter)")
+    v360.add_argument("--input", required=True)
+    v360.add_argument("--output", required=True)
+    v360.add_argument("--input-projection", dest="input_projection", default="equirect",
+                      help=f"Source projection. Default 'equirect'. Known: {sorted(_V360_INPUT_PROJECTIONS)}.")
+    v360.add_argument("--output-projection", dest="output_projection", default="flat",
+                      help=f"Target projection. Default 'flat' (rectilinear viewport).")
+    v360.add_argument("--yaw", type=float, default=0.0, help="Yaw rotation in degrees (default 0).")
+    v360.add_argument("--pitch", type=float, default=0.0, help="Pitch rotation in degrees (default 0).")
+    v360.add_argument("--roll", type=float, default=0.0, help="Roll rotation in degrees (default 0).")
+    v360.add_argument("--h-fov", dest="h_fov", type=float, default=0.0,
+                      help="Horizontal FOV (degrees) for output projection (0 = filter default).")
+    v360.add_argument("--v-fov", dest="v_fov", type=float, default=0.0,
+                      help="Vertical FOV (degrees) for output projection (0 = filter default).")
+    v360.add_argument("--width", type=int, default=0, help="Output width in pixels (0 = source).")
+    v360.add_argument("--height", type=int, default=0, help="Output height in pixels (0 = source).")
+    v360.add_argument("--codec", default="libx264")
+    v360.add_argument("--crf", type=int, default=20)
+    v360.add_argument("--preset", default="medium")
+
     # ── lens-correct ──────────────────────────────────────────────────────────
     lensc = sub.add_parser("lens-correct",
                            help="Barrel/pincushion correction via FFmpeg lenscorrection filter")
@@ -1650,6 +1727,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_lens_correct(args)
         if args.op == "watermark":
             return op_watermark(args)
+        if args.op == "v360":
+            return op_v360(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

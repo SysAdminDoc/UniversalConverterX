@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>360 / VR: equirectangular -> 3x2 cubemap (game-engine import)</Name>
+    <Folder>Video/360</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_cube</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>v360</Arg>
+        <Arg>--input-projection</Arg>
+        <Arg>equirect</Arg>
+        <Arg>--output-projection</Arg>
+        <Arg>c3x2</Arg>
+        <Arg>--crf</Arg>
+        <Arg>20</Arg>
+    </Args>
+</Preset>
