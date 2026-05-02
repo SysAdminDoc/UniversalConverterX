@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Clear ALL metadata (EXIF + XMP + IPTC + ICC)</Name>
+    <Folder>Image/Metadata</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>avif</Extension>
+        <Extension>webp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>{ext}</OutputExtension>
+    <Engine>exiftool-meta</Engine>
+    <InvocationMode>batch-input-list</InvocationMode>
+    <Args>
+        <Arg>clear</Arg>
+    </Args>
+</Preset>

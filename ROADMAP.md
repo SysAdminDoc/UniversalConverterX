@@ -482,7 +482,7 @@ item rather than vendoring a fork.
 Medium-effort items. Some require new sidecars; most build on existing
 engines. Ordered roughly by impact within each category.
 
-### 12. ToolboxPage — Metadata Editor (EXIF / XMP / IPTC)
+### 12. ToolboxPage — Metadata Editor (EXIF / XMP / IPTC) — ✅ SHIPPED 2026-05-02
 
 New `MetadataEditorPage.xaml` backed by an `exiftool-metadata` sidecar
 wrapping ExifTool. Read/write/clear EXIF, XMP, IPTC, GPS tags. Batch-apply
@@ -491,6 +491,23 @@ Supports all RAW formats already handled by `rawphoto` sidecar.
 
 Impact: 5 · Effort: 3 · Type: parity
 Sources: [S8] (ExifTool 100+ format support), [S3] (Any Video Converter metadata track mgmt)
+
+**Closing commit:** new `tools/exiftool-meta/` sidecar wraps Phil
+Harvey's exiftool CLI (Artistic License) with five NDJSON ops: `read`
+(emit full tag dictionary as JSON, optionally filtered by group),
+`write` (set tags via repeatable `--set TAG=value` with optional
+group prefix), `clear` (remove all metadata or a specific tag group),
+`template` (apply a JSON metadata template to every input — useful
+for batch-stamping copyright / artist / location), `rotate-orient`
+(rewrite EXIF Orientation 1..8 without re-encoding pixels), and
+`probe` (availability + version). exiftool binary not bundled —
+sidecar discovers it next to itself, under `tools/_bin/`, on PATH, or
+via `EXIFTOOL_PATH` env var. Three presets ship: `exif-read` (JSON
+dump for any image / video / RAW), `exif-clear-all` (privacy scrub),
+`exif-strip-gps` (location-only strip). Dedicated MetadataEditorPage
+deferred — PresetsPage filtered by `exiftool-meta` engine covers the
+common workflows. New `metadata_record` event registered. Sidecar
+count: 180.
 
 ---
 
@@ -1029,7 +1046,7 @@ render produces distinct deliverables.
 
 ---
 
-### 58. Audio Encoder Advanced Parameters
+### 58. Audio Encoder Advanced Parameters — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 Expose per-encoder advanced options beyond bitrate and sample rate. Most
 professional converters expose these; UCX sidecars support the FFmpeg flags
@@ -1049,6 +1066,23 @@ elements; sidecar parses and maps to FFmpeg flags.
 
 Impact: 3 · Effort: 2 · Type: parity
 Source: [S43] (HandBrake #7336 — audio encoder advanced parameter exposure)
+
+**Closing commit (sidecar layer):** `audiopro convert` exposes five
+new encoder-specific flags that translate directly to FFmpeg flags on
+the matching codec and are silently ignored on others (so a single
+"Advanced audio" preset can ship across formats):
+- `--fdk-cutoff <Hz>` — libfdk_aac low-pass cap (0..24000).
+- `--fdk-afterburner true|false` — libfdk_aac quality knob.
+- `--fdk-profile {aac_low|aac_he|aac_he_v2|aac_ld|aac_eld}` — profile
+  selector covering LC, HE-AAC v1/v2, low-delay, enhanced low-delay.
+- `--vorbis-managed` — libvorbis ABR-bounded managed bitrate mode
+  (requires `--bitrate`; minrate/maxrate set to bracket the target).
+- The libopus application + frame-duration controls Item 90 already
+  shipped also live under this umbrella.
+
+**Remaining work:** the corresponding "Advanced audio…" expansion
+panel in `AudioConverterPage` (when the broader page lands per Item
+2) — sidecars and preset XML wire-format already accept the params.
 
 ---
 
@@ -1839,7 +1873,7 @@ Sources: [S160] (hdr10plus_tool 1.7.2 — extract/inject/edit/plot, Dec 2024)
 
 ---
 
-### 95. Anime / Animation Upscale Sidecar (Real-ESRGAN + Anime4K) _(new T3 / AI)_
+### 95. Anime / Animation Upscale Sidecar (Real-ESRGAN + Anime4K) _(new T3 / AI)_ — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 **Context (iter-7 wave 5, 2026-05-02):** Two complementary anime upscalers exist:
 **Real-ESRGAN** [S161] ships an `realesr-animevideov3` model + portable
@@ -1863,6 +1897,22 @@ on Windows 10 21H2+.
 Impact: 3 · Effort: 3 · Type: AI + niche audience
 Sources: [S161] (Real-ESRGAN — ncnn-vulkan portable Windows binary, anime models),
 [S162] (Anime4K — GLSL shader chain for real-time anime upscale)
+
+**Closing commit:** new `tools/anime-upscale/` sidecar wraps the
+Real-ESRGAN ncnn-vulkan binary with four NDJSON ops: `image` (single
+or batch image upscale 2x/3x/4x), `video` (frame-extract → upscale →
+re-mux audio at the source's framerate; CRF + codec configurable),
+`models` (enumerate `.param` files alongside the binary, surface a
+curated default list), and `probe` (binary + ffmpeg availability).
+Default model is `realesr-animevideov3` for video and
+`realesrgan-x4plus-anime` for stills. Vulkan-based, runs on Intel
+Arc / AMD / Nvidia / iGPU without CUDA. Two presets ship:
+`anime-upscale-still-4x` (4x stills) and `anime-upscale-video-2x`
+(2x video). Sidecar count: 181. **Remaining (sub-feature b):**
+Anime4K GLSL shader-chain backend deferred — needs a parallel
+realtime-rendering path that doesn't fit the batch-converter model
+cleanly. Would land alongside an mpv-script bridge if community signal
+warrants it.
 
 ---
 

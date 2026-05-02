@@ -142,6 +142,21 @@ def op_convert(args: argparse.Namespace) -> int:
         return fail("bad_arg",
                     f"--opus-frame-duration must be 2.5/5/10/20/40/60 ms, got {opus_frame_duration}.")
 
+    # ROADMAP Item 58 — encoder-specific advanced parameters. Each flag
+    # only applies to one encoder family; the sidecar matches against the
+    # active codec and ignores the others silently so a single advanced
+    # preset can ship across formats without spurious errors.
+    fdk_cutoff = getattr(args, "fdk_cutoff", None)
+    fdk_afterburner = getattr(args, "fdk_afterburner", None)
+    fdk_profile = (getattr(args, "fdk_profile", None) or "").strip().lower() or None
+    vorbis_managed = bool(getattr(args, "vorbis_managed", False))
+    if fdk_cutoff is not None and not (0 <= fdk_cutoff <= 24000):
+        return fail("bad_arg",
+                    f"--fdk-cutoff must be 0..24000 Hz, got {fdk_cutoff}.")
+    if fdk_profile and fdk_profile not in ("aac_low", "aac_he", "aac_he_v2", "aac_ld", "aac_eld"):
+        return fail("bad_arg",
+                    f"--fdk-profile must be aac_low|aac_he|aac_he_v2|aac_ld|aac_eld, got '{fdk_profile}'.")
+
     for i, src in enumerate(inputs):
         out_path = out_dir / (src.stem + out_ext)
         cmd = [ffmpeg, "-y", "-i", str(src)]
@@ -162,6 +177,37 @@ def op_convert(args: argparse.Namespace) -> int:
         elif opus_application or opus_frame_duration is not None:
             emit("log", level="info",
                  message=f"opus-* flags ignored — codec is {codec}, not libopus.")
+
+        # FDK-AAC advanced parameters (Item 58). FDK-AAC's cutoff is the
+        # low-pass cap (0 = encoder default — usually too aggressive on
+        # high frequencies), afterburner is a quality/CPU tradeoff knob,
+        # profile selects between LC / HE-AAC / HE-AAC v2 / LD / ELD.
+        if codec == "libfdk_aac":
+            if fdk_cutoff is not None:
+                cmd += ["-cutoff", str(fdk_cutoff)]
+            if fdk_afterburner is not None:
+                cmd += ["-afterburner", "1" if fdk_afterburner else "0"]
+            if fdk_profile:
+                cmd += ["-profile:a", fdk_profile]
+        elif fdk_cutoff is not None or fdk_afterburner is not None or fdk_profile:
+            emit("log", level="info",
+                 message=f"fdk-* flags ignored — codec is {codec}, not libfdk_aac.")
+
+        # libvorbis managed bitrate mode (Item 58). Vorbis is VBR by default;
+        # managed mode produces ABR-like output bounded between min/max
+        # bitrate. Useful when shipping to platforms that mandate a bitrate
+        # ceiling. -b:a is required when --vorbis-managed is set; otherwise
+        # vorbis falls back to its quality-targeted VBR.
+        if codec == "libvorbis" and vorbis_managed:
+            if not (args.bitrate or use_vbr):
+                emit("log", level="warn",
+                     message="--vorbis-managed needs --bitrate or --vbr-quality; "
+                             "encoder will pick its default bounds.")
+            cmd += ["-b:a", args.bitrate or "192k", "-minrate", "64k",
+                    "-maxrate", args.bitrate or "256k"]
+        elif vorbis_managed and codec != "libvorbis":
+            emit("log", level="info",
+                 message=f"vorbis-managed ignored — codec is {codec}, not libvorbis.")
 
         cmd += [str(out_path)]
         proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -235,6 +281,22 @@ def build_parser() -> argparse.ArgumentParser:
                    help="libopus packet length in ms: 2.5, 5, 10, 20 (default), "
                         "40, or 60. Smaller = lower latency (RTC); larger = "
                         "better compression. Ignored for non-Opus targets.")
+    c.add_argument("--fdk-cutoff", type=int, default=None, dest="fdk_cutoff",
+                   help="libfdk_aac low-pass cutoff in Hz (0..24000). 0 = "
+                        "encoder default. Higher values preserve more high-"
+                        "frequency content. Ignored for non-FDK-AAC targets.")
+    c.add_argument("--fdk-afterburner", default=None, type=lambda s: s.lower() in ("1", "true", "on", "yes"),
+                   dest="fdk_afterburner",
+                   help="libfdk_aac afterburner quality knob (true/false). "
+                        "Default off (encoder default); true is roughly +5%% CPU "
+                        "for marginally cleaner output.")
+    c.add_argument("--fdk-profile", default=None, dest="fdk_profile",
+                   help="libfdk_aac profile: aac_low (default LC), aac_he "
+                        "(HE-AAC v1), aac_he_v2 (HE-AAC v2), aac_ld (low "
+                        "delay), aac_eld (enhanced low delay).")
+    c.add_argument("--vorbis-managed", action="store_true", dest="vorbis_managed",
+                   help="libvorbis managed bitrate mode (ABR-bounded). Requires "
+                        "--bitrate. Ignored for non-Vorbis targets.")
     sub.add_parser("codecs", help="Probe which target codecs FFmpeg supports.")
     return p
 

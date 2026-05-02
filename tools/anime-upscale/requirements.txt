@@ -1,0 +1,9 @@
+# anime-upscale sidecar (ROADMAP Item 95) — Real-ESRGAN ncnn-vulkan wrapper
+# for anime / animation upscaling.
+#
+# No Python dependencies. The sidecar shells out to the realesrgan-ncnn-vulkan
+# Rust+Vulkan binary; download a Windows release from
+# github.com/xinntao/Real-ESRGAN-ncnn-vulkan/releases and drop the unzipped
+# folder (binary + models/) next to this sidecar or under tools/_bin/.
+#
+# FFmpeg is required for the `video` op (frame extract + re-mux).
