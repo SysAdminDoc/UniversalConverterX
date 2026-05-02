@@ -372,6 +372,9 @@ public sealed partial class DownloaderPage : Page
                 if (_cts.IsCancellationRequested)
                     break;
 
+                // ROADMAP Item 60 — keep the active job visible in long queues.
+                try { QueueList.ScrollIntoView(job); } catch { /* virtualization race; ignore */ }
+
                 job.StatusText = "Resolving";
                 job.Progress = 0;
                 job.LogPreview = "";
