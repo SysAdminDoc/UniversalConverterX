@@ -4,6 +4,38 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — Audio loudness preset library expansion (ROADMAP Item 18)
+
+- New `presets/loudnorm-broadcast.preset.xml` — EBU R128 / ATSC A/85
+  broadcast deliverable target (-23 LUFS, -2 dBTP). Reuses the existing
+  `audiomastering loudnorm` two-pass FFmpeg engine.
+- New `presets/loudnorm-podcast.preset.xml` — Apple Podcasts / Spotify
+  streaming-safe target (-16 LUFS, -1.5 dBTP).
+- The existing `loudnorm-streaming.preset.xml` (-14 LUFS) remains for
+  YouTube/Netflix-style platforms; all three presets use distinct output
+  suffixes (`_loudnorm`, `_r128`, `_pod16`) so a side-by-side render of
+  the same source produces three independent files.
+- Item 18 closed (preset library gap, not a missing engine — sidecar
+  already implemented `--lufs` / `--tp` / `--lra` two-pass loudnorm).
+
+### Added — Home dashboard update banner (ROADMAP Item 7 Phase 2)
+
+- `HomePage.xaml` gains a top-of-page `InfoBar` (`UpdateBanner`),
+  collapsed by default and only opened when
+  `IUpdateCheckService.GetCachedResults()` reports at least one tracked
+  tool with a newer GitHub release than the locally cached version file.
+- Banner message lists each pending tool with its latest version
+  (e.g. "New release available for: yt-dlp 2026.05.01, ffmpeg n8.1.").
+- "Open release notes" action button shells out to the first tool's
+  `ReleaseUrl` via `ProcessStartInfo { UseShellExecute = true }` so it
+  honours the user's default browser without bundling an HTTP renderer.
+- Reads cache only — never triggers a network probe from the page; the
+  startup-side `UpdateCheckService.CheckAsync` remains the only probe
+  caller and continues to honour the `CheckForUpdates` opt-out toggle.
+- All exceptions are swallowed: a missing service, malformed cache, or
+  shell-launch failure can never block the dashboard from rendering.
+- Item 7 closed end-to-end (Phase 1 service + Phase 2 UI).
+
 ### Changed — faster-whisper sidecar refresh (ROADMAP Item 61, partial)
 
 - Bumped pin: `faster-whisper>=1.0.0` -> `>=1.1.0` in the sidecar

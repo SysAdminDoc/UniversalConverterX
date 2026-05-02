@@ -114,7 +114,31 @@
 
     </Page.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Item 7 Phase 2: dependency update banner. Hidden by default;
+             shown only when UpdateCheckService cache reports updates. -->
+        <InfoBar x:Name="UpdateBanner"
+                 Grid.Row="0"
+                 Margin="32,16,32,0"
+                 IsOpen="False"
+                 Severity="Informational"
+                 IsClosable="True"
+                 Title="Tool updates available"
+                 Message=""
+                 AutomationProperties.AutomationId="HomePage_UpdateBanner">
+            <InfoBar.ActionButton>
+                <Button x:Name="UpdateBannerActionButton"
+                        Content="Open release notes"
+                        Click="UpdateBannerAction_Click"/>
+            </InfoBar.ActionButton>
+        </InfoBar>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
         <Grid Padding="32" RowSpacing="26">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -303,4 +327,5 @@
             </StackPanel>
         </Grid>
     </ScrollViewer>
+    </Grid>
 </Page>
