@@ -4,6 +4,22 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Changed — faster-whisper sidecar refresh (ROADMAP Item 61, partial)
+
+- Bumped pin: `faster-whisper>=1.0.0` -> `>=1.1.0` in the sidecar
+  bootstrap install (`tools/whisper-stt/sidecar.py`).
+- New `--batch-size` CLI arg (default `8`). When >1 and the installed
+  `faster-whisper` exposes `BatchedInferencePipeline`, transcription runs
+  through the batched pipeline (~4x throughput on long-form GPU audio).
+  Older installs and CPU-only builds fall through to the existing
+  sequential streaming path with a warning log; one TypeError on rejected
+  kwargs also retries sequentially.
+- `SpeechToTextPage` model combo gains `large-v3-turbo` (fast + accurate
+  multilingual) and `distil-large-v3` (~6x faster, English-mostly).
+- Deferred: Purfview Whisper-XXL VAD models (`silero_v6`, `nemo_v2`,
+  `ten`) — those live in a fork, not upstream. Tracked separately rather
+  than vendoring a fork.
+
 ### Added — Batch Rename utility (ROADMAP Item 3)
 
 - New `Views/Pages/BatchRenamePage.xaml{,.cs}` under Toolbox · OtherTools.

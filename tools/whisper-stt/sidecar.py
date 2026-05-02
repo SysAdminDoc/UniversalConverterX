@@ -93,7 +93,7 @@ def bootstrap() -> str:
 
     log("faster-whisper not found — installing...")
     progress(0.5, "Installing faster-whisper...")
-    if _pip_install("faster-whisper>=1.0.0"):
+    if _pip_install("faster-whisper>=1.1.0"):
         log("faster-whisper installed.")
         return "faster-whisper"
 
@@ -194,6 +194,7 @@ def transcribe_faster(
     word_timestamps: bool,
     model_dir: Path | None,
     total_duration: float,
+    batch_size: int = 1,
 ) -> list[dict]:
     from faster_whisper import WhisperModel  # type: ignore
 
@@ -215,7 +216,33 @@ def transcribe_faster(
         transcribe_kwargs["vad_filter"] = True
         transcribe_kwargs["vad_parameters"] = {"min_silence_duration_ms": 500}
 
-    result_segments, info = model.transcribe(str(audio_path), **transcribe_kwargs)
+    # faster-whisper >=1.1 ships BatchedInferencePipeline (~4x throughput on
+    # long-form audio). Fall back to the streaming path if the host has
+    # an older version pinned, or if BatchedInferencePipeline raises (some
+    # CPU-only builds reject batch>1).
+    pipeline = None
+    if batch_size > 1:
+        try:
+            from faster_whisper import BatchedInferencePipeline  # type: ignore
+            pipeline = BatchedInferencePipeline(model=model)
+            log(f"Using BatchedInferencePipeline (batch_size={batch_size})")
+        except ImportError:
+            log("faster-whisper <1.1 detected; batched inference unavailable, falling back to sequential.", "warn")
+            pipeline = None
+        except Exception as ex:
+            log(f"BatchedInferencePipeline init failed ({ex}); falling back to sequential.", "warn")
+            pipeline = None
+
+    try:
+        if pipeline is not None:
+            result_segments, info = pipeline.transcribe(
+                str(audio_path), batch_size=batch_size, **transcribe_kwargs)
+        else:
+            result_segments, info = model.transcribe(str(audio_path), **transcribe_kwargs)
+    except TypeError as ex:
+        # Older faster-whisper rejects unknown kwargs — retry without batch_size.
+        log(f"transcribe rejected kwargs ({ex}); retrying sequential.", "warn")
+        result_segments, info = model.transcribe(str(audio_path), **transcribe_kwargs)
 
     for seg in result_segments:
         seg_dict = {"start": seg.start, "end": seg.end, "text": seg.text}
@@ -322,6 +349,9 @@ def main() -> None:
                         help="Use Silero VAD to skip silence (faster + cleaner segments)")
     parser.add_argument("--diarize", action="store_true",
                         help="Speaker diarization via pyannote 3.1 (requires HF token in HF_TOKEN env)")
+    parser.add_argument("--batch-size", type=int, default=8,
+                        help="Batched inference size (faster-whisper>=1.1; ~4x throughput on long-form GPU audio). "
+                             "Set to 1 to force sequential streaming.")
     args = parser.parse_args()
 
     model_dir_env = os.environ.get("UCX_MODEL_DIR")
@@ -358,6 +388,7 @@ def main() -> None:
             segments = transcribe_faster(
                 input_path, args.model, language,
                 args.word_timestamps, model_dir, total_duration,
+                batch_size=max(1, args.batch_size),
             )
         else:
             segments = transcribe_openai(
