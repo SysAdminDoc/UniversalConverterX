@@ -2,6 +2,48 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [Unreleased]
+
+### Added — orchestrator-level output filename collision protection (ROADMAP Item 4)
+
+- **`UniversalConverterX.Core/Utilities/UniqueOutputPath`** — new utility:
+  `Resolve(string desiredPath, int maxSuffix = 9999)` returns the input
+  path unchanged if free, or `"stem (1).ext"`, `"stem (2).ext"`, …
+  otherwise. Preserves the final extension only — `archive.tar.gz` becomes
+  `archive.tar (1).gz`. `TryResolve` companion never throws.
+- **`ConversionOrchestrator`** now applies `OverwriteBehavior` at the
+  orchestrator boundary so every converter strategy and CLI/UI caller
+  benefits from the same policy in one place. `Skip` returns a new
+  `ConversionResult.Skipped` (`WasSkipped` flag, `ConversionStatus.Skipped`),
+  distinct from cancellation.
+- **`OverwriteBehavior` default flipped to `Never`** for fresh installs
+  (auto-rename). Persisted `Ask`/`Always` settings continue to be honoured
+  for upgraders. `Ask` falls through to legacy behaviour in Core (UI layers
+  can prompt and set `OverwriteExisting=true` per job).
+- **11 new xUnit tests** in `UniqueOutputPathTests` (single-collision /
+  multi-collision / dual-extension / no-extension / directory-collision /
+  saturation / TryResolve cases). Full Core suite: 161/161 passing.
+- **`ProgressWindow`** unified its legacy `stem_N.ext` pre-render with the
+  new utility so the UI preview and orchestrator policy match.
+
+### Added — CI sidecar contract test gate (ROADMAP Item 11)
+
+- **`.github/workflows/build.yml`** gains a new `sidecar-contract` job on
+  ubuntu-latest that runs `tests/sidecar_contract/check_contract.py` on
+  every push to `main` and every pull request. Stdlib-only — no install
+  step required. The Windows build job now `needs: sidecar-contract`,
+  failing fast on contract drift before burning Windows runner time.
+- Local verification: 176 sidecars conforming, exit 0.
+
+### Changed — ROADMAP.md reconciliation (Phase 5 audit)
+
+Cross-family Phase 5 audit (master Claude Opus 4.7 + codex-direct gpt-5.4)
+landed `docs/research/iter-1-audit.md`. ROADMAP.md updated:
+- Items 4, 6, 8, 11, 34, 35 marked SHIPPED with closing-commit / evidence.
+- Items 1 and 13 narrowed to PARTIALLY SHIPPED with remaining-scope notes.
+- Item 10 (UIA) marked IN PROGRESS — `Name` partial, zero `AutomationId`.
+- Header authoring date corrected (was future-dated).
+
 ## [v2.20.1] - 2026-05-01
 
 ### Fixed — Universal-converter audit cleanup
