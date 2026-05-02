@@ -33,9 +33,9 @@ public sealed partial class AiLabPage : Page
         Tools.Add(new AiLabToolTile("Noise Remover", "Reduce steady noise in speech and camera audio.", "\uE767", cyan, "Planned", "Needs audio model", "RNNoise / Demucs"));
         Tools.Add(new AiLabToolTile("Vocal Remover", "Split vocals and instrumentals for music and editing workflows.", "\uEC4F", red, "Planned", "Needs stem preview", "Demucs"));
         Tools.Add(new AiLabToolTile("Voice Changer", "Transform narration tone while preserving timing.", "\uED28", orange, "Future", "Model choice open", null));
-        Tools.Add(new AiLabToolTile("Text-to-Speech", "Generate voiceover audio from script text.", "\uEC4F", green, "Future", "Needs voice catalog", null));
-        Tools.Add(new AiLabToolTile("Speech-to-Text", "Transcribe audio/video into editable transcript files.", "\uE720", blue, "Future", "Can share subtitle pipeline", "Whisper"));
-        Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Future", "Needs photo presets", null));
+        Tools.Add(new AiLabToolTile("Text-to-Speech", "Generate voiceover audio from script text.", "\uEC4F", green, "Ready", "Workflow available", "Kokoro / Piper"));
+        Tools.Add(new AiLabToolTile("Speech-to-Text", "Transcribe audio/video into editable transcript files.", "\uE720", blue, "Ready", "Workflow available", "Whisper"));
+        Tools.Add(new AiLabToolTile("Old Photo Restoration", "Repair scratches, fading, stains, and soft detail in legacy images.", "\uE91B", cyan, "Ready", "Workflow available", "Real-ESRGAN / GFPGAN"));
     }
 
     private static readonly Dictionary<string, string> _titleToRoute = new(StringComparer.OrdinalIgnoreCase)
