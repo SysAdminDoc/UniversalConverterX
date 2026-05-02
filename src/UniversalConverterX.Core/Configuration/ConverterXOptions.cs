@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using UniversalConverterX.Core.Models;
 
@@ -14,9 +15,31 @@ public class ConverterXOptions
     /// </summary>
     public const string SectionName = "ConverterX";
 
+    /// <summary>
+    /// Current on-disk schema version. Bump this whenever a field is renamed,
+    /// removed, or changes semantics in a way that needs a migration. Add
+    /// the corresponding entry to <see cref="SettingsMigrations.Migrations"/>
+    /// in the same commit.
+    /// </summary>
+    /// <remarks>
+    /// History:
+    ///   v1 — implicit (pre-2026-05-02). No <c>SchemaVersion</c> field.
+    ///        OverwriteBehavior default was "Ask".
+    ///   v2 — 2026-05-02. SchemaVersion field added. OverwriteBehavior default
+    ///        flipped to "Never" for fresh installs (persisted user values
+    ///        unchanged by the migrator).
+    /// </remarks>
+    public const int CurrentSchemaVersion = 2;
+
     private static readonly string SettingsFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "UniversalConverterX", "settings.json");
+
+    /// <summary>
+    /// On-disk schema version this options instance was loaded from / will
+    /// be saved as. New instances default to <see cref="CurrentSchemaVersion"/>.
+    /// </summary>
+    public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
     #region General Settings
 
@@ -232,7 +255,10 @@ public class ConverterXOptions
     }
 
     /// <summary>
-    /// Load settings from file
+    /// Load settings from file. Older schema versions are migrated through
+    /// <see cref="SettingsMigrations"/> before deserialization; the upgraded
+    /// JSON is persisted back to disk so the next load skips the migration
+    /// chain. Corrupt files are backed up and a default instance is returned.
     /// </summary>
     public static ConverterXOptions Load()
     {
@@ -242,11 +268,7 @@ public class ConverterXOptions
         try
         {
             var json = File.ReadAllText(SettingsFilePath);
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter() }
-            };
-            return JsonSerializer.Deserialize<ConverterXOptions>(json, options) ?? new ConverterXOptions();
+            return LoadFromJson(json, persistMigrated: true);
         }
         catch
         {
@@ -258,6 +280,50 @@ public class ConverterXOptions
             catch { }
             return new ConverterXOptions();
         }
+    }
+
+    /// <summary>
+    /// Parse a settings JSON string, applying schema migrations if the on-disk
+    /// version is older than <see cref="CurrentSchemaVersion"/>. Public so the
+    /// CLI / any future external caller routes legacy reads through the same
+    /// migration chain.
+    /// </summary>
+    /// <param name="json">Raw JSON contents.</param>
+    /// <param name="persistMigrated">When true, the upgraded JSON is written
+    /// back to <see cref="SettingsFilePath"/> after a successful migration.
+    /// External callers should pass false unless they specifically intend to
+    /// rewrite the user's primary settings file.</param>
+    public static ConverterXOptions LoadFromJson(string json, bool persistMigrated = false)
+    {
+        var node = JsonNode.Parse(json) as JsonObject
+                   ?? throw new JsonException("settings root is not a JSON object");
+
+        var fromVersion = (int?)node["SchemaVersion"] ?? 1;
+        var migrated = SettingsMigrations.Migrate(node, fromVersion, CurrentSchemaVersion,
+                                                  out var didMigrate);
+
+        var serializerOptions = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var loaded = migrated.Deserialize<ConverterXOptions>(serializerOptions)
+                     ?? new ConverterXOptions();
+        loaded.SchemaVersion = CurrentSchemaVersion;
+
+        if (didMigrate && persistMigrated)
+        {
+            try
+            {
+                loaded.Save();
+            }
+            catch
+            {
+                // Save is best-effort; if it fails (read-only profile, locked
+                // file) the next process will just re-run the migration.
+            }
+        }
+
+        return loaded;
     }
 
     /// <summary>

@@ -23,6 +23,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="UniversalConverterX.Core.Tests" />
+  </ItemGroup>
+
   <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->
 
   <!-- Cross-namespace global usings — Core's Interfaces and Models reference each other,

@@ -224,7 +224,13 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
             try
             {
                 var json = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<ConverterXOptions>(json, CreateJsonOptions()) ?? new ConverterXOptions();
+                // Route through Core's migration-aware loader so legacy
+                // settings files (no SchemaVersion field, future renames)
+                // get the same upgrade treatment as the GUI path. We do NOT
+                // persist the migration back from the CLI — `ucx config`
+                // is allowed to inspect read-only files and shouldn't write
+                // through silently.
+                return ConverterXOptions.LoadFromJson(json, persistMigrated: false);
             }
             catch
             {
