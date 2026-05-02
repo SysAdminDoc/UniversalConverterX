@@ -42,6 +42,13 @@ accessibility.
 > Uranite HandBrake-SVT-AV1-HDR nightly builds, eac3to v3.36 tsMuxeR replacement).
 > Net additions: Items 69–72 (69 is SVT-AV1-HDR rewrite of iter-6 PSY item).
 > Updated: Items 22, 26, 28, 47. New appendix sources: S68–S83.
+>
+> **iter-7 wave 4 extension (2026-05-02 cont'd):** continued research into emerging
+> codec/format frontier (vvenc 1.14.0 VVC/H.266 capped CQF + film grain, libjxl
+> security floor CVE-2025-12474 / CVE-2026-1837, libavif 1.4.x gain-map HDR,
+> Opus 1.5 DRED neural PLC + 5th-order ambisonics) plus community-signal validation
+> (r/handbrake top-of-year). Net additions: Items 87–92. New appendix sources:
+> S153–S158. Cumulative: ~158 distinct sources, 92 roadmap items.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -1299,6 +1306,148 @@ multiple machines. Not required for single-user local use. UC pending demand sig
 Impact: 2 · Effort: 3 · Type: observability + platform
 Sources: [S115] (Prometheus — time-series monitoring), [S116] (Grafana — composable observability platform)
 
+---
+
+### 87. VVC / H.266 Encoding (vvenc 1.14.0) _(new T3 / Codec)_
+
+**Context (iter-7 wave 4, 2026-05-02):** **vvenc 1.14.0** [S153] is Fraunhofer HHI's
+production-grade VVC (Versatile Video Coding / H.266) encoder. v1.14.0 ships:
+**capped constant-quality mode (CQF)**, **experimental film-grain analysis**, ARM SIMD/SVE
+optimizations, GOP-adaptive QP cascade, and DASH-optimized decoder refresh (`idr_no_radl`).
+VVC is the H.265 successor — **~30–50% bitrate savings vs. H.265 at equal quality** per
+Fraunhofer benchmarks. Adoption is still nascent but tooling has matured enough that
+prosumers archiving long-term assets will want it as a future-proofing path.
+
+**Concept:** Wrap `vvencFFapp` (or `vvencapp`) as `vvc-encoder` sidecar. Expose presets
+`faster | fast | medium | slow | slower` (matching x265 conventions) and CQF mode
+("VVC Capped Quality 24"). Plays nicely with **Item 71** (HDR10 metadata) since vvenc
+honors VUI flags and color range. Decode path: ffmpeg has built-in `libvvdec` decoding
+in 8.x for verification.
+
+**Risks:** VVC playback support is sparse (VLC 4.0 beta, ffmpeg via libvvdec, no native
+Windows codec). Surface this in the preset description so users don't ship VVC files to
+relatives running Windows Media Player. Royalty/patent landscape is unsettled — present
+as "experimental codec" UI tag.
+
+Impact: 2 · Effort: 3 · Type: leapfrog + codec coverage
+Sources: [S153] (vvenc 1.14.0 — capped CQF, film grain, ARM SVE, Jan 2026)
+
+---
+
+### 88. JPEG XL libjxl Security Floor — Update to v0.11.2 _(new T2 / Security)_
+
+**Context (iter-7 wave 4, 2026-05-02):** **libjxl 0.11.2** [S154] (Sep 2025) ships fixes
+for **CVE-2025-12474** (tile dimension flaw in low-memory rendering pipeline) and
+**CVE-2026-1837** (gray-to-gray color-transform channel-count error). Project Zero also
+identified an integer overflow in `djxl` packed-representation size handling (no CVE,
+fixed). All three are reachable from malicious untrusted JPEG XL inputs.
+
+**Concept:** Audit the current bundled libjxl in any JXL-touching sidecar
+(`heicshift`, image-conversion path), pin floor to **v0.11.2 minimum** in
+`requirements.txt` / vcpkg manifest / sidecar build scripts. Add JXL fuzzing test
+(see Item 56 fuzz harness) using small malformed JXL corpus. Add a `--security-pin`
+guard to `build.ps1` that fails the build if a known-vulnerable libjxl version is
+detected on the system.
+
+**Why now:** UCX accepts arbitrary user input. Any image-pipeline CVE is a worst-case
+threat surface (renders untrusted bytes from disk). This is exactly the hardening work
+the charter calls for.
+
+Impact: 4 · Effort: 1 · Type: security
+Sources: [S154] (libjxl 0.11.2 — CVE-2025-12474, CVE-2026-1837)
+
+---
+
+### 89. AVIF Gain Map HDR (libavif 1.4.x) _(new T3 / Image)_
+
+**Context (iter-7 wave 4, 2026-05-02):** **libavif 1.4.0–1.4.1** [S155] adds:
+**Apple-style JPEG gain-map import** (HDR-from-SDR base layer + gain delta), **PNG cICP
+chunk decode**, **Sample Transform 16-bit AVIF**, `--sato` decode flag, transformative
+properties on alpha auxiliary items, and `AOM_TUNE_IQ` quality tuning by default for
+non-RGB still images. Result: AVIF as a true HDR image format, not just an HEIC
+substitute.
+
+**Concept:** Add an `avif-hdr` preset path in the image conversion engine. Inputs:
+HDR PNG (cICP-tagged) or HDR HEIC. Output: AVIF with gain map preserved (or generated).
+Surface a "Preserve HDR" toggle on the image conversion page (next to existing AVIF
+encode preset). Synergy with **Item 71** (video HDR10) — visually consistent HDR story
+across UCX's still-image and video pipelines.
+
+**Risks:** Many image viewers still treat AVIF as SDR-only and tone-map silently.
+Add a UI hint and a verification toggle ("show with HDR-aware viewer recommendation").
+
+Impact: 3 · Effort: 2 · Type: format coverage + HDR parity
+Sources: [S155] (libavif 1.4.0–1.4.1 — gain map, Sample Transform, PNG cICP)
+
+---
+
+### 90. Opus 1.5 DRED + Higher-Order Ambisonics _(new T3 / Audio)_
+
+**Context (iter-7 wave 4, 2026-05-02):** **Opus 1.5** [S156] introduces **Deep
+Redundancy (DRED)** — neural in-band packet-loss recovery — plus **Deep PLC**, low
+bitrate (6 kb/s wideband) speech improvements via ML, and **4th and 5th order
+Ambisonics**. v1.5.2 (Sep 2025) is the stable release with AVX2 alignment fixes for
+Windows.
+
+**Concept:** Two sub-features:
+(a) Audio engine bumps Opus floor to 1.5.2; expose DRED toggle in audio preset
+("Opus DRED for transcripts/dialogue").
+(b) Surface **3rd/4th/5th order ambisonics** as a metadata-aware audio channel layout
+in the audio conversion page. Synergy with the UC entry "Spatial audio conversion"
+(Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) — Opus 1.5 is the codec piece of that puzzle.
+
+**Why T3, not T2:** DRED is mostly relevant for streaming/RTC, not file conversion.
+Ambisonics is a small audience. But both are credible "we support modern codecs" wins.
+
+Impact: 2 · Effort: 2 · Type: codec coverage + audio
+Sources: [S156] (Opus 1.5/1.5.2 — DRED neural PLC, 5th order ambisonics)
+
+---
+
+### 91. Cross-Encoder Capped-CRF / Capped-Quality Harmonization _(new T2 / UX)_
+
+**Context (iter-7 wave 4, 2026-05-02):** Both **vvenc 1.14.0 (CQF)** [S153] and
+**SVT-AV1-PSY/HDR** [S70] support a "capped constant-quality" mode — a CRF target with
+a hard maximum bitrate ceiling. **x265** has it via `--crf-max` since 3.x. **NVEncC**
+exposes it via `--vbr-quality`. Result: across UCX's encoder zoo, capped-CRF is
+universally available but inconsistently labeled, breaking the preset-portability
+promise.
+
+**Concept:** Define a single canonical "Quality with Bitrate Cap" preset axis that all
+five encoders (x264, x265, SVT-AV1, NVEncC, vvenc) honor identically. UI: a "Quality
+target" slider + a "Don't exceed N Mbps" checkbox. Internally, each encoder driver
+translates the abstract pair to its native flag pair. Eliminates the "why does CRF 23
+look different on AV1 vs x265?" support load.
+
+**Why this matters:** UCX's competitive moat is "preset portability across engines."
+Capped-CRF is the next step of that promise. Zero new sidecars, pure orchestration.
+
+Impact: 4 · Effort: 2 · Type: UX + parity
+Sources: [S153] (vvenc CQF), [S70] (SVT-AV1 capped CRF)
+
+---
+
+### 92. r/handbrake & Community Signal — UCX Positioning Validation _(new — Reference, not a build item)_
+
+**Context (iter-7 wave 4, 2026-05-02):** Reddit **r/handbrake top-of-year post**
+[S157] ("Handbrake is the darling of my life", 192 upvotes, Dec 2025) confirms the
+market gap UCX targets: users are not asking for *more* features, they are starving
+for "something that just works." Common pain points across the year's threads:
+preset confusion, queue fragility, lack of post-encode validation, inconsistent HDR.
+
+**Action:** No new code. Use this signal to:
+(a) Reorder Tier 1 to put **Items 26 (queue persistence)**, **72 (post-encode
+validation)**, and **52 (preset clarity)** at the top of the next sprint.
+(b) Pull at least 3 quotes from r/handbrake/r/ffmpeg threads into the README's
+"Why UCX" section as social proof of the problem space.
+(c) Periodic re-scan: harvest r/handbrake top posts every quarter; when a recurring
+complaint appears 3+ times, escalate to a roadmap item without further research.
+
+Impact: N/A · Effort: N/A · Type: positioning / reference
+Sources: [S157] (r/handbrake top-of-year community signal)
+
+---
+
 ### 34. Watch Folder Automation — ✅ SHIPPED (already)
 
 Background service that monitors one or more folders for new files and
@@ -2017,6 +2166,12 @@ Before any new sidecar or preset is merged:
 | S150 | https://github.com/ossrs/srs | SRS (Simple Realtime Server) — RTMP/WebRTC/HLS/SRT/DASH; streaming/broadcast reference; May 2026 |
 | S151 | https://github.com/deezer/spleeter | Spleeter — Music source separation (vocals/drums/bass/other); TensorFlow; May 2026 |
 | S152 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; user-focused UX; Apr 2026 |
+| S153 | https://github.com/fraunhoferhhi/vvenc/releases | vvenc 1.14.0 — VVC/H.266 encoder, capped CQF mode, film-grain analysis, ARM SIMD/SVE, Jan 2026 |
+| S154 | https://github.com/libjxl/libjxl/releases | libjxl 0.11.2 — JPEG XL ref impl, CVE-2025-12474 (tile dim) + CVE-2026-1837 (gray transform), Sep 2025 |
+| S155 | https://github.com/AOMediaCodec/libavif/releases | libavif 1.4.0–1.4.1 — AVIF reference, JPEG gain map import, Sample Transform 16-bit, PNG cICP decode, Mar 2026 |
+| S156 | https://github.com/xiph/opus/releases | Opus 1.5 / 1.5.2 — DRED neural packet loss recovery, Deep PLC, 4th/5th order Ambisonics, AVX2 fixes, Sep 2025 |
+| S157 | https://www.reddit.com/r/handbrake/top/ | r/handbrake community signal — top-of-year praise post + recurring complaints (preset confusion, queue fragility, HDR), Dec 2025 |
+| S158 | https://github.com/GyanD/codexffmpeg/releases | gyan.dev FFmpeg Windows builds — current 8.1 release + nightly git builds, regularly refreshed (Mar–Apr 2026) |
 | S95 | https://github.com/google-ai-edge/mediapipe | MediaPipe — Google on-device ML library, vision (object detect, pose, hand, gesture), text, audio tasks; cross-platform |
 | S96 | https://github.com/TagStudioDev/TagStudio | TagStudio — Photo/file management with tagging; Python; user-focused UX; AI image discovery |
 | S97 | https://github.com/meilisearch/meilisearch | Meilisearch — Lightning-fast full-text search with AI-powered hybrid search; Rust backend |
