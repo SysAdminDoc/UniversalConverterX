@@ -17,7 +17,7 @@
                     CornerRadius="18"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
-                <Grid RowSpacing="10">
+                <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -34,16 +34,16 @@
                             <FontIcon Glyph="{Binding Glyph}" FontSize="20"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Style="{StaticResource StatusPillStyle}" Padding="8,3">
+                        <Border Grid.Column="2" Style="{StaticResource StatusPillStyle}" Padding="10,5">
                             <TextBlock Text="{Binding Phase}" FontSize="10" FontWeight="SemiBold"
                                        Foreground="{Binding PhaseBrush}"/>
                         </Border>
                     </Grid>
-                    <StackPanel Grid.Row="1" Spacing="5">
+                    <StackPanel Grid.Row="1" Spacing="6">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="3"/>
+                                   TextWrapping="Wrap" MaxLines="3" LineHeight="17"/>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Text="{Binding WorkflowHint}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{Binding AccentBrush}"/>

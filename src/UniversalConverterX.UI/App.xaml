@@ -330,7 +330,7 @@
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -346,7 +346,7 @@
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -381,7 +381,7 @@
                 <Setter Property="CornerRadius" Value="10"/>
                 <Setter Property="MinHeight" Value="40"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,9"/>
+                <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
