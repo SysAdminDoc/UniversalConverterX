@@ -65,7 +65,7 @@ public sealed partial class ToolboxPage : Page
         ImageTools.Add(new ToolboxTile("image-converter", "Image Converter", "JPEG, PNG, HEIC, AVIF, WebP, TIFF, BMP", "\uEB9F", blue, "Ready", green, false, "HEICShift"));
         ImageTools.Add(new ToolboxTile("gif-maker", "GIF Maker", "Create GIFs from videos or image sequences", "\uE909", green, "Ready", green, false, "GifStudio"));
         ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Real-ESRGAN super-resolution up to 4× (ncnn-vulkan)", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
-        ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "Apply portrait stylization filters", "\uE77B", blue, "Future", yellow, true, null));
+        ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "CodeFormer + GFPGAN portrait upscale & restoration with fidelity slider", "\uE77B", blue, "Ready", green, true, "CodeFormer / GFPGAN"));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Stitch images into a video slideshow", "\uE786", blue, "Future", yellow, false, null));
         ImageTools.Add(new ToolboxTile("metadata-editor", "Metadata Editor", "View and edit EXIF / XMP / IPTC tags", "\uE8B7", blue, "Future", yellow, false, null));
 

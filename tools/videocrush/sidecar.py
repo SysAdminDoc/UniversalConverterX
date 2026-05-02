@@ -414,7 +414,30 @@ def compress(args: argparse.Namespace) -> int:
         cmd += ["-c:v", codec, "-crf", str(crf)]
         if fpreset and not is_av1:
             cmd += ["-preset", fpreset]
-        if is_av1:
+
+        # ROADMAP Item 91 — Cross-encoder capped-CRF harmonization. The user
+        # asks for "Quality CRF X with no more than N kbps"; each encoder
+        # exposes the cap differently, so the sidecar speaks one canonical
+        # `--max-bitrate` flag and translates per-codec at this layer.
+        max_kbps = getattr(args, "max_bitrate", None)
+        if max_kbps is not None and max_kbps > 0:
+            buf_kbps = max_kbps * 2  # standard 2× cap = 2× rate-control buffer
+            if is_av1:
+                # SVT-AV1 understands `mbr` (max bitrate, kbps) inside -svtav1-params.
+                cmd += ["-svtav1-params", f"crf={crf}:mbr={max_kbps}"]
+            elif is_vp9:
+                # libvpx-vp9 uses -maxrate/-bufsize in kbps suffix form.
+                cmd += ["-maxrate", f"{max_kbps}k", "-bufsize", f"{buf_kbps}k"]
+            else:
+                # x264 / x265 / hardware-accelerated H.26x all honour -maxrate
+                # alongside -crf, which produces capped-CRF behaviour where the
+                # encoder degrades to capped-bitrate only when CRF would exceed
+                # the cap. Same flag works for h264_nvenc / h264_amf / hevc_*.
+                cmd += ["-maxrate", f"{max_kbps}k", "-bufsize", f"{buf_kbps}k"]
+            emit("log", level="info",
+                 message=f"capped-CRF: crf={crf}, max bitrate {max_kbps} kbps "
+                         f"(buf {buf_kbps} kbps) — encoder {codec}")
+        elif is_av1:
             cmd += ["-svtav1-params", f"crf={crf}"]
         cmd += audio_args(audio_codec, audio_bitrate, audio_vbr_quality)
         cmd += ["-movflags", "+faststart", str(out_path)]
@@ -615,6 +638,12 @@ def build_parser() -> argparse.ArgumentParser:
                    default="none",
                    help="Hardware video encoder to use (default: none / software). "
                         "d3d12 enables h264_d3d12va / hevc_d3d12va / av1_d3d12va.")
+    p.add_argument("--max-bitrate", type=int, default=None, dest="max_bitrate",
+                   help="Capped-CRF mode: maximum video bitrate ceiling in kbps "
+                        "(ROADMAP Item 91). Translated per-encoder: x264/x265/h264_*/"
+                        "hevc_* receive -maxrate/-bufsize, libsvtav1 receives mbr "
+                        "via -svtav1-params, libvpx-vp9 receives -maxrate/-bufsize. "
+                        "Has no effect outside CRF mode.")
     p.add_argument("--prores-profile", type=int, default=None,
                    help="ProRes profile when --codec=prores_ks: 0=Proxy / 1=LT / 2=SQ / 3=HQ / 4=4444 / 5=4444 XQ.")
     p.add_argument("--dnxhd-profile", default=None,

@@ -773,7 +773,7 @@ Sources: [S19] (Windows App SDK 2.0 release notes, 2026-04-29),
 
 ---
 
-### 27. AI Portrait — Still Image Enhancement
+### 27. AI Portrait — Still Image Enhancement — ✅ SHIPPED 2026-05-02
 
 Wire the `AI Portrait` ToolboxPage stub to a dedicated `AiPortraitPage.xaml`.
 Pipeline: `real-esrgan` (face-oriented model) or `codeformer` sidecar for
@@ -782,6 +782,19 @@ Restoration (which targets degraded/aged prints).
 
 Impact: 3 · Effort: 2 · Type: parity (wiring) + leapfrog (depth)
 Source: [S5] (ToolboxPage stub)
+
+**Closing commit:** the `facerestore` sidecar already shipped both
+CodeFormer (`--w` fidelity slider, `--upscale`, `--face-upsample`,
+`--bg-enhance`) and GFPGAN ops in v2.10. The remaining wiring was UI
+discoverability: ToolboxPage tile flipped Future → Ready (CodeFormer /
+GFPGAN), `MainWindow.NavigateTo` routes `ai-portrait` to `PresetsPage`
+with the `facerestore` engine filter, and the nav search adds
+"AI Portrait" alongside "Photo Restoration" so both flows are
+findable. PhotoRestorationPage stays focused on GFPGAN blind face
+restoration; AI Portrait surfaces both engines via the `restore-face-codeformer`
+and `gfpgan-restore` presets so users pick the fidelity-vs-restoration
+trade-off explicitly. Dedicated `AiPortraitPage.xaml` is feasible as
+follow-up if the preset UX proves insufficient.
 
 ---
 
@@ -1083,7 +1096,7 @@ Source: [S34] (CCExtractor 0.96.3 VOBSUB OCR support for MP4/MKV)
 
 ---
 
-### 68. Per-Job Estimated Output File Size _(promoted from UC — iter-6)_
+### 68. Per-Job Estimated Output File Size _(promoted from UC — iter-6)_ — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 Show a pre-encode size estimate for each job in the batch queue: target
 bitrate × source duration + container overhead. Surfaces in the queue metadata
@@ -1107,6 +1120,20 @@ inherently approximate (VBR, scene complexity) — show as "~X MB" with a
 
 Impact: 3 · Effort: 1 · Type: UX
 Sources: [S56] (LosslessCut v3.67.2 — segment size estimate in segment list, #2630)
+
+**Closing commit (utility layer):** new
+`Core/Utilities/OutputSizeEstimator.cs` exposes three estimators:
+`ForLosslessCopy(inputBytes)` (input + ~0.5% rewrap overhead, exact
+prefix), `ForConstantBitrate(videoBps, audioBps, durationSec)` (CBR
+target × duration + 1% container overhead, exact prefix),
+`ForVariableBitrate(targetAvgBps, audioBps, duration, sceneComplexity?)`
+(VBR with `~` prefix and ±25% caveat; complexity factor clamped to
+0.5..1.8 so unrealistic values don't blow the estimate up). Returns
+typed `OutputSizeEstimate(Kind, Bytes, DisplayLabel, Caveat)` so the
+UI can colour-code lossless vs CBR vs VBR and surface the caveat as a
+tooltip. 14 new xUnit tests (195/195 passing). **Remaining work:**
+wire the estimator into the queue ListView's "Est. Size" column —
+deferred so it can land alongside the broader queue UX pass.
 
 ---
 
@@ -1627,7 +1654,7 @@ Sources: [S156] (Opus 1.5/1.5.2 — DRED neural PLC, 5th order ambisonics)
 
 ---
 
-### 91. Cross-Encoder Capped-CRF / Capped-Quality Harmonization _(new T2 / UX)_
+### 91. Cross-Encoder Capped-CRF / Capped-Quality Harmonization _(new T2 / UX)_ — ✅ SHIPPED 2026-05-02
 
 **Context (iter-7 wave 4, 2026-05-02):** Both **vvenc 1.14.0 (CQF)** [S153] and
 **SVT-AV1-PSY/HDR** [S70] support a "capped constant-quality" mode — a CRF target with
@@ -1647,6 +1674,23 @@ Capped-CRF is the next step of that promise. Zero new sidecars, pure orchestrati
 
 Impact: 4 · Effort: 2 · Type: UX + parity
 Sources: [S153] (vvenc CQF), [S70] (SVT-AV1 capped CRF)
+
+**Closing commit:** the `videocrush` sidecar gains a single canonical
+`--max-bitrate <kbps>` flag that the user pairs with `--crf <quality>`.
+The sidecar translates per-encoder at dispatch time:
+- libx264 / libx265 / h264_nvenc / hevc_nvenc / h264_amf / hevc_amf /
+  h264_qsv / hevc_qsv → `-maxrate Nk -bufsize 2Nk`
+- libsvtav1 → `-svtav1-params crf=Q:mbr=N`
+- libvpx-vp9 → `-maxrate Nk -bufsize 2Nk`
+The flag is silently ignored outside CRF mode (size-targeted two-pass
+already has its own bitrate ceiling). Three new presets exercise the
+flag end-to-end across the H.264 / H.265 / AV1 encoder family
+(`to-h264-capped-crf-23`, `to-h265-capped-crf-25`, `to-av1-capped-crf-30`),
+proving preset portability — the same UX-level concept ("Quality 23
+with no more than 8 Mbps") renders to three different argv shapes
+without the user thinking about it. **Remaining work:** UI surface
+in `CompressorPage` (paired CRF slider + bitrate-cap checkbox);
+deferred so it can land alongside the broader Compressor UX refresh.
 
 ---
 
