@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To DNxHR HQX (10-bit intermediate for color work)</Name>
+    <Folder>Video/Professional</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+        <Extension>mxf</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_dnxhrhqx</OutputFileNameTemplate>
+    <OutputExtension>mov</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>dnxhr-hqx</Arg>
+    </Args>
+</Preset>
