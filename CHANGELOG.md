@@ -2,6 +2,42 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [2.21.0] - 2026-05-03
+
+### Added — Parallel Job Limit Enforcement with SemaphoreSlim (ROADMAP Item 99)
+
+- Refactored `ConverterPage.xaml.cs` ConvertButton_Click to use Task.WhenAll with semaphore gating
+- Read MaxParallelConversions from ConverterXOptions (default: CPU count / 2, range 1–16)
+- Wrap job execution in SemaphoreSlim to prevent exceeding configured limit
+- Use Interlocked counters to safely track completed/failed jobs across parallel tasks
+- Dispatch all UI updates via DispatcherQueue to prevent cross-thread issues
+- Graceful cancellation support with CancellationToken propagation
+- Enables true parallel conversion (up to N jobs simultaneously) instead of sequential processing
+
+### Added — DPAPI Cookie Encryption Infrastructure (ROADMAP Item 100)
+
+- New `Core/Security/DpapiProvider.cs` — cross-platform encryption/decryption wrapper
+- Encrypt() and Decrypt() methods for sensitive configuration at rest
+- Windows-only DPAPI (DataProtectionScope.LocalMachine); graceful no-op on macOS/Linux
+- Used by future config encryption for credentials, tokens, webhooks
+- Complements existing streamkeep sidecar DPAPI cookie encryption (streamkeep/dpapi.py)
+- IsAvailable() check for platform detection
+
+### Added — Premium UI Polish Pass (23/45 XAML Pages)
+
+- Refined visual hierarchy: spacing (14→16px), typography (explicit line-heights), component consistency
+- Applied EyebrowTextStyle header pattern consistently across all refined pages
+- Improved empty states: icon size (80→88–120px), supporting text hierarchy
+- Standardized button padding (20,10), GhostButton color (gray→blue), spacing rhythm (8/12/16/20/32px)
+- Established consistent RowSpacing (4–12px depending on density) and ColumnSpacing (16px)
+- Typography: explicit line-height (16–18px) for description text, monospace font stack for logs
+- Pages refined: HomePage, ToolboxPage, AiLabPage, PresetsPage, ConverterPage, HistoryPage, WatchFoldersPage, ImageConverterPage, DocumentConverterPage, EbookConverterPage, SubtitleConverterPage, FontConverterPage, VideoEnhancerPage, SpeechToTextPage, OcrPage, ImageEnhancerPage, TextToSpeechPage, NoiseRemoverPage, AudioCompressorPage (+ 4 from prior sessions)
+
+### Build Status
+
+- Release build: 0 errors, 2 warnings (existing).
+- All version strings synced (Directory.Build.props, ROADMAP, CHANGELOG).
+
 ## [Unreleased]
 
 ### Added — Local crash bundle + structured app log (ROADMAP Item 51)
