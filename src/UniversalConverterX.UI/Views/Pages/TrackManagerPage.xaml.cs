@@ -24,6 +24,15 @@ public sealed class TrackRow : INotifyPropertyChanged
 
     public string IndexLabel => $"#{StreamIndex}";
 
+    /// <summary>True when this row represents a subtitle stream — only those
+    /// rows expose the per-row "Export" action (Item 13 narrowed scope).</summary>
+    public bool IsSubtitle =>
+        string.Equals(CodecType, "subtitle", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>UI-bound — show the Export button only on subtitle rows.</summary>
+    public Visibility ExportButtonVisibility =>
+        IsSubtitle ? Visibility.Visible : Visibility.Collapsed;
+
     public string Title
     {
         get
@@ -206,6 +215,65 @@ public sealed partial class TrackManagerPage : Page
             ? $"Saved -> {Path.GetFileName(output.Path)}"
             : $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
         ApplyButton.IsEnabled = true;
+    }
+
+    private async void ExportTrack_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentPath is null) return;
+        if (sender is not Button btn || btn.Tag is not int streamIndex) return;
+
+        // Find the row to know its codec — bitmap subs (PGS / DVDsub) only
+        // round-trip via .sup; text subs accept .srt / .vtt / .ass / .ssa / .lrc.
+        var row = _tracks.FirstOrDefault(t => t.StreamIndex == streamIndex);
+        if (row is null) return;
+
+        var bitmapCodecs = new[] { "hdmv_pgs_subtitle", "dvd_subtitle", "pgssub" };
+        var isBitmap = bitmapCodecs.Contains(row.CodecName.ToLowerInvariant());
+
+        var picker = new FileSavePicker
+        {
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            SuggestedFileName = Path.GetFileNameWithoutExtension(_currentPath)
+                                + $".track{streamIndex}",
+        };
+        if (isBitmap)
+        {
+            picker.FileTypeChoices.Add("PGS bitmap subtitles", new List<string> { ".sup" });
+        }
+        else
+        {
+            picker.FileTypeChoices.Add("SubRip", new List<string> { ".srt" });
+            picker.FileTypeChoices.Add("WebVTT", new List<string> { ".vtt" });
+            picker.FileTypeChoices.Add("Advanced SubStation Alpha", new List<string> { ".ass" });
+            picker.FileTypeChoices.Add("SubStation Alpha", new List<string> { ".ssa" });
+            picker.FileTypeChoices.Add("Lyrics", new List<string> { ".lrc" });
+        }
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+        var output = await picker.PickSaveFileAsync();
+        if (output is null) return;
+
+        StatusText.Text = $"Exporting subtitle stream #{streamIndex} -> {output.Name}";
+        WorkProgress.Value = 0;
+        btn.IsEnabled = false;
+
+        var args = new List<string>
+        {
+            "track-extract",
+            "--input",  _currentPath,
+            "--stream", streamIndex.ToString(),
+            "--output", output.Path,
+        };
+        var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
+        {
+            WorkProgress.Value = p.Percent;
+        }));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
+        var result = await _runner.RunAsync("clipforge", args, progress, null, cts.Token);
+        StatusText.Text = result.Success
+            ? $"Saved -> {Path.GetFileName(output.Path)}"
+            : $"Export failed: {result.ErrorMessage ?? result.ErrorCode}";
+        btn.IsEnabled = true;
     }
 
     private async void AddTrack_Click(object sender, RoutedEventArgs e)

@@ -21,6 +21,7 @@
                         <ColumnDefinition Width="50"/>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox x:Name="MarkForRemoval"
                               IsChecked="{x:Bind MarkedForRemoval, Mode=TwoWay}"
@@ -51,6 +52,15 @@
                                    FontSize="12"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
+                    <Button Grid.Column="4"
+                            Content="Export..."
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Visibility="{x:Bind ExportButtonVisibility}"
+                            Tag="{x:Bind StreamIndex}"
+                            VerticalAlignment="Center"
+                            ToolTipService.ToolTip="Save this subtitle stream to .srt / .vtt / .ass / .ssa / .lrc / .sup"
+                            AutomationProperties.Name="Export subtitle stream"
+                            Click="ExportTrack_Click"/>
                 </Grid>
             </Border>
         </DataTemplate>

@@ -492,6 +492,103 @@ def op_track_add(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_track_extract(args: argparse.Namespace) -> int:
+    """Export one stream from the container to a standalone file.
+
+    Currently scoped to subtitle streams (Item 13 narrowed). The output codec
+    is auto-picked from the output extension:
+
+      .srt -> subrip
+      .vtt -> webvtt
+      .ass / .ssa -> ass / ssa
+      .lrc -> lrc
+      .sup -> copy (PGS bitmap, no decode/re-encode possible)
+
+    --stream is the container-level stream index (matches what track-list
+    reports as `stream_index`).
+
+    Refuses to operate on non-subtitle streams to keep the contract narrow.
+    Audio / video extraction would belong in a separate op so the option
+    matrix doesn't blow up.
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        stream_idx = int(args.stream)
+    except (TypeError, ValueError):
+        return fail("bad_stream_arg", "--stream must be an integer index.")
+
+    info = probe(ffprobe, str(src))
+    if not info:
+        return fail("probe_failed", "ffprobe could not read input.")
+
+    target = next((s for s in info.get("streams", []) if int(s.get("index", -1)) == stream_idx), None)
+    if target is None:
+        return fail("missing_stream",
+                    f"Stream index {stream_idx} not present in {src.name}.")
+    if str(target.get("codec_type") or "").lower() != "subtitle":
+        return fail("not_a_subtitle",
+                    f"Stream {stream_idx} is a "
+                    f"{target.get('codec_type', 'unknown')} stream; "
+                    f"track-extract is currently subtitle-only.")
+
+    out_ext = out.suffix.lower()
+    codec_map = {
+        ".srt":  "subrip",
+        ".vtt":  "webvtt",
+        ".ass":  "ass",
+        ".ssa":  "ssa",
+        ".lrc":  "lrc",
+    }
+    if out_ext == ".sup":
+        # PGS / bitmap subs — copy through, no transcoding possible
+        codec = "copy"
+    elif out_ext in codec_map:
+        codec = codec_map[out_ext]
+    else:
+        return fail("bad_output_ext",
+                    f"Unsupported output extension '{out_ext}'. "
+                    f"Choose one of: {sorted([*codec_map.keys(), '.sup'])}")
+
+    src_codec = str(target.get("codec_name") or "").lower()
+    # Bitmap PGS / DVD subs cannot be transcoded to text formats — error early.
+    bitmap_codecs = {"hdmv_pgs_subtitle", "dvd_subtitle", "pgssub"}
+    if src_codec in bitmap_codecs and codec != "copy":
+        return fail("bitmap_to_text_unsupported",
+                    f"Source stream is bitmap subtitles ({src_codec}); only "
+                    f"--output ending in .sup (stream copy) is supported. "
+                    f"OCR conversion to text formats lives in subocr / subkit sidecars.")
+
+    duration = float(info.get("format", {}).get("duration", 0)) or 0.0
+
+    cmd = [ffmpeg, "-y", "-i", str(src),
+           "-map", f"0:{stream_idx}",
+           "-c:s", codec,
+           str(out)]
+
+    emit("log", level="info",
+         message=f"Extracting subtitle stream #{stream_idx} ({src_codec}) -> "
+                 f"{out.name} ({codec})")
+    emit("progress", percent=0, stage="track-extract", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "track-extract")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out.is_file():
+        return fail("output_missing", f"Output not produced: {out}")
+    emit("complete", output=str(out), size_bytes=out.stat().st_size,
+         stream_index=stream_idx, source_codec=src_codec, output_codec=codec)
+    return 0
+
+
 def op_timeline(args: argparse.Namespace) -> int:
     """Extract a thumbnail strip + waveform image so the UI can paint a visual
     scrub bar above the seek slider. Output dir gets:
@@ -987,6 +1084,16 @@ def build_parser() -> argparse.ArgumentParser:
     track_add.add_argument("--title",
                            help="Optional title metadata for the new track")
 
+    track_extract = sub.add_parser(
+        "track-extract",
+        help="Export a single subtitle stream from the container to a standalone file")
+    track_extract.add_argument("--input", required=True)
+    track_extract.add_argument("--stream", required=True,
+                               help="Container-level stream index (as reported by track-list)")
+    track_extract.add_argument("--output", required=True,
+                               help="Output path; extension drives the target format "
+                                    "(.srt / .vtt / .ass / .ssa / .lrc / .sup)")
+
     # ── concat ────────────────────────────────────────────────────────────────
     concat = sub.add_parser("concat", help="Concatenate clips (stream-copy when codecs match, re-encode otherwise)")
     concat.add_argument("--input", nargs="+", required=True)
@@ -1068,6 +1175,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_track_remove(args)
         if args.op == "track-add":
             return op_track_add(args)
+        if args.op == "track-extract":
+            return op_track_extract(args)
         if args.op == "concat":
             return op_concat(args)
         if args.op == "speed":
