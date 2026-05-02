@@ -435,81 +435,115 @@ public sealed partial class ConverterPage : Page
         var completed = 0;
         var failed = 0;
         var cancelled = false;
+        
+        // Get max parallel jobs from settings
+        var options = App.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>().Value;
+        var maxParallel = Math.Max(1, options.MaxParallelConversions);
+        var semaphore = new SemaphoreSlim(maxParallel, maxParallel);
 
         try
         {
-            foreach (var queued in queuedJobs)
+            var tasks = queuedJobs.Select(async queued =>
             {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                await semaphore.WaitAsync(_cancellationTokenSource.Token);
+                try
                 {
-                    cancelled = true;
-                    break;
-                }
+                    if (_cancellationTokenSource.Token.IsCancellationRequested)
+                        return;
 
-                queued.File.StatusText = "Converting";
-                queued.File.Progress = 0;
-                ProgressStatus.Text = $"Converting {queued.Job.InputFileName}...";
-                ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count}";
-
-                var progress = new Progress<ConversionProgress>(p =>
-                {
                     DispatcherQueue.TryEnqueue(() =>
                     {
-                        if (p.IsIndeterminate)
-                        {
-                            ConversionProgress.IsIndeterminate = true;
-                            queued.File.StatusText = p.StatusMessage ?? p.Stage.ToString();
-                            return;
-                        }
-
-                        ConversionProgress.IsIndeterminate = false;
-                        queued.File.Progress = p.Percent;
-                        var overallProgress = ((completed + failed) * 100.0 + p.Percent) / queuedJobs.Count;
-                        ConversionProgress.Value = overallProgress;
-                        queued.File.StatusText = $"{p.Percent:F0}%";
-
-                        if (p.EstimatedTimeRemaining.HasValue)
-                            ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}";
+                        queued.File.StatusText = "Converting";
+                        queued.File.Progress = 0;
+                        ProgressStatus.Text = $"Converting {queued.Job.InputFileName}...";
+                        UpdateProgressDetails(queuedJobs.Count, completed + failed);
                     });
-                });
 
-                var result = await _orchestrator.ConvertAsync(queued.Job, progress, _cancellationTokenSource.Token);
-                AddFinishedItem(result);
+                    var progress = new Progress<ConversionProgress>(p =>
+                    {
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            if (p.IsIndeterminate)
+                            {
+                                ConversionProgress.IsIndeterminate = true;
+                                queued.File.StatusText = p.StatusMessage ?? p.Stage.ToString();
+                                return;
+                            }
 
-                if (result.Success)
-                {
-                    completed++;
-                    queued.File.Progress = 100;
-                    queued.File.StatusText = "Done";
+                            ConversionProgress.IsIndeterminate = false;
+                            queued.File.Progress = p.Percent;
+                            var overallProgress = ((completed + failed) * 100.0 + p.Percent) / queuedJobs.Count;
+                            ConversionProgress.Value = overallProgress;
+                            queued.File.StatusText = $"{p.Percent:F0}%";
+
+                            if (p.EstimatedTimeRemaining.HasValue)
+                                ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}";
+                        });
+                    });
+
+                    var result = await _orchestrator.ConvertAsync(queued.Job, progress, _cancellationTokenSource.Token);
+                    AddFinishedItem(result);
+
+                    if (result.Success)
+                    {
+                        Interlocked.Increment(ref completed);
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            queued.File.Progress = 100;
+                            queued.File.StatusText = "Done";
+                        });
+                    }
+                    else
+                    {
+                        Interlocked.Increment(ref failed);
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            queued.File.StatusText = "Failed";
+                        });
+                    }
                 }
-                else
+                finally
                 {
-                    failed++;
-                    queued.File.StatusText = "Failed";
+                    semaphore.Release();
                 }
-            }
+            });
 
-            ProgressTitle.Text = cancelled
-                ? "Cancelled"
-                : failed == 0 ? "Complete" : "Completed with errors";
-            ProgressStatus.Text = $"{completed} succeeded, {failed} failed";
-            ConversionProgress.Value = cancelled ? ConversionProgress.Value : 100;
-            ConversionProgress.IsIndeterminate = false;
-            CancelButton.Content = "Close";
-            QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
+            await Task.WhenAll(tasks);
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ProgressTitle.Text = cancelled
+                    ? "Cancelled"
+                    : failed == 0 ? "Complete" : "Completed with errors";
+                ProgressStatus.Text = $"{completed} succeeded, {failed} failed";
+                ConversionProgress.Value = cancelled ? ConversionProgress.Value : 100;
+                ConversionProgress.IsIndeterminate = false;
+                CancelButton.Content = "Close";
+                QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
+            });
         }
         catch (OperationCanceledException)
         {
-            ProgressTitle.Text = "Cancelled";
-            ProgressStatus.Text = $"{completed} completed before cancellation";
-            CancelButton.Content = "Close";
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ProgressTitle.Text = "Cancelled";
+                ProgressStatus.Text = $"{completed} completed before cancellation";
+                CancelButton.Content = "Close";
+            });
+            cancelled = true;
         }
         finally
         {
+            semaphore?.Dispose();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
-            UpdateUI();
+            ConvertButton.IsEnabled = true;
         }
+    }
+
+    private void UpdateProgressDetails(int total, int current)
+    {
+        ProgressDetails.Text = $"{current + 1} of {total}";
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
