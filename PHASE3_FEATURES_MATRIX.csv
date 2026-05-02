@@ -1,0 +1,25 @@
+Feature,Category,Fit,Impact,Effort,Risk,Dependencies,Novelty,Tier,Justification
+HW-ACCEL-001: NVIDIA NVENC H.265 Preset Tuning,Hardware Acceleration,Yes,4,2,Low,None,Parity,Next,High user value for RTX/GTX users; low effort; deferred from Now due to audit-focus iteration priorities
+HW-ACCEL-002: AMD VCE/AMF AV1 Support,Hardware Acceleration,Yes,3,3,Low,Item 29,Parity,Next,Broadens GPU coverage to AMD Radeon users; medium effort; good parity play post-NVENC
+HW-ACCEL-003: Intel QuickSync VP9/AV1,Hardware Acceleration,Yes,3,3,Low,"Item 29, Item 2 (soft)",Parity,Later,Solid parity for iGPU paths; deferred to GPU consolidation wave (v2.25+)
+HW-ACCEL-004: Vulkan Compute Upscaling (Real-ESRGAN ncnn-vulkan),Hardware Acceleration,Yes,4,2,Low,Item 95,Leapfrog,Next,High impact; foundation proven in Item 95 anime upscale; low effort to extend
+HW-ACCEL-005: Post-Process Metrics (SSIMULACRA2/Butteraugli/CVVDP),Hardware Acceleration,Conditional,3,4,High,"Item 68, Item 67 (soft)",Leapfrog,UC,High effort; complex scope; uncertain UX; needs design RFP Phase 4
+HW-ACCEL-029: GPU Detection & Capability Probe Utility,Hardware Acceleration,Yes,3,3,Low,None,Parity,Next,Foundational infra; unblocks multiple HW items; low risk; ship early as foundation wave
+AUDIO-001: Parametric EQ 31-Band Preset Library,Audio Processing,Yes,3,3,Low,None,Parity,Later,Solid parity; mid-effort polish; defer to v2.27+ window
+AUDIO-002: Loudness Normalization (LUFS ITU-R BS.1770-4),Audio Processing,Yes,4,2,Low,None,Parity,Next,Broadcast-critical (Netflix -14 LUFS standard); high impact; low effort; ship early for creator audience
+AUDIO-003: Voice Isolation (Demucs Stem Separation),Audio Processing,Conditional,4,4,Medium,Item 29,Leapfrog,UC,Powerful feature; but engineering effort + UX clarity needed; defer until design phase
+UX-BATCH-001: Job Queue Persistence (Crash Recovery),Batch Operations,Yes,4,3,Low,Item 6,Parity,Next,High impact reliability feature; manageable effort; unblocks fire-and-forget workflows; early ship
+UX-BATCH-002: Batch Template / Workflow Presets,Batch Operations,Yes,3,3,Low,Item 5,Leapfrog,Later,Niche power-user feature; defer to v2.26+ workflow optimization wave
+UX-BATCH-003: Parallel Job Limit Enforcement + CPU/RAM Throttle,Batch Operations,Yes,3,2,Low,None,Parity,Now,Low effort; user safety; prevents system lock-up; promote to Now tier for v2.21
+AI-VOICE-001: Real-time Voice Changer (w-okada fork),AI/ML,Conditional,3,4,Medium,Item 1,Parity,Next,Completes Item 1 voice changer page wiring; medium effort; ready for v2.24
+AI-VOICE-002: TTS Engine Selection (Piper/Dia/FastPitch),AI/ML,Yes,2,3,Medium,Item 1,Parity,Later,Niche power-user feature; defer to v2.27+; lower priority than core TTS
+FORMAT-VIDEO-001: HEVC Main 10 Profile HDR Support,Format Support,Yes,3,2,Low,Item 69,Parity,Next,Low effort; medium impact; parity gap; ship in v2.23 with HDR wave
+FORMAT-VIDEO-002: VVC (H.266) Support (vvenc 1.14.0),Format Support,Yes,2,3,Medium,Item 69,Leapfrog,UC,Patent/adoption risk; low impact; needs legal review; deferred for Phase 5 audit
+FORMAT-IMAGE-001: JPEG XL Gain-Map HDR Writing,Format Support,Yes,3,3,Low,"Item 69, Item 88",Leapfrog,Next,Medium effort; growing professional market; HDR workflow differentiator; ship in v2.24 consolidation wave
+OBS-001: Sidecar Health Dashboard,Observability,Yes,2,2,Low,"Item 51, Item 29",Parity,Later,Nice polish; low priority; defer to v2.26+
+OBS-002: Prometheus Metrics Export (Advanced Opt-in),Observability,Conditional,2,3,Medium,None,Leapfrog,UC,Niche; requires explicit opt-in UI + warnings; defer for Phase 4 advanced-features RFP
+PLATFORM-001: REST API (Batch Job Submission + Polling),Platform,Yes,4,4,Low,None,Leapfrog,UC,Strategic feature; high effort; needs API design RFP Phase 4; high automation value
+PLATFORM-002: PowerShell Module (Native .NET Bindings),Platform,Yes,3,3,Low,"Item 32, Item 54 (soft)",Parity,Later,Admin automation audience; manageable effort; defer to v2.26+ after REST API
+SEC-001: Sidecar Sandbox / Process Isolation,Security,Conditional,2,5,High,None,Leapfrog,Rejected,Extreme effort; limited audience; uncertain ROI; out of scope v2.21–v2.27 window
+SEC-002: DPAPI Cookie Encryption (Streaming Downloads),Security,Yes,4,2,Low,Item 57,Parity,Now,Security-critical for streamkeep; high impact; low effort; promote to Now for v2.21
+A11Y-001: UIA Full Contract Compliance,Accessibility,Yes,3,4,Low,Item 10,Parity,Later,Important; requires dedicated design pass; defer to v2.26+ accessibility wave
