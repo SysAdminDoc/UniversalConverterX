@@ -7,13 +7,41 @@ Falls back to manual cookies.txt import.
 The exported file lives at ``%APPDATA%/StreamKeep/cookies.txt`` and is
 referenced by ``http._build_curl_cmd()`` and ``DownloadWorker`` (yt-dlp
 ``--cookies``).
+
+Closes ROADMAP Item 9: cookies are encrypted at rest via Windows DPAPI
+(``CRYPTPROTECT_LOCAL_MACHINE`` scope) when the platform supports it. Plain
+text on disk is the legacy / non-Windows fallback. yt-dlp can't read
+encrypted cookies, so :func:`cookies_file_path` transparently decrypts to a
+process-private temp file and registers an ``atexit`` cleanup — callers
+remain unchanged.
 """
 
+import atexit
+import os
+import tempfile
 import time
 
 from .paths import CONFIG_DIR
+from . import dpapi
 
 COOKIES_FILE = CONFIG_DIR / "cookies.txt"
+
+# Track the per-process plaintext temp file (when encryption is in use). One
+# per process; cleaned up on interpreter exit.
+_DECRYPTED_TEMP: str | None = None
+
+
+def _cleanup_decrypted_temp() -> None:
+    global _DECRYPTED_TEMP
+    if _DECRYPTED_TEMP and os.path.isfile(_DECRYPTED_TEMP):
+        try:
+            os.unlink(_DECRYPTED_TEMP)
+        except OSError:
+            pass
+    _DECRYPTED_TEMP = None
+
+
+atexit.register(_cleanup_decrypted_temp)
 
 # Domains we care about — filter to reduce file size and surface area
 PLATFORM_DOMAINS = {
@@ -23,10 +51,54 @@ PLATFORM_DOMAINS = {
 
 
 def cookies_file_path():
-    """Return the path to the Netscape cookies.txt, or '' if none exists."""
-    if COOKIES_FILE.is_file() and COOKIES_FILE.stat().st_size > 0:
+    """Return the path to the Netscape cookies.txt, or '' if none exists.
+
+    When the on-disk file is DPAPI-encrypted (current default on Windows),
+    decrypts to a process-private temp file under ``%TEMP%`` and returns the
+    temp path. Subsequent calls in the same process reuse the temp file. The
+    temp file is unlinked on interpreter exit via :mod:`atexit`.
+
+    Plaintext files (legacy / non-Windows / DPAPI failure path) are returned
+    in place — no temp file involved.
+    """
+    global _DECRYPTED_TEMP
+
+    if not (COOKIES_FILE.is_file() and COOKIES_FILE.stat().st_size > 0):
+        return ""
+
+    try:
+        raw = COOKIES_FILE.read_bytes()
+    except OSError:
+        return ""
+
+    if not dpapi.is_encrypted(raw):
+        # Legacy plaintext file — return as-is. Encryption migration kicks
+        # in on the next write (import_from_browser / import_from_file).
         return str(COOKIES_FILE)
-    return ""
+
+    # Encrypted blob — decrypt to a per-process temp file. Reuse if we
+    # already decrypted this process.
+    if _DECRYPTED_TEMP and os.path.isfile(_DECRYPTED_TEMP):
+        return _DECRYPTED_TEMP
+
+    try:
+        plaintext = dpapi.decrypt(raw)
+    except (dpapi.DpapiUnavailable, OSError, ValueError):
+        # Best-effort: if decrypt fails (re-imaged host, GPO restrictions),
+        # treat as no cookies rather than crash the sidecar pipeline.
+        return ""
+
+    fd, tmp_path = tempfile.mkstemp(prefix="streamkeep_cookies_", suffix=".txt")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(plaintext)
+    except OSError:
+        try: os.unlink(tmp_path)
+        except OSError: pass
+        return ""
+
+    _DECRYPTED_TEMP = tmp_path
+    return tmp_path
 
 
 def cookies_file_age_secs():
@@ -110,21 +182,57 @@ def import_from_file(source_path):
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     try:
-        COOKIES_FILE.write_text(content, encoding="utf-8")
+        _write_encrypted_or_plain(content.encode("utf-8"))
     except OSError as e:
         return False, f"Failed to write cookies: {e}"
+    _cleanup_decrypted_temp()  # invalidate any stale process-cached plaintext
 
     return True, f"Imported {valid} cookie(s) from file."
 
 
 def clear_cookies():
-    """Delete the cookies.txt file."""
+    """Delete the cookies.txt file (and any process-cached plaintext temp)."""
     try:
         if COOKIES_FILE.exists():
             COOKIES_FILE.unlink()
+        _cleanup_decrypted_temp()
         return True, "Cookies cleared."
     except OSError as e:
         return False, f"Failed to clear cookies: {e}"
+
+
+def _write_encrypted_or_plain(payload: bytes) -> None:
+    """Write *payload* to :data:`COOKIES_FILE`, DPAPI-encrypted when available,
+    plaintext UTF-8 as the fallback.
+
+    Always overwrites — the old contents (encrypted or not) are replaced. The
+    on-disk format is self-describing via the :data:`dpapi.MAGIC` prefix, so
+    any consumer can detect whether decryption is needed.
+    """
+    if dpapi.available():
+        try:
+            payload = dpapi.encrypt(payload, description="UCX-StreamKeep cookies")
+        except (dpapi.DpapiUnavailable, OSError):
+            # Encryption attempt failed on a Windows host where Crypt32 was
+            # initially loadable — fall back to plaintext rather than abort.
+            # The user gets a write either way; security degrades to legacy.
+            pass
+    COOKIES_FILE.write_bytes(payload)
+
+
+def is_storage_encrypted() -> bool:
+    """Return True if the on-disk cookies file is DPAPI-encrypted.
+
+    Used by the StreamKeep settings UI to display "Encrypted at rest" vs
+    "Plaintext (legacy)". Returns False when no cookies are stored.
+    """
+    if not COOKIES_FILE.is_file():
+        return False
+    try:
+        head = COOKIES_FILE.open("rb").read(len(dpapi.MAGIC))
+    except OSError:
+        return False
+    return head == dpapi.MAGIC
 
 
 def _write_cookies(cookie_list, source):
@@ -159,9 +267,10 @@ def _write_cookies(cookie_list, source):
         return False, f"No relevant cookies found in {source} for supported platforms."
 
     try:
-        COOKIES_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_encrypted_or_plain(("\n".join(lines) + "\n").encode("utf-8"))
     except OSError as e:
         return False, f"Failed to write cookies: {e}"
+    _cleanup_decrypted_temp()  # invalidate stale plaintext temp
 
     return True, f"Exported {count} cookie(s) from {source}."
 

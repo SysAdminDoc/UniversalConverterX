@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Preset xmlns="https://universalconverterx.io/preset/v1">
-    <Name>To MP3 (192 kbps)</Name>
+    <Name>To MP3 (192 kbps CBR)</Name>
     <Folder>Audio</Folder>
     <InputTypes>
         <Extension>wav</Extension>
@@ -15,15 +15,21 @@
         <Extension>mkv</Extension>
         <Extension>mov</Extension>
         <Extension>webm</Extension>
+        <Extension>ape</Extension>
+        <Extension>wv</Extension>
+        <Extension>alac</Extension>
+        <Extension>ac3</Extension>
+        <Extension>dsf</Extension>
     </InputTypes>
     <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
     <OutputExtension>mp3</OutputExtension>
-    <Engine>videocrush</Engine>
+    <Engine>audiopro</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
     <Args>
-        <Arg>--codec</Arg>
-        <Arg>libmp3lame</Arg>
-        <Arg>--audio-bitrate</Arg>
-        <Arg>192</Arg>
-        <Arg>--audio-only</Arg>
+        <Arg>convert</Arg>
+        <Arg>--format</Arg>
+        <Arg>mp3</Arg>
+        <Arg>--bitrate</Arg>
+        <Arg>192k</Arg>
     </Args>
 </Preset>
