@@ -1,13 +1,20 @@
 # UniversalConverterX — Product Roadmap
 
 **Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-04
+**Last updated:** 2026-05-01 (Phase 5 audit reconciliation)
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
 axes: wiring built engines into the UI, platform upgrades, new
 capabilities, developer experience, distribution, security, and
 accessibility.
+
+> **Phase 5 audit reconciliation (2026-05-01):** items 4, 8, and 11 are
+> retired below — items 4 and 11 shipped this iteration; item 8 was already
+> shipped in a prior version but never crossed off. See
+> [`docs/research/iter-1-audit.md`](docs/research/iter-1-audit.md) for the
+> full audit (seven dimensions, cross-family signal). Item 6 (Conversion
+> History) is flagged for verification next iteration.
 
 **Design charter (unchanged):** Offline-first. No cloud. No accounts. No
 telemetry. Windows 10 21H2+. Beat every competitor on: format coverage,
@@ -35,19 +42,23 @@ batch UX, programmability (CLI + REST + PS module), and AI depth.
 Short-iteration items: UI wiring for already-built engines, UX reliability
 fixes, and security hygiene. None of these require a new sidecar engine.
 
-### 1. AiLab UI Wiring — wire existing sidecars to "Future" tiles
+### 1. AiLab UI Wiring — ⚠️ PARTIALLY SHIPPED (narrow scope)
 
-All four AiLab Future tiles have sidecars that already pass contract tests.
-This is a C# UI wiring task, not an engine task.
+Phase 5 audit (2026-05-01) found three of the four "Future" tiles already
+wired to live pages — only Voice Changer remains.
 
-| Tile | Sidecar(s) | Page skeleton needed | Impact | Effort |
-|------|-----------|----------------------|--------|--------|
-| Text-to-Speech | `edge-tts`, `premiumtts` | `TtsPage.xaml` with voice catalog, rate/pitch/volume sliders, preview player | 5 | 2 |
-| Speech-to-Text | `whisper-stt`, `whisper-cpp` | `SttPage.xaml` with model selector, language picker, output format (SRT/VTT/TXT), file or mic input | 5 | 2 |
-| Old Photo Restoration | `facerestore`, `gfpgan` | `PhotoRestorePage.xaml` — drop image(s), model selector (GFPGAN v1.4 / CodeFormer), output quality slider | 4 | 2 |
-| AI Voice Changer _(AiLab)_ | engine TBD | `VoiceChangerPage.xaml` — needs RVC/so-vits-svc sidecar; wire after engine confirmed | 3 | 3 |
+| Tile | Status | Evidence |
+|------|--------|----------|
+| Text-to-Speech | ✅ shipped | `TextToSpeechPage.xaml.cs` exists; routed in `MainWindow.xaml.cs:152` |
+| Speech-to-Text | ✅ shipped | `SpeechToTextPage.xaml.cs` exists; routed in `MainWindow.xaml.cs:153` |
+| Old Photo Restoration | ✅ shipped | `PhotoRestorationPage.xaml.cs` exists; routed in `MainWindow.xaml.cs:154` |
+| AI Voice Changer | ❌ engine TBD | `VoiceChangerPage.xaml` exists but is a placeholder; no RVC/so-vits-svc sidecar yet |
 
-**Rationale:** Any Video Converter, ElevenLabs API wrapper apps, and Whisper GUI tools all ship these as first-class tiles. UCX has the engines; the gap is purely UI surface.
+**Remaining work** (narrowed):
+
+- Voice Changer engine selection — needs sidecar choice (RVC, so-vits-svc, or other), then UI wiring.
+
+Impact: 3 · Effort: 3 · Type: leapfrog
 Sources: [S3], [S4], [S10]
 
 ---
@@ -79,7 +90,7 @@ Sources: [S5] (ToolboxPage stub), [S6] (competitor feature)
 
 ---
 
-### 4. Output Filename Collision Protection
+### 4. Output Filename Collision Protection — ✅ SHIPPED 2026-05-01
 
 When an output file already exists: auto-append ` (1)`, ` (2)` etc. instead
 of silently overwriting or erroring. Apply across all sidecars via the Core
@@ -87,6 +98,8 @@ orchestrator — one fix, universal effect.
 
 Impact: 5 · Effort: 1 · Type: parity
 Sources: [S11] (HandBrake #7848), [S12] (LosslessCut overwrite issue #2667)
+**Closing commit:** `80932bd` — `Core/Utilities/UniqueOutputPath` + orchestrator
+switch on `OverwriteBehavior`, 11 new xUnit tests, 161/161 Core suite passing.
 
 ---
 
@@ -103,7 +116,7 @@ Sources: [S13] (yt-dlp `%(title)s` pattern system), [S14] (general UX pattern)
 
 ---
 
-### 6. Conversion History / Activity Log
+### 6. Conversion History / Activity Log — ✅ SHIPPED (already)
 
 Persist every completed job to a SQLite database: timestamp, engine, input
 file, output file, duration, file sizes, exit code, log snippet. Surface as
@@ -112,6 +125,13 @@ folder" shortcut. Log is local-only — consistent with offline-first charter.
 
 Impact: 4 · Effort: 2 · Type: parity
 Source: [S14] (common request across all media converter communities)
+
+**Already shipped (verified 2026-05-01 audit):**
+`HistoryService.cs` (414 LOC, SQLite-backed `HistoryRecord` schema with
+timestamp/engine/action/source/output/bytes/duration/error fields).
+`HistoryPage.xaml.cs` (138 LOC) with search, refresh, clear, open-output,
+re-run wired. `ConverterXOptions.{EnableHistory=true, MaxHistoryEntries=1000,
+HistoryRetentionDays=30}` for retention policy.
 
 ---
 
@@ -128,14 +148,20 @@ Sources: [S1] (CHANGELOG v2.2.0 CVE pins), [S15] (YoutubeDownloader auto-update 
 
 ---
 
-### 8. Parallel Job Limit Setting
+### 8. Parallel Job Limit Setting — ✅ SHIPPED (already)
 
 Expose the max-concurrent-jobs cap as a user setting (default: CPU count / 2,
-range 1–16). Currently hardcoded. Adds a single `<Slider>` in
+range 1–16). Adds a single `<Slider>` in
 `SettingsPage.xaml` and one property in `AppSettings`.
 
 Impact: 3 · Effort: 1 · Type: parity
 Source: [S14] (common user request in HandBrake / FFmpeg GUI communities)
+
+**Already shipped (verified 2026-05-01 audit):**
+`SettingsWindow.xaml:178-200` ParallelSlider (Min=1, Max=16, default Value=4).
+`ConverterXOptions.cs:61` `MaxParallelConversions = ProcessorCount / 2`.
+`ConversionOrchestrator.cs:235` runtime clamp. `ConfigCommand.cs:64,111`
+`--max-parallel` CLI flag.
 
 ---
 
@@ -151,7 +177,7 @@ Source: [S15] (YoutubeDownloader DPAPI cookie encryption, v1.14 changelog)
 
 ---
 
-### 10. Accessibility — UIA Automation Properties Pass
+### 10. Accessibility — UIA Automation Properties Pass — ⚠️ IN PROGRESS
 
 Assign `AutomationProperties.Name` and `AutomationProperties.AutomationId` to
 all interactive controls in every page XAML. Fixes screen reader blind spots
@@ -161,17 +187,26 @@ accessibility audit.
 Impact: 3 · Effort: 2 · Type: accessibility
 Source: [S16] (WinUI 3 accessibility docs — UIA peer requirement)
 
+**Status (2026-05-01 audit):** `AutomationProperties.Name` is present in
+22 occurrences across 10 of 45+ pages — partial coverage. **Zero
+`AutomationProperties.AutomationId`** anywhere in `src/`. The remaining
+work is: (a) extend `Name` to the other ~35 pages, (b) introduce
+`AutomationId` for every interactive control across all pages so UI
+automation tests can target controls reliably.
+
 ---
 
-### 11. CI — Sidecar Contract Test Gate
+### 11. CI — Sidecar Contract Test Gate — ✅ SHIPPED 2026-05-01
 
 Add a GitHub Actions job that runs `tests/sidecar_contract/check_contract.py`
-against all 176 sidecars on every PR. Currently the contract test exists but
-is not gated. Failing contract tests block merge. This catches NDJSON schema
-regressions before they hit users.
+against all 176 sidecars on every PR. Failing contract tests block merge.
+This catches NDJSON schema regressions before they hit users.
 
 Impact: 3 · Effort: 1 · Type: dx
 Source: [S17] (tools/README.md contract checklist), repo CI gap observation
+**Closing commit:** `2f2864c` — `.github/workflows/build.yml` adds
+`sidecar-contract` job on ubuntu-latest, gated on push/PR/tag triggers,
+build job now `needs: sidecar-contract`. 176 sidecars conforming locally.
 
 ---
 
@@ -192,7 +227,7 @@ Sources: [S8] (ExifTool 100+ format support), [S3] (Any Video Converter metadata
 
 ---
 
-### 13. Subtitle Track Management
+### 13. Subtitle Track Management — ⚠️ PARTIALLY SHIPPED
 
 Add/remove/export subtitle tracks in MKV/MP4 without full re-encode. New
 preset + sidecar wrapping `mkvmerge` or `ffmpeg -map` for track operations.
@@ -201,6 +236,12 @@ Track". Complements existing `subconvert` and `subkit` sidecars.
 
 Impact: 4 · Effort: 2 · Type: parity
 Sources: [S3] (Any Video Converter track add/remove/export, v9.1.8), [S26] (SubtitleEdit v5.0.0 format breadth)
+
+**Already shipped (verified 2026-05-01 audit):**
+`TrackManagerPage.xaml{,.cs}` already supports `track-add` and `track-remove`.
+
+**Remaining work** (narrowed): subtitle track *export* path — extract a
+specific subtitle track to an `.srt`/`.vtt`/`.ass` file via `ffmpeg -map 0:s:N`.
 
 ---
 
@@ -474,31 +515,36 @@ Sources: [S37] (MediaArea/MediaInfo — technical A/V stream analysis),
 
 Higher effort, lower urgency, or dependent on Tier 1/2 completion.
 
-### 34. Watch Folder Automation
+### 34. Watch Folder Automation — ✅ SHIPPED (already)
 
 Background service that monitors one or more folders for new files and
 auto-dispatches them through a configured preset. Surface in
 `WatchFolderPage.xaml`. Implementation options: FileSystemWatcher (in-process)
-or a lightweight Windows Service (`ucx-watchd`). The old roadmap listed this
-under "Out of Scope" — reconsidering it here given its frequency in user
-requests and its presence as a table-stakes feature in HandBrake and all
-commercial converters.
+or a lightweight Windows Service (`ucx-watchd`).
 
 Impact: 5 · Effort: 4 · Type: parity
 Source: [S14] (HandBrake batch queue, AVC watch folder — universal commercial feature)
 
+**Already shipped (verified 2026-05-01 audit):**
+`src/UniversalConverterX.UI/Views/Pages/WatchFoldersPage.xaml{,.cs}` and
+`src/UniversalConverterX.UI/Services/WatchFolderService.cs`. Listed as
+"Tier 3 Later" but actually shipped pre-v2.20.1.
+
 ---
 
-### 35. REST API / Local HTTP Service (`ucx serve`)
+### 35. REST API / Local HTTP Service (`ucx serve`) — ✅ SHIPPED (already)
 
 Extend the existing `ucx` CLI with a `ucx serve` subcommand: local HTTP API
 for headless/programmatic conversion. Enables scripting and integration with
-other tools. The old roadmap listed this "Out of Scope" — moving to Later
-since it's not user-facing but is a strong developer-ecosystem play. Design
-around OpenAPI 3.1 schema.
+other tools.
 
 Impact: 3 · Effort: 4 · Type: dx
 Source: [S5] (old ROADMAP.md "Out of Scope" call-out — reconsidered)
+
+**Already shipped (verified 2026-05-01 audit):**
+`src/UniversalConverterX.Console/Commands/ServeCommand.cs` (505 LOC).
+Listed as "Tier 3 Later" but shipped in v2.4. ROADMAP entry survived a
+version cycle without being crossed off.
 
 ---
 
@@ -701,7 +747,7 @@ These need more investigation or community signal before placement.
 | Item | Question blocking placement |
 |------|-----------------------------|
 | **OCR full pipeline** (image → structured text, not just searchable PDF) | Already have `pdfocr`; would a dedicated `ocrkit` sidecar add incremental value? Survey user requests. |
-| **VMAF quality reporting** | Expose `libvmaf` score as a post-conversion metric. Useful for production workflows; adds ~10% to encode time. Needs UI surface design. |
+| **VMAF quality reporting** _(✅ shipped — `VmafAnalysisPage.xaml` exists; retire from UC list next iteration)_ | Expose `libvmaf` score as a post-conversion metric. Useful for production workflows; adds ~10% to encode time. |
 | **Spatial audio conversion** (Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) | FFmpeg has partial support; full Ambisonics requires specialized libraries. Assess demand. |
 | **Community preset repository** | GitHub-hosted index of contributed presets. Requires governance model, security review of contributed XML, and moderation bandwidth. Assess when preset count warrants it. |
 | **EDL / XML timeline import** | Bulk-convert based on an edit decision list (CMX 3600 EDL, Final Cut XML). Niche; assess against demand. |
