@@ -12,31 +12,34 @@
         <DataTemplate x:Key="EbookFileTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="12"
-                    Margin="0,0,0,8">
-                <Grid ColumnSpacing="14">
+                    BorderThickness="1" CornerRadius="12" Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <FontIcon Glyph="&#xE82D;" FontSize="22"
+                    <FontIcon Glyph="&#xE82D;" FontSize="24"
                               Foreground="{StaticResource AccentBlueBrush}"
                               VerticalAlignment="Center"/>
-                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{Binding FileName}"
                                    Style="{StaticResource LabelTextStyle}"
+                                   FontSize="13"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
+                                   LineHeight="16"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <TextBlock Grid.Column="2"
                                Text="{Binding StatusText, Mode=OneWay}"
                                Style="{StaticResource MutedTextStyle}"
+                               FontSize="11"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="3"
@@ -69,14 +72,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="6">
-                <TextBlock Text="eBook Converter"
-                           Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Spacing="8">
+                <TextBlock Text="EBOOK CONVERTER"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX / HTML and more via Calibre's ebook-convert. Optional metadata overrides for title / authors / language."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add eBooks"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddFiles_Click"/>
@@ -88,8 +92,8 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
-            <Grid ColumnSpacing="20">
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
+            <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>

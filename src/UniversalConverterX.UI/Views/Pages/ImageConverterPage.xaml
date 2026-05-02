@@ -13,12 +13,12 @@
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="16"
-                    Padding="14"
+                    CornerRadius="12"
+                    Padding="16"
                     Margin="0,0,0,10">
-                <Grid ColumnSpacing="14" RowSpacing="8">
+                <Grid ColumnSpacing="16" RowSpacing="10">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="160"/>
                         <ColumnDefinition Width="Auto"/>
@@ -28,25 +28,30 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xEB9F;" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4">
                         <TextBlock Text="{Binding FileName}"
                                    Style="{StaticResource LabelTextStyle}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding SourceSummary}"
                                    Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   LineHeight="18"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
                             Background="{StaticResource SurfaceLightBrush}"
-                            CornerRadius="10" Padding="10,5">
+                            CornerRadius="10" Padding="10,6">
                         <TextBlock Text="{Binding PlanSummary}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontWeight="SemiBold"
+                                   FontSize="11"
                                    TextAlignment="Center"
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
@@ -66,12 +71,13 @@
                         <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
-                                     Height="6" CornerRadius="3"
+                                     Height="7" CornerRadius="4"
                                      VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding StatusText}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   MinWidth="112"
+                                   FontSize="11"
+                                   MinWidth="120"
                                    TextAlignment="Right"/>
                     </Grid>
                 </Grid>
@@ -82,35 +88,40 @@
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="16"
-                    Padding="14"
+                    CornerRadius="12"
+                    Padding="16"
                     Margin="0,0,0,10">
-                <Grid ColumnSpacing="14">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}" FontSize="19"
                                   Foreground="{Binding AccentBrush}"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="3">
+                    <StackPanel Grid.Column="1" Spacing="4">
                         <TextBlock Text="{Binding FileName}"
                                    Style="{StaticResource LabelTextStyle}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11"
+                                   LineHeight="16"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}"
                                    Style="{StaticResource MutedTextStyle}"
+                                   FontSize="10"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <Button Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Padding="14,8"
+                            Padding="14,10"
                             Click="OpenFinishedFolder_Click"
                             Tag="{Binding OutputPath}"
                             IsEnabled="{Binding CanOpenFolder}"/>
@@ -131,13 +142,14 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Image Converter" Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="IMAGE CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Convert between HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP. Preserves ICC + EXIF by default."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"/>
@@ -157,27 +169,29 @@
 
             <Border Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
-                    Padding="18"
+                    CornerRadius="20"
+                    Padding="20"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem Header="Queue">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="430" Padding="0,12,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                        Spacing="14">
+                                <Border Width="120" Height="120" CornerRadius="30"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xEB9F;" FontSize="48"
+                                    <FontIcon Glyph="&#xEB9F;" FontSize="52"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
                                 <TextBlock Text="Drop image files here"
-                                           Style="{StaticResource SubtitleTextStyle}"
-                                           HorizontalAlignment="Center"/>
+                                           Style="{StaticResource TitleTextStyle}"
+                                           HorizontalAlignment="Center"
+                                           FontSize="17" TextWrapping="Wrap"
+                                           MaxWidth="280"/>
                                 <TextBlock Text="Each file converts to the target format using the settings on the right."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"

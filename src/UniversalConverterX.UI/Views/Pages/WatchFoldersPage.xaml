@@ -12,9 +12,9 @@
         <DataTemplate x:Key="ProfileRowTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="14" Padding="14"
-                    Margin="0,0,0,8">
-                <Grid ColumnSpacing="14">
+                    BorderThickness="1" CornerRadius="12" Padding="16"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -26,21 +26,23 @@
                                   VerticalAlignment="Center"
                                   Toggled="ProfileToggled"
                                   Tag="{Binding Id}"/>
-                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Name}"
                                    Style="{StaticResource LabelTextStyle}"
-                                   FontWeight="SemiBold"/>
+                                   FontWeight="SemiBold"
+                                   FontSize="13"/>
                         <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   LineHeight="18"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="11"
                                    TextTrimming="CharacterEllipsis">
-                            <Run Text="filter:"/>
-                            <Run Text="{Binding Filter}"/>
-                            <Run Text=" |"/>
-                            <Run Text="action:"/>
-                            <Run Text="{Binding Action}"/>
+                            <Run Text="filter: "/>
+                            <Run Text="{Binding Filter}" FontWeight="SemiBold"/>
+                            <Run Text="  |  action: "/>
+                            <Run Text="{Binding Action}" FontWeight="SemiBold"/>
                         </TextBlock>
                     </StackPanel>
                     <Button Grid.Column="2"
@@ -65,11 +67,13 @@
 
         <DataTemplate x:Key="EventRowTemplate">
             <Border Background="{StaticResource SurfaceLightBrush}"
-                    CornerRadius="10" Padding="10,6"
-                    Margin="0,0,0,4">
+                    CornerRadius="10" Padding="12,8"
+                    Margin="0,0,0,6">
                 <TextBlock Text="{Binding Display}"
                            Style="{StaticResource MutedTextStyle}"
-                           FontFamily="Consolas, Cascadia Mono, monospace"
+                           FontSize="11"
+                           FontFamily="Cascadia Mono, monospace"
+                           LineHeight="16"
                            TextTrimming="CharacterEllipsis"/>
             </Border>
         </DataTemplate>
@@ -87,12 +91,13 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Spacing="6">
-                <TextBlock Text="Watch Folders"
-                           Style="{StaticResource TitleTextStyle}"/>
+            <StackPanel Spacing="8">
+                <TextBlock Text="WATCH FOLDERS"
+                           Style="{StaticResource EyebrowTextStyle}"/>
                 <TextBlock Text="Drop a file into any watched folder to auto-convert or auto-compress it. Profiles persist across launches."
-                           Style="{StaticResource SubtitleTextStyle}"
-                           TextWrapping="Wrap"/>
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <Button Grid.Column="1"
                     Content="New Watch"
@@ -101,19 +106,19 @@
                     VerticalAlignment="Center"/>
         </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="18">
             <Grid>
                 <StackPanel x:Name="EmptyState" Visibility="Collapsed"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Spacing="10">
-                    <Border Width="80" Height="80" CornerRadius="20"
+                            Spacing="12">
+                    <Border Width="88" Height="88" CornerRadius="22"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xED25;" FontSize="36"
+                        <FontIcon Glyph="&#xED25;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock Text="No watch profiles yet"
-                               Style="{StaticResource SubtitleTextStyle}"
-                               HorizontalAlignment="Center"/>
+                               Style="{StaticResource TitleTextStyle}"
+                               HorizontalAlignment="Center" FontSize="18"/>
                     <TextBlock Text="Click New Watch to point UCX at a folder. New files dropped there will be processed automatically."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
@@ -127,28 +132,28 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="16">
-            <Grid RowSpacing="10">
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="18">
+            <Grid RowSpacing="12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="Recent activity"
                            Style="{StaticResource LabelTextStyle}"
-                           FontWeight="SemiBold"/>
+                           FontWeight="SemiBold" FontSize="13"/>
                 <StackPanel x:Name="RecentEmptyState"
                             Grid.Row="1"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Spacing="8">
-                    <Border Width="58" Height="58" CornerRadius="16"
+                            Spacing="10">
+                    <Border Width="64" Height="64" CornerRadius="18"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE823;" FontSize="24"
+                        <FontIcon Glyph="&#xE823;" FontSize="28"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Border>
                     <TextBlock Text="No activity yet"
                                Style="{StaticResource MutedTextStyle}"
-                               HorizontalAlignment="Center"/>
+                               HorizontalAlignment="Center" FontSize="12"/>
                 </StackPanel>
                 <ScrollViewer x:Name="EventScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="EventList"
