@@ -134,7 +134,8 @@
             <InfoBar.ActionButton>
                 <Button x:Name="UpdateBannerActionButton"
                         Content="Open release notes"
-                        Click="UpdateBannerAction_Click"/>
+                        Click="UpdateBannerAction_Click"
+                        AutomationProperties.AutomationId="HomePage_UpdateBannerActionButton"/>
             </InfoBar.ActionButton>
         </InfoBar>
 
