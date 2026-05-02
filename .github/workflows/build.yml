@@ -3,15 +3,34 @@ name: Build & Release
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
+  sidecar-contract:
+    name: Sidecar NDJSON contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify sidecar contract conformance
+        # Pure stdlib (ast, pathlib, sys) — no pip install needed.
+        # Exits non-zero on any violation; that fails the job + gates merge.
+        run: python tests/sidecar_contract/check_contract.py
+
   build:
     runs-on: windows-latest
+    needs: sidecar-contract
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
