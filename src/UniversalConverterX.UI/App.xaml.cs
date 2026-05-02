@@ -46,6 +46,7 @@ public partial class App : Application
         services.AddSingleton<IPresetExecutor, PresetExecutor>();
         services.AddSingleton<IUiPresetCache, UiPresetCache>();
         services.AddSingleton<IUpdateCheckService, UpdateCheckService>();
+        services.AddSingleton<IStructuredLogger, StructuredLogger>();
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<ConversionViewModel>();
@@ -57,11 +58,40 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // Eager-resolve the structured logger so the ring buffer is live for
+        // the rest of launch — including the unhandled-exception bundler.
+        var logger = Services.GetRequiredService<IStructuredLogger>();
+
         UnhandledException += (_, e) =>
         {
             LogUnhandledException(e.Exception);
+            try
+            {
+                logger.Log(LogLevel.Crash, "app", "unhandled XAML exception", e.Exception);
+                CrashBundle.Capture(logger, e.Exception);
+            }
+            catch { /* never throw from inside the unhandled-exception path */ }
             e.Handled = false;
         };
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var ex = e.ExceptionObject as Exception;
+            LogUnhandledException(ex);
+            try
+            {
+                logger.Log(LogLevel.Crash, "appdomain", "unhandled native-side exception", ex);
+                CrashBundle.Capture(logger, ex);
+            }
+            catch { }
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            try { logger.Log(LogLevel.Error, "tasks", "unobserved task exception", e.Exception); }
+            catch { }
+        };
+
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
 

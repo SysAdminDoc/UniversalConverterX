@@ -2141,7 +2141,7 @@ research focused on competitor-feature parity rather than internal
 quality / extensibility / migration concerns. Tier placement reflects
 audit recommendation, not pure user-facing impact.
 
-### 51. Observability — Local Crash Bundle + Structured App Log _(Tier 2)_
+### 51. Observability — Local Crash Bundle + Structured App Log _(Tier 2)_ — ✅ SHIPPED 2026-05-02
 
 A user-toggleable structured log panel inside the app (Catppuccin debug
 console) that streams to `%LocalAppData%/UniversalConverterX/logs/` on
@@ -2159,6 +2159,23 @@ the structured log that produced them.
 
 Impact: 3 · Effort: 2 · Type: dx + observability
 Source: standard desktop-app pattern; surfaced by Phase 5 audit.
+
+**Closing commit:** new `Services/StructuredLogger.cs` (`IStructuredLogger`
+interface + NDJSON-per-line writer + 500-entry ring buffer + 30-day
+retention prune at startup) and `Services/CrashBundle.cs` (zip with
+`system-info.txt`, `exception.txt`, `log-tail.ndjson` ring tail, plus
+today's full NDJSON when present). `App.xaml.cs` registers the logger
+as a singleton, eagerly resolves it in `OnLaunched`, and routes the
+existing `UnhandledException` plus new `AppDomain.UnhandledException`
+and `TaskScheduler.UnobservedTaskException` paths through both the
+logger and the bundle capture. Daily files land at
+`%LocalAppData%/UniversalConverterX/logs/ucx-YYYYMMDD.ndjson`; bundles
+at `…/crashes/crash_YYYYMMDD-HHMMSS.zip`. HomePage gains a Diagnostics
+card with "Open log folder" + "Export crash bundle" buttons (both
+guarded with try/catch + status text fallback). Verbose-off behaviour:
+Debug/Info entries skip disk writes but still populate the ring buffer
+so a crash bundle has a meaningful tail; Warning/Error/Crash always
+reach disk. Build verified Release.
 
 ---
 
