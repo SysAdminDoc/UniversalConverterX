@@ -4,6 +4,82 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added — Audio Compressor sidecar + standalone page (ROADMAP Item 2)
+
+- New `tools/audio-compressor/sidecar.py` — stdlib-only FFmpeg
+  `acompressor` wrapper. Three operations: `compress` (explicit
+  threshold/ratio/attack/release/makeup), `preset` (named DRC profile),
+  `presets` (NDJSON enumeration of built-in presets).
+- Five tested DRC presets: `light` (gentle, mastering bus), `medium`
+  (default, all-purpose), `heavy` (obvious, loud sources), `podcast`
+  (spoken word), `broadcast` (heavy with fast attack).
+- Audio-only inputs preserve the original codec; video containers
+  re-mux video and re-encode only the audio. Optional `--encode
+  {mp3|aac|opus|flac|wav}` flag transcodes output for size-conscious
+  workflows.
+- Range-validated parameters: threshold −60..0 dB, ratio 1..20:1,
+  attack 0.01..2000 ms, release 0.01..9000 ms, makeup 0..24 dB.
+- New `audio_compressed` event registered in `KNOWN_EVENTS`; 177
+  sidecars conform.
+- New `Views/Pages/AudioCompressorPage.xaml` + `.xaml.cs` follows
+  `CompressorPage` layout: drag-drop queue, preset combo with Custom
+  mode revealing five sliders, encode-output combo, output-folder
+  picker, progress overlay; every interactive control carries
+  `AutomationProperties.AutomationId`.
+- `ToolboxPage` `audio-compressor` tile flipped from `Future` /
+  `null` engine to `Ready` / `FFmpeg acompressor`. `MainWindow` nav
+  routes `audio-compressor` to the new page.
+
+### Added — DownloaderPage cookie auth surface (ROADMAP Item 9-UI)
+
+- Closes ROADMAP Item 9 — the DPAPI at-rest cookie encryption layer
+  shipped iter-3 (commit `b8058de`) is now reachable from the C# UI.
+- `streamkeep/sidecar.py` gains three ops: `cookies-status`,
+  `cookies-import` (`--browser <chrome|firefox|edge|brave|chromium|
+  vivaldi|opera|librewolf|safari>` | `--file <path>`), `cookies-clear`.
+  All three emit a unified `cookie_status` NDJSON event reporting
+  presence, encryption state, staleness in seconds, last action, and
+  user-visible message.
+- `cookie_status` event registered in `KNOWN_EVENTS`.
+- `DownloaderPage.xaml` inserts a Cookie Authentication card between
+  the URL options card and the Activity card. Browser combo, Import
+  button, "Import from file..." picker for manual cookies.txt files,
+  Clear button (gated on actual cookie presence). Status text auto-
+  refreshes on page activation: e.g. "Cookies imported · encrypted
+  at rest (DPAPI) · 5m ago".
+
+### Added — UIA AutomationId contract gate + DownloaderPage cleanup (ROADMAP Item 10)
+
+- Ships parts (a) and (c) of ROADMAP Item 10's three-part
+  accessibility plan: a CI lint that prevents regression of
+  AutomationId coverage on new interactive controls, plus an opening
+  shrink of the baseline covering the most-clicked DownloaderPage
+  chrome.
+- `tests/uia_contract/check_uia.py` — stdlib-only XAML scanner over
+  every `src/UniversalConverterX.UI/Views/**/*.xaml`. Flags 18
+  interactive control element types (Button / ComboBox / Slider /
+  ToggleSwitch / CheckBox / RadioButton / ToggleButton /
+  MenuFlyoutItem / NumberBox / TextBox / PasswordBox / AutoSuggestBox
+  / DropDownButton / SplitButton / HyperlinkButton / RepeatButton /
+  AppBar*Button / ColorPicker / DatePicker / TimePicker / PivotItem)
+  lacking `AutomationProperties.AutomationId`.
+- Skips `DataTemplate` / `ControlTemplate` / `ItemsPanelTemplate` /
+  `Style.Setters` scopes (templates can't carry an instance ID).
+- Line-independent baseline keys: named controls keyed by `x:Name`,
+  anonymous controls keyed by per-(file, element) document-order
+  index `UNNAMED#N`. Unrelated edits don't trip the lint; only adding
+  a new control without an ID does.
+- `tests/uia_contract/baseline.txt` snapshots the current 470-entry
+  deficit. CI passes when current violations are a subset; cleanups
+  that shrink it are silently accepted. Regenerate with
+  `--write-baseline`.
+- `.github/workflows/build.yml` adds a `uia-contract` job; build job
+  now `needs: [sidecar-contract, uia-contract]`.
+- `DownloaderPage.xaml`: 11 high-traffic controls annotated
+  (UrlBox, PasteButton, AddUrlButton, QualityCombo, OutputFormatCombo,
+  AudioOnlyCheck, SubtitlesCheck, SponsorBlockCheck, ClearQueueButton,
+  DownloadButton, CancelButton) — first cleanup against the baseline.
+
 ### Added — DPAPI at-rest encryption for StreamKeep cookies (ROADMAP Item 9 partial)
 
 - New `tools/streamkeep/streamkeep/dpapi.py` — stdlib-only `ctypes`
