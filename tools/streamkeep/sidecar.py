@@ -208,6 +208,90 @@ def op_download(args: argparse.Namespace) -> int:
     return 0
 
 
+# ─── Cookies ─────────────────────────────────────────────────────────────────
+#
+# UCX-side cookie management surface for ROADMAP Item 9 (UI completion). The
+# at-rest DPAPI encryption layer was shipped in iter-3 inside the streamkeep
+# package; these ops expose that machinery to the C# DownloaderPage so the
+# user can import / clear / inspect cookies without leaving UCX.
+
+SUPPORTED_BROWSERS = (
+    "chrome", "firefox", "edge", "brave", "chromium", "vivaldi",
+    "opera", "librewolf", "safari",
+)
+
+
+def _emit_cookie_status(action: str | None = None, message: str | None = None) -> None:
+    """Common ``cookie_status`` event emit.
+
+    Reports whether a cookies file is present, whether the on-disk format is
+    DPAPI-encrypted, the staleness in seconds, and the last user-visible
+    action ("imported" / "cleared" / etc). The C# UI keys off these fields to
+    populate the Cookie Auth card.
+    """
+    try:
+        from streamkeep import cookies as ck
+    except ImportError as exc:
+        emit("cookie_status", present=False, encrypted=False, age_seconds=-1,
+             action=action, message=message or f"streamkeep package missing: {exc}",
+             ok=False)
+        return
+
+    path = ck.cookies_file_path()
+    present = bool(path)
+    age = ck.cookies_file_age_secs() if present else -1
+    encrypted = ck.is_storage_encrypted() if present else False
+    emit("cookie_status",
+         present=present,
+         encrypted=encrypted,
+         age_seconds=age,
+         action=action,
+         message=message,
+         ok=True)
+
+
+def op_cookies_status(_args: argparse.Namespace) -> int:
+    _emit_cookie_status()
+    emit("complete", output="", size_bytes=0)
+    return 0
+
+
+def op_cookies_import(args: argparse.Namespace) -> int:
+    try:
+        from streamkeep import cookies as ck
+    except ImportError as exc:
+        return fail("missing_streamkeep", f"streamkeep package missing: {exc}")
+
+    if args.file:
+        ok, msg = ck.import_from_file(args.file)
+    else:
+        if args.browser not in SUPPORTED_BROWSERS:
+            return fail("unknown_browser",
+                        f"Browser '{args.browser}' not supported. "
+                        f"Pick one of: {', '.join(SUPPORTED_BROWSERS)}.")
+        ok, msg = ck.import_from_browser(args.browser)
+
+    _emit_cookie_status(action="imported" if ok else "import_failed", message=msg)
+    if not ok:
+        return fail("import_failed", msg)
+    emit("complete", output="", size_bytes=0)
+    return 0
+
+
+def op_cookies_clear(_args: argparse.Namespace) -> int:
+    try:
+        from streamkeep import cookies as ck
+    except ImportError as exc:
+        return fail("missing_streamkeep", f"streamkeep package missing: {exc}")
+
+    ok, msg = ck.clear_cookies()
+    _emit_cookie_status(action="cleared" if ok else "clear_failed", message=msg)
+    if not ok:
+        return fail("clear_failed", msg)
+    emit("complete", output="", size_bytes=0)
+    return 0
+
+
 # ─── Entry ───────────────────────────────────────────────────────────────────
 
 def build_parser() -> argparse.ArgumentParser:
@@ -241,6 +325,20 @@ def build_parser() -> argparse.ArgumentParser:
                     help="Comma-separated SponsorBlock categories to mark/remove "
                          "(default: sponsor,selfpromo,interaction). Available: "
                          "sponsor, selfpromo, interaction, intro, outro, preview, music_offtopic, filler.")
+
+    sub.add_parser("cookies-status",
+                   help="Report current cookie store state (presence, DPAPI encryption, staleness).")
+
+    ci = sub.add_parser("cookies-import",
+                        help="Import cookies from an installed browser (or a Netscape cookies.txt file).")
+    src = ci.add_mutually_exclusive_group(required=True)
+    src.add_argument("--browser", choices=SUPPORTED_BROWSERS,
+                     help="Browser name to extract cookies from (uses rookiepy / browser_cookie3).")
+    src.add_argument("--file", help="Path to a Netscape cookies.txt to import directly.")
+
+    sub.add_parser("cookies-clear",
+                   help="Delete the on-disk cookies store (and any process-cached plaintext temp).")
+
     return p
 
 
@@ -251,6 +349,12 @@ def main(argv: list[str] | None = None) -> int:
             return op_probe(args)
         if args.op == "download":
             return op_download(args)
+        if args.op == "cookies-status":
+            return op_cookies_status(args)
+        if args.op == "cookies-import":
+            return op_cookies_import(args)
+        if args.op == "cookies-clear":
+            return op_cookies_clear(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

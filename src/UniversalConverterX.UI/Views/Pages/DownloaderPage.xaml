@@ -128,6 +128,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -200,6 +201,78 @@
         </Border>
 
         <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+            <Grid ColumnSpacing="12" RowSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <FontIcon Grid.Row="0" Grid.Column="0"
+                          Glyph="&#xE72E;" FontSize="18"
+                          Foreground="{StaticResource AccentBlueBrush}"
+                          VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="Cookie Authentication"
+                               Style="{StaticResource PanelTitleTextStyle}"/>
+                    <TextBlock x:Name="CookieStatusText"
+                               Text="Checking cookie store..."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <ComboBox x:Name="BrowserCombo"
+                          Grid.Row="0" Grid.Column="2"
+                          AutomationProperties.AutomationId="DownloaderBrowserCombo"
+                          Width="150"
+                          VerticalAlignment="Center"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="Chrome" Tag="chrome"/>
+                    <ComboBoxItem Content="Firefox" Tag="firefox"/>
+                    <ComboBoxItem Content="Edge" Tag="edge"/>
+                    <ComboBoxItem Content="Brave" Tag="brave"/>
+                    <ComboBoxItem Content="Chromium" Tag="chromium"/>
+                    <ComboBoxItem Content="Vivaldi" Tag="vivaldi"/>
+                    <ComboBoxItem Content="Opera" Tag="opera"/>
+                    <ComboBoxItem Content="LibreWolf" Tag="librewolf"/>
+                </ComboBox>
+                <Button x:Name="CookieImportBrowserButton"
+                        Grid.Row="0" Grid.Column="3"
+                        AutomationProperties.AutomationId="DownloaderImportCookiesButton"
+                        Content="Import"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        ToolTipService.ToolTip="Extract cookies from the selected browser into UCX's encrypted cookie store"
+                        Click="ImportCookiesFromBrowser_Click"/>
+                <Button x:Name="CookieImportFileButton"
+                        Grid.Row="0" Grid.Column="4"
+                        AutomationProperties.AutomationId="DownloaderImportCookiesFromFileButton"
+                        Content="From file..."
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        ToolTipService.ToolTip="Import cookies from a Netscape cookies.txt file you exported manually"
+                        Click="ImportCookiesFromFile_Click"/>
+                <Button x:Name="CookieClearButton"
+                        Grid.Row="0" Grid.Column="5"
+                        AutomationProperties.AutomationId="DownloaderClearCookiesButton"
+                        Content="Clear"
+                        Style="{StaticResource GhostButtonStyle}"
+                        IsEnabled="False"
+                        Click="ClearCookies_Click"/>
+                <TextBlock x:Name="CookieMessageText"
+                           Grid.Row="1" Grid.ColumnSpan="6"
+                           Style="{StaticResource MutedTextStyle}"
+                           Visibility="Collapsed"
+                           TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -279,7 +352,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
