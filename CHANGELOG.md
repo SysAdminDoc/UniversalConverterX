@@ -40,6 +40,11 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Changed — planning consolidation
+
+- Consolidated project planning docs into root `ROADMAP.md`, `COMPLETED.md`, and `RESEARCH_REPORT.md`.
+- Archived phase-3 and iter-8 root planning artifacts under `docs/archive/`.
+
 ### Added — Local crash bundle + structured app log (ROADMAP Item 51)
 
 - New `Services/StructuredLogger.cs` (`IStructuredLogger`) — NDJSON

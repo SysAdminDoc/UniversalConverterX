@@ -12,7 +12,7 @@
 | Document | Purpose | Audience | Time |
 |----------|---------|----------|------|
 | **[PHASE3_SUMMARY.md](PHASE3_SUMMARY.md)** | 📋 Executive summary + headlines | Leaders, PM, stakeholders | **5 min** |
-| **[PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md)** | 🔧 Integration guide + item specs | Tech lead, ROADMAP maintainer | **30 min** |
+| **[PHASE3_ROADMAP_MERGE.md](../roadmap/PHASE3_ROADMAP_MERGE.md)** | 🔧 Integration guide + item specs | Tech lead, ROADMAP maintainer | **30 min** |
 | **[PHASE3_GAP_ANALYSIS.md](PHASE3_GAP_ANALYSIS.md)** | 📊 Master report + detailed analysis | Engineers, architects | **30 min** |
 | **[PHASE3_EXTENDED_ANALYSIS.md](PHASE3_EXTENDED_ANALYSIS.md)** | 🔬 Deep dive + dependencies | Technical leads, engineers | **60 min** |
 | **[PHASE3_FEATURES_MATRIX.csv](PHASE3_FEATURES_MATRIX.csv)** | 📥 CSV export for tracking | Planners, project managers | N/A |
@@ -314,11 +314,11 @@ Tier 5 — Rejected                → 1 item (out-of-scope)       ❌ Out-of-sc
 
 ### 🔧 Implementer (30 minutes)
 1. [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) → Key Findings
-2. [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md) → Items 99–100 (Now tier)
+2. [PHASE3_ROADMAP_MERGE.md](../roadmap/PHASE3_ROADMAP_MERGE.md) → Items 99–100 (Now tier)
 
 ### 🏗️ Architect (2 hours)
 1. [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) → Full document
-2. [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md) → Full document
+2. [PHASE3_ROADMAP_MERGE.md](../roadmap/PHASE3_ROADMAP_MERGE.md) → Full document
 3. [PHASE3_EXTENDED_ANALYSIS.md](PHASE3_EXTENDED_ANALYSIS.md) → Tier 2 sequencing + RFP topics
 4. [PHASE3_DELIVERY_CHECKLIST.md](PHASE3_DELIVERY_CHECKLIST.md) → Peer review + sign-off
 
@@ -331,7 +331,7 @@ Tier 5 — Rejected                → 1 item (out-of-scope)       ❌ Out-of-sc
 ## Support & Questions
 
 For questions or clarifications:
-- **Implementation scope:** See [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md) Item Specs
+- **Implementation scope:** See [PHASE3_ROADMAP_MERGE.md](../roadmap/PHASE3_ROADMAP_MERGE.md) Item Specs
 - **Dependency sequencing:** See [PHASE3_EXTENDED_ANALYSIS.md](PHASE3_EXTENDED_ANALYSIS.md) Dependency Resolution section
 - **Design RFP scope:** See [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) Phase 4 section
 - **Charter alignment:** See [PHASE3_GAP_ANALYSIS.md](PHASE3_GAP_ANALYSIS.md) Charter Alignment Reference

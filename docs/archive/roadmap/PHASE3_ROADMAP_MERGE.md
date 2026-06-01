@@ -1,5 +1,10 @@
 # Phase 3 Gap Analysis — ROADMAP.md Integration Instructions
 
+> **Archive note (2026-06-01):** This merge-plan artifact is retained for
+> historical context. The active roadmap lives in
+> [`../../../ROADMAP.md`](../../../ROADMAP.md), and current research synthesis
+> lives in [`../../../RESEARCH_REPORT.md`](../../../RESEARCH_REPORT.md).
+
 **Date:** 2026-05-XX  
 **Document:** Ready for merge into ROADMAP.md  
 **Format:** Markdown; compatible with existing ROADMAP structure
@@ -404,4 +409,4 @@ Add to ROADMAP.md line 3–4 (status update):
 
 ---
 
-*Document prepared for ROADMAP.md integration. Ready to commit as supplementary docs (PHASE3_GAP_ANALYSIS.md, PHASE3_FEATURES_MATRIX.csv, PHASE3_EXTENDED_ANALYSIS.md).*
+*Document prepared for ROADMAP.md integration. Ready to commit as supplementary docs ([PHASE3_GAP_ANALYSIS.md](../research/PHASE3_GAP_ANALYSIS.md), [PHASE3_FEATURES_MATRIX.csv](../research/PHASE3_FEATURES_MATRIX.csv), [PHASE3_EXTENDED_ANALYSIS.md](../research/PHASE3_EXTENDED_ANALYSIS.md)).*

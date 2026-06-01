@@ -1,5 +1,11 @@
 # UniversalConverterX — Product Roadmap
 
+> **Archive note (2026-06-01):** This iter-8 complete roadmap snapshot is
+> retained as historical context. The active roadmap lives in
+> [`../../../ROADMAP.md`](../../../ROADMAP.md), shipped work is summarized in
+> [`../../../COMPLETED.md`](../../../COMPLETED.md), and current research
+> synthesis lives in [`../../../RESEARCH_REPORT.md`](../../../RESEARCH_REPORT.md).
+
 **Status:** v2.21.0-preview · 181 sidecar engines · 280+ presets · 45+ UI pages  
 **Last updated:** 2026-05-03 (iter-8 Phase 3 research integration — 120 items, 230+ sources)
 
@@ -8,7 +14,7 @@
 > Phase 3 evaluated features across 8-criteria framework; 22 items promoted to actionable tiers (Now/Next/Later).  
 > Phase 3 findings: 100% charter-aligned, zero conflicts, realistic effort (60–70 days over 18 weeks, 1–2 FTE).  
 > **Result:** Items 99–120 integrated below; 5 design RFPs queued for Phase 4 (parallel track).  
-> See [PHASE3_README.md](PHASE3_README.md), [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md), [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md) for full analysis.
+> See [PHASE3_README.md](../research/PHASE3_README.md), [PHASE3_SUMMARY.md](../research/PHASE3_SUMMARY.md), [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md) for full analysis.
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
@@ -2625,4 +2631,4 @@ Five parallel design initiatives to resolve UC tier placement:
 **Status:** Ready for Phase 4 RFP kickoff + v2.21 shipping  
 **Next Review:** Phase 4 RFP decision gates (June 2026)
 
-*For detailed analysis, see: [PHASE3_README.md](PHASE3_README.md), [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md), [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md), [PHASE3_GAP_ANALYSIS.md](PHASE3_GAP_ANALYSIS.md), [PHASE3_EXTENDED_ANALYSIS.md](PHASE3_EXTENDED_ANALYSIS.md), [PHASE3_FEATURES_MATRIX.csv](PHASE3_FEATURES_MATRIX.csv).*
+*For detailed analysis, see: [PHASE3_README.md](../research/PHASE3_README.md), [PHASE3_SUMMARY.md](../research/PHASE3_SUMMARY.md), [PHASE3_ROADMAP_MERGE.md](PHASE3_ROADMAP_MERGE.md), [PHASE3_GAP_ANALYSIS.md](../research/PHASE3_GAP_ANALYSIS.md), [PHASE3_EXTENDED_ANALYSIS.md](../research/PHASE3_EXTENDED_ANALYSIS.md), [PHASE3_FEATURES_MATRIX.csv](../research/PHASE3_FEATURES_MATRIX.csv).*

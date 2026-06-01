@@ -118,6 +118,14 @@ ucx info document.pdf
 --hw-accel                Enable hardware acceleration
 ```
 
+## Project planning
+
+- [ROADMAP.md](ROADMAP.md) — active roadmap.
+- [COMPLETED.md](COMPLETED.md) — shipped feature summary.
+- [RESEARCH_REPORT.md](RESEARCH_REPORT.md) — current research synthesis.
+- [docs/research/](docs/research/) — audit and state-of-repo evidence.
+- [docs/archive/](docs/archive/) — archived phase roadmap and research artifacts.
+
 ## Project Structure
 
 ```

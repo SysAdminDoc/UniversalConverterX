@@ -1,7 +1,12 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.20.1 · 176 sidecar engines · 274+ presets · 45 UI pages
-**Last updated:** 2026-05-02 (iter-7 wave 5 + Phase 5 self-audit — 98 items, 165 sources)
+**Status:** v2.21.0 · 181 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-01 (planning consolidation; Phase 3/iter-8 artifacts archived, v2.21.0 release state reflected)
+
+Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
+shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
+lives in [`CHANGELOG.md`](CHANGELOG.md), and historical phase artifacts are
+archived under [`docs/archive/`](docs/archive/).
 
 All format-coverage waves (A–X, shipped through v2.20.1) are complete and
 retired from this document. This roadmap focuses on the next strategic
