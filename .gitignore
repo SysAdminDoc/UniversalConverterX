@@ -35,3 +35,11 @@ installer/wix/PresetFiles.generated.wxs
 __pycache__/
 *.pyc
 .factory/
+
+# Markdown files local-only (except README)
+*.md
+!README.md
+
+# Markdown files local-only (except README)
+*.md
+!README.md
