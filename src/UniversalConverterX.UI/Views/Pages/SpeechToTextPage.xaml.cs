@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -226,6 +227,14 @@ public sealed partial class SpeechToTextPage : Page
             f.SettingsSummary = summary;
     }
 
+    private void Settings_Number_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (TranscribeButton is null) return;
+        var summary = BuildSettingsSummary();
+        foreach (var f in _files)
+            f.SettingsSummary = summary;
+    }
+
     // -------------------------------------------------------------------------
     // Transcribe
     // -------------------------------------------------------------------------
@@ -240,6 +249,7 @@ public sealed partial class SpeechToTextPage : Page
         var format = SelectedComboTag(FormatCombo) ?? "srt";
         var wordTs = WordTimestampsToggle.IsOn;
         var useVad = VadCheck?.IsChecked == true;
+        var batchSize = SafeBatchSize(BatchSizeBox?.Value);
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -260,8 +270,7 @@ public sealed partial class SpeechToTextPage : Page
                 // Per-backend arg shape:
                 //   whisper-stt (faster-whisper):  no subcommand, flat flags.
                 //   whisper-cpp:                   `transcribe` subcommand,
-                //                                  output extension drives format,
-                //                                  --vad flag is whisper.cpp-only.
+                //                                  output extension drives format.
                 List<string> args;
                 if (backend == "whisper-cpp")
                 {
@@ -300,6 +309,9 @@ public sealed partial class SpeechToTextPage : Page
                         "--format",   format,
                     ];
                     if (wordTs) args.Add("--word-timestamps");
+                    if (useVad) args.Add("--vad");
+                    args.Add("--batch-size");
+                    args.Add(batchSize.ToString(CultureInfo.InvariantCulture));
                 }
 
                 item.Progress = 0;
@@ -424,12 +436,21 @@ public sealed partial class SpeechToTextPage : Page
     {
         var model = SelectedComboTag(ModelCombo) ?? "base";
         var format = SelectedComboTag(FormatCombo) ?? "srt";
-        return $"{model} / .{format}";
+        var backend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
+        var batch = backend == "whisper-stt" ? $" / b{SafeBatchSize(BatchSizeBox?.Value)}" : "";
+        var vad = VadCheck?.IsChecked == true ? " / VAD" : "";
+        return $"{model} / .{format}{batch}{vad}";
     }
 
     private static string? SelectedComboTag(ComboBox combo)
     {
         return (combo.SelectedItem as ComboBoxItem)?.Tag as string;
+    }
+
+    private static int SafeBatchSize(double? value)
+    {
+        if (value is null || double.IsNaN(value.Value)) return 8;
+        return Math.Clamp((int)Math.Round(value.Value), 1, 32);
     }
 
     private static string FormatSize(long bytes) => bytes switch

@@ -112,6 +112,8 @@
                             <ComboBoxItem Content="base" Tag="base"/>
                             <ComboBoxItem Content="small" Tag="small"/>
                             <ComboBoxItem Content="medium" Tag="medium"/>
+                            <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
+                            <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
                             <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
                         </ComboBox>
                         <ComboBox x:Name="LanguageCombo"
@@ -132,6 +134,25 @@
                             <ComboBoxItem Content="Russian" Tag="ru"/>
                             <ComboBoxItem Content="Korean" Tag="ko"/>
                         </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Inference" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <CheckBox x:Name="VadCheck"
+                                  Content="VAD pre-filter (skip silence)"
+                                  Checked="Settings_Bool_Changed"
+                                  Unchecked="Settings_Bool_Changed"
+                            AutomationProperties.AutomationId="AiSubtitleVadCheck"/>
+                        <NumberBox x:Name="BatchSizeBox"
+                                   Header="faster-whisper batch size"
+                                   Value="8"
+                                   Minimum="1"
+                                   Maximum="32"
+                                   SpinButtonPlacementMode="Inline"
+                                   ValueChanged="Settings_Number_Changed"
+                            AutomationProperties.AutomationId="AiSubtitleBatchSizeBox"/>
                     </StackPanel>
                 </Border>
 

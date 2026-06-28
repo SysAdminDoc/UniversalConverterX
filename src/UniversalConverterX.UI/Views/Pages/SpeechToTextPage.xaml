@@ -260,7 +260,7 @@
                             <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
                         </ComboBox>
                         <CheckBox x:Name="VadCheck"
-                                  Content="VAD pre-filter (skip silence — whisper.cpp only)"
+                                  Content="VAD pre-filter (skip silence)"
                                   Checked="Settings_Changed"
                                   Unchecked="Settings_Changed"
                             AutomationProperties.AutomationId="VadCheck"/>
@@ -336,6 +336,14 @@
                                       OnContent="On"
                                       Toggled="Settings_Changed"
                             AutomationProperties.AutomationId="WordTimestampsToggle"/>
+                        <NumberBox x:Name="BatchSizeBox"
+                                   Header="faster-whisper batch size"
+                                   Value="8"
+                                   Minimum="1"
+                                   Maximum="32"
+                                   SpinButtonPlacementMode="Inline"
+                                   ValueChanged="Settings_Number_Changed"
+                                   AutomationProperties.AutomationId="SpeechToTextBatchSizeBox"/>
                     </StackPanel>
                 </Border>
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -77,6 +78,8 @@ public sealed partial class AiSubtitlePage : Page
 
     private void Settings_Bool_Changed(object sender, RoutedEventArgs e) => UpdateRunEnabled();
 
+    private void Settings_Number_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args) => UpdateRunEnabled();
+
     private void UpdateRunEnabled()
     {
         if (RunButton is null) return;
@@ -92,6 +95,8 @@ public sealed partial class AiSubtitlePage : Page
         var language = SelectedTag(LanguageCombo) ?? "auto";
         var format = SelectedTag(FormatCombo) ?? "srt";
         var burnIn = BurnInCheck.IsChecked == true;
+        var useVad = VadCheck.IsChecked == true;
+        var batchSize = SafeBatchSize(BatchSizeBox.Value);
 
         // Subtitle output sits next to the source. Burn-in produces a second
         // file <name>_subtitled<ext>.
@@ -120,6 +125,7 @@ public sealed partial class AiSubtitlePage : Page
                 "--model",  model,
                 "--language", language,
             ];
+            if (useVad) sttArgs.Add("--vad");
         }
         else
         {
@@ -131,6 +137,9 @@ public sealed partial class AiSubtitlePage : Page
                 "--language", language,
                 "--format", format,
             ];
+            if (useVad) sttArgs.Add("--vad");
+            sttArgs.Add("--batch-size");
+            sttArgs.Add(batchSize.ToString(CultureInfo.InvariantCulture));
         }
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
@@ -263,6 +272,12 @@ public sealed partial class AiSubtitlePage : Page
     {
         if (combo.SelectedItem is ComboBoxItem item && item.Tag is string tag) return tag;
         return null;
+    }
+
+    private static int SafeBatchSize(double value)
+    {
+        if (double.IsNaN(value)) return 8;
+        return Math.Clamp((int)Math.Round(value), 1, 32);
     }
 
     private static bool IsVideoFile(string path)
