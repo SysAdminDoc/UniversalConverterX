@@ -1,5 +1,6 @@
 using System.Net;
 using System.IO.Compression;
+using System.Security.Cryptography;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
@@ -17,6 +18,10 @@ public class ToolDownloaderTests : IDisposable
     [Fact]
     public async Task DownloadToolAsync_WithChecksumMismatch_ShouldFailBeforeInstall()
     {
+        Directory.CreateDirectory(Path.Combine(_toolsBasePath, "bin"));
+        var previousBytes = new byte[] { 9, 9, 9 };
+        await File.WriteAllBytesAsync(ExpectedToolPath("ffmpeg"), previousBytes);
+
         var downloader = CreateDownloader([1, 2, 3]);
         var info = downloader.GetToolDownloadInfo("ffmpeg");
         info.Should().NotBeNull();
@@ -27,16 +32,17 @@ public class ToolDownloaderTests : IDisposable
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("Checksum mismatch");
-        File.Exists(ExpectedToolPath("ffmpeg")).Should().BeFalse();
+        File.ReadAllBytes(ExpectedToolPath("ffmpeg")).Should().Equal(previousBytes);
     }
 
     [Fact]
     public async Task DownloadToolAsync_WithInstallerExecutable_ShouldFailClosed()
     {
-        var downloader = CreateDownloader([1, 2, 3]);
+        var payload = new byte[] { 1, 2, 3 };
+        var downloader = CreateDownloader(payload);
         var info = downloader.GetToolDownloadInfo("ffmpeg");
         info.Should().NotBeNull();
-        info!.ExpectedChecksum = null;
+        info!.ExpectedChecksum = Sha256(payload);
         SetAllPlatformUrls(info, "https://example.test/setup.exe");
 
         var result = await downloader.DownloadToolAsync("ffmpeg");
@@ -51,12 +57,13 @@ public class ToolDownloaderTests : IDisposable
     {
         var exeName = "ffmpeg" + (OperatingSystem.IsWindows() ? ".exe" : "");
         var companionName = "ffprobe" + (OperatingSystem.IsWindows() ? ".exe" : "");
-        var downloader = CreateDownloader(CreateZip(
+        var payload = CreateZip(
             ("nested/" + exeName, [1, 2, 3]),
-            ("nested/" + companionName, [4, 5, 6])));
+            ("nested/" + companionName, [4, 5, 6]));
+        var downloader = CreateDownloader(payload);
         var info = downloader.GetToolDownloadInfo("ffmpeg");
         info.Should().NotBeNull();
-        info!.ExpectedChecksum = null;
+        info!.ExpectedChecksum = Sha256(payload);
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
         var result = await downloader.DownloadToolAsync("ffmpeg");
@@ -64,6 +71,38 @@ public class ToolDownloaderTests : IDisposable
         result.Success.Should().BeTrue();
         File.Exists(ExpectedToolPath("ffmpeg")).Should().BeTrue();
         File.Exists(Path.Combine(_toolsBasePath, "bin", companionName)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DownloadToolAsync_WithExistingTool_ShouldRetainRollbackBackup()
+    {
+        var exeName = "ffmpeg" + (OperatingSystem.IsWindows() ? ".exe" : "");
+        var companionName = "ffprobe" + (OperatingSystem.IsWindows() ? ".exe" : "");
+        var binDir = Path.Combine(_toolsBasePath, "bin");
+        Directory.CreateDirectory(binDir);
+        await File.WriteAllBytesAsync(Path.Combine(binDir, exeName), [7, 7, 7]);
+        await File.WriteAllBytesAsync(Path.Combine(binDir, companionName), [8, 8, 8]);
+
+        var payload = CreateZip(
+            ("nested/" + exeName, [1, 2, 3]),
+            ("nested/" + companionName, [4, 5, 6]));
+        var downloader = CreateDownloader(payload);
+        var info = downloader.GetToolDownloadInfo("ffmpeg");
+        info.Should().NotBeNull();
+        info!.ExpectedChecksum = Sha256(payload);
+        SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
+
+        var result = await downloader.DownloadToolAsync("ffmpeg");
+
+        result.Success.Should().BeTrue();
+        File.ReadAllBytes(Path.Combine(binDir, exeName)).Should().Equal([1, 2, 3]);
+        File.ReadAllBytes(Path.Combine(binDir, companionName)).Should().Equal([4, 5, 6]);
+
+        var rollbackDirs = Directory.GetDirectories(Path.Combine(_toolsBasePath, "rollback", "ffmpeg"));
+        rollbackDirs.Should().ContainSingle();
+        File.ReadAllBytes(Path.Combine(rollbackDirs[0], exeName)).Should().Equal([7, 7, 7]);
+        File.ReadAllBytes(Path.Combine(rollbackDirs[0], companionName)).Should().Equal([8, 8, 8]);
+        File.Exists(Path.Combine(rollbackDirs[0], "manifest.json")).Should().BeTrue();
     }
 
     public void Dispose()
@@ -99,6 +138,12 @@ public class ToolDownloaderTests : IDisposable
             }
         }
         return stream.ToArray();
+    }
+
+    private static string Sha256(byte[] payload)
+    {
+        var hash = SHA256.HashData(payload);
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
     private string ExpectedToolPath(string executableName)

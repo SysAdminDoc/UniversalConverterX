@@ -1,7 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Console.Commands;
 
@@ -126,9 +129,32 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
             return 1;
         }
 
-        AnsiConsole.MarkupLine($"[yellow]Automatic download is not yet implemented.[/]");
-        AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine($"Please download [cyan]{tool.Name}[/] manually from:");
+        var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
+        var downloader = new ToolDownloader(
+            Options.Create(new ConverterXOptions
+            {
+                ToolsBasePath = toolsPath,
+                SearchSystemTools = false,
+            }),
+            new HttpClient());
+
+        if (downloader.GetToolDownloadInfo(toolId) is not null)
+        {
+            AnsiConsole.MarkupLine($"[green]Downloading {tool.Name} to:[/] {toolsPath}");
+            var result = await downloader.DownloadToolAsync(toolId);
+            if (result.Success)
+            {
+                var version = string.IsNullOrWhiteSpace(result.Version) ? "" : $" {result.Version}";
+                AnsiConsole.MarkupLine($"[green]Installed {tool.Name}{version}.[/]");
+                AnsiConsole.MarkupLine("[dim]Existing binaries, if replaced, were retained under tools/rollback.[/]");
+                return 0;
+            }
+
+            AnsiConsole.MarkupLine($"[red]Download failed:[/] {result.ErrorMessage}");
+            AnsiConsole.WriteLine();
+        }
+
+        AnsiConsole.MarkupLine($"Please install [cyan]{tool.Name}[/] manually from:");
         AnsiConsole.MarkupLine($"  [link={tool.Website}]{tool.Website}[/]");
         AnsiConsole.WriteLine();
 

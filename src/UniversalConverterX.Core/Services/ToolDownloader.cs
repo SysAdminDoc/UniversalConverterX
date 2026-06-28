@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -63,9 +64,8 @@ public class ToolDownloader : IToolDownloader
         {
             _logger?.LogInformation("Starting download of {Tool}", toolName);
 
-            // Get the download URL for current platform
-            var downloadUrl = await GetDownloadUrlAsync(downloadInfo, cancellationToken);
-            if (string.IsNullOrEmpty(downloadUrl))
+            var resolved = await ResolveDownloadAsync(downloadInfo, cancellationToken);
+            if (string.IsNullOrEmpty(resolved.Url))
             {
                 return new ToolDownloadResult(
                     Success: false,
@@ -74,7 +74,7 @@ public class ToolDownloader : IToolDownloader
                     ErrorMessage: $"No download available for {toolName} on {_platform}-{_architecture}");
             }
 
-            _logger?.LogDebug("Download URL: {Url}", downloadUrl);
+            _logger?.LogDebug("Download URL: {Url}", resolved.Url);
 
             // Create temp directory for download
             var tempDir = Path.Combine(Path.GetTempPath(), $"ucx-download-{Guid.NewGuid()}");
@@ -83,25 +83,34 @@ public class ToolDownloader : IToolDownloader
             try
             {
                 // Download the file
-                var downloadPath = Path.Combine(tempDir, GetFilenameFromUrl(downloadUrl));
-                await DownloadFileAsync(downloadUrl, downloadPath, progress, cancellationToken);
+                var downloadPath = Path.Combine(tempDir, GetFilenameFromUrl(resolved.Url));
+                await DownloadFileAsync(resolved.Url, downloadPath, progress, cancellationToken);
 
-                // Verify checksum if available
-                if (!string.IsNullOrEmpty(downloadInfo.ExpectedChecksum))
+                var configuredChecksum = NormalizeSha256(downloadInfo.ExpectedChecksum);
+                if (!string.IsNullOrWhiteSpace(downloadInfo.ExpectedChecksum) && configuredChecksum is null)
+                    throw new InvalidDataException($"Invalid SHA-256 checksum configured for {toolName}.");
+
+                var expectedChecksum = configuredChecksum ?? resolved.Sha256;
+                if (string.IsNullOrWhiteSpace(expectedChecksum) && downloadInfo.RequireChecksum)
+                    throw new InvalidDataException(
+                        $"No SHA-256 checksum is available for {toolName}; refusing to install an unchecked download.");
+
+                if (!string.IsNullOrEmpty(expectedChecksum))
                 {
                     var actualChecksum = await ComputeFileChecksumAsync(downloadPath, cancellationToken);
-                    if (!string.Equals(actualChecksum, downloadInfo.ExpectedChecksum, StringComparison.OrdinalIgnoreCase))
+                    if (!string.Equals(actualChecksum, expectedChecksum, StringComparison.OrdinalIgnoreCase))
                     {
                         _logger?.LogError("Checksum mismatch for {Tool}. Expected: {Expected}, Got: {Actual}",
-                            toolName, downloadInfo.ExpectedChecksum, actualChecksum);
+                            toolName, expectedChecksum, actualChecksum);
                         throw new InvalidDataException(
-                            $"Checksum mismatch for {toolName}. Expected {downloadInfo.ExpectedChecksum}, got {actualChecksum}.");
+                            $"Checksum mismatch for {toolName}. Expected {expectedChecksum}, got {actualChecksum}.");
                     }
                 }
 
-                // Extract and install
                 var installPath = Path.Combine(_options.ToolsBasePath, "bin");
-                await ExtractAndInstallAsync(downloadPath, installPath, downloadInfo, cancellationToken);
+                var stagePath = Path.Combine(tempDir, "stage");
+                await ExtractAndInstallAsync(downloadPath, stagePath, downloadInfo, cancellationToken);
+                await PromoteStagedInstallAsync(stagePath, installPath, downloadInfo, toolName, cancellationToken);
 
                 // Verify installation
                 var exePath = GetExecutablePath(toolName);
@@ -535,6 +544,109 @@ public class ToolDownloader : IToolDownloader
         return copied;
     }
 
+    private async Task PromoteStagedInstallAsync(
+        string stagePath,
+        string installPath,
+        ToolDownloadInfo downloadInfo,
+        string toolName,
+        CancellationToken cancellationToken)
+    {
+        var stagedFiles = GetStagedInstallFiles(stagePath, downloadInfo).ToList();
+        if (stagedFiles.Count == 0)
+            throw new InvalidDataException($"Archive did not contain {downloadInfo.ExecutableName}.");
+
+        Directory.CreateDirectory(installPath);
+
+        var rollbackRoot = Path.Combine(
+            _options.ToolsBasePath,
+            "rollback",
+            toolName,
+            DateTime.UtcNow.ToString("yyyyMMddHHmmssfff"));
+        var backups = new List<RollbackFile>();
+        var installed = new List<string>();
+
+        try
+        {
+            foreach (var stagedFile in stagedFiles)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var fileName = Path.GetFileName(stagedFile);
+                var destination = Path.Combine(installPath, fileName);
+                if (File.Exists(destination))
+                {
+                    Directory.CreateDirectory(rollbackRoot);
+                    var backup = Path.Combine(rollbackRoot, fileName);
+                    File.Move(destination, backup, overwrite: true);
+                    backups.Add(new RollbackFile(fileName, backup, destination));
+                }
+
+                File.Move(stagedFile, destination, overwrite: true);
+                installed.Add(destination);
+            }
+
+            if (backups.Count > 0)
+                await WriteRollbackManifestAsync(rollbackRoot, toolName, backups, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            RestoreRollback(backups, installed);
+            throw;
+        }
+    }
+
+    private static IEnumerable<string> GetStagedInstallFiles(
+        string stagePath,
+        ToolDownloadInfo downloadInfo)
+    {
+        if (!Directory.Exists(stagePath))
+            yield break;
+
+        foreach (var file in Directory.EnumerateFiles(stagePath, "*", SearchOption.TopDirectoryOnly))
+        {
+            if (ShouldExtractFile(Path.GetFileName(file), downloadInfo))
+                yield return file;
+        }
+    }
+
+    private static async Task WriteRollbackManifestAsync(
+        string rollbackRoot,
+        string toolName,
+        IReadOnlyList<RollbackFile> backups,
+        CancellationToken cancellationToken)
+    {
+        var manifest = new RollbackManifest(
+            ToolName: toolName,
+            InstalledAtUtc: DateTime.UtcNow,
+            Files: backups.Select(f => f.FileName).ToArray());
+        var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(Path.Combine(rollbackRoot, "manifest.json"), json, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static void RestoreRollback(
+        IEnumerable<RollbackFile> backups,
+        IEnumerable<string> installed)
+    {
+        foreach (var file in installed)
+        {
+            try { if (File.Exists(file)) File.Delete(file); } catch { }
+        }
+
+        foreach (var backup in backups.Reverse())
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(backup.DestinationPath);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+                if (File.Exists(backup.BackupPath))
+                    File.Move(backup.BackupPath, backup.DestinationPath, overwrite: true);
+            }
+            catch { }
+        }
+    }
+
     private static bool ShouldExtractFile(string fileName, ToolDownloadInfo downloadInfo)
     {
         var name = Path.GetFileName(fileName);
@@ -553,39 +665,52 @@ public class ToolDownloader : IToolDownloader
                (downloadInfo.AdditionalFiles?.Any(f => name.Equals(f, StringComparison.OrdinalIgnoreCase)) ?? false);
     }
 
-    private async Task<string> GetDownloadUrlAsync(ToolDownloadInfo downloadInfo, CancellationToken cancellationToken)
+    private async Task<ResolvedDownload> ResolveDownloadAsync(
+        ToolDownloadInfo downloadInfo,
+        CancellationToken cancellationToken)
     {
+        var configuredChecksum = NormalizeSha256(downloadInfo.ExpectedChecksum);
+
         // Check for platform-specific URLs
         if (downloadInfo.PlatformUrls != null)
         {
             var platformKey = $"{_platform}-{_architecture}";
             if (downloadInfo.PlatformUrls.TryGetValue(platformKey, out var url))
-                return url;
+            {
+                var digest = configuredChecksum
+                    ?? await TryGetGitHubAssetDigestAsync(downloadInfo, url, cancellationToken).ConfigureAwait(false);
+                return new ResolvedDownload(url, digest, downloadInfo.LatestVersion);
+            }
 
             // Try architecture-agnostic
             if (downloadInfo.PlatformUrls.TryGetValue(_platform, out url))
-                return url;
+            {
+                var digest = configuredChecksum
+                    ?? await TryGetGitHubAssetDigestAsync(downloadInfo, url, cancellationToken).ConfigureAwait(false);
+                return new ResolvedDownload(url, digest, downloadInfo.LatestVersion);
+            }
         }
 
         // Check for GitHub release API
         if (!string.IsNullOrEmpty(downloadInfo.GitHubRepo))
         {
-            return await GetGitHubReleaseUrlAsync(downloadInfo, cancellationToken);
+            return await GetGitHubReleaseDownloadAsync(downloadInfo, configuredChecksum, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         // Return base URL
-        return downloadInfo.BaseDownloadUrl ?? "";
+        return new ResolvedDownload(downloadInfo.BaseDownloadUrl ?? "", configuredChecksum, downloadInfo.LatestVersion);
     }
 
-    private async Task<string> GetGitHubReleaseUrlAsync(ToolDownloadInfo downloadInfo, CancellationToken cancellationToken)
+    private async Task<ResolvedDownload> GetGitHubReleaseDownloadAsync(
+        ToolDownloadInfo downloadInfo,
+        string? configuredChecksum,
+        CancellationToken cancellationToken)
     {
-        var apiUrl = $"https://api.github.com/repos/{downloadInfo.GitHubRepo}/releases/latest";
-        
-        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UniversalConverterX/1.0");
-        
-        var response = await _httpClient.GetFromJsonAsync<GitHubRelease>(apiUrl, cancellationToken);
+        var response = await GetGitHubReleaseAsync(downloadInfo.GitHubRepo!, cancellationToken)
+            .ConfigureAwait(false);
         if (response?.Assets == null)
-            return "";
+            return new ResolvedDownload("", configuredChecksum, null);
 
         // Find the appropriate asset for our platform
         var assetPattern = GetAssetPattern(downloadInfo);
@@ -593,7 +718,43 @@ public class ToolDownloader : IToolDownloader
             !string.IsNullOrWhiteSpace(a.Name) &&
             assetPattern.Any(p => a.Name.Contains(p, StringComparison.OrdinalIgnoreCase)));
 
-        return asset?.BrowserDownloadUrl ?? "";
+        return new ResolvedDownload(
+            asset?.BrowserDownloadUrl ?? "",
+            configuredChecksum ?? NormalizeSha256(asset?.Digest),
+            response.TagName?.TrimStart('v'));
+    }
+
+    private async Task<string?> TryGetGitHubAssetDigestAsync(
+        ToolDownloadInfo downloadInfo,
+        string downloadUrl,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(downloadInfo.GitHubRepo))
+            return null;
+
+        var response = await GetGitHubReleaseAsync(downloadInfo.GitHubRepo, cancellationToken)
+            .ConfigureAwait(false);
+        if (response?.Assets == null)
+            return null;
+
+        var fileName = GetFilenameFromUrl(downloadUrl);
+        var asset = response.Assets.FirstOrDefault(a =>
+                string.Equals(a.BrowserDownloadUrl, downloadUrl, StringComparison.OrdinalIgnoreCase))
+            ?? response.Assets.FirstOrDefault(a =>
+                string.Equals(a.Name, fileName, StringComparison.OrdinalIgnoreCase));
+
+        return NormalizeSha256(asset?.Digest);
+    }
+
+    private async Task<GitHubRelease?> GetGitHubReleaseAsync(string repo, CancellationToken cancellationToken)
+    {
+        var apiUrl = $"https://api.github.com/repos/{repo}/releases/latest";
+
+        if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UniversalConverterX/1.0");
+
+        return await _httpClient.GetFromJsonAsync<GitHubRelease>(apiUrl, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static string[] GetAssetPattern(ToolDownloadInfo downloadInfo)
@@ -645,10 +806,8 @@ public class ToolDownloader : IToolDownloader
     {
         if (!string.IsNullOrEmpty(downloadInfo.GitHubRepo))
         {
-            var apiUrl = $"https://api.github.com/repos/{downloadInfo.GitHubRepo}/releases/latest";
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UniversalConverterX/1.0");
-            
-            var response = await _httpClient.GetFromJsonAsync<GitHubRelease>(apiUrl, cancellationToken);
+            var response = await GetGitHubReleaseAsync(downloadInfo.GitHubRepo, cancellationToken)
+                .ConfigureAwait(false);
             return response?.TagName?.TrimStart('v');
         }
 
@@ -747,6 +906,20 @@ public class ToolDownloader : IToolDownloader
         await using var stream = File.OpenRead(filePath);
         var hash = await SHA256.HashDataAsync(stream, cancellationToken);
         return Convert.ToHexString(hash).ToLowerInvariant();
+    }
+
+    private static string? NormalizeSha256(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var normalized = value.Trim();
+        if (normalized.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
+            normalized = normalized["sha256:".Length..];
+
+        return normalized.Length == 64 && normalized.All(Uri.IsHexDigit)
+            ? normalized.ToLowerInvariant()
+            : null;
     }
 
     private static async Task MakeExecutableAsync(string filePath, CancellationToken cancellationToken)
@@ -909,6 +1082,12 @@ public class ToolDownloader : IToolDownloader
         };
     }
 
+    private sealed record ResolvedDownload(string Url, string? Sha256, string? Version);
+
+    private sealed record RollbackFile(string FileName, string BackupPath, string DestinationPath);
+
+    private sealed record RollbackManifest(string ToolName, DateTime InstalledAtUtc, string[] Files);
+
     private class GitHubRelease
     {
         [JsonPropertyName("tag_name")]
@@ -925,6 +1104,9 @@ public class ToolDownloader : IToolDownloader
 
         [JsonPropertyName("browser_download_url")]
         public string? BrowserDownloadUrl { get; set; }
+
+        [JsonPropertyName("digest")]
+        public string? Digest { get; set; }
     }
 }
 
@@ -964,6 +1146,7 @@ public class ToolDownloadInfo
     public Dictionary<string, string>? PlatformUrls { get; set; }
     public string? VersionArg { get; set; }
     public string? ExpectedChecksum { get; set; }
+    public bool RequireChecksum { get; set; } = true;
     public string? LatestVersion { get; set; }
     public string? Description { get; set; }
     public string? InstallerArgs { get; set; }

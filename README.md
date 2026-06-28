@@ -4,7 +4,7 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.21.3-blue)
+![Version](https://img.shields.io/badge/version-2.21.4-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -223,6 +223,8 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 ```
 
 ## Installing Converter Tools
+
+Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
 ### Windows (winget)
 

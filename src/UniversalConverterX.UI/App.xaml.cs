@@ -35,7 +35,12 @@ public partial class App : Application
         });
 
         services.AddSingleton<IConversionOrchestrator, ConversionOrchestrator>();
-        services.AddSingleton<IToolManager, ToolManager>();
+        services.AddSingleton<IToolDownloader>(sp => new ToolDownloader(
+            sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(),
+            new HttpClient()));
+        services.AddSingleton<IToolManager>(sp => new ToolManager(
+            sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(),
+            sp.GetRequiredService<IToolDownloader>()));
 
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();

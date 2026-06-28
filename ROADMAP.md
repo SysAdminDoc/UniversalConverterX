@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.3 · 184 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-28 (SQLitePCLRaw advisory closed; v2.21.3 local roadmap state reflected)
+**Status:** v2.21.4 · 184 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-28 (signed tool updater closed; v2.21.4 local roadmap state reflected)
 
 Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
 shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
@@ -2684,13 +2684,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P0 - Complete signed tool updater with checksum and rollback
-  Why: `UpdateCheckService` detects new releases, but `ToolManager.DownloadToolAsync` still returns "not implemented", leaving security updates manual.
-  Evidence: `src/UniversalConverterX.UI/Services/UpdateCheckService.cs`; `src/UniversalConverterX.Core/Services/ToolManager.cs`; yt-dlp and FFmpeg release cadence.
-  Touches: `ToolManager`, `ToolDownloader`, `UpdateCheckService`, Settings/Home update UI, `%LocalAppData%/UniversalConverterX/tools/`.
-  Acceptance: user can install/update one tracked tool from the app; download is checksum-verified, staged atomically, old binary is retained for rollback, and failures leave the previous tool runnable.
-  Complexity: L
 
 - [ ] P1 - Reconcile shipped workflow discoverability
   Why: Several shipped or preset-backed workflows remain labeled `Future`, so users are routed to placeholders instead of runnable presets.

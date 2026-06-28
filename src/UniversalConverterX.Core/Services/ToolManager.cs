@@ -14,6 +14,7 @@ public class ToolManager : IToolManager
     private static readonly TimeSpan VersionProbeTimeout = TimeSpan.FromSeconds(10);
     private readonly ILogger<ToolManager>? _logger;
     private readonly ConverterXOptions _options;
+    private readonly IToolDownloader? _downloader;
     private readonly Dictionary<string, ToolDefinition> _toolDefinitions;
     private readonly Dictionary<string, string?> _versionCache = [];
 
@@ -22,6 +23,12 @@ public class ToolManager : IToolManager
         _options = options.Value;
         _logger = logger;
         _toolDefinitions = InitializeToolDefinitions();
+    }
+
+    public ToolManager(IOptions<ConverterXOptions> options, IToolDownloader downloader)
+        : this(options, logger: null)
+    {
+        _downloader = downloader;
     }
 
     public string ToolsBasePath => _options.ToolsBasePath;
@@ -146,14 +153,16 @@ public class ToolManager : IToolManager
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        // Placeholder - actual download implementation would go here
-        _logger?.LogWarning("Tool download not implemented. Please install {Tool} manually.", toolName);
-        
+        if (_downloader is not null)
+            return _downloader.DownloadToolAsync(toolName, progress, cancellationToken);
+
+        _logger?.LogWarning("Tool downloader is not configured. Please install {Tool} manually.", toolName);
+
         return Task.FromResult(new ToolDownloadResult(
             Success: false,
             ToolName: toolName,
             Version: null,
-            ErrorMessage: "Automatic download not implemented. Please install manually."));
+            ErrorMessage: "Tool downloader is not configured. Please install manually."));
     }
 
     public IReadOnlyCollection<ToolInfo> GetAvailableTools()

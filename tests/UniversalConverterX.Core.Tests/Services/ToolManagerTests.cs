@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Core.Tests.Services;
@@ -140,12 +141,25 @@ public class ToolManagerTests
     }
 
     [Fact]
-    public async Task DownloadToolAsync_NotImplemented_ShouldReturnFailure()
+    public async Task DownloadToolAsync_WithoutConfiguredDownloader_ShouldReturnFailure()
     {
         var result = await _toolManager.DownloadToolAsync("ffmpeg");
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task DownloadToolAsync_WithConfiguredDownloader_ShouldDelegate()
+    {
+        var expected = new ToolDownloadResult(true, "ffmpeg", "1.0.0", null);
+        var downloader = new RecordingToolDownloader(expected);
+        var manager = new ToolManager(_optionsMock.Object, downloader);
+
+        var result = await manager.DownloadToolAsync("ffmpeg");
+
+        result.Should().Be(expected);
+        downloader.ToolName.Should().Be("ffmpeg");
     }
 
     [Fact]
@@ -157,5 +171,34 @@ public class ToolManagerTests
 
         path1.Should().Be(path2);
         path2.Should().Be(path3);
+    }
+
+    private sealed class RecordingToolDownloader(ToolDownloadResult result) : IToolDownloader
+    {
+        public string? ToolName { get; private set; }
+
+        public Task<ToolDownloadResult> DownloadToolAsync(
+            string toolName,
+            IProgress<DownloadProgress>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            ToolName = toolName;
+            return Task.FromResult(result);
+        }
+
+        public Task<IReadOnlyList<ToolDownloadResult>> DownloadToolsAsync(
+            IEnumerable<string> toolNames,
+            IProgress<BatchDownloadProgress>? progress = null,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<ToolDownloadResult>>([result]);
+
+        public Task<ToolUpdateInfo?> CheckForUpdateAsync(
+            string toolName,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<ToolUpdateInfo?>(null);
+
+        public ToolDownloadInfo? GetToolDownloadInfo(string toolName) => null;
+
+        public IReadOnlyList<string> GetDownloadableTools() => [];
     }
 }
