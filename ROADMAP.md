@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.2 · 184 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-28 (Item 16 closed; v2.21.2 local roadmap state reflected)
+**Status:** v2.21.3 · 184 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-28 (SQLitePCLRaw advisory closed; v2.21.3 local roadmap state reflected)
 
 Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
 shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
@@ -2684,13 +2684,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P0 - Patch SQLitePCLRaw high-severity advisory
-  Why: Local package audit reports vulnerable transitive `SQLitePCLRaw.lib.e_sqlite3` 2.1.11 in the WinUI project.
-  Evidence: `dotnet list src\UniversalConverterX.sln package --vulnerable --include-transitive`; GHSA-2m69-gcr7-jv3q.
-  Touches: `src/UniversalConverterX.UI/UniversalConverterX.UI.csproj`, `tests/UniversalConverterX.Core.Tests/`, build verification docs.
-  Acceptance: `dotnet list ... --vulnerable --include-transitive` reports no vulnerable packages; history SQLite smoke still opens, writes, queries, and clears rows.
-  Complexity: S
 
 - [ ] P0 - Complete signed tool updater with checksum and rollback
   Why: `UpdateCheckService` detects new releases, but `ToolManager.DownloadToolAsync` still returns "not implemented", leaving security updates manual.

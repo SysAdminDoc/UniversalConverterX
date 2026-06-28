@@ -83,6 +83,7 @@ public interface IHistoryService
 public sealed class HistoryService : IHistoryService
 {
     private const int RecentCap = 100;
+    private static int _sqliteProviderInitialized;
 
     /// <summary>Lower bound on the row cap so a misconfigured options blob
     /// (Max=0) can't reduce retention to zero and silently drop every job.</summary>
@@ -143,6 +144,8 @@ public sealed class HistoryService : IHistoryService
 
     private SqliteConnection Open()
     {
+        EnsureSqliteProvider();
+
         var builder = new SqliteConnectionStringBuilder
         {
             DataSource = _dbPath,
@@ -159,6 +162,14 @@ public sealed class HistoryService : IHistoryService
             try { pragma.ExecuteNonQuery(); } catch { /* WAL unsupported on some drives */ }
         }
         return conn;
+    }
+
+    private static void EnsureSqliteProvider()
+    {
+        if (Interlocked.Exchange(ref _sqliteProviderInitialized, 1) != 0)
+            return;
+
+        SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_winsqlite3());
     }
 
     private void EnsureSchema()
