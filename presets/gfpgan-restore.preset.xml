@@ -12,7 +12,7 @@
     <OutputFileNameTemplate>{dir}/{stem}_restored</OutputFileNameTemplate>
     <OutputExtension>png</OutputExtension>
     <Engine>gfpgan</Engine>
-    <InvocationMode>batch-output-dir</InvocationMode>
+    <InvocationMode>per-file</InvocationMode>
     <Args>
         <Arg>restore</Arg>
     </Args>

@@ -82,7 +82,8 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("lens-correction", "Lens Correction", "Fix distortion, rolling shutter, stabilize", "\uE71E", blue, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("vr-converter", "VR Converter", "Equirectangular, fisheye, 360° to 2D", "\uE787", blue, "Future", yellow, false, null));
         VideoTools.Add(new ToolboxTile("frame-snapshot", "Frame Snapshot", "Extract precise frames as images", "\uE722", blue, "Ready", green, false, "FFmpeg"));
-        VideoTools.Add(new ToolboxTile("ai-video-enhancer", "Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution (slow)", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
+        VideoTools.Add(new ToolboxTile("ai-video-enhancer", "Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution and cleanup", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
+        VideoTools.Add(new ToolboxTile("presets:video-face-enhance", "Video Face Enhance", "CodeFormer/GFPGAN frame restoration with source audio passthrough", "\uE77B", blue, "Ready", green, true, "CodeFormer / GFPGAN"));
 
         // AI
         AiTools.Add(new ToolboxTile("ai-bgremove", "Background Remover", "Remove or replace video background", "\uE91B", green, "Ready", green, true, "AlphaCut"));

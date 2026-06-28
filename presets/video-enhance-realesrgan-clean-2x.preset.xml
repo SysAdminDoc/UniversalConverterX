@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Preset xmlns="https://universalconverterx.io/preset/v1">
-    <Name>Anime upscale 2× (video, Real-ESRGAN animevideo)</Name>
+    <Name>Video denoise/enhance 2x (Real-ESRGAN)</Name>
     <Folder>AI/Video</Folder>
     <InputTypes>
         <Extension>mp4</Extension>
@@ -10,19 +10,18 @@
         <Extension>avi</Extension>
         <Extension>webm</Extension>
         <Extension>ts</Extension>
+        <Extension>mts</Extension>
     </InputTypes>
-    <OutputFileNameTemplate>{dir}/{stem}_anime2x</OutputFileNameTemplate>
+    <OutputFileNameTemplate>{dir}/{stem}_ai_clean2x</OutputFileNameTemplate>
     <OutputExtension>mp4</OutputExtension>
-    <Engine>anime-upscale</Engine>
+    <Engine>realesrgan</Engine>
     <InvocationMode>per-file</InvocationMode>
     <Args>
-        <Arg>video</Arg>
+        <Arg>upscale-video</Arg>
+        <Arg>--model</Arg>
+        <Arg>realesrgan-x4plus</Arg>
         <Arg>--scale</Arg>
         <Arg>2</Arg>
-        <Arg>--model</Arg>
-        <Arg>realesr-animevideov3</Arg>
-        <Arg>--codec</Arg>
-        <Arg>libx264</Arg>
         <Arg>--crf</Arg>
         <Arg>18</Arg>
     </Args>

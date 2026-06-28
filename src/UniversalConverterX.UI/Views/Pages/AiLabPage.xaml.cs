@@ -24,8 +24,8 @@ public sealed partial class AiLabPage : Page
         var orange = (Brush)Application.Current.Resources["AccentOrangeBrush"];
         var red = (Brush)Application.Current.Resources["AccentRedBrush"];
 
-        Tools.Add(new AiLabToolTile("Video Enhancer", "Upscale footage, reduce noise, sharpen detail, and smooth frame rate.", "\uE7B3", blue, "Planned", "Needs model cache and preview", "Real-ESRGAN / RIFE"));
-        Tools.Add(new AiLabToolTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos without cloud processing.", "\uEB9F", cyan, "Planned", "Needs standalone workflow", "Real-ESRGAN"));
+        Tools.Add(new AiLabToolTile("Video Enhancer", "Upscale, denoise, anime-sharpen, and face-enhance videos frame-by-frame.", "\uE7B3", blue, "Ready", "Workflow + presets available", "Real-ESRGAN / CodeFormer"));
+        Tools.Add(new AiLabToolTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos without cloud processing.", "\uEB9F", cyan, "Ready", "Workflow available", "Real-ESRGAN"));
         Tools.Add(new AiLabToolTile("Background Remover", "Remove or replace video/image backgrounds and preserve alpha exports.", "\uE91B", green, "Ready", "Workflow available", "AlphaCut"));
         Tools.Add(new AiLabToolTile("Watermark Remover", "Inpaint selected logos, captions, objects, or people.", "\uE71B", orange, "Planned", "Needs region selection UI", "VideoSubtitleRemover"));
         Tools.Add(new AiLabToolTile("AI Subtitle & Translation", "Generate, edit, translate, burn, or export SRT/VTT/ASS captions.", "\uED1E", green, "Planned", "Needs Whisper pipeline", "Whisper"));

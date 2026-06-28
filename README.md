@@ -4,7 +4,7 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.21.1-blue)
+![Version](https://img.shields.io/badge/version-2.21.2-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -33,7 +33,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 
 UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
 
-Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Audio Compressor, Voice Changer, and Slideshow Maker.
+Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Audio Compressor, Voice Changer, Slideshow Maker, and Video Face Enhance.
 
 ## Features
 

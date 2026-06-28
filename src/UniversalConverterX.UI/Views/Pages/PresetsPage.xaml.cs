@@ -277,6 +277,8 @@ public sealed partial class PresetsPage : Page
         "demucs"       => "\uE767",
         "gfpgan"       => "\uE77B",
         "alphacut"     => "\uE91B",
+        "anime-upscale" => "\uE799",
+        "video-face-enhance" => "\uE77B",
         "lipsight"     => "\uE909",
         "recordcast"   => "\uE714",
         "vertigo"      => "\uE740",

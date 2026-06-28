@@ -91,7 +91,7 @@ public sealed partial class HomePage : Page
         var greenSurface = (Brush)Application.Current.Resources["SurfaceSoftBrush"];
 
         Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, PDFs, and 3D files.", "\uE895", green, greenSurface, "Ready", "Convert files", "converter"));
-        Actions.Add(new HomeActionTile("Video Enhancer", "Planned upscaling, denoise, and frame interpolation workflow.", "\uE7B3", blue, blueSurface, "Planned", "View status", "ai-lab"));
+        Actions.Add(new HomeActionTile("Video Enhancer", "Upscale, denoise, anime-sharpen, and face-enhance clips locally.", "\uE7B3", blue, blueSurface, "Ready", "Enhance video", "ai-video-enhancer"));
         Actions.Add(new HomeActionTile("Compressor", "Compress video for web, email, and archive targets.", "\uE91F", cyan, blueSurface, "Ready", "Compress video", "compressor"));
         Actions.Add(new HomeActionTile("Downloader", "Paste URLs, choose quality, and save to the local queue.", "\uE896", blue, blueSurface, "Ready", "Download media", "downloader"));
         Actions.Add(new HomeActionTile("Recorder", "Capture fixed-duration desktop recordings with local FFmpeg processing.", "\uE7C8", red, blueSurface, "Ready", "Record screen", "recorder"));
@@ -100,7 +100,7 @@ public sealed partial class HomePage : Page
         AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Create transcript-backed summaries from long recordings.", "\uE8D2", blue, "Planned", "ai-lab"));
         AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Generate editable caption files and translations.", "\uED1E", green, "Planned", "ai-lab"));
         AiFeatures.Add(new HomeAiFeatureTile("Watermark Remover", "Inpaint selected logos, text, or objects.", "\uE71B", orange, "Planned", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Ready", "ai-image-enhancer"));
         AiFeatures.Add(new HomeAiFeatureTile("Noise Remover", "Reduce background noise in speech and camera audio.", "\uE767", blue, "Planned", "ai-lab"));
         AiFeatures.Add(new HomeAiFeatureTile("Vocal Remover", "Split vocals and instrumentals for editing.", "\uEC4F", red, "Planned", "ai-lab"));
 
@@ -117,7 +117,10 @@ public sealed partial class HomePage : Page
             new("Trim a clip", "Open video editor trim workflow", "editor"),
             new("Download from URL", "Open downloader", "downloader"),
             new("Record screen", "Open desktop screen recorder", "recorder"),
-            new("Video enhancer", "View AI Lab status", "ai-lab"),
+            new("Video enhancer", "Open Real-ESRGAN video enhancement", "ai-video-enhancer"),
+            new("Video denoise", "Run Real-ESRGAN video cleanup presets", "presets:realesrgan"),
+            new("Anime video sharpen", "Run anime-focused Real-ESRGAN presets", "presets:anime-upscale"),
+            new("Video face enhance", "Run CodeFormer frame enhancement presets", "presets:video-face-enhance"),
             new("Subtitle generator", "View AI Lab status", "ai-lab"),
             new("Watermark remover", "View AI Lab status", "ai-lab"),
             new("Background remover", "Open background remover", "ai-bgremove"),

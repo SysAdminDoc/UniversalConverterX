@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Preset xmlns="https://universalconverterx.io/preset/v1">
-    <Name>Anime upscale 2× (video, Real-ESRGAN animevideo)</Name>
+    <Name>Video face enhance (CodeFormer)</Name>
     <Folder>AI/Video</Folder>
     <InputTypes>
         <Extension>mp4</Extension>
@@ -10,19 +10,21 @@
         <Extension>avi</Extension>
         <Extension>webm</Extension>
         <Extension>ts</Extension>
+        <Extension>mts</Extension>
     </InputTypes>
-    <OutputFileNameTemplate>{dir}/{stem}_anime2x</OutputFileNameTemplate>
+    <OutputFileNameTemplate>{dir}/{stem}_face_enhanced</OutputFileNameTemplate>
     <OutputExtension>mp4</OutputExtension>
-    <Engine>anime-upscale</Engine>
+    <Engine>video-face-enhance</Engine>
     <InvocationMode>per-file</InvocationMode>
     <Args>
-        <Arg>video</Arg>
-        <Arg>--scale</Arg>
-        <Arg>2</Arg>
-        <Arg>--model</Arg>
-        <Arg>realesr-animevideov3</Arg>
-        <Arg>--codec</Arg>
-        <Arg>libx264</Arg>
+        <Arg>enhance</Arg>
+        <Arg>--backend</Arg>
+        <Arg>codeformer</Arg>
+        <Arg>--w</Arg>
+        <Arg>0.65</Arg>
+        <Arg>--upscale</Arg>
+        <Arg>1</Arg>
+        <Arg>--face-upsample</Arg>
         <Arg>--crf</Arg>
         <Arg>18</Arg>
     </Args>

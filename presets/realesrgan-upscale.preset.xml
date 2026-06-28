@@ -12,8 +12,12 @@
     <OutputFileNameTemplate>{dir}/{stem}_4x</OutputFileNameTemplate>
     <OutputExtension>png</OutputExtension>
     <Engine>realesrgan</Engine>
-    <InvocationMode>batch-output-dir</InvocationMode>
+    <InvocationMode>per-file</InvocationMode>
     <Args>
         <Arg>upscale-image</Arg>
+        <Arg>--model</Arg>
+        <Arg>realesrgan-x4plus</Arg>
+        <Arg>--scale</Arg>
+        <Arg>4</Arg>
     </Args>
 </Preset>
