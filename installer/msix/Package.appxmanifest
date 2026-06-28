@@ -14,7 +14,7 @@
   <Identity
     Name="UniversalConverterX"
     Publisher="CN=UniversalConverterX"
-    Version="2.21.6.0"
+    Version="2.21.7.0"
     ProcessorArchitecture="x64" />
 
   <Properties>

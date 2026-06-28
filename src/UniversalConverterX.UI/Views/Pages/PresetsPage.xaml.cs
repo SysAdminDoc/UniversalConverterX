@@ -40,6 +40,20 @@ public sealed class PresetCardItem : INotifyPropertyChanged
         get => _statusText;
         set { if (_statusText != value) { _statusText = value; PropertyChanged?.Invoke(this, new(nameof(StatusText))); } }
     }
+
+    private bool _canRun = true;
+    public bool CanRun
+    {
+        get => _canRun;
+        set { if (_canRun != value) { _canRun = value; PropertyChanged?.Invoke(this, new(nameof(CanRun))); } }
+    }
+
+    private string _healthDetail = "";
+    public string HealthDetail
+    {
+        get => _healthDetail;
+        set { if (_healthDetail != value) { _healthDetail = value; PropertyChanged?.Invoke(this, new(nameof(HealthDetail))); } }
+    }
 }
 
 public sealed partial class PresetsPage : Page
@@ -47,8 +61,10 @@ public sealed partial class PresetsPage : Page
     private readonly IPresetExecutor _executor;
     private readonly IHistoryService _history;
     private readonly IUiPresetCache _presetCache;
+    private readonly ISidecarHealthService _health;
     private readonly ObservableCollection<PresetCardItem> _displayed = [];
     private List<PresetCardItem> _all = [];
+    private readonly Dictionary<string, SidecarHealthReport> _healthByEngine = new(StringComparer.OrdinalIgnoreCase);
     private string? _engineFilter;
     private string? _searchTerm;
 
@@ -66,6 +82,7 @@ public sealed partial class PresetsPage : Page
         _executor    = App.Services.GetRequiredService<IPresetExecutor>();
         _history     = App.Services.GetRequiredService<IHistoryService>();
         _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
+        _health      = App.Services.GetRequiredService<ISidecarHealthService>();
         PresetList.ItemsSource = _displayed;
     }
 
@@ -89,6 +106,7 @@ public sealed partial class PresetsPage : Page
             Preset = p,
             Glyph = GlyphFor(p.Engine),
         }).ToList();
+        RefreshHealth();
 
         // Populate engine filter combo (first item "(all engines)" stays).
         var engines = presets.Select(p => p.Engine).Distinct()
@@ -127,6 +145,28 @@ public sealed partial class PresetsPage : Page
                                                         Path.AltDirectorySeparatorChar))));
     }
 
+    private void RefreshHealth()
+    {
+        _healthByEngine.Clear();
+        foreach (var report in _health.EvaluateAll(_all.Select(c => c.Preset)))
+            _healthByEngine[report.Engine] = report;
+
+        foreach (var card in _all)
+        {
+            if (!_healthByEngine.TryGetValue(card.Preset.Engine, out var report))
+            {
+                card.CanRun = false;
+                card.StatusText = "Health unavailable";
+                card.HealthDetail = "Dependency health could not be evaluated.";
+                continue;
+            }
+
+            card.CanRun = report.CanRun;
+            card.StatusText = report.Summary;
+            card.HealthDetail = report.Detail;
+        }
+    }
+
     private void ApplyFilter()
     {
         IEnumerable<PresetCardItem> q = _all;
@@ -145,6 +185,39 @@ public sealed partial class PresetsPage : Page
         foreach (var c in q) _displayed.Add(c);
         EmptyState.Visibility = _displayed.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         PresetScroll.Visibility = _displayed.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        UpdateHealthPanel();
+    }
+
+    private void UpdateHealthPanel()
+    {
+        var visibleReports = _displayed
+            .Select(c => _healthByEngine.TryGetValue(c.Preset.Engine, out var report) ? report : null)
+            .Where(r => r is not null)
+            .DistinctBy(r => r!.Engine, StringComparer.OrdinalIgnoreCase)
+            .Select(r => r!)
+            .ToList();
+
+        if (visibleReports.Count == 0)
+        {
+            HealthPanelTitle.Text = "Preset health";
+            HealthPanelSummary.Text = "No visible preset engines to check.";
+            HealthPanelDetails.Text = "";
+            return;
+        }
+
+        var blocked = visibleReports.Where(r => !r.CanRun).ToList();
+        var warnings = visibleReports
+            .Where(r => r.CanRun && r.Requirements.Any(req => req.Status == "Warning"))
+            .ToList();
+        HealthPanelTitle.Text = blocked.Count == 0
+            ? "Preset health: ready"
+            : $"Preset health: {blocked.Count} blocked engine(s)";
+        HealthPanelSummary.Text = $"{visibleReports.Count} engine(s) visible - {blocked.Count} blocked - {warnings.Count} warning(s)";
+        HealthPanelDetails.Text = blocked.Count > 0
+            ? string.Join("  |  ", blocked.Take(4).Select(r => $"{r.Engine}: {r.Detail}"))
+            : warnings.Count > 0
+                ? string.Join("  |  ", warnings.Take(4).Select(r => $"{r.Engine}: {r.Detail}"))
+                : "All visible preset engines have their sidecar binary and required external tools available.";
     }
 
     private void Reload_Click(object sender, RoutedEventArgs e) => Reload();
@@ -180,6 +253,17 @@ public sealed partial class PresetsPage : Page
         var card = _all.FirstOrDefault(c => c.Name == presetName);
         if (card is null) return;
         var preset = card.Preset;
+        var health = _health.Evaluate(preset);
+        _healthByEngine[preset.Engine] = health;
+        card.CanRun = health.CanRun;
+        card.StatusText = health.Summary;
+        card.HealthDetail = health.Detail;
+        UpdateHealthPanel();
+        if (!health.CanRun)
+        {
+            StatusText.Text = $"{preset.Name} blocked: {health.Detail}";
+            return;
+        }
 
         // Per-card guard — multiple clicks on the same Run button while the
         // first invocation is still in flight used to spawn parallel sidecars.

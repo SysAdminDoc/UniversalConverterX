@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.6 · 184 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-28 (converter batch queue persistence shipped; v2.21.6 local roadmap state reflected)
+**Status:** v2.21.7 · 184 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-28 (sidecar health preflight shipped; v2.21.7 local roadmap state reflected)
 
 Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
 shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
@@ -2684,13 +2684,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P1 - Add sidecar capability preflight and health panel
-  Why: Missing sidecar binaries, external CLIs, model weights, GPU support, or FFmpeg features are discovered only after execution starts.
-  Evidence: `SidecarRunner.Locate`, `tools/README.md`, `tests/sidecar_contract/check_contract.py`, repeated roadmap notes about external binaries not bundled.
-  Touches: `SidecarRunner`, `ToolManager`, `PresetsPage`, `ToolboxPage`, diagnostics/crash bundle.
-  Acceptance: before running a preset, UCX shows required binary/model/GPU/feature status, download size if applicable, and exact remediation; diagnostics export includes the same health table.
-  Complexity: M
 
 - [ ] P2 - Refresh platform and NuGet upgrade plan
   Why: Local outdated-package audit shows Microsoft package patch drift, WinAppSDK latest 2.2.0, and test/package tooling drift beyond the existing WinAppSDK 2.0 roadmap text.

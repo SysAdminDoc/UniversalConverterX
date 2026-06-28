@@ -224,8 +224,10 @@ public sealed partial class HomePage : Page
                 return;
             }
             logger.Info("diagnostics", "user-initiated crash bundle export");
+            var sidecarHealth = BuildSidecarHealthSnapshot();
             var path = CrashBundle.Capture(logger, exception: null,
-                note: "User-initiated bundle export from Home dashboard.");
+                note: "User-initiated bundle export from Home dashboard.",
+                sidecarHealth: sidecarHealth);
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
                 DiagnosticsStatusText.Text = "Bundle export failed (disk full or permission denied).";
@@ -242,6 +244,23 @@ public sealed partial class HomePage : Page
         catch (Exception ex)
         {
             DiagnosticsStatusText.Text = $"Bundle export error: {ex.GetType().Name}.";
+        }
+    }
+
+    private static IReadOnlyList<SidecarHealthReport> BuildSidecarHealthSnapshot()
+    {
+        try
+        {
+            var cache = App.Services?.GetService<IUiPresetCache>();
+            var health = App.Services?.GetService<ISidecarHealthService>();
+            if (cache is null || health is null)
+                return [];
+
+            return health.EvaluateAll(cache.Get());
+        }
+        catch
+        {
+            return [];
         }
     }
 }

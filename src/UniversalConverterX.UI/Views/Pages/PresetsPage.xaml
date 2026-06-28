@@ -45,10 +45,15 @@
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Padding="16,10"
                                 Click="RunPreset_Click"
-                                Tag="{Binding Name}"/>
+                                Tag="{Binding Name}"
+                                IsEnabled="{Binding CanRun}"
+                                ToolTipService.ToolTip="{Binding HealthDetail}"/>
                         <TextBlock Text="{Binding StatusText, Mode=OneWay}"
                                    Style="{StaticResource SubtleTextStyle}"
-                                   TextAlignment="Center" FontSize="10"/>
+                                   TextAlignment="Center" FontSize="10"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="132"
+                                   ToolTipService.ToolTip="{Binding HealthDetail}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -57,6 +62,7 @@
 
     <Grid Padding="32" RowSpacing="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -104,7 +110,37 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="2">
+        <Border Grid.Row="2"
+                Style="{StaticResource CardStyle}"
+                Padding="16">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="0"
+                          Glyph="&#xE946;"
+                          Foreground="{StaticResource AccentBlueBrush}"
+                          FontSize="20"
+                          VerticalAlignment="Top"/>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock x:Name="HealthPanelTitle"
+                               Text="Preset health"
+                               Style="{StaticResource PanelTitleTextStyle}"/>
+                    <TextBlock x:Name="HealthPanelSummary"
+                               Text="Checking visible preset engines..."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock x:Name="HealthPanelDetails"
+                               Text=""
+                               Style="{StaticResource SubtleTextStyle}"
+                               TextWrapping="Wrap"
+                               MaxLines="3"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3">
             <StackPanel x:Name="EmptyState"
                         Visibility="Collapsed"
                         HorizontalAlignment="Center"
@@ -130,7 +166,7 @@
             </ScrollViewer>
         </Grid>
 
-        <TextBlock Grid.Row="3"
+        <TextBlock Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Loading presets..."/>

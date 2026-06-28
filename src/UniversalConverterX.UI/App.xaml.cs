@@ -55,6 +55,7 @@ public partial class App : Application
         services.AddSingleton<IWatchFolderService, WatchFolderService>();
         services.AddSingleton<IPresetExecutor, PresetExecutor>();
         services.AddSingleton<IUiPresetCache, UiPresetCache>();
+        services.AddSingleton<ISidecarHealthService, SidecarHealthService>();
         services.AddSingleton<IUpdateCheckService, UpdateCheckService>();
         services.AddSingleton<IStructuredLogger, StructuredLogger>();
 

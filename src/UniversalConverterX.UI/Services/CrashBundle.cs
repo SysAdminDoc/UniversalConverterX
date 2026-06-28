@@ -23,7 +23,11 @@ public static class CrashBundle
     /// triggering exception (if any). Returns the bundle path on success
     /// or <c>null</c> if the write failed.
     /// </summary>
-    public static string? Capture(IStructuredLogger logger, Exception? exception, string? note = null)
+    public static string? Capture(
+        IStructuredLogger logger,
+        Exception? exception,
+        string? note = null,
+        IReadOnlyList<SidecarHealthReport>? sidecarHealth = null)
     {
         try
         {
@@ -49,6 +53,9 @@ public static class CrashBundle
 
             // Recent NDJSON tail (ring buffer) — most actionable signal.
             WriteEntry(zip, "log-tail.ndjson", FormatRingBuffer(logger.Snapshot()));
+
+            if (sidecarHealth is { Count: > 0 })
+                WriteEntry(zip, "sidecar-health.json", JsonSerializer.Serialize(sidecarHealth, JsonOpts));
 
             // Today's full log file, if it exists, for full-context reads.
             try
