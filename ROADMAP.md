@@ -1684,31 +1684,6 @@ Sources: [S157] (r/handbrake top-of-year community signal)
 
 ---
 
-### 94. HDR10+ Dynamic Metadata Pass-Through (hdr10plus_tool 1.7.2) _(new T2 / HDR)_
-
-**Context (iter-7 wave 5, 2026-05-02):** **hdr10plus_tool 1.7.2** [S160] (Dec 2024)
-extract / inject / edit / plot HDR10+ dynamic metadata (SMPTE ST 2094-40, Samsung-
-backed competitor to Dolby Vision). v1.7.1 graduated MKV input out of experimental.
-Same problem as DV: a transcode without explicit pass-through erases the dynamic
-tone-mapping curve and reduces the file to static HDR10.
-
-**Concept:** Symmetric to Item 93. `hdrplus-passthrough` sidecar:
-(a) `hdr10plus_tool extract` from input HEVC → `metadata.json`;
-(b) re-encode video;
-(c) `hdr10plus_tool inject` JSON metadata back into the new HEVC bitstream;
-(d) optional editor pass for trim/level fixups via `editor`. Synergy with **Item 69**
-(HDR10 master metadata) — the static MaxCLL/MaxFALL go in the SEI, the dynamic curve
-goes via this path.
-
-**Why T2:** Less ubiquitous than DV but free of licensing constraints (open spec).
-Many Samsung TVs, recent Apple TV firmware, and YouTube playback honor it. Together
-with Item 93, completes the HDR-archival promise.
-
-Impact: 4 · Effort: 3 · Type: leapfrog + HDR
-Sources: [S160] (hdr10plus_tool 1.7.2 — extract/inject/edit/plot, Dec 2024)
-
----
-
 ### 95. Anime / Animation Upscale Sidecar (Real-ESRGAN + Anime4K) _(new T3 / AI)_ — ⚠️ PARTIALLY SHIPPED 2026-05-02
 
 **Context (iter-7 wave 5, 2026-05-02):** Two complementary anime upscalers exist:

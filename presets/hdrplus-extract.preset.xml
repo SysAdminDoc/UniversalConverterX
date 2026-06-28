@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Extract HDR10+ Metadata</Name>
+    <Folder>Video/HDR</Folder>
+    <InputTypes>
+        <Extension>hevc</Extension>
+        <Extension>h265</Extension>
+        <Extension>265</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mp4</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_hdr10plus</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>hdrplus-rpu</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>extract</Arg>
+    </Args>
+</Preset>

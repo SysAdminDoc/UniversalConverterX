@@ -1,0 +1,2 @@
+# hdrplus-rpu sidecar — stdlib-only (wraps external hdr10plus_tool binary)
+# No Python dependencies required.

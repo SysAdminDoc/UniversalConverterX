@@ -276,6 +276,7 @@ KNOWN_EVENTS = {
     "metadata_record",     # exiftool-meta — emitted per file with read/write/clear results
     # v2.21.9 (Dolby Vision RPU pass-through)
     "dovi_rpu",            # dovi-rpu — RPU extract/inject/demux/info result
+    "hdrplus_meta",        # hdrplus-rpu — HDR10+ metadata extract/inject/info result
 }
 
 

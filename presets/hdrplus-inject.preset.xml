@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Inject HDR10+ Metadata into HEVC</Name>
+    <Folder>Video/HDR</Folder>
+    <InputTypes>
+        <Extension>hevc</Extension>
+        <Extension>h265</Extension>
+        <Extension>265</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_hdr10plus</OutputFileNameTemplate>
+    <OutputExtension>hevc</OutputExtension>
+    <Engine>hdrplus-rpu</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <RequiresExtraInput>true</RequiresExtraInput>
+    <Args>
+        <Arg>inject</Arg>
+    </Args>
+</Preset>
