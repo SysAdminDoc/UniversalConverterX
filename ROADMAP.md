@@ -2017,25 +2017,6 @@ Sources: [S5] (ToolboxPage.xaml.cs DiscTools stubs),
 
 ---
 
-### 45. Preset Import / Export / Share
-
-Export a preset XML (or preset bundle ZIP including sidecar model weights) to
-a shareable file. Import from file or URL. Prerequisite for a community preset
-repository. Wire to a "Share Preset" menu action in `PresetsPage.xaml`.
-
-Impact: 3 · Effort: 2 · Type: dx
-Source: [S14] (HandBrake preset import/export — table-stakes in converter UX)
-
-**Charter note (Phase 5 audit, 2026-05-02):** "Import from URL" is a
-user-initiated outbound network request. Charter-aligned because (a) the
-user typed/pasted the URL, (b) the import is to local disk (no cloud
-storage), (c) imported XML must pass a strict allow-list schema validator
-before any sidecar reference is resolved (mitigates malicious-preset
-attack surface). Implementation must show the URL clearly + a "this will
-download from the internet" confirmation step before fetching.
-
----
-
 ### 46. Audio Waveform Preview
 
 Show a waveform thumbnail in `AudioConverterPage` and `SttPage` after file
