@@ -1,0 +1,2 @@
+# dovi-rpu sidecar — stdlib-only (wraps external dovi_tool binary)
+# No Python dependencies required.

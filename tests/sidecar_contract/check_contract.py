@@ -274,6 +274,8 @@ KNOWN_EVENTS = {
     "cookie_status",       # streamkeep — cookie store presence/encryption/staleness
     # iter-5 wave 5 (metadata + auto-edit + ab-av1)
     "metadata_record",     # exiftool-meta — emitted per file with read/write/clear results
+    # v2.21.9 (Dolby Vision RPU pass-through)
+    "dovi_rpu",            # dovi-rpu — RPU extract/inject/demux/info result
 }
 
 

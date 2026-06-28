@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Dolby Vision RPU Info</Name>
+    <Folder>Video/HDR</Folder>
+    <InputTypes>
+        <Extension>hevc</Extension>
+        <Extension>h265</Extension>
+        <Extension>265</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mp4</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_dovi-info</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>dovi-rpu</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>info</Arg>
+        <Arg>--summary</Arg>
+    </Args>
+</Preset>

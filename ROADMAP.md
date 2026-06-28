@@ -1684,33 +1684,6 @@ Sources: [S157] (r/handbrake top-of-year community signal)
 
 ---
 
-### 93. Dolby Vision RPU Pass-Through (dovi_tool 2.3.2) _(new T2 / HDR)_
-
-**Context (iter-7 wave 5, 2026-05-02):** **dovi_tool 2.3.2** [S159] (April 2025) is the
-de-facto Dolby Vision metadata Swiss-army knife: `extract` / `inject-rpu` / `mux` /
-`demux` / `editor` / `info` / `plot`. Critical fixes in 2.3.x: RPU now placed as last
-NALU in access unit (corrects FFmpeg-based playback), `--remove-eos` flag, L8 trim
-display fixes. Without RPU pass-through, transcoding a Dolby Vision source flattens it
-to HDR10 and silently destroys per-shot grading.
-
-**Concept:** Wrap dovi_tool as a `dovi-passthrough` sidecar. Default flow:
-(a) on encode start, `dovi_tool extract-rpu` from input → `RPU.bin` sidecar file;
-(b) re-encode video stream while preserving HEVC NALUs;
-(c) `dovi_tool inject-rpu` to put RPU back into the encoded HEVC stream;
-(d) `mux` step into MKV/MP4. Critical edge case: must detect Profile 5 (single-layer
-IPT-PQ-C2) vs Profile 7 (dual-layer FEL/MEL) and refuse Profile 7 → Profile 5 conversion
-(or expose an explicit `--convert-to-p8` flag with warning).
-
-**Why T2:** Dolby Vision is the gold standard HDR for film archival. UCX's video
-preset story is incomplete without this. Competitor pain: HandBrake silently strips
-DV; FFmpeg has it but requires CLI choreography. UCX wraps the whole flow in a preset.
-Synergy with **Item 69** (SVT-AV1-HDR) and **Item 89** (AVIF gain map).
-
-Impact: 5 · Effort: 3 · Type: leapfrog + HDR
-Sources: [S159] (dovi_tool 2.3.2 — RPU extract/inject/mux, Apr 2025)
-
----
-
 ### 94. HDR10+ Dynamic Metadata Pass-Through (hdr10plus_tool 1.7.2) _(new T2 / HDR)_
 
 **Context (iter-7 wave 5, 2026-05-02):** **hdr10plus_tool 1.7.2** [S160] (Dec 2024)
