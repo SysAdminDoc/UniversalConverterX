@@ -67,7 +67,7 @@ public sealed partial class ToolboxPage : Page
         ImageTools.Add(new ToolboxTile("ai-image-enhancer", "Image Upscaler", "Real-ESRGAN super-resolution up to 4× (ncnn-vulkan)", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
         ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "CodeFormer + GFPGAN portrait upscale & restoration with fidelity slider", "\uE77B", blue, "Ready", green, true, "CodeFormer / GFPGAN"));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Image folders to MP4/MOV/WebM with Ken Burns motion, transitions, captions, and music", "\uE786", blue, "Ready", green, false, "FFmpeg slideshow"));
-        ImageTools.Add(new ToolboxTile("metadata-editor", "Metadata Editor", "View and edit EXIF / XMP / IPTC tags", "\uE8B7", blue, "Future", yellow, false, null));
+        ImageTools.Add(new ToolboxTile("presets:exiftool-meta", "Metadata Editor", "View, edit, and clear EXIF / XMP / IPTC metadata", "\uE8B7", blue, "Ready", green, false, "ExifTool"));
 
         // Video
         VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Detect highlight ranges and trim", "\uE71D", green, "Planned", orange, true, "ClipForge"));
@@ -75,19 +75,19 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("timeline-preview", "Timeline Preview", "Thumbnail strip + audio waveform image for any video", "\uE71D", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("track-manager", "Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "\uE93F", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5 (static or smart face track)", "\uE740", blue, "Ready", green, true, "Vertigo"));
-        VideoTools.Add(new ToolboxTile("auto-crop", "Auto Crop", "Detect subject and crop accordingly", "\uE7A8", blue, "Future", yellow, true, null));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "Auto Crop", "Detect crop bounds and apply FFmpeg crop filters", "\uE7A8", blue, "Ready", green, true, "ClipForge"));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Ready", blue, false, "VideoSubtitleRemover"));
         VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect strong clip candidates", "\uE7C9", blue, "Future", yellow, true, null));
-        VideoTools.Add(new ToolboxTile("intro-outro", "Intro & Outro", "Apply branded intros and outros", "\uE7AD", green, "Future", yellow, false, null));
-        VideoTools.Add(new ToolboxTile("lens-correction", "Lens Correction", "Fix distortion, rolling shutter, stabilize", "\uE71E", blue, "Future", yellow, false, null));
-        VideoTools.Add(new ToolboxTile("vr-converter", "VR Converter", "Equirectangular, fisheye, 360° to 2D", "\uE787", blue, "Future", yellow, false, null));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "Intro & Outro", "Apply branded intros and outros", "\uE7AD", green, "Ready", green, false, "ClipForge"));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "Lens Correction", "Fix distortion, rolling shutter, and stabilize clips", "\uE71E", blue, "Ready", green, false, "ClipForge"));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "VR Converter", "Equirectangular, fisheye, and 360° projection conversion", "\uE787", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("frame-snapshot", "Frame Snapshot", "Extract precise frames as images", "\uE722", blue, "Ready", green, false, "FFmpeg"));
         VideoTools.Add(new ToolboxTile("ai-video-enhancer", "Video Upscaler", "Real-ESRGAN frame-by-frame video super-resolution and cleanup", "\uE799", blue, "Ready", green, true, "Real-ESRGAN"));
         VideoTools.Add(new ToolboxTile("presets:video-face-enhance", "Video Face Enhance", "CodeFormer/GFPGAN frame restoration with source audio passthrough", "\uE77B", blue, "Ready", green, true, "CodeFormer / GFPGAN"));
 
         // AI
         AiTools.Add(new ToolboxTile("ai-bgremove", "Background Remover", "Remove or replace video background", "\uE91B", green, "Ready", green, true, "AlphaCut"));
-        AiTools.Add(new ToolboxTile("subtitle-remover", "Subtitle Remover", "Remove hard-coded subtitles from selected regions", "\uE93B", blue, "Planned", orange, true, "VideoSubtitleRemover"));
+        AiTools.Add(new ToolboxTile("presets:videosubtitleremover", "Subtitle Remover", "Remove hard-coded subtitles from selected regions", "\uE93B", blue, "Ready", green, true, "VideoSubtitleRemover"));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Auto Subtitle", "Generate SRT/VTT subtitles + optional video burn-in", "\uED1E", blue, "Ready", green, true, "Whisper"));
         AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Ready", blue, true, "Demucs"));
         AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "Local voice style transformation with pitch, timbre, and video remux options", "\uE720", red, "Ready", green, true, "FFmpeg filters"));
@@ -175,10 +175,10 @@ public sealed partial class ToolboxPage : Page
         DocumentTools.Add(new ToolboxTile("presets:pdfocr", "Scanned PDF -> Searchable PDF", "OCRmyPDF + Poppler scanned-PDF OCR pass", "\uE8E6", blue, "Ready", green, false, "OCRmyPDF"));
         DocumentTools.Add(new ToolboxTile("presets:pdftools", "PDF Tools", "Merge / split / compress / encrypt / extract / rotate via pikepdf", "\uEA90", orange, "Ready", green, false, "pikepdf"));
         ImageTools.Add(new ToolboxTile("presets:realesrgan", "Image / Video Upscale", "Real-ESRGAN x4 super-resolution for image + video", "\uE714", red, "Ready", green, false, "Real-ESRGAN"));
-        AudioTools.Add(new ToolboxTile("presets:recordcast", "Screen / Audio Recorder", "Live screen + system-audio + mic capture (DirectShow / FFmpeg)", "\uE714", blue, "Ready", green, false, "FFmpeg + DirectShow"));
+        AudioTools.Add(new ToolboxTile("recorder", "Screen / Audio Recorder", "Live screen + system-audio + mic capture (DirectShow / FFmpeg)", "\uE714", blue, "Ready", green, false, "FFmpeg + DirectShow"));
         AudioTools.Add(new ToolboxTile("presets:rnnoise", "Audio Denoise (RNNoise)", "Real-time RNNoise voice denoising for any audio", "\uE767", blue, "Ready", green, false, "RNNoise"));
         VideoTools.Add(new ToolboxTile("presets:scenedetect", "Scene Detection", "PySceneDetect adaptive + content scene-change detection -> CSV / EDL", "\uE714", blue, "Ready", green, false, "PySceneDetect"));
-        AudioTools.Add(new ToolboxTile("presets:streamkeep", "Stream / VOD Downloader", "yt-dlp wrapper for YouTube / Twitch / TikTok / Vimeo / 1500+ sites", "\uE896", blue, "Ready", green, false, "yt-dlp + FFmpeg"));
+        AudioTools.Add(new ToolboxTile("downloader", "Stream / VOD Downloader", "yt-dlp wrapper for YouTube / Twitch / TikTok / Vimeo / 1500+ sites", "\uE896", blue, "Ready", green, false, "yt-dlp + FFmpeg"));
         VideoTools.Add(new ToolboxTile("presets:subconvert", "Subtitle Format Convert", "SRT / VTT / ASS / SSA / SUB / SAMI mutual conversion + retime", "\uED1E", blue, "Ready", green, false, "pysubs2"));
         OtherTools.Add(new ToolboxTile("presets:timefmt", "Timestamp Format", "ISO 8601 / Epoch / Excel / FILETIME / Cocoa / Mainframe Julian", "\uE787", blue, "Ready", green, false, "stdlib + dateutil"));
         VideoTools.Add(new ToolboxTile("presets:vertigo", "Auto-Reframe 9:16 Vertical", "Smart 16:9 -> 9:16 vertical reframing for TikTok / Reels / Shorts", "\uE714", red, "Ready", green, false, "Vertigo + OpenCV"));

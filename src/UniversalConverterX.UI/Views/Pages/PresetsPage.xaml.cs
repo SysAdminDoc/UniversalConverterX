@@ -287,6 +287,7 @@ public sealed partial class PresetsPage : Page
         "streamkeep"   => "\uE896",
         "scenedetect"  => "\uE71D",
         "chaptermark"  => "\uE8B7",
+        "exiftool-meta" => "\uE8B7",
         "docconvert"   => "\uE8A5",
         "archive"      => "\uE7B8",
         "pdftools"     => "\uEA90",

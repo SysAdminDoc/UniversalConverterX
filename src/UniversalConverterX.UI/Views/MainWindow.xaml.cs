@@ -30,6 +30,12 @@ public sealed partial class MainWindow : Window
         new("Video Denoise", "Real-ESRGAN frame-by-frame cleanup presets", "presets:realesrgan"),
         new("Anime Video Sharpen", "Anime-focused Real-ESRGAN video presets", "presets:anime-upscale"),
         new("Video Face Enhance", "CodeFormer frame-by-frame face enhancement presets", "presets:video-face-enhance"),
+        new("Auto Crop", "ClipForge cropdetect presets for video crop cleanup", "presets:clipforge"),
+        new("Intro & Outro", "ClipForge presets for branded intro and outro assembly", "presets:clipforge"),
+        new("Lens Correction", "ClipForge lens correction and stabilization presets", "presets:clipforge"),
+        new("VR Converter", "ClipForge 360 / VR projection conversion presets", "presets:clipforge"),
+        new("Metadata Editor", "ExifTool metadata read, write, and clear presets", "presets:exiftool-meta"),
+        new("Subtitle Remover", "VideoSubtitleRemover preset workflow", "presets:videosubtitleremover"),
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
         new("AI Portrait", "CodeFormer / GFPGAN portrait upscale + restoration with fidelity slider", "ai-portrait"),
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
@@ -296,6 +302,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
+        _ when routeKey.StartsWith("presets:", StringComparison.OrdinalIgnoreCase) => "toolbox",
         "format-inspector" or "frame-snapshot" or "slideshow-maker" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"

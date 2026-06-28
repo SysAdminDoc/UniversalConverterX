@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.4 · 184 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-28 (signed tool updater closed; v2.21.4 local roadmap state reflected)
+**Status:** v2.21.5 · 184 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-28 (workflow discoverability reconciled; v2.21.5 local roadmap state reflected)
 
 Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
 shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
@@ -2684,13 +2684,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P1 - Reconcile shipped workflow discoverability
-  Why: Several shipped or preset-backed workflows remain labeled `Future`, so users are routed to placeholders instead of runnable presets.
-  Evidence: `src/UniversalConverterX.UI/Views/Pages/ToolboxPage.xaml.cs`; shipped `clipforge` ops/presets for auto-crop, intro/outro, lens correction, VR conversion, and metadata presets.
-  Touches: `ToolboxPage.xaml.cs`, `MainWindow.xaml.cs`, `PresetsPage.xaml.cs`, relevant preset filters.
-  Acceptance: every tile with a shipped route or preset filter is `Ready`, opens a runnable page/preset list, and a regression test fails if a `Future` tile points at an existing preset engine.
-  Complexity: M
 
 - [ ] P1 - Persist and resume active batch queues
   Why: `HistoryService` records completed jobs, but an app crash or restart loses queued/running work and forces users to reconstruct long batches.
