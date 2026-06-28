@@ -971,28 +971,6 @@ panel in `AudioConverterPage` (when the broader page lands per Item
 
 ---
 
-### 59. Post-Conversion Source File Management
-
-After a successful conversion, optionally: move the source file to a configured
-archive folder, delete it, or do nothing (default). Surface as a per-preset
-option: "After successful conversion: [Keep / Move to / Delete]".
-
-Implementation:
-
-- Add `PostConversionAction` enum (`Keep`, `Move`, `Delete`) to
-  `ConversionPreset`.
-- The orchestrator executes the action after the `complete` event and
-  verification of output file presence.
-- "Move to" shows a folder picker; resolves relative paths from source parent
-  if the configured path is relative.
-- Delete requires explicit user opt-in (checked setting in the preset editor)
-  and logs the deletion to History (Item 6) before executing.
-
-Impact: 3 · Effort: 2 · Type: UX
-Source: [S41] (HandBrake #7400 — auto-move source files after successful encode)
-
----
-
 ### 62. Lock Preset Dimensions Across Switches
 
 When a user adjusts the crop / resolution / aspect ratio settings in the
@@ -2684,13 +2662,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P2 - Refresh platform and NuGet upgrade plan
-  Why: Local outdated-package audit shows Microsoft package patch drift, WinAppSDK latest 2.2.0, and test/package tooling drift beyond the existing WinAppSDK 2.0 roadmap text.
-  Evidence: `dotnet list src\UniversalConverterX.sln package --outdated`; existing Item 26.
-  Touches: `Directory.Build.props`, `src/**/*.csproj`, `tests/**/*.csproj`, WinUI XAML build path, README build prerequisites.
-  Acceptance: roadmap Item 26 is implemented against the current WinAppSDK target, Microsoft packages are patched consistently, tests/builds pass locally, and any blocked package is documented with a concrete reason.
-  Complexity: M
 
 - [ ] P2 - Publish release manifest with hashes and bundled-tool inventory
   Why: A local-first converter that ships many sidecars needs an installable artifact users can verify without trusting hidden binaries.

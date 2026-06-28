@@ -28,8 +28,10 @@ public class ConverterXOptions
     ///   v2 — 2026-05-02. SchemaVersion field added. OverwriteBehavior default
     ///        flipped to "Never" for fresh installs (persisted user values
     ///        unchanged by the migrator).
+    ///   v3 — 2026-06-28. PostConversionAction replaces DeleteSourceOnSuccess.
+    ///        Migration: DeleteSourceOnSuccess=true → PostConversionAction="Delete".
     /// </remarks>
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     private static readonly string SettingsFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -68,9 +70,27 @@ public class ConverterXOptions
     public OverwriteBehavior OverwriteBehavior { get; set; } = OverwriteBehavior.Never;
 
     /// <summary>
-    /// Delete source files after successful conversion
+    /// Delete source files after successful conversion.
+    /// Deprecated — use <see cref="PostConversionAction"/> instead.
+    /// Retained for JSON backward compatibility; v2→v3 migration
+    /// converts true values to PostConversionAction.Delete.
     /// </summary>
     public bool DeleteSourceOnSuccess { get; set; } = false;
+
+    /// <summary>
+    /// Action to take on source files after a successful conversion.
+    /// Keep (default) = leave the source untouched.
+    /// Move = relocate the source to <see cref="PostConversionArchiveFolder"/>.
+    /// Delete = remove the source file permanently.
+    /// </summary>
+    public PostConversionAction PostConversionAction { get; set; } = PostConversionAction.Keep;
+
+    /// <summary>
+    /// Folder to move source files to when <see cref="PostConversionAction"/>
+    /// is Move. Absolute paths are used as-is; relative paths resolve from
+    /// the source file's parent directory.
+    /// </summary>
+    public string? PostConversionArchiveFolder { get; set; }
 
     /// <summary>
     /// Show system notifications on completion
@@ -361,6 +381,8 @@ public class ConverterXOptions
         DefaultOutputDirectory = defaults.DefaultOutputDirectory;
         OverwriteBehavior = defaults.OverwriteBehavior;
         DeleteSourceOnSuccess = defaults.DeleteSourceOnSuccess;
+        PostConversionAction = defaults.PostConversionAction;
+        PostConversionArchiveFolder = defaults.PostConversionArchiveFolder;
         ShowNotifications = defaults.ShowNotifications;
         PlaySoundOnComplete = defaults.PlaySoundOnComplete;
         MaxParallelConversions = defaults.MaxParallelConversions;

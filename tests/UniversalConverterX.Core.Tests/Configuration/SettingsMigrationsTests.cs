@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using FluentAssertions;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Models;
 
 namespace UniversalConverterX.Core.Tests.Configuration;
 
@@ -115,5 +116,64 @@ public class SettingsMigrationsTests
 
         FluentActions.Invoking(() => ConverterXOptions.LoadFromJson(notAnObject, persistMigrated: false))
             .Should().Throw<System.Text.Json.JsonException>();
+    }
+
+    [Fact]
+    public void Migrate_V2ToV3_DeleteSourceTrue_SetsPostConversionActionDelete()
+    {
+        var root = new JsonObject
+        {
+            ["SchemaVersion"] = 2,
+            ["DeleteSourceOnSuccess"] = true,
+        };
+
+        SettingsMigrations.Migrate(root, fromVersion: 2, toVersion: 3, out var didMigrate);
+
+        didMigrate.Should().BeTrue();
+        ((string?)root["PostConversionAction"]).Should().Be("Delete");
+    }
+
+    [Fact]
+    public void Migrate_V2ToV3_DeleteSourceFalse_LeavesPostConversionActionAbsent()
+    {
+        var root = new JsonObject
+        {
+            ["SchemaVersion"] = 2,
+            ["DeleteSourceOnSuccess"] = false,
+        };
+
+        SettingsMigrations.Migrate(root, fromVersion: 2, toVersion: 3, out _);
+
+        root.ContainsKey("PostConversionAction").Should().BeFalse();
+    }
+
+    [Fact]
+    public void Migrate_V2ToV3_ExplicitPostConversionAction_NotOverwritten()
+    {
+        var root = new JsonObject
+        {
+            ["SchemaVersion"] = 2,
+            ["DeleteSourceOnSuccess"] = true,
+            ["PostConversionAction"] = "Move",
+        };
+
+        SettingsMigrations.Migrate(root, fromVersion: 2, toVersion: 3, out _);
+
+        ((string?)root["PostConversionAction"]).Should().Be("Move");
+    }
+
+    [Fact]
+    public void LoadFromJson_V2WithDeleteTrue_LoadsAsPostConversionDelete()
+    {
+        var json = """
+        {
+          "SchemaVersion": 2,
+          "DeleteSourceOnSuccess": true
+        }
+        """;
+
+        var loaded = ConverterXOptions.LoadFromJson(json, persistMigrated: false);
+
+        loaded.PostConversionAction.Should().Be(PostConversionAction.Delete);
     }
 }

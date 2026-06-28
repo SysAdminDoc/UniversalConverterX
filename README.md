@@ -4,7 +4,7 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.21.7-blue)
+![Version](https://img.shields.io/badge/version-2.21.9-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -160,7 +160,7 @@ UniversalConverterX/
 
 - .NET 10 SDK
 - Windows 10 SDK (for UI project)
-- Visual Studio or Build Tools with MSBuild and Windows App SDK build tools (required for the WinUI project)
+- Visual Studio or Build Tools with MSBuild plus Windows App SDK 2.2 packages restored from NuGet (required for the WinUI project)
 
 ### Build
 

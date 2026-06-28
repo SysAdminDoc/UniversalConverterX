@@ -39,11 +39,26 @@ internal static class SettingsMigrations
     ///   v1 → v2 (2026-05-02): no rename / rewrite needed. Adds the
     ///   <c>SchemaVersion</c> field if missing; legacy files lacked it
     ///   entirely.
+    ///   v2 → v3 (2026-06-28): PostConversionAction replaces
+    ///   DeleteSourceOnSuccess. If the legacy bool is true and the new
+    ///   enum is absent, inject <c>"PostConversionAction": "Delete"</c>.
     /// </remarks>
     private static readonly List<Action<JsonObject>> Migrations =
     [
         // v1 -> v2: stamp the SchemaVersion field. No other rewrites.
         v1 => { /* no-op rename — SchemaVersion is set after migration runs */ },
+
+        // v2 -> v3: migrate DeleteSourceOnSuccess=true → PostConversionAction=Delete.
+        v2 =>
+        {
+            if (v2["PostConversionAction"] is not null)
+                return;
+            var legacy = v2["DeleteSourceOnSuccess"];
+            if (legacy is JsonValue jv && jv.TryGetValue<bool>(out var del) && del)
+            {
+                v2["PostConversionAction"] = "Delete";
+            }
+        },
     ];
 
     /// <summary>

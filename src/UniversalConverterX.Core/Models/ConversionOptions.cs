@@ -68,9 +68,24 @@ public class ConversionOptions
     public TimeSpan? Timeout { get; set; }
 
     /// <summary>
-    /// Delete source file after successful conversion
+    /// Delete source file after successful conversion.
+    /// Deprecated — use <see cref="PostConversionAction"/> instead.
+    /// Retained for backward compatibility with existing preset XML
+    /// and JSON configs. When both are set, PostConversionAction wins.
     /// </summary>
     public bool DeleteSourceOnSuccess { get; set; } = false;
+
+    /// <summary>
+    /// Action to take on the source file after a successful conversion.
+    /// </summary>
+    public PostConversionAction PostConversionAction { get; set; } = PostConversionAction.Keep;
+
+    /// <summary>
+    /// Folder to move source files to when <see cref="PostConversionAction"/>
+    /// is <see cref="Models.PostConversionAction.Move"/>. Absolute paths are
+    /// used as-is; relative paths resolve from the source file's parent directory.
+    /// </summary>
+    public string? PostConversionArchiveFolder { get; set; }
 
     /// <summary>
     /// Output directory (if different from source)
@@ -184,4 +199,15 @@ public class DocumentOptions
     public string? Template { get; set; }
     public bool Standalone { get; set; } = true;
     public string? PdfEngine { get; set; }
+}
+
+/// <summary>
+/// Action to take on the source file after a successful conversion.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PostConversionAction
+{
+    Keep,
+    Move,
+    Delete
 }

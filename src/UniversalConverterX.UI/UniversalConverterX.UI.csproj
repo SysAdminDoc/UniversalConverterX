@@ -21,7 +21,7 @@
     <Product>UniversalConverter X</Product>
     <Description>Universal converter: media (video / audio / image), documents (PDF / DOCX / EPUB / archives / fonts / subtitles / OCR), and 25+ AI-powered tools</Description>
     <Copyright>Copyright © 2026 Maven Imaging</Copyright>
-    <Version>2.21.7</Version>
+    <Version>2.21.9</Version>
 
     <!-- Enable unpackaged deployment -->
     <WindowsPackageType>None</WindowsPackageType>
@@ -36,15 +36,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.0" />
-    <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="2.1.11" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.9" />
+    <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="3.0.3" />
   </ItemGroup>
 
   <!-- XAML / code-behind: the WindowsAppSDK and .NET SDK auto-include Page/ApplicationDefinition/Compile items.
