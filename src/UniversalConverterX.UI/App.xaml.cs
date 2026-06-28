@@ -35,6 +35,11 @@ public partial class App : Application
         });
 
         services.AddSingleton<IConversionOrchestrator, ConversionOrchestrator>();
+        services.AddSingleton<IBatchQueueStore>(_ => new JsonBatchQueueStore(
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "UniversalConverterX",
+                "queues")));
         services.AddSingleton<IToolDownloader>(sp => new ToolDownloader(
             sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(),
             new HttpClient()));

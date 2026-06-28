@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.5 · 184 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-28 (workflow discoverability reconciled; v2.21.5 local roadmap state reflected)
+**Status:** v2.21.6 · 184 sidecar engines · 280+ presets · 45+ UI pages
+**Last updated:** 2026-06-28 (converter batch queue persistence shipped; v2.21.6 local roadmap state reflected)
 
 Current research synthesis lives in [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md),
 shipped work is summarized in [`COMPLETED.md`](COMPLETED.md), release detail
@@ -2684,13 +2684,6 @@ Before any new sidecar or preset is merged:
 | S98 | https://github.com/quodlibet/mutagen | Mutagen — Python audio metadata handling (ID3v2, Vorbis, MP4, FLAC, WavPack, TA, APE, etc.) |
 
 ## Research-Driven Additions
-
-- [ ] P1 - Persist and resume active batch queues
-  Why: `HistoryService` records completed jobs, but an app crash or restart loses queued/running work and forces users to reconstruct long batches.
-  Evidence: `src/UniversalConverterX.UI/Services/HistoryService.cs`; competitor queue persistence in HandBrake-style workflows.
-  Touches: batch page queue models, `HistoryService` or new `JobQueueService`, settings retention, crash bundle context.
-  Acceptance: queued jobs survive restart; completed jobs are not duplicated; failed/interrupted jobs can be retried with original input, output, preset, and arguments.
-  Complexity: L
 
 - [ ] P1 - Add sidecar capability preflight and health panel
   Why: Missing sidecar binaries, external CLIs, model weights, GPU support, or FFmpeg features are discovered only after execution starts.

@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -44,13 +45,17 @@ public sealed partial class ConverterPage : Page
     /// <summary>Soft limit when adding folders so a stray giant directory doesn't
     /// pin the UI thread building thousands of FileItem rows.</summary>
     private const int FolderAddCap = 500;
+    private const string QueueKey = "converter";
+    private const string QueuePageName = "Converter";
 
     private readonly IConversionOrchestrator _orchestrator;
+    private readonly IBatchQueueStore _queueStore;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
     private CancellationTokenSource? _cancellationTokenSource;
     private string? _selectedFormat;
     private string? _outputDirectory;
+    private bool _restoringQueue;
 
     public ConverterPage()
     {
@@ -59,9 +64,11 @@ public sealed partial class ConverterPage : Page
         // private one — every prior page navigation built a fresh registry of
         // 13 converter strategies for no reason.
         _orchestrator = App.Services.GetRequiredService<IConversionOrchestrator>();
+        _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
+        RestorePersistedQueue();
         UpdateUI();
     }
 
@@ -154,6 +161,7 @@ public sealed partial class ConverterPage : Page
 
         _outputDirectory = folder.Path;
         OutputDirectoryBox.Text = _outputDirectory;
+        PersistQueue();
         UpdateFooterStatus();
     }
 
@@ -161,6 +169,7 @@ public sealed partial class ConverterPage : Page
     {
         _outputDirectory = null;
         OutputDirectoryBox.Text = "";
+        PersistQueue();
         UpdateFooterStatus();
     }
 
@@ -202,6 +211,7 @@ public sealed partial class ConverterPage : Page
             StatusText.Text = $"Added {added} files from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).";
         else
             StatusText.Text = $"Added {added} files from {path}.";
+        PersistQueue();
         UpdateUI();
     }
 
@@ -242,7 +252,10 @@ public sealed partial class ConverterPage : Page
         });
 
         if (updateUi)
+        {
+            PersistQueue();
             UpdateUI();
+        }
 
         return true;
     }
@@ -252,6 +265,7 @@ public sealed partial class ConverterPage : Page
         if (sender is Button button && button.Tag is FileItem file)
         {
             _files.Remove(file);
+            PersistQueue();
             UpdateUI();
         }
     }
@@ -270,6 +284,7 @@ public sealed partial class ConverterPage : Page
         }
 
         _files.Clear();
+        PersistQueue();
         UpdateUI();
     }
 
@@ -285,8 +300,131 @@ public sealed partial class ConverterPage : Page
             _selectedFormat = item.Tag?.ToString();
             foreach (var file in _files)
                 file.FormatSummary = BuildFormatSummary(file.Extension);
+            PersistQueue();
             UpdateUI();
         }
+    }
+
+    private void RestorePersistedQueue()
+    {
+        _restoringQueue = true;
+        try
+        {
+            var queue = _queueStore.Load(QueueKey);
+            if (queue is null || queue.Jobs.Count == 0)
+                return;
+
+            if (queue.Settings.TryGetValue("targetFormat", out var targetFormat)
+                && !string.IsNullOrWhiteSpace(targetFormat))
+            {
+                SelectFormat(targetFormat);
+            }
+
+            if (queue.Settings.TryGetValue("outputDirectory", out var outputDirectory)
+                && !string.IsNullOrWhiteSpace(outputDirectory))
+            {
+                _outputDirectory = outputDirectory;
+                OutputDirectoryBox.Text = outputDirectory;
+            }
+
+            var restored = 0;
+            foreach (var job in queue.Jobs)
+            {
+                if (string.IsNullOrWhiteSpace(job.SourcePath)
+                    || !File.Exists(job.SourcePath)
+                    || _files.Any(f => string.Equals(f.Path, job.SourcePath, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                var info = new FileInfo(job.SourcePath);
+                var status = job.Status switch
+                {
+                    "Running" or "Converting" => "Interrupted - ready to retry",
+                    "Failed" => "Failed - ready to retry",
+                    "Cancelled" => "Cancelled - ready to retry",
+                    _ => "Queued",
+                };
+
+                _files.Add(new FileItem
+                {
+                    Id = string.IsNullOrWhiteSpace(job.Id) ? Guid.NewGuid().ToString("N") : job.Id,
+                    Path = job.SourcePath,
+                    FileName = info.Name,
+                    Extension = info.Extension.TrimStart('.').ToUpperInvariant(),
+                    FileSize = FormatSize(info.Length),
+                    Size = info.Length,
+                    FormatSummary = BuildFormatSummary(info.Extension),
+                    StatusText = status,
+                    Progress = 0,
+                    OutputPath = job.OutputPath,
+                    ErrorMessage = job.ErrorMessage,
+                    PersistedArgs = [.. job.Args],
+                });
+                restored++;
+            }
+
+            if (restored > 0)
+                StatusText.Text = $"Restored {restored} queued conversion(s) from the previous session.";
+        }
+        finally
+        {
+            _restoringQueue = false;
+        }
+
+        PersistQueue();
+    }
+
+    private void PersistQueue()
+    {
+        if (_restoringQueue || _queueStore is null)
+            return;
+
+        var activeJobs = _files
+            .Where(f => !f.StatusText.Equals("Done", StringComparison.OrdinalIgnoreCase))
+            .Select(f => new PersistedBatchJob
+            {
+                Id = string.IsNullOrWhiteSpace(f.Id) ? Guid.NewGuid().ToString("N") : f.Id,
+                SourcePath = f.Path,
+                OutputPath = f.OutputPath,
+                Engine = "converter",
+                Action = "convert",
+                Preset = _selectedFormat,
+                Args = f.PersistedArgs,
+                Status = NormalizePersistedStatus(f.StatusText),
+                ErrorMessage = f.ErrorMessage,
+            })
+            .ToList();
+
+        if (activeJobs.Count == 0)
+        {
+            _queueStore.Clear(QueueKey);
+            return;
+        }
+
+        _queueStore.Save(new PersistedBatchQueue
+        {
+            QueueKey = QueueKey,
+            PageName = QueuePageName,
+            Settings = new Dictionary<string, string?>
+            {
+                ["targetFormat"] = _selectedFormat,
+                ["outputDirectory"] = _outputDirectory,
+            },
+            Jobs = activeJobs,
+        });
+    }
+
+    private static string NormalizePersistedStatus(string status)
+    {
+        if (status.StartsWith("Interrupted", StringComparison.OrdinalIgnoreCase))
+            return "Interrupted";
+        if (status.StartsWith("Failed", StringComparison.OrdinalIgnoreCase))
+            return "Failed";
+        if (status.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase))
+            return "Cancelled";
+        if (status.Equals("Converting", StringComparison.OrdinalIgnoreCase)
+            || status.EndsWith("%", StringComparison.Ordinal))
+            return "Running";
+        return "Queued";
     }
 
     private void SmartMatch_Click(object sender, RoutedEventArgs e)
@@ -430,8 +568,23 @@ public sealed partial class ConverterPage : Page
         CancelButton.Content = "Cancel";
 
         var queuedJobs = _files
-            .Select(f => new QueuedConversion(f, CreateJob(f.Path, _selectedFormat)))
+            .Where(f => !f.StatusText.Equals("Done", StringComparison.OrdinalIgnoreCase))
+            .Select(f =>
+            {
+                var outputPath = string.IsNullOrWhiteSpace(f.OutputPath)
+                    ? BuildOutputPath(f.Path, _selectedFormat)
+                    : f.OutputPath!;
+                f.OutputPath = outputPath;
+                f.PersistedArgs = BuildRetryArgs(_selectedFormat, outputPath);
+                f.ErrorMessage = null;
+                if (!f.StatusText.StartsWith("Failed", StringComparison.OrdinalIgnoreCase)
+                    && !f.StatusText.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase)
+                    && !f.StatusText.StartsWith("Interrupted", StringComparison.OrdinalIgnoreCase))
+                    f.StatusText = "Queued";
+                return new QueuedConversion(f, CreateJob(f.Path, _selectedFormat, outputPath));
+            })
             .ToList();
+        PersistQueue();
         var completed = 0;
         var failed = 0;
         var cancelled = false;
@@ -455,8 +608,10 @@ public sealed partial class ConverterPage : Page
                     {
                         queued.File.StatusText = "Converting";
                         queued.File.Progress = 0;
+                        queued.File.ErrorMessage = null;
                         ProgressStatus.Text = $"Converting {queued.Job.InputFileName}...";
                         UpdateProgressDetails(queuedJobs.Count, completed + failed);
+                        PersistQueue();
                     });
 
                     var progress = new Progress<ConversionProgress>(p =>
@@ -467,6 +622,7 @@ public sealed partial class ConverterPage : Page
                             {
                                 ConversionProgress.IsIndeterminate = true;
                                 queued.File.StatusText = p.StatusMessage ?? p.Stage.ToString();
+                                PersistQueue();
                                 return;
                             }
 
@@ -478,19 +634,23 @@ public sealed partial class ConverterPage : Page
 
                             if (p.EstimatedTimeRemaining.HasValue)
                                 ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}";
+                            PersistQueue();
                         });
                     });
 
                     var result = await _orchestrator.ConvertAsync(queued.Job, progress, _cancellationTokenSource.Token);
-                    AddFinishedItem(result);
 
-                    if (result.Success)
+                    if (result.Success || result.WasSkipped)
                     {
                         Interlocked.Increment(ref completed);
                         DispatcherQueue.TryEnqueue(() =>
                         {
+                            AddFinishedItem(result);
+                            queued.File.OutputPath = result.OutputPath ?? result.Job.OutputPath;
                             queued.File.Progress = 100;
                             queued.File.StatusText = "Done";
+                            queued.File.ErrorMessage = null;
+                            PersistQueue();
                         });
                     }
                     else
@@ -498,7 +658,13 @@ public sealed partial class ConverterPage : Page
                         Interlocked.Increment(ref failed);
                         DispatcherQueue.TryEnqueue(() =>
                         {
-                            queued.File.StatusText = "Failed";
+                            AddFinishedItem(result);
+                            queued.File.OutputPath = result.OutputPath ?? result.Job.OutputPath;
+                            queued.File.StatusText = result.WasCancelled
+                                ? "Cancelled - ready to retry"
+                                : "Failed - ready to retry";
+                            queued.File.ErrorMessage = result.ErrorMessage;
+                            PersistQueue();
                         });
                     }
                 }
@@ -526,9 +692,19 @@ public sealed partial class ConverterPage : Page
         {
             DispatcherQueue.TryEnqueue(() =>
             {
+                foreach (var file in _files.Where(f =>
+                    f.StatusText.Equals("Converting", StringComparison.OrdinalIgnoreCase)
+                    || f.StatusText.EndsWith("%", StringComparison.Ordinal)
+                    || f.StatusText.Equals("Queued", StringComparison.OrdinalIgnoreCase)))
+                {
+                    file.StatusText = "Interrupted - ready to retry";
+                    file.ErrorMessage = "Conversion interrupted before completion.";
+                }
+
                 ProgressTitle.Text = "Cancelled";
                 ProgressStatus.Text = $"{completed} completed before cancellation";
                 CancelButton.Content = "Close";
+                PersistQueue();
             });
             cancelled = true;
         }
@@ -538,6 +714,7 @@ public sealed partial class ConverterPage : Page
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
             ConvertButton.IsEnabled = true;
+            PersistQueue();
         }
     }
 
@@ -600,7 +777,15 @@ public sealed partial class ConverterPage : Page
             _finishedFiles.RemoveAt(_finishedFiles.Count - 1);
     }
 
-    private ConversionJob CreateJob(string inputPath, string outputFormat)
+    private ConversionJob CreateJob(string inputPath, string outputFormat, string? outputPathOverride = null)
+    {
+        var outputPath = string.IsNullOrWhiteSpace(outputPathOverride)
+            ? BuildOutputPath(inputPath, outputFormat)
+            : outputPathOverride;
+        return ConversionJob.Create(inputPath, outputPath);
+    }
+
+    private string BuildOutputPath(string inputPath, string outputFormat)
     {
         var sourceDir = Path.GetDirectoryName(inputPath) ?? ".";
         var dir = _outputDirectory ?? sourceDir;
@@ -610,9 +795,16 @@ public sealed partial class ConverterPage : Page
         if (sourceExtension.Equals(normalizedFormat, StringComparison.OrdinalIgnoreCase))
             name += "_converted";
 
-        var outputPath = EnsureUniquePath(Path.Combine(dir, $"{name}.{normalizedFormat}"));
-        return ConversionJob.Create(inputPath, outputPath);
+        return EnsureUniquePath(Path.Combine(dir, $"{name}.{normalizedFormat}"));
     }
+
+    private static List<string> BuildRetryArgs(string outputFormat, string outputPath) =>
+    [
+        "--format",
+        outputFormat.TrimStart('.'),
+        "--output",
+        outputPath,
+    ];
 
     private string BuildFormatSummary(string sourceExtension)
     {
@@ -704,6 +896,10 @@ public class FileItem : INotifyPropertyChanged
     public string Extension { get; set; } = "";
     public string FileSize { get; set; } = "";
     public long Size { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string? OutputPath { get; set; }
+    public string? ErrorMessage { get; set; }
+    public List<string> PersistedArgs { get; set; } = [];
 
     public double Progress
     {
