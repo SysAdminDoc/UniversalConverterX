@@ -71,3 +71,4 @@ This matches UCX's existing `IConversionOrchestrator` progress contract and mini
 - **v2.1** — `videocrush/sidecar.py` + `clipforge/sidecar.py` + `streamkeep/sidecar.py` + `recordcast/sidecar.py` + freeze scripts; UI tabs (Compressor / Editor / Downloader / Recorder) wired to invoke them.
 - **v2.2** — `alphacut/sidecar.py` + `videosubtitleremover/sidecar.py` + `lipsight/sidecar.py`; shared ONNX model cache at `tools/_models/` (gitignored).
 - **v2.3** — `vertigo/sidecar.py` + `framesnap/sidecar.py` + `heicshift/` defaults absorbed into UCX FFmpeg/libvips strategies; `gifstudio/index.html` hosted via WebView2 (no shim needed).
+- **v2.21+** — first-party FFmpeg shims such as `audio-compressor/sidecar.py` and `voice-changer/sidecar.py` use the same NDJSON runner for local audio processing workflows.

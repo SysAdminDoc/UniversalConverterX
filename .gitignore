@@ -14,6 +14,11 @@ CODEX_CHANGELOG.md
 # Sidecar runtime artifacts (binaries land in tools/ at build time, not in git)
 tools/**/*.exe
 tools/**/*.dll
+tools/**/.venv/
+tools/**/build/
+tools/**/dist/
+tools/**/spec/
+tools/**/*.spec
 tools/**/models/
 tools/**/__pycache__/
 

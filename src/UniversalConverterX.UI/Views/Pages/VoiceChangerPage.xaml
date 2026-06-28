@@ -8,143 +8,302 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="32" Spacing="20">
-
-            <!-- Header -->
-            <StackPanel Spacing="6">
-                <TextBlock Text="Voice Changer" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Transform narration tone, pitch, and timbre while preserving speech timing and intelligibility."
-                           Style="{StaticResource SubtitleTextStyle}"/>
-            </StackPanel>
-
-            <!-- Dev status banner -->
-            <Border Style="{StaticResource CardStyle}">
-                <Grid ColumnSpacing="16">
+    <Page.Resources>
+        <DataTemplate x:Key="VoiceChangeQueueTemplate">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Padding="14"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="14" RowSpacing="8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="44"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="126"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xED28;" FontSize="22"
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.RowSpan="2" Grid.Column="0"
+                            Width="44" Height="44" CornerRadius="14"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xED28;" FontSize="20"
                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                     </Border>
-                    <StackPanel Grid.Column="1" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="FUTURE" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentOrangeBrush}"/>
-                            </Border>
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock Text="Model choice open" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource TextMutedBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="Voice Changer is not available yet."
-                                   Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock Text="Required before enabling: model selection, preview, export path, cancellation, and failure recovery."
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3">
+                        <TextBlock Text="{Binding FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding SourceSummary}"
+                                   Style="{StaticResource MutedTextStyle}"/>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
+                            Background="{StaticResource SurfaceLightBrush}"
+                            CornerRadius="10" Padding="10,5">
+                        <TextBlock Text="{Binding StyleSummary}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextAlignment="Center"/>
+                    </Border>
+
+                    <Button Grid.Column="3" Grid.Row="0"
+                            Style="{StaticResource IconButtonStyle}"
+                            AutomationProperties.Name="Remove from queue"
+                            AutomationProperties.AutomationId="VoiceChangerRemoveButton"
+                            ToolTipService.ToolTip="Remove from queue"
+                            Click="RemoveFile_Click" Tag="{Binding}">
+                        <FontIcon Glyph="&#xE711;" FontSize="14"
+                                  Foreground="{StaticResource TextMutedBrush}"/>
+                    </Button>
+
+                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar AutomationProperties.Name="Progress"
+                                     Grid.Column="0" Minimum="0" Maximum="100"
+                                     Value="{Binding Progress}"
+                                     Height="6" CornerRadius="3"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   MinWidth="92" TextAlignment="Right"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="VOICE CHANGER"
+                           Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock Text="Transform narration tone, pitch, and timbre while preserving speech timing."
+                           Style="{StaticResource TitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="760" LineHeight="30"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Content="Add Files"
+                        AutomationProperties.AutomationId="VoiceChangerAddFilesButton"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Browse_Click"/>
+                <Button Content="Add Folder"
+                        AutomationProperties.AutomationId="VoiceChangerAddFolderButton"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BrowseFolder_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="360"/>
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="DropZone" Grid.Column="0"
+                    Style="{StaticResource CardStyle}"
+                    CornerRadius="22"
+                    Padding="18"
+                    AllowDrop="True"
+                    DragOver="DropZone_DragOver"
+                    Drop="DropZone_Drop">
+                <Grid MinHeight="430" Padding="0,8,0,0">
+                    <StackPanel x:Name="EmptyState"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+                        <Border Width="116" Height="116" CornerRadius="28"
+                                Background="{StaticResource SurfaceLightBrush}">
+                            <FontIcon Glyph="&#xED28;" FontSize="48"
+                                      Foreground="{StaticResource AccentOrangeBrush}"/>
+                        </Border>
+                        <TextBlock Text="Drop audio or video files"
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="MP3, WAV, FLAC, M4A, AAC, OGG, OPUS, MP4, MKV, MOV, WEBM and common speech containers."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="460"
+                                   TextAlignment="Center"/>
+                        <Button Content="Browse Files"
+                                AutomationProperties.AutomationId="VoiceChangerBrowseButton"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="Browse_Click"
+                                HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <ListView x:Name="FileList"
+                              Visibility="Collapsed"
+                              Background="Transparent"
+                              SelectionMode="None"
+                              ItemTemplate="{StaticResource VoiceChangeQueueTemplate}"/>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="14">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Voice Style" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="StyleCombo"
+                                  AutomationProperties.AutomationId="VoiceChangerStyleCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="VoiceCombo_Changed">
+                            <ComboBoxItem Content="Neutral / cleaned" Tag="neutral" IsSelected="True"/>
+                            <ComboBoxItem Content="Lower / deeper" Tag="lower"/>
+                            <ComboBoxItem Content="Higher / lighter" Tag="higher"/>
+                            <ComboBoxItem Content="Robotic" Tag="robotic"/>
+                            <ComboBoxItem Content="Whisper" Tag="whisper"/>
+                        </ComboBox>
+                        <TextBlock x:Name="StyleSummary"
+                                   Text=""
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Tuning" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Name="PitchSlider"
+                                AutomationProperties.AutomationId="VoiceChangerPitchSlider"
+                                Header="Pitch shift (semitones)"
+                                Minimum="-12" Maximum="12" Value="0"
+                                StepFrequency="1" SnapsTo="StepValues"
+                                ValueChanged="VoiceSlider_Changed"/>
+                        <Slider x:Name="IntensitySlider"
+                                AutomationProperties.AutomationId="VoiceChangerIntensitySlider"
+                                Header="Timbre intensity"
+                                Minimum="0" Maximum="100" Value="65"
+                                StepFrequency="5" SnapsTo="StepValues"
+                                ValueChanged="VoiceSlider_Changed"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="FormatCombo"
+                                  AutomationProperties.AutomationId="VoiceChangerFormatCombo"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="VoiceCombo_Changed">
+                            <ComboBoxItem Content="WAV (16-bit PCM)" Tag="wav" IsSelected="True"/>
+                            <ComboBoxItem Content="MP3 (V2)" Tag="mp3"/>
+                            <ComboBoxItem Content="AAC (M4A 192 kbps)" Tag="m4a"/>
+                            <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
+                            <ComboBoxItem Content="Opus (128 kbps)" Tag="opus"/>
+                            <ComboBoxItem Content="Keep video when possible" Tag="video"/>
+                        </ComboBox>
+                        <TextBox x:Name="OutputDirectoryBox"
+                                 AutomationProperties.AutomationId="VoiceChangerOutputDirBox"
+                                 Header="Save to"
+                                 PlaceholderText="Same folder as each source file"
+                                 IsReadOnly="True"/>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Browse"
+                                    AutomationProperties.AutomationId="VoiceChangerBrowseOutputButton"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"/>
+                            <Button Grid.Column="1" Content="Same as source"
+                                    AutomationProperties.AutomationId="VoiceChangerSameAsSourceButton"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="SameAsSource_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource InfoBannerStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE946;" FontSize="16"
+                                  Foreground="{StaticResource AccentOrangeBrush}"
+                                  VerticalAlignment="Top"/>
+                        <TextBlock Text="The local engine uses FFmpeg filters for pitch, EQ, dynamics, and modulation. Originals are kept."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
-                </Grid>
-            </Border>
+                </Border>
+            </StackPanel>
+        </Grid>
 
-            <!-- Input area -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0"
+                       Style="{StaticResource MutedTextStyle}"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <Button Grid.Column="1" Content="Clear Queue"
+                    x:Name="ClearButton"
+                    AutomationProperties.AutomationId="VoiceChangerClearButton"
+                    Style="{StaticResource GhostButtonStyle}"
+                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
+            <Button Grid.Column="2" Content="Open Output"
+                    AutomationProperties.AutomationId="VoiceChangerOpenOutputButton"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
+            <Button Grid.Column="3" Content="Transform All"
+                    x:Name="TransformButton"
+                    AutomationProperties.AutomationId="VoiceChangerTransformButton"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Transform_Click" IsEnabled="False"/>
+        </Grid>
+
+        <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
+              Background="{StaticResource OverlayBrush}">
             <Border Style="{StaticResource CardStyle}"
-                    MinHeight="160"
-                    AllowDrop="False"
-                    Opacity="0.72"
-                    DragOver="DropZone_DragOver"
-                    Drop="DropZone_Drop">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <Border Width="72" Height="72" CornerRadius="18"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xED28;" FontSize="32"
-                                  Foreground="{StaticResource AccentOrangeBrush}"/>
-                    </Border>
-                    <TextBlock x:Name="DropZoneLabel"
-                               Text="Input is disabled until this workflow is ready."
-                               Style="{StaticResource BodyTextStyle}"
-                               HorizontalAlignment="Center"/>
-                    <Button x:Name="BrowseButton" Content="Browse Files"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            IsEnabled="False"
-                            HorizontalAlignment="Center"
-                            Click="Browse_Click"
-                        AutomationProperties.AutomationId="BrowseButton"/>
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MinWidth="440"
+                    MaxWidth="560">
+                <StackPanel Spacing="14">
+                    <TextBlock x:Name="ProgressTitle" Text="Transforming..."
+                               Style="{StaticResource TitleTextStyle}"/>
+                    <ProgressBar AutomationProperties.Name="Progress"
+                                 x:Name="ProgressBar" Height="8" CornerRadius="4"
+                                 Minimum="0" Maximum="100"/>
+                    <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
+                    <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
+                    <ScrollViewer Height="96" VerticalScrollBarVisibility="Auto"
+                                  Background="{StaticResource SurfaceLightBrush}" Padding="8" CornerRadius="4">
+                        <TextBlock x:Name="ProgressLog" Style="{StaticResource CodeTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </ScrollViewer>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                        <Button x:Name="CancelButton" Content="Cancel"
+                                AutomationProperties.AutomationId="VoiceChangerCancelButton"
+                                Style="{StaticResource DangerButtonStyle}"
+                                Click="Cancel_Click"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
-
-            <!-- Settings panel -->
-            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Voice Style" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Target Style" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VoiceChangerPageComboBox01">
-                                <ComboBoxItem Content="Neutral / Cleaned" IsSelected="True"/>
-                                <ComboBoxItem Content="Lower / Deeper"/>
-                                <ComboBoxItem Content="Higher / Lighter"/>
-                                <ComboBoxItem Content="Robotic"/>
-                                <ComboBoxItem Content="Whisper"/>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Pitch Shift (semitones)" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="-12" Maximum="12" Value="0" TickFrequency="1"
-                                AutomationProperties.AutomationId="VoiceChangerPageSlider01"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="1" Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="14">
-                        <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Preservation Strength" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="0" Maximum="100" Value="75" TickFrequency="10"
-                                AutomationProperties.AutomationId="VoiceChangerPageSlider02"/>
-                        </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VoiceChangerPageComboBox02">
-                                <ComboBoxItem Content="WAV (lossless)" IsSelected="True"/>
-                                <ComboBoxItem Content="MP3 (320kbps)"/>
-                                <ComboBoxItem Content="Muxed back into video"/>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <!-- Action bar -->
-            <Border Style="{StaticResource CardStyle}" Padding="16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
-                               Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Transform Voice"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"
-                        AutomationProperties.AutomationId="VoiceChangerPageButton01"/>
-                </Grid>
-            </Border>
-
-        </StackPanel>
-    </ScrollViewer>
+        </Grid>
+    </Grid>
 </Page>

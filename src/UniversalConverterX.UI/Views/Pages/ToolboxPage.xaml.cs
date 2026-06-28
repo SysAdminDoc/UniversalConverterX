@@ -89,7 +89,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("subtitle-remover", "Subtitle Remover", "Remove hard-coded subtitles from selected regions", "\uE93B", blue, "Planned", orange, true, "VideoSubtitleRemover"));
         AiTools.Add(new ToolboxTile("ai-subtitle", "Auto Subtitle", "Generate SRT/VTT subtitles + optional video burn-in", "\uED1E", blue, "Ready", green, true, "Whisper"));
         AiTools.Add(new ToolboxTile("ai-vocal", "Vocal Remover", "Isolate or remove vocals from audio", "\uE767", red, "Ready", blue, true, "Demucs"));
-        AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "AI voice transformation", "\uE720", red, "Future", yellow, true, null));
+        AiTools.Add(new ToolboxTile("ai-voice-changer", "Voice Changer", "Local voice style transformation with pitch, timbre, and video remux options", "\uE720", red, "Ready", green, true, "FFmpeg filters"));
         AiTools.Add(new ToolboxTile("ai-tts", "Text-to-Speech", "Generate voiceovers from text — 322 voices, 50+ languages", "\uEC4F", green, "Ready", green, true, "edge-tts"));
         AiTools.Add(new ToolboxTile("ai-photo-restore", "Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "\uE77B", green, "Ready", green, true, "GFPGAN"));
         AiTools.Add(new ToolboxTile("ai-stt", "Speech-to-Text", "Transcribe audio to text", "\uE720", green, "Ready", blue, true, "Whisper"));
