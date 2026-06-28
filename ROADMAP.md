@@ -1473,32 +1473,6 @@ Sources: [S115] (Prometheus — time-series monitoring), [S116] (Grafana — com
 
 ---
 
-### 87. VVC / H.266 Encoding (vvenc 1.14.0) _(new T3 / Codec)_
-
-**Context (iter-7 wave 4, 2026-05-02):** **vvenc 1.14.0** [S153] is Fraunhofer HHI's
-production-grade VVC (Versatile Video Coding / H.266) encoder. v1.14.0 ships:
-**capped constant-quality mode (CQF)**, **experimental film-grain analysis**, ARM SIMD/SVE
-optimizations, GOP-adaptive QP cascade, and DASH-optimized decoder refresh (`idr_no_radl`).
-VVC is the H.265 successor — **~30–50% bitrate savings vs. H.265 at equal quality** per
-Fraunhofer benchmarks. Adoption is still nascent but tooling has matured enough that
-prosumers archiving long-term assets will want it as a future-proofing path.
-
-**Concept:** Wrap `vvencFFapp` (or `vvencapp`) as `vvc-encoder` sidecar. Expose presets
-`faster | fast | medium | slow | slower` (matching x265 conventions) and CQF mode
-("VVC Capped Quality 24"). Plays nicely with **Item 69** (SVT-AV1-HDR) since vvenc
-honors VUI flags and color range. Decode path: ffmpeg has built-in `libvvdec` decoding
-in 8.x for verification.
-
-**Risks:** VVC playback support is sparse (VLC 4.0 beta, ffmpeg via libvvdec, no native
-Windows codec). Surface this in the preset description so users don't ship VVC files to
-relatives running Windows Media Player. Royalty/patent landscape is unsettled — present
-as "experimental codec" UI tag.
-
-Impact: 2 · Effort: 3 · Type: leapfrog + codec coverage
-Sources: [S153] (vvenc 1.14.0 — capped CQF, film grain, ARM SVE, Jan 2026)
-
----
-
 ### 88. JPEG XL libjxl Security Floor — Update to v0.11.2 _(new T2 / Security)_ — ✅ SHIPPED 2026-05-02
 
 **Context (iter-7 wave 4, 2026-05-02):** **libjxl 0.11.2** [S154] (Sep 2025) ships fixes

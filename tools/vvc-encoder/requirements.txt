@@ -1,0 +1,2 @@
+# vvc-encoder sidecar — stdlib-only (wraps external vvencapp binary)
+# No Python dependencies required.

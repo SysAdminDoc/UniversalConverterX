@@ -278,6 +278,7 @@ KNOWN_EVENTS = {
     "dovi_rpu",            # dovi-rpu — RPU extract/inject/demux/info result
     "hdrplus_meta",        # hdrplus-rpu — HDR10+ metadata extract/inject/info result
     "subtitle_synced",     # subtitle-sync — audio-fingerprint subtitle synchronization
+    "vvc_encode",          # vvc-encoder — VVC/H.266 encode result (vvencapp wrapper)
 }
 
 
