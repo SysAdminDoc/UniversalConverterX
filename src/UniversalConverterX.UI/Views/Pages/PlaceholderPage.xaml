@@ -84,10 +84,12 @@
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,0">
                     <Button Content="Browse Tools"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            Click="OpenToolbox_Click"/>
+                            Click="OpenToolbox_Click"
+                        AutomationProperties.AutomationId="PlaceholderPageButton01"/>
                     <Button Content="Back to Home"
                             Style="{StaticResource GhostButtonStyle}"
-                            Click="OpenHome_Click"/>
+                            Click="OpenHome_Click"
+                        AutomationProperties.AutomationId="PlaceholderPageButton02"/>
                 </StackPanel>
             </StackPanel>
         </Border>

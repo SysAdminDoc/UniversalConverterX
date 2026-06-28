@@ -73,7 +73,8 @@
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
                             HorizontalAlignment="Center"
-                            Click="Browse_Click"/>
+                            Click="Browse_Click"
+                        AutomationProperties.AutomationId="BrowseButton"/>
                 </StackPanel>
             </Border>
 
@@ -89,7 +90,8 @@
                         <TextBlock Text="Voice Style" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Target Style" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VoiceChangerPageComboBox01">
                                 <ComboBoxItem Content="Neutral / Cleaned" IsSelected="True"/>
                                 <ComboBoxItem Content="Lower / Deeper"/>
                                 <ComboBoxItem Content="Higher / Lighter"/>
@@ -99,7 +101,8 @@
                         </StackPanel>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Pitch Shift (semitones)" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="-12" Maximum="12" Value="0" TickFrequency="1"/>
+                            <Slider Minimum="-12" Maximum="12" Value="0" TickFrequency="1"
+                                AutomationProperties.AutomationId="VoiceChangerPageSlider01"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -109,11 +112,13 @@
                         <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Preservation Strength" Style="{StaticResource MutedTextStyle}"/>
-                            <Slider Minimum="0" Maximum="100" Value="75" TickFrequency="10"/>
+                            <Slider Minimum="0" Maximum="100" Value="75" TickFrequency="10"
+                                AutomationProperties.AutomationId="VoiceChangerPageSlider02"/>
                         </StackPanel>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VoiceChangerPageComboBox02">
                                 <ComboBoxItem Content="WAV (lossless)" IsSelected="True"/>
                                 <ComboBoxItem Content="MP3 (320kbps)"/>
                                 <ComboBoxItem Content="Muxed back into video"/>
@@ -135,7 +140,8 @@
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Transform Voice"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"/>
+                            IsEnabled="False"
+                        AutomationProperties.AutomationId="VoiceChangerPageButton01"/>
                 </Grid>
             </Border>
 

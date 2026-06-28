@@ -129,20 +129,24 @@
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenFolder_Click"
-                    Visibility="Collapsed"/>
+                    Visibility="Collapsed"
+                AutomationProperties.AutomationId="OpenFolderButton"/>
             <Button x:Name="PauseButton"
                     Content="Pause"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Click="Pause_Click"/>
+                    Click="Pause_Click"
+                AutomationProperties.AutomationId="PauseButton"/>
             <Button x:Name="CancelButton"
                     Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
-                    Click="Cancel_Click"/>
+                    Click="Cancel_Click"
+                AutomationProperties.AutomationId="CancelButton"/>
             <Button x:Name="CloseButton"
                     Content="Close"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Close_Click"
-                    Visibility="Collapsed"/>
+                    Visibility="Collapsed"
+                AutomationProperties.AutomationId="CloseButton"/>
         </StackPanel>
     </Grid>
 </Window>

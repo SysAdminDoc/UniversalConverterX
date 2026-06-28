@@ -66,12 +66,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Open File"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="OpenFile_Click"/>
+                        Click="OpenFile_Click"
+                    AutomationProperties.AutomationId="ChapterMarksPageButton01"/>
                 <Button x:Name="SaveButton"
                         Content="Save As..."
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Save_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="SaveButton"/>
             </StackPanel>
         </Grid>
 
@@ -94,7 +96,8 @@
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddRow_Click"
                         IsEnabled="False"
-                        x:Name="AddButton"/>
+                        x:Name="AddButton"
+                    AutomationProperties.AutomationId="AddButton"/>
             </Grid>
         </Border>
 

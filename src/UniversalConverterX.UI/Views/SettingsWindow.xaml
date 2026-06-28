@@ -80,13 +80,15 @@
                                      Header="Default output folder"
                                      PlaceholderText="Same as input file"
                                      Style="{StaticResource PremiumTextBoxStyle}"
-                                     IsReadOnly="True"/>
+                                     IsReadOnly="True"
+                                AutomationProperties.AutomationId="OutputDirectoryTextBox"/>
                             <Button Grid.Column="1" 
                                     Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputDirectory_Click"/>
+                                    Click="BrowseOutputDirectory_Click"
+                                AutomationProperties.AutomationId="SettingsWindowButton01"/>
                         </Grid>
 
                         <!-- Overwrite Behavior -->
@@ -95,7 +97,8 @@
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="OverwriteBehaviorComboBox">
                             <ComboBoxItem Content="Ask each time"/>
                             <ComboBoxItem Content="Always overwrite"/>
                             <ComboBoxItem Content="Never overwrite (rename)"/>
@@ -107,7 +110,8 @@
                                       Header="Delete source files after conversion"
                                       OffContent="Keep original files"
                                       OnContent="Move to Recycle Bin"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="DeleteSourceToggle"/>
 
                         <!-- Notifications -->
                         <ToggleSwitch x:Name="NotificationsToggle"
@@ -115,7 +119,8 @@
                                       OffContent="Disabled"
                                       OnContent="Enabled"
                                       IsOn="True"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="NotificationsToggle"/>
 
                         <!-- Sound -->
                         <ToggleSwitch x:Name="SoundToggle"
@@ -123,7 +128,8 @@
                                       OffContent="Silent"
                                       OnContent="Enabled"
                                       IsOn="True"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="SoundToggle"/>
                     </StackPanel>
                 </Expander>
 
@@ -151,7 +157,8 @@
                                   SelectedIndex="3"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="DefaultQualityComboBox">
                             <ComboBoxItem Content="Lowest - Smallest file size"/>
                             <ComboBoxItem Content="Low"/>
                             <ComboBoxItem Content="Medium - Balanced"/>
@@ -166,7 +173,8 @@
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="HardwareAccelComboBox">
                             <ComboBoxItem Content="Auto-detect"/>
                             <ComboBoxItem Content="NVIDIA NVENC (CUDA)"/>
                             <ComboBoxItem Content="Intel Quick Sync"/>
@@ -189,7 +197,8 @@
                                         StepFrequency="1"
                                         TickFrequency="1"
                                         TickPlacement="Outside"
-                                        ValueChanged="ParallelSlider_ValueChanged"/>
+                                        ValueChanged="ParallelSlider_ValueChanged"
+                                    AutomationProperties.AutomationId="ParallelSlider"/>
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding Value, ElementName=ParallelSlider}"
                                            Width="30"
@@ -205,7 +214,8 @@
                                       OffContent="Strip metadata"
                                       OnContent="Keep EXIF, tags, etc."
                                       IsOn="True"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="PreserveMetadataToggle"/>
                     </StackPanel>
                 </Expander>
 
@@ -237,13 +247,15 @@
                                      Header="Tools directory"
                                      PlaceholderText="Default location"
                                      Style="{StaticResource PremiumTextBoxStyle}"
-                                     IsReadOnly="True"/>
+                                     IsReadOnly="True"
+                                AutomationProperties.AutomationId="ToolsPathTextBox"/>
                             <Button Grid.Column="1" 
                                     Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseToolsPath_Click"/>
+                                    Click="BrowseToolsPath_Click"
+                                AutomationProperties.AutomationId="SettingsWindowButton02"/>
                         </Grid>
 
                         <!-- Tools List -->
@@ -299,7 +311,8 @@
                                 Content="Install missing tools"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 HorizontalAlignment="Right"
-                                Click="DownloadAllTools_Click"/>
+                                Click="DownloadAllTools_Click"
+                            AutomationProperties.AutomationId="DownloadAllToolsButton"/>
                     </StackPanel>
                 </Expander>
 
@@ -327,7 +340,8 @@
                                       OffContent="Disabled"
                                       OnContent="Enabled"
                                       IsOn="True"
-                                      Toggled="ContextMenuToggle_Toggled"/>
+                                      Toggled="ContextMenuToggle_Toggled"
+                            AutomationProperties.AutomationId="ContextMenuToggle"/>
 
                         <!-- Context Menu Style -->
                         <ComboBox x:Name="ContextMenuStyleComboBox"
@@ -336,7 +350,8 @@
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
-                                  IsEnabled="{Binding IsOn, ElementName=ContextMenuToggle}">
+                                  IsEnabled="{Binding IsOn, ElementName=ContextMenuToggle}"
+                            AutomationProperties.AutomationId="ContextMenuStyleComboBox">
                             <ComboBoxItem Content="Cascading menu (Convert to →)"/>
                             <ComboBoxItem Content="Flat menu (individual formats)"/>
                             <ComboBoxItem Content="Single item (opens app)"/>
@@ -345,12 +360,18 @@
                         <!-- Quick Convert Presets -->
                         <TextBlock Text="Quick convert presets in context menu" Margin="0,8,0,0"/>
                         <StackPanel Spacing="8">
-                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
-                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
-                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
-                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
-                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract audio as MP3" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
-                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"/>
+                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetWebpCheckBox"/>
+                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetPngCheckBox"/>
+                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetJpgCheckBox"/>
+                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetMp4CheckBox"/>
+                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract audio as MP3" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetMp3CheckBox"/>
+                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                                AutomationProperties.AutomationId="PresetPdfCheckBox"/>
                         </StackPanel>
 
                         <!-- Register/Unregister Buttons -->
@@ -358,11 +379,13 @@
                             <Button x:Name="RegisterShellButton"
                                     Content="Register menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="RegisterShell_Click"/>
+                                    Click="RegisterShell_Click"
+                                AutomationProperties.AutomationId="RegisterShellButton"/>
                             <Button x:Name="UnregisterShellButton"
                                     Content="Remove menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="UnregisterShell_Click"/>
+                                    Click="UnregisterShell_Click"
+                                AutomationProperties.AutomationId="UnregisterShellButton"/>
                         </StackPanel>
                     </StackPanel>
                 </Expander>
@@ -391,7 +414,8 @@
                                   SelectedIndex="1"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="ThemeComboBox_SelectionChanged">
+                                  SelectionChanged="ThemeComboBox_SelectionChanged"
+                            AutomationProperties.AutomationId="ThemeComboBox">
                             <ComboBoxItem Content="Light"/>
                             <ComboBoxItem Content="Dark"/>
                             <ComboBoxItem Content="Use system setting"/>
@@ -406,31 +430,36 @@
                                         Background="#22c55e"
                                         AutomationProperties.Name="Green accent"
                                         CornerRadius="20"
-                                        Click="AccentColor_Click" Tag="#22c55e"/>
+                                        Click="AccentColor_Click" Tag="#22c55e"
+                                    AutomationProperties.AutomationId="AccentGreenButton"/>
                                 <Button x:Name="AccentBlueButton" 
                                         Width="40" Height="40" 
                                         Background="#60a5fa"
                                         AutomationProperties.Name="Blue accent"
                                         CornerRadius="20"
-                                        Click="AccentColor_Click" Tag="#60a5fa"/>
+                                        Click="AccentColor_Click" Tag="#60a5fa"
+                                    AutomationProperties.AutomationId="AccentBlueButton"/>
                                 <Button x:Name="AccentPurpleButton" 
                                         Width="40" Height="40" 
                                         Background="#a78bfa"
                                         AutomationProperties.Name="Purple accent"
                                         CornerRadius="20"
-                                        Click="AccentColor_Click" Tag="#a78bfa"/>
+                                        Click="AccentColor_Click" Tag="#a78bfa"
+                                    AutomationProperties.AutomationId="AccentPurpleButton"/>
                                 <Button x:Name="AccentOrangeButton" 
                                         Width="40" Height="40" 
                                         Background="#fb923c"
                                         AutomationProperties.Name="Orange accent"
                                         CornerRadius="20"
-                                        Click="AccentColor_Click" Tag="#fb923c"/>
+                                        Click="AccentColor_Click" Tag="#fb923c"
+                                    AutomationProperties.AutomationId="AccentOrangeButton"/>
                                 <Button x:Name="AccentRedButton" 
                                         Width="40" Height="40" 
                                         Background="#f87171"
                                         AutomationProperties.Name="Red accent"
                                         CornerRadius="20"
-                                        Click="AccentColor_Click" Tag="#f87171"/>
+                                        Click="AccentColor_Click" Tag="#f87171"
+                                    AutomationProperties.AutomationId="AccentRedButton"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -439,14 +468,16 @@
                                       Header="Minimize to system tray"
                                       OffContent="Close to taskbar"
                                       OnContent="Minimize to tray"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="MinimizeToTrayToggle"/>
 
                         <!-- Start Minimized -->
                         <ToggleSwitch x:Name="StartMinimizedToggle"
                                       Header="Start minimized"
                                       OffContent="Show window on startup"
                                       OnContent="Start in background"
-                                      Toggled="SettingsToggle_Changed"/>
+                                      Toggled="SettingsToggle_Changed"
+                            AutomationProperties.AutomationId="StartMinimizedToggle"/>
                     </StackPanel>
                 </Expander>
 
@@ -480,15 +511,19 @@
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX"/>
-                            <HyperlinkButton Content="Documentation" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX#readme"/>
-                            <HyperlinkButton Content="Report Issue" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX/issues/new"/>
+                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX"
+                                AutomationProperties.AutomationId="SettingsWindowHyperlinkButton01"/>
+                            <HyperlinkButton Content="Documentation" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX#readme"
+                                AutomationProperties.AutomationId="SettingsWindowHyperlinkButton02"/>
+                            <HyperlinkButton Content="Report Issue" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX/issues/new"
+                                AutomationProperties.AutomationId="SettingsWindowHyperlinkButton03"/>
                         </StackPanel>
 
                         <Button x:Name="CheckUpdatesButton"
                                 Content="View Releases"
                                 Style="{StaticResource SecondaryButtonStyle}"
-                                Click="CheckUpdates_Click"/>
+                                Click="CheckUpdates_Click"
+                            AutomationProperties.AutomationId="CheckUpdatesButton"/>
 
                         <!-- Credits -->
                         <TextBlock Text="Local engines:" Margin="0,16,0,0"/>
@@ -516,7 +551,8 @@
                     <Button x:Name="ResetButton"
                             Content="Reset defaults"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Click="ResetSettings_Click"/>
+                            Click="ResetSettings_Click"
+                        AutomationProperties.AutomationId="ResetButton"/>
                     <TextBlock x:Name="UnsavedStatusText"
                                Text="No unsaved changes"
                                Style="{StaticResource MutedTextStyle}"
@@ -527,12 +563,14 @@
                     <Button x:Name="CancelButton"
                             Content="Cancel"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Click="Cancel_Click"/>
+                            Click="Cancel_Click"
+                        AutomationProperties.AutomationId="CancelButton"/>
                     <Button x:Name="SaveButton"
                             Content="Save"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
-                            Click="Save_Click"/>
+                            Click="Save_Click"
+                        AutomationProperties.AutomationId="SaveButton"/>
                 </StackPanel>
             </Grid>
         </Border>

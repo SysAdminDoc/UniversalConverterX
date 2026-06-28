@@ -300,11 +300,13 @@
                     </StackPanel>
                     <Button Grid.Column="1" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Click="OpenOutput_Click"/>
+                            Click="OpenOutput_Click"
+                        AutomationProperties.AutomationId="DownloaderPageButton01"/>
                 </Grid>
 
                 <Pivot x:Name="QueuePivot" Grid.Row="1" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Downloading">
+                    <PivotItem Header="Downloading"
+                        AutomationProperties.AutomationId="DownloaderPagePivotItem01">
                         <Grid MinHeight="330" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
                                         HorizontalAlignment="Center"
@@ -331,7 +333,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="DownloaderPagePivotItem02">
                         <Grid MinHeight="330" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"

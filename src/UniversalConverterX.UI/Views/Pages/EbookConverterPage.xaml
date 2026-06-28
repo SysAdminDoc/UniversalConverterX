@@ -83,12 +83,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add eBooks"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddFiles_Click"/>
+                        Click="AddFiles_Click"
+                    AutomationProperties.AutomationId="EbookConverterPageButton01"/>
                 <Button x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="ConvertButton"/>
             </StackPanel>
         </Grid>
 
@@ -101,7 +103,8 @@
                 </Grid.ColumnDefinitions>
                 <ComboBox x:Name="FormatCombo"
                           Header="Target format"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="FormatCombo">
                     <ComboBoxItem Content="EPUB" Tag="epub"/>
                     <ComboBoxItem Content="MOBI" Tag="mobi"/>
                     <ComboBoxItem Content="AZW3 (Kindle)" Tag="azw3"/>
@@ -122,12 +125,14 @@
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
-                         PlaceholderText="(same as source)"/>
+                         PlaceholderText="(same as source)"
+                    AutomationProperties.AutomationId="OutputDirBox"/>
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="BrowseOutputDir_Click"/>
+                        Click="BrowseOutputDir_Click"
+                    AutomationProperties.AutomationId="EbookConverterPageButton02"/>
             </Grid>
         </Border>
 
@@ -140,15 +145,18 @@
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="TitleBox"
                          Header="Title (optional)"
-                         PlaceholderText="(keep source)"/>
+                         PlaceholderText="(keep source)"
+                    AutomationProperties.AutomationId="TitleBox"/>
                 <TextBox Grid.Column="1"
                          x:Name="AuthorsBox"
                          Header="Authors (optional)"
-                         PlaceholderText='Asimov, Isaac &amp; Clarke, Arthur'/>
+                         PlaceholderText='Asimov, Isaac &amp; Clarke, Arthur'
+                    AutomationProperties.AutomationId="AuthorsBox"/>
                 <TextBox Grid.Column="2"
                          x:Name="LanguageBox"
                          Header="Language (ISO-639)"
-                         PlaceholderText="en"/>
+                         PlaceholderText="en"
+                    AutomationProperties.AutomationId="LanguageBox"/>
             </Grid>
         </Border>
 

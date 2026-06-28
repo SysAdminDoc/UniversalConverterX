@@ -84,9 +84,11 @@
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                             <Button Content="Open Toolbox" Style="{StaticResource PrimaryButtonStyle}"
-                                    Click="OpenToolbox_Click"/>
+                                    Click="OpenToolbox_Click"
+                                AutomationProperties.AutomationId="AiLabPageButton01"/>
                             <Button Content="Start Converter" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="OpenConverter_Click"/>
+                                    Click="OpenConverter_Click"
+                                AutomationProperties.AutomationId="AiLabPageButton02"/>
                         </StackPanel>
                     </StackPanel>
 

@@ -113,12 +113,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="VideoEnhancerPageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Upscale Video"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -134,7 +136,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="VideoEnhancerPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                                 <Border Width="116" Height="116" CornerRadius="28"
@@ -150,14 +153,16 @@
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
                                 <Button Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
-                                        Click="Browse_Click" HorizontalAlignment="Center"/>
+                                        Click="Browse_Click" HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="VideoEnhancerPageButton02"/>
                             </StackPanel>
                             <ListView x:Name="FileList" Visibility="Collapsed"
                                       Background="Transparent" SelectionMode="None"
                                       ItemTemplate="{StaticResource VeQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="VideoEnhancerPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
@@ -185,10 +190,12 @@
                         <ComboBox x:Name="ModelCombo" Header="Model"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Discovering..."
-                                  SelectionChanged="Settings_Changed"/>
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="ModelCombo"/>
                         <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
-                                Click="RefreshModels_Click" HorizontalAlignment="Stretch"/>
+                                Click="RefreshModels_Click" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="VideoEnhancerPageButton03"/>
                     </StackPanel>
                 </Border>
 
@@ -197,7 +204,8 @@
                         <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="ScaleCombo">
                             <ComboBoxItem Content="2× (recommended)" Tag="2"/>
                             <ComboBoxItem Content="3× (slower)"      Tag="3"/>
                             <ComboBoxItem Content="4× (slowest)"     Tag="4"/>
@@ -206,7 +214,8 @@
                                 Header="x264 CRF"
                                 Minimum="14" Maximum="32" Value="20"
                                 StepFrequency="1"
-                                ValueChanged="Crf_Changed"/>
+                                ValueChanged="Crf_Changed"
+                            AutomationProperties.AutomationId="CrfSlider"/>
                         <TextBlock x:Name="CrfLabel"
                                    Text="CRF 20 (high quality)"
                                    Style="{StaticResource MutedTextStyle}"
@@ -235,10 +244,12 @@
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
             <Button Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"
-                    Margin="0,0,12,0" IsEnabled="False"/>
+                    Margin="0,0,12,0" IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
-                    Click="Cancel_Click" IsEnabled="False"/>
+                    Click="Cancel_Click" IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

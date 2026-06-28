@@ -74,7 +74,8 @@
         </Grid>
 
         <Pivot Grid.Row="1" x:Name="ModePivot" SelectionChanged="ModePivot_SelectionChanged">
-            <PivotItem Header="Pack">
+            <PivotItem Header="Pack"
+                AutomationProperties.AutomationId="ArchivePagePivotItem01">
                 <Border Style="{StaticResource CardStyle}" Padding="14">
                     <Grid ColumnSpacing="20" RowSpacing="10">
                         <Grid.ColumnDefinitions>
@@ -88,7 +89,8 @@
                         </Grid.RowDefinitions>
                         <ComboBox x:Name="PackFormatCombo"
                                   Header="Archive format"
-                                  SelectedIndex="0">
+                                  SelectedIndex="0"
+                            AutomationProperties.AutomationId="PackFormatCombo">
                             <ComboBoxItem Content="7z (best ratio)" Tag="7z"/>
                             <ComboBoxItem Content="zip (most compatible)" Tag="zip"/>
                             <ComboBoxItem Content="tar (no compression)" Tag="tar"/>
@@ -102,25 +104,30 @@
                                 Minimum="0" Maximum="9"
                                 StepFrequency="1"
                                 Value="5"
-                                TickPlacement="BottomRight" TickFrequency="1"/>
+                                TickPlacement="BottomRight" TickFrequency="1"
+                            AutomationProperties.AutomationId="LevelSlider"/>
                         <PasswordBox Grid.Column="2"
                                      x:Name="PackPasswordBox"
                                      Header="Password (optional)"
-                                     PlaceholderText="(none)"/>
+                                     PlaceholderText="(none)"
+                            AutomationProperties.AutomationId="PackPasswordBox"/>
                         <TextBox Grid.Row="1" Grid.ColumnSpan="2"
                                  x:Name="PackOutputBox"
                                  Header="Output archive"
                                  IsReadOnly="True"
-                                 PlaceholderText="(pick where to save)"/>
+                                 PlaceholderText="(pick where to save)"
+                            AutomationProperties.AutomationId="PackOutputBox"/>
                         <Button Grid.Row="1" Grid.Column="2"
                                 Content="Save as..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
-                                Click="PickPackOutput_Click"/>
+                                Click="PickPackOutput_Click"
+                            AutomationProperties.AutomationId="ArchivePageButton01"/>
                     </Grid>
                 </Border>
             </PivotItem>
-            <PivotItem Header="Unpack">
+            <PivotItem Header="Unpack"
+                AutomationProperties.AutomationId="ArchivePagePivotItem02">
                 <Border Style="{StaticResource CardStyle}" Padding="14">
                     <Grid ColumnSpacing="20" RowSpacing="10">
                         <Grid.ColumnDefinitions>
@@ -136,22 +143,26 @@
                                  Header="Archive"
                                  IsReadOnly="True"
                                  Grid.ColumnSpan="2"
-                                 PlaceholderText="(pick an archive to extract)"/>
+                                 PlaceholderText="(pick an archive to extract)"
+                            AutomationProperties.AutomationId="UnpackArchiveBox"/>
                         <Button Grid.Column="2"
                                 Content="Pick archive..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
-                                Click="PickUnpackInput_Click"/>
+                                Click="PickUnpackInput_Click"
+                            AutomationProperties.AutomationId="ArchivePageButton02"/>
                         <TextBox Grid.Row="1" Grid.ColumnSpan="2"
                                  x:Name="UnpackOutputDirBox"
                                  Header="Extract to"
                                  IsReadOnly="True"
-                                 PlaceholderText="(pick destination folder)"/>
+                                 PlaceholderText="(pick destination folder)"
+                            AutomationProperties.AutomationId="UnpackOutputDirBox"/>
                         <Button Grid.Row="1" Grid.Column="2"
                                 Content="Pick folder..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
-                                Click="PickUnpackOutput_Click"/>
+                                Click="PickUnpackOutput_Click"
+                            AutomationProperties.AutomationId="ArchivePageButton03"/>
                     </Grid>
                 </Border>
             </PivotItem>
@@ -204,13 +215,15 @@
                     Content="List contents"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ListContents_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ListButton"/>
             <Button Grid.Column="2"
                     x:Name="GoButton"
                     Content="Pack"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Go_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="GoButton"/>
         </Grid>
 
         <ScrollViewer Grid.Row="4" Height="80"

@@ -79,7 +79,8 @@
                     Content="Reload"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="Reload_Click"
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center"
+                AutomationProperties.AutomationId="PresetsPageButton01"/>
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
@@ -91,11 +92,13 @@
                 <AutoSuggestBox x:Name="SearchBox"
                                 PlaceholderText="Filter by name, folder, engine..."
                                 QueryIcon="Find"
-                                TextChanged="Search_TextChanged"/>
+                                TextChanged="Search_TextChanged"
+                    AutomationProperties.AutomationId="SearchBox"/>
                 <ComboBox Grid.Column="1"
                           x:Name="EngineFilter"
                           Header="Engine filter"
-                          SelectionChanged="EngineFilter_Changed">
+                          SelectionChanged="EngineFilter_Changed"
+                    AutomationProperties.AutomationId="EngineFilter">
                     <ComboBoxItem Content="All engines" Tag=""/>
                 </ComboBox>
             </Grid>

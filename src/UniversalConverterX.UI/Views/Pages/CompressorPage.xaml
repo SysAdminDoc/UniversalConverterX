@@ -136,9 +136,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="CompressorPageButton01"/>
                 <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="CompressorPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -157,7 +159,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Compressing">
+                    <PivotItem Header="Compressing"
+                        AutomationProperties.AutomationId="CompressorPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -177,7 +180,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="CompressorPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -188,7 +192,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="CompressorPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -222,7 +227,8 @@
                         <TextBlock Text="Hardware Acceleration" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="HwAccelCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="HwAccel_SelectionChanged">
+                                  SelectionChanged="HwAccel_SelectionChanged"
+                            AutomationProperties.AutomationId="HwAccelCombo">
                             <ComboBoxItem Content="Software (CPU)" Tag="none" IsSelected="True"/>
                             <ComboBoxItem Content="NVIDIA NVENC" Tag="nvenc"/>
                             <ComboBoxItem Content="AMD AMF" Tag="amf"/>
@@ -244,28 +250,33 @@
                                      Tag="web-1080p"
                                      IsChecked="True"
                                      Checked="Preset_Checked"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetWeb"/>
                         <RadioButton x:Name="PresetEmail" Content="Email friendly (~9.5 MB)"
                                      GroupName="Preset"
                                      Tag="email-10mb"
                                      Checked="Preset_Checked"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetEmail"/>
                         <RadioButton x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
                                      GroupName="Preset"
                                      Tag="archive-av1"
                                      Checked="Preset_Checked"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetArchive"/>
                         <RadioButton x:Name="PresetPro" Content="Professional / archival ▾"
                                      GroupName="Preset"
                                      Tag="__pro__"
                                      Checked="Preset_Checked"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetPro"/>
                         <ComboBox x:Name="ProPresetCombo"
                                   Header="Intermediate / archival codec"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="2"
                                   SelectionChanged="ProPreset_Changed"
-                                  Visibility="Collapsed">
+                                  Visibility="Collapsed"
+                            AutomationProperties.AutomationId="ProPresetCombo">
                             <ComboBoxItem Content="ProRes 422 Proxy (low-res rough cut)" Tag="prores-422-proxy"/>
                             <ComboBoxItem Content="ProRes 422 LT (offline edit)"        Tag="prores-422-lt"/>
                             <ComboBoxItem Content="ProRes 422 (online edit)"            Tag="prores-422"/>
@@ -286,7 +297,8 @@
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -294,10 +306,12 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="CompressorPageButton04"/>
                             <Button Grid.Column="1" Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="CompressorPageButton05"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -359,14 +373,17 @@
             <Button Grid.Column="1" Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
-                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
+                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2" Content="Open Output"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
+                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"
+                AutomationProperties.AutomationId="CompressorPageButton06"/>
             <Button Grid.Column="3" Content="Compress All"
                     x:Name="CompressButton"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Click="Compress_Click" IsEnabled="False"/>
+                    Click="Compress_Click" IsEnabled="False"
+                AutomationProperties.AutomationId="CompressButton"/>
         </Grid>
 
         <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
@@ -391,7 +408,8 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                         <Button x:Name="CancelButton" Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
-                                Click="Cancel_Click"/>
+                                Click="Cancel_Click"
+                            AutomationProperties.AutomationId="CancelButton"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

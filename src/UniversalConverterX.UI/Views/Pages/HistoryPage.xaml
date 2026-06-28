@@ -101,10 +101,12 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Refresh"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Refresh_Click"/>
+                        Click="Refresh_Click"
+                    AutomationProperties.AutomationId="HistoryPageButton01"/>
                 <Button Content="Clear history"
                         Style="{StaticResource DangerButtonStyle}"
-                        Click="Clear_Click"/>
+                        Click="Clear_Click"
+                    AutomationProperties.AutomationId="HistoryPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -151,7 +153,8 @@
                         PlaceholderText="Filter by engine, action, file path, preset..."
                         QueryIcon="Find"
                         Padding="12,8"
-                        TextChanged="Search_TextChanged"/>
+                        TextChanged="Search_TextChanged"
+            AutomationProperties.AutomationId="SearchBox"/>
 
         <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="18">
             <Grid>

@@ -81,12 +81,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add images"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddFiles_Click"/>
+                        Click="AddFiles_Click"
+                    AutomationProperties.AutomationId="OcrPageButton01"/>
                 <Button x:Name="RecognizeButton"
                         Content="Recognise"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Recognize_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RecognizeButton"/>
             </StackPanel>
         </Grid>
 
@@ -106,11 +108,13 @@
                 <ComboBox x:Name="LangCombo"
                           Header="Language pack"
                           IsEditable="True"
-                          PlaceholderText="eng (or click Reload)"/>
+                          PlaceholderText="eng (or click Reload)"
+                    AutomationProperties.AutomationId="LangCombo"/>
                 <ComboBox Grid.Column="1"
                           x:Name="FormatCombo"
                           Header="Output format"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="FormatCombo">
                     <ComboBoxItem Content="TXT (plain text)" Tag="txt"/>
                     <ComboBoxItem Content="hOCR (HTML + bbox)" Tag="hocr"/>
                     <ComboBoxItem Content="Searchable PDF" Tag="pdf"/>
@@ -123,23 +127,27 @@
                            Value="3"
                            Minimum="0" Maximum="13"
                            SmallChange="1" LargeChange="1"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="PsmBox"/>
                 <Button Grid.Column="3"
                         Content="Reload langs"
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="ReloadLangs_Click"/>
+                        Click="ReloadLangs_Click"
+                    AutomationProperties.AutomationId="OcrPageButton02"/>
 
                 <TextBox Grid.Row="1" Grid.ColumnSpan="3"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
-                         PlaceholderText="(same as source)"/>
+                         PlaceholderText="(same as source)"
+                    AutomationProperties.AutomationId="OutputDirBox"/>
                 <Button Grid.Row="1" Grid.Column="3"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="BrowseOutputDir_Click"/>
+                        Click="BrowseOutputDir_Click"
+                    AutomationProperties.AutomationId="OcrPageButton03"/>
             </Grid>
         </Border>
 

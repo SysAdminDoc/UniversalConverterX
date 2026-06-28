@@ -32,7 +32,8 @@
                 <ComboBox x:Name="OpCombo"
                           Header="Operation"
                           SelectedIndex="0"
-                          SelectionChanged="OpCombo_SelectionChanged">
+                          SelectionChanged="OpCombo_SelectionChanged"
+                    AutomationProperties.AutomationId="OpCombo">
                     <ComboBoxItem Content="Merge -- combine multiple PDFs into one" Tag="merge"/>
                     <ComboBoxItem Content="Split -- per page, or by ranges" Tag="split"/>
                     <ComboBoxItem Content="Extract -- pull a page range into a new PDF" Tag="extract"/>
@@ -51,12 +52,14 @@
                     <TextBox x:Name="MultiInputBox"
                              Header="Input PDFs (in merge order)"
                              IsReadOnly="True"
-                             PlaceholderText="(pick two or more PDFs)"/>
+                             PlaceholderText="(pick two or more PDFs)"
+                        AutomationProperties.AutomationId="MultiInputBox"/>
                     <Button Grid.Column="1"
                             Content="Pick PDFs..."
                             Style="{StaticResource SecondaryButtonStyle}"
                             VerticalAlignment="Bottom"
-                            Click="PickMultiInput_Click"/>
+                            Click="PickMultiInput_Click"
+                        AutomationProperties.AutomationId="PdfToolsPageButton01"/>
                 </Grid>
 
                 <Grid x:Name="SingleInputRow" ColumnSpacing="10" Visibility="Visible">
@@ -67,12 +70,14 @@
                     <TextBox x:Name="SingleInputBox"
                              Header="Input PDF"
                              IsReadOnly="True"
-                             PlaceholderText="(pick a PDF)"/>
+                             PlaceholderText="(pick a PDF)"
+                        AutomationProperties.AutomationId="SingleInputBox"/>
                     <Button Grid.Column="1"
                             Content="Pick PDF..."
                             Style="{StaticResource SecondaryButtonStyle}"
                             VerticalAlignment="Bottom"
-                            Click="PickSingleInput_Click"/>
+                            Click="PickSingleInput_Click"
+                        AutomationProperties.AutomationId="PdfToolsPageButton02"/>
                 </Grid>
 
                 <Grid ColumnSpacing="10">
@@ -83,13 +88,15 @@
                     <TextBox x:Name="OutputBox"
                              Header="Output (file or folder)"
                              IsReadOnly="True"
-                             PlaceholderText="(pick destination)"/>
+                             PlaceholderText="(pick destination)"
+                        AutomationProperties.AutomationId="OutputBox"/>
                     <Button x:Name="OutputBrowseButton"
                             Grid.Column="1"
                             Content="Save as..."
                             Style="{StaticResource SecondaryButtonStyle}"
                             VerticalAlignment="Bottom"
-                            Click="PickOutput_Click"/>
+                            Click="PickOutput_Click"
+                        AutomationProperties.AutomationId="OutputBrowseButton"/>
                 </Grid>
 
                 <Grid ColumnSpacing="10">
@@ -101,7 +108,8 @@
                     <TextBox x:Name="PagesBox"
                              Header="Pages / ranges (e.g. 1,3-5,7)"
                              PlaceholderText="all"
-                             Visibility="Collapsed"/>
+                             Visibility="Collapsed"
+                        AutomationProperties.AutomationId="PagesBox"/>
                     <NumberBox Grid.Column="1"
                                x:Name="AngleBox"
                                Header="Angle"
@@ -109,18 +117,21 @@
                                Minimum="-180" Maximum="270"
                                SmallChange="90" LargeChange="180"
                                SpinButtonPlacementMode="Inline"
-                               Visibility="Collapsed"/>
+                               Visibility="Collapsed"
+                        AutomationProperties.AutomationId="AngleBox"/>
                     <PasswordBox Grid.Column="2"
                                  x:Name="UserPwdBox"
                                  Header="User password"
                                  PlaceholderText="(none)"
-                                 Visibility="Collapsed"/>
+                                 Visibility="Collapsed"
+                        AutomationProperties.AutomationId="UserPwdBox"/>
                 </Grid>
 
                 <PasswordBox x:Name="ReadPwdBox"
                              Header="Read password (if source is encrypted)"
                              PlaceholderText="(none)"
-                             Visibility="Collapsed"/>
+                             Visibility="Collapsed"
+                    AutomationProperties.AutomationId="ReadPwdBox"/>
             </StackPanel>
         </Border>
 
@@ -139,7 +150,8 @@
                     Content="Run"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Run_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="RunButton"/>
         </Grid>
 
         <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="14">

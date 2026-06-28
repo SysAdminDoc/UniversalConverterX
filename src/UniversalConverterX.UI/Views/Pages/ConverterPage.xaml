@@ -138,9 +138,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseButton_Click"/>
+                        Click="BrowseButton_Click"
+                    AutomationProperties.AutomationId="ConverterPageButton01"/>
                 <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="ConverterPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -159,7 +161,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Converting">
+                    <PivotItem Header="Converting"
+                        AutomationProperties.AutomationId="ConverterPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -179,7 +182,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="BrowseButton_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="ConverterPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -190,7 +194,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="ConverterPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -240,22 +245,26 @@
                                     Content="Smart Match"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Click="SmartMatch_Click"
-                                    IsEnabled="False"/>
+                                    IsEnabled="False"
+                                AutomationProperties.AutomationId="SmartMatchButton"/>
                             <Button Grid.Row="0" Grid.Column="1"
                                     Content="Web MP4"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Tag="mp4"
-                                    Click="ProfileShortcut_Click"/>
+                                    Click="ProfileShortcut_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton04"/>
                             <Button Grid.Row="1" Grid.Column="0"
                                     Content="Audio MP3"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Tag="mp3"
-                                    Click="ProfileShortcut_Click"/>
+                                    Click="ProfileShortcut_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton05"/>
                             <Button Grid.Row="1" Grid.Column="1"
                                     Content="Image WebP"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Tag="webp"
-                                    Click="ProfileShortcut_Click"/>
+                                    Click="ProfileShortcut_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton06"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -267,7 +276,8 @@
                                   Header="Convert all files to"
                                   PlaceholderText="Select format"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="FormatSelector_SelectionChanged">
+                                  SelectionChanged="FormatSelector_SelectionChanged"
+                            AutomationProperties.AutomationId="FormatSelector">
                             <ComboBoxItem Content="MP4 - Video" Tag="mp4"/>
                             <ComboBoxItem Content="MKV - Video" Tag="mkv"/>
                             <ComboBoxItem Content="MOV - Video" Tag="mov"/>
@@ -289,7 +299,8 @@
                                       OffContent="Software routing"
                                       OnContent="Use fastest available backend"
                                       IsOn="True"
-                                      IsEnabled="False"/>
+                                      IsEnabled="False"
+                            AutomationProperties.AutomationId="HighSpeedToggle"/>
                     </StackPanel>
                 </Border>
 
@@ -299,7 +310,8 @@
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -307,10 +319,12 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton07"/>
                             <Button Grid.Column="1" Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton08"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -354,13 +368,16 @@
                        TextTrimming="CharacterEllipsis"/>
             <Button Grid.Column="1" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}"
-                    Click="ClearAll_Click" Margin="0,0,12,0"/>
+                    Click="ClearAll_Click" Margin="0,0,12,0"
+                AutomationProperties.AutomationId="ConverterPageButton09"/>
             <Button Grid.Column="2" Content="Open Output"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
+                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"
+                AutomationProperties.AutomationId="ConverterPageButton10"/>
             <Button x:Name="ConvertButton" Grid.Column="3" Content="Convert All"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Click="ConvertButton_Click" IsEnabled="False"/>
+                    Click="ConvertButton_Click" IsEnabled="False"
+                AutomationProperties.AutomationId="ConvertButton"/>
         </Grid>
 
         <Grid x:Name="ProgressOverlay" Grid.RowSpan="3" Visibility="Collapsed"
@@ -389,7 +406,8 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                         <Button x:Name="CancelButton" Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
-                                Click="CancelButton_Click"/>
+                                Click="CancelButton_Click"
+                            AutomationProperties.AutomationId="CancelButton"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

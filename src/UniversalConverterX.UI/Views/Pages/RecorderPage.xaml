@@ -151,12 +151,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Session"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddSession_Click"/>
+                        Click="AddSession_Click"
+                    AutomationProperties.AutomationId="RecorderPageButton01"/>
                 <Button Content="Record All"
                         x:Name="RecordButton"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Background="{StaticResource AccentRedBrush}"
-                        Click="Record_Click"/>
+                        Click="Record_Click"
+                    AutomationProperties.AutomationId="RecordButton"/>
             </StackPanel>
         </Grid>
 
@@ -171,7 +173,8 @@
                     CornerRadius="22"
                     Padding="18">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Recording">
+                    <PivotItem Header="Recording"
+                        AutomationProperties.AutomationId="RecorderPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
                                         HorizontalAlignment="Center"
@@ -194,7 +197,8 @@
                                 <Button Content="Add Current Setup"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="AddSession_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="RecorderPageButton02"/>
                             </StackPanel>
 
                             <ListView x:Name="QueueList"
@@ -205,7 +209,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="RecorderPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -249,14 +254,16 @@
                                           IsChecked="True"
                                           Padding="16,10"
                                           Click="SourceToggle_Click"
-                                          HorizontalAlignment="Stretch"/>
+                                          HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="ScreenToggle"/>
                             <ToggleButton x:Name="WebcamToggle"
                                           Grid.Column="1"
                                           Content="Webcam"
                                           IsChecked="False"
                                           Padding="16,10"
                                           Click="SourceToggle_Click"
-                                          HorizontalAlignment="Stretch"/>
+                                          HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="WebcamToggle"/>
                         </Grid>
 
                         <!-- Webcam device (visible when Webcam mode active) -->
@@ -267,7 +274,8 @@
                             <ComboBox x:Name="WebcamDeviceCombo"
                                       HorizontalAlignment="Stretch"
                                       PlaceholderText="Loading devices..."
-                                      SelectionChanged="Option_Changed"/>
+                                      SelectionChanged="Option_Changed"
+                                AutomationProperties.AutomationId="WebcamDeviceCombo"/>
                         </StackPanel>
 
                         <!-- Microphone section (always visible) -->
@@ -276,24 +284,28 @@
                             <ComboBox x:Name="AudioDeviceCombo"
                                       HorizontalAlignment="Stretch"
                                       PlaceholderText="Loading devices..."
-                                      SelectionChanged="Option_Changed"/>
+                                      SelectionChanged="Option_Changed"
+                                AutomationProperties.AutomationId="AudioDeviceCombo"/>
                         </StackPanel>
 
                         <!-- System audio loopback (#52) -->
                         <CheckBox x:Name="SystemAudioCheck"
                                   Content="Capture system audio (loopback)"
-                                  Click="Option_BoolChanged"/>
+                                  Click="Option_BoolChanged"
+                            AutomationProperties.AutomationId="SystemAudioCheck"/>
                         <ComboBox x:Name="SystemAudioCombo"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="auto-detect (Stereo Mix / loopback)"
                                   Visibility="Collapsed"
-                                  SelectionChanged="Option_Changed"/>
+                                  SelectionChanged="Option_Changed"
+                            AutomationProperties.AutomationId="SystemAudioCombo"/>
 
                         <Button x:Name="RefreshDevicesButton"
                                 Content="Refresh Devices"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
-                                Click="RefreshDevices_Click"/>
+                                Click="RefreshDevices_Click"
+                            AutomationProperties.AutomationId="RefreshDevicesButton"/>
                     </StackPanel>
                 </Border>
 
@@ -305,7 +317,8 @@
                         <ComboBox x:Name="RegionCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
-                                  SelectionChanged="Option_Changed">
+                                  SelectionChanged="Option_Changed"
+                            AutomationProperties.AutomationId="RegionCombo">
                             <ComboBoxItem Content="Full screen" Tag=""/>
                             <ComboBoxItem Content="1920×1080 at (0,0)"  Tag="0,0,1920,1080"/>
                             <ComboBoxItem Content="1280×720 at (0,0)"   Tag="0,0,1280,720"/>
@@ -323,10 +336,14 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <TextBox x:Name="RegionXBox" Header="X"     PlaceholderText="0"     Grid.Row="0" Grid.Column="0" TextChanged="Option_TextChanged"/>
-                            <TextBox x:Name="RegionYBox" Header="Y"     PlaceholderText="0"     Grid.Row="0" Grid.Column="1" TextChanged="Option_TextChanged"/>
-                            <TextBox x:Name="RegionWBox" Header="Width" PlaceholderText="1920"  Grid.Row="1" Grid.Column="0" TextChanged="Option_TextChanged"/>
-                            <TextBox x:Name="RegionHBox" Header="Height" PlaceholderText="1080" Grid.Row="1" Grid.Column="1" TextChanged="Option_TextChanged"/>
+                            <TextBox x:Name="RegionXBox" Header="X"     PlaceholderText="0"     Grid.Row="0" Grid.Column="0" TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="RegionXBox"/>
+                            <TextBox x:Name="RegionYBox" Header="Y"     PlaceholderText="0"     Grid.Row="0" Grid.Column="1" TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="RegionYBox"/>
+                            <TextBox x:Name="RegionWBox" Header="Width" PlaceholderText="1920"  Grid.Row="1" Grid.Column="0" TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="RegionWBox"/>
+                            <TextBox x:Name="RegionHBox" Header="Height" PlaceholderText="1080" Grid.Row="1" Grid.Column="1" TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="RegionHBox"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -339,7 +356,8 @@
                                   Header="Duration"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="DurationCombo">
                             <ComboBoxItem Content="15 seconds" Tag="15"/>
                             <ComboBoxItem Content="30 seconds" Tag="30"/>
                             <ComboBoxItem Content="1 minute" Tag="60"/>
@@ -350,7 +368,8 @@
                                   Header="Frame rate"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FrameRateCombo">
                             <ComboBoxItem Content="24 fps" Tag="24"/>
                             <ComboBoxItem Content="30 fps" Tag="30"/>
                             <ComboBoxItem Content="60 fps" Tag="60"/>
@@ -359,7 +378,8 @@
                                   Header="Quality"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="QualityCombo">
                             <ComboBoxItem Content="Archive quality (CRF 18)" Tag="18"/>
                             <ComboBoxItem Content="Balanced (CRF 20)" Tag="20"/>
                             <ComboBoxItem Content="Compact (CRF 24)" Tag="24"/>
@@ -373,10 +393,12 @@
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Button Content="Browse"
                                 Style="{StaticResource SecondaryButtonStyle}"
-                                Click="BrowseOutputFolder_Click"/>
+                                Click="BrowseOutputFolder_Click"
+                            AutomationProperties.AutomationId="RecorderPageButton03"/>
                     </StackPanel>
                 </Border>
 
@@ -411,20 +433,23 @@
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
-                    Margin="0,0,12,0"/>
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="RecorderPageButton04"/>
             <Button Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="ClearQueue_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearQueueButton"/>
             <Button Grid.Column="3"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

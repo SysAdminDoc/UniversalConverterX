@@ -57,12 +57,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Open Video"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="OpenFile_Click"/>
+                        Click="OpenFile_Click"
+                    AutomationProperties.AutomationId="TimelinePreviewPageButton01"/>
                 <Button x:Name="GenerateButton"
                         Content="Generate"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Generate_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="GenerateButton"/>
             </StackPanel>
         </Grid>
 
@@ -77,14 +79,16 @@
                            Value="1"
                            Minimum="0.1" Maximum="10"
                            SmallChange="0.1" LargeChange="1"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="ThumbFpsBox"/>
                 <NumberBox Grid.Column="1"
                            x:Name="ThumbHeightBox"
                            Header="Thumbnail height (px)"
                            Value="72"
                            Minimum="24" Maximum="240"
                            SmallChange="1" LargeChange="8"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="ThumbHeightBox"/>
             </Grid>
         </Border>
 
@@ -142,7 +146,8 @@
                 x:Name="SeekSlider"
                 Minimum="0" Maximum="100" Value="0"
                 IsEnabled="False"
-                ValueChanged="SeekSlider_ValueChanged"/>
+                ValueChanged="SeekSlider_ValueChanged"
+            AutomationProperties.AutomationId="SeekSlider"/>
 
         <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
@@ -158,7 +163,8 @@
                     Content="Open output folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="Export_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ExportButton"/>
         </Grid>
 
         <TextBlock Grid.Row="6"

@@ -82,12 +82,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddFiles_Click"/>
+                        Click="AddFiles_Click"
+                    AutomationProperties.AutomationId="DocumentConverterPageButton01"/>
                 <Button x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="ConvertButton"/>
             </StackPanel>
         </Grid>
 
@@ -101,17 +103,20 @@
                 <ComboBox x:Name="FormatCombo"
                           Header="Target format"
                           IsEditable="True"
-                          PlaceholderText="Pick a format (or type one)"/>
+                          PlaceholderText="Pick a format (or type one)"
+                    AutomationProperties.AutomationId="FormatCombo"/>
                 <TextBox Grid.Column="1"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          PlaceholderText="(same as source)"
-                         IsReadOnly="True"/>
+                         IsReadOnly="True"
+                    AutomationProperties.AutomationId="OutputDirBox"/>
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="BrowseOutputDir_Click"/>
+                        Click="BrowseOutputDir_Click"
+                    AutomationProperties.AutomationId="DocumentConverterPageButton02"/>
             </Grid>
         </Border>
 

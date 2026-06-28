@@ -132,9 +132,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="WatermarkRemoverPageButton01"/>
                 <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="WatermarkRemoverPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -155,7 +157,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="WatermarkRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -175,7 +178,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="WatermarkRemoverPageButton03"/>
                             </StackPanel>
                             <ListView x:Name="FileList"
                                       Visibility="Collapsed"
@@ -185,7 +189,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="WatermarkRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -220,7 +225,8 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Inpainting Algorithm" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModeCombo" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="ModeCombo" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="ModeCombo">
                             <ComboBoxItem Content="STTN (temporal, default)" Tag="sttn" IsSelected="True"/>
                             <ComboBoxItem Content="LaMa (single-frame, fast)" Tag="lama"/>
                             <ComboBoxItem Content="ProPainter (high quality)" Tag="propainter"/>
@@ -233,7 +239,8 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Compute Device" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="DeviceCombo" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="DeviceCombo" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="DeviceCombo">
                             <ComboBoxItem Content="CPU" Tag="cpu" IsSelected="True"/>
                             <ComboBoxItem Content="DirectML (AMD / Intel)" Tag="directml"/>
                             <ComboBoxItem Content="CUDA GPU 0" Tag="cuda:0"/>
@@ -247,7 +254,8 @@
                         <TextBlock Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="OCR Language" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox x:Name="LangCombo" HorizontalAlignment="Stretch">
+                            <ComboBox x:Name="LangCombo" HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="LangCombo">
                                 <ComboBoxItem Content="English" Tag="en" IsSelected="True"/>
                                 <ComboBoxItem Content="Chinese (Simplified)" Tag="ch"/>
                                 <ComboBoxItem Content="Japanese" Tag="ja"/>
@@ -262,7 +270,8 @@
                             <TextBlock Text="Region (optional): x1,y1,x2,y2" Style="{StaticResource MutedTextStyle}"/>
                             <TextBox x:Name="AreaBox"
                                      PlaceholderText="e.g. 0,900,1920,1080"
-                                     HorizontalAlignment="Stretch"/>
+                                     HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="AreaBox"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -280,14 +289,17 @@
                                            FontWeight="SemiBold"/>
                             </Grid>
                             <Slider x:Name="QualitySlider" Minimum="0" Maximum="51" Value="23"
-                                    TickFrequency="1" StepFrequency="1"/>
+                                    TickFrequency="1" StepFrequency="1"
+                                AutomationProperties.AutomationId="QualitySlider"/>
                         </StackPanel>
                         <ToggleSwitch x:Name="KeepAudioToggle"
                                       Header="Preserve audio track"
-                                      IsOn="True"/>
+                                      IsOn="True"
+                            AutomationProperties.AutomationId="KeepAudioToggle"/>
                         <ToggleSwitch x:Name="NoHwEncodeToggle"
                                       Header="Disable HW encoder (NVENC/QSV)"
-                                      IsOn="False"/>
+                                      IsOn="False"
+                            AutomationProperties.AutomationId="NoHwEncodeToggle"/>
                     </StackPanel>
                 </Border>
 
@@ -296,12 +308,15 @@
                     <StackPanel Spacing="10">
                         <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
-                                 IsReadOnly="True" HorizontalAlignment="Stretch"/>
+                                 IsReadOnly="True" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Button Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="WatermarkRemoverPageButton04"/>
                             <Button Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="WatermarkRemoverPageButton05"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -325,14 +340,17 @@
                     <Button x:Name="ClearButton" Content="Clear Queue"
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
-                            Click="Clear_Click"/>
+                            Click="Clear_Click"
+                        AutomationProperties.AutomationId="ClearButton"/>
                     <Button Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Click="OpenOutputFolder_Click"/>
+                            Click="OpenOutputFolder_Click"
+                        AutomationProperties.AutomationId="WatermarkRemoverPageButton06"/>
                     <Button x:Name="RunButton" Content="Remove"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
-                            Click="Run_Click"/>
+                            Click="Run_Click"
+                        AutomationProperties.AutomationId="RunButton"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -365,7 +383,8 @@
                 <Button x:Name="CancelButton" Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         HorizontalAlignment="Center"
-                        Click="Cancel_Click"/>
+                        Click="Cancel_Click"
+                    AutomationProperties.AutomationId="CancelButton"/>
             </StackPanel>
         </Border>
 

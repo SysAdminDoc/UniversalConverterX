@@ -132,9 +132,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="LipReadingPageButton01"/>
                 <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="LipReadingPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -155,7 +157,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="LipReadingPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -175,7 +178,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="LipReadingPageButton03"/>
                             </StackPanel>
                             <ListView x:Name="FileList"
                                       Visibility="Collapsed"
@@ -185,7 +189,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="LipReadingPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -221,7 +226,8 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Inference Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo" HorizontalAlignment="Stretch"
-                                  SelectionChanged="Backend_SelectionChanged">
+                                  SelectionChanged="Backend_SelectionChanged"
+                            AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem Content="HuggingFace Space (free)" Tag="hf" IsSelected="True"/>
                             <ComboBoxItem Content="Local Auto-AVSR (free)" Tag="local"/>
                             <ComboBoxItem Content="Replicate API (token)" Tag="replicate"/>
@@ -236,7 +242,8 @@
                         <TextBlock Text="HuggingFace Space URL" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="HfUrlBox"
                                  PlaceholderText="https://your-space.hf.space (optional)"
-                                 HorizontalAlignment="Stretch"/>
+                                 HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="HfUrlBox"/>
                         <TextBlock Text="Leave blank to use the built-in public spaces."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -250,7 +257,8 @@
                         <TextBlock Text="Replicate API Token" Style="{StaticResource PanelTitleTextStyle}"/>
                         <PasswordBox x:Name="ReplicateTokenBox"
                                      PlaceholderText="r8_…"
-                                     HorizontalAlignment="Stretch"/>
+                                     HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="ReplicateTokenBox"/>
                     </StackPanel>
                 </Border>
 
@@ -261,10 +269,12 @@
                         <TextBlock Text="Custom Endpoint" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="CustomUrlBox"
                                  PlaceholderText="https://your-endpoint/transcribe"
-                                 HorizontalAlignment="Stretch"/>
+                                 HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="CustomUrlBox"/>
                         <TextBox x:Name="CustomKeyBox"
                                  PlaceholderText="Bearer token (optional)"
-                                 HorizontalAlignment="Stretch"/>
+                                 HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="CustomKeyBox"/>
                     </StackPanel>
                 </Border>
 
@@ -274,7 +284,8 @@
                         <TextBlock Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ToggleSwitch x:Name="SegmentToggle"
                                       Header="Auto speech segmentation"
-                                      IsOn="True"/>
+                                      IsOn="True"
+                            AutomationProperties.AutomationId="SegmentToggle"/>
                         <StackPanel Spacing="6" x:Name="ThresholdPanel">
                             <Grid>
                                 <TextBlock Text="Mouth-open threshold" Style="{StaticResource MutedTextStyle}"/>
@@ -284,7 +295,8 @@
                                            FontWeight="SemiBold"/>
                             </Grid>
                             <Slider x:Name="ThresholdSlider" Minimum="1" Maximum="20" Value="6"
-                                    TickFrequency="1" StepFrequency="1"/>
+                                    TickFrequency="1" StepFrequency="1"
+                                AutomationProperties.AutomationId="ThresholdSlider"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -293,7 +305,8 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="SRT subtitles (.srt)" Tag="srt" IsSelected="True"/>
                             <ComboBoxItem Content="Plain text (.txt)" Tag="txt"/>
                             <ComboBoxItem Content="JSON (.json)" Tag="json"/>
@@ -306,12 +319,15 @@
                     <StackPanel Spacing="10">
                         <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
-                                 IsReadOnly="True" HorizontalAlignment="Stretch"/>
+                                 IsReadOnly="True" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Button Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="LipReadingPageButton04"/>
                             <Button Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="LipReadingPageButton05"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -334,14 +350,17 @@
                     <Button x:Name="ClearButton" Content="Clear Queue"
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
-                            Click="Clear_Click"/>
+                            Click="Clear_Click"
+                        AutomationProperties.AutomationId="ClearButton"/>
                     <Button Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Click="OpenOutputFolder_Click"/>
+                            Click="OpenOutputFolder_Click"
+                        AutomationProperties.AutomationId="LipReadingPageButton06"/>
                     <Button x:Name="RunButton" Content="Transcribe"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
-                            Click="Run_Click"/>
+                            Click="Run_Click"
+                        AutomationProperties.AutomationId="RunButton"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -374,7 +393,8 @@
                 <Button x:Name="CancelButton" Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         HorizontalAlignment="Center"
-                        Click="Cancel_Click"/>
+                        Click="Cancel_Click"
+                    AutomationProperties.AutomationId="CancelButton"/>
             </StackPanel>
         </Border>
 

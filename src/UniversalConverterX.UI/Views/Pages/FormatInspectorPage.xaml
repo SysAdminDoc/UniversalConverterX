@@ -100,10 +100,12 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFiles_Click"/>
+                        Click="BrowseFiles_Click"
+                    AutomationProperties.AutomationId="FormatInspectorPageButton01"/>
                 <Button Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="FormatInspectorPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -143,7 +145,8 @@
                         <Button Content="Browse Files"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="BrowseFiles_Click"
-                                HorizontalAlignment="Center"/>
+                                HorizontalAlignment="Center"
+                            AutomationProperties.AutomationId="FormatInspectorPageButton03"/>
                     </StackPanel>
 
                     <ListView x:Name="FileList"
@@ -229,20 +232,23 @@
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenFolder_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="OpenFolderButton"/>
             <Button Grid.Column="2"
                     Content="Clear List"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="3"
                     Content="Inspect All"
                     x:Name="InspectButton"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Inspect_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="InspectButton"/>
         </Grid>
     </Grid>
 </Page>

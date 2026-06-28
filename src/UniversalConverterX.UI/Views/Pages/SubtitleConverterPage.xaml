@@ -81,12 +81,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddFiles_Click"/>
+                        Click="AddFiles_Click"
+                    AutomationProperties.AutomationId="SubtitleConverterPageButton01"/>
                 <Button x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="ConvertButton"/>
             </StackPanel>
         </Grid>
 
@@ -105,7 +107,8 @@
 
                 <ComboBox x:Name="FormatCombo"
                           Header="Target format"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="FormatCombo">
                     <ComboBoxItem Content="SRT (SubRip)" Tag="srt"/>
                     <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
                     <ComboBoxItem Content="ASS (Aegisub)" Tag="ass"/>
@@ -118,16 +121,19 @@
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
-                         PlaceholderText="(same as source)"/>
+                         PlaceholderText="(same as source)"
+                    AutomationProperties.AutomationId="OutputDirBox"/>
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="BrowseOutputDir_Click"/>
+                        Click="BrowseOutputDir_Click"
+                    AutomationProperties.AutomationId="SubtitleConverterPageButton02"/>
                 <ComboBox Grid.Column="3"
                           x:Name="EncodingCombo"
                           Header="Source encoding"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="EncodingCombo">
                     <ComboBoxItem Content="utf-8" Tag="utf-8"/>
                     <ComboBoxItem Content="utf-8-sig" Tag="utf-8-sig"/>
                     <ComboBoxItem Content="cp1252 (Western EU)" Tag="cp1252"/>
@@ -142,7 +148,8 @@
                            Value="0"
                            Minimum="-3600000" Maximum="3600000"
                            SmallChange="100" LargeChange="1000"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="ShiftMsBox"/>
                 <NumberBox Grid.Row="1" Grid.Column="1"
                            x:Name="FpsInBox"
                            Header="Source FPS (optional)"
@@ -150,7 +157,8 @@
                            Value="NaN"
                            Minimum="1" Maximum="120"
                            SmallChange="0.001" LargeChange="1"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="FpsInBox"/>
                 <NumberBox Grid.Row="1" Grid.Column="2"
                            x:Name="FpsOutBox"
                            Header="Target FPS (optional)"
@@ -158,11 +166,13 @@
                            Value="NaN"
                            Minimum="1" Maximum="120"
                            SmallChange="0.001" LargeChange="1"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="FpsOutBox"/>
                 <ComboBox Grid.Row="1" Grid.Column="3"
                           x:Name="OutEncodingCombo"
                           Header="Output encoding"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="OutEncodingCombo">
                     <ComboBoxItem Content="utf-8" Tag="utf-8"/>
                     <ComboBoxItem Content="utf-8-sig (BOM)" Tag="utf-8-sig"/>
                     <ComboBoxItem Content="cp1252" Tag="cp1252"/>

@@ -49,7 +49,8 @@
                 <Button Grid.Column="2"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Content="Browse..."
-                        Click="PickReference_Click"/>
+                        Click="PickReference_Click"
+                    AutomationProperties.AutomationId="VmafAnalysisPageButton01"/>
 
                 <TextBlock Grid.Row="1" Text="Distorted"
                            Style="{StaticResource LabelTextStyle}"
@@ -63,7 +64,8 @@
                 <Button Grid.Row="1" Grid.Column="2"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Content="Browse..."
-                        Click="PickDistorted_Click"/>
+                        Click="PickDistorted_Click"
+                    AutomationProperties.AutomationId="VmafAnalysisPageButton02"/>
             </Grid>
         </Border>
 
@@ -81,7 +83,8 @@
                     Content="Run VMAF"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Run_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="RunButton"/>
         </Grid>
 
         <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20">

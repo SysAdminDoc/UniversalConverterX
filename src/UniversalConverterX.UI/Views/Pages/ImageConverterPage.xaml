@@ -152,12 +152,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="ImageConverterPageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -176,7 +178,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="ImageConverterPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,12,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -201,7 +204,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="ImageConverterPageButton02"/>
                             </StackPanel>
                             <ListView x:Name="FileList"
                                       Visibility="Collapsed"
@@ -210,7 +214,8 @@
                                       ItemTemplate="{StaticResource ImgQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="ImageConverterPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -243,7 +248,8 @@
                                   Header="Format"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="JPEG (.jpg)"  Tag="jpeg"/>
                             <ComboBoxItem Content="PNG (.png)"   Tag="png"/>
                             <ComboBoxItem Content="WebP (.webp)" Tag="webp"/>
@@ -257,7 +263,8 @@
                                 Header="Quality (lossy formats only)"
                                 Minimum="40" Maximum="100" Value="85"
                                 StepFrequency="1"
-                                ValueChanged="Quality_Changed"/>
+                                ValueChanged="Quality_Changed"
+                            AutomationProperties.AutomationId="QualitySlider"/>
                         <TextBlock x:Name="QualityValueText"
                                    Text="85"
                                    Style="{StaticResource MutedTextStyle}"
@@ -272,12 +279,14 @@
                                   Content="Strip EXIF metadata"
                                   IsChecked="False"
                                   Checked="Settings_Bool_Changed"
-                                  Unchecked="Settings_Bool_Changed"/>
+                                  Unchecked="Settings_Bool_Changed"
+                            AutomationProperties.AutomationId="StripExifCheck"/>
                         <CheckBox x:Name="StripIccCheck"
                                   Content="Strip ICC colour profile"
                                   IsChecked="False"
                                   Checked="Settings_Bool_Changed"
-                                  Unchecked="Settings_Bool_Changed"/>
+                                  Unchecked="Settings_Bool_Changed"
+                            AutomationProperties.AutomationId="StripIccCheck"/>
                     </StackPanel>
                 </Border>
 
@@ -312,13 +321,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

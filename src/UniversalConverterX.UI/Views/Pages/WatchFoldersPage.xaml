@@ -103,7 +103,8 @@
                     Content="New Watch"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="NewWatch_Click"
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center"
+                AutomationProperties.AutomationId="WatchFoldersPageButton01"/>
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="18">

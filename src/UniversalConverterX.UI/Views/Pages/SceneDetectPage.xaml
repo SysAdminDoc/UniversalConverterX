@@ -68,12 +68,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Open Video"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="OpenFile_Click"/>
+                        Click="OpenFile_Click"
+                    AutomationProperties.AutomationId="SceneDetectPageButton01"/>
                 <Button x:Name="DetectButton"
                         Content="Detect"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Detect_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="DetectButton"/>
             </StackPanel>
         </Grid>
 
@@ -86,7 +88,8 @@
                 </Grid.ColumnDefinitions>
                 <ComboBox x:Name="DetectorCombo"
                           Header="Detector"
-                          SelectedIndex="0">
+                          SelectedIndex="0"
+                    AutomationProperties.AutomationId="DetectorCombo">
                     <ComboBoxItem Content="Content (HSV + edge)" Tag="content"/>
                     <ComboBoxItem Content="Threshold (raw pixel diff -- catches fades)" Tag="threshold"/>
                 </ComboBox>
@@ -96,14 +99,16 @@
                            Value="27"
                            Minimum="1" Maximum="100"
                            SmallChange="1" LargeChange="5"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="ThresholdBox"/>
                 <NumberBox Grid.Column="2"
                            Header="Min scene length (frames)"
                            x:Name="MinLenBox"
                            Value="15"
                            Minimum="1" Maximum="600"
                            SmallChange="1" LargeChange="5"
-                           SpinButtonPlacementMode="Inline"/>
+                           SpinButtonPlacementMode="Inline"
+                    AutomationProperties.AutomationId="MinLenBox"/>
             </Grid>
         </Border>
 
@@ -122,13 +127,15 @@
                     Content="Export CSV"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ExportCsv_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ExportCsvButton"/>
             <Button Grid.Column="2"
                     x:Name="ExportEdlButton"
                     Content="Export EDL"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ExportEdl_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ExportEdlButton"/>
         </Grid>
 
         <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="14">

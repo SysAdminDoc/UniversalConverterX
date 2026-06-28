@@ -76,12 +76,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add fonts"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="AddFiles_Click"/>
+                        Click="AddFiles_Click"
+                    AutomationProperties.AutomationId="FontConverterPageButton01"/>
                 <Button x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="ConvertButton"/>
             </StackPanel>
         </Grid>
 
@@ -94,7 +96,8 @@
                 </Grid.ColumnDefinitions>
                 <ComboBox x:Name="FormatCombo"
                           Header="Target format"
-                          SelectedIndex="2">
+                          SelectedIndex="2"
+                    AutomationProperties.AutomationId="FormatCombo">
                     <ComboBoxItem Content="TTF (TrueType)" Tag="ttf"/>
                     <ComboBoxItem Content="OTF (OpenType)" Tag="otf"/>
                     <ComboBoxItem Content="WOFF (web)" Tag="woff"/>
@@ -104,12 +107,14 @@
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
-                         PlaceholderText="(same as source)"/>
+                         PlaceholderText="(same as source)"
+                    AutomationProperties.AutomationId="OutputDirBox"/>
                 <Button Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
-                        Click="BrowseOutputDir_Click"/>
+                        Click="BrowseOutputDir_Click"
+                    AutomationProperties.AutomationId="FontConverterPageButton02"/>
             </Grid>
         </Border>
 

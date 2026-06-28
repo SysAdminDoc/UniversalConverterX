@@ -71,7 +71,7 @@ TEMPLATE_SCOPES = {
 # Per-element-tag regex: matches the opening of an interactive control. Using
 # non-greedy match up to the matching `>` so we capture only that one tag.
 TAG_PATTERN = re.compile(
-    r"<(?P<el>[A-Z][A-Za-z]*)\b(?P<body>[^>]*?)/?>",
+    r"<(?P<el>[A-Z][A-Za-z]*)(?=[\s>/])(?P<body>[^>]*?)/?>",
     re.DOTALL,
 )
 

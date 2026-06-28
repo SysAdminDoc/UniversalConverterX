@@ -31,12 +31,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Refresh Voices"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="RefreshVoices_Click"/>
+                        Click="RefreshVoices_Click"
+                    AutomationProperties.AutomationId="TextToSpeechPageButton01"/>
                 <Button x:Name="GenerateButton"
                         Content="Generate Audio"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Generate_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="GenerateButton"/>
             </StackPanel>
         </Grid>
 
@@ -65,7 +67,8 @@
                              VerticalContentAlignment="Top"
                              MinHeight="320"
                              Style="{StaticResource PremiumTextBoxStyle}"
-                             TextChanged="ScriptBox_TextChanged"/>
+                             TextChanged="ScriptBox_TextChanged"
+                        AutomationProperties.AutomationId="ScriptBox"/>
 
                     <Grid Grid.Row="2" ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -97,7 +100,8 @@
                                   Header="Locale filter"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="LocaleCombo_SelectionChanged">
+                                  SelectionChanged="LocaleCombo_SelectionChanged"
+                            AutomationProperties.AutomationId="LocaleCombo">
                             <ComboBoxItem Content="English (any)" Tag="en"/>
                             <ComboBoxItem Content="English (US)" Tag="en-US"/>
                             <ComboBoxItem Content="English (UK)" Tag="en-GB"/>
@@ -116,7 +120,8 @@
                                   Header="Voice"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Loading..."
-                                  SelectionChanged="VoiceCombo_SelectionChanged"/>
+                                  SelectionChanged="VoiceCombo_SelectionChanged"
+                            AutomationProperties.AutomationId="VoiceCombo"/>
                         <TextBlock x:Name="VoiceMetaText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -130,7 +135,8 @@
                                 Header="Rate"
                                 Minimum="-50" Maximum="100" Value="0"
                                 StepFrequency="5"
-                                ValueChanged="Setting_Slider_Changed"/>
+                                ValueChanged="Setting_Slider_Changed"
+                            AutomationProperties.AutomationId="RateSlider"/>
                         <TextBlock x:Name="RateLabel"
                                    Text="0% (normal)"
                                    Style="{StaticResource MutedTextStyle}"
@@ -139,7 +145,8 @@
                                 Header="Pitch (Hz)"
                                 Minimum="-50" Maximum="50" Value="0"
                                 StepFrequency="5"
-                                ValueChanged="Setting_Slider_Changed"/>
+                                ValueChanged="Setting_Slider_Changed"
+                            AutomationProperties.AutomationId="PitchSlider"/>
                         <TextBlock x:Name="PitchLabel"
                                    Text="0 Hz"
                                    Style="{StaticResource MutedTextStyle}"
@@ -154,7 +161,8 @@
                                   Header="Format"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Setting_Combo_Changed">
+                                  SelectionChanged="Setting_Combo_Changed"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="MP3" Tag=".mp3"/>
                             <ComboBoxItem Content="WAV" Tag=".wav"/>
                             <ComboBoxItem Content="FLAC" Tag=".flac"/>
@@ -165,7 +173,8 @@
                         <Button Content="Save to..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="ChooseOutput_Click"
-                                HorizontalAlignment="Stretch"/>
+                                HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="TextToSpeechPageButton02"/>
                         <TextBlock x:Name="OutputPathText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -191,13 +200,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="OpenOutput_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="OpenOutputButton"/>
             <Button Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

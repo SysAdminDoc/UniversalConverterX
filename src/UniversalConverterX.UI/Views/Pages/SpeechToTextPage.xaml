@@ -157,10 +157,12 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="SpeechToTextPageButton01"/>
                 <Button Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="SpeechToTextPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -182,7 +184,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="SpeechToTextPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -202,7 +205,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="SpeechToTextPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -213,7 +217,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="SpeechToTextPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -249,14 +254,16 @@
                         <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
                             <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
                         </ComboBox>
                         <CheckBox x:Name="VadCheck"
                                   Content="VAD pre-filter (skip silence — whisper.cpp only)"
                                   Checked="Settings_Changed"
-                                  Unchecked="Settings_Changed"/>
+                                  Unchecked="Settings_Changed"
+                            AutomationProperties.AutomationId="VadCheck"/>
                     </StackPanel>
                 </Border>
 
@@ -265,7 +272,8 @@
                         <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="ModelCombo">
                             <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
                             <ComboBoxItem Content="base (fast, good)" Tag="base" IsSelected="True"/>
                             <ComboBoxItem Content="small (balanced)" Tag="small"/>
@@ -282,7 +290,8 @@
                         <TextBlock Text="Language" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="LanguageCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="LanguageCombo">
                             <ComboBoxItem Content="Auto-detect" Tag="auto" IsSelected="True"/>
                             <ComboBoxItem Content="English" Tag="en"/>
                             <ComboBoxItem Content="Spanish" Tag="es"/>
@@ -308,7 +317,8 @@
                         <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="SubRip (.srt)" Tag="srt" IsSelected="True"/>
                             <ComboBoxItem Content="Plain text (.txt)" Tag="txt"/>
                             <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
@@ -324,7 +334,8 @@
                                       Header="Word-level timestamps"
                                       OffContent="Off"
                                       OnContent="On"
-                                      Toggled="Settings_Changed"/>
+                                      Toggled="Settings_Changed"
+                            AutomationProperties.AutomationId="WordTimestampsToggle"/>
                     </StackPanel>
                 </Border>
 
@@ -334,11 +345,13 @@
                         <TextBox x:Name="OutputFolderBox"
                                  PlaceholderText="Same as source file"
                                  IsReadOnly="True"
-                                 TextWrapping="Wrap"/>
+                                 TextWrapping="Wrap"
+                            AutomationProperties.AutomationId="OutputFolderBox"/>
                         <Button Content="Browse..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
-                                Click="BrowseOutputFolder_Click"/>
+                                Click="BrowseOutputFolder_Click"
+                            AutomationProperties.AutomationId="SpeechToTextPageButton04"/>
                     </StackPanel>
                 </Border>
 
@@ -362,19 +375,22 @@
                 <Button Grid.Column="1"
                         Content="Clear All"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="ClearAll_Click"/>
+                        Click="ClearAll_Click"
+                    AutomationProperties.AutomationId="SpeechToTextPageButton05"/>
                 <Button x:Name="CancelButton"
                         Grid.Column="2"
                         Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         IsEnabled="False"
-                        Click="Cancel_Click"/>
+                        Click="Cancel_Click"
+                    AutomationProperties.AutomationId="CancelButton"/>
                 <Button x:Name="TranscribeButton"
                         Grid.Column="3"
                         Content="Transcribe"
                         Style="{StaticResource PrimaryButtonStyle}"
                         IsEnabled="False"
-                        Click="Transcribe_Click"/>
+                        Click="Transcribe_Click"
+                    AutomationProperties.AutomationId="TranscribeButton"/>
             </Grid>
         </Border>
 

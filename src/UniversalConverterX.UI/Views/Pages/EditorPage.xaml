@@ -150,10 +150,12 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="EditorPageButton01"/>
                 <Button Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="EditorPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -173,7 +175,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Editing">
+                    <PivotItem Header="Editing"
+                        AutomationProperties.AutomationId="EditorPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -193,7 +196,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="EditorPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -204,7 +208,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="EditorPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -239,7 +244,8 @@
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="OperationCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="OperationCombo_SelectionChanged">
+                                  SelectionChanged="OperationCombo_SelectionChanged"
+                            AutomationProperties.AutomationId="OperationCombo">
                             <ComboBoxItem Content="Trim" Tag="trim" IsSelected="True"/>
                             <ComboBoxItem Content="Crop" Tag="crop"/>
                             <ComboBoxItem Content="Rotate / Flip" Tag="rotate"/>
@@ -262,19 +268,22 @@
                                  PlaceholderText="0"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
-                                 LostFocus="TrimText_LostFocus"/>
+                                 LostFocus="TrimText_LostFocus"
+                            AutomationProperties.AutomationId="StartBox"/>
                         <TextBox x:Name="EndBox"
                                  Header="End"
                                  PlaceholderText="End of clip"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
-                                 LostFocus="TrimText_LostFocus"/>
+                                 LostFocus="TrimText_LostFocus"
+                            AutomationProperties.AutomationId="EndBox"/>
                         <CheckBox x:Name="LosslessCheck"
                                   Content="Lossless stream-copy"
                                   IsChecked="True"
                                   Checked="TrimOption_Changed"
                                   Unchecked="TrimOption_Changed"
-                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                                  Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="LosslessCheck"/>
                         <TextBlock Text="Lossless is fast and preserves quality, but cuts on keyframes. Re-encode for frame-accurate trims."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
@@ -292,7 +301,8 @@
                                 Maximum="51"
                                 Value="18"
                                 StepFrequency="1"
-                                ValueChanged="CrfSlider_ValueChanged"/>
+                                ValueChanged="CrfSlider_ValueChanged"
+                            AutomationProperties.AutomationId="CrfSlider"/>
                         <TextBlock x:Name="CrfLabel"
                                    Text="CRF 18 (visually lossless)"
                                    Style="{StaticResource MutedTextStyle}"/>
@@ -316,12 +326,14 @@
                                      Header="Width" PlaceholderText="1920"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
-                                     LostFocus="TrimText_LostFocus"/>
+                                     LostFocus="TrimText_LostFocus"
+                                AutomationProperties.AutomationId="CropWidthBox"/>
                             <TextBox x:Name="CropHeightBox" Grid.Column="1"
                                      Header="Height" PlaceholderText="1080"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
-                                     LostFocus="TrimText_LostFocus"/>
+                                     LostFocus="TrimText_LostFocus"
+                                AutomationProperties.AutomationId="CropHeightBox"/>
                         </Grid>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
@@ -332,12 +344,14 @@
                                      Header="X offset" PlaceholderText="0"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
-                                     LostFocus="TrimText_LostFocus"/>
+                                     LostFocus="TrimText_LostFocus"
+                                AutomationProperties.AutomationId="CropXBox"/>
                             <TextBox x:Name="CropYBox" Grid.Column="1"
                                      Header="Y offset" PlaceholderText="0"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
-                                     LostFocus="TrimText_LostFocus"/>
+                                     LostFocus="TrimText_LostFocus"
+                                AutomationProperties.AutomationId="CropYBox"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -349,7 +363,8 @@
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="RotateAngleCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="TrimOption_Changed">
+                                  SelectionChanged="TrimOption_Changed"
+                            AutomationProperties.AutomationId="RotateAngleCombo">
                             <ComboBoxItem Content="90° clockwise" Tag="90" IsSelected="True"/>
                             <ComboBoxItem Content="180°" Tag="180"/>
                             <ComboBoxItem Content="270° clockwise" Tag="270"/>
@@ -372,7 +387,8 @@
                                  PlaceholderText="-14"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
-                                 LostFocus="TrimText_LostFocus"/>
+                                 LostFocus="TrimText_LostFocus"
+                            AutomationProperties.AutomationId="LufsBox"/>
                         <TextBlock Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
@@ -390,7 +406,8 @@
                                    TextWrapping="Wrap"/>
                         <ComboBox x:Name="RewrapFormatCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="TrimOption_Changed">
+                                  SelectionChanged="TrimOption_Changed"
+                            AutomationProperties.AutomationId="RewrapFormatCombo">
                             <ComboBoxItem Content=".mp4 (H.264/AAC)" Tag=".mp4" IsSelected="True"/>
                             <ComboBoxItem Content=".mkv (universal)" Tag=".mkv"/>
                             <ComboBoxItem Content=".mov (Apple)" Tag=".mov"/>
@@ -406,7 +423,8 @@
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -415,11 +433,13 @@
                             <Button Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="EditorPageButton04"/>
                             <Button Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="EditorPageButton05"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -462,14 +482,16 @@
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
-                    Margin="0,0,12,0"/>
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="EditorPageButton06"/>
             <Button Grid.Column="2"
                     x:Name="UndoButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     ToolTipService.ToolTip="Undo last setting change"
                     Click="Undo_Click"
                     IsEnabled="False"
-                    Margin="0,0,4,0">
+                    Margin="0,0,4,0"
+                AutomationProperties.AutomationId="UndoButton">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE10E;" FontSize="14"/>
                     <TextBlock Text="Undo"/>
@@ -481,7 +503,8 @@
                     ToolTipService.ToolTip="Redo last undone change"
                     Click="Redo_Click"
                     IsEnabled="False"
-                    Margin="0,0,12,0">
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="RedoButton">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE10C;" FontSize="14"/>
                     <TextBlock Text="Redo"/>
@@ -493,13 +516,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="5"
                     Content="Export All"
                     x:Name="ExportButton"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Export_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ExportButton"/>
         </Grid>
 
         <Grid x:Name="ProgressOverlay"
@@ -538,7 +563,8 @@
                         <Button x:Name="CancelButton"
                                 Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
-                                Click="Cancel_Click"/>
+                                Click="Cancel_Click"
+                            AutomationProperties.AutomationId="CancelButton"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

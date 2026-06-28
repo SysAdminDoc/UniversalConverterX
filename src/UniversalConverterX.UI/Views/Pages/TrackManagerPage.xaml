@@ -91,7 +91,8 @@
                     Content="Open Video"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenFile_Click"
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center"
+                AutomationProperties.AutomationId="TrackManagerPageButton01"/>
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
@@ -149,13 +150,15 @@
                     Content="Add track..."
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="AddTrack_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="AddTrackButton"/>
             <Button Grid.Column="2"
                     x:Name="ApplyButton"
                     Content="Apply changes..."
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Apply_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ApplyButton"/>
         </Grid>
 
         <TextBlock Grid.Row="4"

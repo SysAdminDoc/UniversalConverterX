@@ -29,12 +29,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Browse File"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="AiSubtitlePageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Generate"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -77,7 +79,8 @@
                     <Button Content="Browse File"
                             Style="{StaticResource PrimaryButtonStyle}"
                             Click="Browse_Click"
-                            HorizontalAlignment="Center"/>
+                            HorizontalAlignment="Center"
+                        AutomationProperties.AutomationId="AiSubtitlePageButton02"/>
                 </StackPanel>
             </Border>
 
@@ -88,7 +91,8 @@
                         <ComboBox x:Name="BackendCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt"/>
                             <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · binary)" Tag="whisper-cpp"/>
                         </ComboBox>
@@ -102,7 +106,8 @@
                                   Header="Model"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="1"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="ModelCombo">
                             <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
                             <ComboBoxItem Content="base" Tag="base"/>
                             <ComboBoxItem Content="small" Tag="small"/>
@@ -113,7 +118,8 @@
                                   Header="Language"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="LanguageCombo">
                             <ComboBoxItem Content="Auto-detect" Tag="auto"/>
                             <ComboBoxItem Content="English" Tag="en"/>
                             <ComboBoxItem Content="Spanish" Tag="es"/>
@@ -136,14 +142,16 @@
                                   Header="Subtitle format"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="SubRip (.srt)" Tag="srt"/>
                             <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
                         </ComboBox>
                         <CheckBox x:Name="BurnInCheck"
                                   Content="Also burn subtitles into a copy of the video"
                                   Checked="Settings_Bool_Changed"
-                                  Unchecked="Settings_Bool_Changed"/>
+                                  Unchecked="Settings_Bool_Changed"
+                            AutomationProperties.AutomationId="BurnInCheck"/>
                         <TextBlock Text="Burn-in re-encodes the video with hard-coded captions. The original .srt/.vtt is kept alongside."
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
@@ -167,11 +175,13 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="OpenOutput_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="OpenOutputButton"/>
             <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

@@ -180,11 +180,14 @@
                                    TextWrapping="Wrap" MaxWidth="720"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,10,0,0">
                             <Button Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
-                                    Click="OpenConverter_Click"/>
+                                    Click="OpenConverter_Click"
+                                AutomationProperties.AutomationId="HomePageButton01"/>
                             <Button Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="OpenAiLab_Click"/>
+                                    Click="OpenAiLab_Click"
+                                AutomationProperties.AutomationId="HomePageButton02"/>
                             <Button Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
-                                    Click="OpenToolbox_Click"/>
+                                    Click="OpenToolbox_Click"
+                                AutomationProperties.AutomationId="HomePageButton03"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -260,7 +263,8 @@
                                 QueryIcon="Find"
                                 TextChanged="TaskSearchBox_TextChanged"
                                 SuggestionChosen="TaskSearchBox_SuggestionChosen"
-                                QuerySubmitted="TaskSearchBox_QuerySubmitted">
+                                QuerySubmitted="TaskSearchBox_QuerySubmitted"
+                    AutomationProperties.AutomationId="TaskSearchBox">
                     <AutoSuggestBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Padding="4">

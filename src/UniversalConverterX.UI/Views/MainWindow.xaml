@@ -41,7 +41,8 @@
                                 QueryIcon="Find"
                                 TextChanged="NavSearchBox_TextChanged"
                                 SuggestionChosen="NavSearchBox_SuggestionChosen"
-                                QuerySubmitted="NavSearchBox_QuerySubmitted">
+                                QuerySubmitted="NavSearchBox_QuerySubmitted"
+                    AutomationProperties.AutomationId="NavSearchBox">
                     <AutoSuggestBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Padding="4">

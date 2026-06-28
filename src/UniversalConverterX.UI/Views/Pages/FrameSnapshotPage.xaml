@@ -161,14 +161,17 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFiles_Click"/>
+                        Click="BrowseFiles_Click"
+                    AutomationProperties.AutomationId="FrameSnapshotPageButton01"/>
                 <Button Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="FrameSnapshotPageButton02"/>
                 <Button Content="Extract"
                         x:Name="ExtractButton"
                         Style="{StaticResource PrimaryButtonStyle}"
-                        Click="Extract_Click"/>
+                        Click="Extract_Click"
+                    AutomationProperties.AutomationId="ExtractButton"/>
             </StackPanel>
         </Grid>
 
@@ -188,7 +191,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Snapshots">
+                    <PivotItem Header="Snapshots"
+                        AutomationProperties.AutomationId="FrameSnapshotPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
                                         HorizontalAlignment="Center"
@@ -211,7 +215,8 @@
                                 <Button Content="Browse Videos"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="BrowseFiles_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="FrameSnapshotPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="QueueList"
@@ -222,7 +227,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="FrameSnapshotPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -269,7 +275,8 @@
                                   Header="Image format"
                                   SelectedIndex="0"
                                   SelectionChanged="Option_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="PNG lossless" Tag="png"/>
                             <ComboBoxItem Content="JPEG compact" Tag="jpg"/>
                             <ComboBoxItem Content="WebP web-ready" Tag="webp"/>
@@ -283,12 +290,14 @@
                                      Grid.Column="0"
                                      Header="Start second"
                                      Text="0"
-                                     TextChanged="Option_TextChanged"/>
+                                     TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="StartSecondBox"/>
                             <TextBox x:Name="IntervalSecondBox"
                                      Grid.Column="1"
                                      Header="Interval"
                                      Text="5"
-                                     TextChanged="Option_TextChanged"/>
+                                     TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="IntervalSecondBox"/>
                         </Grid>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
@@ -299,13 +308,15 @@
                                      Grid.Column="0"
                                      Header="Frames per video"
                                      Text="3"
-                                     TextChanged="Option_TextChanged"/>
+                                     TextChanged="Option_TextChanged"
+                                AutomationProperties.AutomationId="CountBox"/>
                             <ComboBox x:Name="QualityCombo"
                                       Grid.Column="1"
                                       Header="Quality"
                                       SelectedIndex="1"
                                       SelectionChanged="Option_Changed"
-                                      HorizontalAlignment="Stretch">
+                                      HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="QualityCombo">
                                 <ComboBoxItem Content="Highest" Tag="2"/>
                                 <ComboBoxItem Content="Balanced" Tag="4"/>
                                 <ComboBoxItem Content="Compact" Tag="8"/>
@@ -323,7 +334,8 @@
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -332,11 +344,13 @@
                             <Button Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="FrameSnapshotPageButton04"/>
                             <Button Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="FrameSnapshotPageButton05"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -373,19 +387,22 @@
                     x:Name="OpenOutputButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
-                    Margin="0,0,12,0"/>
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="OpenOutputButton"/>
             <Button Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="ClearQueue_Click"
-                    Margin="0,0,12,0"/>
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="ClearQueueButton"/>
             <Button Grid.Column="3"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

@@ -142,12 +142,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="NoiseRemoverPageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Denoise"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -166,7 +168,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="NoiseRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -189,7 +192,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="NoiseRemoverPageButton02"/>
                             </StackPanel>
                             <ListView x:Name="FileList"
                                       Visibility="Collapsed"
@@ -198,7 +202,8 @@
                                       ItemTemplate="{StaticResource NrQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="NoiseRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -231,14 +236,16 @@
                                   Header="Active model"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Discovering..."
-                                  SelectionChanged="Settings_Combo_Changed"/>
+                                  SelectionChanged="Settings_Combo_Changed"
+                            AutomationProperties.AutomationId="ModelCombo"/>
                         <TextBlock x:Name="ModelHintText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <Button Content="Refresh Models"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="RefreshModels_Click"
-                                HorizontalAlignment="Stretch"/>
+                                HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="NoiseRemoverPageButton03"/>
                     </StackPanel>
                 </Border>
 
@@ -249,7 +256,8 @@
                                   Header="Mode"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Combo_Changed">
+                                  SelectionChanged="Settings_Combo_Changed"
+                            AutomationProperties.AutomationId="ModeCombo">
                             <ComboBoxItem Content="Pass video, replace audio" Tag="muxed"/>
                             <ComboBoxItem Content="Audio file only" Tag="audio"/>
                         </ComboBox>
@@ -257,7 +265,8 @@
                                   Header="Audio container"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Combo_Changed">
+                                  SelectionChanged="Settings_Combo_Changed"
+                            AutomationProperties.AutomationId="AudioFormatCombo">
                             <ComboBoxItem Content="WAV"  Tag=".wav"/>
                             <ComboBoxItem Content="FLAC" Tag=".flac"/>
                             <ComboBoxItem Content="AAC (.m4a)" Tag=".m4a"/>
@@ -299,13 +308,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

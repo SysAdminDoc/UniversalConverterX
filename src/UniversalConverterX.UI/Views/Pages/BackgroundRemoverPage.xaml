@@ -137,9 +137,11 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="BackgroundRemoverPageButton01"/>
                 <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="BackgroundRemoverPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -160,7 +162,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="BackgroundRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -180,7 +183,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="BackgroundRemoverPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -191,7 +195,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="BackgroundRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -227,7 +232,8 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="AI Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo" HorizontalAlignment="Stretch"
-                                  SelectionChanged="ModelCombo_SelectionChanged">
+                                  SelectionChanged="ModelCombo_SelectionChanged"
+                            AutomationProperties.AutomationId="ModelCombo">
                             <ComboBoxItem Content="Human Segmentation (u2net_human_seg)" Tag="u2net_human_seg" IsSelected="True"/>
                             <ComboBoxItem Content="General Purpose (isnet-general-use)" Tag="isnet-general-use"/>
                             <ComboBoxItem Content="Fast General (u2net)" Tag="u2net"/>
@@ -241,7 +247,8 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch">
+                        <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="MP4 (H.264 + alpha composite)" Tag="mp4" IsSelected="True"/>
                             <ComboBoxItem Content="MOV (ProRes alpha)" Tag="mov"/>
                             <ComboBoxItem Content="WebM (VP9 alpha)" Tag="webm"/>
@@ -250,7 +257,8 @@
                         <StackPanel Spacing="6">
                             <TextBlock Text="Quality" Style="{StaticResource MutedTextStyle}"/>
                             <Slider x:Name="QualitySlider" Minimum="0" Maximum="100" Value="70"
-                                    TickFrequency="10"/>
+                                    TickFrequency="10"
+                                AutomationProperties.AutomationId="QualitySlider"/>
                             <TextBlock Style="{StaticResource MutedTextStyle}">
                                 <Run Text="Quality: "/>
                                 <Run x:Name="QualityValueText" Text="70"/>
@@ -266,12 +274,15 @@
                         <StackPanel Spacing="6">
                             <TextBlock Text="Edge Softness" Style="{StaticResource MutedTextStyle}"/>
                             <Slider x:Name="EdgeSlider" Minimum="0" Maximum="100" Value="0"
-                                   />
+                                   
+                                AutomationProperties.AutomationId="EdgeSlider"/>
                         </StackPanel>
                         <ToggleSwitch x:Name="InvertMaskToggle" Header="Invert mask (keep background)"
-                                      OffContent="Off" OnContent="On"/>
+                                      OffContent="Off" OnContent="On"
+                            AutomationProperties.AutomationId="InvertMaskToggle"/>
                         <ToggleSwitch x:Name="KeepAudioToggle" Header="Keep audio track"
-                                      IsOn="True" OffContent="Off" OnContent="On"/>
+                                      IsOn="True" OffContent="Off" OnContent="On"
+                            AutomationProperties.AutomationId="KeepAudioToggle"/>
                     </StackPanel>
                 </Border>
 
@@ -282,31 +293,37 @@
                         <RadioButton x:Name="BgTransparent" Content="Transparent / alpha"
                                      GroupName="BgType" IsChecked="True"
                                      Foreground="{StaticResource TextPrimaryBrush}"
-                                     Checked="BgType_Checked"/>
+                                     Checked="BgType_Checked"
+                            AutomationProperties.AutomationId="BgTransparent"/>
                         <RadioButton x:Name="BgSolid" Content="Solid color"
                                      GroupName="BgType"
                                      Foreground="{StaticResource TextPrimaryBrush}"
-                                     Checked="BgType_Checked"/>
+                                     Checked="BgType_Checked"
+                            AutomationProperties.AutomationId="BgSolid"/>
                         <RadioButton x:Name="BgImage" Content="Background image"
                                      GroupName="BgType"
                                      Foreground="{StaticResource TextPrimaryBrush}"
-                                     Checked="BgType_Checked"/>
+                                     Checked="BgType_Checked"
+                            AutomationProperties.AutomationId="BgImage"/>
 
                         <StackPanel x:Name="BgColorPanel" Spacing="8" Visibility="Collapsed">
                             <TextBox x:Name="BgColorBox"
                                      Header="Hex color"
                                      PlaceholderText="#ffffff"
-                                     MaxLength="9"/>
+                                     MaxLength="9"
+                                AutomationProperties.AutomationId="BgColorBox"/>
                         </StackPanel>
 
                         <StackPanel x:Name="BgImagePanel" Spacing="8" Visibility="Collapsed">
                             <TextBox x:Name="BgImagePathBox"
                                      Header="Image path"
                                      PlaceholderText="No image selected"
-                                     IsReadOnly="True"/>
+                                     IsReadOnly="True"
+                                AutomationProperties.AutomationId="BgImagePathBox"/>
                             <Button Content="Browse Image"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseBgImage_Click"/>
+                                    Click="BrowseBgImage_Click"
+                                AutomationProperties.AutomationId="BackgroundRemoverPageButton04"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -318,7 +335,8 @@
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -326,10 +344,12 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="BackgroundRemoverPageButton05"/>
                             <Button Grid.Column="1" Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="BackgroundRemoverPageButton06"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -351,14 +371,17 @@
             <Button Grid.Column="1" Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
-                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
+                    Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2" Content="Open Output"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
+                    Click="OpenOutputFolder_Click" Margin="0,0,12,0"
+                AutomationProperties.AutomationId="BackgroundRemoverPageButton07"/>
             <Button Grid.Column="3" Content="Remove Backgrounds"
                     x:Name="RunButton"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    Click="Run_Click" IsEnabled="False"/>
+                    Click="Run_Click" IsEnabled="False"
+                AutomationProperties.AutomationId="RunButton"/>
         </Grid>
 
         <!-- Progress overlay -->
@@ -384,7 +407,8 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
                         <Button x:Name="CancelButton" Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
-                                Click="Cancel_Click"/>
+                                Click="Cancel_Click"
+                            AutomationProperties.AutomationId="CancelButton"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

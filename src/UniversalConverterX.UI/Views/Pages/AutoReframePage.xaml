@@ -140,12 +140,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="AutoReframePageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Reframe"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -164,7 +166,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="AutoReframePagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -187,7 +190,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="AutoReframePageButton02"/>
                             </StackPanel>
                             <ListView x:Name="FileList"
                                       Visibility="Collapsed"
@@ -196,7 +200,8 @@
                                       ItemTemplate="{StaticResource ArQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="AutoReframePagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -229,7 +234,8 @@
                                   Header="Target"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="AspectCombo">
                             <ComboBoxItem Content="9:16 — Vertical (Reels / Shorts / TikTok)" Tag="9x16"/>
                             <ComboBoxItem Content="1:1 — Square (Instagram feed)" Tag="1x1"/>
                             <ComboBoxItem Content="4:5 — Portrait social" Tag="4x5"/>
@@ -245,11 +251,13 @@
                                      Content="Static centre-crop"
                                      IsChecked="True"
                                      GroupName="ReframeMode"
-                                     Checked="Mode_Changed"/>
+                                     Checked="Mode_Changed"
+                            AutomationProperties.AutomationId="StaticRadio"/>
                         <RadioButton x:Name="SmartRadio"
                                      Content="Smart (MediaPipe face track)"
                                      GroupName="ReframeMode"
-                                     Checked="Mode_Changed"/>
+                                     Checked="Mode_Changed"
+                            AutomationProperties.AutomationId="SmartRadio"/>
                         <TextBlock Text="Smart mode samples the source at 1 Hz, finds the largest face per frame, and drives a moving crop. Falls back to static if no faces detected."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
@@ -264,7 +272,8 @@
                                 Header="x264 CRF"
                                 Minimum="14" Maximum="32" Value="20"
                                 StepFrequency="1"
-                                ValueChanged="Crf_Changed"/>
+                                ValueChanged="Crf_Changed"
+                            AutomationProperties.AutomationId="CrfSlider"/>
                         <TextBlock x:Name="CrfLabel"
                                    Text="CRF 20 (high quality)"
                                    Style="{StaticResource MutedTextStyle}"
@@ -303,13 +312,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

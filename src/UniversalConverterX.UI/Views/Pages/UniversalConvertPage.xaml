@@ -108,7 +108,8 @@
                     <Button Content="Pick files"
                             Style="{StaticResource PrimaryButtonStyle}"
                             Click="Pick_Click"
-                            HorizontalAlignment="Center"/>
+                            HorizontalAlignment="Center"
+                        AutomationProperties.AutomationId="UniversalConvertPageButton01"/>
                     <TextBlock x:Name="SelectedFilesText"
                                Style="{StaticResource MutedTextStyle}"
                                FontSize="12"
@@ -146,11 +147,13 @@
                 <AutoSuggestBox x:Name="SearchBox"
                                 PlaceholderText="Filter matches..."
                                 QueryIcon="Find"
-                                TextChanged="Search_TextChanged"/>
+                                TextChanged="Search_TextChanged"
+                    AutomationProperties.AutomationId="SearchBox"/>
                 <Button Grid.Column="1"
                         Content="Clear"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Clear_Click"/>
+                        Click="Clear_Click"
+                    AutomationProperties.AutomationId="UniversalConvertPageButton02"/>
             </Grid>
         </Border>
 

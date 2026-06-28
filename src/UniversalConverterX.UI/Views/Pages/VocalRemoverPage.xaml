@@ -146,10 +146,12 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="VocalRemoverPageButton01"/>
                 <Button Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"/>
+                        Click="BrowseFolder_Click"
+                    AutomationProperties.AutomationId="VocalRemoverPageButton02"/>
             </StackPanel>
         </Grid>
 
@@ -169,7 +171,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="VocalRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -189,7 +192,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="VocalRemoverPageButton03"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -200,7 +204,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="VocalRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -235,7 +240,8 @@
                         <TextBlock Text="Stems" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="StemCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="StemCombo">
                             <ComboBoxItem Content="Vocals + Instrumentals (2-stem)" Tag="2stem" IsSelected="True"/>
                             <ComboBoxItem Content="Vocals only" Tag="vocals"/>
                             <ComboBoxItem Content="Instrumentals only" Tag="accompaniment"/>
@@ -250,7 +256,8 @@
                         <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="ModelCombo">
                             <ComboBoxItem Content="htdemucs_ft (fine-tuned, recommended)" Tag="htdemucs_ft" IsSelected="True"/>
                             <ComboBoxItem Content="htdemucs (base)" Tag="htdemucs"/>
                             <ComboBoxItem Content="mdx_extra (MDX-Net)" Tag="mdx_extra"/>
@@ -263,7 +270,8 @@
                         <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed">
+                                  SelectionChanged="Settings_Changed"
+                            AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="WAV (lossless)" Tag="wav" IsSelected="True"/>
                             <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
                             <ComboBoxItem Content="MP3 (320 kbps)" Tag="mp3"/>
@@ -278,7 +286,8 @@
                                       Header="Equivariant stabilization"
                                       OffContent="Off (faster)"
                                       OnContent="On (better quality)"
-                                      Toggled="Settings_Changed"/>
+                                      Toggled="Settings_Changed"
+                            AutomationProperties.AutomationId="ShiftsToggle"/>
                         <TextBlock Text="Runs separation twice with shifted windows and averages the result. Doubles processing time."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
@@ -292,7 +301,8 @@
                         <TextBox x:Name="OutputDirectoryBox"
                                  Header="Save stems to"
                                  PlaceholderText="Same folder as each source"
-                                 IsReadOnly="True"/>
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -301,11 +311,13 @@
                             <Button Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"/>
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="VocalRemoverPageButton04"/>
                             <Button Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"/>
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="VocalRemoverPageButton05"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -329,20 +341,23 @@
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
-                    Margin="0,0,12,0"/>
+                    Margin="0,0,12,0"
+                AutomationProperties.AutomationId="VocalRemoverPageButton06"/>
             <Button Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="3"
                     Content="Separate Stems"
                     x:Name="RunButton"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Run_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="RunButton"/>
         </Grid>
 
         <Grid x:Name="ProgressOverlay"
@@ -379,7 +394,8 @@
                         <Button x:Name="CancelButton"
                                 Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
-                                Click="Cancel_Click"/>
+                                Click="Cancel_Click"
+                            AutomationProperties.AutomationId="CancelButton"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

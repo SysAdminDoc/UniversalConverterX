@@ -145,12 +145,14 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
-                        Click="Browse_Click"/>
+                        Click="Browse_Click"
+                    AutomationProperties.AutomationId="GifMakerPageButton01"/>
                 <Button x:Name="RunButton"
                         Content="Make GIFs"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="RunButton"/>
             </StackPanel>
         </Grid>
 
@@ -169,7 +171,8 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue">
+                    <PivotItem Header="Queue"
+                        AutomationProperties.AutomationId="GifMakerPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
@@ -192,7 +195,8 @@
                                 <Button Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
-                                        HorizontalAlignment="Center"/>
+                                        HorizontalAlignment="Center"
+                                    AutomationProperties.AutomationId="GifMakerPageButton02"/>
                             </StackPanel>
 
                             <ListView x:Name="FileList"
@@ -203,7 +207,8 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished">
+                    <PivotItem Header="Finished"
+                        AutomationProperties.AutomationId="GifMakerPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
@@ -240,7 +245,8 @@
                                   Header="Width"
                                   SelectedIndex="1"
                                   SelectionChanged="Settings_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="WidthCombo">
                             <ComboBoxItem Content="240 px (tiny)"  Tag="240"/>
                             <ComboBoxItem Content="480 px (social)" Tag="480"/>
                             <ComboBoxItem Content="720 px (HD)"    Tag="720"/>
@@ -251,7 +257,8 @@
                                   Header="Frame rate"
                                   SelectedIndex="1"
                                   SelectionChanged="Settings_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="FpsCombo">
                             <ComboBoxItem Content="10 fps" Tag="10"/>
                             <ComboBoxItem Content="15 fps" Tag="15"/>
                             <ComboBoxItem Content="20 fps" Tag="20"/>
@@ -263,7 +270,8 @@
                                   Header="Loop"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
-                                  HorizontalAlignment="Stretch">
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="LoopCombo">
                             <ComboBoxItem Content="Infinite" Tag="0"/>
                             <ComboBoxItem Content="Play once" Tag="-1"/>
                             <ComboBoxItem Content="Loop 3×" Tag="3"/>
@@ -278,11 +286,13 @@
                         <TextBox x:Name="StartBox"
                                  Header="Start"
                                  PlaceholderText="0"
-                                 TextChanged="Settings_Text_Changed"/>
+                                 TextChanged="Settings_Text_Changed"
+                            AutomationProperties.AutomationId="StartBox"/>
                         <TextBox x:Name="DurationBox"
                                  Header="Duration (blank = to end)"
                                  PlaceholderText="5"
-                                 TextChanged="Settings_Text_Changed"/>
+                                 TextChanged="Settings_Text_Changed"
+                            AutomationProperties.AutomationId="DurationBox"/>
                     </StackPanel>
                 </Border>
 
@@ -317,13 +327,15 @@
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click"
                     Margin="0,0,12,0"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="ClearButton"/>
             <Button Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                AutomationProperties.AutomationId="CancelButton"/>
         </Grid>
     </Grid>
 </Page>

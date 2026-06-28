@@ -73,7 +73,8 @@
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
                             HorizontalAlignment="Center"
-                            Click="Browse_Click"/>
+                            Click="Browse_Click"
+                        AutomationProperties.AutomationId="VideoSummarizerPageButton01"/>
                 </StackPanel>
             </Border>
 
@@ -89,7 +90,8 @@
                         <TextBlock Text="Summary" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Summary Length" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox01">
                                 <ComboBoxItem Content="Brief (3-5 bullets)" IsSelected="True"/>
                                 <ComboBoxItem Content="Standard (1 paragraph)"/>
                                 <ComboBoxItem Content="Detailed (multi-section)"/>
@@ -98,7 +100,8 @@
                         </StackPanel>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox02">
                                 <ComboBoxItem Content="Plain text" IsSelected="True"/>
                                 <ComboBoxItem Content="Markdown"/>
                                 <ComboBoxItem Content="Chapters with timestamps"/>
@@ -107,7 +110,8 @@
                         </StackPanel>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Output Language" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox03">
                                 <ComboBoxItem Content="Auto (match source)" IsSelected="True"/>
                                 <ComboBoxItem Content="English"/>
                                 <ComboBoxItem Content="Spanish"/>
@@ -122,7 +126,8 @@
                         <TextBlock Text="Transcript &amp; Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <TextBlock Text="Whisper Model" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox04">
                                 <ComboBoxItem Content="medium (balanced)" IsSelected="True"/>
                                 <ComboBoxItem Content="large-v3 (accurate)"/>
                                 <ComboBoxItem Content="small (fast)"/>
@@ -130,17 +135,20 @@
                         </StackPanel>
                         <StackPanel Spacing="6">
                             <TextBlock Text="LLM Backend" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox05">
                                 <ComboBoxItem Content="Llama.cpp (local)" IsSelected="True"/>
                                 <ComboBoxItem Content="Ollama (local server)"/>
                             </ComboBox>
                         </StackPanel>
                         <ToggleSwitch Header="Export transcript alongside summary"
                                       IsOn="True"
-                                      OffContent="Off" OnContent="On"/>
+                                      OffContent="Off" OnContent="On"
+                            AutomationProperties.AutomationId="VideoSummarizerPageToggleSwitch01"/>
                         <ToggleSwitch Header="Include chapter timestamps"
                                       IsOn="True"
-                                      OffContent="Off" OnContent="On"/>
+                                      OffContent="Off" OnContent="On"
+                            AutomationProperties.AutomationId="VideoSummarizerPageToggleSwitch02"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -157,7 +165,8 @@
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1" Content="Summarize Video"
                             Style="{StaticResource PrimaryButtonStyle}"
-                            IsEnabled="False"/>
+                            IsEnabled="False"
+                        AutomationProperties.AutomationId="VideoSummarizerPageButton02"/>
                 </Grid>
             </Border>
 
