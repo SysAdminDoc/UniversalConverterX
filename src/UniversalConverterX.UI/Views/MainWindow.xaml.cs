@@ -22,6 +22,7 @@ public sealed partial class MainWindow : Window
         new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
         new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
         new("GIF Maker", "Convert video clips to high-quality animated GIFs", "gif-maker"),
+        new("Slideshow Maker", "Turn image folders into videos with motion, transitions, text, and music", "slideshow-maker"),
         new("Image Converter", "Convert HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP", "image-converter"),
         new("Auto Reframe", "Convert horizontal video to 9:16 / 1:1 / 4:5 with optional face tracking", "auto-reframe"),
         new("Image Upscaler", "Real-ESRGAN super-resolution up to 4× for photos / illustrations", "ai-image-enhancer"),
@@ -161,6 +162,7 @@ public sealed partial class MainWindow : Window
             "ai-portrait" => typeof(PresetsPage),
             "lip-reading" => typeof(LipReadingPage),
             "gif-maker" => typeof(GifMakerPage),
+            "slideshow-maker" => typeof(SlideshowPage),
             "image-converter" => typeof(ImageConverterPage),
             "auto-reframe" => typeof(AutoReframePage),
             "chapter-marks" => typeof(ChapterMarksPage),
@@ -291,7 +293,7 @@ public sealed partial class MainWindow : Window
 
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
-        "format-inspector" or "frame-snapshot" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "slideshow-maker" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"
