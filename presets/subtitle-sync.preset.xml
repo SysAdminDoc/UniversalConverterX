@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Sync Subtitles to Video (Audio Fingerprint)</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>srt</Extension>
+        <Extension>vtt</Extension>
+        <Extension>ass</Extension>
+        <Extension>ssa</Extension>
+        <Extension>sub</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_synced</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subtitle-sync</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <RequiresExtraInput>true</RequiresExtraInput>
+    <Args>
+        <Arg>sync</Arg>
+    </Args>
+</Preset>

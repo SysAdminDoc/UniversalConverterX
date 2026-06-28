@@ -1,0 +1,3 @@
+# subtitle-sync sidecar — wraps subsync or ffsubsync (pip-installable)
+# Install one of: pip install subsync OR pip install ffsubsync
+# The sidecar discovers whichever is available.

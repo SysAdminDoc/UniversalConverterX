@@ -828,20 +828,6 @@ op land if explicit demand surfaces.
 
 ---
 
-### 32. Subtitle Auto-Sync
-
-New `subtitle-sync` sidecar: correct subtitle timing drift by comparing FFT
-audio fingerprints of speech segments against subtitle timestamps. Backend:
-`subsync` (Python, audio-based dynamic time-warping alignment). No video
-re-encode; outputs a re-timed `.srt` file. Wire to a "Subtitle Sync" entry in
-VideoToolsPage: input video + misaligned SRT → corrected SRT. Complements the
-existing `subconvert` / `subkit` sidecars (format conversion, not timing).
-
-Impact: 4 · Effort: 3 · Type: parity
-Source: [S32] (smacke/subsync — FFT audio fingerprint subtitle synchronization)
-
----
-
 ### 33. Media Inspector (Technical Stream Analysis) — ✅ SHIPPED (already, via FormatInspectorPage)
 
 New `mediainspect` sidecar wrapping `pymediainfo` (Python MediaInfo bindings):
