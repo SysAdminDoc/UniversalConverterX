@@ -2558,3 +2558,45 @@ Before any new sidecar or preset is merged:
   Touches: `build.ps1`, `installer/`, release artifact scripts, `tools/*/build.ps1`, README install section.
   Acceptance: release build emits a machine-readable manifest listing app version, sidecar/tool versions, SHA-256 hashes, signing state, and required external downloads; installer/portable ZIP includes the manifest.
   Complexity: M
+
+- [ ] P0 — Repair package graph and version single-source truth
+  Why: The current solution restore fails and release/version strings disagree, so implementation agents cannot trust builds or artifacts.
+  Evidence: `dotnet restore src\UniversalConverterX.sln` NU1605; `Directory.Build.props`/`src\Directory.Build.props` at 2.21.7 while README/app projects show 2.21.9; .NET 10.0.9 and WinAppSDK 2.2 package sources.
+  Touches: `Directory.Build.props`, `src/Directory.Build.props`, `src/**/*.csproj`, `tests/**/*.csproj`, installer manifests, version consistency test.
+  Acceptance: `dotnet restore`, `dotnet test src\UniversalConverterX.sln -c Release`, `dotnet list ... --outdated`, and `dotnet list ... --vulnerable --include-transitive` pass; every version surface resolves to one value; any intentionally held package has an inline reason.
+  Complexity: S
+
+- [ ] P0 — Wire post-conversion source actions end-to-end
+  Why: Source move/delete is user-data-sensitive and currently has Core utilities/tests but no production invocation path.
+  Evidence: `src/UniversalConverterX.Core/Utilities/PostConversionHandler.cs`; `rg "PostConversionHandler.Execute" src tests` finds only tests; `SettingsWindow.xaml.cs` still saves deprecated `DeleteSourceOnSuccess`; HandBrake source-file move requests show user demand.
+  Touches: `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs`, `src/UniversalConverterX.Console/Commands/ConvertCommand.cs`, `src/UniversalConverterX.UI/Views/Pages/ConverterPage.xaml.cs`, `src/UniversalConverterX.UI/Views/SettingsWindow.xaml*`, Core/UI tests.
+  Acceptance: successful conversions honor Keep/Move/Delete only after verified output exists; UI exposes action plus archive folder with truthful copy; CLI can set the action; tests fail if `PostConversionHandler` is not called.
+  Complexity: M
+
+- [ ] P1 — Fail native conversions on missing or zero-byte outputs
+  Why: Native converter success currently trusts process exit status even when the output file is absent or empty, matching competitor issue patterns around "successful" bad exports.
+  Evidence: `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs` sets `OutputFileSize = 0` then returns success; HandBrake #7949; LosslessCut #2939; existing sidecar-only `OutputDurationValidator`.
+  Touches: `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs`, specialized converter overrides, `ConversionResult`, Core tests.
+  Acceptance: native conversions fail with actionable errors when expected output is missing/zero-byte; converters that intentionally produce stdout/no-file outputs must opt out explicitly; tests cover success, missing output, and zero-byte output.
+  Complexity: S
+
+- [ ] P1 — Normalize ML sidecar dependency security floors
+  Why: ML sidecars have uneven floors, including `stemkit` allowing old ONNX Runtime versions while ONNX Runtime continues shipping security fixes.
+  Evidence: `tools/stemkit/requirements.txt` has `onnxruntime>=1.17`; `tools/videosubtitleremover/requirements.txt` already documents an ONNX Runtime >=1.25.1 security floor; ONNX Runtime v1.27.0 release notes.
+  Touches: `tools/*/requirements.txt`, `tools/*/build.ps1`, `SidecarHealthService`, sidecar contract/security checks.
+  Acceptance: all sidecars with ONNX/PyTorch/OpenCV/yt-dlp style high-risk dependencies declare a reviewed minimum; a local check fails on known-below-floor pins; affected sidecars still pass contract smoke.
+  Complexity: M
+
+- [ ] P2 — Evaluate WinAppSDK 2.2 VideoScaler as a local upscaling backend
+  Why: Windows App SDK 2.2 adds a first-party local AI video upscaling API that may complement existing Real-ESRGAN/Anime4K paths without cloud processing.
+  Evidence: WindowsAppSDK v2.2.0 release notes; existing `VideoEnhancerPage`, `video-face-enhance`, `realesrgan`, and `superres` sidecars.
+  Touches: `src/UniversalConverterX.UI/Views/Pages/VideoEnhancerPage.xaml*`, `SidecarHealthService`, new capability probe/service, benchmark smoke tests.
+  Acceptance: spike reports supported OS/GPU conditions, sample invocation viability, quality/speed comparison against existing local upscalers, and either a gated backend implementation or a documented rejection in `RESEARCH.md`.
+  Complexity: M
+
+- [ ] P2 — Align public planning links with current doc hygiene
+  Why: README still points users at legacy planning files while AGENTS requires `RESEARCH.md` and `ROADMAP.md` as the planning surfaces.
+  Evidence: `README.md` Project planning section links `COMPLETED.md` and `RESEARCH_REPORT.md`; `AGENTS.md` documentation hygiene; current `RESEARCH.md` replacement.
+  Touches: `README.md`, existing legacy root planning docs if they are intentionally archived/deleted, `.gitignore`.
+  Acceptance: README links only active public planning surfaces; legacy planning docs are either removed from root or clearly archived without creating new markdown files; no new markdown files are introduced.
+  Complexity: S
