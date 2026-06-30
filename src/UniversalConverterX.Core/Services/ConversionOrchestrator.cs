@@ -256,8 +256,12 @@ public class ConversionOrchestrator : IConversionOrchestrator
             job.ConverterUsed = converter.Id;
             _logger?.LogDebug("Using converter: {Converter}", converter.Name);
 
-            // Execute conversion
-            return await converter.ConvertAsync(job, progress, cancellationToken);
+            // Execute conversion, then apply any source-file action at the
+            // orchestrator boundary so CLI, UI, and batch callers agree.
+            var result = await converter.ConvertAsync(job, progress, cancellationToken);
+            if (result.Success)
+                cancellationToken.ThrowIfCancellationRequested();
+            return ApplyPostConversionAction(result);
         }
         catch (OperationCanceledException)
         {
@@ -265,6 +269,45 @@ public class ConversionOrchestrator : IConversionOrchestrator
             job.CompletedAt = DateTime.UtcNow;
             return ConversionResult.Cancelled(job, DateTime.UtcNow - startedAt);
         }
+    }
+
+    private ConversionResult ApplyPostConversionAction(ConversionResult result)
+    {
+        if (!result.Success || string.IsNullOrWhiteSpace(result.OutputPath))
+            return result;
+
+        var action = PostConversionHandler.ResolveAction(result.Job.Options);
+        if (action == PostConversionAction.Keep)
+            return result;
+
+        var postResult = PostConversionHandler.Execute(
+            result.Job.InputPath,
+            result.OutputPath,
+            action,
+            result.Job.Options.PostConversionArchiveFolder,
+            _logger);
+
+        if (postResult.Success)
+            return result;
+
+        result.Job.Status = ConversionStatus.Failed;
+        result.Job.CompletedAt = DateTime.UtcNow;
+
+        return new ConversionResult
+        {
+            Success = false,
+            Job = result.Job,
+            OutputPath = result.OutputPath,
+            OutputSize = result.OutputSize,
+            Duration = result.Duration,
+            ErrorMessage = $"Conversion succeeded but post-conversion source action failed: {postResult.ErrorMessage}",
+            ExitCode = -1,
+            StandardOutput = result.StandardOutput,
+            StandardError = result.StandardError,
+            ConverterUsed = result.ConverterUsed,
+            CommandLine = result.CommandLine,
+            Warnings = result.Warnings
+        };
     }
 
     public async Task<BatchConversionResult> ConvertBatchAsync(

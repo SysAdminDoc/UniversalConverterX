@@ -7,6 +7,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
@@ -51,7 +52,9 @@ public sealed partial class SettingsWindow : Window
         // General
         OutputDirectoryTextBox.Text = _options.DefaultOutputDirectory ?? "";
         OverwriteBehaviorComboBox.SelectedIndex = (int)_options.OverwriteBehavior;
-        DeleteSourceToggle.IsOn = _options.DeleteSourceOnSuccess;
+        PostConversionActionComboBox.SelectedIndex = (int)_options.PostConversionAction;
+        PostConversionArchiveTextBox.Text = _options.PostConversionArchiveFolder ?? "";
+        UpdatePostConversionArchiveState();
         NotificationsToggle.IsOn = _options.ShowNotifications;
         SoundToggle.IsOn = _options.PlaySoundOnComplete;
 
@@ -130,6 +133,18 @@ public sealed partial class SettingsWindow : Window
     private void SettingsToggle_Changed(object sender, RoutedEventArgs e) => MarkDirty();
 
     private void SettingsCheck_Changed(object sender, RoutedEventArgs e) => MarkDirty();
+
+    private void SettingsText_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (Content is FrameworkElement { IsLoaded: true })
+            MarkDirty();
+    }
+
+    private void PostConversionAction_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        UpdatePostConversionArchiveState();
+        SettingsSelection_Changed(sender, e);
+    }
 
     private void ParallelSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
     {
@@ -281,6 +296,23 @@ public sealed partial class SettingsWindow : Window
         }
     }
 
+    private async void BrowsePostConversionArchive_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.FileTypeFilter.Add("*");
+
+        var hwnd = WindowNative.GetWindowHandle(this);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder != null)
+        {
+            PostConversionArchiveTextBox.Text = folder.Path;
+            MarkDirty();
+        }
+    }
+
     private void ContextMenuToggle_Toggled(object sender, RoutedEventArgs e)
     {
         MarkDirty();
@@ -417,7 +449,14 @@ public sealed partial class SettingsWindow : Window
             ? null 
             : OutputDirectoryTextBox.Text;
         _options.OverwriteBehavior = (OverwriteBehavior)OverwriteBehaviorComboBox.SelectedIndex;
-        _options.DeleteSourceOnSuccess = DeleteSourceToggle.IsOn;
+        _options.PostConversionAction = (PostConversionAction)Math.Clamp(
+            PostConversionActionComboBox.SelectedIndex,
+            (int)PostConversionAction.Keep,
+            (int)PostConversionAction.Delete);
+        _options.PostConversionArchiveFolder = string.IsNullOrWhiteSpace(PostConversionArchiveTextBox.Text)
+            ? (_options.PostConversionAction == PostConversionAction.Move ? "_converted-sources" : null)
+            : PostConversionArchiveTextBox.Text.Trim();
+        _options.DeleteSourceOnSuccess = _options.PostConversionAction == PostConversionAction.Delete;
         _options.ShowNotifications = NotificationsToggle.IsOn;
         _options.PlaySoundOnComplete = SoundToggle.IsOn;
 
@@ -454,6 +493,18 @@ public sealed partial class SettingsWindow : Window
 
         _isDirty = false;
         UpdateDirtyState();
+    }
+
+    private void UpdatePostConversionArchiveState()
+    {
+        if (PostConversionArchiveTextBox is null || BrowsePostConversionArchiveButton is null)
+            return;
+
+        var isMove = PostConversionActionComboBox.SelectedIndex == (int)PostConversionAction.Move;
+        PostConversionArchiveTextBox.IsEnabled = isMove;
+        BrowsePostConversionArchiveButton.IsEnabled = isMove;
+        if (isMove && string.IsNullOrWhiteSpace(PostConversionArchiveTextBox.Text))
+            PostConversionArchiveTextBox.PlaceholderText = "_converted-sources";
     }
 
     private void MarkDirty()

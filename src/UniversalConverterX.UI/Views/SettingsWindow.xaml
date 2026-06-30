@@ -105,13 +105,45 @@
                             <ComboBoxItem Content="Skip file"/>
                         </ComboBox>
 
-                        <!-- Delete Source -->
-                        <ToggleSwitch x:Name="DeleteSourceToggle"
-                                      Header="Delete source files after conversion"
-                                      OffContent="Keep original files"
-                                      OnContent="Move to Recycle Bin"
-                                      Toggled="SettingsToggle_Changed"
-                            AutomationProperties.AutomationId="DeleteSourceToggle"/>
+                        <!-- Post-conversion source action -->
+                        <ComboBox x:Name="PostConversionActionComboBox"
+                                  Header="After successful conversion"
+                                  SelectedIndex="0"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="PostConversionAction_Changed"
+                                  HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="PostConversionActionComboBox"
+                            AutomationProperties.HelpText="Choose whether original source files are kept, moved to an archive folder, or permanently deleted after output is created.">
+                            <ComboBoxItem Content="Keep original files"/>
+                            <ComboBoxItem Content="Move originals to archive folder"/>
+                            <ComboBoxItem Content="Permanently delete originals"/>
+                        </ComboBox>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="PostConversionArchiveTextBox"
+                                     Header="Archive folder for moved originals"
+                                     PlaceholderText="_converted-sources or an absolute path"
+                                     Style="{StaticResource PremiumTextBoxStyle}"
+                                     TextChanged="SettingsText_Changed"
+                                AutomationProperties.AutomationId="PostConversionArchiveTextBox"/>
+                            <Button x:Name="BrowsePostConversionArchiveButton"
+                                    Grid.Column="1"
+                                    Content="Browse"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowsePostConversionArchive_Click"
+                                AutomationProperties.AutomationId="BrowsePostConversionArchiveButton"/>
+                        </Grid>
+
+                        <TextBlock Text="Delete permanently removes originals after a verified output exists. Move is the safer cleanup option."
+                                   TextWrapping="Wrap"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <!-- Notifications -->
                         <ToggleSwitch x:Name="NotificationsToggle"

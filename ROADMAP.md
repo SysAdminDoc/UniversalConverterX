@@ -2559,13 +2559,6 @@ Before any new sidecar or preset is merged:
   Acceptance: release build emits a machine-readable manifest listing app version, sidecar/tool versions, SHA-256 hashes, signing state, and required external downloads; installer/portable ZIP includes the manifest.
   Complexity: M
 
-- [ ] P0 — Wire post-conversion source actions end-to-end
-  Why: Source move/delete is user-data-sensitive and currently has Core utilities/tests but no production invocation path.
-  Evidence: `src/UniversalConverterX.Core/Utilities/PostConversionHandler.cs`; `rg "PostConversionHandler.Execute" src tests` finds only tests; `SettingsWindow.xaml.cs` still saves deprecated `DeleteSourceOnSuccess`; HandBrake source-file move requests show user demand.
-  Touches: `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs`, `src/UniversalConverterX.Console/Commands/ConvertCommand.cs`, `src/UniversalConverterX.UI/Views/Pages/ConverterPage.xaml.cs`, `src/UniversalConverterX.UI/Views/SettingsWindow.xaml*`, Core/UI tests.
-  Acceptance: successful conversions honor Keep/Move/Delete only after verified output exists; UI exposes action plus archive folder with truthful copy; CLI can set the action; tests fail if `PostConversionHandler` is not called.
-  Complexity: M
-
 - [ ] P1 — Fail native conversions on missing or zero-byte outputs
   Why: Native converter success currently trusts process exit status even when the output file is absent or empty, matching competitor issue patterns around "successful" bad exports.
   Evidence: `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs` sets `OutputFileSize = 0` then returns success; HandBrake #7949; LosslessCut #2939; existing sidecar-only `OutputDurationValidator`.

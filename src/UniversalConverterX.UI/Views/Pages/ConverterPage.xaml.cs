@@ -782,7 +782,17 @@ public sealed partial class ConverterPage : Page
         var outputPath = string.IsNullOrWhiteSpace(outputPathOverride)
             ? BuildOutputPath(inputPath, outputFormat)
             : outputPathOverride;
-        return ConversionJob.Create(inputPath, outputPath);
+        var appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+            .Value;
+        var conversionOptions = new ConversionOptions
+        {
+            PostConversionAction = appOptions.PostConversionAction,
+            PostConversionArchiveFolder = appOptions.PostConversionArchiveFolder,
+            DeleteSourceOnSuccess = appOptions.DeleteSourceOnSuccess
+        };
+
+        return ConversionJob.Create(inputPath, outputPath, conversionOptions);
     }
 
     private string BuildOutputPath(string inputPath, string outputFormat)

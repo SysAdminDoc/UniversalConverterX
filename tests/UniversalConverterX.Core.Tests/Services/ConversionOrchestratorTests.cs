@@ -325,6 +325,139 @@ public class ConversionOrchestratorTests
     }
 
     [Fact]
+    public async Task ConvertAsync_WithPostConversionDelete_RemovesSourceAfterSuccessfulOutput()
+    {
+        var tempDir = CreateTempDirectory();
+        try
+        {
+            var inputPath = Path.Combine(tempDir, "input.mp4");
+            var outputPath = Path.Combine(tempDir, "output.png");
+            File.WriteAllText(inputPath, "source");
+            var job = ConversionJob.Create(inputPath, outputPath, new ConversionOptions
+            {
+                PostConversionAction = PostConversionAction.Delete
+            });
+
+            _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+                .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
+                    WriteOutputAndSucceed(j, "converter1"));
+
+            var result = await _orchestrator.ConvertAsync(job);
+
+            result.Success.Should().BeTrue();
+            File.Exists(inputPath).Should().BeFalse();
+            File.Exists(outputPath).Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ConvertAsync_WithPostConversionMove_RelocatesSourceAfterSuccessfulOutput()
+    {
+        var tempDir = CreateTempDirectory();
+        try
+        {
+            var inputPath = Path.Combine(tempDir, "input.mp4");
+            var outputPath = Path.Combine(tempDir, "output.png");
+            File.WriteAllText(inputPath, "source");
+            var job = ConversionJob.Create(inputPath, outputPath, new ConversionOptions
+            {
+                PostConversionAction = PostConversionAction.Move,
+                PostConversionArchiveFolder = "_sources"
+            });
+
+            _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+                .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
+                    WriteOutputAndSucceed(j, "converter1"));
+
+            var result = await _orchestrator.ConvertAsync(job);
+
+            result.Success.Should().BeTrue();
+            File.Exists(inputPath).Should().BeFalse();
+            File.Exists(Path.Combine(tempDir, "_sources", "input.mp4")).Should().BeTrue();
+            File.Exists(outputPath).Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ConvertAsync_WithFailedConversion_DoesNotDeleteSource()
+    {
+        var tempDir = CreateTempDirectory();
+        try
+        {
+            var inputPath = Path.Combine(tempDir, "input.mp4");
+            var outputPath = Path.Combine(tempDir, "output.png");
+            File.WriteAllText(inputPath, "source");
+            var job = ConversionJob.Create(inputPath, outputPath, new ConversionOptions
+            {
+                PostConversionAction = PostConversionAction.Delete
+            });
+
+            _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ConversionResult.Failed(job, "converter failed", TimeSpan.FromSeconds(1), converter: "converter1"));
+
+            var result = await _orchestrator.ConvertAsync(job);
+
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Contain("converter failed");
+            File.Exists(inputPath).Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ConvertAsync_WithSuccessfulResultButMissingOutput_FailsPostConversionAction()
+    {
+        var tempDir = CreateTempDirectory();
+        try
+        {
+            var inputPath = Path.Combine(tempDir, "input.mp4");
+            var outputPath = Path.Combine(tempDir, "output.png");
+            File.WriteAllText(inputPath, "source");
+            var job = ConversionJob.Create(inputPath, outputPath, new ConversionOptions
+            {
+                PostConversionAction = PostConversionAction.Delete
+            });
+
+            _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ConversionResult.Succeeded(job, outputPath, TimeSpan.FromSeconds(1), "converter1"));
+
+            var result = await _orchestrator.ConvertAsync(job);
+
+            result.Success.Should().BeFalse();
+            result.OutputPath.Should().Be(outputPath);
+            result.ErrorMessage.Should().Contain("post-conversion source action failed");
+            File.Exists(inputPath).Should().BeTrue();
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
     public void DetectFormat_WithKnownExtension_ShouldReturnFormat()
     {
         var tempFile = Path.GetTempFileName();
@@ -405,5 +538,21 @@ public class ConversionOrchestratorTests
             OutputPath = output,
             Options = new ConversionOptions()
         };
+    }
+
+    private static string CreateTempDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "ucx-orchestrator-tests-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    private static Task<ConversionResult> WriteOutputAndSucceed(ConversionJob job, string converter)
+    {
+        var outputDirectory = Path.GetDirectoryName(job.OutputPath);
+        if (!string.IsNullOrEmpty(outputDirectory))
+            Directory.CreateDirectory(outputDirectory);
+        File.WriteAllText(job.OutputPath, "output");
+        return Task.FromResult(ConversionResult.Succeeded(job, job.OutputPath, TimeSpan.FromSeconds(1), converter));
     }
 }

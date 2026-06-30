@@ -16,6 +16,9 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 - New `PostConversionAction` enum (Keep/Move/Delete) replaces the limited `DeleteSourceOnSuccess` bool
 - `PostConversionHandler` utility with output-file verification, in-place conversion safety, and archive folder collision resolution
+- Core conversion orchestration now applies Keep/Move/Delete only after successful output creation, so CLI, UI, and batch conversion share the same guardrails
+- `ucx convert` now supports `--source-action keep|move|delete` plus `--source-archive <PATH>` for archive moves
+- Settings now exposes explicit source-file action choices and an archive-folder picker instead of the deprecated delete toggle
 - Settings schema v3 migration: `DeleteSourceOnSuccess=true` automatically upgrades to `PostConversionAction=Delete`
 - Relative archive folder paths resolve from the source file's parent directory
 - 15 new unit tests covering keep/move/delete actions, safety guards, and edge cases

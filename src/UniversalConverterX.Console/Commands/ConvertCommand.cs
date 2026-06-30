@@ -75,6 +75,15 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [CommandOption("--tools-path <PATH>")]
         [Description("Path to converter tools")]
         public string? ToolsPath { get; set; }
+
+        [CommandOption("--source-action <ACTION>")]
+        [Description("After successful conversion: keep, move, or delete the source file")]
+        [DefaultValue("keep")]
+        public string SourceAction { get; set; } = "keep";
+
+        [CommandOption("--source-archive <PATH>")]
+        [Description("Archive folder for --source-action move. Relative paths resolve beside each source file.")]
+        public string? SourceArchive { get; set; }
     }
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -100,6 +109,20 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             return 1;
         }
         settings.OutputFormat = normalizedOutputFormat;
+
+        if (!TryParsePostConversionAction(settings.SourceAction, out var sourceAction))
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]Error:[/] Invalid source action [yellow]{Esc(settings.SourceAction)}[/]. " +
+                "Use [cyan]keep[/], [cyan]move[/], or [cyan]delete[/].");
+            return 1;
+        }
+
+        if (sourceAction == PostConversionAction.Move && string.IsNullOrWhiteSpace(settings.SourceArchive))
+        {
+            AnsiConsole.MarkupLine("[red]Error:[/] --source-archive is required when --source-action is move.");
+            return 1;
+        }
 
         // Expand glob patterns and find files
         var inputFiles = ExpandFiles(settings.Files);
@@ -141,7 +164,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
 
         // Build conversion options
-        var conversionOptions = BuildOptions(settings);
+        var conversionOptions = BuildOptions(settings, sourceAction);
 
         // Create jobs
         var jobs = inputFiles.Select(f => CreateJob(f, settings, conversionOptions)).ToList();
@@ -358,7 +381,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
     }
 
-    private static ConversionOptions BuildOptions(Settings settings)
+    private static ConversionOptions BuildOptions(Settings settings, PostConversionAction sourceAction)
     {
         var quality = settings.Quality.ToLowerInvariant() switch
         {
@@ -379,6 +402,8 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             UseHardwareAcceleration = settings.HardwareAccel,
             ForceConverter = settings.Converter,
             OutputDirectory = settings.OutputDirectory,
+            PostConversionAction = sourceAction,
+            PostConversionArchiveFolder = settings.SourceArchive,
             Video = new VideoOptions
             {
                 Width = settings.Width,
@@ -405,6 +430,27 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         var outputPath = Path.Combine(outputDir, $"{baseName}.{outputExt}");
 
         return ConversionJob.Create(inputPath, outputPath, options);
+    }
+
+    private static bool TryParsePostConversionAction(string? value, out PostConversionAction action)
+    {
+        action = PostConversionAction.Keep;
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "keep" => Set(PostConversionAction.Keep, out action),
+            "move" or "archive" => Set(PostConversionAction.Move, out action),
+            "delete" or "remove" => Set(PostConversionAction.Delete, out action),
+            _ => false
+        };
+
+        static bool Set(PostConversionAction selected, out PostConversionAction target)
+        {
+            target = selected;
+            return true;
+        }
     }
 
     private static List<string> ExpandFiles(string[] patterns)

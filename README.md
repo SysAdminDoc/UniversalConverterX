@@ -86,6 +86,9 @@ ucx convert video.mp4 -o mp3
 # Convert multiple files
 ucx convert *.png -o webp -q high
 
+# Move originals to an archive folder after verified output is created
+ucx convert *.mov -o mp4 --source-action move --source-archive _converted-sources
+
 # List supported formats
 ucx list formats
 
@@ -116,6 +119,8 @@ ucx info document.pdf
 -p, --parallel <COUNT>    Maximum parallel conversions
 --converter <ID>          Force a specific converter
 --hw-accel                Enable hardware acceleration
+--source-action <ACTION>  After success: keep, move, or delete the source
+--source-archive <PATH>   Archive folder for --source-action move
 ```
 
 ## Project planning
