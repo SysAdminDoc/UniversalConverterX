@@ -36,13 +36,13 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         ["ghostscript"] = new("gs", "Ghostscript", "https://www.ghostscript.com/", "PDF processing"),
     };
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         return settings.Action.ToLowerInvariant() switch
         {
             "list" => ListTools(settings),
-            "check" => await CheckTools(settings),
-            "download" => await DownloadTool(settings),
+            "check" => await CheckTools(settings, cancellationToken),
+            "download" => await DownloadTool(settings, cancellationToken),
             "path" => ShowToolsPath(settings),
             _ => InvalidAction(settings.Action)
         };
@@ -79,7 +79,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         return 0;
     }
 
-    private async Task<int> CheckTools(Settings settings)
+    private async Task<int> CheckTools(Settings settings, CancellationToken cancellationToken)
     {
         var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
 
@@ -95,7 +95,8 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
 
         foreach (var (id, tool) in KnownTools)
         {
-            var (found, version, path) = await FindTool(tool.Executable, toolsPath);
+            cancellationToken.ThrowIfCancellationRequested();
+            var (found, version, path) = await FindTool(tool.Executable, toolsPath, cancellationToken);
 
             var status = found ? "[green]✓ Found[/]" : "[red]✗ Not Found[/]";
             var versionStr = version ?? "[dim]N/A[/]";
@@ -112,7 +113,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         return 0;
     }
 
-    private async Task<int> DownloadTool(Settings settings)
+    private async Task<int> DownloadTool(Settings settings, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(settings.ToolName))
         {
@@ -141,6 +142,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         if (downloader.GetToolDownloadInfo(toolId) is not null)
         {
             AnsiConsole.MarkupLine($"[green]Downloading {tool.Name} to:[/] {toolsPath}");
+            cancellationToken.ThrowIfCancellationRequested();
             var result = await downloader.DownloadToolAsync(toolId);
             if (result.Success)
             {
@@ -216,7 +218,10 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         return 1;
     }
 
-    private static async Task<(bool Found, string? Version, string? Path)> FindTool(string executable, string toolsPath)
+    private static async Task<(bool Found, string? Version, string? Path)> FindTool(
+        string executable,
+        string toolsPath,
+        CancellationToken cancellationToken)
     {
         var exeName = OperatingSystem.IsWindows() ? $"{executable}.exe" : executable;
 
@@ -224,7 +229,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         var toolPath = Path.Combine(toolsPath, "bin", exeName);
         if (File.Exists(toolPath))
         {
-            var version = await GetToolVersion(toolPath, executable);
+            var version = await GetToolVersion(toolPath, executable, cancellationToken);
             return (true, version, toolPath);
         }
 
@@ -232,10 +237,11 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
         foreach (var dir in pathDirs)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var fullPath = Path.Combine(dir, exeName);
             if (File.Exists(fullPath))
             {
-                var version = await GetToolVersion(fullPath, executable);
+                var version = await GetToolVersion(fullPath, executable, cancellationToken);
                 return (true, version, fullPath);
             }
         }
@@ -244,9 +250,10 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         var commonPaths = GetCommonPaths(executable);
         foreach (var path in commonPaths)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (File.Exists(path))
             {
-                var version = await GetToolVersion(path, executable);
+                var version = await GetToolVersion(path, executable, cancellationToken);
                 return (true, version, path);
             }
         }
@@ -254,7 +261,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         return (false, null, null);
     }
 
-    private static async Task<string?> GetToolVersion(string path, string toolName)
+    private static async Task<string?> GetToolVersion(string path, string toolName, CancellationToken cancellationToken)
     {
         try
         {
@@ -284,8 +291,8 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
             };
 
             process.Start();
-            var output = await process.StandardOutput.ReadToEndAsync();
-            await process.WaitForExitAsync();
+            var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
 
             // Extract version from first line
             var firstLine = output.Split('\n').FirstOrDefault()?.Trim();

@@ -77,7 +77,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         public string? ToolsPath { get; set; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         // Validate input
         if (settings.Files.Length == 0)
@@ -152,21 +152,25 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         // Single file conversion
         if (jobs.Count == 1)
         {
-            return await ConvertSingleFile(orchestrator, jobs[0], settings);
+            return await ConvertSingleFile(orchestrator, jobs[0], settings, cancellationToken);
         }
 
         // Batch conversion
-        return await ConvertBatch(orchestrator, jobs, settings);
+        return await ConvertBatch(orchestrator, jobs, settings, cancellationToken);
     }
 
-    private async Task<int> ConvertSingleFile(IConversionOrchestrator orchestrator, ConversionJob job, Settings settings)
+    private async Task<int> ConvertSingleFile(
+        IConversionOrchestrator orchestrator,
+        ConversionJob job,
+        Settings settings,
+        CancellationToken cancellationToken)
     {
         var success = false;
         ConversionResult? result = null;
 
         if (settings.NoProgress)
         {
-            result = await orchestrator.ConvertAsync(job);
+            result = await orchestrator.ConvertAsync(job, cancellationToken: cancellationToken);
             success = result.Success;
         }
         else
@@ -203,7 +207,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                         }
                     });
 
-                    result = await orchestrator.ConvertAsync(job, progress);
+                    result = await orchestrator.ConvertAsync(job, progress, cancellationToken);
                     task.Value = 100;
                     success = result.Success;
                 });
@@ -225,13 +229,17 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         return 1;
     }
 
-    private async Task<int> ConvertBatch(IConversionOrchestrator orchestrator, List<ConversionJob> jobs, Settings settings)
+    private async Task<int> ConvertBatch(
+        IConversionOrchestrator orchestrator,
+        List<ConversionJob> jobs,
+        Settings settings,
+        CancellationToken cancellationToken)
     {
         var failedCount = 0;
 
         if (settings.NoProgress)
         {
-            var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel);
+            var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, cancellationToken: cancellationToken);
             failedCount = batchResult.FailureCount;
 
             foreach (var result in batchResult.Results)
@@ -276,7 +284,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                         }
                     });
 
-                    var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, progress);
+                    var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, progress, cancellationToken);
                     
                     overallTask.Value = jobs.Count;
                     currentTask.Value = 100;

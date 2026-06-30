@@ -2559,13 +2559,6 @@ Before any new sidecar or preset is merged:
   Acceptance: release build emits a machine-readable manifest listing app version, sidecar/tool versions, SHA-256 hashes, signing state, and required external downloads; installer/portable ZIP includes the manifest.
   Complexity: M
 
-- [ ] P0 — Repair package graph and version single-source truth
-  Why: The current solution restore fails and release/version strings disagree, so implementation agents cannot trust builds or artifacts.
-  Evidence: `dotnet restore src\UniversalConverterX.sln` NU1605; `Directory.Build.props`/`src\Directory.Build.props` at 2.21.7 while README/app projects show 2.21.9; .NET 10.0.9 and WinAppSDK 2.2 package sources.
-  Touches: `Directory.Build.props`, `src/Directory.Build.props`, `src/**/*.csproj`, `tests/**/*.csproj`, installer manifests, version consistency test.
-  Acceptance: `dotnet restore`, `dotnet test src\UniversalConverterX.sln -c Release`, `dotnet list ... --outdated`, and `dotnet list ... --vulnerable --include-transitive` pass; every version surface resolves to one value; any intentionally held package has an inline reason.
-  Complexity: S
-
 - [ ] P0 — Wire post-conversion source actions end-to-end
   Why: Source move/delete is user-data-sensitive and currently has Core utilities/tests but no production invocation path.
   Evidence: `src/UniversalConverterX.Core/Utilities/PostConversionHandler.cs`; `rg "PostConversionHandler.Execute" src tests` finds only tests; `SettingsWindow.xaml.cs` still saves deprecated `DeleteSourceOnSuccess`; HandBrake source-file move requests show user demand.

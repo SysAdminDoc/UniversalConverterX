@@ -20,7 +20,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         public string? ToolsPath { get; set; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         if (!File.Exists(settings.FilePath))
         {
@@ -33,7 +33,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         var orchestrator = new ConversionOrchestrator(options);
 
         var fileInfo = new FileInfo(settings.FilePath);
-        var format = await orchestrator.DetectFormatAsync(settings.FilePath);
+        var format = await orchestrator.DetectFormatAsync(settings.FilePath, cancellationToken);
         var availableOutputs = orchestrator.GetOutputFormatsFor(settings.FilePath);
 
         AnsiConsole.MarkupLine($"[green]File Information:[/] {fileInfo.Name}");

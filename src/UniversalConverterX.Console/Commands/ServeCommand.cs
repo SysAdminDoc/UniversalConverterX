@@ -40,7 +40,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         public string Host { get; set; } = "127.0.0.1";
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         if (settings.Port is < 1 or > 65535)
         {
@@ -71,7 +71,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         AnsiConsole.MarkupLine("Press Ctrl+C to stop.");
 
         var jobs = new JobManager();
-        using var stopCts = new CancellationTokenSource();
+        using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         System.Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopCts.Cancel(); };
 
         try

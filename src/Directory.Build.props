@@ -1,28 +1,7 @@
 <Project>
+  <Import Project="..\Directory.Build.props" />
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>13</LangVersion>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>5</WarningLevel>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Company>Maven Imaging</Company>
-    <Product>UniversalConverter X</Product>
-    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
-    <Version>2.21.7</Version>
-    <AssemblyVersion>2.21.7.0</AssemblyVersion>
-    <FileVersion>2.21.7.0</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <Optimize>true</Optimize>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 </Project>

@@ -35,7 +35,7 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
         public string[] Files { get; set; } = [];
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var presets = PresetLoader.LoadAll();
 

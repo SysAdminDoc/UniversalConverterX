@@ -29,7 +29,7 @@ public class ListCommand : Command<ListCommand.Settings>
         public string? ToolsPath { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
         var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
