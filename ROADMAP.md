@@ -2600,3 +2600,17 @@ Before any new sidecar or preset is merged:
   Touches: `README.md`, existing legacy root planning docs if they are intentionally archived/deleted, `.gitignore`.
   Acceptance: README links only active public planning surfaces; legacy planning docs are either removed from root or clearly archived without creating new markdown files; no new markdown files are introduced.
   Complexity: S
+
+- [ ] P1 - Normalize ROADMAP.md to actionable open work only
+  Why: Autonomous development loops can misread the current roadmap because it still contains many shipped legacy entries, partial closure notes, source appendices, and old planning links despite the repo hygiene rule.
+  Evidence: AGENTS.md ROADMAP rules; ROADMAP.md entries marked SHIPPED/PARTIALLY SHIPPED; CHANGELOG.md already records shipped work.
+  Touches: ROADMAP.md.
+  Acceptance: ROADMAP.md contains only incomplete actionable items plus minimal headings; no SHIPPED, PARTIALLY SHIPPED, completed checkmarks, source inventory dumps, cycle logs, or continuation notes remain; no new markdown files are created.
+  Complexity: M
+
+- [ ] P1 - Extend the UIA gate to accessible names and state semantics
+  Why: The current accessibility gate passes because it checks AutomationIds only, but screen-reader users also need meaningful names, disabled reasons, destructive-action copy, and progress/state announcements.
+  Evidence: tests/uia_contract/check_uia.py; Microsoft WinUI accessibility guidance; src/UniversalConverterX.UI/Views/SettingsWindow.xaml source-action toggle copy.
+  Touches: tests/uia_contract/check_uia.py, src/UniversalConverterX.UI/Views/**/*.xaml, high-traffic page code-behind status/progress updates.
+  Acceptance: a semantic UIA check fails icon-only/destructive/disabled/progress controls without appropriate AutomationProperties.Name/HelpText or visible equivalent text; existing UIA check still passes; at least Settings, Converter, Presets, Downloader, Toolbox, and AI workflow pages pass the new semantic gate.
+  Complexity: M
