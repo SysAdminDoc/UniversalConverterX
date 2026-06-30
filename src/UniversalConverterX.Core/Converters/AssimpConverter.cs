@@ -331,11 +331,23 @@ public partial class AssimpConverter : BaseConverterStrategy
 
             if (optimizeResult.Success)
             {
-                job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
+                var commandLine = FormatCommandLine(pipelinePath, pipelineArgs);
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    optimizeResult.ExitCode,
+                    optimizeResult.StandardOutput,
+                    optimizeResult.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
 
-                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id,
-                    warnings: warnings);
+                if (outputFailure != null)
+                    return outputFailure;
+
+                job.Status = ConversionStatus.Completed;
+
+                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
             }
 
             return null; // Fall back to assimp-only

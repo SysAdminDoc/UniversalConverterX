@@ -308,11 +308,23 @@ public partial class PotraceConverter : BaseConverterStrategy
 
             if (traceResult.Success)
             {
-                job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
+                var commandLine = FormatCommandLine(executablePath, potraceArgs);
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    traceResult.ExitCode,
+                    traceResult.StandardOutput,
+                    traceResult.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
 
-                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id,
-                    warnings: warnings);
+                if (outputFailure != null)
+                    return outputFailure;
+
+                job.Status = ConversionStatus.Completed;
+
+                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
             }
 
             return ConversionResult.Failed(job,
@@ -417,11 +429,23 @@ public partial class PotraceConverter : BaseConverterStrategy
 
             if (traceResult.Success)
             {
-                job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
+                var commandLine = FormatCommandLine(executablePath, potraceArgs);
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    traceResult.ExitCode,
+                    traceResult.StandardOutput,
+                    traceResult.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
 
-                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id,
-                    warnings: warnings);
+                if (outputFailure != null)
+                    return outputFailure;
+
+                job.Status = ConversionStatus.Completed;
+
+                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
             }
 
             return ConversionResult.Failed(job,

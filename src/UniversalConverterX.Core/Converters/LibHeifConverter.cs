@@ -225,6 +225,7 @@ public partial class LibHeifConverter : BaseConverterStrategy
         {
             progress?.Report(ConversionProgress.Indeterminate("Encoding to HEIF...", ConversionStage.Initializing));
 
+            var commandLine = FormatCommandLine(encoderPath, args);
             var result = await ExecuteProcessAsync(
                 encoderPath,
                 args,
@@ -237,15 +238,33 @@ public partial class LibHeifConverter : BaseConverterStrategy
 
             if (result.Success)
             {
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    result.ExitCode,
+                    result.StandardOutput,
+                    result.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
+
+                if (outputFailure != null)
+                    return outputFailure;
+
                 job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
                 
-                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id);
+                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
             }
 
             return ConversionResult.Failed(job, 
                 result.ErrorMessage ?? "HEIF encoding failed", 
-                stopwatch.Elapsed);
+                stopwatch.Elapsed,
+                result.ExitCode,
+                result.StandardOutput,
+                result.StandardError,
+                Id,
+                commandLine,
+                warnings);
         }
         catch (OperationCanceledException)
         {

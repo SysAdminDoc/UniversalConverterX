@@ -29,6 +29,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
     protected abstract HashSet<string> SupportedOutputFormats { get; }
     protected abstract Dictionary<string, HashSet<string>> FormatMappings { get; }
 
+    protected virtual bool RequiresOutputFile => true;
+    protected virtual bool AllowsEmptyOutputFile => false;
+
     public virtual bool CanConvert(FileFormat source, FileFormat target)
     {
         var inputExt = source.Extension.ToLowerInvariant().TrimStart('.');
@@ -127,7 +130,6 @@ public abstract class BaseConverterStrategy : IConverterStrategy
 
             // Build arguments
             var arguments = BuildArguments(job, job.Options);
-            var argumentString = string.Join(" ", arguments.Select(QuoteArgument));
 
             // Get executable path
             var executablePath = GetExecutablePath();
@@ -136,7 +138,8 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                 return ConversionResult.Failed(job, $"Converter executable not found: {executablePath}", stopwatch.Elapsed);
             }
 
-            Logger?.LogDebug("Executing: {Executable} {Arguments}", executablePath, argumentString);
+            var commandLine = FormatCommandLine(executablePath, arguments);
+            Logger?.LogDebug("Executing: {CommandLine}", commandLine);
 
             // Ensure output directory exists
             var outputDir = Path.GetDirectoryName(job.OutputPath);
@@ -159,15 +162,27 @@ public abstract class BaseConverterStrategy : IConverterStrategy
 
             if (result.Success)
             {
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    result.ExitCode,
+                    result.StandardOutput,
+                    result.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
+
+                if (outputFailure != null)
+                    return outputFailure;
+
                 job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
                 
                 return ConversionResult.Succeeded(
                     job,
                     job.OutputPath,
                     stopwatch.Elapsed,
                     Id,
-                    $"{executablePath} {argumentString}",
+                    commandLine,
                     warnings);
             }
             else
@@ -181,7 +196,8 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                     result.StandardOutput,
                     result.StandardError,
                     Id,
-                    $"{executablePath} {argumentString}");
+                    commandLine,
+                    warnings);
             }
         }
         catch (OperationCanceledException) when (timeoutCts?.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
@@ -324,7 +340,7 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         int exitCode;
         try { exitCode = process.ExitCode; }
         catch (InvalidOperationException) { exitCode = -1; }
-        var success = exitCode == 0 && File.Exists(job.OutputPath) && new FileInfo(job.OutputPath).Length > 0;
+        var success = exitCode == 0;
 
         return new ProcessResult
         {
@@ -334,6 +350,61 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             StandardError = stderr.ToString(),
             ErrorMessage = success ? null : GetErrorMessage(stderr.ToString(), exitCode)
         };
+    }
+
+    protected virtual ConversionResult? ValidateSuccessfulOutput(
+        ConversionJob job,
+        TimeSpan duration,
+        int exitCode = 0,
+        string? standardOutput = null,
+        string? standardError = null,
+        string? converter = null,
+        string? commandLine = null,
+        IReadOnlyList<string>? warnings = null)
+    {
+        if (!RequiresOutputFile)
+        {
+            job.OutputFileSize = File.Exists(job.OutputPath)
+                ? new FileInfo(job.OutputPath).Length
+                : 0;
+            return null;
+        }
+
+        if (!File.Exists(job.OutputPath))
+        {
+            job.Status = ConversionStatus.Failed;
+            job.OutputFileSize = 0;
+            return ConversionResult.Failed(
+                job,
+                $"Converter completed but did not create the expected output file: {job.OutputPath}",
+                duration,
+                exitCode,
+                standardOutput,
+                standardError,
+                converter,
+                commandLine,
+                warnings);
+        }
+
+        var outputSize = new FileInfo(job.OutputPath).Length;
+        job.OutputFileSize = outputSize;
+
+        if (!AllowsEmptyOutputFile && outputSize == 0)
+        {
+            job.Status = ConversionStatus.Failed;
+            return ConversionResult.Failed(
+                job,
+                $"Converter created an empty output file: {job.OutputPath}",
+                duration,
+                exitCode,
+                standardOutput,
+                standardError,
+                converter,
+                commandLine,
+                warnings);
+        }
+
+        return null;
     }
 
     protected virtual void ProcessOutputLine(
@@ -384,6 +455,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
 
         return $"\"{arg.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
     }
+
+    protected static string FormatCommandLine(string executable, IEnumerable<string> arguments) =>
+        $"{QuoteArgument(executable)} {string.Join(" ", arguments.Select(QuoteArgument))}".TrimEnd();
 
     protected static string NormalizeExtension(string extension) =>
         extension.Trim().TrimStart('.').ToLowerInvariant();

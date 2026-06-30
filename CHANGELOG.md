@@ -4,6 +4,12 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [2.21.9] - 2026-06-28
 
+### Fixed - Native Output Validation
+
+- Native converter wrappers now fail successful process exits when the expected output file is missing or zero bytes.
+- Added an explicit converter opt-out for intentional stdout/no-file outputs and preserved command/output metadata on validation failures.
+- Moved process-exit success apart from final artifact validation so multi-stage converters can validate intermediate and final outputs correctly.
+
 ### Fixed - Package Graph and Version Truth
 
 - Repaired solution restore after the test project pinned lower `Microsoft.Extensions.*` versions than Core.

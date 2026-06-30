@@ -137,7 +137,8 @@ public class ConversionResult
         string? standardOutput = null,
         string? standardError = null,
         string? converter = null,
-        string? commandLine = null)
+        string? commandLine = null,
+        IReadOnlyList<string>? warnings = null)
     {
         return new ConversionResult
         {
@@ -149,7 +150,8 @@ public class ConversionResult
             StandardOutput = standardOutput,
             StandardError = standardError,
             ConverterUsed = converter,
-            CommandLine = commandLine
+            CommandLine = commandLine,
+            Warnings = warnings ?? []
         };
     }
 

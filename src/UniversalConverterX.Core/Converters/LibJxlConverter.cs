@@ -237,6 +237,7 @@ public partial class LibJxlConverter : BaseConverterStrategy
             progress?.Report(ConversionProgress.Indeterminate("Decoding JPEG XL...", ConversionStage.Initializing));
 
             var args = BuildArguments(job, job.Options);
+            var commandLine = FormatCommandLine(decoderPath, args);
             var result = await ExecuteProcessAsync(
                 decoderPath,
                 args,
@@ -249,15 +250,33 @@ public partial class LibJxlConverter : BaseConverterStrategy
 
             if (result.Success)
             {
-                job.Status = ConversionStatus.Completed;
-                job.OutputFileSize = File.Exists(job.OutputPath) ? new FileInfo(job.OutputPath).Length : 0;
+                var outputFailure = ValidateSuccessfulOutput(
+                    job,
+                    stopwatch.Elapsed,
+                    result.ExitCode,
+                    result.StandardOutput,
+                    result.StandardError,
+                    Id,
+                    commandLine,
+                    warnings);
 
-                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id);
+                if (outputFailure != null)
+                    return outputFailure;
+
+                job.Status = ConversionStatus.Completed;
+
+                return ConversionResult.Succeeded(job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
             }
 
             return ConversionResult.Failed(job,
                 result.ErrorMessage ?? "JPEG XL decoding failed",
-                stopwatch.Elapsed);
+                stopwatch.Elapsed,
+                result.ExitCode,
+                result.StandardOutput,
+                result.StandardError,
+                Id,
+                commandLine,
+                warnings);
         }
         catch (OperationCanceledException)
         {

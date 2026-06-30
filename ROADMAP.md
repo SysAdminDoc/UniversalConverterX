@@ -2559,13 +2559,6 @@ Before any new sidecar or preset is merged:
   Acceptance: release build emits a machine-readable manifest listing app version, sidecar/tool versions, SHA-256 hashes, signing state, and required external downloads; installer/portable ZIP includes the manifest.
   Complexity: M
 
-- [ ] P1 — Fail native conversions on missing or zero-byte outputs
-  Why: Native converter success currently trusts process exit status even when the output file is absent or empty, matching competitor issue patterns around "successful" bad exports.
-  Evidence: `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs` sets `OutputFileSize = 0` then returns success; HandBrake #7949; LosslessCut #2939; existing sidecar-only `OutputDurationValidator`.
-  Touches: `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs`, specialized converter overrides, `ConversionResult`, Core tests.
-  Acceptance: native conversions fail with actionable errors when expected output is missing/zero-byte; converters that intentionally produce stdout/no-file outputs must opt out explicitly; tests cover success, missing output, and zero-byte output.
-  Complexity: S
-
 - [ ] P1 — Normalize ML sidecar dependency security floors
   Why: ML sidecars have uneven floors, including `stemkit` allowing old ONNX Runtime versions while ONNX Runtime continues shipping security fixes.
   Evidence: `tools/stemkit/requirements.txt` has `onnxruntime>=1.17`; `tools/videosubtitleremover/requirements.txt` already documents an ONNX Runtime >=1.25.1 security floor; ONNX Runtime v1.27.0 release notes.
