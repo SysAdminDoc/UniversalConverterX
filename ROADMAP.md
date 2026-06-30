@@ -2593,3 +2593,31 @@ Before any new sidecar or preset is merged:
   Touches: tests/uia_contract/check_uia.py, src/UniversalConverterX.UI/Views/**/*.xaml, high-traffic page code-behind status/progress updates.
   Acceptance: a semantic UIA check fails icon-only/destructive/disabled/progress controls without appropriate AutomationProperties.Name/HelpText or visible equivalent text; existing UIA check still passes; at least Settings, Converter, Presets, Downloader, Toolbox, and AI workflow pages pass the new semantic gate.
   Complexity: M
+
+- [ ] P1 — Extend sidecar security-floor checks to non-ML file parsers
+  Why: Sidecars parse untrusted local images/documents/archives, and current Pillow floors allow versions below the 12.2.0 security fixes even when NuGet is clean.
+  Evidence: `tools/*/requirements.txt` Pillow floors; Pillow 12.2.0 release; GHSA-pwv6-vv43-88gr; `RESEARCH.md` Security section.
+  Touches: `tools/*/requirements.txt`, `tests/sidecar_contract/check_contract.py`, sidecar build scripts, dependency-floor tooling.
+  Acceptance: local checks fail when file-parser dependencies such as Pillow, libjxl/libavif/OpenCV wrappers, or archive parsers permit known-vulnerable versions; affected sidecars still pass the NDJSON contract smoke.
+  Complexity: M
+
+- [ ] P1 — Move sidecar health and capability metadata into manifests
+  Why: `SidecarHealthService` hard-codes model, GPU, and tool requirements, which will drift across 188 sidecars and any future plugin-style extension.
+  Evidence: `src/UniversalConverterX.UI/Services/SidecarHealthService.cs`; `tools/README.md`; Tdarr repository; Unmanic 0.4.0 plugin metadata release notes; `RESEARCH.md` Architecture Assessment.
+  Touches: `tools/*/ucx.sidecar.json`, `src/UniversalConverterX.UI/Services/SidecarHealthService.cs`, `tests/sidecar_contract/check_contract.py`, `tools/README.md`.
+  Acceptance: preset-backed sidecars with external tools, models, GPU requirements, caches, licenses, or optional backends declare validated manifest metadata; health/preflight UI consumes generated manifest data instead of hard-coded engine lists.
+  Complexity: L
+
+- [ ] P2 — Add shell-extension preset invocation smoke tests
+  Why: Explorer context-menu conversion is a core differentiator, and path quoting, preset selection, and missing registry fallback can regress without launching the full UI.
+  Evidence: `src/UniversalConverterX.ShellExtension/ExplorerCommand.cs`; `src/UniversalConverterX.ShellExtension/Presets/PresetReader.cs`; File Converter v2.2 release; Stack Overflow `ffmpeg` path/quoting signal; `RESEARCH.md` Competitive Landscape.
+  Touches: `src/UniversalConverterX.ShellExtension`, shell-extension test project or focused unit seams, installer/package smoke scripts.
+  Acceptance: tests cover preset discovery/override ordering, selected paths with spaces/quotes, command argument construction, missing CLI/app registry fallback, and x64 shell-extension build still passes.
+  Complexity: M
+
+- [ ] P2 — Surface preset and queue compatibility warnings during updates
+  Why: HandBrake and StaxRip warn before updates that may affect queued jobs or custom presets; UCX has migrations and update probing but no user-facing compatibility channel.
+  Evidence: HandBrake 1.11.2 upgrade notice; StaxRip v2.52.4 release notes; `src/UniversalConverterX.Core/Configuration/SettingsMigrations.cs`; `src/UniversalConverterX.UI/Services/UpdateCheckService.cs`; `RESEARCH.md` Architecture Assessment.
+  Touches: `src/UniversalConverterX.UI/Services/UpdateCheckService.cs`, settings/update UI, preset and batch-queue models, release manifest generation.
+  Acceptance: update checks can display compatibility notes from the release manifest; users with queued jobs or custom presets see a non-blocking warning when an update may affect them; tool-only patch updates do not show false warnings.
+  Complexity: M
