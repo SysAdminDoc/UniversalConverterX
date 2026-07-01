@@ -10,6 +10,13 @@ from __future__ import annotations
 
 import argparse
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil

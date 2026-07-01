@@ -4,6 +4,13 @@
 import sys
 import os
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import argparse
 import tempfile
 import shutil

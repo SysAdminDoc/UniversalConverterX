@@ -14,13 +14,20 @@ import argparse
 import email
 import email.policy
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import mailbox
 import sys
 from pathlib import Path
 
 
 def emit(event: str, **fields) -> None:
-    sys.stdout.write(json.dumps({"event": event, **fields}, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
     sys.stdout.flush()
 
 

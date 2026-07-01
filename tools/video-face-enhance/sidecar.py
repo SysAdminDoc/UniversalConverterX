@@ -20,7 +20,7 @@ from pathlib import Path
 
 
 def emit(event: str, **fields) -> None:
-    sys.stdout.write(json.dumps({"event": event, **fields}, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
     sys.stdout.flush()
 
 

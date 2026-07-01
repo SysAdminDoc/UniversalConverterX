@@ -18,6 +18,13 @@ import argparse
 import base64
 import getpass
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import os
 import sys
 import time
@@ -25,7 +32,7 @@ from pathlib import Path
 
 
 def emit(event: str, **fields) -> None:
-    sys.stdout.write(json.dumps({"event": event, **fields}, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
     sys.stdout.flush()
 
 

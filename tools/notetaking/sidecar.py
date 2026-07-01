@@ -28,6 +28,13 @@ import argparse
 import csv
 import io
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import re
 import sys
 import tarfile
@@ -37,7 +44,7 @@ from xml.etree import ElementTree as ET
 
 
 def emit(event: str, **fields) -> None:
-    sys.stdout.write(json.dumps({"event": event, **fields}, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
     sys.stdout.flush()
 
 

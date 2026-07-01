@@ -18,6 +18,13 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+try:
+    import orjson
+    def _dumps(obj):
+        return orjson.dumps(obj).decode()
+except ImportError:
+    def _dumps(obj):
+        return json.dumps(obj, ensure_ascii=False)
 import sys
 import time
 from dataclasses import dataclass, asdict
