@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>AV1 D3D12 hardware encode (Intel Arc/AMD/Nvidia)</Name>
+    <Folder>Video/Hardware</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+        <Extension>m2ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_d3d12-av1</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>videocrush</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>compress</Arg>
+        <Arg>--codec</Arg>
+        <Arg>libsvtav1</Arg>
+        <Arg>--hwaccel</Arg>
+        <Arg>d3d12</Arg>
+        <Arg>--crf</Arg>
+        <Arg>30</Arg>
+    </Args>
+</Preset>
