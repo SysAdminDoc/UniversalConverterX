@@ -5,7 +5,7 @@
     <InputTypes>
         <Extension>py</Extension>
         <Extension>md</Extension>
-        <Extension>Rmd</Extension>
+        <Extension>rmd</Extension>
         <Extension>qmd</Extension>
     </InputTypes>
     <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
