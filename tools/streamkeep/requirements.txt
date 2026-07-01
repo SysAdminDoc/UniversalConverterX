@@ -4,3 +4,5 @@ Pillow>=12.2.0
 yt-dlp>=2026.03.17
 send2trash>=1.8
 websocket-client>=1.7
+
+pydantic>=2.0; python_version>='3.9'
