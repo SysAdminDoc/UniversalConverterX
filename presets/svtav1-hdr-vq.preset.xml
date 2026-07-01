@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SVT-AV1-HDR Visual Quality (detail retention)</Name>
+    <Folder>Video/AV1</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+        <Extension>m2ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_svtav1hdr-vq</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>svtav1-hdr</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>encode</Arg>
+        <Arg>--tune-mode</Arg>
+        <Arg>vq</Arg>
+        <Arg>--crf</Arg>
+        <Arg>30</Arg>
+        <Arg>--preset</Arg>
+        <Arg>6</Arg>
+    </Args>
+</Preset>

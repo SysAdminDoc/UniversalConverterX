@@ -1,0 +1,3 @@
+# SVT-AV1-HDR sidecar — stdlib only (wraps external binary)
+# Runtime: svtav1encapp.exe from Uranite/HandBrake-SVT-AV1-HDR
+# Also requires: ffmpeg for decode/mux

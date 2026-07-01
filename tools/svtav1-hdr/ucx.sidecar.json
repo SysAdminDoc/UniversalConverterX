@@ -1,0 +1,7 @@
+{
+  "engine": "svtav1-hdr",
+  "tools": [
+    { "id": "svtav1encapp", "executable": "svtav1encapp", "display": "SVT-AV1-HDR", "managed": false },
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+  ]
+}
