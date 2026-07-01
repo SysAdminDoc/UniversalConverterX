@@ -2,6 +2,27 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [2.22.0] - 2026-07-01
+
+### Security
+
+- Normalized sidecar dependency security floors: Pillow>=12.2.0 across 19 sidecars (GHSA-pwv6-vv43-88gr), onnxruntime>=1.25.1 in stemkit (15+ ORT CVEs), opencv-python>=4.10.0 in videosubtitleremover. Added automated security-floor enforcement to the sidecar contract test.
+
+### Added
+
+- Extended UIA gate with icon-only button accessible-name semantic check to prevent screen-reader regressions.
+- Created `ucx.sidecar.json` manifests for 50 sidecars declaring tool, model, and GPU requirements. SidecarHealthService now reads manifests with hard-coded fallback.
+- Added orjson fast-path to all 188 sidecar emit functions for ~3-5x NDJSON serialization speedup when orjson is installed.
+- Wired OutputSizeEstimator into ConverterPage queue — queued files now show estimated output size with tooltip caveat.
+- Added lock toggles for crop and quality values in EditorPage that persist across operation/preset switches.
+- Added VOBSUB/PGS OCR subtitle extraction presets for the existing subocr sidecar.
+- Added shared Pydantic validation layer (`tools/_lib/ucx_validate.py`) for structured input validation in sidecars.
+
+### Changed
+
+- Normalized ROADMAP.md from ~2600 lines to ~300 lines of actionable open work. Moved 4 blocked items to Roadmap_Blocked.md.
+- Updated README project planning links to reference active planning surfaces only.
+
 ## [2.21.9] - 2026-06-28
 
 ### Fixed - Native Output Validation
