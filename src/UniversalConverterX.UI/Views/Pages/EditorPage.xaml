@@ -294,8 +294,21 @@
                 <!-- Re-encode Quality panel (trim re-encode + crop + rotate) -->
                 <Border x:Name="QualityPanel" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Re-encode Quality"
-                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Re-encode Quality"
+                                       Style="{StaticResource PanelTitleTextStyle}"/>
+                            <ToggleButton x:Name="QualityLockToggle" Grid.Column="1"
+                                          AutomationProperties.AutomationId="QualityLockToggle"
+                                          AutomationProperties.Name="Lock quality value"
+                                          ToolTipService.ToolTip="Lock CRF value across operation/preset changes"
+                                          Padding="6,4" MinWidth="0" MinHeight="0">
+                                <FontIcon Glyph="&#xE72E;" FontSize="12"/>
+                            </ToggleButton>
+                        </Grid>
                         <Slider x:Name="CrfSlider"
                                 Minimum="0"
                                 Maximum="51"
@@ -312,8 +325,21 @@
                 <!-- Crop panel -->
                 <Border x:Name="CropPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Crop Rectangle"
-                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Crop Rectangle"
+                                       Style="{StaticResource PanelTitleTextStyle}"/>
+                            <ToggleButton x:Name="CropLockToggle" Grid.Column="1"
+                                          AutomationProperties.AutomationId="CropLockToggle"
+                                          AutomationProperties.Name="Lock crop values"
+                                          ToolTipService.ToolTip="Lock crop values across operation/preset changes"
+                                          Padding="6,4" MinWidth="0" MinHeight="0">
+                                <FontIcon Glyph="&#xE72E;" FontSize="12"/>
+                            </ToggleButton>
+                        </Grid>
                         <TextBlock Text="All values in pixels. Output = W x H region starting at (X, Y)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>

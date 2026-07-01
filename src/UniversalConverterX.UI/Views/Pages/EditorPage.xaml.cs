@@ -652,11 +652,15 @@ public sealed partial class EditorPage : Page
             StartBox.Text = snap.StartText;
             EndBox.Text = snap.EndText;
             LosslessCheck.IsChecked = snap.Lossless;
-            CrfSlider.Value = snap.CrfValue;
-            CropWidthBox.Text = snap.CropWidth;
-            CropHeightBox.Text = snap.CropHeight;
-            CropXBox.Text = snap.CropX;
-            CropYBox.Text = snap.CropY;
+            if (QualityLockToggle?.IsChecked != true)
+                CrfSlider.Value = snap.CrfValue;
+            if (CropLockToggle?.IsChecked != true)
+            {
+                CropWidthBox.Text = snap.CropWidth;
+                CropHeightBox.Text = snap.CropHeight;
+                CropXBox.Text = snap.CropX;
+                CropYBox.Text = snap.CropY;
+            }
             RotateAngleCombo.SelectedIndex = snap.RotateIndex;
             LufsBox.Text = snap.LufsText;
             RewrapFormatCombo.SelectedIndex = snap.RewrapIndex;
