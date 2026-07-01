@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Generate AV1 grain table (ISO 800)</Name>
+    <Folder>Video/AV1</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_grain</OutputFileNameTemplate>
+    <OutputExtension>tbl</OutputExtension>
+    <Engine>svtav1-hdr</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>grain-table</Arg>
+        <Arg>--iso</Arg>
+        <Arg>800</Arg>
+        <Arg>--chroma-grain</Arg>
+        <Arg>--transfer</Arg>
+        <Arg>bt1886</Arg>
+    </Args>
+</Preset>
