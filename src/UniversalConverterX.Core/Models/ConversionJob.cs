@@ -73,6 +73,11 @@ public class ConversionJob
     public long OutputFileSize { get; set; }
 
     /// <summary>
+    /// Pre-encode estimated output size computed by <see cref="OutputSizeEstimator"/>.
+    /// </summary>
+    public OutputSizeEstimate? EstimatedOutput { get; set; }
+
+    /// <summary>
     /// Converter that handled this job
     /// </summary>
     public string? ConverterUsed { get; set; }

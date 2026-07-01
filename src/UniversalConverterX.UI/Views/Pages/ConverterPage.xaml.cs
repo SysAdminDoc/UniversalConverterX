@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Utilities;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -239,6 +240,7 @@ public sealed partial class ConverterPage : Page
             return false;
         }
 
+        var estimate = OutputSizeEstimator.ForLosslessCopy(size);
         _files.Add(new FileItem
         {
             Path = path,
@@ -249,6 +251,8 @@ public sealed partial class ConverterPage : Page
             FormatSummary = BuildFormatSummary(fileInfo.Extension),
             StatusText = "Queued",
             Progress = 0,
+            EstimatedSizeLabel = $"→ {estimate.DisplayLabel}",
+            EstimatedSizeCaveat = estimate.Caveat ?? "Based on lossless copy estimate",
         });
 
         if (updateUi)
@@ -910,6 +914,12 @@ public class FileItem : INotifyPropertyChanged
     public string? OutputPath { get; set; }
     public string? ErrorMessage { get; set; }
     public List<string> PersistedArgs { get; set; } = [];
+    public string EstimatedSizeLabel { get; set; } = "";
+    public string EstimatedSizeCaveat { get; set; } = "";
+    public Microsoft.UI.Xaml.Visibility HasEstimatedSize =>
+        string.IsNullOrEmpty(EstimatedSizeLabel)
+            ? Microsoft.UI.Xaml.Visibility.Collapsed
+            : Microsoft.UI.Xaml.Visibility.Visible;
 
     public double Progress
     {
