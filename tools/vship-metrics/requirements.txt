@@ -1,0 +1,2 @@
+# Vship quality metrics sidecar — stdlib only (wraps external binary)
+# Runtime: vship.exe from codeberg.org/Line-fr/Vship

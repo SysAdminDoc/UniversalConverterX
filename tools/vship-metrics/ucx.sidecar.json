@@ -1,0 +1,6 @@
+{
+  "engine": "vship-metrics",
+  "tools": [
+    { "id": "vship", "executable": "vship", "display": "Vship", "managed": false }
+  ]
+}

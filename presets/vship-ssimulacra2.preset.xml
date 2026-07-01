@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SSIMULACRA2 quality comparison (GPU)</Name>
+    <Folder>Analysis</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>png</Extension>
+        <Extension>jpg</Extension>
+        <Extension>webp</Extension>
+        <Extension>avif</Extension>
+        <Extension>jxl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ssimulacra2</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>vship-metrics</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <RequiresExtraInput>true</RequiresExtraInput>
+    <ExtraInputPrompt>Pick the distorted (encoded) file to compare against the reference.</ExtraInputPrompt>
+    <Args>
+        <Arg>compare</Arg>
+        <Arg>--metrics</Arg>
+        <Arg>ssimulacra2</Arg>
+    </Args>
+</Preset>
