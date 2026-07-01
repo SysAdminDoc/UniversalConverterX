@@ -66,6 +66,18 @@ public static class PostConversionHandler
                 $"Output file not found — refusing to {action.ToString().ToLowerInvariant()} " +
                 $"source without a verified output: '{outputPath}'");
 
+        try
+        {
+            var outputSize = new FileInfo(outputPath).Length;
+            if (outputSize == 0)
+                return new PostConversionResult(action, false, null,
+                    $"Output file is zero bytes — refusing to {action.ToString().ToLowerInvariant()} " +
+                    $"source when the output may be corrupt: '{outputPath}'");
+        }
+        catch (IOException)
+        {
+        }
+
         // Never operate on the source if it IS the output (in-place conversion).
         if (string.Equals(Path.GetFullPath(sourcePath), Path.GetFullPath(outputPath),
                 StringComparison.OrdinalIgnoreCase))

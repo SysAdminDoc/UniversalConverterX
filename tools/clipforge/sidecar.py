@@ -919,12 +919,28 @@ def op_speed(args: argparse.Namespace) -> int:
         chain.append(f"atempo={f}")
         return ",".join(chain)
 
+    streams = info.get("streams", [])
+    has_video = any(s.get("codec_type") == "video" for s in streams)
+    has_audio = any(s.get("codec_type") == "audio" for s in streams)
+    if not has_video and not has_audio:
+        return fail("no_streams", "Input has no video or audio streams.")
+
+    if has_video and has_audio:
+        fc = f"[0:v]setpts=PTS/{factor}[v];[0:a]{_atempo_chain(factor)}[a]"
+        maps = ["-map", "[v]", "-map", "[a]"]
+        codecs = ["-c:v", "libx264", "-crf", "20", "-preset", "medium",
+                  "-c:a", "aac", "-b:a", "192k"]
+    elif has_video:
+        fc = f"[0:v]setpts=PTS/{factor}[v]"
+        maps = ["-map", "[v]"]
+        codecs = ["-c:v", "libx264", "-crf", "20", "-preset", "medium"]
+    else:
+        fc = f"[0:a]{_atempo_chain(factor)}[a]"
+        maps = ["-map", "[a]"]
+        codecs = ["-c:a", "aac", "-b:a", "192k"]
+
     cmd = [ffmpeg, "-y", "-i", str(src),
-           "-filter_complex",
-           f"[0:v]setpts=PTS/{factor}[v];[0:a]{_atempo_chain(factor)}[a]",
-           "-map", "[v]", "-map", "[a]",
-           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
-           "-c:a", "aac", "-b:a", "192k", str(out_path)]
+           "-filter_complex", fc, *maps, *codecs, str(out_path)]
     emit("progress", percent=0, stage=f"speed x{factor}", eta_seconds=None)
     rc = run_ffmpeg(cmd, duration / factor, f"speed x{factor}")
     if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc}")
@@ -943,11 +959,18 @@ def op_reverse(args: argparse.Namespace) -> int:
     info = probe(ffprobe, str(src)) or {}
     duration = float(info.get("format", {}).get("duration", 0))
 
-    cmd = [ffmpeg, "-y", "-i", str(src),
-           "-vf", "reverse",
-           "-af", "areverse" if args.reverse_audio else "anull",
-           "-c:v", "libx264", "-crf", "20", "-preset", "medium",
-           "-c:a", "aac", "-b:a", "192k", str(out_path)]
+    streams = info.get("streams", [])
+    has_video = any(s.get("codec_type") == "video" for s in streams)
+    has_audio = any(s.get("codec_type") == "audio" for s in streams)
+    cmd = [ffmpeg, "-y", "-i", str(src)]
+    if has_video:
+        cmd += ["-vf", "reverse", "-c:v", "libx264", "-crf", "20", "-preset", "medium"]
+    if has_audio:
+        cmd += ["-af", "areverse" if args.reverse_audio else "anull",
+                "-c:a", "aac", "-b:a", "192k"]
+    elif not has_video:
+        return fail("no_streams", "Input has no video or audio streams.")
+    cmd.append(str(out_path))
     emit("progress", percent=0, stage="reverse", eta_seconds=None)
     rc = run_ffmpeg(cmd, duration, "reverse")
     if rc != 0: return fail("ffmpeg_failed", f"FFmpeg exited {rc}")

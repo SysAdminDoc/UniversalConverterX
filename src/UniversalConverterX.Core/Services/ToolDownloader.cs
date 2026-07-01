@@ -35,8 +35,10 @@ public class ToolDownloader : IToolDownloader
         _httpClient = httpClient;
         _logger = logger;
         _toolDownloadInfo = InitializeToolDownloadInfo();
-        
-        // Ensure tools directory exists
+
+        if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UniversalConverterX/1.0");
+
         var binDir = Path.Combine(_options.ToolsBasePath, "bin");
         Directory.CreateDirectory(binDir);
     }
@@ -752,9 +754,6 @@ public class ToolDownloader : IToolDownloader
     private async Task<GitHubRelease?> GetGitHubReleaseAsync(string repo, CancellationToken cancellationToken)
     {
         var apiUrl = $"https://api.github.com/repos/{repo}/releases/latest";
-
-        if (!_httpClient.DefaultRequestHeaders.UserAgent.Any())
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("UniversalConverterX/1.0");
 
         return await _httpClient.GetFromJsonAsync<GitHubRelease>(apiUrl, cancellationToken)
             .ConfigureAwait(false);
