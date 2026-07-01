@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.21.9 · 188 sidecar engines · 280+ presets · 45+ UI pages
-**Last updated:** 2026-06-30
+**Status:** v2.22.0 · 190 sidecar engines · 290+ presets · 45+ UI pages
+**Last updated:** 2026-07-01
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
 Shipped work is recorded in [`CHANGELOG.md`](CHANGELOG.md).
@@ -74,54 +74,6 @@ Impact: 4 · Effort: 3 · Type: leapfrog
 Sidecar layer shipped (FDK-AAC cutoff/afterburner/profile, libvorbis managed mode). **Remaining:** "Advanced audio…" expansion panel in `AudioConverterPage` when the broader page lands.
 
 Impact: 3 · Effort: 2 · Type: parity
-
----
-
-### 62. Lock Preset Dimensions Across Switches
-
-Add a per-field lock toggle (lock icon) beside crop/resolution/aspect controls that pins values across preset switches. `LockedFields` bitmask on the UI ViewModel; preset-apply skips locked fields. No preset XML change.
-
-Impact: 3 · Effort: 2 · Type: UX
-
----
-
-### 63. VOBSUB + OCR Subtitle Extraction (Standalone Tool)
-
-Wire a toolbox entry for VOBSUB/PGS image-subtitle → SRT conversion via CCExtractor 0.96.3. Extend `ccextract` sidecar with `--input-format vobsub`, OCR to SRT/VTT, and `--ocr-lang` for Tesseract.
-
-Impact: 2 · Effort: 2 · Type: parity
-
----
-
-### 68. Per-Job Estimated Output File Size — remaining: queue ListView column
-
-Core `OutputSizeEstimator` shipped with lossless/CBR/VBR estimators + 14 tests. **Remaining:** wire into queue ListView "Est. Size" column.
-
-Impact: 3 · Effort: 1 · Type: UX
-
----
-
-### 69. SVT-AV1-HDR Tuning Presets
-
-Add preset family `SVT-AV1-HDR` alongside existing `SVT-AV1`. Bundle community-build `svtav1.exe` in `tools/svtav1-hdr/`. Expose tuning modes: VQ (detail), Film Grain, IQ (still), Custom. Custom exposes cdef-scaling, noise, noise-chroma sliders.
-
-Impact: 3 · Effort: 2 · Type: leapfrog
-
----
-
-### 70. SSIMULACRA2 / Butteraugli Quality Metrics
-
-Extend `VmafAnalysisPage` with a metric selector: VMAF, SSIMULACRA2, Butteraugli, or all three. Call the Vship CLI for GPU-accelerated score computation. Display results alongside VMAF.
-
-Impact: 3 · Effort: 2 · Type: leapfrog
-
----
-
-### 81. Structured Logging Framework (Sidecar-side)
-
-Integrate Loguru (Python) and spdlog (C++) for all sidecar logging. NDJSON to `%LocalAppData%/UniversalConverterX/logs/` with 7-day rotation. Gate behind `VerboseLogging` toggle. Note: C# app-side crash bundle already shipped (Item 51); this extends to sidecar processes.
-
-Impact: 3 · Effort: 2 · Type: observability/dx
 
 ---
 
@@ -215,9 +167,9 @@ Impact: 3 · Effort: 4 · Type: leapfrog
 
 ---
 
-### 66. FFmpeg 8.1 D3D12 Hardware Encode / Filter Pipeline
+### 66. FFmpeg 8.1 D3D12 Filter Pipeline — remaining: FFmpeg binary upgrade + filter chain
 
-Upgrade bundled FFmpeg to ≥8.1. Add D3D12 encoder group (Intel Arc, AMD, Nvidia without CUDA). `scale_d3d12` + `deinterlace_d3d12` for GPU zero-copy filter chains.
+D3D12 encoder presets shipped (h264/av1_d3d12va via videocrush). **Remaining:** upgrade bundled FFmpeg binary to ≥8.1 and wire `scale_d3d12` + `deinterlace_d3d12` GPU zero-copy filter chains.
 
 Impact: 3 · Effort: 2 · Type: platform + leapfrog
 
@@ -228,30 +180,6 @@ Impact: 3 · Effort: 2 · Type: platform + leapfrog
 Auto-generate 480p/5Mbps proxy files for faster preview in VmafAnalysisPage and CompressorPage.
 
 Impact: 2 · Effort: 3 · Type: UX + performance
-
----
-
-### 77. AV1 Film Grain Synthesis (av1-grain Crate)
-
-Extend `generate-av1-config` sidecar with per-ISO photon noise table generation via the Rust `av1-grain` crate. Synergy with Item 69 (SVT-AV1-HDR).
-
-Impact: 2 · Effort: 2 · Type: leapfrog
-
----
-
-### 83. Validation Layer + Pydantic Schemas
-
-Define Pydantic models for each sidecar contract. Validate input JSON at sidecar entry point. Surface validation errors as structured warnings.
-
-Impact: 2 · Effort: 2 · Type: reliability + dx
-
----
-
-### 84. Fast JSON Serialization (Orjson)
-
-Replace `json.dumps()` in Python sidecars with `orjson.dumps()` for ~3–5x speedup on preset/history serialization.
-
-Impact: 1 · Effort: 1 · Type: performance
 
 ---
 
@@ -328,17 +256,8 @@ Impact: 3 · Effort: 2 · Type: performance
   Touches: `VideoEnhancerPage`, `SidecarHealthService`, benchmark smoke tests.
   Complexity: M
 
-- [ ] P2 — Align public planning links with current doc hygiene
-  Touches: `README.md`, legacy root planning docs.
-  Complexity: S
 
-- [ ] P1 — Move sidecar health and capability metadata into manifests
-  Touches: `tools/*/ucx.sidecar.json`, `SidecarHealthService.cs`, `check_contract.py`.
-  Complexity: L
 
-- [ ] P2 — Add shell-extension preset invocation smoke tests
-  Touches: `src/UniversalConverterX.ShellExtension`, test project.
-  Complexity: M
 
 - [ ] P2 — Surface preset and queue compatibility warnings during updates
   Touches: `UpdateCheckService.cs`, settings/update UI, release manifest.

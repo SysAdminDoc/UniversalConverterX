@@ -1234,9 +1234,16 @@ _BURN_POSITION_TO_AN = {
 def _ffmpeg_subfile_arg(path: Path) -> str:
     """Escape a Windows path so FFmpeg's `subtitles=` filter parses it."""
     s = str(path).replace("\\", "/")
-    # Drive colon needs to be escaped twice for the inner filter parser.
-    s = s.replace(":", "\\:").replace("'", "\\'")
+    s = s.replace("'", "\\'")
+    s = s.replace(":", "\\:")
+    s = s.replace("[", "\\[").replace("]", "\\]")
+    s = s.replace(";", "\\;")
     return s
+
+
+import re as _re
+_SAFE_FONT_RE = _re.compile(r"^[A-Za-z0-9 \-_.']+$")
+_SAFE_HEX_RE = _re.compile(r"^[0-9A-Fa-f]{6,8}$")
 
 
 def op_subtitle_burn(args: argparse.Namespace) -> int:
@@ -1263,10 +1270,16 @@ def op_subtitle_burn(args: argparse.Namespace) -> int:
         return fail("invalid_args", f"Unknown position: {pos}. "
                                      f"Use one of {sorted(_BURN_POSITION_TO_AN)}.")
 
-    # libass force_style accepts comma-separated key=value pairs. We build the
-    # ones the user actually customised to keep style overrides minimal.
+    font = args.font
+    if not _SAFE_FONT_RE.match(font):
+        font = _re.sub(r"[^A-Za-z0-9 \-_.]", "", font) or "Arial"
+    for color_name in ("color", "outline_color", "shadow_color"):
+        val = getattr(args, color_name, "")
+        if val and not _SAFE_HEX_RE.match(val):
+            return fail("invalid_args", f"--{color_name.replace('_', '-')} must be a hex color (e.g. FFFFFF)")
+
     style_pairs = [
-        f"FontName={args.font}",
+        f"FontName={font}",
         f"FontSize={args.size}",
         f"PrimaryColour=&H{args.color}",
         f"OutlineColour=&H{args.outline_color}",
@@ -1400,7 +1413,7 @@ def op_stabilize(args: argparse.Namespace) -> int:
     shakiness = max(1, min(10, args.shakiness))
     smoothing = max(1, min(60, args.smoothing))
 
-    transforms = src.with_suffix(".trf")
+    transforms = out_path.parent / f"{src.stem}_{os.getpid()}.trf"
     try:
         # Pass 1: detect.
         detect_filter = f"vidstabdetect=shakiness={shakiness}:result={_ffmpeg_subfile_arg(transforms)}"

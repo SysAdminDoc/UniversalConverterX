@@ -626,7 +626,6 @@ public sealed partial class ConverterPage : Page
                             {
                                 ConversionProgress.IsIndeterminate = true;
                                 queued.File.StatusText = p.StatusMessage ?? p.Stage.ToString();
-                                PersistQueue();
                                 return;
                             }
 
@@ -638,7 +637,6 @@ public sealed partial class ConverterPage : Page
 
                             if (p.EstimatedTimeRemaining.HasValue)
                                 ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}";
-                            PersistQueue();
                         });
                     });
 
@@ -717,8 +715,11 @@ public sealed partial class ConverterPage : Page
             semaphore?.Dispose();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
-            ConvertButton.IsEnabled = true;
-            PersistQueue();
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ConvertButton.IsEnabled = true;
+                PersistQueue();
+            });
         }
     }
 
@@ -859,7 +860,7 @@ public sealed partial class ConverterPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", folder)
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\""{folder}\"""))
             {
                 UseShellExecute = true,
             });

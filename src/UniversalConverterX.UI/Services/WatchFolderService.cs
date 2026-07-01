@@ -70,8 +70,8 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private readonly IHistoryService _history;
     private readonly DispatcherQueue _ui;
     private readonly string _configPath;
-    private readonly Dictionary<string, FileSystemWatcher> _watchers = [];
-    private readonly Dictionary<string, CancellationTokenSource> _profileCts = [];
+    private readonly ConcurrentDictionary<string, FileSystemWatcher> _watchers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _profileCts = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, byte> _processing = new(
         OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     private readonly object _saveLock = new();
@@ -292,15 +292,13 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
     private void StopWatcher(string id)
     {
-        if (_watchers.TryGetValue(id, out var fsw))
+        if (_watchers.TryRemove(id, out var fsw))
         {
             try { fsw.EnableRaisingEvents = false; fsw.Dispose(); } catch { }
-            _watchers.Remove(id);
         }
-        if (_profileCts.TryGetValue(id, out var cts))
+        if (_profileCts.TryRemove(id, out var cts))
         {
             try { cts.Cancel(); cts.Dispose(); } catch { }
-            _profileCts.Remove(id);
         }
     }
 

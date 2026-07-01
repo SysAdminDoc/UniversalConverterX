@@ -457,7 +457,7 @@ public sealed partial class VoiceChangerPage : Page
         if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder)) return;
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{folder}\"") { UseShellExecute = true });
         }
         catch
         {

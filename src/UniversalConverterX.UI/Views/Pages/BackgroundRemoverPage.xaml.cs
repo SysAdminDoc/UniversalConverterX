@@ -546,7 +546,7 @@ public sealed partial class BackgroundRemoverPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", folder)
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\""{folder}\"""))
             {
                 UseShellExecute = true,
             });

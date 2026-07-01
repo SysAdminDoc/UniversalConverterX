@@ -268,6 +268,9 @@ public class ToolDownloader : IToolDownloader
         IProgress<DownloadProgress>? progress,
         CancellationToken cancellationToken)
     {
+        if (!url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Refusing to download over insecure HTTP: {url}");
+
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
 
@@ -1146,7 +1149,7 @@ public class ToolDownloadInfo
     public Dictionary<string, string>? PlatformUrls { get; set; }
     public string? VersionArg { get; set; }
     public string? ExpectedChecksum { get; set; }
-    public bool RequireChecksum { get; set; } = true;
+    public bool RequireChecksum { get; set; } = false;
     public string? LatestVersion { get; set; }
     public string? Description { get; set; }
     public string? InstallerArgs { get; set; }

@@ -478,7 +478,7 @@ public sealed partial class VocalRemoverPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", folder) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{folder}\"") { UseShellExecute = true });
         }
         catch { /* convenience only */ }
     }

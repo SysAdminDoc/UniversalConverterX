@@ -40,7 +40,7 @@ public static class DpapiProvider
         {
 #if WINDOWS
             return System.Security.Cryptography.ProtectedData.Protect(
-                plaintext, null, System.Security.Cryptography.DataProtectionScope.LocalMachine);
+                plaintext, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
 #else
             return plaintext;
 #endif
@@ -68,7 +68,7 @@ public static class DpapiProvider
         {
 #if WINDOWS
             return System.Security.Cryptography.ProtectedData.Unprotect(
-                ciphertext, null, System.Security.Cryptography.DataProtectionScope.LocalMachine);
+                ciphertext, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
 #else
             return ciphertext;
 #endif

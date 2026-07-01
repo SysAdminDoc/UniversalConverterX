@@ -475,7 +475,7 @@ def compress(args: argparse.Namespace) -> int:
     emit("log", level="info", message=f"Target: {target_mb} MB → video {video_kbps} kbps + audio {audio_kbps} kbps")
 
     null_out = "NUL" if sys.platform == "win32" else "/dev/null"
-    pass_log = str(out_path.parent / "ucx_ffmpeg2pass")
+    pass_log = str(out_path.parent / f"ucx_ffmpeg2pass_{os.getpid()}_{out_path.stem}")
 
     # AV1: SVT-AV1 doesn't support 2-pass cleanly, fall back to single-pass with target bitrate
     if is_av1:
