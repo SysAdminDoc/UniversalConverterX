@@ -125,11 +125,9 @@ ucx info document.pdf
 
 ## Project planning
 
-- [ROADMAP.md](ROADMAP.md) — active roadmap.
-- [COMPLETED.md](COMPLETED.md) — shipped feature summary.
-- [RESEARCH_REPORT.md](RESEARCH_REPORT.md) — current research synthesis.
-- [docs/research/](docs/research/) — audit and state-of-repo evidence.
-- [docs/archive/](docs/archive/) — archived phase roadmap and research artifacts.
+- [ROADMAP.md](ROADMAP.md) — active roadmap (actionable open work only).
+- [CHANGELOG.md](CHANGELOG.md) — shipped work per release.
+- [docs/research/](docs/research/) — audit and research evidence.
 
 ## Project Structure
 
