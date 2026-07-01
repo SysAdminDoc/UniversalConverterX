@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""WinUI 3 AutomationId contract check.
+"""WinUI 3 AutomationId + accessible-name contract check.
 
 Scans every src/UniversalConverterX.UI/Views/**/*.xaml file and enforces:
 
-  Every interactive control (Button, ComboBox, Slider, ToggleSwitch,
-  CheckBox, RadioButton, ToggleButton, MenuFlyoutItem, NumberBox, TextBox,
-  PasswordBox, AutoSuggestBox) carries an `AutomationProperties.AutomationId`
-  attribute so UI automation tests (Playwright / Appium / WinAppDriver) can
-  target it deterministically.
+  1. Every interactive control (Button, ComboBox, Slider, ToggleSwitch,
+     CheckBox, RadioButton, ToggleButton, MenuFlyoutItem, NumberBox, TextBox,
+     PasswordBox, AutoSuggestBox) carries an `AutomationProperties.AutomationId`
+     attribute so UI automation tests (Playwright / Appium / WinAppDriver) can
+     target it deterministically.
+
+  2. Every icon-only button (FontIcon/SymbolIcon content with no visible text)
+     carries either `AutomationProperties.Name` or `ToolTipService.ToolTip` so
+     screen readers can announce the control's purpose.
 
 ROADMAP Item 10 (a)+(c): the ID gate is the regression-prevention property
 the audit asked for; without it, every new <Button> ships without an ID and
@@ -76,7 +80,11 @@ TAG_PATTERN = re.compile(
 )
 
 AUTOMATION_ID_PATTERN = re.compile(r"AutomationProperties\.AutomationId\s*=", re.MULTILINE)
+AUTOMATION_NAME_PATTERN = re.compile(r"AutomationProperties\.Name\s*=", re.MULTILINE)
 X_NAME_PATTERN = re.compile(r'\bx:Name\s*=\s*"([^"]+)"')
+ICON_CONTENT_PATTERN = re.compile(r"(?:FontIcon|SymbolIcon|BitmapIcon|PathIcon|ImageIcon)", re.MULTILINE)
+TEXT_CONTENT_PATTERN = re.compile(r'\bContent\s*=\s*"([^"]*)"')
+TOOLTIP_PATTERN = re.compile(r"ToolTipService\.ToolTip\s*=", re.MULTILINE)
 
 # Lines starting with comment markers we should ignore when locating tags.
 # XAML comments use <!-- ... -->; we strip those entirely before scanning.
@@ -144,6 +152,55 @@ def find_violations(path: Path) -> list[tuple[str, str]]:
     return out
 
 
+BUTTON_TYPES = {
+    "Button", "ToggleButton", "AppBarButton", "AppBarToggleButton",
+    "HyperlinkButton", "RepeatButton", "DropDownButton", "SplitButton",
+}
+
+
+def find_semantic_violations(path: Path) -> list[tuple[str, str]]:
+    """Return violations for icon-only buttons without an accessible name.
+
+    A button whose Content is purely iconic (FontIcon/SymbolIcon/etc. with no
+    visible text) must have AutomationProperties.Name or
+    ToolTipService.ToolTip so screen readers can announce it.
+    """
+    raw = path.read_text(encoding="utf-8")
+    src = _strip_comments(raw)
+    out: list[tuple[str, str]] = []
+
+    for match in TAG_PATTERN.finditer(src):
+        el = match.group("el")
+        if el not in BUTTON_TYPES:
+            continue
+        body = match.group("body") or ""
+        if _ancestor_template_scope(src, match.start()):
+            continue
+        has_text_content = TEXT_CONTENT_PATTERN.search(body)
+        if has_text_content and has_text_content.group(1).strip():
+            continue
+        is_self_closed = match.group(0).endswith("/>")
+        if is_self_closed and not ICON_CONTENT_PATTERN.search(body):
+            continue
+        if not is_self_closed:
+            tag_end = src.find(f"</{el}>", match.end())
+            if tag_end == -1:
+                continue
+            inner = src[match.end():tag_end]
+            has_icon = bool(ICON_CONTENT_PATTERN.search(inner))
+            has_text_child = bool(re.search(r"<TextBlock\b", inner))
+            if not has_icon or has_text_child:
+                continue
+        if AUTOMATION_NAME_PATTERN.search(body):
+            continue
+        if TOOLTIP_PATTERN.search(body):
+            continue
+        name_match = X_NAME_PATTERN.search(body)
+        label = name_match.group(1) if name_match else f"line-{_line_no_for(src, match.start())}"
+        out.append((f"{el}[icon-only]", label))
+    return out
+
+
 def collect_all_violations() -> list[str]:
     """Return baseline-format keys for every violation in the tree."""
     if not XAML_ROOT.is_dir():
@@ -155,6 +212,8 @@ def collect_all_violations() -> list[str]:
             continue
         rel = xaml.relative_to(REPO).as_posix()
         for el, name in find_violations(xaml):
+            keys.append(f"{rel}:{el}:{name}")
+        for el, name in find_semantic_violations(xaml):
             keys.append(f"{rel}:{el}:{name}")
     return keys
 
