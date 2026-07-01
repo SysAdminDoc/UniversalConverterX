@@ -24,7 +24,7 @@ _IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff", ".tif"}
 
 def emit(event: str, **fields) -> None:
     payload = {"event": event, **fields}
-    sys.stdout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps(payload) + "\n")
     sys.stdout.flush()
 
 

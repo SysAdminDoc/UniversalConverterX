@@ -30,8 +30,7 @@ from pathlib import Path
 
 def emit(event: str, **fields) -> None:
     """Write a single NDJSON line to stdout and flush."""
-    payload = {"event": event, **fields}
-    sys.stdout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
     sys.stdout.flush()
 
 
@@ -661,11 +660,24 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        return compress(args)
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+        from ucx_log import sidecar_logger
+        _log = sidecar_logger("videocrush")
+        _log.info("compress start", input=getattr(args, "input", None),
+                  preset=getattr(args, "preset", None))
+    except Exception:
+        pass
+    try:
+        rc = compress(args)
+        try: _log.info("compress done", rc=rc)  # noqa: E702
+        except Exception: pass
+        return rc
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")
         return 130
     except Exception as exc:  # pylint: disable=broad-except
+        try: _log.error("unhandled", exception=f"{type(exc).__name__}: {exc}")  # noqa: E702
+        except Exception: pass
         emit("error", code="unhandled", message=f"{type(exc).__name__}: {exc}")
         return 2
 

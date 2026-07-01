@@ -32,7 +32,7 @@ sys.path.insert(0, str(_here))
 def emit(event: str, **fields) -> None:
     """Write a single NDJSON line to stdout and flush immediately."""
     payload = {"event": event, **fields}
-    sys.stdout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    sys.stdout.write(_dumps(payload) + "\n")
     sys.stdout.flush()
 
 
