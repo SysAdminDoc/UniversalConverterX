@@ -534,7 +534,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
                             <TextBlock x:Name="VersionText" 
-                                       Text="Version 2.22.0"
+                                       Text="Version 2.22.1"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 

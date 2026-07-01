@@ -262,3 +262,27 @@ Impact: 3 · Effort: 2 · Type: performance
 - [ ] P2 — Surface preset and queue compatibility warnings during updates
   Touches: `UpdateCheckService.cs`, settings/update UI, release manifest.
   Complexity: M
+
+- [ ] P1 — Add DPAPI entropy parameter and return success/failure indicator
+  Why: DpapiProvider silently falls back to plaintext on failure, and uses no entropy, so any app can decrypt the blobs.
+  Touches: `DpapiProvider.cs`, `streamkeep/dpapi.py`, cookie and credential consumers.
+
+- [ ] P2 — Fix UpdateCheckService version comparison false positives
+  Why: String equality comparison marks update available when installed version is newer (nightly builds) or when tag formats differ (autobuild tags vs version files).
+  Touches: `UpdateCheckService.cs`.
+
+- [ ] P2 — Fix ConverterPage cancelled state never shown to user
+  Why: The `cancelled` variable is set inside a catch block that doesn't fire because Task.WhenAll swallows per-task cancellation exceptions.
+  Touches: `ConverterPage.xaml.cs` conversion loop.
+
+- [ ] P2 — Fix streamkeep output path fallback picking directories or wrong files
+  Why: The iterdir() fallback includes subdirectories and can pick pre-existing files when the download directory isn't empty.
+  Touches: `tools/streamkeep/sidecar.py`.
+
+- [ ] P2 — Fix whisper-stt auto-installing packages with --break-system-packages
+  Why: Silent package installation with escalating permission flags can corrupt system Python and is a supply chain risk.
+  Touches: `tools/whisper-stt/sidecar.py`, `tools/heicshift/sidecar.py`.
+
+- [ ] P3 — Refactor shared sidecar utilities (find_ffmpeg, probe, run_ffmpeg, emit) into a common module
+  Why: Duplicate implementations across 190 sidecars with subtle differences that will continue to drift.
+  Touches: `tools/_lib/`, all sidecar.py files.

@@ -2,6 +2,26 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [2.22.1] - 2026-07-01
+
+### Security
+
+- DPAPI scope narrowed from `LocalMachine` to `CurrentUser` so other accounts on the same machine cannot decrypt stored credentials.
+- ToolDownloader: enforced HTTPS-only downloads; relaxed RequireChecksum default (was true but no checksums configured, blocking all downloads).
+- Clipforge subtitle burn-in: sanitize font names and validate hex color args to prevent FFmpeg filter-graph injection. Also escape `[`, `]`, `;` in path arguments.
+- HttpClient UserAgent set once in constructor to prevent thread-unsafe mutation of DefaultRequestHeaders.
+
+### Fixed
+
+- **P1**: ConverterPage finally block now dispatches UI property access to the dispatcher thread, preventing COM exception crash when conversion completes on a thread-pool thread.
+- **P2**: OpenContainingFolder now quotes folder paths in explorer.exe /select invocation across 21 pages so paths with spaces open correctly.
+- **P2**: PersistQueue removed from per-progress-tick callback — was causing disk thrashing with dozens of JSON writes per second during conversion.
+- **P2**: WatchFolderService _watchers and _profileCts switched from Dictionary to ConcurrentDictionary to prevent data race between FSW callback and UI threads.
+- **P2**: PostConversionHandler refuses to delete/move source when output file is zero bytes (prevents data loss on corrupt conversions).
+- **P2**: Clipforge op_speed and op_reverse now probe input streams and build filters conditionally for video-only, audio-only, or A+V inputs instead of crashing.
+- **P2**: Videocrush two-pass log prefix now includes PID + stem to prevent concurrent job corruption.
+- **P2**: Stabilize .trf file now written to output directory instead of next to source (which fails on read-only input paths).
+
 ## [2.22.0] - 2026-07-01
 
 ### Security
