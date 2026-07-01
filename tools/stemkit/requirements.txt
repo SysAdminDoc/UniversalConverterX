@@ -1,4 +1,4 @@
 audio-separator>=0.21
-onnxruntime>=1.17
+onnxruntime>=1.25.1
 torch>=2.2
 numpy>=1.24

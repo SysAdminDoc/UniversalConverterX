@@ -434,6 +434,58 @@ def check_known_events(path: Path, tree: ast.AST) -> list[Violation]:
     return violations
 
 
+SECURITY_FLOORS: dict[str, tuple[str, str]] = {
+    "Pillow": ("12.2.0", "GHSA-pwv6-vv43-88gr image parsing CVEs"),
+    "pillow": ("12.2.0", "GHSA-pwv6-vv43-88gr image parsing CVEs"),
+    "onnxruntime": ("1.25.1", "15+ CVEs fixed in ORT 1.25.0/1.25.1"),
+    "onnxruntime-gpu": ("1.25.1", "15+ CVEs fixed in ORT 1.25.0/1.25.1"),
+    "opencv-python": ("4.10.0", "pre-4.10 heap/buffer overflow fixes"),
+    "opencv-python-headless": ("4.10.0", "pre-4.10 heap/buffer overflow fixes"),
+    "yt-dlp": ("2026.02.21", "CVE-2026-26331 command injection"),
+    "pillow-jxl-plugin": ("1.3.4", "libjxl CVE-2025-12474 + CVE-2026-1837"),
+}
+
+
+def _parse_version(v: str, pad: int = 4) -> tuple[int, ...]:
+    parts: list[int] = []
+    for seg in v.split("."):
+        digits = ""
+        for c in seg:
+            if c.isdigit():
+                digits += c
+            else:
+                break
+        parts.append(int(digits) if digits else 0)
+    while len(parts) < pad:
+        parts.append(0)
+    return tuple(parts)
+
+
+def check_security_floors(sidecar_dir: Path) -> list[Violation]:
+    req = sidecar_dir / "requirements.txt"
+    if not req.is_file():
+        return []
+    violations: list[Violation] = []
+    for lineno, raw in enumerate(req.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#") or line.startswith("-"):
+            continue
+        for pkg, (floor, reason) in SECURITY_FLOORS.items():
+            if not line.startswith(pkg):
+                continue
+            rest = line[len(pkg):]
+            if rest and rest[0] not in (">", "=", "<", "!", " ", ";", "["):
+                continue
+            if ">=" in rest:
+                pinned = rest.split(">=")[1].split(",")[0].split(";")[0].strip()
+                if _parse_version(pinned) < _parse_version(floor):
+                    violations.append(Violation(
+                        req, lineno, "security-floor",
+                        f"{pkg}>={pinned} is below security floor >={floor} ({reason})",
+                    ))
+    return violations
+
+
 def check_one(path: Path) -> list[Violation]:
     src = path.read_text(encoding="utf-8")
     try:
@@ -457,6 +509,7 @@ def main(argv: list[str] | None = None) -> int:
     all_violations: list[Violation] = []
     for path in sidecars:
         all_violations.extend(check_one(path))
+        all_violations.extend(check_security_floors(path.parent))
 
     if not all_violations:
         print(f"OK — {len(sidecars)} sidecar(s) conform to the NDJSON contract")

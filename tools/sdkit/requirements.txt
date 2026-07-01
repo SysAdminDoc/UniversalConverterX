@@ -5,4 +5,4 @@ safetensors>=0.4
 sentencepiece>=0.2
 protobuf>=4.25
 torch>=2.4
-Pillow>=10.3
+Pillow>=12.2.0

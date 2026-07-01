@@ -1,4 +1,4 @@
 rarfile>=4.2
 img2pdf>=0.5
 EbookLib>=0.18
-Pillow>=10.3
+Pillow>=12.2.0
