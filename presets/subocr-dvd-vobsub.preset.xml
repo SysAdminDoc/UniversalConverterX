@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>DVD VobSub (.idx + .sub) to SRT</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>idx</Extension>
+        <Extension>sub</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ocr</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subocr</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>vobsub-to-srt</Arg>
+        <Arg>--lang</Arg>
+        <Arg>eng</Arg>
+    </Args>
+</Preset>

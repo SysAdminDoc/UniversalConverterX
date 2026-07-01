@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>VOBSUB / PGS image subtitles to SRT (OCR)</Name>
+    <Folder>Video/Subtitles</Folder>
+    <InputTypes>
+        <Extension>mkv</Extension>
+        <Extension>mp4</Extension>
+        <Extension>sub</Extension>
+        <Extension>sup</Extension>
+        <Extension>idx</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ocr</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>subocr</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>ocr</Arg>
+        <Arg>--lang</Arg>
+        <Arg>eng</Arg>
+    </Args>
+</Preset>
