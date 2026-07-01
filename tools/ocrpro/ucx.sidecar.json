@@ -1,0 +1,5 @@
+{
+  "engine": "ocrpro",
+  "models": true,
+  "gpu": "cuda-optional"
+}

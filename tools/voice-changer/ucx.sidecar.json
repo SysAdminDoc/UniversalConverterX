@@ -1,0 +1,11 @@
+{
+  "engine": "voice-changer",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "engine": "anime-upscale",
+  "models": true,
+  "gpu": "vulkan"
+}

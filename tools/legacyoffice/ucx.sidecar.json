@@ -1,0 +1,11 @@
+{
+  "engine": "legacyoffice",
+  "tools": [
+    {
+      "id": "libreoffice",
+      "executable": "soffice",
+      "display": "LibreOffice",
+      "managed": true
+    }
+  ]
+}

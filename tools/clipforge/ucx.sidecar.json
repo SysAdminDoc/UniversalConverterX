@@ -1,0 +1,6 @@
+{
+  "engine": "clipforge",
+  "tools": [
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+  ]
+}

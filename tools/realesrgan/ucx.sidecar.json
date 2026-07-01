@@ -1,0 +1,5 @@
+{
+  "engine": "realesrgan",
+  "models": true,
+  "gpu": "vulkan"
+}

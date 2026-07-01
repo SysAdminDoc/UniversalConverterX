@@ -1,0 +1,5 @@
+{
+  "engine": "facerestore",
+  "models": true,
+  "gpu": "cuda-optional"
+}

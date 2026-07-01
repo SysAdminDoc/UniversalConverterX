@@ -1,0 +1,11 @@
+{
+  "engine": "slideshow",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
+  ]
+}

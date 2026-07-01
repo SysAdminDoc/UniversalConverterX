@@ -1,0 +1,11 @@
+{
+  "engine": "vectorkit",
+  "tools": [
+    {
+      "id": "inkscape",
+      "executable": "inkscape",
+      "display": "Inkscape",
+      "managed": true
+    }
+  ]
+}

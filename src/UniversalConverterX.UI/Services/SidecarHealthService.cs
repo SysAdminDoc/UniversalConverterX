@@ -88,6 +88,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
     private readonly ISidecarRunner _runner;
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
+    private readonly Dictionary<string, SidecarManifest> _manifestCache = new(StringComparer.OrdinalIgnoreCase);
 
     public SidecarHealthService(
         ISidecarRunner runner,
@@ -98,6 +99,79 @@ public sealed class SidecarHealthService : ISidecarHealthService
         _toolManager = toolManager;
         _toolDownloader = toolDownloader;
     }
+
+    private SidecarManifest? LoadManifest(string engine)
+    {
+        if (_manifestCache.TryGetValue(engine, out var cached))
+            return cached;
+
+        var sidecarPath = _runner.Locate(engine);
+        if (sidecarPath is null) return null;
+
+        var manifestPath = Path.Combine(Path.GetDirectoryName(sidecarPath)!, "ucx.sidecar.json");
+        if (!File.Exists(manifestPath))
+        {
+            var toolsDir = Path.GetDirectoryName(Path.GetDirectoryName(sidecarPath));
+            if (toolsDir is not null)
+                manifestPath = Path.Combine(toolsDir, engine, "ucx.sidecar.json");
+        }
+
+        if (!File.Exists(manifestPath)) return null;
+
+        try
+        {
+            var json = File.ReadAllText(manifestPath);
+            var manifest = System.Text.Json.JsonSerializer.Deserialize<SidecarManifest>(json,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (manifest is not null)
+                _manifestCache[engine] = manifest;
+            return manifest;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private bool HasModels(string engine)
+    {
+        var manifest = LoadManifest(engine);
+        if (manifest?.Models == true) return true;
+        return ModelEngines.Contains(engine);
+    }
+
+    private string? GpuKind(string engine)
+    {
+        var manifest = LoadManifest(engine);
+        if (manifest?.Gpu is not null) return manifest.Gpu;
+        if (VulkanEngines.Contains(engine)) return "vulkan";
+        if (CudaOptionalEngines.Contains(engine)) return "cuda-optional";
+        return null;
+    }
+
+    private IEnumerable<ToolRequirement> ManifestTools(string engine)
+    {
+        var manifest = LoadManifest(engine);
+        if (manifest?.Tools is null or { Count: 0 }) yield break;
+        foreach (var t in manifest.Tools)
+        {
+            yield return t.Managed
+                ? ToolRequirement.Managed(t.Id, t.Executable, t.Display)
+                : ToolRequirement.External(t.Id, t.Executable, t.Display);
+        }
+    }
+
+    private sealed record SidecarManifest(
+        string? Engine = null,
+        List<ManifestTool>? Tools = null,
+        bool? Models = null,
+        string? Gpu = null);
+
+    private sealed record ManifestTool(
+        string Id = "",
+        string Executable = "",
+        string Display = "",
+        bool Managed = false);
 
     public SidecarHealthReport Evaluate(UiPreset preset)
     {
@@ -110,13 +184,13 @@ public sealed class SidecarHealthService : ISidecarHealthService
         foreach (var tool in ToolRequirementsFor(preset))
             rows.Add(EvaluateTool(preset.Engine, tool));
 
-        if (ModelEngines.Contains(preset.Engine))
+        if (HasModels(preset.Engine))
             rows.Add(EvaluateModelCache(preset.Engine, sidecarPath));
 
-        if (VulkanEngines.Contains(preset.Engine))
+        var gpu = GpuKind(preset.Engine);
+        if (gpu == "vulkan")
             rows.Add(EvaluateVulkan(preset.Engine));
-
-        if (CudaOptionalEngines.Contains(preset.Engine))
+        else if (gpu == "cuda-optional")
             rows.Add(new SidecarHealthRequirement(
                 preset.Engine,
                 "gpu",
@@ -158,9 +232,15 @@ public sealed class SidecarHealthService : ISidecarHealthService
             .ToList();
     }
 
-    private static IEnumerable<ToolRequirement> ToolRequirementsFor(UiPreset preset)
+    private IEnumerable<ToolRequirement> ToolRequirementsFor(UiPreset preset)
     {
-        if (EngineToolRequirements.TryGetValue(preset.Engine, out var tools))
+        var fromManifest = ManifestTools(preset.Engine).ToList();
+        if (fromManifest.Count > 0)
+        {
+            foreach (var tool in fromManifest)
+                yield return tool;
+        }
+        else if (EngineToolRequirements.TryGetValue(preset.Engine, out var tools))
         {
             foreach (var tool in tools)
                 yield return tool;

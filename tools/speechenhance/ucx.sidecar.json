@@ -1,0 +1,5 @@
+{
+  "engine": "speechenhance",
+  "models": true,
+  "gpu": "cuda-optional"
+}

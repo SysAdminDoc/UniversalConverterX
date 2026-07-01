@@ -1,0 +1,17 @@
+{
+  "engine": "streamkeep",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    },
+    {
+      "id": "yt-dlp",
+      "executable": "yt-dlp",
+      "display": "yt-dlp",
+      "managed": false
+    }
+  ]
+}

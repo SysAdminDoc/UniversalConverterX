@@ -1,0 +1,5 @@
+{
+  "engine": "gfpgan",
+  "models": true,
+  "gpu": "cuda-optional"
+}

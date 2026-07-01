@@ -1,0 +1,13 @@
+{
+  "engine": "video-face-enhance",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
+  ],
+  "models": true,
+  "gpu": "vulkan"
+}

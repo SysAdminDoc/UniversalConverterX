@@ -1,0 +1,11 @@
+{
+  "engine": "auto-edit",
+  "tools": [
+    {
+      "id": "auto-editor",
+      "executable": "auto-editor",
+      "display": "auto-editor",
+      "managed": false
+    }
+  ]
+}

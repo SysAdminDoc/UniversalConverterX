@@ -1,0 +1,5 @@
+{
+  "engine": "stemkit",
+  "models": true,
+  "gpu": "cuda-optional"
+}

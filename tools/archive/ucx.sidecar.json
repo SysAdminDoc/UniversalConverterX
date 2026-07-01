@@ -1,0 +1,11 @@
+{
+  "engine": "archive",
+  "tools": [
+    {
+      "id": "7z",
+      "executable": "7z",
+      "display": "7-Zip",
+      "managed": false
+    }
+  ]
+}

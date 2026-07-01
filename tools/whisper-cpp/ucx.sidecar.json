@@ -1,0 +1,12 @@
+{
+  "engine": "whisper-cpp",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
+  ],
+  "models": true
+}

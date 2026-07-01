@@ -1,0 +1,5 @@
+{
+  "engine": "demucs",
+  "models": true,
+  "gpu": "cuda-optional"
+}

@@ -1,0 +1,8 @@
+{
+  "engine": "whisper-stt",
+  "tools": [
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+  ],
+  "models": true,
+  "gpu": "cuda-optional"
+}

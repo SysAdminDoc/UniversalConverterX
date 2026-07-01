@@ -1,0 +1,5 @@
+{
+  "engine": "sdkit",
+  "models": true,
+  "gpu": "cuda-optional"
+}

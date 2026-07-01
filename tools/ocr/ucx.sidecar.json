@@ -1,0 +1,11 @@
+{
+  "engine": "ocr",
+  "tools": [
+    {
+      "id": "tesseract",
+      "executable": "tesseract",
+      "display": "Tesseract OCR",
+      "managed": false
+    }
+  ]
+}

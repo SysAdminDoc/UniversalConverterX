@@ -1,0 +1,11 @@
+{
+  "engine": "ebookmore",
+  "tools": [
+    {
+      "id": "calibre",
+      "executable": "ebook-convert",
+      "display": "Calibre",
+      "managed": true
+    }
+  ]
+}

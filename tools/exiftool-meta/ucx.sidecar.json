@@ -1,0 +1,11 @@
+{
+  "engine": "exiftool-meta",
+  "tools": [
+    {
+      "id": "exiftool",
+      "executable": "exiftool",
+      "display": "ExifTool",
+      "managed": false
+    }
+  ]
+}

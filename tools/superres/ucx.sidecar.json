@@ -1,0 +1,5 @@
+{
+  "engine": "superres",
+  "models": true,
+  "gpu": "cuda-optional"
+}

@@ -1,0 +1,11 @@
+{
+  "engine": "pandoc-cli",
+  "tools": [
+    {
+      "id": "pandoc",
+      "executable": "pandoc",
+      "display": "Pandoc",
+      "managed": true
+    }
+  ]
+}
