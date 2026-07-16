@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added APV camera-master support backed by the bundled FFmpeg 8.1.2 codec: Format Inspector recognizes RFC 9924 raw bitstreams, and presets convert APV to H.265 10-bit, ProRes 422 HQ, or compatible H.264. Raw streams without container duration now run with indeterminate progress instead of failing, and professional/lossless VideoCrush presets correctly bypass lossy CRF validation.
 - Subtitle Studio now runs a complete local Whisper-to-caption workflow with optional Helsinki OPUS-MT translation through ONNX Runtime, editable text and cue timing preview, SRT/VTT/ASS export, and post-preview video burn-in. The AI Lab and Home tiles now open the ready workflow.
 - Converter now exposes batch-safe FFmpeg command templates with required `{input}` and `{output}` placeholders. An off-by-default Advanced setting enables shell-free argument editing for direct conversions and exact per-invocation command review for FFmpeg calls made inside sidecars; edited vectors reject shell metacharacters before dispatch.
 - Audio Converter is now a complete batch workflow in Toolbox with MP3, AAC, FDK-AAC, Opus, Ogg Vorbis, FLAC, WAV, ALAC, WavPack, AC-3, E-AC-3, and WMA targets. Codec-aware VBR quality (0–9), fixed bitrate, sample-rate/channel overrides, Opus application/frame controls, FDK-AAC cutoff/afterburner/profile controls, and Vorbis managed mode are wired to AudioPro; existing outputs receive unique names instead of being overwritten.

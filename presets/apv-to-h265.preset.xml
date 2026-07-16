@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>APV to H.265 10-bit (high quality)</Name>
+    <Folder>Video/APV Camera Masters</Folder>
+    <InputTypes>
+        <Extension>apv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_h265</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>apv-to-h265</Arg>
+    </Args>
+</Preset>

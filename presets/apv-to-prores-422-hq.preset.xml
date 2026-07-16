@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>APV to ProRes 422 HQ (editing master)</Name>
+    <Folder>Video/APV Camera Masters</Folder>
+    <InputTypes>
+        <Extension>apv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_prores422hq</OutputFileNameTemplate>
+    <OutputExtension>mov</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>apv-to-prores-422-hq</Arg>
+    </Args>
+</Preset>

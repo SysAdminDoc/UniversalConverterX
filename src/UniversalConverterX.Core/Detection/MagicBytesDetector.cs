@@ -308,6 +308,9 @@ public class MagicBytesDetector
 
             // Video — Matroska/WebM share the EBML header and are resolved by
             // DetectEbmlFormat; QuickTime/MP4 are resolved by DetectIsoBaseMediaFormat.
+            // RFC 9924 raw APV prefixes each access unit with its 32-bit size,
+            // followed by the required `aPv1` signature at byte offset 4.
+            new("apv", [0x61, 0x50, 0x76, 0x31], FormatCategory.Video, 4, "Advanced Professional Video"),
             new("avi", [0x52, 0x49, 0x46, 0x46], FormatCategory.Video, 0, [0x41, 0x56, 0x49, 0x20], "AVI Video"),
             new("flv", [0x46, 0x4C, 0x56, 0x01], FormatCategory.Video, 0, "Flash Video"),
             new("wmv", [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11], FormatCategory.Video, 0, "Windows Media Video"),
@@ -371,6 +374,7 @@ public class MagicBytesDetector
         "avi" => "video/x-msvideo",
         "mov" => "video/quicktime",
         "webm" => "video/webm",
+        "apv" => "video/x-apv",
         "flv" => "video/x-flv",
         "wmv" => "video/x-ms-wmv",
         "mp3" => "audio/mpeg",
@@ -410,7 +414,7 @@ public class MagicBytesDetector
 
     private static FormatCategory DetermineCategory(string extension) => extension switch
     {
-        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "mts" => FormatCategory.Video,
+        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or "apv" or "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "mts" => FormatCategory.Video,
         "mp3" or "wav" or "flac" or "aac" or "ogg" or "wma" or "m4a" or "opus" or "aiff" or "ape" or "ac3" => FormatCategory.Audio,
         "jpg" or "jpeg" or "png" or "gif" or "bmp" or "tiff" or "tif" or "webp" or "ico" or "heic" or "heif" or "avif" or "jxl" or "psd" or "raw" or "cr2" or "nef" => FormatCategory.Image,
         "pdf" or "doc" or "docx" or "odt" or "rtf" or "txt" or "html" or "htm" or "md" or "tex" => FormatCategory.Document,
@@ -429,6 +433,7 @@ public class MagicBytesDetector
         "mp4" => "MP4 Video",
         "m4a" => "M4A Audio",
         "mov" => "QuickTime Movie",
+        "apv" => "Advanced Professional Video",
         "heic" or "heif" => "HEIC Image",
         "avif" => "AVIF Image",
         _ => null

@@ -12,6 +12,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 
 - **Converter** — 1000+ formats via FFmpeg, ImageMagick, Pandoc, libvips, libjxl, libheif, Inkscape, Calibre, Assimp, Ghostscript, LibreOffice, resvg, Potrace.
 - **Compressor** — web/archive profiles, cap-safe social size targets, custom maximum-size two-pass encoding, and VMAF-targeted smart compression with verified quality scores.
+- **APV camera masters** — detect RFC 9924 raw APV and convert locally to H.265 10-bit, ProRes 422 HQ, or H.264 with the bundled FFmpeg build.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.

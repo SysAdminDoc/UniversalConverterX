@@ -219,6 +219,28 @@ PRESETS = {
         "resolution": "1080p",
         "audio_codec": "libopus", "audio_bitrate": 128,
     },
+    # APV camera masters (RFC 9924 / FFmpeg 8.1 liboapv decoder) to broadly
+    # editable and playable interchange formats. APV sources are normally
+    # 10-bit 4:2:2; H.265 keeps 10-bit precision while H.264 favors playback
+    # compatibility. ProRes follows the professional intermediate branch.
+    "apv-to-h265": {
+        "target_mb": None, "crf": 18,
+        "codec": "libx265", "preset": "slow",
+        "resolution": "Original", "pixel_format": "yuv420p10le",
+        "audio_codec": "aac", "audio_bitrate": 256,
+    },
+    "apv-to-prores-422-hq": {
+        "target_mb": None, "crf": None,
+        "codec": "prores_ks", "prores_profile": 3,
+        "preset": None, "resolution": "Original",
+        "audio_codec": "pcm_s24le", "audio_bitrate": 0,
+    },
+    "apv-to-h264": {
+        "target_mb": None, "crf": 16,
+        "codec": "libx264", "preset": "slow",
+        "resolution": "Original", "pixel_format": "yuv420p",
+        "audio_codec": "aac", "audio_bitrate": 256,
+    },
     # ── Professional-tier intermediate codecs (HandBrake 1.11 / FFmpeg 8.1) ──
     "prores-422-proxy": {
         "target_mb": None, "crf": None,
@@ -380,6 +402,7 @@ def compress(args: argparse.Namespace) -> int:
         if args.audio_vbr_quality is not None
         else preset_cfg.get("audio_vbr_quality")
     )
+    pixel_format = preset_cfg.get("pixel_format")
 
     # Resolve HW encoder; falls back to software if accelerator is unavailable
     hwaccel = getattr(args, "hwaccel", None)
@@ -387,7 +410,9 @@ def compress(args: argparse.Namespace) -> int:
     if hwaccel and hwaccel != "none":
         emit("log", level="info", message=f"Hardware accelerator: {hwaccel} -> encoder: {codec}")
 
-    if target_mb is None and crf is None:
+    if (target_mb is None and crf is None
+            and codec not in INTERMEDIATE_CODECS
+            and codec not in LOSSLESS_CODECS):
         return fail("invalid_args",
                     "Must specify either --target-mb (size-targeted) or --crf (quality-targeted), "
                     "or pick a preset that defines one.")
@@ -398,8 +423,15 @@ def compress(args: argparse.Namespace) -> int:
         return fail("probe_failed", "Could not read input metadata via ffprobe.")
     duration = float(info.get("format", {}).get("duration", 0))
     if duration <= 0:
-        return fail("probe_failed", "Could not determine input duration.")
-    emit("log", level="info", message=f"Duration: {duration:.1f}s")
+        if in_path.suffix.lower() != ".apv":
+            return fail("probe_failed", "Could not determine input duration.")
+        # RFC 9924 raw elementary streams have no container-level duration.
+        # FFmpeg can still decode them; run_ffmpeg emits an indeterminate
+        # stage followed by progress=end instead of calculating a percentage.
+        emit("log", level="warn",
+             message="Raw APV has no container duration; progress is indeterminate.")
+    else:
+        emit("log", level="info", message=f"Duration: {duration:.1f}s")
 
     # Build vf filter
     vf_filters: list[str] = []
@@ -464,6 +496,8 @@ def compress(args: argparse.Namespace) -> int:
         if vf_filters:
             cmd += ["-vf", ",".join(vf_filters)]
         cmd += ["-c:v", codec, "-crf", str(crf)]
+        if pixel_format:
+            cmd += ["-pix_fmt", pixel_format]
         if fpreset and not is_av1:
             cmd += ["-preset", fpreset]
 
@@ -665,7 +699,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--preset", choices=list(PRESETS.keys()),
                    help="Predefined preset — see PRESETS dict in sidecar.py for the full list "
                         "(web-1080p, email-10mb, discord-{10mb,25mb,50mb}, email-25mb, "
-                        "archive-av1, prores-422-{proxy,lt,hq}, prores-4444, "
+                        "archive-av1, apv-to-{h265,prores-422-hq,h264}, "
+                        "prores-422-{proxy,lt,hq}, prores-4444, "
                         "dnxhr-{sq,hq,hqx,444}, archive-ffv1).")
     p.add_argument("--target-mb", type=float, help="Target file size in megabytes")
     p.add_argument("--crf", type=int, help="Constant Rate Factor (quality-targeted)")

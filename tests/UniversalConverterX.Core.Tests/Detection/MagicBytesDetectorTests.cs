@@ -351,6 +351,30 @@ public class MagicBytesDetectorTests
     }
 
     [Fact]
+    public void DetectFormat_ApvRawBitstream_ShouldUseAccessUnitSignature()
+    {
+        // RFC 9924 Appendix A: 32-bit AU size, then the required `aPv1`
+        // access-unit signature (0x61507631).
+        var bytes = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x20,
+            0x61, 0x50, 0x76, 0x31,
+            0x00, 0x00, 0x00, 0x08,
+        };
+        var tempFile = CreateTempFileWithContent(bytes, ".bin");
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be("apv");
+            format.MimeType.Should().Be("video/x-apv");
+            format.Category.Should().Be(FormatCategory.Video);
+            format.Description.Should().Be("Advanced Professional Video");
+        }
+        finally { CleanupTempFile(tempFile); }
+    }
+
+    [Fact]
     public void DetectFormat_MatroskaEbml_ShouldDistinguishFromWebm()
     {
         var bytes = new byte[]

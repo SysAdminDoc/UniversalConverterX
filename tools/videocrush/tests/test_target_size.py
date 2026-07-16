@@ -39,6 +39,64 @@ class TargetSizeTests(TestCase):
             self.assertEqual("libx264", preset["codec"])
             self.assertLess(target_mb, float(name.split("-")[-1].removesuffix("mb")))
 
+    def test_apv_presets_cover_delivery_and_intermediate_targets(self):
+        expected = {
+            "apv-to-h265": ("libx265", "yuv420p10le"),
+            "apv-to-prores-422-hq": ("prores_ks", None),
+            "apv-to-h264": ("libx264", "yuv420p"),
+        }
+
+        for name, (codec, pixel_format) in expected.items():
+            preset = sidecar.PRESETS[name]
+            self.assertEqual(codec, preset["codec"])
+            self.assertEqual(pixel_format, preset.get("pixel_format"))
+
+    def test_apv_prores_preset_does_not_require_lossy_quality_target(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            input_path = root / "input.apv"
+            output_path = root / "output.mov"
+            input_path.write_bytes(b"aPv1")
+            commands = []
+
+            def fake_run(command, *_args):
+                commands.append(command)
+                output_path.write_bytes(b"output")
+                return 0
+
+            args = argparse.Namespace(
+                input=str(input_path),
+                output=str(output_path),
+                preset="apv-to-prores-422-hq",
+                target_mb=None,
+                crf=None,
+                codec=None,
+                ffmpeg_preset=None,
+                resolution=None,
+                audio_codec=None,
+                audio_bitrate=None,
+                audio_vbr_quality=None,
+                hwaccel="none",
+                max_bitrate=None,
+                prores_profile=None,
+                dnxhd_profile=None,
+            )
+            # Raw RFC 9924 elementary streams have no container duration.
+            probe = {"format": {}, "streams": [{"codec_name": "apv"}]}
+            with (
+                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(sidecar, "probe", return_value=probe),
+                mock.patch.object(sidecar, "run_ffmpeg", side_effect=fake_run),
+            ):
+                result = sidecar.compress(args)
+
+        self.assertEqual(0, result)
+        self.assertEqual(1, len(commands))
+        self.assertIn("prores_ks", commands[0])
+        self.assertIn("yuv422p10le", commands[0])
+        self.assertEqual(0, commands[0][1:].count("-t"))
+
     def test_target_mode_uses_two_pass_bitrate_budget(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
