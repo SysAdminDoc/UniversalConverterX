@@ -25,7 +25,7 @@
                         <ColumnDefinition Width="90"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                    <CheckBox x:Uid="AutoHighlightPage_Item_001" IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
                               Click="HighlightSelection_Click"
                               VerticalAlignment="Center"
                               AutomationProperties.Name="Include highlight"/>
@@ -67,9 +67,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Auto Highlight"
+                <TextBlock x:Uid="AutoHighlightPage_Item_002" Text="Auto Highlight"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Find high-energy moments locally from scene-change peaks and visible motion. Review the ranked windows, then export a highlight reel, CMX 3600 EDL, or OpenTimelineIO timeline."
+                <TextBlock x:Uid="AutoHighlightPage_Item_003" Text="Find high-energy moments locally from scene-change peaks and visible motion. Review the ranked windows, then export a highlight reel, CMX 3600 EDL, or OpenTimelineIO timeline."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="780"/>
@@ -78,18 +78,18 @@
                         Orientation="Horizontal"
                         Spacing="10"
                         VerticalAlignment="Center">
-                <Button x:Name="OpenVideoButton"
+                <Button x:Uid="AutoHighlightPage_OpenVideoButton" x:Name="OpenVideoButton"
                         Content="Open Video"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="OpenVideo_Click"
                         AutomationProperties.AutomationId="AutoHighlightOpenVideoButton"/>
-                <Button x:Name="CancelButton"
+                <Button x:Uid="AutoHighlightPage_CancelButton" x:Name="CancelButton"
                         Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Cancel_Click"
                         Visibility="Collapsed"
                         AutomationProperties.AutomationId="AutoHighlightCancelButton"/>
-                <Button x:Name="AnalyzeButton"
+                <Button x:Uid="AutoHighlightPage_AnalyzeButton" x:Name="AnalyzeButton"
                         Content="Analyze"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Analyze_Click"
@@ -106,14 +106,14 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <NumberBox x:Name="CandidateCountBox"
+                <NumberBox x:Uid="AutoHighlightPage_CandidateCountBox" x:Name="CandidateCountBox"
                            Header="Highlight candidates"
                            Value="5"
                            Minimum="1" Maximum="10"
                            SmallChange="1"
                            SpinButtonPlacementMode="Inline"
                            AutomationProperties.AutomationId="AutoHighlightCandidateCountBox"/>
-                <NumberBox Grid.Column="1"
+                <NumberBox x:Uid="AutoHighlightPage_ClipLengthBox" Grid.Column="1"
                            x:Name="ClipLengthBox"
                            Header="Clip length (seconds)"
                            Value="12"
@@ -121,7 +121,7 @@
                            SmallChange="1" LargeChange="5"
                            SpinButtonPlacementMode="Inline"
                            AutomationProperties.AutomationId="AutoHighlightClipLengthBox"/>
-                <NumberBox Grid.Column="2"
+                <NumberBox x:Uid="AutoHighlightPage_ThresholdBox" Grid.Column="2"
                            x:Name="ThresholdBox"
                            Header="Scene threshold"
                            Value="27"
@@ -129,7 +129,7 @@
                            SmallChange="1" LargeChange="5"
                            SpinButtonPlacementMode="Inline"
                            AutomationProperties.AutomationId="AutoHighlightThresholdBox"/>
-                <NumberBox Grid.Column="3"
+                <NumberBox x:Uid="AutoHighlightPage_MinimumGapBox" Grid.Column="3"
                            x:Name="MinimumGapBox"
                            Header="Minimum gap (seconds)"
                            Value="2"
@@ -147,25 +147,25 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="AnalysisProgress"
+            <ProgressBar x:Uid="AutoHighlightPage_AnalysisProgress" x:Name="AnalysisProgress"
                          Minimum="0" Maximum="100"
                          VerticalAlignment="Center"
                          AutomationProperties.Name="Auto Highlight progress"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="AutoHighlightPage_ExportReelButton" Grid.Column="1"
                     x:Name="ExportReelButton"
                     Content="Export Reel"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ExportReel_Click"
                     IsEnabled="False"
                     AutomationProperties.AutomationId="AutoHighlightExportReelButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="AutoHighlightPage_ExportEdlButton" Grid.Column="2"
                     x:Name="ExportEdlButton"
                     Content="Export EDL"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ExportEdl_Click"
                     IsEnabled="False"
                     AutomationProperties.AutomationId="AutoHighlightExportEdlButton"/>
-            <Button Grid.Column="3"
+            <Button x:Uid="AutoHighlightPage_ExportOtioButton" Grid.Column="3"
                     x:Name="ExportOtioButton"
                     Content="Export OTIO"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -185,10 +185,10 @@
                         <FontIcon Glyph="&#xE7C9;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No highlights yet"
+                    <TextBlock x:Uid="AutoHighlightPage_Item_015" Text="No highlights yet"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Open a video and analyze it. Nothing leaves this device."
+                    <TextBlock x:Uid="AutoHighlightPage_Item_016" Text="Open a video and analyze it. Nothing leaves this device."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
@@ -201,7 +201,7 @@
             </Grid>
         </Border>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="AutoHighlightPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Text="Open a video to begin."
                    Style="{StaticResource MutedTextStyle}"

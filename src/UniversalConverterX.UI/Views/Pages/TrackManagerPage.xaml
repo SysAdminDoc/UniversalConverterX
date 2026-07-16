@@ -23,7 +23,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox x:Name="MarkForRemoval"
+                    <CheckBox x:Uid="TrackManagerPage_MarkForRemoval" x:Name="MarkForRemoval"
                               IsChecked="{x:Bind MarkedForRemoval, Mode=TwoWay}"
                               VerticalAlignment="Center"
                               ToolTipService.ToolTip="Tick to remove this stream when you click Apply"/>
@@ -52,7 +52,7 @@
                                    FontSize="12"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="4"
+                    <Button x:Uid="TrackManagerPage_Item_002" Grid.Column="4"
                             Content="Export..."
                             Style="{StaticResource SecondaryButtonStyle}"
                             Visibility="{x:Bind ExportButtonVisibility}"
@@ -81,13 +81,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Track Manager"
+                <TextBlock x:Uid="TrackManagerPage_Item_003" Text="Track Manager"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Add or remove audio, subtitle, and data tracks from a video container without re-encoding. Tick streams to drop, then Apply -- or pick an external audio / subtitle file to attach as a new track."
+                <TextBlock x:Uid="TrackManagerPage_Item_004" Text="Add or remove audio, subtitle, and data tracks from a video container without re-encoding. Tick streams to drop, then Apply -- or pick an external audio / subtitle file to attach as a new track."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
-            <Button Grid.Column="1"
+            <Button x:Uid="TrackManagerPage_TrackManagerPageButton01" Grid.Column="1"
                     Content="Open Video"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenFile_Click"
@@ -97,7 +97,7 @@
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="16">
             <StackPanel Spacing="3">
-                <TextBlock x:Name="SourceLabel"
+                <TextBlock x:Uid="TrackManagerPage_SourceLabel" x:Name="SourceLabel"
                            Style="{StaticResource LabelTextStyle}"
                            Text="No file loaded."
                            TextTrimming="CharacterEllipsis"/>
@@ -117,10 +117,10 @@
                         <FontIcon Glyph="&#xE93F;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No tracks loaded"
+                    <TextBlock x:Uid="TrackManagerPage_Item_007" Text="No tracks loaded"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Open a video to see every audio / video / subtitle / data track inside the container."
+                    <TextBlock x:Uid="TrackManagerPage_Item_008" Text="Open a video to see every audio / video / subtitle / data track inside the container."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"
@@ -141,18 +141,18 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar AutomationProperties.Name="Progress" x:Name="WorkProgress"
+            <ProgressBar x:Uid="TrackManagerPage_WorkProgress" AutomationProperties.Name="Progress" x:Name="WorkProgress"
                          Minimum="0" Maximum="100"
                          IsIndeterminate="False"
                          VerticalAlignment="Center"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="TrackManagerPage_AddTrackButton" Grid.Column="1"
                     x:Name="AddTrackButton"
                     Content="Add track..."
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="AddTrack_Click"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="AddTrackButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="TrackManagerPage_ApplyButton" Grid.Column="2"
                     x:Name="ApplyButton"
                     Content="Apply changes..."
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -161,7 +161,7 @@
                 AutomationProperties.AutomationId="ApplyButton"/>
         </Grid>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="TrackManagerPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Open a video to begin."/>

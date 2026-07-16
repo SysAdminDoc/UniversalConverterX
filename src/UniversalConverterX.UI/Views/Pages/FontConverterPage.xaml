@@ -37,7 +37,7 @@
                                FontSize="11"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="FontConverterPage_Item_001" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             ToolTipService.ToolTip="Remove from queue"
@@ -66,19 +66,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="FONT CONVERTER"
+                <TextBlock x:Uid="FontConverterPage_Item_002" Text="FONT CONVERTER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Convert TTF / OTF / WOFF / WOFF2. WOFF and WOFF2 are the modern web-font wrappers (the latter uses Brotli compression). Backed by fonttools."
+                <TextBlock x:Uid="FontConverterPage_Item_003" Text="Convert TTF / OTF / WOFF / WOFF2. WOFF and WOFF2 are the modern web-font wrappers (the latter uses Brotli compression). Backed by fonttools."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add fonts"
+                <Button x:Uid="FontConverterPage_FontConverterPageButton01" Content="Add fonts"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddFiles_Click"
                     AutomationProperties.AutomationId="FontConverterPageButton01"/>
-                <Button x:Name="ConvertButton"
+                <Button x:Uid="FontConverterPage_ConvertButton" x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
@@ -94,22 +94,22 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox x:Name="FormatCombo"
+                <ComboBox x:Uid="FontConverterPage_FormatCombo" x:Name="FormatCombo"
                           Header="Target format"
                           SelectedIndex="2"
                     AutomationProperties.AutomationId="FormatCombo">
-                    <ComboBoxItem Content="TTF (TrueType)" Tag="ttf"/>
-                    <ComboBoxItem Content="OTF (OpenType)" Tag="otf"/>
-                    <ComboBoxItem Content="WOFF (web)" Tag="woff"/>
-                    <ComboBoxItem Content="WOFF2 (web, Brotli)" Tag="woff2"/>
+                    <ComboBoxItem x:Uid="FontConverterPage_Item_007" Content="TTF (TrueType)" Tag="ttf"/>
+                    <ComboBoxItem x:Uid="FontConverterPage_Item_008" Content="OTF (OpenType)" Tag="otf"/>
+                    <ComboBoxItem x:Uid="FontConverterPage_Item_009" Content="WOFF (web)" Tag="woff"/>
+                    <ComboBoxItem x:Uid="FontConverterPage_Item_010" Content="WOFF2 (web, Brotli)" Tag="woff2"/>
                 </ComboBox>
-                <TextBox Grid.Column="1"
+                <TextBox x:Uid="FontConverterPage_OutputDirBox" Grid.Column="1"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
                          PlaceholderText="(same as source)"
                     AutomationProperties.AutomationId="OutputDirBox"/>
-                <Button Grid.Column="2"
+                <Button x:Uid="FontConverterPage_FontConverterPageButton02" Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
@@ -128,10 +128,10 @@
                         <FontIcon Glyph="&#xE8D2;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Add fonts"
+                    <TextBlock x:Uid="FontConverterPage_Item_013" Text="Add fonts"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Drop or pick TTF / OTF / WOFF / WOFF2 files. Pick a target format and run."
+                    <TextBlock x:Uid="FontConverterPage_Item_014" Text="Drop or pick TTF / OTF / WOFF / WOFF2 files. Pick a target format and run."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
@@ -143,13 +143,13 @@
             </Grid>
         </Border>
 
-        <ProgressBar AutomationProperties.Name="Progress"
+        <ProgressBar x:Uid="FontConverterPage_WorkProgress" AutomationProperties.Name="Progress"
                      Grid.Row="3"
                      x:Name="WorkProgress"
                      Minimum="0" Maximum="100"
                      IsIndeterminate="False"/>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="FontConverterPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Add fonts to begin."/>

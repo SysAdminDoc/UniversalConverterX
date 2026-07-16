@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Localization;
 using UniversalConverterX.Core.Models;
 
 namespace UniversalConverterX.Core.Converters;
@@ -126,7 +127,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             job.StartedAt = DateTime.UtcNow;
 
             // Report initial progress
-            progress?.Report(ConversionProgress.Indeterminate("Starting conversion...", ConversionStage.Initializing));
+            progress?.Report(ConversionProgress.Indeterminate(
+                LocalizedText.Get("Core_StartingConversion", "Starting conversion..."),
+                ConversionStage.Initializing));
 
             // Build arguments
             var arguments = BuildArguments(job, job.Options);
@@ -135,7 +138,12 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             var executablePath = GetExecutablePath();
             if (!File.Exists(executablePath))
             {
-                return ConversionResult.Failed(job, $"Converter executable not found: {executablePath}", stopwatch.Elapsed);
+                return ConversionResult.Failed(
+                    job,
+                    LocalizedText.Format(
+                        "Core_ConverterExecutableNotFound",
+                        "Converter executable was not found: {0}", executablePath),
+                    stopwatch.Elapsed);
             }
 
             var commandLine = FormatCommandLine(executablePath, arguments);
@@ -190,7 +198,7 @@ public abstract class BaseConverterStrategy : IConverterStrategy
                 job.Status = ConversionStatus.Failed;
                 return ConversionResult.Failed(
                     job,
-                    result.ErrorMessage ?? "Unknown error",
+                    result.ErrorMessage ?? LocalizedText.Get("Core_UnknownError", "Unknown error"),
                     stopwatch.Elapsed,
                     result.ExitCode,
                     result.StandardOutput,
@@ -212,7 +220,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
 
             return ConversionResult.Failed(
                 job,
-                $"Conversion timed out after {job.Options.Timeout!.Value}.",
+                LocalizedText.Format(
+                    "Core_ConversionTimedOut", "Conversion timed out after {0}.",
+                    job.Options.Timeout!.Value),
                 stopwatch.Elapsed,
                 exitCode: -1,
                 converter: Id);
@@ -388,7 +398,10 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             job.OutputFileSize = 0;
             return ConversionResult.Failed(
                 job,
-                $"Converter completed but did not create the expected output file: {job.OutputPath}",
+                LocalizedText.Format(
+                    "Core_ExpectedOutputMissing",
+                    "The converter completed but did not create the expected output file: {0}",
+                    job.OutputPath),
                 duration,
                 exitCode,
                 standardOutput,
@@ -406,7 +419,9 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             job.Status = ConversionStatus.Failed;
             return ConversionResult.Failed(
                 job,
-                $"Converter created an empty output file: {job.OutputPath}",
+                LocalizedText.Format(
+                    "Core_EmptyOutputFile",
+                    "The converter created an empty output file: {0}", job.OutputPath),
                 duration,
                 exitCode,
                 standardOutput,

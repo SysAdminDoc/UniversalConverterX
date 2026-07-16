@@ -48,7 +48,7 @@
                                    FontWeight="SemiBold"
                                    TextAlignment="Center"/>
                     </Border>
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="WatermarkRemoverPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click" Tag="{Binding}">
@@ -60,7 +60,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
+                        <ProgressBar x:Uid="WatermarkRemoverPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
                                      VerticalAlignment="Center"/>
@@ -101,7 +101,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="WatermarkRemoverPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
                             Click="OpenFinishedFolder_Click"
@@ -126,15 +126,15 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Watermark &amp; Subtitle Remover" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Detect and inpaint logos, captions, static overlays, and subtitle text using AI reconstruction."
+                <TextBlock x:Uid="WatermarkRemoverPage_Item_004" Text="Watermark &amp; Subtitle Remover" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="WatermarkRemoverPage_Item_005" Text="Detect and inpaint logos, captions, static overlays, and subtitle text using AI reconstruction."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="WatermarkRemoverPageButton01"/>
-                <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton02" Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="WatermarkRemoverPageButton02"/>
             </StackPanel>
@@ -157,7 +157,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="WatermarkRemoverPage_WatermarkRemoverPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="WatermarkRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -169,13 +169,13 @@
                                     <FontIcon Glyph="&#xE71B;" FontSize="48"
                                               Foreground="{StaticResource AccentOrangeBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video or image files"
+                                <TextBlock x:Uid="WatermarkRemoverPage_Item_009" Text="Drop video or image files"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP4, MOV, MKV, WebM, PNG, JPG, WEBP, and more."
+                                <TextBlock x:Uid="WatermarkRemoverPage_Item_010" Text="MP4, MOV, MKV, WebM, PNG, JPG, WEBP, and more."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -189,7 +189,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="WatermarkRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -201,10 +201,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished jobs yet"
+                                <TextBlock x:Uid="WatermarkRemoverPage_Item_013" Text="No finished jobs yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed, failed, and cancelled jobs appear here."
+                                <TextBlock x:Uid="WatermarkRemoverPage_Item_014" Text="Completed, failed, and cancelled jobs appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -224,13 +224,13 @@
                 <!-- Inpainting mode -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Inpainting Algorithm" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="WatermarkRemoverPage_Item_015" Text="Inpainting Algorithm" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModeCombo" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="ModeCombo">
-                            <ComboBoxItem Content="STTN (temporal, default)" Tag="sttn" IsSelected="True"/>
-                            <ComboBoxItem Content="LaMa (single-frame, fast)" Tag="lama"/>
-                            <ComboBoxItem Content="ProPainter (high quality)" Tag="propainter"/>
-                            <ComboBoxItem Content="Auto (TBE + LaMa routing)" Tag="auto"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_016" Content="STTN (temporal, default)" Tag="sttn" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_017" Content="LaMa (single-frame, fast)" Tag="lama"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_018" Content="ProPainter (high quality)" Tag="propainter"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_019" Content="Auto (TBE + LaMa routing)" Tag="auto"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -238,12 +238,12 @@
                 <!-- Device -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Compute Device" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="WatermarkRemoverPage_Item_020" Text="Compute Device" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="DeviceCombo" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="DeviceCombo">
-                            <ComboBoxItem Content="CPU" Tag="cpu" IsSelected="True"/>
-                            <ComboBoxItem Content="DirectML (AMD / Intel)" Tag="directml"/>
-                            <ComboBoxItem Content="CUDA GPU 0" Tag="cuda:0"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_021" Content="CPU" Tag="cpu" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_022" Content="DirectML (AMD / Intel)" Tag="directml"/>
+                            <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_023" Content="CUDA GPU 0" Tag="cuda:0"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -251,24 +251,24 @@
                 <!-- Detection options -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="WatermarkRemoverPage_Item_024" Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="OCR Language" Style="{StaticResource MutedTextStyle}"/>
+                            <TextBlock x:Uid="WatermarkRemoverPage_Item_025" Text="OCR Language" Style="{StaticResource MutedTextStyle}"/>
                             <ComboBox x:Name="LangCombo" HorizontalAlignment="Stretch"
                                 AutomationProperties.AutomationId="LangCombo">
-                                <ComboBoxItem Content="English" Tag="en" IsSelected="True"/>
-                                <ComboBoxItem Content="Chinese (Simplified)" Tag="ch"/>
-                                <ComboBoxItem Content="Japanese" Tag="ja"/>
-                                <ComboBoxItem Content="Korean" Tag="ko"/>
-                                <ComboBoxItem Content="French" Tag="fr"/>
-                                <ComboBoxItem Content="German" Tag="de"/>
-                                <ComboBoxItem Content="Spanish" Tag="es"/>
-                                <ComboBoxItem Content="Russian" Tag="ru"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_026" Content="English" Tag="en" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_027" Content="Chinese (Simplified)" Tag="ch"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_028" Content="Japanese" Tag="ja"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_029" Content="Korean" Tag="ko"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_030" Content="French" Tag="fr"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_031" Content="German" Tag="de"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_032" Content="Spanish" Tag="es"/>
+                                <ComboBoxItem x:Uid="WatermarkRemoverPage_Item_033" Content="Russian" Tag="ru"/>
                             </ComboBox>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Region (optional): x1,y1,x2,y2" Style="{StaticResource MutedTextStyle}"/>
-                            <TextBox x:Name="AreaBox"
+                            <TextBlock x:Uid="WatermarkRemoverPage_Item_034" Text="Region (optional): x1,y1,x2,y2" Style="{StaticResource MutedTextStyle}"/>
+                            <TextBox x:Uid="WatermarkRemoverPage_AreaBox" x:Name="AreaBox"
                                      PlaceholderText="e.g. 0,900,1920,1080"
                                      HorizontalAlignment="Stretch"
                                 AutomationProperties.AutomationId="AreaBox"/>
@@ -279,11 +279,11 @@
                 <!-- Quality -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Quality" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="WatermarkRemoverPage_Item_036" Text="Output Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
                             <Grid>
-                                <TextBlock Text="CRF (video re-encode)" Style="{StaticResource MutedTextStyle}"/>
-                                <TextBlock x:Name="QualityValueText" Text="23"
+                                <TextBlock x:Uid="WatermarkRemoverPage_Item_037" Text="CRF (video re-encode)" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock x:Uid="WatermarkRemoverPage_QualityValueText" x:Name="QualityValueText" Text="23"
                                            HorizontalAlignment="Right"
                                            Style="{StaticResource MutedTextStyle}"
                                            FontWeight="SemiBold"/>
@@ -292,11 +292,11 @@
                                     TickFrequency="1" StepFrequency="1"
                                 AutomationProperties.AutomationId="QualitySlider"/>
                         </StackPanel>
-                        <ToggleSwitch x:Name="KeepAudioToggle"
+                        <ToggleSwitch x:Uid="WatermarkRemoverPage_KeepAudioToggle" x:Name="KeepAudioToggle"
                                       Header="Preserve audio track"
                                       IsOn="True"
                             AutomationProperties.AutomationId="KeepAudioToggle"/>
-                        <ToggleSwitch x:Name="NoHwEncodeToggle"
+                        <ToggleSwitch x:Uid="WatermarkRemoverPage_NoHwEncodeToggle" x:Name="NoHwEncodeToggle"
                                       Header="Disable HW encoder (NVENC/QSV)"
                                       IsOn="False"
                             AutomationProperties.AutomationId="NoHwEncodeToggle"/>
@@ -306,15 +306,15 @@
                 <!-- Output folder -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
+                        <TextBlock x:Uid="WatermarkRemoverPage_Item_041" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="WatermarkRemoverPage_OutputDirectoryBox" x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
                                  IsReadOnly="True" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton04" Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="WatermarkRemoverPageButton04"/>
-                            <Button Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton05" Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
                                 AutomationProperties.AutomationId="WatermarkRemoverPageButton05"/>
                         </StackPanel>
@@ -332,21 +332,21 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                    <TextBlock x:Name="StatusText"
+                    <TextBlock x:Uid="WatermarkRemoverPage_StatusText" x:Name="StatusText"
                                Text="Add video or image files to start a removal queue."
                                Style="{StaticResource MutedTextStyle}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                    <Button x:Name="ClearButton" Content="Clear Queue"
+                    <Button x:Uid="WatermarkRemoverPage_ClearButton" x:Name="ClearButton" Content="Clear Queue"
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
                             Click="Clear_Click"
                         AutomationProperties.AutomationId="ClearButton"/>
-                    <Button Content="Open Output Folder"
+                    <Button x:Uid="WatermarkRemoverPage_WatermarkRemoverPageButton06" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="OpenOutputFolder_Click"
                         AutomationProperties.AutomationId="WatermarkRemoverPageButton06"/>
-                    <Button x:Name="RunButton" Content="Remove"
+                    <Button x:Uid="WatermarkRemoverPage_RunButton" x:Name="RunButton" Content="Remove"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
                             Click="Run_Click"
@@ -362,12 +362,12 @@
                 CornerRadius="20"
                 Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14" MaxWidth="480">
-                <TextBlock x:Name="ProgressTitle" Text="Processing..."
+                <TextBlock x:Uid="WatermarkRemoverPage_ProgressTitle" x:Name="ProgressTitle" Text="Processing..."
                            Style="{StaticResource SubtitleTextStyle}"
                            HorizontalAlignment="Center"/>
-                <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0"
+                <ProgressBar x:Uid="WatermarkRemoverPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0"
                              Width="380" Height="8" CornerRadius="4"/>
-                <TextBlock x:Name="ProgressStage" Text="Starting..."
+                <TextBlock x:Uid="WatermarkRemoverPage_ProgressStage" x:Name="ProgressStage" Text="Starting..."
                            Style="{StaticResource MutedTextStyle}"
                            HorizontalAlignment="Center"/>
                 <TextBlock x:Name="ProgressEta" Text=""
@@ -380,7 +380,7 @@
                                FontSize="11"
                                TextWrapping="Wrap"/>
                 </ScrollViewer>
-                <Button x:Name="CancelButton" Content="Cancel"
+                <Button x:Uid="WatermarkRemoverPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         HorizontalAlignment="Center"
                         Click="Cancel_Click"

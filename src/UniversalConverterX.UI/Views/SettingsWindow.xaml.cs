@@ -20,6 +20,7 @@ namespace UniversalConverterX.UI.Views;
 public sealed partial class SettingsWindow : Window
 {
     private const string ReleasesUrl = "https://github.com/SysAdminDoc/UniversalConverterX/releases";
+    private static readonly string[] LanguageTags = ["", "en-US", "de-DE", "fr-FR", "es-ES", "pl-PL", "zh-Hans"];
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ConverterXOptions _options;
@@ -49,7 +50,8 @@ public sealed partial class SettingsWindow : Window
         var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
         appWindow.Resize(new Windows.Graphics.SizeInt32(820, 920));
-        appWindow.Title = "Settings - UniversalConverter X";
+        appWindow.Title = AppLocalizer.Get(
+            "SettingsWindow_Item_001.Title", "Settings - UniversalConverter X");
 
         LoadSettings();
         LoadTools();
@@ -176,6 +178,10 @@ public sealed partial class SettingsWindow : Window
 
         // Appearance
         ThemeComboBox.SelectedIndex = (int)_options.Theme;
+        var languageIndex = Array.FindIndex(
+            LanguageTags,
+            tag => tag.Equals(_options.Language ?? "", StringComparison.OrdinalIgnoreCase));
+        LanguageComboBox.SelectedIndex = languageIndex >= 0 ? languageIndex : 0;
         MinimizeToTrayToggle.IsOn = _options.MinimizeToTray;
         StartMinimizedToggle.IsOn = _options.StartMinimized;
 
@@ -710,6 +716,7 @@ public sealed partial class SettingsWindow : Window
 
         // Appearance
         _options.Theme = (AppTheme)ThemeComboBox.SelectedIndex;
+        _options.Language = LanguageTags[Math.Clamp(LanguageComboBox.SelectedIndex, 0, LanguageTags.Length - 1)];
         _options.MinimizeToTray = MinimizeToTrayToggle.IsOn;
         _options.StartMinimized = StartMinimizedToggle.IsOn;
 

@@ -49,7 +49,7 @@
                         </Border>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="4">
-                        <Button Content="Run preset"
+                        <Button x:Uid="UniversalConvertPage_Item_001" Content="Run preset"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="RunPreset_Click"
                                 Tag="{Binding Name}"/>
@@ -73,9 +73,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
-            <TextBlock Text="Universal Convert"
+            <TextBlock x:Uid="UniversalConvertPage_Item_002" Text="Universal Convert"
                        Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Drop files once and see every compatible preset before running a sidecar."
+            <TextBlock x:Uid="UniversalConvertPage_Item_003" Text="Drop files once and see every compatible preset before running a sidecar."
                        Style="{StaticResource SubtitleTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
@@ -97,15 +97,15 @@
                                   Foreground="{StaticResource AccentBlueBrush}"
                                   HorizontalAlignment="Center"/>
                     </Border>
-                    <TextBlock x:Name="DropHint"
+                    <TextBlock x:Uid="UniversalConvertPage_DropHint" x:Name="DropHint"
                                Text="Drop files here, or pick them"
                                HorizontalAlignment="Center"
                                Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="UCX checks preset inputs locally, filters incompatible tools, and keeps your original files untouched."
+                    <TextBlock x:Uid="UniversalConvertPage_Item_005" Text="UCX checks preset inputs locally, filters incompatible tools, and keeps your original files untouched."
                                Style="{StaticResource MutedTextStyle}"
                                TextAlignment="Center"
                                TextWrapping="Wrap"/>
-                    <Button Content="Pick files"
+                    <Button x:Uid="UniversalConvertPage_UniversalConvertPageButton01" Content="Pick files"
                             Style="{StaticResource PrimaryButtonStyle}"
                             Click="Pick_Click"
                             HorizontalAlignment="Center"
@@ -119,16 +119,16 @@
                 <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
                     <Border Style="{StaticResource QuietSurfaceStyle}">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="SAFE MATCHING" Style="{StaticResource MetricLabelTextStyle}"/>
-                            <TextBlock Text="No conversion starts until you choose a preset."
+                            <TextBlock x:Uid="UniversalConvertPage_Item_007" Text="SAFE MATCHING" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock x:Uid="UniversalConvertPage_Item_008" Text="No conversion starts until you choose a preset."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource QuietSurfaceStyle}">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="BATCH AWARE" Style="{StaticResource MetricLabelTextStyle}"/>
-                            <TextBlock Text="Mixed selections show partial and full-coverage matches."
+                            <TextBlock x:Uid="UniversalConvertPage_Item_009" Text="BATCH AWARE" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock x:Uid="UniversalConvertPage_Item_010" Text="Mixed selections show partial and full-coverage matches."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -144,12 +144,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <AutoSuggestBox x:Name="SearchBox"
+                <AutoSuggestBox x:Uid="UniversalConvertPage_SearchBox" x:Name="SearchBox"
                                 PlaceholderText="Filter matches..."
                                 QueryIcon="Find"
                                 TextChanged="Search_TextChanged"
                     AutomationProperties.AutomationId="SearchBox"/>
-                <Button Grid.Column="1"
+                <Button x:Uid="UniversalConvertPage_UniversalConvertPageButton02" Grid.Column="1"
                         Content="Clear"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Clear_Click"
@@ -169,10 +169,10 @@
                     <FontIcon Glyph="&#xE946;" FontSize="38"
                               Foreground="{StaticResource AccentOrangeBrush}"/>
                 </Border>
-                <TextBlock Text="No compatible presets found"
+                <TextBlock x:Uid="UniversalConvertPage_Item_013" Text="No compatible presets found"
                            Style="{StaticResource SectionHeaderTextStyle}"
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="Try another file type, install a matching sidecar, or add a custom *.preset.xml in your UCX presets folder."
+                <TextBlock x:Uid="UniversalConvertPage_Item_014" Text="Try another file type, install a matching sidecar, or add a custom *.preset.xml in your UCX presets folder."
                            Style="{StaticResource MutedTextStyle}"
                            TextAlignment="Center"
                            TextWrapping="Wrap"/>
@@ -183,7 +183,7 @@
             </ScrollViewer>
         </Grid>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="UniversalConvertPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Drop files above to see matching presets."/>

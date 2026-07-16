@@ -35,7 +35,7 @@
                         </Border>
                         <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}" CornerRadius="10"
                                 Padding="8,3" Visibility="{Binding ShowAi}">
-                            <TextBlock Text="AI" FontSize="10" FontWeight="SemiBold"
+                            <TextBlock x:Uid="ToolboxPage_Item_001" Text="AI" FontSize="10" FontWeight="SemiBold"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                     </Grid>
@@ -71,12 +71,12 @@
                         <ColumnDefinition Width="320"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="10">
-                        <TextBlock Text="TOOLBOX" Style="{StaticResource EyebrowTextStyle}"/>
-                        <TextBlock Text="Specialized tools for finishing, repairing, extracting, and preparing media."
+                        <TextBlock x:Uid="ToolboxPage_Item_002" Text="TOOLBOX" Style="{StaticResource EyebrowTextStyle}"/>
+                        <TextBlock x:Uid="ToolboxPage_Item_003" Text="Specialized tools for finishing, repairing, extracting, and preparing media."
                                    Style="{StaticResource TitleTextStyle}"
                                    TextWrapping="Wrap"
                                    MaxWidth="720" LineHeight="30"/>
-                        <TextBlock Text="Ready tools open directly. Planned tools stay disabled and explain what is missing."
+                        <TextBlock x:Uid="ToolboxPage_Item_004" Text="Ready tools open directly. Planned tools stay disabled and explain what is missing."
                                    Style="{StaticResource SubtitleTextStyle}" FontSize="13"
                                    TextWrapping="Wrap"
                                    MaxWidth="760"/>
@@ -88,7 +88,7 @@
                             CornerRadius="20"
                             Padding="22">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Status key" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock x:Uid="ToolboxPage_Item_005" Text="Status key" Style="{StaticResource PanelTitleTextStyle}"/>
                             <Grid RowSpacing="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -98,22 +98,22 @@
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10">
                                     <Ellipse Width="8" Height="8" Fill="{StaticResource AccentGreenBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Ready opens a runnable workflow" Style="{StaticResource MutedTextStyle}"/>
+                                    <TextBlock x:Uid="ToolboxPage_Item_006" Text="Ready opens a runnable workflow" Style="{StaticResource MutedTextStyle}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
                                     <Ellipse Width="8" Height="8" Fill="{StaticResource AccentOrangeBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Planned has a defined implementation path" Style="{StaticResource MutedTextStyle}"/>
+                                    <TextBlock x:Uid="ToolboxPage_Item_007" Text="Planned has a defined implementation path" Style="{StaticResource MutedTextStyle}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
                                     <Ellipse Width="8" Height="8" Fill="{StaticResource AccentYellowBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Future still needs scope decisions" Style="{StaticResource MutedTextStyle}"/>
+                                    <TextBlock x:Uid="ToolboxPage_Item_008" Text="Future still needs scope decisions" Style="{StaticResource MutedTextStyle}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10">
                                     <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="8" Padding="6,2">
-                                        <TextBlock Text="AI" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="ToolboxPage_Item_009" Text="AI" FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentBlueBrush}"/>
                                     </Border>
-                                    <TextBlock Text="Model-backed tool" Style="{StaticResource MutedTextStyle}"/>
+                                    <TextBlock x:Uid="ToolboxPage_Item_010" Text="Model-backed tool" Style="{StaticResource MutedTextStyle}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -122,56 +122,56 @@
             </Border>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Image" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_011" Text="Image" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="ImageGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Video" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_012" Text="Video" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="VideoGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_013" Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Audio" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_014" Text="Audio" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AudioGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Documents" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_015" Text="Documents" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DocumentGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_016" Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="DiscGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel Spacing="12">
-                <TextBlock Text="Other" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_017" Text="Other" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="OtherGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
 
             <StackPanel x:Name="PluginSection" Spacing="12" Visibility="Collapsed">
-                <TextBlock Text="Trusted Plugins" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <TextBlock x:Uid="ToolboxPage_Item_018" Text="Trusted Plugins" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="PluginGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>

@@ -50,7 +50,7 @@
                                    TextAlignment="Center"
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="NoiseRemoverPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveQueued_Click"
@@ -63,7 +63,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="NoiseRemoverPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -107,7 +107,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="NoiseRemoverPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -132,19 +132,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="NOISE REMOVER"
+                <TextBlock x:Uid="NoiseRemoverPage_Item_004" Text="NOISE REMOVER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="RNNoise broadband speech denoiser via FFmpeg arnndn. Cleans hum, hiss, fan and HVAC noise from voice tracks."
+                <TextBlock x:Uid="NoiseRemoverPage_Item_005" Text="RNNoise broadband speech denoiser via FFmpeg arnndn. Cleans hum, hiss, fan and HVAC noise from voice tracks."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="NoiseRemoverPage_NoiseRemoverPageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="NoiseRemoverPageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="NoiseRemoverPage_RunButton" x:Name="RunButton"
                         Content="Denoise"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -168,7 +168,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="NoiseRemoverPage_NoiseRemoverPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="NoiseRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -180,16 +180,16 @@
                                     <FontIcon Glyph="&#xE767;" FontSize="48"
                                               Foreground="{StaticResource AccentOrangeBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop audio or video files here"
+                                <TextBlock x:Uid="NoiseRemoverPage_Item_009" Text="Drop audio or video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each file gets its audio track denoised in place. Video tracks are passed through unchanged."
+                                <TextBlock x:Uid="NoiseRemoverPage_Item_010" Text="Each file gets its audio track denoised in place. Video tracks are passed through unchanged."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="420"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="NoiseRemoverPage_NoiseRemoverPageButton02" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -202,7 +202,7 @@
                                       ItemTemplate="{StaticResource NrQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="NoiseRemoverPage_NoiseRemoverPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="NoiseRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -214,7 +214,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No denoised tracks yet"
+                                <TextBlock x:Uid="NoiseRemoverPage_Item_013" Text="No denoised tracks yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -231,8 +231,8 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo"
+                        <TextBlock x:Uid="NoiseRemoverPage_Item_014" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="NoiseRemoverPage_ModelCombo" x:Name="ModelCombo"
                                   Header="Active model"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Discovering..."
@@ -241,7 +241,7 @@
                         <TextBlock x:Name="ModelHintText"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <Button Content="Refresh Models"
+                        <Button x:Uid="NoiseRemoverPage_NoiseRemoverPageButton03" Content="Refresh Models"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="RefreshModels_Click"
                                 HorizontalAlignment="Stretch"
@@ -251,36 +251,36 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Mode" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModeCombo"
+                        <TextBlock x:Uid="NoiseRemoverPage_Item_017" Text="Output Mode" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="NoiseRemoverPage_ModeCombo" x:Name="ModeCombo"
                                   Header="Mode"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Combo_Changed"
                             AutomationProperties.AutomationId="ModeCombo">
-                            <ComboBoxItem Content="Pass video, replace audio" Tag="muxed"/>
-                            <ComboBoxItem Content="Audio file only" Tag="audio"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_019" Content="Pass video, replace audio" Tag="muxed"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_020" Content="Audio file only" Tag="audio"/>
                         </ComboBox>
-                        <ComboBox x:Name="AudioFormatCombo"
+                        <ComboBox x:Uid="NoiseRemoverPage_AudioFormatCombo" x:Name="AudioFormatCombo"
                                   Header="Audio container"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Combo_Changed"
                             AutomationProperties.AutomationId="AudioFormatCombo">
-                            <ComboBoxItem Content="WAV"  Tag=".wav"/>
-                            <ComboBoxItem Content="FLAC" Tag=".flac"/>
-                            <ComboBoxItem Content="AAC (.m4a)" Tag=".m4a"/>
-                            <ComboBoxItem Content="MP3"  Tag=".mp3"/>
-                            <ComboBoxItem Content="Opus" Tag=".opus"/>
-                            <ComboBoxItem Content="OGG"  Tag=".ogg"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_022" Content="WAV"  Tag=".wav"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_023" Content="FLAC" Tag=".flac"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_024" Content="AAC (.m4a)" Tag=".m4a"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_025" Content="MP3"  Tag=".mp3"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_026" Content="Opus" Tag=".opus"/>
+                            <ComboBoxItem x:Uid="NoiseRemoverPage_Item_027" Content="OGG"  Tag=".ogg"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="NoiseRemoverPage_Item_028" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="NoiseRemoverPage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText"
@@ -302,7 +302,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="NoiseRemoverPage_ClearButton" Grid.Column="1"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -310,7 +310,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="NoiseRemoverPage_CancelButton" Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

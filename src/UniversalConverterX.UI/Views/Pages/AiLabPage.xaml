@@ -72,21 +72,21 @@
                     <StackPanel Grid.Column="0" Spacing="14">
                         <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
                                 Padding="12,5" HorizontalAlignment="Left">
-                            <TextBlock Text="AI LAB"
+                            <TextBlock x:Uid="AiLabPage_Item_001" Text="AI LAB"
                                        Style="{StaticResource EyebrowTextStyle}"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="AI tools show readiness before you start."
+                        <TextBlock x:Uid="AiLabPage_Item_002" Text="AI tools show readiness before you start."
                                    Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
-                        <TextBlock Text="Ready tools open directly. Planned tools stay clear about missing engine, preview, export, and recovery work."
+                        <TextBlock x:Uid="AiLabPage_Item_003" Text="Ready tools open directly. Planned tools stay clear about missing engine, preview, export, and recovery work."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                            <Button Content="Open Toolbox" Style="{StaticResource PrimaryButtonStyle}"
+                            <Button x:Uid="AiLabPage_AiLabPageButton01" Content="Open Toolbox" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenToolbox_Click"
                                 AutomationProperties.AutomationId="AiLabPageButton01"/>
-                            <Button Content="Start Converter" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="AiLabPage_AiLabPageButton02" Content="Start Converter" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="OpenConverter_Click"
                                 AutomationProperties.AutomationId="AiLabPageButton02"/>
                         </StackPanel>
@@ -96,7 +96,7 @@
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                             CornerRadius="20" Padding="22">
                         <StackPanel Spacing="14">
-                            <TextBlock Text="Availability" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock x:Uid="AiLabPage_Item_006" Text="Availability" Style="{StaticResource PanelTitleTextStyle}"/>
                             <StackPanel Spacing="10">
                                 <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
@@ -107,11 +107,11 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource AccentGreenBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Ready - Background Remover"
+                                    <TextBlock x:Uid="AiLabPage_Item_007" Grid.Column="1" Text="Ready - Background Remover"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_008" Text="Ready" FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentGreenBrush}"/>
                                     </Border>
                                 </Grid>
@@ -124,11 +124,11 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource AccentOrangeBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Planned - engine and UI work"
+                                    <TextBlock x:Uid="AiLabPage_Item_009" Grid.Column="1" Text="Planned - engine and UI work"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock Text="Planned" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_010" Text="Planned" FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentOrangeBrush}"/>
                                     </Border>
                                 </Grid>
@@ -141,16 +141,16 @@
                                     <Ellipse Grid.Column="0" Width="8" Height="8"
                                              Fill="{StaticResource TextMutedBrush}"
                                              VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Future - scope not final"
+                                    <TextBlock x:Uid="AiLabPage_Item_011" Grid.Column="1" Text="Future - scope not final"
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock Text="Roadmap" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_012" Text="Roadmap" FontSize="10" FontWeight="SemiBold"
                                                    Foreground="{StaticResource TextMutedBrush}"/>
                                     </Border>
                                 </Grid>
                             </StackPanel>
-                            <TextBlock Text="A tool is marked Ready only when import, preview, batch export, and failure recovery are explicit."
+                            <TextBlock x:Uid="AiLabPage_Item_013" Text="A tool is marked Ready only when import, preview, batch export, and failure recovery are explicit."
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -159,8 +159,8 @@
 
             <StackPanel Grid.Row="1" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Open status or ready workflow" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock x:Uid="AiLabPage_Item_014" Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock x:Uid="AiLabPage_Item_015" Text="Open status or ready workflow" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="AiToolsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -179,18 +179,18 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="8">
-                        <TextBlock Text="1. Import" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Drop media, inspect streams, detect duration, codec, subtitles, and workflow fit."
+                        <TextBlock x:Uid="AiLabPage_Item_016" Text="1. Import" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AiLabPage_Item_017" Text="Drop media, inspect streams, detect duration, codec, subtitles, and workflow fit."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="8">
-                        <TextBlock Text="2. Preview" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Show before/after frames, estimated storage, model requirements, and fallback behavior."
+                        <TextBlock x:Uid="AiLabPage_Item_018" Text="2. Preview" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AiLabPage_Item_019" Text="Show before/after frames, estimated storage, model requirements, and fallback behavior."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Spacing="8">
-                        <TextBlock Text="3. Export" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Queue batch output with format presets, alpha/subtitle handling, and clear partial-success results."
+                        <TextBlock x:Uid="AiLabPage_Item_020" Text="3. Export" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AiLabPage_Item_021" Text="Queue batch output with format presets, alpha/subtitle handling, and clear partial-success results."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Grid>

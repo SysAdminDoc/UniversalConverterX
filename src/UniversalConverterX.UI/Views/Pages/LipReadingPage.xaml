@@ -48,7 +48,7 @@
                                    FontWeight="SemiBold"
                                    TextAlignment="Center"/>
                     </Border>
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="LipReadingPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click" Tag="{Binding}">
@@ -60,7 +60,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
+                        <ProgressBar x:Uid="LipReadingPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
                                      VerticalAlignment="Center"/>
@@ -101,7 +101,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="LipReadingPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
                             Click="OpenFinishedFolder_Click"
@@ -126,15 +126,15 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Lip Reading" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Transcribe speech from silent or muted video using AI visual speech recognition."
+                <TextBlock x:Uid="LipReadingPage_Item_004" Text="Lip Reading" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="LipReadingPage_Item_005" Text="Transcribe speech from silent or muted video using AI visual speech recognition."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="LipReadingPage_LipReadingPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="LipReadingPageButton01"/>
-                <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="LipReadingPage_LipReadingPageButton02" Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="LipReadingPageButton02"/>
             </StackPanel>
@@ -157,7 +157,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="LipReadingPage_LipReadingPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="LipReadingPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -169,13 +169,13 @@
                                     <FontIcon Glyph="&#xE909;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video files"
+                                <TextBlock x:Uid="LipReadingPage_Item_009" Text="Drop video files"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP4, MOV, MKV, AVI, WebM, and more."
+                                <TextBlock x:Uid="LipReadingPage_Item_010" Text="MP4, MOV, MKV, AVI, WebM, and more."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="LipReadingPage_LipReadingPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -189,7 +189,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="LipReadingPage_LipReadingPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="LipReadingPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -201,10 +201,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished jobs yet"
+                                <TextBlock x:Uid="LipReadingPage_Item_013" Text="No finished jobs yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed and failed jobs appear here."
+                                <TextBlock x:Uid="LipReadingPage_Item_014" Text="Completed and failed jobs appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -224,14 +224,14 @@
                 <!-- Backend -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Inference Backend" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="LipReadingPage_Item_015" Text="Inference Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo" HorizontalAlignment="Stretch"
                                   SelectionChanged="Backend_SelectionChanged"
                             AutomationProperties.AutomationId="BackendCombo">
-                            <ComboBoxItem Content="HuggingFace Space (free)" Tag="hf" IsSelected="True"/>
-                            <ComboBoxItem Content="Local Auto-AVSR (free)" Tag="local"/>
-                            <ComboBoxItem Content="Replicate API (token)" Tag="replicate"/>
-                            <ComboBoxItem Content="Custom Endpoint" Tag="custom"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_016" Content="HuggingFace Space (free)" Tag="hf" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_017" Content="Local Auto-AVSR (free)" Tag="local"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_018" Content="Replicate API (token)" Tag="replicate"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_019" Content="Custom Endpoint" Tag="custom"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -239,12 +239,12 @@
                 <!-- HF custom URL panel -->
                 <Border x:Name="HfPanel" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="HuggingFace Space URL" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="HfUrlBox"
+                        <TextBlock x:Uid="LipReadingPage_Item_020" Text="HuggingFace Space URL" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="LipReadingPage_HfUrlBox" x:Name="HfUrlBox"
                                  PlaceholderText="https://your-space.hf.space (optional)"
                                  HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="HfUrlBox"/>
-                        <TextBlock Text="Leave blank to use the built-in public spaces."
+                        <TextBlock x:Uid="LipReadingPage_Item_022" Text="Leave blank to use the built-in public spaces."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -254,8 +254,8 @@
                 <Border x:Name="ReplicatePanel" Style="{StaticResource CardStyle}"
                         Visibility="Collapsed">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Replicate API Token" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <PasswordBox x:Name="ReplicateTokenBox"
+                        <TextBlock x:Uid="LipReadingPage_Item_023" Text="Replicate API Token" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <PasswordBox x:Uid="LipReadingPage_ReplicateTokenBox" x:Name="ReplicateTokenBox"
                                      PlaceholderText="r8_…"
                                      HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="ReplicateTokenBox"/>
@@ -266,12 +266,12 @@
                 <Border x:Name="CustomPanel" Style="{StaticResource CardStyle}"
                         Visibility="Collapsed">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Custom Endpoint" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="CustomUrlBox"
+                        <TextBlock x:Uid="LipReadingPage_Item_025" Text="Custom Endpoint" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="LipReadingPage_CustomUrlBox" x:Name="CustomUrlBox"
                                  PlaceholderText="https://your-endpoint/transcribe"
                                  HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="CustomUrlBox"/>
-                        <TextBox x:Name="CustomKeyBox"
+                        <TextBox x:Uid="LipReadingPage_CustomKeyBox" x:Name="CustomKeyBox"
                                  PlaceholderText="Bearer token (optional)"
                                  HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="CustomKeyBox"/>
@@ -281,15 +281,15 @@
                 <!-- Detection options -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ToggleSwitch x:Name="SegmentToggle"
+                        <TextBlock x:Uid="LipReadingPage_Item_028" Text="Detection" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ToggleSwitch x:Uid="LipReadingPage_SegmentToggle" x:Name="SegmentToggle"
                                       Header="Auto speech segmentation"
                                       IsOn="True"
                             AutomationProperties.AutomationId="SegmentToggle"/>
                         <StackPanel Spacing="6" x:Name="ThresholdPanel">
                             <Grid>
-                                <TextBlock Text="Mouth-open threshold" Style="{StaticResource MutedTextStyle}"/>
-                                <TextBlock x:Name="ThresholdValueText" Text="0.06"
+                                <TextBlock x:Uid="LipReadingPage_Item_030" Text="Mouth-open threshold" Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock x:Uid="LipReadingPage_ThresholdValueText" x:Name="ThresholdValueText" Text="0.06"
                                            HorizontalAlignment="Right"
                                            Style="{StaticResource MutedTextStyle}"
                                            FontWeight="SemiBold"/>
@@ -304,12 +304,12 @@
                 <!-- Output format -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="LipReadingPage_Item_032" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="SRT subtitles (.srt)" Tag="srt" IsSelected="True"/>
-                            <ComboBoxItem Content="Plain text (.txt)" Tag="txt"/>
-                            <ComboBoxItem Content="JSON (.json)" Tag="json"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_033" Content="SRT subtitles (.srt)" Tag="srt" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_034" Content="Plain text (.txt)" Tag="txt"/>
+                            <ComboBoxItem x:Uid="LipReadingPage_Item_035" Content="JSON (.json)" Tag="json"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -317,15 +317,15 @@
                 <!-- Output folder -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
+                        <TextBlock x:Uid="LipReadingPage_Item_036" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="LipReadingPage_OutputDirectoryBox" x:Name="OutputDirectoryBox" PlaceholderText="Same folder as source"
                                  IsReadOnly="True" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="LipReadingPage_LipReadingPageButton04" Content="Choose Folder" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="LipReadingPageButton04"/>
-                            <Button Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="LipReadingPage_LipReadingPageButton05" Content="Same as Source" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
                                 AutomationProperties.AutomationId="LipReadingPageButton05"/>
                         </StackPanel>
@@ -342,21 +342,21 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="StatusText"
+                <TextBlock x:Uid="LipReadingPage_StatusText" x:Name="StatusText"
                            Text="Add video files to start a transcription queue."
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                    <Button x:Name="ClearButton" Content="Clear Queue"
+                    <Button x:Uid="LipReadingPage_ClearButton" x:Name="ClearButton" Content="Clear Queue"
                             Style="{StaticResource SecondaryButtonStyle}"
                             IsEnabled="False"
                             Click="Clear_Click"
                         AutomationProperties.AutomationId="ClearButton"/>
-                    <Button Content="Open Output Folder"
+                    <Button x:Uid="LipReadingPage_LipReadingPageButton06" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="OpenOutputFolder_Click"
                         AutomationProperties.AutomationId="LipReadingPageButton06"/>
-                    <Button x:Name="RunButton" Content="Transcribe"
+                    <Button x:Uid="LipReadingPage_RunButton" x:Name="RunButton" Content="Transcribe"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
                             Click="Run_Click"
@@ -372,12 +372,12 @@
                 CornerRadius="20"
                 Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14" MaxWidth="480">
-                <TextBlock x:Name="ProgressTitle" Text="Transcribing..."
+                <TextBlock x:Uid="LipReadingPage_ProgressTitle" x:Name="ProgressTitle" Text="Transcribing..."
                            Style="{StaticResource SubtitleTextStyle}"
                            HorizontalAlignment="Center"/>
-                <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0"
+                <ProgressBar x:Uid="LipReadingPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar" Minimum="0" Maximum="100" Value="0"
                              Width="380" Height="8" CornerRadius="4"/>
-                <TextBlock x:Name="ProgressStage" Text="Starting..."
+                <TextBlock x:Uid="LipReadingPage_ProgressStage" x:Name="ProgressStage" Text="Starting..."
                            Style="{StaticResource MutedTextStyle}"
                            HorizontalAlignment="Center"/>
                 <TextBlock x:Name="ProgressEta" Text=""
@@ -390,7 +390,7 @@
                                FontSize="11"
                                TextWrapping="Wrap"/>
                 </ScrollViewer>
-                <Button x:Name="CancelButton" Content="Cancel"
+                <Button x:Uid="LipReadingPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         HorizontalAlignment="Center"
                         Click="Cancel_Click"

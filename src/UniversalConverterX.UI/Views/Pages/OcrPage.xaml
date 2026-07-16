@@ -42,7 +42,7 @@
                                FontSize="11"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="OcrPage_Item_001" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             ToolTipService.ToolTip="Remove from queue"
@@ -71,19 +71,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="OCR (TEXT RECOGNITION)"
+                <TextBlock x:Uid="OcrPage_Item_002" Text="OCR (TEXT RECOGNITION)"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Extract text from images and scans via Tesseract. Output as plain TXT, hOCR (HTML with bounding boxes), searchable PDF, TSV (per-word coords), or ALTO XML."
+                <TextBlock x:Uid="OcrPage_Item_003" Text="Extract text from images and scans via Tesseract. Output as plain TXT, hOCR (HTML with bounding boxes), searchable PDF, TSV (per-word coords), or ALTO XML."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add images"
+                <Button x:Uid="OcrPage_OcrPageButton01" Content="Add images"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddFiles_Click"
                     AutomationProperties.AutomationId="OcrPageButton01"/>
-                <Button x:Name="RecognizeButton"
+                <Button x:Uid="OcrPage_RecognizeButton" x:Name="RecognizeButton"
                         Content="Recognise"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Recognize_Click"
@@ -105,23 +105,23 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ComboBox x:Name="LangCombo"
+                <ComboBox x:Uid="OcrPage_LangCombo" x:Name="LangCombo"
                           Header="Language pack"
                           IsEditable="True"
                           PlaceholderText="eng (or click Reload)"
                     AutomationProperties.AutomationId="LangCombo"/>
-                <ComboBox Grid.Column="1"
+                <ComboBox x:Uid="OcrPage_FormatCombo" Grid.Column="1"
                           x:Name="FormatCombo"
                           Header="Output format"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="FormatCombo">
-                    <ComboBoxItem Content="TXT (plain text)" Tag="txt"/>
-                    <ComboBoxItem Content="hOCR (HTML + bbox)" Tag="hocr"/>
-                    <ComboBoxItem Content="Searchable PDF" Tag="pdf"/>
-                    <ComboBoxItem Content="TSV (per-word coords)" Tag="tsv"/>
-                    <ComboBoxItem Content="ALTO XML" Tag="alto"/>
+                    <ComboBoxItem x:Uid="OcrPage_Item_008" Content="TXT (plain text)" Tag="txt"/>
+                    <ComboBoxItem x:Uid="OcrPage_Item_009" Content="hOCR (HTML + bbox)" Tag="hocr"/>
+                    <ComboBoxItem x:Uid="OcrPage_Item_010" Content="Searchable PDF" Tag="pdf"/>
+                    <ComboBoxItem x:Uid="OcrPage_Item_011" Content="TSV (per-word coords)" Tag="tsv"/>
+                    <ComboBoxItem x:Uid="OcrPage_Item_012" Content="ALTO XML" Tag="alto"/>
                 </ComboBox>
-                <NumberBox Grid.Column="2"
+                <NumberBox x:Uid="OcrPage_PsmBox" Grid.Column="2"
                            x:Name="PsmBox"
                            Header="Page segmentation mode"
                            Value="3"
@@ -129,20 +129,20 @@
                            SmallChange="1" LargeChange="1"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="PsmBox"/>
-                <Button Grid.Column="3"
+                <Button x:Uid="OcrPage_OcrPageButton02" Grid.Column="3"
                         Content="Reload langs"
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
                         Click="ReloadLangs_Click"
                     AutomationProperties.AutomationId="OcrPageButton02"/>
 
-                <TextBox Grid.Row="1" Grid.ColumnSpan="3"
+                <TextBox x:Uid="OcrPage_OutputDirBox" Grid.Row="1" Grid.ColumnSpan="3"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
                          PlaceholderText="(same as source)"
                     AutomationProperties.AutomationId="OutputDirBox"/>
-                <Button Grid.Row="1" Grid.Column="3"
+                <Button x:Uid="OcrPage_OcrPageButton03" Grid.Row="1" Grid.Column="3"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
@@ -161,10 +161,10 @@
                         <FontIcon Glyph="&#xE8A1;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Add images"
+                    <TextBlock x:Uid="OcrPage_Item_017" Text="Add images"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="PNG, JPG, TIFF, BMP, WebP. Pick a language and output format, then Recognise."
+                    <TextBlock x:Uid="OcrPage_Item_018" Text="PNG, JPG, TIFF, BMP, WebP. Pick a language and output format, then Recognise."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"
@@ -178,13 +178,13 @@
             </Grid>
         </Border>
 
-        <ProgressBar AutomationProperties.Name="Progress"
+        <ProgressBar x:Uid="OcrPage_WorkProgress" AutomationProperties.Name="Progress"
                      Grid.Row="3"
                      x:Name="WorkProgress"
                      Minimum="0" Maximum="100"
                      IsIndeterminate="False"/>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="OcrPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Click Reload langs to populate the language picker."/>

@@ -54,7 +54,7 @@
                                    TextAlignment="Center"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="DownloaderPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveQueued_Click" Tag="{Binding}">
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
+                        <ProgressBar x:Uid="DownloaderPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
                                      VerticalAlignment="Center"/>
@@ -113,7 +113,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="DownloaderPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
                             Click="OpenFinishedFolder_Click"
@@ -135,8 +135,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
-            <TextBlock Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Queue video and audio downloads from supported URLs, then review completed results."
+            <TextBlock x:Uid="DownloaderPage_Item_004" Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock x:Uid="DownloaderPage_Item_005" Text="Queue video and audio downloads from supported URLs, then review completed results."
                        Style="{StaticResource SubtitleTextStyle}" TextWrapping="Wrap"/>
         </StackPanel>
 
@@ -153,15 +153,15 @@
                               Foreground="{StaticResource AccentBlueBrush}"/>
                 </Border>
                 <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                    <TextBlock x:Name="RuntimeHealthTitleText"
+                    <TextBlock x:Uid="DownloaderPage_RuntimeHealthTitleText" x:Name="RuntimeHealthTitleText"
                                Text="Checking downloader runtimes..."
                                Style="{StaticResource PanelTitleTextStyle}"/>
-                    <TextBlock x:Name="RuntimeHealthDetailText"
+                    <TextBlock x:Uid="DownloaderPage_RuntimeHealthDetailText" x:Name="RuntimeHealthDetailText"
                                Text="Verifying yt-dlp, Deno, and the local sidecar."
                                Style="{StaticResource MutedTextStyle}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
-                <Button x:Name="RuntimeToolsButton" Grid.Column="2"
+                <Button x:Uid="DownloaderPage_RuntimeToolsButton" x:Name="RuntimeToolsButton" Grid.Column="2"
                         Content="Install / update runtimes"
                         AutomationProperties.AutomationId="DownloaderRuntimeToolsButton"
                         Style="{StaticResource SecondaryButtonStyle}"
@@ -182,7 +182,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
+                <TextBox x:Uid="DownloaderPage_UrlBox" x:Name="UrlBox" Grid.Row="0" Grid.Column="0"
                          AutomationProperties.AutomationId="DownloaderUrlBox"
                          PlaceholderText="Paste one or more URLs, one per line"
                          AcceptsReturn="True"
@@ -190,34 +190,34 @@
                          MinHeight="44"
                          MaxHeight="96"
                          TextChanged="UrlBox_TextChanged"/>
-                <Button x:Name="PasteButton" Grid.Row="0" Grid.Column="1" Content="Paste"
+                <Button x:Uid="DownloaderPage_PasteButton" x:Name="PasteButton" Grid.Row="0" Grid.Column="1" Content="Paste"
                         AutomationProperties.AutomationId="DownloaderPasteButton"
                         Style="{StaticResource SecondaryButtonStyle}" Click="Paste_Click"/>
-                <Button x:Name="AddUrlButton" Grid.Row="0" Grid.Column="2" Content="Add to Queue"
+                <Button x:Uid="DownloaderPage_AddUrlButton" x:Name="AddUrlButton" Grid.Row="0" Grid.Column="2" Content="Add to Queue"
                         AutomationProperties.AutomationId="DownloaderAddUrlButton"
                         Style="{StaticResource PrimaryButtonStyle}" Click="AddUrl_Click" IsEnabled="False"/>
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
-                    <ComboBox x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0"
+                    <ComboBox x:Uid="DownloaderPage_QualityCombo" x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0"
                               AutomationProperties.AutomationId="DownloaderQualityCombo">
-                        <ComboBoxItem Content="Highest available (video + audio)" Tag="best"/>
-                        <ComboBoxItem Content="1080p" Tag="1080"/>
-                        <ComboBoxItem Content="720p" Tag="720"/>
-                        <ComboBoxItem Content="480p" Tag="480"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_013" Content="Highest available (video + audio)" Tag="best"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_014" Content="1080p" Tag="1080"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_015" Content="720p" Tag="720"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_016" Content="480p" Tag="480"/>
                     </ComboBox>
-                    <ComboBox x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0"
+                    <ComboBox x:Uid="DownloaderPage_OutputFormatCombo" x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0"
                               AutomationProperties.AutomationId="DownloaderOutputFormatCombo">
-                        <ComboBoxItem Content="MP4" Tag="mp4"/>
-                        <ComboBoxItem Content="MKV" Tag="mkv"/>
-                        <ComboBoxItem Content="WebM" Tag="webm"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_018" Content="MP4" Tag="mp4"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_019" Content="MKV" Tag="mkv"/>
+                        <ComboBoxItem x:Uid="DownloaderPage_Item_020" Content="WebM" Tag="webm"/>
                     </ComboBox>
-                    <CheckBox x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
+                    <CheckBox x:Uid="DownloaderPage_AudioOnlyCheck" x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
                               AutomationProperties.AutomationId="DownloaderAudioOnlyCheck"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox x:Name="SubtitlesCheck" Content="Embed subtitles"
+                    <CheckBox x:Uid="DownloaderPage_SubtitlesCheck" x:Name="SubtitlesCheck" Content="Embed subtitles"
                               AutomationProperties.AutomationId="DownloaderSubtitlesCheck"
                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox x:Name="SponsorBlockCheck"
+                    <CheckBox x:Uid="DownloaderPage_SponsorBlockCheck" x:Name="SponsorBlockCheck"
                               Content="Skip sponsor segments (SponsorBlock)"
                               AutomationProperties.AutomationId="DownloaderSponsorBlockCheck"
                               ToolTipService.ToolTip="Removes sponsor / self-promo / interaction segments from the final download. Uses yt-dlp's SponsorBlock postprocessor — pulls segment data from api.sponsor.ajay.app on demand."
@@ -230,7 +230,7 @@
                         <FontIcon Glyph="&#xE946;" FontSize="16"
                                   Foreground="{StaticResource AccentBlueBrush}"
                                   VerticalAlignment="Top"/>
-                        <TextBlock Text="Downloads run through the local sidecar queue. Review site terms before downloading protected or private media."
+                        <TextBlock x:Uid="DownloaderPage_Item_024" Text="Downloads run through the local sidecar queue. Review site terms before downloading protected or private media."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -258,9 +258,9 @@
                           Foreground="{StaticResource AccentBlueBrush}"
                           VerticalAlignment="Center"/>
                 <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Text="Cookie Authentication"
+                    <TextBlock x:Uid="DownloaderPage_Item_025" Text="Cookie Authentication"
                                Style="{StaticResource PanelTitleTextStyle}"/>
-                    <TextBlock x:Name="CookieStatusText"
+                    <TextBlock x:Uid="DownloaderPage_CookieStatusText" x:Name="CookieStatusText"
                                Text="Checking cookie store..."
                                Style="{StaticResource MutedTextStyle}"
                                TextWrapping="NoWrap"
@@ -272,30 +272,30 @@
                           Width="150"
                           VerticalAlignment="Center"
                           SelectedIndex="0">
-                    <ComboBoxItem Content="Chrome" Tag="chrome"/>
-                    <ComboBoxItem Content="Firefox" Tag="firefox"/>
-                    <ComboBoxItem Content="Edge" Tag="edge"/>
-                    <ComboBoxItem Content="Brave" Tag="brave"/>
-                    <ComboBoxItem Content="Chromium" Tag="chromium"/>
-                    <ComboBoxItem Content="Vivaldi" Tag="vivaldi"/>
-                    <ComboBoxItem Content="Opera" Tag="opera"/>
-                    <ComboBoxItem Content="LibreWolf" Tag="librewolf"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_027" Content="Chrome" Tag="chrome"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_028" Content="Firefox" Tag="firefox"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_029" Content="Edge" Tag="edge"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_030" Content="Brave" Tag="brave"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_031" Content="Chromium" Tag="chromium"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_032" Content="Vivaldi" Tag="vivaldi"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_033" Content="Opera" Tag="opera"/>
+                    <ComboBoxItem x:Uid="DownloaderPage_Item_034" Content="LibreWolf" Tag="librewolf"/>
                 </ComboBox>
-                <Button x:Name="CookieImportBrowserButton"
+                <Button x:Uid="DownloaderPage_CookieImportBrowserButton" x:Name="CookieImportBrowserButton"
                         Grid.Row="0" Grid.Column="3"
                         AutomationProperties.AutomationId="DownloaderImportCookiesButton"
                         Content="Import"
                         Style="{StaticResource PrimaryButtonStyle}"
                         ToolTipService.ToolTip="Extract cookies from the selected browser into UCX's encrypted cookie store"
                         Click="ImportCookiesFromBrowser_Click"/>
-                <Button x:Name="CookieImportFileButton"
+                <Button x:Uid="DownloaderPage_CookieImportFileButton" x:Name="CookieImportFileButton"
                         Grid.Row="0" Grid.Column="4"
                         AutomationProperties.AutomationId="DownloaderImportCookiesFromFileButton"
                         Content="From file..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         ToolTipService.ToolTip="Import cookies from a Netscape cookies.txt file you exported manually"
                         Click="ImportCookiesFromFile_Click"/>
-                <Button x:Name="CookieClearButton"
+                <Button x:Uid="DownloaderPage_CookieClearButton" x:Name="CookieClearButton"
                         Grid.Row="0" Grid.Column="5"
                         AutomationProperties.AutomationId="DownloaderClearCookiesButton"
                         Content="Clear"
@@ -323,19 +323,19 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="Activity" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="DownloaderPage_Item_038" Text="Activity" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="QueueSummaryText"
                                    Style="{StaticResource MutedTextStyle}"
                                    VerticalAlignment="Bottom"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="Open Output Folder"
+                    <Button x:Uid="DownloaderPage_DownloaderPageButton01" Grid.Column="1" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="OpenOutput_Click"
                         AutomationProperties.AutomationId="DownloaderPageButton01"/>
                 </Grid>
 
                 <Pivot x:Name="QueuePivot" Grid.Row="1" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Downloading"
+                    <PivotItem x:Uid="DownloaderPage_DownloaderPagePivotItem01" Header="Downloading"
                         AutomationProperties.AutomationId="DownloaderPagePivotItem01">
                         <Grid MinHeight="330" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
@@ -347,10 +347,10 @@
                                     <FontIcon Glyph="&#xE896;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Paste a URL above and add it to the queue"
+                                <TextBlock x:Uid="DownloaderPage_Item_041" Text="Paste a URL above and add it to the queue"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Multiple pasted URLs are split automatically."
+                                <TextBlock x:Uid="DownloaderPage_Item_042" Text="Multiple pasted URLs are split automatically."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -363,7 +363,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="DownloaderPage_DownloaderPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="DownloaderPagePivotItem02">
                         <Grid MinHeight="330" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -375,10 +375,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished downloads yet"
+                                <TextBlock x:Uid="DownloaderPage_Item_044" Text="No finished downloads yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Saved, failed, and cancelled downloads appear here."
+                                <TextBlock x:Uid="DownloaderPage_Item_045" Text="Saved, failed, and cancelled downloads appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -404,15 +404,15 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button x:Name="ClearQueueButton" Grid.Column="1" Content="Clear Queue"
+            <Button x:Uid="DownloaderPage_ClearQueueButton" x:Name="ClearQueueButton" Grid.Column="1" Content="Clear Queue"
                     AutomationProperties.AutomationId="DownloaderClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}" Click="ClearQueue_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
-            <Button x:Name="DownloadButton" Grid.Column="2" Content="Download All"
+            <Button x:Uid="DownloaderPage_DownloadButton" x:Name="DownloadButton" Grid.Column="2" Content="Download All"
                     AutomationProperties.AutomationId="DownloaderDownloadButton"
                     Style="{StaticResource PrimaryButtonStyle}" Click="Download_Click"
                     Margin="0,0,12,0" IsEnabled="False"/>
-            <Button x:Name="CancelButton" Grid.Column="3" Content="Cancel"
+            <Button x:Uid="DownloaderPage_CancelButton" x:Name="CancelButton" Grid.Column="3" Content="Cancel"
                     AutomationProperties.AutomationId="DownloaderCancelButton"
                     Style="{StaticResource DangerButtonStyle}" Click="Cancel_Click"
                     IsEnabled="False"/>

@@ -21,16 +21,16 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Back"
+            <Button x:Uid="PresetEditorPage_PresetEditorBackButton" Content="Back"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="Cancel_Click"
                     VerticalAlignment="Center"
                     AutomationProperties.AutomationId="PresetEditorBackButton"/>
             <StackPanel Grid.Column="1" Spacing="6">
-                <TextBlock x:Name="PageTitle"
+                <TextBlock x:Uid="PresetEditorPage_PageTitle" x:Name="PageTitle"
                            Text="Create preset"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Name="PageSubtitle"
+                <TextBlock x:Uid="PresetEditorPage_PageSubtitle" x:Name="PageSubtitle"
                            Text="Build a reusable local preset. Arguments are passed directly to the selected sidecar."
                            Style="{StaticResource SubtitleTextStyle}"
                            FontSize="13"
@@ -38,7 +38,7 @@
             </StackPanel>
         </Grid>
 
-        <InfoBar Grid.Row="1"
+        <InfoBar x:Uid="PresetEditorPage_ValidationInfo" Grid.Row="1"
                  x:Name="ValidationInfo"
                  IsOpen="False"
                  IsClosable="True"
@@ -49,9 +49,9 @@
             <StackPanel Spacing="16" Padding="0,0,12,16">
                 <Border Style="{StaticResource CardStyle}" Padding="20">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Identity and matching"
+                        <TextBlock x:Uid="PresetEditorPage_Item_005" Text="Identity and matching"
                                    Style="{StaticResource SectionHeaderTextStyle}"/>
-                        <TextBlock Text="Custom presets are stored under your Windows profile and override shipped presets only when their names match."
+                        <TextBlock x:Uid="PresetEditorPage_Item_006" Text="Custom presets are stored under your Windows profile and override shipped presets only when their names match."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <Grid ColumnSpacing="14" RowSpacing="12">
@@ -63,24 +63,24 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <TextBox x:Name="NameBox"
+                            <TextBox x:Uid="PresetEditorPage_NameBox" x:Name="NameBox"
                                      Header="Preset name"
                                      PlaceholderText="My H.264 encode"
                                      TextChanged="EditorField_Changed"
                                      AutomationProperties.AutomationId="PresetEditorNameBox"/>
-                            <TextBox Grid.Column="1"
+                            <TextBox x:Uid="PresetEditorPage_EngineBox" Grid.Column="1"
                                      x:Name="EngineBox"
                                      Header="Sidecar engine"
                                      PlaceholderText="videocrush"
                                      TextChanged="EditorField_Changed"
                                      AutomationProperties.AutomationId="PresetEditorEngineBox"/>
-                            <TextBox Grid.Row="1"
+                            <TextBox x:Uid="PresetEditorPage_FolderBox" Grid.Row="1"
                                      x:Name="FolderBox"
                                      Header="Category"
                                      PlaceholderText="Video/Custom"
                                      TextChanged="EditorField_Changed"
                                      AutomationProperties.AutomationId="PresetEditorFolderBox"/>
-                            <TextBox Grid.Row="1" Grid.Column="1"
+                            <TextBox x:Uid="PresetEditorPage_InputTypesBox" Grid.Row="1" Grid.Column="1"
                                      x:Name="InputTypesBox"
                                      Header="Input extensions"
                                      PlaceholderText="mp4, mkv, mov (blank means any)"
@@ -92,9 +92,9 @@
 
                 <Border Style="{StaticResource CardStyle}" Padding="20">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Output and invocation"
+                        <TextBlock x:Uid="PresetEditorPage_Item_011" Text="Output and invocation"
                                    Style="{StaticResource SectionHeaderTextStyle}"/>
-                        <TextBox x:Name="OutputTemplateBox"
+                        <TextBox x:Uid="PresetEditorPage_OutputTemplateBox" x:Name="OutputTemplateBox"
                                  Header="Output filename template"
                                  PlaceholderText="{}{dir}/{stem}_custom"
                                  TextChanged="EditorField_Changed"
@@ -104,24 +104,24 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="OutputExtensionBox"
+                            <TextBox x:Uid="PresetEditorPage_OutputExtensionBox" x:Name="OutputExtensionBox"
                                      Header="Output extension"
                                      PlaceholderText="mkv, tar.gz, or __dir__"
                                      TextChanged="EditorField_Changed"
                                      AutomationProperties.AutomationId="PresetEditorOutputExtensionBox"/>
-                            <ComboBox Grid.Column="1"
+                            <ComboBox x:Uid="PresetEditorPage_InvocationModeCombo" Grid.Column="1"
                                       x:Name="InvocationModeCombo"
                                       Header="Invocation mode"
                                       SelectionChanged="InvocationMode_Changed"
                                       AutomationProperties.AutomationId="PresetEditorInvocationModeCombo">
-                                <ComboBoxItem Content="One run per file" Tag="per-file"/>
-                                <ComboBoxItem Content="Batch input list" Tag="batch-input-list"/>
-                                <ComboBoxItem Content="Batch with output folder" Tag="batch-output-dir"/>
-                                <ComboBoxItem Content="Batch to one output" Tag="batch-single-output"/>
-                                <ComboBoxItem Content="Extract each input" Tag="extract-each"/>
+                                <ComboBoxItem x:Uid="PresetEditorPage_Item_015" Content="One run per file" Tag="per-file"/>
+                                <ComboBoxItem x:Uid="PresetEditorPage_Item_016" Content="Batch input list" Tag="batch-input-list"/>
+                                <ComboBoxItem x:Uid="PresetEditorPage_Item_017" Content="Batch with output folder" Tag="batch-output-dir"/>
+                                <ComboBoxItem x:Uid="PresetEditorPage_Item_018" Content="Batch to one output" Tag="batch-single-output"/>
+                                <ComboBoxItem x:Uid="PresetEditorPage_Item_019" Content="Extract each input" Tag="extract-each"/>
                             </ComboBox>
                         </Grid>
-                        <TextBlock Text="Tokens: {dir}, {stem}, {ext}, and {preset}. Use __dir__ when the preset creates a folder instead of a file."
+                        <TextBlock x:Uid="PresetEditorPage_Item_020" Text="Tokens: {dir}, {stem}, {ext}, and {preset}. Use __dir__ when the preset creates a folder instead of a file."
                                    Style="{StaticResource SubtleTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -129,12 +129,12 @@
 
                 <Border Style="{StaticResource CardStyle}" Padding="20">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Sidecar arguments"
+                        <TextBlock x:Uid="PresetEditorPage_Item_021" Text="Sidecar arguments"
                                    Style="{StaticResource SectionHeaderTextStyle}"/>
-                        <TextBlock Text="Enter exactly one argument per line. Input and output arguments are appended by the selected invocation mode."
+                        <TextBlock x:Uid="PresetEditorPage_Item_022" Text="Enter exactly one argument per line. Input and output arguments are appended by the selected invocation mode."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <TextBox x:Name="ArgumentsBox"
+                        <TextBox x:Uid="PresetEditorPage_ArgumentsBox" x:Name="ArgumentsBox"
                                  AcceptsReturn="True"
                                  TextWrapping="NoWrap"
                                  MinHeight="180"
@@ -147,13 +147,13 @@
 
                 <Border Style="{StaticResource CardStyle}" Padding="20">
                     <StackPanel Spacing="12">
-                        <ToggleSwitch x:Name="RequiresExtraInputToggle"
+                        <ToggleSwitch x:Uid="PresetEditorPage_RequiresExtraInputToggle" x:Name="RequiresExtraInputToggle"
                                       Header="Ask for an additional input"
                                       OffContent="No extra input"
                                       OnContent="Extra input required"
                                       Toggled="RequiresExtraInput_Toggled"
                                       AutomationProperties.AutomationId="PresetEditorExtraInputToggle"/>
-                        <TextBox x:Name="ExtraInputPromptBox"
+                        <TextBox x:Uid="PresetEditorPage_ExtraInputPromptBox" x:Name="ExtraInputPromptBox"
                                  Header="Extra input prompt"
                                  PlaceholderText="Explain what additional file the user should choose"
                                  IsEnabled="False"
@@ -168,9 +168,9 @@
                         CornerRadius="12"
                         Padding="14">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Local preset preview"
+                        <TextBlock x:Uid="PresetEditorPage_Item_026" Text="Local preset preview"
                                    Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock x:Name="PreviewText"
+                        <TextBlock x:Uid="PresetEditorPage_PreviewText" x:Name="PreviewText"
                                    Text="Complete the required fields to preview this preset."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -189,17 +189,17 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="SaveLocationText"
+                <TextBlock x:Uid="PresetEditorPage_SaveLocationText" x:Name="SaveLocationText"
                            Text="Saved presets remain available after restart."
                            Style="{StaticResource SubtleTextStyle}"
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"/>
-                <Button Grid.Column="1"
+                <Button x:Uid="PresetEditorPage_PresetEditorCancelButton" Grid.Column="1"
                         Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Cancel_Click"
                         AutomationProperties.AutomationId="PresetEditorCancelButton"/>
-                <Button Grid.Column="2"
+                <Button x:Uid="PresetEditorPage_SaveButton" Grid.Column="2"
                         x:Name="SaveButton"
                         Content="Save preset"
                         Style="{StaticResource PrimaryButtonStyle}"

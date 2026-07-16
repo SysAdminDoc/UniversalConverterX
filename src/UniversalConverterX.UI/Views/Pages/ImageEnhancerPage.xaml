@@ -40,7 +40,7 @@
                         <TextBlock Text="{Binding PlanSummary}" Style="{StaticResource MutedTextStyle}"
                                    FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Style="{StaticResource IconButtonStyle}"
+                    <Button x:Uid="ImageEnhancerPage_Item_001" Grid.Column="3" Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove" ToolTipService.ToolTip="Remove" Click="RemoveQueued_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -50,7 +50,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                        <ProgressBar x:Uid="ImageEnhancerPage_Item_002" AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
                                      Height="6" CornerRadius="3" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding StatusText}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -81,7 +81,7 @@
                         <TextBlock Text="{Binding Details}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="ImageEnhancerPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}" Padding="14,8"
                             Click="OpenFinishedFolder_Click" Tag="{Binding OutputPath}"
                             IsEnabled="{Binding CanOpenFolder}"/>
@@ -103,19 +103,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="IMAGE UPSCALER"
+                <TextBlock x:Uid="ImageEnhancerPage_Item_004" Text="IMAGE UPSCALER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Real-ESRGAN ncnn-vulkan super-resolution up to 4×. Photo, anime, and general models available."
+                <TextBlock x:Uid="ImageEnhancerPage_Item_005" Text="Real-ESRGAN ncnn-vulkan super-resolution up to 4×. Photo, anime, and general models available."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="ImageEnhancerPage_ImageEnhancerPageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="ImageEnhancerPageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="ImageEnhancerPage_RunButton" x:Name="RunButton"
                         Content="Upscale"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -136,7 +136,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="ImageEnhancerPage_ImageEnhancerPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="ImageEnhancerPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -145,14 +145,14 @@
                                     <FontIcon Glyph="&#xE799;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop images here"
+                                <TextBlock x:Uid="ImageEnhancerPage_Item_009" Text="Drop images here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each file will be upscaled by the selected factor and saved alongside the source."
+                                <TextBlock x:Uid="ImageEnhancerPage_Item_010" Text="Each file will be upscaled by the selected factor and saved alongside the source."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
-                                <Button Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
+                                <Button x:Uid="ImageEnhancerPage_ImageEnhancerPageButton02" Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click" HorizontalAlignment="Center"
                                     AutomationProperties.AutomationId="ImageEnhancerPageButton02"/>
                             </StackPanel>
@@ -161,7 +161,7 @@
                                       ItemTemplate="{StaticResource UpQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="ImageEnhancerPage_ImageEnhancerPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="ImageEnhancerPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -171,7 +171,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No upscaled images yet"
+                                <TextBlock x:Uid="ImageEnhancerPage_Item_013" Text="No upscaled images yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -186,14 +186,14 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo" Header="Model"
+                        <TextBlock x:Uid="ImageEnhancerPage_Item_014" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="ImageEnhancerPage_ModelCombo" x:Name="ModelCombo" Header="Model"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Discovering..."
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ModelCombo"/>
                         <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
-                        <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
+                        <Button x:Uid="ImageEnhancerPage_ImageEnhancerPageButton03" Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
                                 Click="RefreshModels_Click" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="ImageEnhancerPageButton03"/>
                     </StackPanel>
@@ -201,24 +201,24 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Scale" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ScaleCombo" Header="Factor" SelectedIndex="2"
+                        <TextBlock x:Uid="ImageEnhancerPage_Item_017" Text="Scale" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="ImageEnhancerPage_ScaleCombo" x:Name="ScaleCombo" Header="Factor" SelectedIndex="2"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ScaleCombo">
-                            <ComboBoxItem Content="2× upscale" Tag="2"/>
-                            <ComboBoxItem Content="3× upscale" Tag="3"/>
-                            <ComboBoxItem Content="4× upscale" Tag="4"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_019" Content="2× upscale" Tag="2"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_020" Content="3× upscale" Tag="3"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_021" Content="4× upscale" Tag="4"/>
                         </ComboBox>
-                        <ComboBox x:Name="FormatCombo" Header="Output format" SelectedIndex="0"
+                        <ComboBox x:Uid="ImageEnhancerPage_FormatCombo" x:Name="FormatCombo" Header="Output format" SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="PNG (lossless)" Tag="png"/>
-                            <ComboBoxItem Content="JPEG"           Tag="jpg"/>
-                            <ComboBoxItem Content="WebP"           Tag="webp"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_023" Content="PNG (lossless)" Tag="png"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_024" Content="JPEG"           Tag="jpg"/>
+                            <ComboBoxItem x:Uid="ImageEnhancerPage_Item_025" Content="WebP"           Tag="webp"/>
                         </ComboBox>
-                        <CheckBox x:Name="TtaCheck"
+                        <CheckBox x:Uid="ImageEnhancerPage_TtaCheck" x:Name="TtaCheck"
                                   Content="TTA (slower, slight quality bump)"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
@@ -228,8 +228,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText" Text="0 queued / 0 finished"
+                        <TextBlock x:Uid="ImageEnhancerPage_Item_027" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="ImageEnhancerPage_QueueSummaryText" x:Name="QueueSummaryText" Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
@@ -245,11 +245,11 @@
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText" Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
+            <Button x:Uid="ImageEnhancerPage_ClearButton" Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"
                     Margin="0,0,12,0" IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
+            <Button x:Uid="ImageEnhancerPage_CancelButton" Grid.Column="2" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click" IsEnabled="False"
                 AutomationProperties.AutomationId="CancelButton"/>

@@ -52,7 +52,7 @@
                                    TextAlignment="Center"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="VoiceChangerPage_VoiceChangerRemoveButton" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             AutomationProperties.AutomationId="VoiceChangerRemoveButton"
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress"
+                        <ProgressBar x:Uid="VoiceChangerPage_Item_002" AutomationProperties.Name="Progress"
                                      Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -94,19 +94,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="VOICE CHANGER"
+                <TextBlock x:Uid="VoiceChangerPage_Item_003" Text="VOICE CHANGER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Transform narration tone, pitch, and timbre while preserving speech timing."
+                <TextBlock x:Uid="VoiceChangerPage_Item_004" Text="Transform narration tone, pitch, and timbre while preserving speech timing."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="760" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="VoiceChangerPage_VoiceChangerAddFilesButton" Content="Add Files"
                         AutomationProperties.AutomationId="VoiceChangerAddFilesButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="VoiceChangerPage_VoiceChangerAddFolderButton" Content="Add Folder"
                         AutomationProperties.AutomationId="VoiceChangerAddFolderButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"/>
@@ -136,16 +136,16 @@
                             <FontIcon Glyph="&#xED28;" FontSize="48"
                                       Foreground="{StaticResource AccentOrangeBrush}"/>
                         </Border>
-                        <TextBlock Text="Drop audio or video files"
+                        <TextBlock x:Uid="VoiceChangerPage_Item_007" Text="Drop audio or video files"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="MP3, WAV, FLAC, M4A, AAC, OGG, OPUS, MP4, MKV, MOV, WEBM and common speech containers."
+                        <TextBlock x:Uid="VoiceChangerPage_Item_008" Text="MP3, WAV, FLAC, M4A, AAC, OGG, OPUS, MP4, MKV, MOV, WEBM and common speech containers."
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Center"
                                    TextWrapping="Wrap"
                                    MaxWidth="460"
                                    TextAlignment="Center"/>
-                        <Button Content="Browse Files"
+                        <Button x:Uid="VoiceChangerPage_VoiceChangerBrowseButton" Content="Browse Files"
                                 AutomationProperties.AutomationId="VoiceChangerBrowseButton"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="Browse_Click"
@@ -163,16 +163,16 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Voice Style" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VoiceChangerPage_Item_010" Text="Voice Style" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="StyleCombo"
                                   AutomationProperties.AutomationId="VoiceChangerStyleCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="VoiceCombo_Changed">
-                            <ComboBoxItem Content="Neutral / cleaned" Tag="neutral" IsSelected="True"/>
-                            <ComboBoxItem Content="Lower / deeper" Tag="lower"/>
-                            <ComboBoxItem Content="Higher / lighter" Tag="higher"/>
-                            <ComboBoxItem Content="Robotic" Tag="robotic"/>
-                            <ComboBoxItem Content="Whisper" Tag="whisper"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_011" Content="Neutral / cleaned" Tag="neutral" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_012" Content="Lower / deeper" Tag="lower"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_013" Content="Higher / lighter" Tag="higher"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_014" Content="Robotic" Tag="robotic"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_015" Content="Whisper" Tag="whisper"/>
                         </ComboBox>
                         <TextBlock x:Name="StyleSummary"
                                    Text=""
@@ -184,14 +184,14 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Tuning" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <Slider x:Name="PitchSlider"
+                        <TextBlock x:Uid="VoiceChangerPage_Item_016" Text="Tuning" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Uid="VoiceChangerPage_PitchSlider" x:Name="PitchSlider"
                                 AutomationProperties.AutomationId="VoiceChangerPitchSlider"
                                 Header="Pitch shift (semitones)"
                                 Minimum="-12" Maximum="12" Value="0"
                                 StepFrequency="1" SnapsTo="StepValues"
                                 ValueChanged="VoiceSlider_Changed"/>
-                        <Slider x:Name="IntensitySlider"
+                        <Slider x:Uid="VoiceChangerPage_IntensitySlider" x:Name="IntensitySlider"
                                 AutomationProperties.AutomationId="VoiceChangerIntensitySlider"
                                 Header="Timbre intensity"
                                 Minimum="0" Maximum="100" Value="65"
@@ -202,19 +202,19 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VoiceChangerPage_Item_019" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   AutomationProperties.AutomationId="VoiceChangerFormatCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="VoiceCombo_Changed">
-                            <ComboBoxItem Content="WAV (16-bit PCM)" Tag="wav" IsSelected="True"/>
-                            <ComboBoxItem Content="MP3 (V2)" Tag="mp3"/>
-                            <ComboBoxItem Content="AAC (M4A 192 kbps)" Tag="m4a"/>
-                            <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
-                            <ComboBoxItem Content="Opus (128 kbps)" Tag="opus"/>
-                            <ComboBoxItem Content="Keep video when possible" Tag="video"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_020" Content="WAV (16-bit PCM)" Tag="wav" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_021" Content="MP3 (V2)" Tag="mp3"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_022" Content="AAC (M4A 192 kbps)" Tag="m4a"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_023" Content="FLAC (lossless)" Tag="flac"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_024" Content="Opus (128 kbps)" Tag="opus"/>
+                            <ComboBoxItem x:Uid="VoiceChangerPage_Item_025" Content="Keep video when possible" Tag="video"/>
                         </ComboBox>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBox x:Uid="VoiceChangerPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  AutomationProperties.AutomationId="VoiceChangerOutputDirBox"
                                  Header="Save to"
                                  PlaceholderText="Same folder as each source file"
@@ -224,11 +224,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Browse"
+                            <Button x:Uid="VoiceChangerPage_VoiceChangerBrowseOutputButton" Grid.Column="0" Content="Browse"
                                     AutomationProperties.AutomationId="VoiceChangerBrowseOutputButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"/>
-                            <Button Grid.Column="1" Content="Same as source"
+                            <Button x:Uid="VoiceChangerPage_VoiceChangerSameAsSourceButton" Grid.Column="1" Content="Same as source"
                                     AutomationProperties.AutomationId="VoiceChangerSameAsSourceButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"/>
@@ -241,7 +241,7 @@
                         <FontIcon Glyph="&#xE946;" FontSize="16"
                                   Foreground="{StaticResource AccentOrangeBrush}"
                                   VerticalAlignment="Top"/>
-                        <TextBlock Text="The local engine uses FFmpeg filters for pitch, EQ, dynamics, and modulation. Originals are kept."
+                        <TextBlock x:Uid="VoiceChangerPage_Item_029" Text="The local engine uses FFmpeg filters for pitch, EQ, dynamics, and modulation. Originals are kept."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -260,16 +260,16 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" Content="Clear Queue"
+            <Button x:Uid="VoiceChangerPage_ClearButton" Grid.Column="1" Content="Clear Queue"
                     x:Name="ClearButton"
                     AutomationProperties.AutomationId="VoiceChangerClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
-            <Button Grid.Column="2" Content="Open Output"
+            <Button x:Uid="VoiceChangerPage_VoiceChangerOpenOutputButton" Grid.Column="2" Content="Open Output"
                     AutomationProperties.AutomationId="VoiceChangerOpenOutputButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
-            <Button Grid.Column="3" Content="Transform All"
+            <Button x:Uid="VoiceChangerPage_TransformButton" Grid.Column="3" Content="Transform All"
                     x:Name="TransformButton"
                     AutomationProperties.AutomationId="VoiceChangerTransformButton"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -284,9 +284,9 @@
                     MinWidth="440"
                     MaxWidth="560">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle" Text="Transforming..."
+                    <TextBlock x:Uid="VoiceChangerPage_ProgressTitle" x:Name="ProgressTitle" Text="Transforming..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress"
+                    <ProgressBar x:Uid="VoiceChangerPage_ProgressBar" AutomationProperties.Name="Progress"
                                  x:Name="ProgressBar" Height="8" CornerRadius="4"
                                  Minimum="0" Maximum="100"/>
                     <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
@@ -297,7 +297,7 @@
                                    TextWrapping="Wrap"/>
                     </ScrollViewer>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                        <Button x:Name="CancelButton" Content="Cancel"
+                        <Button x:Uid="VoiceChangerPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                                 AutomationProperties.AutomationId="VoiceChangerCancelButton"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"/>

@@ -42,7 +42,7 @@
                                FontSize="11"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="EbookConverterPage_Item_001" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             ToolTipService.ToolTip="Remove from queue"
@@ -73,19 +73,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="EBOOK CONVERTER"
+                <TextBlock x:Uid="EbookConverterPage_Item_002" Text="EBOOK CONVERTER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX / HTML and more via Calibre's ebook-convert. Optional metadata overrides for title / authors / language."
+                <TextBlock x:Uid="EbookConverterPage_Item_003" Text="Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX / HTML and more via Calibre's ebook-convert. Optional metadata overrides for title / authors / language."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add eBooks"
+                <Button x:Uid="EbookConverterPage_EbookConverterPageButton01" Content="Add eBooks"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddFiles_Click"
                     AutomationProperties.AutomationId="EbookConverterPageButton01"/>
-                <Button x:Name="ConvertButton"
+                <Button x:Uid="EbookConverterPage_ConvertButton" x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
@@ -101,33 +101,33 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox x:Name="FormatCombo"
+                <ComboBox x:Uid="EbookConverterPage_FormatCombo" x:Name="FormatCombo"
                           Header="Target format"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="FormatCombo">
-                    <ComboBoxItem Content="EPUB" Tag="epub"/>
-                    <ComboBoxItem Content="MOBI" Tag="mobi"/>
-                    <ComboBoxItem Content="AZW3 (Kindle)" Tag="azw3"/>
-                    <ComboBoxItem Content="PDF" Tag="pdf"/>
-                    <ComboBoxItem Content="FB2" Tag="fb2"/>
-                    <ComboBoxItem Content="DOCX" Tag="docx"/>
-                    <ComboBoxItem Content="ODT" Tag="odt"/>
-                    <ComboBoxItem Content="HTML" Tag="html"/>
-                    <ComboBoxItem Content="HTMLZ" Tag="htmlz"/>
-                    <ComboBoxItem Content="RTF" Tag="rtf"/>
-                    <ComboBoxItem Content="TXT" Tag="txt"/>
-                    <ComboBoxItem Content="LIT" Tag="lit"/>
-                    <ComboBoxItem Content="LRF" Tag="lrf"/>
-                    <ComboBoxItem Content="PDB" Tag="pdb"/>
-                    <ComboBoxItem Content="CBZ" Tag="cbz"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_007" Content="EPUB" Tag="epub"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_008" Content="MOBI" Tag="mobi"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_009" Content="AZW3 (Kindle)" Tag="azw3"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_010" Content="PDF" Tag="pdf"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_011" Content="FB2" Tag="fb2"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_012" Content="DOCX" Tag="docx"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_013" Content="ODT" Tag="odt"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_014" Content="HTML" Tag="html"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_015" Content="HTMLZ" Tag="htmlz"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_016" Content="RTF" Tag="rtf"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_017" Content="TXT" Tag="txt"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_018" Content="LIT" Tag="lit"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_019" Content="LRF" Tag="lrf"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_020" Content="PDB" Tag="pdb"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_021" Content="CBZ" Tag="cbz"/>
                 </ComboBox>
-                <TextBox Grid.Column="1"
+                <TextBox x:Uid="EbookConverterPage_OutputDirBox" Grid.Column="1"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
                          PlaceholderText="(same as source)"
                     AutomationProperties.AutomationId="OutputDirBox"/>
-                <Button Grid.Column="2"
+                <Button x:Uid="EbookConverterPage_EbookConverterPageButton02" Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
@@ -143,16 +143,16 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="TitleBox"
+                <TextBox x:Uid="EbookConverterPage_TitleBox" x:Name="TitleBox"
                          Header="Title (optional)"
                          PlaceholderText="(keep source)"
                     AutomationProperties.AutomationId="TitleBox"/>
-                <TextBox Grid.Column="1"
+                <TextBox x:Uid="EbookConverterPage_AuthorsBox" Grid.Column="1"
                          x:Name="AuthorsBox"
                          Header="Authors (optional)"
                          PlaceholderText='Asimov, Isaac &amp; Clarke, Arthur'
                     AutomationProperties.AutomationId="AuthorsBox"/>
-                <TextBox Grid.Column="2"
+                <TextBox x:Uid="EbookConverterPage_LanguageBox" Grid.Column="2"
                          x:Name="LanguageBox"
                          Header="Language (ISO-639)"
                          PlaceholderText="en"
@@ -170,10 +170,10 @@
                         <FontIcon Glyph="&#xE82D;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Add eBooks"
+                    <TextBlock x:Uid="EbookConverterPage_Item_027" Text="Add eBooks"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="EPUB, MOBI, AZW3, PDF, FB2, DOCX, HTML, RTF, TXT. Pick a target format and run."
+                    <TextBlock x:Uid="EbookConverterPage_Item_028" Text="EPUB, MOBI, AZW3, PDF, FB2, DOCX, HTML, RTF, TXT. Pick a target format and run."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"
@@ -187,7 +187,7 @@
             </Grid>
         </Border>
 
-        <ProgressBar AutomationProperties.Name="Progress"
+        <ProgressBar x:Uid="EbookConverterPage_WorkProgress" AutomationProperties.Name="Progress"
                      Grid.Row="4"
                      x:Name="WorkProgress"
                      Minimum="0" Maximum="100"
@@ -202,7 +202,7 @@
                        TextWrapping="Wrap"/>
         </ScrollViewer>
 
-        <TextBlock Grid.Row="6"
+        <TextBlock x:Uid="EbookConverterPage_StatusText" Grid.Row="6"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Add eBooks to begin."/>

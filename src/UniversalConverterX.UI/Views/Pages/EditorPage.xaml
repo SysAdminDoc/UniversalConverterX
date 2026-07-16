@@ -53,7 +53,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="EditorPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click"
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="EditorPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress}"
@@ -117,7 +117,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="EditorPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -142,17 +142,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Editor" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Batch-trim clips with local ClipForge processing, progress, and finished results."
+                <TextBlock x:Uid="EditorPage_Item_004" Text="Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="EditorPage_Item_005" Text="Batch-trim clips with local ClipForge processing, progress, and finished results."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="EditorPage_EditorPageButton01" Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="EditorPageButton01"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="EditorPage_EditorPageButton02" Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="EditorPageButton02"/>
@@ -175,7 +175,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Editing"
+                    <PivotItem x:Uid="EditorPage_EditorPagePivotItem01" Header="Editing"
                         AutomationProperties.AutomationId="EditorPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -187,13 +187,13 @@
                                     <FontIcon Glyph="&#xE714;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop videos to edit"
+                                <TextBlock x:Uid="EditorPage_Item_009" Text="Drop videos to edit"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, WMV, TS, MTS, and M4V."
+                                <TextBlock x:Uid="EditorPage_Item_010" Text="MP4, MKV, MOV, AVI, WebM, FLV, WMV, TS, MTS, and M4V."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="EditorPage_EditorPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -208,7 +208,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="EditorPage_EditorPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="EditorPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -220,10 +220,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished edits yet"
+                                <TextBlock x:Uid="EditorPage_Item_013" Text="No finished edits yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed, failed, and cancelled exports appear here."
+                                <TextBlock x:Uid="EditorPage_Item_014" Text="Completed, failed, and cancelled exports appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -240,19 +240,19 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Operation"
+                        <TextBlock x:Uid="EditorPage_Item_015" Text="Operation"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="OperationCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="OperationCombo_SelectionChanged"
                             AutomationProperties.AutomationId="OperationCombo">
-                            <ComboBoxItem Content="Trim" Tag="trim" IsSelected="True"/>
-                            <ComboBoxItem Content="Crop" Tag="crop"/>
-                            <ComboBoxItem Content="Crop Metadata (lossless)" Tag="crop-meta"/>
-                            <ComboBoxItem Content="Aspect Override (lossless)" Tag="aspect-override"/>
-                            <ComboBoxItem Content="Rotate / Flip" Tag="rotate"/>
-                            <ComboBoxItem Content="Normalize Audio" Tag="loudnorm"/>
-                            <ComboBoxItem Content="Rewrap Container" Tag="rewrap"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_016" Content="Trim" Tag="trim" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_017" Content="Crop" Tag="crop"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_018" Content="Crop Metadata (lossless)" Tag="crop-meta"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_019" Content="Aspect Override (lossless)" Tag="aspect-override"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_020" Content="Rotate / Flip" Tag="rotate"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_021" Content="Normalize Audio" Tag="loudnorm"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_022" Content="Rewrap Container" Tag="rewrap"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -260,33 +260,33 @@
                 <!-- Trim panel -->
                 <Border x:Name="TrimPanel" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Trim"
+                        <TextBlock x:Uid="EditorPage_Item_023" Text="Trim"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Times in seconds. Leave end blank to export through the end of each clip."
+                        <TextBlock x:Uid="EditorPage_Item_024" Text="Times in seconds. Leave end blank to export through the end of each clip."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <TextBox x:Name="StartBox"
+                        <TextBox x:Uid="EditorPage_StartBox" x:Name="StartBox"
                                  Header="Start"
                                  PlaceholderText="0"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
                                  LostFocus="TrimText_LostFocus"
                             AutomationProperties.AutomationId="StartBox"/>
-                        <TextBox x:Name="EndBox"
+                        <TextBox x:Uid="EditorPage_EndBox" x:Name="EndBox"
                                  Header="End"
                                  PlaceholderText="End of clip"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
                                  LostFocus="TrimText_LostFocus"
                             AutomationProperties.AutomationId="EndBox"/>
-                        <CheckBox x:Name="LosslessCheck"
+                        <CheckBox x:Uid="EditorPage_LosslessCheck" x:Name="LosslessCheck"
                                   Content="Lossless stream-copy"
                                   IsChecked="True"
                                   Checked="TrimOption_Changed"
                                   Unchecked="TrimOption_Changed"
                                   Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="LosslessCheck"/>
-                        <TextBlock Text="Lossless is fast and preserves quality, but cuts on keyframes. Re-encode for frame-accurate trims."
+                        <TextBlock x:Uid="EditorPage_Item_028" Text="Lossless is fast and preserves quality, but cuts on keyframes. Re-encode for frame-accurate trims."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
@@ -301,9 +301,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Re-encode Quality"
+                            <TextBlock x:Uid="EditorPage_Item_029" Text="Re-encode Quality"
                                        Style="{StaticResource PanelTitleTextStyle}"/>
-                            <ToggleButton x:Name="QualityLockToggle" Grid.Column="1"
+                            <ToggleButton x:Uid="EditorPage_QualityLockToggle" x:Name="QualityLockToggle" Grid.Column="1"
                                           AutomationProperties.AutomationId="QualityLockToggle"
                                           AutomationProperties.Name="Lock quality value"
                                           ToolTipService.ToolTip="Lock CRF value across operation/preset changes"
@@ -318,7 +318,7 @@
                                 StepFrequency="1"
                                 ValueChanged="CrfSlider_ValueChanged"
                             AutomationProperties.AutomationId="CrfSlider"/>
-                        <TextBlock x:Name="CrfLabel"
+                        <TextBlock x:Uid="EditorPage_CrfLabel" x:Name="CrfLabel"
                                    Text="CRF 18 (visually lossless)"
                                    Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
@@ -332,9 +332,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Crop Rectangle"
+                            <TextBlock x:Uid="EditorPage_Item_032" Text="Crop Rectangle"
                                        Style="{StaticResource PanelTitleTextStyle}"/>
-                            <ToggleButton x:Name="CropLockToggle" Grid.Column="1"
+                            <ToggleButton x:Uid="EditorPage_CropLockToggle" x:Name="CropLockToggle" Grid.Column="1"
                                           AutomationProperties.AutomationId="CropLockToggle"
                                           AutomationProperties.Name="Lock crop values"
                                           ToolTipService.ToolTip="Lock crop values across operation/preset changes"
@@ -342,7 +342,7 @@
                                 <FontIcon Glyph="&#xE72E;" FontSize="12"/>
                             </ToggleButton>
                         </Grid>
-                        <TextBlock Text="All values in pixels. Output = W x H region starting at (X, Y)."
+                        <TextBlock x:Uid="EditorPage_Item_034" Text="All values in pixels. Output = W x H region starting at (X, Y)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <Grid ColumnSpacing="10">
@@ -350,13 +350,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="CropWidthBox" Grid.Column="0"
+                            <TextBox x:Uid="EditorPage_CropWidthBox" x:Name="CropWidthBox" Grid.Column="0"
                                      Header="Width" PlaceholderText="1920"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
                                      LostFocus="TrimText_LostFocus"
                                 AutomationProperties.AutomationId="CropWidthBox"/>
-                            <TextBox x:Name="CropHeightBox" Grid.Column="1"
+                            <TextBox x:Uid="EditorPage_CropHeightBox" x:Name="CropHeightBox" Grid.Column="1"
                                      Header="Height" PlaceholderText="1080"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
@@ -368,13 +368,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="CropXBox" Grid.Column="0"
+                            <TextBox x:Uid="EditorPage_CropXBox" x:Name="CropXBox" Grid.Column="0"
                                      Header="X offset" PlaceholderText="0"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
                                      LostFocus="TrimText_LostFocus"
                                 AutomationProperties.AutomationId="CropXBox"/>
-                            <TextBox x:Name="CropYBox" Grid.Column="1"
+                            <TextBox x:Uid="EditorPage_CropYBox" x:Name="CropYBox" Grid.Column="1"
                                      Header="Y offset" PlaceholderText="0"
                                      InputScope="Number"
                                      TextChanged="TrimText_Changed"
@@ -387,9 +387,9 @@
                 <!-- Codec metadata crop panel -->
                 <Border x:Name="CropMetaPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Lossless Display Crop"
+                        <TextBlock x:Uid="EditorPage_Item_039" Text="Lossless Display Crop"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Set H.264/H.265 edge-crop metadata without decoding frames. Coded pictures stay intact; players display the smaller rectangle."
+                        <TextBlock x:Uid="EditorPage_Item_040" Text="Set H.264/H.265 edge-crop metadata without decoding frames. Coded pictures stay intact; players display the smaller rectangle."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <Grid ColumnSpacing="10">
@@ -397,11 +397,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="CropMetaLeftBox" Grid.Column="0"
+                            <TextBox x:Uid="EditorPage_CropMetaLeftBox" x:Name="CropMetaLeftBox" Grid.Column="0"
                                      Header="Left edge" Text="0" InputScope="Number"
                                      TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
                                      AutomationProperties.AutomationId="CropMetaLeftBox"/>
-                            <TextBox x:Name="CropMetaRightBox" Grid.Column="1"
+                            <TextBox x:Uid="EditorPage_CropMetaRightBox" x:Name="CropMetaRightBox" Grid.Column="1"
                                      Header="Right edge" Text="0" InputScope="Number"
                                      TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
                                      AutomationProperties.AutomationId="CropMetaRightBox"/>
@@ -411,16 +411,16 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="CropMetaTopBox" Grid.Column="0"
+                            <TextBox x:Uid="EditorPage_CropMetaTopBox" x:Name="CropMetaTopBox" Grid.Column="0"
                                      Header="Top edge" Text="0" InputScope="Number"
                                      TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
                                      AutomationProperties.AutomationId="CropMetaTopBox"/>
-                            <TextBox x:Name="CropMetaBottomBox" Grid.Column="1"
+                            <TextBox x:Uid="EditorPage_CropMetaBottomBox" x:Name="CropMetaBottomBox" Grid.Column="1"
                                      Header="Bottom edge" Text="0" InputScope="Number"
                                      TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
                                      AutomationProperties.AutomationId="CropMetaBottomBox"/>
                         </Grid>
-                        <TextBlock Text="Offsets replace existing SPS crop metadata. Some chroma formats require even values; unsupported offsets fail without creating a successful export."
+                        <TextBlock x:Uid="EditorPage_Item_045" Text="Offsets replace existing SPS crop metadata. Some chroma formats require even values; unsupported offsets fail without creating a successful export."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap" FontSize="11"/>
                     </StackPanel>
@@ -429,12 +429,12 @@
                 <!-- Container aspect metadata panel -->
                 <Border x:Name="AspectOverridePanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Display Aspect Override"
+                        <TextBlock x:Uid="EditorPage_Item_046" Text="Display Aspect Override"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Change only the container display ratio. Compressed video and audio packets are copied byte-for-byte."
+                        <TextBlock x:Uid="EditorPage_Item_047" Text="Change only the container display ratio. Compressed video and audio packets are copied byte-for-byte."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <TextBox x:Name="AspectRatioBox"
+                        <TextBox x:Uid="EditorPage_AspectRatioBox" x:Name="AspectRatioBox"
                                  Header="Display ratio" Text="16:9" PlaceholderText="16:9"
                                  TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
                                  AutomationProperties.AutomationId="AspectRatioBox"/>
@@ -444,17 +444,17 @@
                 <!-- Rotate panel -->
                 <Border x:Name="RotatePanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Rotate / Flip"
+                        <TextBlock x:Uid="EditorPage_Item_049" Text="Rotate / Flip"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="RotateAngleCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="TrimOption_Changed"
                             AutomationProperties.AutomationId="RotateAngleCombo">
-                            <ComboBoxItem Content="90° clockwise" Tag="90" IsSelected="True"/>
-                            <ComboBoxItem Content="180°" Tag="180"/>
-                            <ComboBoxItem Content="270° clockwise" Tag="270"/>
-                            <ComboBoxItem Content="Flip horizontal" Tag="flip_h"/>
-                            <ComboBoxItem Content="Flip vertical" Tag="flip_v"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_050" Content="90° clockwise" Tag="90" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_051" Content="180°" Tag="180"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_052" Content="270° clockwise" Tag="270"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_053" Content="Flip horizontal" Tag="flip_h"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_054" Content="Flip vertical" Tag="flip_v"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -462,19 +462,19 @@
                 <!-- Loudnorm panel -->
                 <Border x:Name="LoudnormPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Audio Normalisation"
+                        <TextBlock x:Uid="EditorPage_Item_055" Text="Audio Normalisation"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="EBU R128 two-pass normalisation. Video stream is copied unchanged."
+                        <TextBlock x:Uid="EditorPage_Item_056" Text="EBU R128 two-pass normalisation. Video stream is copied unchanged."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <TextBox x:Name="LufsBox"
+                        <TextBox x:Uid="EditorPage_LufsBox" x:Name="LufsBox"
                                  Header="Target LUFS"
                                  PlaceholderText="-14"
                                  InputScope="Number"
                                  TextChanged="TrimText_Changed"
                                  LostFocus="TrimText_LostFocus"
                             AutomationProperties.AutomationId="LufsBox"/>
-                        <TextBlock Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
+                        <TextBlock x:Uid="EditorPage_Item_058" Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
@@ -484,28 +484,28 @@
                 <!-- Rewrap panel -->
                 <Border x:Name="RewrapPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Rewrap Container"
+                        <TextBlock x:Uid="EditorPage_Item_059" Text="Rewrap Container"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="Stream-copy all tracks into the container chosen by the output extension. No re-encode."
+                        <TextBlock x:Uid="EditorPage_Item_060" Text="Stream-copy all tracks into the container chosen by the output extension. No re-encode."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <ComboBox x:Name="RewrapFormatCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="TrimOption_Changed"
                             AutomationProperties.AutomationId="RewrapFormatCombo">
-                            <ComboBoxItem Content=".mp4 (H.264/AAC)" Tag=".mp4" IsSelected="True"/>
-                            <ComboBoxItem Content=".mkv (universal)" Tag=".mkv"/>
-                            <ComboBoxItem Content=".mov (Apple)" Tag=".mov"/>
-                            <ComboBoxItem Content=".webm (web)" Tag=".webm"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_061" Content=".mp4 (H.264/AAC)" Tag=".mp4" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_062" Content=".mkv (universal)" Tag=".mkv"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_063" Content=".mov (Apple)" Tag=".mov"/>
+                            <ComboBoxItem x:Uid="EditorPage_Item_064" Content=".webm (web)" Tag=".webm"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location"
+                        <TextBlock x:Uid="EditorPage_Item_065" Text="File Location"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBox x:Uid="EditorPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
                                  IsReadOnly="True"
@@ -515,12 +515,12 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
+                            <Button x:Uid="EditorPage_EditorPageButton04" Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="EditorPageButton04"/>
-                            <Button Grid.Column="1"
+                            <Button x:Uid="EditorPage_EditorPageButton05" Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
@@ -531,16 +531,16 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary"
+                        <TextBlock x:Uid="EditorPage_Item_069" Text="Queue Summary"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueCountText"
+                        <TextBlock x:Uid="EditorPage_QueueCountText" x:Name="QueueCountText"
                                    Text="0 clips queued"
                                    Style="{StaticResource BodyTextStyle}"/>
-                        <TextBlock x:Name="OperationText"
+                        <TextBlock x:Uid="EditorPage_OperationText" x:Name="OperationText"
                                    Text="Trim from 0s to end"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <TextBlock x:Name="OutputText"
+                        <TextBlock x:Uid="EditorPage_OutputText" x:Name="OutputText"
                                    Text="Output: same as source"
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -563,13 +563,13 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="EditorPage_EditorPageButton06" Grid.Column="1"
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"
                 AutomationProperties.AutomationId="EditorPageButton06"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="EditorPage_UndoButton" Grid.Column="2"
                     x:Name="UndoButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     ToolTipService.ToolTip="Undo last setting change"
@@ -579,10 +579,10 @@
                 AutomationProperties.AutomationId="UndoButton">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE10E;" FontSize="14"/>
-                    <TextBlock Text="Undo"/>
+                    <TextBlock x:Uid="EditorPage_Item_075" Text="Undo"/>
                 </StackPanel>
             </Button>
-            <Button Grid.Column="3"
+            <Button x:Uid="EditorPage_RedoButton" Grid.Column="3"
                     x:Name="RedoButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     ToolTipService.ToolTip="Redo last undone change"
@@ -592,10 +592,10 @@
                 AutomationProperties.AutomationId="RedoButton">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE10C;" FontSize="14"/>
-                    <TextBlock Text="Redo"/>
+                    <TextBlock x:Uid="EditorPage_Item_077" Text="Redo"/>
                 </StackPanel>
             </Button>
-            <Button Grid.Column="4"
+            <Button x:Uid="EditorPage_ClearButton" Grid.Column="4"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -603,7 +603,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="5"
+            <Button x:Uid="EditorPage_ExportButton" Grid.Column="5"
                     Content="Export All"
                     x:Name="ExportButton"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -622,10 +622,10 @@
                     MinWidth="440"
                     MaxWidth="540">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle"
+                    <TextBlock x:Uid="EditorPage_ProgressTitle" x:Name="ProgressTitle"
                                Text="Exporting..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
+                    <ProgressBar x:Uid="EditorPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar"
                                  Height="8"
                                  CornerRadius="4"
                                  Minimum="0"
@@ -645,7 +645,7 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 Spacing="12">
-                        <Button x:Name="CancelButton"
+                        <Button x:Uid="EditorPage_CancelButton" x:Name="CancelButton"
                                 Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"

@@ -53,7 +53,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="VocalRemoverPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click"
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="VocalRemoverPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -113,7 +113,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="VocalRemoverPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -138,17 +138,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Vocal Remover" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Split music with BS-RoFormer, Mel-RoFormer, or Demucs."
+                <TextBlock x:Uid="VocalRemoverPage_Item_004" Text="Vocal Remover" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="VocalRemoverPage_Item_005" Text="Split music with BS-RoFormer, Mel-RoFormer, or Demucs."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton01" Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="VocalRemoverPageButton01"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton02" Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="VocalRemoverPageButton02"/>
@@ -171,7 +171,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="VocalRemoverPage_VocalRemoverPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="VocalRemoverPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -183,13 +183,13 @@
                                     <FontIcon Glyph="&#xEC4F;" FontSize="48"
                                               Foreground="{StaticResource AccentRedBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop audio or video files"
+                                <TextBlock x:Uid="VocalRemoverPage_Item_009" Text="Drop audio or video files"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP3, WAV, FLAC, M4A, AAC, OGG, MP4, MKV, and more."
+                                <TextBlock x:Uid="VocalRemoverPage_Item_010" Text="MP3, WAV, FLAC, M4A, AAC, OGG, MP4, MKV, and more."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -204,7 +204,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="VocalRemoverPage_VocalRemoverPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="VocalRemoverPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -216,10 +216,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished separations yet"
+                                <TextBlock x:Uid="VocalRemoverPage_Item_013" Text="No finished separations yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed stems appear here after separation."
+                                <TextBlock x:Uid="VocalRemoverPage_Item_014" Text="Completed stems appear here after separation."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -237,61 +237,61 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Stems" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VocalRemoverPage_Item_015" Text="Stems" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="StemCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="StemCombo">
-                            <ComboBoxItem Content="Vocals + Instrumentals (2-stem)" Tag="2stem" IsSelected="True"/>
-                            <ComboBoxItem Content="Vocals only" Tag="vocals"/>
-                            <ComboBoxItem Content="Instrumentals only" Tag="accompaniment"/>
-                            <ComboBoxItem Content="4-stem (vocals / drums / bass / other)" Tag="4stem"/>
-                            <ComboBoxItem Content="6-stem (+guitar / piano)" Tag="6stem"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_016" Content="Vocals + Instrumentals (2-stem)" Tag="2stem" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_017" Content="Vocals only" Tag="vocals"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_018" Content="Instrumentals only" Tag="accompaniment"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_019" Content="4-stem (vocals / drums / bass / other)" Tag="4stem"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_020" Content="6-stem (+guitar / piano)" Tag="6stem"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VocalRemoverPage_Item_021" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ModelCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ModelCombo">
-                            <ComboBoxItem Content="MelBand-RoFormer (recommended for vocals)" Tag="stemkit:vocals-roformer" IsSelected="True"/>
-                            <ComboBoxItem Content="BS-RoFormer SW (6-stem)" Tag="stemkit:bs-roformer-sw"/>
-                            <ComboBoxItem Content="BS-RoFormer Viperx (legacy)" Tag="stemkit:vocals-roformer-viperx"/>
-                            <ComboBoxItem Content="htdemucs_ft (fine-tuned)" Tag="demucs:htdemucs_ft"/>
-                            <ComboBoxItem Content="htdemucs (base)" Tag="demucs:htdemucs"/>
-                            <ComboBoxItem Content="mdx_extra (legacy MDX-Net)" Tag="demucs:mdx_extra"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_022" Content="MelBand-RoFormer (recommended for vocals)" Tag="stemkit:vocals-roformer" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_023" Content="BS-RoFormer SW (6-stem)" Tag="stemkit:bs-roformer-sw"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_024" Content="BS-RoFormer Viperx (legacy)" Tag="stemkit:vocals-roformer-viperx"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_025" Content="htdemucs_ft (fine-tuned)" Tag="demucs:htdemucs_ft"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_026" Content="htdemucs (base)" Tag="demucs:htdemucs"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_027" Content="mdx_extra (legacy MDX-Net)" Tag="demucs:mdx_extra"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VocalRemoverPage_Item_028" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="WAV (lossless)" Tag="wav" IsSelected="True"/>
-                            <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
-                            <ComboBoxItem Content="MP3 (320 kbps)" Tag="mp3"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_029" Content="WAV (lossless)" Tag="wav" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_030" Content="FLAC (lossless)" Tag="flac"/>
+                            <ComboBoxItem x:Uid="VocalRemoverPage_Item_031" Content="MP3 (320 kbps)" Tag="mp3"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ToggleSwitch x:Name="ShiftsToggle"
+                        <TextBlock x:Uid="VocalRemoverPage_Item_032" Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ToggleSwitch x:Uid="VocalRemoverPage_ShiftsToggle" x:Name="ShiftsToggle"
                                       Header="Equivariant stabilization"
                                       OffContent="Off (faster)"
                                       OnContent="On (better quality)"
                                       Toggled="Settings_Changed"
                             AutomationProperties.AutomationId="ShiftsToggle"/>
-                        <TextBlock Text="Runs separation twice with shifted windows and averages the result. Doubles processing time."
+                        <TextBlock x:Uid="VocalRemoverPage_Item_034" Text="Runs separation twice with shifted windows and averages the result. Doubles processing time."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
@@ -300,8 +300,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBlock x:Uid="VocalRemoverPage_Item_035" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="VocalRemoverPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  Header="Save stems to"
                                  PlaceholderText="Same folder as each source"
                                  IsReadOnly="True"
@@ -311,12 +311,12 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
+                            <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton04" Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="VocalRemoverPageButton04"/>
-                            <Button Grid.Column="1"
+                            <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton05" Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
@@ -340,13 +340,13 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="VocalRemoverPage_VocalRemoverPageButton06" Grid.Column="1"
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"
                 AutomationProperties.AutomationId="VocalRemoverPageButton06"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="VocalRemoverPage_ClearButton" Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -354,7 +354,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="3"
+            <Button x:Uid="VocalRemoverPage_RunButton" Grid.Column="3"
                     Content="Separate Stems"
                     x:Name="RunButton"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -373,10 +373,10 @@
                     MinWidth="440"
                     MaxWidth="540">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle"
+                    <TextBlock x:Uid="VocalRemoverPage_ProgressTitle" x:Name="ProgressTitle"
                                Text="Separating stems..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
+                    <ProgressBar x:Uid="VocalRemoverPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar"
                                  Height="8" CornerRadius="4"
                                  Minimum="0" Maximum="100"/>
                     <TextBlock x:Name="ProgressStage"
@@ -394,7 +394,7 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 Spacing="12">
-                        <Button x:Name="CancelButton"
+                        <Button x:Uid="VocalRemoverPage_CancelButton" x:Name="CancelButton"
                                 Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"

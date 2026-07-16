@@ -21,17 +21,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Subtitle Studio" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Transcribe with Whisper, translate locally, edit every cue, then export SRT/VTT/ASS or burn captions into video."
+                <TextBlock x:Uid="AiSubtitlePage_Item_001" Text="Subtitle Studio" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="AiSubtitlePage_Item_002" Text="Transcribe with Whisper, translate locally, edit every cue, then export SRT/VTT/ASS or burn captions into video."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Browse File"
+                <Button x:Uid="AiSubtitlePage_AiSubtitlePageButton01" Content="Browse File"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="AiSubtitlePageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="AiSubtitlePage_RunButton" x:Name="RunButton"
                         Content="Transcribe &amp; Preview"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -63,7 +63,7 @@
                             <FontIcon Glyph="&#xED1E;" FontSize="48"
                                       Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock x:Name="DropZoneLabel"
+                        <TextBlock x:Uid="AiSubtitlePage_DropZoneLabel" x:Name="DropZoneLabel"
                                    Text="Drop a video or audio file here"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"
@@ -75,11 +75,11 @@
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    MaxWidth="460"/>
-                        <ProgressBar AutomationProperties.Name="Pipeline progress" x:Name="ProgressBar"
+                        <ProgressBar x:Uid="AiSubtitlePage_ProgressBar" AutomationProperties.Name="Pipeline progress" x:Name="ProgressBar"
                                      Width="380" Height="6" CornerRadius="3"
                                      Minimum="0" Maximum="100"
                                      Visibility="Collapsed"/>
-                        <Button Content="Browse File"
+                        <Button x:Uid="AiSubtitlePage_AiSubtitlePageButton02" Content="Browse File"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="Browse_Click"
                                 HorizontalAlignment="Center"
@@ -97,13 +97,13 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Caption preview" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <TextBlock x:Uid="AiSubtitlePage_Item_008" Text="Caption preview" Style="{StaticResource PanelTitleTextStyle}"/>
                                 <TextBlock x:Name="CueSummaryText" Style="{StaticResource MutedTextStyle}"/>
                             </StackPanel>
-                            <TextBlock Grid.Column="1" Text="Times are seconds" Style="{StaticResource MutedTextStyle}"
+                            <TextBlock x:Uid="AiSubtitlePage_Item_009" Grid.Column="1" Text="Times are seconds" Style="{StaticResource MutedTextStyle}"
                                        VerticalAlignment="Center"/>
                         </Grid>
-                        <ListView Grid.Row="1" x:Name="CueList" SelectionMode="None"
+                        <ListView x:Uid="AiSubtitlePage_CueList" Grid.Row="1" x:Name="CueList" SelectionMode="None"
                                   AutomationProperties.Name="Editable subtitle cues">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
@@ -116,11 +116,11 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Number}" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center"/>
-                                        <NumberBox Grid.Column="1" Header="Start" Value="{Binding StartSeconds, Mode=TwoWay}"
+                                        <NumberBox x:Uid="AiSubtitlePage_Item_011" Grid.Column="1" Header="Start" Value="{Binding StartSeconds, Mode=TwoWay}"
                                                    Minimum="0" SmallChange="0.1" SpinButtonPlacementMode="Compact"/>
-                                        <NumberBox Grid.Column="2" Header="End" Value="{Binding EndSeconds, Mode=TwoWay}"
+                                        <NumberBox x:Uid="AiSubtitlePage_Item_012" Grid.Column="2" Header="End" Value="{Binding EndSeconds, Mode=TwoWay}"
                                                    Minimum="0" SmallChange="0.1" SpinButtonPlacementMode="Compact"/>
-                                        <TextBox Grid.Column="3" Header="Caption" Text="{Binding Text, Mode=TwoWay}"
+                                        <TextBox x:Uid="AiSubtitlePage_Item_013" Grid.Column="3" Header="Caption" Text="{Binding Text, Mode=TwoWay}"
                                                  AcceptsReturn="True" TextWrapping="Wrap" MinWidth="220"/>
                                     </Grid>
                                 </DataTemplate>
@@ -134,65 +134,65 @@
             <StackPanel Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AiSubtitlePage_Item_014" Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="BackendCombo">
-                            <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt"/>
-                            <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · binary)" Tag="whisper-cpp"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_015" Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_016" Content="whisper.cpp (Vulkan / CUDA · binary)" Tag="whisper-cpp"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Model + Language" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo"
+                        <TextBlock x:Uid="AiSubtitlePage_Item_017" Text="Model + Language" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="AiSubtitlePage_ModelCombo" x:Name="ModelCombo"
                                   Header="Model"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="1"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ModelCombo">
-                            <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
-                            <ComboBoxItem Content="base" Tag="base"/>
-                            <ComboBoxItem Content="small" Tag="small"/>
-                            <ComboBoxItem Content="medium" Tag="medium"/>
-                            <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
-                            <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
-                            <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_019" Content="tiny (fastest)" Tag="tiny"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_020" Content="base" Tag="base"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_021" Content="small" Tag="small"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_022" Content="medium" Tag="medium"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_023" Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_024" Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_025" Content="large-v3 (best)" Tag="large-v3"/>
                         </ComboBox>
-                        <ComboBox x:Name="LanguageCombo"
+                        <ComboBox x:Uid="AiSubtitlePage_LanguageCombo" x:Name="LanguageCombo"
                                   Header="Language"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="LanguageCombo">
-                            <ComboBoxItem Content="Auto-detect" Tag="auto"/>
-                            <ComboBoxItem Content="English" Tag="en"/>
-                            <ComboBoxItem Content="Spanish" Tag="es"/>
-                            <ComboBoxItem Content="French" Tag="fr"/>
-                            <ComboBoxItem Content="German" Tag="de"/>
-                            <ComboBoxItem Content="Japanese" Tag="ja"/>
-                            <ComboBoxItem Content="Chinese" Tag="zh"/>
-                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
-                            <ComboBoxItem Content="Italian" Tag="it"/>
-                            <ComboBoxItem Content="Russian" Tag="ru"/>
-                            <ComboBoxItem Content="Korean" Tag="ko"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_027" Content="Auto-detect" Tag="auto"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_028" Content="English" Tag="en"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_029" Content="Spanish" Tag="es"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_030" Content="French" Tag="fr"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_031" Content="German" Tag="de"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_032" Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_033" Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_034" Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_035" Content="Italian" Tag="it"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_036" Content="Russian" Tag="ru"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_037" Content="Korean" Tag="ko"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Inference" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <CheckBox x:Name="VadCheck"
+                        <TextBlock x:Uid="AiSubtitlePage_Item_038" Text="Inference" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <CheckBox x:Uid="AiSubtitlePage_VadCheck" x:Name="VadCheck"
                                   Content="VAD pre-filter (skip silence)"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
                             AutomationProperties.AutomationId="AiSubtitleVadCheck"/>
-                        <NumberBox x:Name="BatchSizeBox"
+                        <NumberBox x:Uid="AiSubtitlePage_BatchSizeBox" x:Name="BatchSizeBox"
                                    Header="faster-whisper batch size"
                                    Value="8"
                                    Minimum="1"
@@ -205,59 +205,59 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Translation" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <CheckBox x:Name="TranslateCheck"
+                        <TextBlock x:Uid="AiSubtitlePage_Item_041" Text="Translation" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <CheckBox x:Uid="AiSubtitlePage_TranslateCheck" x:Name="TranslateCheck"
                                   Content="Translate after transcription"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
                                   AutomationProperties.AutomationId="TranslateCheck"/>
-                        <ComboBox x:Name="TranslationModelCombo"
+                        <ComboBox x:Uid="AiSubtitlePage_TranslationModelCombo" x:Name="TranslationModelCombo"
                                   Header="Local model"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                                   AutomationProperties.AutomationId="TranslationModelCombo">
-                            <ComboBoxItem Content="Helsinki OPUS-MT (ONNX, lightweight)" Tag="opus-mt"/>
-                            <ComboBoxItem Content="NLLB-200 distilled (broad coverage)" Tag="facebook/nllb-200-distilled-600M"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_044" Content="Helsinki OPUS-MT (ONNX, lightweight)" Tag="opus-mt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_045" Content="NLLB-200 distilled (broad coverage)" Tag="facebook/nllb-200-distilled-600M"/>
                         </ComboBox>
-                        <ComboBox x:Name="TargetLanguageCombo"
+                        <ComboBox x:Uid="AiSubtitlePage_TargetLanguageCombo" x:Name="TargetLanguageCombo"
                                   Header="Translate to"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                                   AutomationProperties.AutomationId="TargetLanguageCombo">
-                            <ComboBoxItem Content="Spanish" Tag="es"/>
-                            <ComboBoxItem Content="French" Tag="fr"/>
-                            <ComboBoxItem Content="German" Tag="de"/>
-                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
-                            <ComboBoxItem Content="Italian" Tag="it"/>
-                            <ComboBoxItem Content="Japanese" Tag="ja"/>
-                            <ComboBoxItem Content="Chinese" Tag="zh"/>
-                            <ComboBoxItem Content="Russian" Tag="ru"/>
-                            <ComboBoxItem Content="Korean" Tag="ko"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_047" Content="Spanish" Tag="es"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_048" Content="French" Tag="fr"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_049" Content="German" Tag="de"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_050" Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_051" Content="Italian" Tag="it"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_052" Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_053" Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_054" Content="Russian" Tag="ru"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_055" Content="Korean" Tag="ko"/>
                         </ComboBox>
-                        <TextBlock Text="Choose the source language above when translating; auto-detect remains available for transcription-only jobs."
+                        <TextBlock x:Uid="AiSubtitlePage_Item_056" Text="Choose the source language above when translating; auto-detect remains available for transcription-only jobs."
                                    Style="{StaticResource MutedTextStyle}" FontSize="11" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo"
+                        <TextBlock x:Uid="AiSubtitlePage_Item_057" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="AiSubtitlePage_FormatCombo" x:Name="FormatCombo"
                                   Header="Subtitle format"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="SubRip (.srt)" Tag="srt"/>
-                            <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
-                            <ComboBoxItem Content="Advanced SubStation Alpha (.ass)" Tag="ass"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_059" Content="SubRip (.srt)" Tag="srt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_060" Content="WebVTT (.vtt)" Tag="vtt"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_Item_061" Content="Advanced SubStation Alpha (.ass)" Tag="ass"/>
                         </ComboBox>
-                        <CheckBox x:Name="BurnInCheck"
+                        <CheckBox x:Uid="AiSubtitlePage_BurnInCheck" x:Name="BurnInCheck"
                                   Content="Also burn subtitles into a copy of the video"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
                             AutomationProperties.AutomationId="BurnInCheck"/>
-                        <TextBlock Text="Export uses the edited preview. Burn-in re-encodes video with the exported caption file and keeps both outputs."
+                        <TextBlock x:Uid="AiSubtitlePage_Item_063" Text="Export uses the edited preview. Burn-in re-encodes video with the exported caption file and keeps both outputs."
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
                                    TextWrapping="Wrap"/>
@@ -278,19 +278,19 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="ExportButton" Content="Export Preview"
+            <Button x:Uid="AiSubtitlePage_ExportButton" Grid.Column="1" x:Name="ExportButton" Content="Export Preview"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Export_Click"
                     Margin="0,0,12,0"
                     IsEnabled="False"
                     AutomationProperties.AutomationId="ExportButton"/>
-            <Button Grid.Column="2" x:Name="OpenOutputButton" Content="Open Output"
+            <Button x:Uid="AiSubtitlePage_OpenOutputButton" Grid.Column="2" x:Name="OpenOutputButton" Content="Open Output"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="OpenOutput_Click"
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="OpenOutputButton"/>
-            <Button Grid.Column="3" x:Name="CancelButton" Content="Cancel"
+            <Button x:Uid="AiSubtitlePage_CancelButton" Grid.Column="3" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
                     IsEnabled="False"

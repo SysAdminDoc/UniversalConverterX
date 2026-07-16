@@ -182,6 +182,11 @@ public class ConverterXOptions
     public AppTheme Theme { get; set; } = AppTheme.Dark;
 
     /// <summary>
+    /// BCP-47 UI language override. Empty uses the Windows language preference.
+    /// </summary>
+    public string Language { get; set; } = "";
+
+    /// <summary>
     /// Accent color hex value
     /// </summary>
     public string AccentColor { get; set; } = "#22c55e";

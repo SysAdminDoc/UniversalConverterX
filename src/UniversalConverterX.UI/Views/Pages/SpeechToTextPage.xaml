@@ -53,7 +53,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="SpeechToTextPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click"
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="SpeechToTextPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -114,14 +114,14 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="SpeechToTextPage_Item_003" Grid.Column="2"
                             Content="Open file"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
                             Click="OpenFinishedFile_Click"
                             Tag="{Binding OutputPath}"
                             IsEnabled="{Binding CanOpenFile}"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="SpeechToTextPage_Item_004" Grid.Column="3"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -147,19 +147,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="SPEECH TO TEXT"
+                <TextBlock x:Uid="SpeechToTextPage_Item_005" Text="SPEECH TO TEXT"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Transcribe audio and video into editable transcript files using local ASR inference."
+                <TextBlock x:Uid="SpeechToTextPage_Item_006" Text="Transcribe audio and video into editable transcript files using local ASR inference."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="SpeechToTextPage_SpeechToTextPageButton01" Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="SpeechToTextPageButton01"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="SpeechToTextPage_SpeechToTextPageButton02" Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="SpeechToTextPageButton02"/>
@@ -184,7 +184,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="SpeechToTextPage_SpeechToTextPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="SpeechToTextPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -196,13 +196,13 @@
                                     <FontIcon Glyph="&#xE720;" FontSize="48"
                                               Foreground="{StaticResource AccentGreenBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop audio or video files"
+                                <TextBlock x:Uid="SpeechToTextPage_Item_010" Text="Drop audio or video files"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP3, WAV, FLAC, M4A, MP4, MKV, and more."
+                                <TextBlock x:Uid="SpeechToTextPage_Item_011" Text="MP3, WAV, FLAC, M4A, MP4, MKV, and more."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="SpeechToTextPage_SpeechToTextPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -217,7 +217,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="SpeechToTextPage_SpeechToTextPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="SpeechToTextPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -229,10 +229,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished transcriptions yet"
+                                <TextBlock x:Uid="SpeechToTextPage_Item_014" Text="No finished transcriptions yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed transcripts appear here."
+                                <TextBlock x:Uid="SpeechToTextPage_Item_015" Text="Completed transcripts appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -251,16 +251,16 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SpeechToTextPage_Item_016" Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Backend_Changed"
                             AutomationProperties.AutomationId="BackendCombo">
-                            <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
-                            <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
-                            <ComboBoxItem Content="Parakeet TDT v3 (CUDA · 25 languages)" Tag="parakeet-stt"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_017" Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_018" Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_019" Content="Parakeet TDT v3 (CUDA · 25 languages)" Tag="parakeet-stt"/>
                         </ComboBox>
-                        <CheckBox x:Name="VadCheck"
+                        <CheckBox x:Uid="SpeechToTextPage_VadCheck" x:Name="VadCheck"
                                   Content="VAD pre-filter (skip silence)"
                                   Checked="Settings_Changed"
                                   Unchecked="Settings_Changed"
@@ -270,34 +270,34 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SpeechToTextPage_Item_021" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel x:Name="WhisperModelPanel">
                             <ComboBox x:Name="ModelCombo"
                                       HorizontalAlignment="Stretch"
                                       SelectionChanged="Settings_Changed"
                                 AutomationProperties.AutomationId="ModelCombo">
-                                <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
-                                <ComboBoxItem Content="base (fast, good)" Tag="base" IsSelected="True"/>
-                                <ComboBoxItem Content="small (balanced)" Tag="small"/>
-                                <ComboBoxItem Content="medium (accurate)" Tag="medium"/>
-                                <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
-                                <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
-                                <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_022" Content="tiny (fastest)" Tag="tiny"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_023" Content="base (fast, good)" Tag="base" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_024" Content="small (balanced)" Tag="small"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_025" Content="medium (accurate)" Tag="medium"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_026" Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_027" Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
+                                <ComboBoxItem x:Uid="SpeechToTextPage_Item_028" Content="large-v3 (best)" Tag="large-v3"/>
                             </ComboBox>
                         </StackPanel>
                         <StackPanel x:Name="ParakeetModelPanel" Visibility="Collapsed" Spacing="8">
-                            <TextBlock Text="NVIDIA Parakeet TDT 0.6B v3"
+                            <TextBlock x:Uid="SpeechToTextPage_Item_029" Text="NVIDIA Parakeet TDT 0.6B v3"
                                        Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Text="Pinned local model · CC-BY-4.0 · approximately 2.5 GB. UCX never downloads it during transcription."
+                            <TextBlock x:Uid="SpeechToTextPage_Item_030" Text="Pinned local model · CC-BY-4.0 · approximately 2.5 GB. UCX never downloads it during transcription."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
-                            <Button x:Name="DownloadParakeetModelButton"
+                            <Button x:Uid="SpeechToTextPage_DownloadParakeetModelButton" x:Name="DownloadParakeetModelButton"
                                     Content="Review &amp; download model"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     Click="DownloadParakeetModel_Click"
                                     AutomationProperties.AutomationId="DownloadParakeetModelButton"/>
-                            <TextBlock x:Name="ParakeetModelStatus"
+                            <TextBlock x:Uid="SpeechToTextPage_ParakeetModelStatus" x:Name="ParakeetModelStatus"
                                        Text="Checking local model pack..."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
@@ -308,29 +308,29 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Language" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SpeechToTextPage_Item_033" Text="Language" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="LanguageCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="LanguageCombo">
-                            <ComboBoxItem Content="Auto-detect" Tag="auto" IsSelected="True"/>
-                            <ComboBoxItem Content="English" Tag="en"/>
-                            <ComboBoxItem Content="Spanish" Tag="es"/>
-                            <ComboBoxItem Content="French" Tag="fr"/>
-                            <ComboBoxItem Content="German" Tag="de"/>
-                            <ComboBoxItem Content="Japanese" Tag="ja"/>
-                            <ComboBoxItem Content="Chinese" Tag="zh"/>
-                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
-                            <ComboBoxItem Content="Italian" Tag="it"/>
-                            <ComboBoxItem Content="Russian" Tag="ru"/>
-                            <ComboBoxItem Content="Korean" Tag="ko"/>
-                            <ComboBoxItem Content="Arabic" Tag="ar"/>
-                            <ComboBoxItem Content="Hindi" Tag="hi"/>
-                            <ComboBoxItem Content="Dutch" Tag="nl"/>
-                            <ComboBoxItem Content="Polish" Tag="pl"/>
-                            <ComboBoxItem Content="Turkish" Tag="tr"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_034" Content="Auto-detect" Tag="auto" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_035" Content="English" Tag="en"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_036" Content="Spanish" Tag="es"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_037" Content="French" Tag="fr"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_038" Content="German" Tag="de"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_039" Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_040" Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_041" Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_042" Content="Italian" Tag="it"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_043" Content="Russian" Tag="ru"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_044" Content="Korean" Tag="ko"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_045" Content="Arabic" Tag="ar"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_046" Content="Hindi" Tag="hi"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_047" Content="Dutch" Tag="nl"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_048" Content="Polish" Tag="pl"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_049" Content="Turkish" Tag="tr"/>
                         </ComboBox>
-                        <TextBlock x:Name="ParakeetLanguageNote"
+                        <TextBlock x:Uid="SpeechToTextPage_ParakeetLanguageNote" x:Name="ParakeetLanguageNote"
                                    Visibility="Collapsed"
                                    Text="Parakeet auto-detects Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, German, Greek, Hungarian, Italian, Latvian, Lithuanian, Maltese, Polish, Portuguese, Romanian, Slovak, Slovenian, Spanish, Swedish, Russian, and Ukrainian."
                                    Style="{StaticResource MutedTextStyle}"
@@ -340,29 +340,29 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SpeechToTextPage_Item_051" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="SubRip (.srt)" Tag="srt" IsSelected="True"/>
-                            <ComboBoxItem Content="Plain text (.txt)" Tag="txt"/>
-                            <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
-                            <ComboBoxItem Content="JSON (raw)" Tag="json"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_052" Content="SubRip (.srt)" Tag="srt" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_053" Content="Plain text (.txt)" Tag="txt"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_054" Content="WebVTT (.vtt)" Tag="vtt"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_Item_055" Content="JSON (raw)" Tag="json"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Options" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ToggleSwitch x:Name="WordTimestampsToggle"
+                        <TextBlock x:Uid="SpeechToTextPage_Item_056" Text="Options" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ToggleSwitch x:Uid="SpeechToTextPage_WordTimestampsToggle" x:Name="WordTimestampsToggle"
                                       Header="Word-level timestamps"
                                       OffContent="Off"
                                       OnContent="On"
                                       Toggled="Settings_Changed"
                             AutomationProperties.AutomationId="WordTimestampsToggle"/>
-                        <NumberBox x:Name="BatchSizeBox"
+                        <NumberBox x:Uid="SpeechToTextPage_BatchSizeBox" x:Name="BatchSizeBox"
                                    Header="faster-whisper batch size"
                                    Value="8"
                                    Minimum="1"
@@ -375,13 +375,13 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputFolderBox"
+                        <TextBlock x:Uid="SpeechToTextPage_Item_059" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="SpeechToTextPage_OutputFolderBox" x:Name="OutputFolderBox"
                                  PlaceholderText="Same as source file"
                                  IsReadOnly="True"
                                  TextWrapping="Wrap"
                             AutomationProperties.AutomationId="OutputFolderBox"/>
-                        <Button Content="Browse..."
+                        <Button x:Uid="SpeechToTextPage_SpeechToTextPageButton04" Content="Browse..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
                                 Click="BrowseOutputFolder_Click"
@@ -401,24 +401,24 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="StatusLabel"
+                <TextBlock x:Uid="SpeechToTextPage_StatusLabel" x:Name="StatusLabel"
                            Grid.Column="0"
                            Text="Add audio or video files to transcribe."
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
-                <Button Grid.Column="1"
+                <Button x:Uid="SpeechToTextPage_SpeechToTextPageButton05" Grid.Column="1"
                         Content="Clear All"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="ClearAll_Click"
                     AutomationProperties.AutomationId="SpeechToTextPageButton05"/>
-                <Button x:Name="CancelButton"
+                <Button x:Uid="SpeechToTextPage_CancelButton" x:Name="CancelButton"
                         Grid.Column="2"
                         Content="Cancel"
                         Style="{StaticResource SecondaryButtonStyle}"
                         IsEnabled="False"
                         Click="Cancel_Click"
                     AutomationProperties.AutomationId="CancelButton"/>
-                <Button x:Name="TranscribeButton"
+                <Button x:Uid="SpeechToTextPage_TranscribeButton" x:Name="TranscribeButton"
                         Grid.Column="3"
                         Content="Transcribe"
                         Style="{StaticResource PrimaryButtonStyle}"

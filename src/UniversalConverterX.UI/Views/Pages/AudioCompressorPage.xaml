@@ -52,7 +52,7 @@
                                    TextAlignment="Center"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="AudioCompressorPage_AudioCompressorRemoveButton" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             AutomationProperties.AutomationId="AudioCompressorRemoveButton"
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress"
+                        <ProgressBar x:Uid="AudioCompressorPage_Item_002" AutomationProperties.Name="Progress"
                                      Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -94,19 +94,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="AUDIO COMPRESSOR"
+                <TextBlock x:Uid="AudioCompressorPage_Item_003" Text="AUDIO COMPRESSOR"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Apply dynamic-range compression to audio (or video audio tracks). Tame loud peaks, lift quiet passages, level a podcast guest."
+                <TextBlock x:Uid="AudioCompressorPage_Item_004" Text="Apply dynamic-range compression to audio (or video audio tracks). Tame loud peaks, lift quiet passages, level a podcast guest."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="AudioCompressorPage_AudioCompressorAddFilesButton" Content="Add Files"
                         AutomationProperties.AutomationId="AudioCompressorAddFilesButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="AudioCompressorPage_AudioCompressorAddFolderButton" Content="Add Folder"
                         AutomationProperties.AutomationId="AudioCompressorAddFolderButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"/>
@@ -137,16 +137,16 @@
                             <FontIcon Glyph="&#xE91F;" FontSize="48"
                                       Foreground="{StaticResource AccentCyanBrush}"/>
                         </Border>
-                        <TextBlock Text="Drop audio files to compress"
+                        <TextBlock x:Uid="AudioCompressorPage_Item_007" Text="Drop audio files to compress"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="MP3, WAV, FLAC, M4A, AAC, OGG, OPUS, WMA, ALAC, APE, WV, AIFF and most video containers."
+                        <TextBlock x:Uid="AudioCompressorPage_Item_008" Text="MP3, WAV, FLAC, M4A, AAC, OGG, OPUS, WMA, ALAC, APE, WV, AIFF and most video containers."
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Center"
                                    TextWrapping="Wrap"
                                    MaxWidth="420"
                                    TextAlignment="Center"/>
-                        <Button Content="Browse Files"
+                        <Button x:Uid="AudioCompressorPage_AudioCompressorBrowseButton" Content="Browse Files"
                                 AutomationProperties.AutomationId="AudioCompressorBrowseButton"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="Browse_Click"
@@ -164,17 +164,17 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Compression Preset" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AudioCompressorPage_Item_010" Text="Compression Preset" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="PresetCombo"
                                   AutomationProperties.AutomationId="AudioCompressorPresetCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Preset_SelectionChanged">
-                            <ComboBoxItem Content="Light (gentle, transparent)" Tag="light"/>
-                            <ComboBoxItem Content="Medium (default, all-purpose)" Tag="medium" IsSelected="True"/>
-                            <ComboBoxItem Content="Heavy (obvious, loud sources)" Tag="heavy"/>
-                            <ComboBoxItem Content="Podcast (spoken word)" Tag="podcast"/>
-                            <ComboBoxItem Content="Broadcast (heavy, fast attack)" Tag="broadcast"/>
-                            <ComboBoxItem Content="Custom (sliders below)" Tag="__custom__"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_011" Content="Light (gentle, transparent)" Tag="light"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_012" Content="Medium (default, all-purpose)" Tag="medium" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_013" Content="Heavy (obvious, loud sources)" Tag="heavy"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_014" Content="Podcast (spoken word)" Tag="podcast"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_015" Content="Broadcast (heavy, fast attack)" Tag="broadcast"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_016" Content="Custom (sliders below)" Tag="__custom__"/>
                         </ComboBox>
                         <TextBlock x:Name="PresetSummary"
                                    Text=""
@@ -186,32 +186,32 @@
 
                 <Border x:Name="CustomCard" Style="{StaticResource CardStyle}" Visibility="Collapsed">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Custom Parameters" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <Slider x:Name="ThresholdSlider"
+                        <TextBlock x:Uid="AudioCompressorPage_Item_017" Text="Custom Parameters" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Uid="AudioCompressorPage_ThresholdSlider" x:Name="ThresholdSlider"
                                 AutomationProperties.AutomationId="AudioCompressorThresholdSlider"
                                 Header="Threshold (dB)"
                                 Minimum="-60" Maximum="0" Value="-20"
                                 StepFrequency="1" SnapsTo="StepValues"
                                 ValueChanged="Param_ValueChanged"/>
-                        <Slider x:Name="RatioSlider"
+                        <Slider x:Uid="AudioCompressorPage_RatioSlider" x:Name="RatioSlider"
                                 AutomationProperties.AutomationId="AudioCompressorRatioSlider"
                                 Header="Ratio (:1)"
                                 Minimum="1" Maximum="20" Value="3"
                                 StepFrequency="0.5" SnapsTo="StepValues"
                                 ValueChanged="Param_ValueChanged"/>
-                        <Slider x:Name="AttackSlider"
+                        <Slider x:Uid="AudioCompressorPage_AttackSlider" x:Name="AttackSlider"
                                 AutomationProperties.AutomationId="AudioCompressorAttackSlider"
                                 Header="Attack (ms)"
                                 Minimum="0.1" Maximum="500" Value="10"
                                 StepFrequency="0.5" SnapsTo="StepValues"
                                 ValueChanged="Param_ValueChanged"/>
-                        <Slider x:Name="ReleaseSlider"
+                        <Slider x:Uid="AudioCompressorPage_ReleaseSlider" x:Name="ReleaseSlider"
                                 AutomationProperties.AutomationId="AudioCompressorReleaseSlider"
                                 Header="Release (ms)"
                                 Minimum="1" Maximum="2000" Value="200"
                                 StepFrequency="1" SnapsTo="StepValues"
                                 ValueChanged="Param_ValueChanged"/>
-                        <Slider x:Name="MakeupSlider"
+                        <Slider x:Uid="AudioCompressorPage_MakeupSlider" x:Name="MakeupSlider"
                                 AutomationProperties.AutomationId="AudioCompressorMakeupSlider"
                                 Header="Makeup gain (dB)"
                                 Minimum="0" Maximum="24" Value="4"
@@ -222,25 +222,25 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Encoding" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AudioCompressorPage_Item_023" Text="Output Encoding" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="EncodeCombo"
                                   AutomationProperties.AutomationId="AudioCompressorEncodeCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Encode_SelectionChanged">
-                            <ComboBoxItem Content="Preserve (same container + codec)" Tag="" IsSelected="True"/>
-                            <ComboBoxItem Content="MP3 (libmp3lame, V2)" Tag="mp3"/>
-                            <ComboBoxItem Content="AAC (192 kbps M4A)" Tag="aac"/>
-                            <ComboBoxItem Content="Opus (128 kbps)" Tag="opus"/>
-                            <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
-                            <ComboBoxItem Content="WAV (16-bit PCM)" Tag="wav"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_024" Content="Preserve (same container + codec)" Tag="" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_025" Content="MP3 (libmp3lame, V2)" Tag="mp3"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_026" Content="AAC (192 kbps M4A)" Tag="aac"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_027" Content="Opus (128 kbps)" Tag="opus"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_028" Content="FLAC (lossless)" Tag="flac"/>
+                            <ComboBoxItem x:Uid="AudioCompressorPage_Item_029" Content="WAV (16-bit PCM)" Tag="wav"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBlock x:Uid="AudioCompressorPage_Item_030" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="AudioCompressorPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  AutomationProperties.AutomationId="AudioCompressorOutputDirBox"
                                  Header="Save to"
                                  PlaceholderText="Same folder as each source file"
@@ -250,11 +250,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Browse"
+                            <Button x:Uid="AudioCompressorPage_AudioCompressorBrowseOutputButton" Grid.Column="0" Content="Browse"
                                     AutomationProperties.AutomationId="AudioCompressorBrowseOutputButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"/>
-                            <Button Grid.Column="1" Content="Same as source"
+                            <Button x:Uid="AudioCompressorPage_AudioCompressorSameAsSourceButton" Grid.Column="1" Content="Same as source"
                                     AutomationProperties.AutomationId="AudioCompressorSameAsSourceButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"/>
@@ -267,7 +267,7 @@
                         <FontIcon Glyph="&#xE946;" FontSize="16"
                                   Foreground="{StaticResource AccentCyanBrush}"
                                   VerticalAlignment="Top"/>
-                        <TextBlock Text="Originals are kept. Outputs land beside each source (or in the chosen folder) with a preset suffix appended to the stem."
+                        <TextBlock x:Uid="AudioCompressorPage_Item_034" Text="Originals are kept. Outputs land beside each source (or in the chosen folder) with a preset suffix appended to the stem."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -286,16 +286,16 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" Content="Clear Queue"
+            <Button x:Uid="AudioCompressorPage_ClearButton" Grid.Column="1" Content="Clear Queue"
                     x:Name="ClearButton"
                     AutomationProperties.AutomationId="AudioCompressorClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
-            <Button Grid.Column="2" Content="Open Output"
+            <Button x:Uid="AudioCompressorPage_AudioCompressorOpenOutputButton" Grid.Column="2" Content="Open Output"
                     AutomationProperties.AutomationId="AudioCompressorOpenOutputButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
-            <Button Grid.Column="3" Content="Compress All"
+            <Button x:Uid="AudioCompressorPage_CompressButton" Grid.Column="3" Content="Compress All"
                     x:Name="CompressButton"
                     AutomationProperties.AutomationId="AudioCompressorCompressButton"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -310,9 +310,9 @@
                     MinWidth="440"
                     MaxWidth="560">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle" Text="Compressing..."
+                    <TextBlock x:Uid="AudioCompressorPage_ProgressTitle" x:Name="ProgressTitle" Text="Compressing..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress"
+                    <ProgressBar x:Uid="AudioCompressorPage_ProgressBar" AutomationProperties.Name="Progress"
                                  x:Name="ProgressBar" Height="8" CornerRadius="4"
                                  Minimum="0" Maximum="100"/>
                     <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
@@ -323,7 +323,7 @@
                                    TextWrapping="Wrap"/>
                     </ScrollViewer>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                        <Button x:Name="CancelButton" Content="Cancel"
+                        <Button x:Uid="AudioCompressorPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                                 AutomationProperties.AutomationId="AudioCompressorCancelButton"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"/>

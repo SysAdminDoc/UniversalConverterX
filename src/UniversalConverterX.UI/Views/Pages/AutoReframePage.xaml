@@ -50,7 +50,7 @@
                                    TextAlignment="Center"
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="AutoReframePage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveQueued_Click"
@@ -63,7 +63,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="AutoReframePage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -107,7 +107,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="AutoReframePage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -132,17 +132,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Auto Reframe" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Convert horizontal video to vertical (9:16), square (1:1), or portrait social (4:5). Static centre-crop or smart MediaPipe face tracking."
+                <TextBlock x:Uid="AutoReframePage_Item_004" Text="Auto Reframe" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="AutoReframePage_Item_005" Text="Convert horizontal video to vertical (9:16), square (1:1), or portrait social (4:5). Static centre-crop or smart MediaPipe face tracking."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="AutoReframePage_AutoReframePageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="AutoReframePageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="AutoReframePage_RunButton" x:Name="RunButton"
                         Content="Reframe"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -166,7 +166,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="AutoReframePage_AutoReframePagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="AutoReframePagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -178,16 +178,16 @@
                                     <FontIcon Glyph="&#xE740;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video files here"
+                                <TextBlock x:Uid="AutoReframePage_Item_009" Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each clip is reframed to the chosen aspect using the mode on the right."
+                                <TextBlock x:Uid="AutoReframePage_Item_010" Text="Each clip is reframed to the chosen aspect using the mode on the right."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="420"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="AutoReframePage_AutoReframePageButton02" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -200,7 +200,7 @@
                                       ItemTemplate="{StaticResource ArQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="AutoReframePage_AutoReframePagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="AutoReframePagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -212,7 +212,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No reframed clips yet"
+                                <TextBlock x:Uid="AutoReframePage_Item_013" Text="No reframed clips yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -229,36 +229,36 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Aspect Ratio" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="AspectCombo"
+                        <TextBlock x:Uid="AutoReframePage_Item_014" Text="Aspect Ratio" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="AutoReframePage_AspectCombo" x:Name="AspectCombo"
                                   Header="Target"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="AspectCombo">
-                            <ComboBoxItem Content="9:16 — Vertical (Reels / Shorts / TikTok)" Tag="9x16"/>
-                            <ComboBoxItem Content="1:1 — Square (Instagram feed)" Tag="1x1"/>
-                            <ComboBoxItem Content="4:5 — Portrait social" Tag="4x5"/>
-                            <ComboBoxItem Content="3:4 — Portrait social (alt)" Tag="3x4"/>
+                            <ComboBoxItem x:Uid="AutoReframePage_Item_016" Content="9:16 — Vertical (Reels / Shorts / TikTok)" Tag="9x16"/>
+                            <ComboBoxItem x:Uid="AutoReframePage_Item_017" Content="1:1 — Square (Instagram feed)" Tag="1x1"/>
+                            <ComboBoxItem x:Uid="AutoReframePage_Item_018" Content="4:5 — Portrait social" Tag="4x5"/>
+                            <ComboBoxItem x:Uid="AutoReframePage_Item_019" Content="3:4 — Portrait social (alt)" Tag="3x4"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Crop Mode" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <RadioButton x:Name="StaticRadio"
+                        <TextBlock x:Uid="AutoReframePage_Item_020" Text="Crop Mode" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <RadioButton x:Uid="AutoReframePage_StaticRadio" x:Name="StaticRadio"
                                      Content="Static centre-crop"
                                      IsChecked="True"
                                      GroupName="ReframeMode"
                                      Checked="Mode_Changed"
                             AutomationProperties.AutomationId="StaticRadio"/>
-                        <RadioButton x:Name="SmartRadio"
+                        <RadioButton x:Uid="AutoReframePage_SmartRadio" x:Name="SmartRadio"
                                      Content="Smart (MediaPipe face track)"
                                      GroupName="ReframeMode"
                                      Checked="Mode_Changed"
                             AutomationProperties.AutomationId="SmartRadio"/>
-                        <TextBlock Text="Smart mode samples the source at 1 Hz, finds the largest face per frame, and drives a moving crop. Falls back to static if no faces detected."
+                        <TextBlock x:Uid="AutoReframePage_Item_023" Text="Smart mode samples the source at 1 Hz, finds the largest face per frame, and drives a moving crop. Falls back to static if no faces detected."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
@@ -267,14 +267,14 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <Slider x:Name="CrfSlider"
+                        <TextBlock x:Uid="AutoReframePage_Item_024" Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Uid="AutoReframePage_CrfSlider" x:Name="CrfSlider"
                                 Header="x264 CRF"
                                 Minimum="14" Maximum="32" Value="20"
                                 StepFrequency="1"
                                 ValueChanged="Crf_Changed"
                             AutomationProperties.AutomationId="CrfSlider"/>
-                        <TextBlock x:Name="CrfLabel"
+                        <TextBlock x:Uid="AutoReframePage_CrfLabel" x:Name="CrfLabel"
                                    Text="CRF 20 (high quality)"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
@@ -283,8 +283,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="AutoReframePage_Item_027" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="AutoReframePage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText"
@@ -306,7 +306,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="AutoReframePage_ClearButton" Grid.Column="1"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -314,7 +314,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="AutoReframePage_CancelButton" Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

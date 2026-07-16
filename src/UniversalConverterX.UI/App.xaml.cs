@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Localization;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Security;
 using UniversalConverterX.UI.Services;
@@ -22,15 +23,17 @@ public partial class App : Application
 
     public App()
     {
+        var persistedOptions = ConverterXOptions.Load();
+        ApplyLanguageOverride(persistedOptions.Language);
         InitializeComponent();
-        ConfigureServices();
+        ConfigureServices(persistedOptions);
+        LocalizedText.Configure(AppLocalizer.Get);
     }
 
-    private static void ConfigureServices()
+    private static void ConfigureServices(ConverterXOptions persistedOptions)
     {
         var services = new ServiceCollection();
 
-        var persistedOptions = ConverterXOptions.Load();
         if (string.IsNullOrWhiteSpace(persistedOptions.ToolsBasePath))
             persistedOptions.ToolsBasePath = GetDefaultToolsPath();
         services.AddSingleton<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(
@@ -70,6 +73,16 @@ public partial class App : Application
         services.AddTransient<ProgressViewModel>();
 
         Services = services.BuildServiceProvider();
+    }
+
+    private static void ApplyLanguageOverride(string? language)
+    {
+        var supported = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "en-US", "de-DE", "fr-FR", "es-ES", "pl-PL", "zh-Hans",
+        };
+        if (!string.IsNullOrWhiteSpace(language) && supported.Contains(language))
+            Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language;
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)

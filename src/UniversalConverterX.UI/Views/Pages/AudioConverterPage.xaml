@@ -36,7 +36,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding SourceSummary}" Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Style="{StaticResource IconButtonStyle}"
+                    <Button x:Uid="AudioConverterPage_AudioConverterRemoveButton" Grid.Column="2" Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             AutomationProperties.AutomationId="AudioConverterRemoveButton"
                             ToolTipService.ToolTip="Remove from queue"
@@ -48,7 +48,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Conversion progress"
+                        <ProgressBar x:Uid="AudioConverterPage_Item_002" AutomationProperties.Name="Conversion progress"
                                      Height="6" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding StatusText}"
@@ -73,16 +73,16 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="AUDIO CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Convert audio locally with codec-aware VBR quality and advanced encoder controls."
+                <TextBlock x:Uid="AudioConverterPage_Item_003" Text="AUDIO CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="AudioConverterPage_Item_004" Text="Convert audio locally with codec-aware VBR quality and advanced encoder controls."
                            Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
                            MaxWidth="760" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="AudioConverterPage_AudioConverterAddFilesButton" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         AutomationProperties.AutomationId="AudioConverterAddFilesButton"
                         Click="Browse_Click"/>
-                <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="AudioConverterPage_AudioConverterAddFolderButton" Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
                         AutomationProperties.AutomationId="AudioConverterAddFolderButton"
                         Click="BrowseFolder_Click"/>
             </StackPanel>
@@ -106,13 +106,13 @@
                             <FontIcon Glyph="&#xEC4F;" FontSize="48"
                                       Foreground="{StaticResource AccentGreenBrush}"/>
                         </Border>
-                        <TextBlock Text="Drop audio files to convert"
+                        <TextBlock x:Uid="AudioConverterPage_Item_007" Text="Drop audio files to convert"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="MP3, WAV, FLAC, AAC, OGG, Opus, M4A, APE, WavPack, DSD, WMA, AC-3 and more."
+                        <TextBlock x:Uid="AudioConverterPage_Item_008" Text="MP3, WAV, FLAC, AAC, OGG, Opus, M4A, APE, WavPack, DSD, WMA, AC-3 and more."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"
                                    TextAlignment="Center" MaxWidth="460"/>
-                        <Button Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
+                        <Button x:Uid="AudioConverterPage_AudioConverterBrowseButton" Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
                                 AutomationProperties.AutomationId="AudioConverterBrowseButton"
                                 HorizontalAlignment="Center" Click="Browse_Click"/>
                     </StackPanel>
@@ -126,30 +126,30 @@
                 <StackPanel Spacing="14" Padding="0,0,4,0">
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock x:Uid="AudioConverterPage_Item_010" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
                             <ComboBox x:Name="FormatCombo" HorizontalAlignment="Stretch"
                                       AutomationProperties.AutomationId="AudioConverterFormatCombo"
                                       SelectionChanged="Format_Changed">
-                                <ComboBoxItem Content="MP3 (libmp3lame)" Tag="mp3" IsSelected="True"/>
-                                <ComboBoxItem Content="AAC / M4A (native)" Tag="aac"/>
-                                <ComboBoxItem Content="AAC / M4A (libfdk_aac)" Tag="fdk-aac"/>
-                                <ComboBoxItem Content="Opus" Tag="opus"/>
-                                <ComboBoxItem Content="Ogg Vorbis" Tag="vorbis"/>
-                                <ComboBoxItem Content="FLAC (lossless)" Tag="flac"/>
-                                <ComboBoxItem Content="WAV (PCM)" Tag="wav"/>
-                                <ComboBoxItem Content="ALAC / M4A (lossless)" Tag="alac"/>
-                                <ComboBoxItem Content="WavPack (lossless)" Tag="wavpack"/>
-                                <ComboBoxItem Content="AC-3" Tag="ac3"/>
-                                <ComboBoxItem Content="E-AC-3" Tag="eac3"/>
-                                <ComboBoxItem Content="WMA" Tag="wma"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_011" Content="MP3 (libmp3lame)" Tag="mp3" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_012" Content="AAC / M4A (native)" Tag="aac"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_013" Content="AAC / M4A (libfdk_aac)" Tag="fdk-aac"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_014" Content="Opus" Tag="opus"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_015" Content="Ogg Vorbis" Tag="vorbis"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_016" Content="FLAC (lossless)" Tag="flac"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_017" Content="WAV (PCM)" Tag="wav"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_018" Content="ALAC / M4A (lossless)" Tag="alac"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_019" Content="WavPack (lossless)" Tag="wavpack"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_020" Content="AC-3" Tag="ac3"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_021" Content="E-AC-3" Tag="eac3"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_022" Content="WMA" Tag="wma"/>
                             </ComboBox>
                         </StackPanel>
                     </Border>
 
                     <Border x:Name="QualityCard" Style="{StaticResource CardStyle}">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
-                            <ToggleSwitch x:Name="VbrToggle" Header="Variable bitrate (VBR)"
+                            <TextBlock x:Uid="AudioConverterPage_Item_023" Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <ToggleSwitch x:Uid="AudioConverterPage_VbrToggle" x:Name="VbrToggle" Header="Variable bitrate (VBR)"
                                           IsOn="True" AutomationProperties.AutomationId="AudioConverterVbrToggle"
                                           Toggled="Vbr_Toggled"/>
                             <StackPanel x:Name="VbrPanel" Spacing="6">
@@ -158,101 +158,101 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="VBR quality" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock x:Name="VbrQualityValue" Grid.Column="1" Text="2 — high quality"
+                                    <TextBlock x:Uid="AudioConverterPage_Item_025" Text="VBR quality" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock x:Uid="AudioConverterPage_VbrQualityValue" x:Name="VbrQualityValue" Grid.Column="1" Text="2 — high quality"
                                                Style="{StaticResource MutedTextStyle}"/>
                                 </Grid>
-                                <Slider x:Name="VbrQualitySlider" Minimum="0" Maximum="9" Value="2"
+                                <Slider x:Uid="AudioConverterPage_VbrQualitySlider" x:Name="VbrQualitySlider" Minimum="0" Maximum="9" Value="2"
                                         StepFrequency="1" SnapsTo="StepValues"
                                         AutomationProperties.Name="VBR quality, zero is highest"
                                         AutomationProperties.AutomationId="AudioConverterVbrQualitySlider"
                                         ValueChanged="VbrQuality_ValueChanged"/>
                                 <Grid>
-                                    <TextBlock Text="0 · highest" Style="{StaticResource MutedTextStyle}"/>
-                                    <TextBlock Text="9 · smallest" Style="{StaticResource MutedTextStyle}"
+                                    <TextBlock x:Uid="AudioConverterPage_Item_028" Text="0 · highest" Style="{StaticResource MutedTextStyle}"/>
+                                    <TextBlock x:Uid="AudioConverterPage_Item_029" Text="9 · smallest" Style="{StaticResource MutedTextStyle}"
                                                HorizontalAlignment="Right"/>
                                 </Grid>
                             </StackPanel>
                             <StackPanel x:Name="BitratePanel" Spacing="6" Visibility="Collapsed">
-                                <TextBlock Text="Fixed bitrate" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="AudioConverterPage_Item_030" Text="Fixed bitrate" Style="{StaticResource LabelTextStyle}"/>
                                 <ComboBox x:Name="BitrateCombo" HorizontalAlignment="Stretch"
                                           AutomationProperties.AutomationId="AudioConverterBitrateCombo"
                                           SelectionChanged="Setting_Changed">
-                                    <ComboBoxItem Content="64 kbps" Tag="64k"/>
-                                    <ComboBoxItem Content="96 kbps" Tag="96k"/>
-                                    <ComboBoxItem Content="128 kbps" Tag="128k"/>
-                                    <ComboBoxItem Content="160 kbps" Tag="160k"/>
-                                    <ComboBoxItem Content="192 kbps" Tag="192k" IsSelected="True"/>
-                                    <ComboBoxItem Content="256 kbps" Tag="256k"/>
-                                    <ComboBoxItem Content="320 kbps" Tag="320k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_031" Content="64 kbps" Tag="64k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_032" Content="96 kbps" Tag="96k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_033" Content="128 kbps" Tag="128k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_034" Content="160 kbps" Tag="160k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_035" Content="192 kbps" Tag="192k" IsSelected="True"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_036" Content="256 kbps" Tag="256k"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_037" Content="320 kbps" Tag="320k"/>
                                 </ComboBox>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <Expander Header="Advanced audio" AutomationProperties.AutomationId="AudioConverterAdvancedExpander">
+                    <Expander x:Uid="AudioConverterPage_AudioConverterAdvancedExpander" Header="Advanced audio" AutomationProperties.AutomationId="AudioConverterAdvancedExpander">
                         <StackPanel Spacing="12" Padding="0,12,0,0">
-                            <ComboBox x:Name="SampleRateCombo" Header="Sample rate"
+                            <ComboBox x:Uid="AudioConverterPage_SampleRateCombo" x:Name="SampleRateCombo" Header="Sample rate"
                                       AutomationProperties.AutomationId="AudioConverterSampleRateCombo"
                                       SelectionChanged="Setting_Changed">
-                                <ComboBoxItem Content="Auto (preserve)" Tag="" IsSelected="True"/>
-                                <ComboBoxItem Content="44.1 kHz" Tag="44100"/>
-                                <ComboBoxItem Content="48 kHz" Tag="48000"/>
-                                <ComboBoxItem Content="96 kHz" Tag="96000"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_040" Content="Auto (preserve)" Tag="" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_041" Content="44.1 kHz" Tag="44100"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_042" Content="48 kHz" Tag="48000"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_043" Content="96 kHz" Tag="96000"/>
                             </ComboBox>
-                            <ComboBox x:Name="ChannelsCombo" Header="Channels"
+                            <ComboBox x:Uid="AudioConverterPage_ChannelsCombo" x:Name="ChannelsCombo" Header="Channels"
                                       AutomationProperties.AutomationId="AudioConverterChannelsCombo"
                                       SelectionChanged="Setting_Changed">
-                                <ComboBoxItem Content="Auto (preserve)" Tag="" IsSelected="True"/>
-                                <ComboBoxItem Content="Mono" Tag="1"/>
-                                <ComboBoxItem Content="Stereo" Tag="2"/>
-                                <ComboBoxItem Content="5.1" Tag="6"/>
-                                <ComboBoxItem Content="7.1" Tag="8"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_045" Content="Auto (preserve)" Tag="" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_046" Content="Mono" Tag="1"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_047" Content="Stereo" Tag="2"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_048" Content="5.1" Tag="6"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_049" Content="7.1" Tag="8"/>
                             </ComboBox>
 
                             <StackPanel x:Name="OpusPanel" Spacing="10" Visibility="Collapsed">
-                                <TextBlock Text="Opus" Style="{StaticResource PanelTitleTextStyle}"/>
-                                <ComboBox x:Name="OpusApplicationCombo" Header="Application"
+                                <TextBlock x:Uid="AudioConverterPage_Item_050" Text="Opus" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <ComboBox x:Uid="AudioConverterPage_OpusApplicationCombo" x:Name="OpusApplicationCombo" Header="Application"
                                           AutomationProperties.AutomationId="AudioConverterOpusApplicationCombo"
                                           SelectionChanged="Setting_Changed">
-                                    <ComboBoxItem Content="Audio / music" Tag="audio" IsSelected="True"/>
-                                    <ComboBoxItem Content="Voice / podcast" Tag="voip"/>
-                                    <ComboBoxItem Content="Low delay" Tag="lowdelay"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_052" Content="Audio / music" Tag="audio" IsSelected="True"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_053" Content="Voice / podcast" Tag="voip"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_054" Content="Low delay" Tag="lowdelay"/>
                                 </ComboBox>
-                                <ComboBox x:Name="OpusFrameCombo" Header="Frame duration"
+                                <ComboBox x:Uid="AudioConverterPage_OpusFrameCombo" x:Name="OpusFrameCombo" Header="Frame duration"
                                           AutomationProperties.AutomationId="AudioConverterOpusFrameCombo"
                                           SelectionChanged="Setting_Changed">
-                                    <ComboBoxItem Content="5 ms" Tag="5"/>
-                                    <ComboBoxItem Content="10 ms" Tag="10"/>
-                                    <ComboBoxItem Content="20 ms (default)" Tag="20" IsSelected="True"/>
-                                    <ComboBoxItem Content="40 ms" Tag="40"/>
-                                    <ComboBoxItem Content="60 ms" Tag="60"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_056" Content="5 ms" Tag="5"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_057" Content="10 ms" Tag="10"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_058" Content="20 ms (default)" Tag="20" IsSelected="True"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_059" Content="40 ms" Tag="40"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_060" Content="60 ms" Tag="60"/>
                                 </ComboBox>
                             </StackPanel>
 
                             <StackPanel x:Name="FdkPanel" Spacing="10" Visibility="Collapsed">
-                                <TextBlock Text="FDK-AAC" Style="{StaticResource PanelTitleTextStyle}"/>
-                                <NumberBox x:Name="FdkCutoffBox" Header="Low-pass cutoff (Hz)"
+                                <TextBlock x:Uid="AudioConverterPage_Item_061" Text="FDK-AAC" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <NumberBox x:Uid="AudioConverterPage_FdkCutoffBox" x:Name="FdkCutoffBox" Header="Low-pass cutoff (Hz)"
                                            Minimum="0" Maximum="24000" Value="20000" SpinButtonPlacementMode="Compact"
                                            AutomationProperties.AutomationId="AudioConverterFdkCutoffBox"
                                            ValueChanged="NumberSetting_Changed"/>
-                                <ToggleSwitch x:Name="FdkAfterburnerToggle" Header="Afterburner quality pass"
+                                <ToggleSwitch x:Uid="AudioConverterPage_FdkAfterburnerToggle" x:Name="FdkAfterburnerToggle" Header="Afterburner quality pass"
                                               IsOn="True" AutomationProperties.AutomationId="AudioConverterFdkAfterburnerToggle"
                                               Toggled="Vbr_Toggled"/>
-                                <ComboBox x:Name="FdkProfileCombo" Header="Profile"
+                                <ComboBox x:Uid="AudioConverterPage_FdkProfileCombo" x:Name="FdkProfileCombo" Header="Profile"
                                           AutomationProperties.AutomationId="AudioConverterFdkProfileCombo"
                                           SelectionChanged="Setting_Changed">
-                                    <ComboBoxItem Content="AAC-LC" Tag="aac_low" IsSelected="True"/>
-                                    <ComboBoxItem Content="HE-AAC v1" Tag="aac_he"/>
-                                    <ComboBoxItem Content="HE-AAC v2" Tag="aac_he_v2"/>
-                                    <ComboBoxItem Content="AAC-LD" Tag="aac_ld"/>
-                                    <ComboBoxItem Content="AAC-ELD" Tag="aac_eld"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_065" Content="AAC-LC" Tag="aac_low" IsSelected="True"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_066" Content="HE-AAC v1" Tag="aac_he"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_067" Content="HE-AAC v2" Tag="aac_he_v2"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_068" Content="AAC-LD" Tag="aac_ld"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_069" Content="AAC-ELD" Tag="aac_eld"/>
                                 </ComboBox>
                             </StackPanel>
 
                             <StackPanel x:Name="VorbisPanel" Spacing="10" Visibility="Collapsed">
-                                <TextBlock Text="Vorbis" Style="{StaticResource PanelTitleTextStyle}"/>
-                                <ToggleSwitch x:Name="VorbisManagedToggle"
+                                <TextBlock x:Uid="AudioConverterPage_Item_070" Text="Vorbis" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <ToggleSwitch x:Uid="AudioConverterPage_VorbisManagedToggle" x:Name="VorbisManagedToggle"
                                               Header="Managed bitrate bounds (streaming compatibility)"
                                               AutomationProperties.AutomationId="AudioConverterVorbisManagedToggle"
                                               Toggled="VorbisManaged_Toggled"/>
@@ -262,18 +262,18 @@
 
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
-                            <TextBox x:Name="OutputDirectoryBox" IsReadOnly="True"
+                            <TextBlock x:Uid="AudioConverterPage_Item_072" Text="Output Folder" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBox x:Uid="AudioConverterPage_OutputDirectoryBox" x:Name="OutputDirectoryBox" IsReadOnly="True"
                                      PlaceholderText="Add a file to choose a default"
                                      AutomationProperties.AutomationId="AudioConverterOutputDirectoryBox"/>
-                            <Button Content="Browse Output Folder" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="AudioConverterPage_AudioConverterBrowseOutputButton" Content="Browse Output Folder" Style="{StaticResource SecondaryButtonStyle}"
                                     AutomationProperties.AutomationId="AudioConverterBrowseOutputButton"
                                     Click="BrowseOutput_Click"/>
                         </StackPanel>
                     </Border>
 
                     <Border Style="{StaticResource InfoBannerStyle}">
-                        <TextBlock Text="Originals are never modified. Existing outputs receive a numbered name instead of being overwritten."
+                        <TextBlock x:Uid="AudioConverterPage_Item_075" Text="Originals are never modified. Existing outputs receive a numbered name instead of being overwritten."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </Border>
                 </StackPanel>
@@ -290,18 +290,18 @@
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText" VerticalAlignment="Center"
                        Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
+            <Button x:Uid="AudioConverterPage_ClearButton" Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}" Margin="0,0,12,0"
                     AutomationProperties.AutomationId="AudioConverterClearButton"
                     Click="Clear_Click" IsEnabled="False"/>
-            <Button Grid.Column="2" Content="Open Output" Style="{StaticResource SecondaryButtonStyle}"
+            <Button x:Uid="AudioConverterPage_AudioConverterOpenOutputButton" Grid.Column="2" Content="Open Output" Style="{StaticResource SecondaryButtonStyle}"
                     Margin="0,0,12,0" AutomationProperties.AutomationId="AudioConverterOpenOutputButton"
                     Click="OpenOutput_Click"/>
-            <Button Grid.Column="3" x:Name="CancelButton" Content="Cancel"
+            <Button x:Uid="AudioConverterPage_CancelButton" Grid.Column="3" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}" Margin="0,0,12,0"
                     AutomationProperties.AutomationId="AudioConverterCancelButton"
                     Click="Cancel_Click" IsEnabled="False"/>
-            <Button Grid.Column="4" x:Name="RunButton" Content="Convert All"
+            <Button x:Uid="AudioConverterPage_RunButton" Grid.Column="4" x:Name="RunButton" Content="Convert All"
                     Style="{StaticResource PrimaryButtonStyle}"
                     AutomationProperties.AutomationId="AudioConverterRunButton"
                     Click="Run_Click" IsEnabled="False"/>

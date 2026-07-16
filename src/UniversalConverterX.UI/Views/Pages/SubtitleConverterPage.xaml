@@ -42,7 +42,7 @@
                                FontSize="11"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="SubtitleConverterPage_Item_001" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue"
                             ToolTipService.ToolTip="Remove from queue"
@@ -71,19 +71,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="SUBTITLE CONVERTER"
+                <TextBlock x:Uid="SubtitleConverterPage_Item_002" Text="SUBTITLE CONVERTER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP. Optional millisecond shift and framerate retiming for files captured at the wrong fps. Backed by pysubs2."
+                <TextBlock x:Uid="SubtitleConverterPage_Item_003" Text="Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP. Optional millisecond shift and framerate retiming for files captured at the wrong fps. Backed by pysubs2."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add files"
+                <Button x:Uid="SubtitleConverterPage_SubtitleConverterPageButton01" Content="Add files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddFiles_Click"
                     AutomationProperties.AutomationId="SubtitleConverterPageButton01"/>
-                <Button x:Name="ConvertButton"
+                <Button x:Uid="SubtitleConverterPage_ConvertButton" x:Name="ConvertButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Convert_Click"
@@ -105,44 +105,44 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ComboBox x:Name="FormatCombo"
+                <ComboBox x:Uid="SubtitleConverterPage_FormatCombo" x:Name="FormatCombo"
                           Header="Target format"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="FormatCombo">
-                    <ComboBoxItem Content="SRT (SubRip)" Tag="srt"/>
-                    <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
-                    <ComboBoxItem Content="ASS (Aegisub)" Tag="ass"/>
-                    <ComboBoxItem Content="SSA" Tag="ssa"/>
-                    <ComboBoxItem Content="MicroDVD (.sub)" Tag="microdvd"/>
-                    <ComboBoxItem Content="TMP" Tag="tmp"/>
-                    <ComboBoxItem Content="JSON" Tag="json"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_007" Content="SRT (SubRip)" Tag="srt"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_008" Content="WebVTT (.vtt)" Tag="vtt"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_009" Content="ASS (Aegisub)" Tag="ass"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_010" Content="SSA" Tag="ssa"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_011" Content="MicroDVD (.sub)" Tag="microdvd"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_012" Content="TMP" Tag="tmp"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_013" Content="JSON" Tag="json"/>
                 </ComboBox>
-                <TextBox Grid.Column="1"
+                <TextBox x:Uid="SubtitleConverterPage_OutputDirBox" Grid.Column="1"
                          x:Name="OutputDirBox"
                          Header="Output directory"
                          IsReadOnly="True"
                          PlaceholderText="(same as source)"
                     AutomationProperties.AutomationId="OutputDirBox"/>
-                <Button Grid.Column="2"
+                <Button x:Uid="SubtitleConverterPage_SubtitleConverterPageButton02" Grid.Column="2"
                         Content="Browse..."
                         Style="{StaticResource SecondaryButtonStyle}"
                         VerticalAlignment="Bottom"
                         Click="BrowseOutputDir_Click"
                     AutomationProperties.AutomationId="SubtitleConverterPageButton02"/>
-                <ComboBox Grid.Column="3"
+                <ComboBox x:Uid="SubtitleConverterPage_EncodingCombo" Grid.Column="3"
                           x:Name="EncodingCombo"
                           Header="Source encoding"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="EncodingCombo">
-                    <ComboBoxItem Content="utf-8" Tag="utf-8"/>
-                    <ComboBoxItem Content="utf-8-sig" Tag="utf-8-sig"/>
-                    <ComboBoxItem Content="cp1252 (Western EU)" Tag="cp1252"/>
-                    <ComboBoxItem Content="cp1251 (Cyrillic)" Tag="cp1251"/>
-                    <ComboBoxItem Content="cp932 (Shift-JIS)" Tag="cp932"/>
-                    <ComboBoxItem Content="gbk" Tag="gbk"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_017" Content="utf-8" Tag="utf-8"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_018" Content="utf-8-sig" Tag="utf-8-sig"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_019" Content="cp1252 (Western EU)" Tag="cp1252"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_020" Content="cp1251 (Cyrillic)" Tag="cp1251"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_021" Content="cp932 (Shift-JIS)" Tag="cp932"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_022" Content="gbk" Tag="gbk"/>
                 </ComboBox>
 
-                <NumberBox Grid.Row="1"
+                <NumberBox x:Uid="SubtitleConverterPage_ShiftMsBox" Grid.Row="1"
                            x:Name="ShiftMsBox"
                            Header="Shift (ms)"
                            Value="0"
@@ -150,7 +150,7 @@
                            SmallChange="100" LargeChange="1000"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="ShiftMsBox"/>
-                <NumberBox Grid.Row="1" Grid.Column="1"
+                <NumberBox x:Uid="SubtitleConverterPage_FpsInBox" Grid.Row="1" Grid.Column="1"
                            x:Name="FpsInBox"
                            Header="Source FPS (optional)"
                            PlaceholderText="(skip)"
@@ -159,7 +159,7 @@
                            SmallChange="0.001" LargeChange="1"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="FpsInBox"/>
-                <NumberBox Grid.Row="1" Grid.Column="2"
+                <NumberBox x:Uid="SubtitleConverterPage_FpsOutBox" Grid.Row="1" Grid.Column="2"
                            x:Name="FpsOutBox"
                            Header="Target FPS (optional)"
                            PlaceholderText="(skip)"
@@ -168,14 +168,14 @@
                            SmallChange="0.001" LargeChange="1"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="FpsOutBox"/>
-                <ComboBox Grid.Row="1" Grid.Column="3"
+                <ComboBox x:Uid="SubtitleConverterPage_OutEncodingCombo" Grid.Row="1" Grid.Column="3"
                           x:Name="OutEncodingCombo"
                           Header="Output encoding"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="OutEncodingCombo">
-                    <ComboBoxItem Content="utf-8" Tag="utf-8"/>
-                    <ComboBoxItem Content="utf-8-sig (BOM)" Tag="utf-8-sig"/>
-                    <ComboBoxItem Content="cp1252" Tag="cp1252"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_027" Content="utf-8" Tag="utf-8"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_028" Content="utf-8-sig (BOM)" Tag="utf-8-sig"/>
+                    <ComboBoxItem x:Uid="SubtitleConverterPage_Item_029" Content="cp1252" Tag="cp1252"/>
                 </ComboBox>
             </Grid>
         </Border>
@@ -190,10 +190,10 @@
                         <FontIcon Glyph="&#xE93B;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Add subtitle files"
+                    <TextBlock x:Uid="SubtitleConverterPage_Item_030" Text="Add subtitle files"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="SRT, VTT, ASS, SSA, SUB, TMP. Pick a target format and run."
+                    <TextBlock x:Uid="SubtitleConverterPage_Item_031" Text="SRT, VTT, ASS, SSA, SUB, TMP. Pick a target format and run."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
@@ -205,13 +205,13 @@
             </Grid>
         </Border>
 
-        <ProgressBar AutomationProperties.Name="Progress"
+        <ProgressBar x:Uid="SubtitleConverterPage_WorkProgress" AutomationProperties.Name="Progress"
                      Grid.Row="3"
                      x:Name="WorkProgress"
                      Minimum="0" Maximum="100"
                      IsIndeterminate="False"/>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="SubtitleConverterPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Add subtitles to begin."/>

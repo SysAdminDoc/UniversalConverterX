@@ -40,7 +40,7 @@
                         <TextBlock Text="{Binding PlanSummary}" Style="{StaticResource MutedTextStyle}"
                                    FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Style="{StaticResource IconButtonStyle}"
+                    <Button x:Uid="PhotoRestorationPage_Item_001" Grid.Column="3" Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove" ToolTipService.ToolTip="Remove" Click="RemoveQueued_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14" Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
@@ -49,7 +49,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                        <ProgressBar x:Uid="PhotoRestorationPage_Item_002" AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
                                      Height="6" CornerRadius="3" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding StatusText}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -80,7 +80,7 @@
                         <TextBlock Text="{Binding Details}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="PhotoRestorationPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}" Padding="14,8"
                             Click="OpenFinishedFolder_Click" Tag="{Binding OutputPath}"
                             IsEnabled="{Binding CanOpenFolder}"/>
@@ -102,14 +102,14 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Photo Restoration" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="GFPGAN v1.4 blind face restoration. Sharpens degraded portraits, repairs old scans, smooths compression artifacts."
+                <TextBlock x:Uid="PhotoRestorationPage_Item_004" Text="Photo Restoration" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="PhotoRestorationPage_Item_005" Text="GFPGAN v1.4 blind face restoration. Sharpens degraded portraits, repairs old scans, smooths compression artifacts."
                            Style="{StaticResource SubtitleTextStyle}" TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click"
+                <Button x:Uid="PhotoRestorationPage_PhotoRestorationPageButton01" Content="Browse Files" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click"
                     AutomationProperties.AutomationId="PhotoRestorationPageButton01"/>
-                <Button x:Name="RunButton" Content="Restore"
+                <Button x:Uid="PhotoRestorationPage_RunButton" x:Name="RunButton" Content="Restore"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click" IsEnabled="False"
                     AutomationProperties.AutomationId="RunButton"/>
@@ -128,7 +128,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="PhotoRestorationPage_PhotoRestorationPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="PhotoRestorationPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -137,14 +137,14 @@
                                     <FontIcon Glyph="&#xE77B;" FontSize="48"
                                               Foreground="{StaticResource AccentGreenBrush}"/>
                                 </Border>
-                                <TextBlock x:Name="DropZoneLabel" Text="Drop portrait photos here"
+                                <TextBlock x:Uid="PhotoRestorationPage_DropZoneLabel" x:Name="DropZoneLabel" Text="Drop portrait photos here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each photo is restored face-by-face and saved alongside the source."
+                                <TextBlock x:Uid="PhotoRestorationPage_Item_010" Text="Each photo is restored face-by-face and saved alongside the source."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
-                                <Button Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
+                                <Button x:Uid="PhotoRestorationPage_PhotoRestorationPageButton02" Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click" HorizontalAlignment="Center"
                                     AutomationProperties.AutomationId="PhotoRestorationPageButton02"/>
                             </StackPanel>
@@ -153,7 +153,7 @@
                                       ItemTemplate="{StaticResource PrQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="PhotoRestorationPage_PhotoRestorationPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="PhotoRestorationPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -163,7 +163,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No restorations yet"
+                                <TextBlock x:Uid="PhotoRestorationPage_Item_013" Text="No restorations yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -178,14 +178,14 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo" Header="GFPGAN model"
+                        <TextBlock x:Uid="PhotoRestorationPage_Item_014" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="PhotoRestorationPage_ModelCombo" x:Name="ModelCombo" Header="GFPGAN model"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Discovering..."
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ModelCombo"/>
                         <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
-                        <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
+                        <Button x:Uid="PhotoRestorationPage_PhotoRestorationPageButton03" Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
                                 Click="RefreshModels_Click" HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="PhotoRestorationPageButton03"/>
                     </StackPanel>
@@ -193,26 +193,26 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Settings" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="UpscaleCombo" Header="Upscale" SelectedIndex="1"
+                        <TextBlock x:Uid="PhotoRestorationPage_Item_017" Text="Settings" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="PhotoRestorationPage_UpscaleCombo" x:Name="UpscaleCombo" Header="Upscale" SelectedIndex="1"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="UpscaleCombo">
-                            <ComboBoxItem Content="1× (no enlarge)" Tag="1"/>
-                            <ComboBoxItem Content="2× (recommended)" Tag="2"/>
-                            <ComboBoxItem Content="3×" Tag="3"/>
-                            <ComboBoxItem Content="4×" Tag="4"/>
+                            <ComboBoxItem x:Uid="PhotoRestorationPage_Item_019" Content="1× (no enlarge)" Tag="1"/>
+                            <ComboBoxItem x:Uid="PhotoRestorationPage_Item_020" Content="2× (recommended)" Tag="2"/>
+                            <ComboBoxItem x:Uid="PhotoRestorationPage_Item_021" Content="3×" Tag="3"/>
+                            <ComboBoxItem x:Uid="PhotoRestorationPage_Item_022" Content="4×" Tag="4"/>
                         </ComboBox>
-                        <Slider x:Name="WeightSlider" Header="Restoration strength"
+                        <Slider x:Uid="PhotoRestorationPage_WeightSlider" x:Name="WeightSlider" Header="Restoration strength"
                                 Minimum="0" Maximum="100" Value="50"
                                 StepFrequency="5"
                                 ValueChanged="Weight_Changed"
                             AutomationProperties.AutomationId="WeightSlider"/>
-                        <TextBlock x:Name="WeightLabel"
+                        <TextBlock x:Uid="PhotoRestorationPage_WeightLabel" x:Name="WeightLabel"
                                    Text="0.50 (balanced)"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
-                        <CheckBox x:Name="OnlyCenterCheck"
+                        <CheckBox x:Uid="PhotoRestorationPage_OnlyCenterCheck" x:Name="OnlyCenterCheck"
                                   Content="Only restore the largest face"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
@@ -222,8 +222,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText" Text="0 queued / 0 finished"
+                        <TextBlock x:Uid="PhotoRestorationPage_Item_026" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="PhotoRestorationPage_QueueSummaryText" x:Name="QueueSummaryText" Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
@@ -239,11 +239,11 @@
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText" Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
+            <Button x:Uid="PhotoRestorationPage_ClearButton" Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"
                     Margin="0,0,12,0" IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
+            <Button x:Uid="PhotoRestorationPage_CancelButton" Grid.Column="2" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click" IsEnabled="False"
                 AutomationProperties.AutomationId="CancelButton"/>

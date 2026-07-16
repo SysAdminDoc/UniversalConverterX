@@ -48,18 +48,18 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Timeline Preview"
+                <TextBlock x:Uid="TimelinePreviewPage_Item_001" Text="Timeline Preview"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Generate a thumbnail strip + audio waveform image for any video. Useful for visually scrubbing long clips before sending them through ClipForge or VideoCrush. Output drops to a per-clip folder under %TEMP% by default; use Export to move it next to the source."
+                <TextBlock x:Uid="TimelinePreviewPage_Item_002" Text="Generate a thumbnail strip + audio waveform image for any video. Useful for visually scrubbing long clips before sending them through ClipForge or VideoCrush. Output drops to a per-clip folder under %TEMP% by default; use Export to move it next to the source."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Open Video"
+                <Button x:Uid="TimelinePreviewPage_TimelinePreviewPageButton01" Content="Open Video"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="OpenFile_Click"
                     AutomationProperties.AutomationId="TimelinePreviewPageButton01"/>
-                <Button x:Name="GenerateButton"
+                <Button x:Uid="TimelinePreviewPage_GenerateButton" x:Name="GenerateButton"
                         Content="Generate"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Generate_Click"
@@ -74,14 +74,14 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <NumberBox x:Name="ThumbFpsBox"
+                <NumberBox x:Uid="TimelinePreviewPage_ThumbFpsBox" x:Name="ThumbFpsBox"
                            Header="Thumbnail rate (per second)"
                            Value="1"
                            Minimum="0.1" Maximum="10"
                            SmallChange="0.1" LargeChange="1"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="ThumbFpsBox"/>
-                <NumberBox Grid.Column="1"
+                <NumberBox x:Uid="TimelinePreviewPage_ThumbHeightBox" Grid.Column="1"
                            x:Name="ThumbHeightBox"
                            Header="Thumbnail height (px)"
                            Value="72"
@@ -92,7 +92,7 @@
             </Grid>
         </Border>
 
-        <ProgressBar AutomationProperties.Name="Progress" Grid.Row="2"
+        <ProgressBar x:Uid="TimelinePreviewPage_GenProgress" AutomationProperties.Name="Progress" Grid.Row="2"
                      x:Name="GenProgress"
                      Minimum="0" Maximum="100"
                      IsIndeterminate="False"/>
@@ -107,10 +107,10 @@
                         <FontIcon Glyph="&#xE71D;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No timeline yet"
+                    <TextBlock x:Uid="TimelinePreviewPage_Item_008" Text="No timeline yet"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Open a video and click Generate to render a scrubbable thumbnail strip + waveform."
+                    <TextBlock x:Uid="TimelinePreviewPage_Item_009" Text="Open a video and click Generate to render a scrubbable thumbnail strip + waveform."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"
@@ -154,11 +154,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="SeekLabel"
+            <TextBlock x:Uid="TimelinePreviewPage_SeekLabel" x:Name="SeekLabel"
                        Style="{StaticResource MutedTextStyle}"
                        Text="00:00.000 / 00:00.000"
                        FontFamily="Consolas, Cascadia Mono, monospace"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="TimelinePreviewPage_ExportButton" Grid.Column="1"
                     x:Name="ExportButton"
                     Content="Open output folder"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -167,7 +167,7 @@
                 AutomationProperties.AutomationId="ExportButton"/>
         </Grid>
 
-        <TextBlock Grid.Row="6"
+        <TextBlock x:Uid="TimelinePreviewPage_StatusText" Grid.Row="6"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Open a video to begin."/>

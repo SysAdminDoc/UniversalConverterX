@@ -21,16 +21,16 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Header="Start (s)"
+                    <TextBox x:Uid="ChapterMarksPage_Item_001" Header="Start (s)"
                              Text="{Binding StartText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Grid.Column="1"
+                    <TextBox x:Uid="ChapterMarksPage_Item_002" Grid.Column="1"
                              Header="End (s)"
                              PlaceholderText="auto"
                              Text="{Binding EndText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Grid.Column="2"
+                    <TextBox x:Uid="ChapterMarksPage_Item_003" Grid.Column="2"
                              Header="Title"
                              Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="ChapterMarksPage_Item_004" Grid.Column="3"
                             VerticalAlignment="Bottom"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove chapter" ToolTipService.ToolTip="Remove chapter"
@@ -58,29 +58,29 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Chapter Marks Editor" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Read, edit, import, export, and rewrite chapter markers without re-encoding. Exact source PTS values are retained; MKV writes require MKVToolNix 97 or newer."
+                <TextBlock x:Uid="ChapterMarksPage_Item_005" Text="Chapter Marks Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="ChapterMarksPage_Item_006" Text="Read, edit, import, export, and rewrite chapter markers without re-encoding. Exact source PTS values are retained; MKV writes require MKVToolNix 97 or newer."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button x:Name="OpenFileButton"
+                <Button x:Uid="ChapterMarksPage_OpenFileButton" x:Name="OpenFileButton"
                         Content="Open Media"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="OpenFile_Click"
                     AutomationProperties.AutomationId="ChapterMarksPageButton01"/>
-                <Button x:Name="ImportButton"
+                <Button x:Uid="ChapterMarksPage_ImportButton" x:Name="ImportButton"
                         Content="Import Chapters"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Import_Click"
                     AutomationProperties.AutomationId="ChapterMarksImportButton"/>
-                <Button x:Name="ExportButton"
+                <Button x:Uid="ChapterMarksPage_ExportButton" x:Name="ExportButton"
                         Content="Export List"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Export_Click"
                         IsEnabled="False"
                     AutomationProperties.AutomationId="ChapterMarksExportButton"/>
-                <Button x:Name="SaveButton"
+                <Button x:Uid="ChapterMarksPage_SaveButton" x:Name="SaveButton"
                         Content="Save Media As..."
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Save_Click"
@@ -96,14 +96,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="SourceLabel" Text="No file loaded."
+                    <TextBlock x:Uid="ChapterMarksPage_SourceLabel" x:Name="SourceLabel" Text="No file loaded."
                                Style="{StaticResource LabelTextStyle}"
                                TextTrimming="CharacterEllipsis"/>
                     <TextBlock x:Name="SourceMeta"
                                Style="{StaticResource MutedTextStyle}"
                                TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
-                <Button Grid.Column="1"
+                <Button x:Uid="ChapterMarksPage_AddButton" Grid.Column="1"
                         Content="Add Chapter"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddRow_Click"
@@ -123,10 +123,10 @@
                         <FontIcon Glyph="&#xE8B7;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Open media or import a chapter list"
+                    <TextBlock x:Uid="ChapterMarksPage_Item_013" Text="Open media or import a chapter list"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="JSON, Matroska XML, and simple CHAPTERxx text are supported. You can also start fresh with Add Chapter."
+                    <TextBlock x:Uid="ChapterMarksPage_Item_014" Text="JSON, Matroska XML, and simple CHAPTERxx text are supported. You can also start fresh with Add Chapter."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextWrapping="Wrap" TextAlignment="Center"

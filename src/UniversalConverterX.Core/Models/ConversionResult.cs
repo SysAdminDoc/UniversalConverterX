@@ -164,7 +164,8 @@ public class ConversionResult
         {
             Success = false,
             Job = job,
-            ErrorMessage = "Conversion was cancelled",
+            ErrorMessage = Localization.LocalizedText.Get(
+                "Core_ConversionCancelled", "Conversion was cancelled"),
             Duration = duration,
             ExitCode = -1,
             WasCancelled = true

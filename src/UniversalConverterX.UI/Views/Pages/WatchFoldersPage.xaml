@@ -39,13 +39,13 @@
                         <TextBlock Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
                                    TextTrimming="CharacterEllipsis">
-                            <Run Text="filter: "/>
+                            <Run x:Uid="WatchFoldersPage_Item_001" Text="filter: "/>
                             <Run Text="{Binding Filter}" FontWeight="SemiBold"/>
-                            <Run Text="  |  action: "/>
+                            <Run x:Uid="WatchFoldersPage_Item_002" Text="  |  action: "/>
                             <Run Text="{Binding Action}" FontWeight="SemiBold"/>
                         </TextBlock>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="WatchFoldersPage_Item_003" Grid.Column="2"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Edit profile" ToolTipService.ToolTip="Edit profile"
                             Click="EditProfile_Click"
@@ -53,7 +53,7 @@
                         <FontIcon Glyph="&#xE70F;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="WatchFoldersPage_Item_004" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove profile" ToolTipService.ToolTip="Remove profile"
                             Click="RemoveProfile_Click"
@@ -92,14 +92,14 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="WATCH FOLDERS"
+                <TextBlock x:Uid="WatchFoldersPage_Item_005" Text="WATCH FOLDERS"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Drop a file into any watched folder to auto-convert or auto-compress it. Profiles persist across launches."
+                <TextBlock x:Uid="WatchFoldersPage_Item_006" Text="Drop a file into any watched folder to auto-convert or auto-compress it. Profiles persist across launches."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
-            <Button Grid.Column="1"
+            <Button x:Uid="WatchFoldersPage_WatchFoldersPageButton01" Grid.Column="1"
                     Content="New Watch"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="NewWatch_Click"
@@ -117,10 +117,10 @@
                         <FontIcon Glyph="&#xED25;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No watch profiles yet"
+                    <TextBlock x:Uid="WatchFoldersPage_Item_008" Text="No watch profiles yet"
                                Style="{StaticResource TitleTextStyle}"
                                HorizontalAlignment="Center" FontSize="18"/>
-                    <TextBlock Text="Click New Watch to point UCX at a folder. New files dropped there will be processed automatically."
+                    <TextBlock x:Uid="WatchFoldersPage_Item_009" Text="Click New Watch to point UCX at a folder. New files dropped there will be processed automatically."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"
@@ -144,7 +144,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="Recent activity"
+                    <TextBlock x:Uid="WatchFoldersPage_Item_010" Text="Recent activity"
                                Style="{StaticResource LabelTextStyle}"
                                FontWeight="SemiBold" FontSize="13"/>
                     <TextBlock x:Name="WatchStatusText"
@@ -163,7 +163,7 @@
                         <FontIcon Glyph="&#xE823;" FontSize="28"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Border>
-                    <TextBlock Text="No activity yet"
+                    <TextBlock x:Uid="WatchFoldersPage_Item_011" Text="No activity yet"
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center" FontSize="12"/>
                 </StackPanel>

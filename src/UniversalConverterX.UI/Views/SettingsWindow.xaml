@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window
+<Window x:Uid="SettingsWindow_Item_001"
     x:Class="UniversalConverterX.UI.Views.SettingsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -26,8 +26,8 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Spacing="5">
-                    <TextBlock Text="Settings" Style="{StaticResource TitleTextStyle}"/>
-                    <TextBlock Text="Set defaults, local tool paths, Explorer integration, and appearance."
+                    <TextBlock x:Uid="SettingsWindow_Item_002" Text="Settings" Style="{StaticResource TitleTextStyle}"/>
+                    <TextBlock x:Uid="SettingsWindow_Item_003" Text="Set defaults, local tool paths, Explorer integration, and appearance."
                                Style="{StaticResource SubtitleTextStyle}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
@@ -41,7 +41,7 @@
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE83D;" FontSize="15"
                                   Foreground="{StaticResource AccentGreenBrush}"/>
-                        <TextBlock Text="Local defaults"
+                        <TextBlock x:Uid="SettingsWindow_Item_004" Text="Local defaults"
                                    Style="{StaticResource PillTextStyle}"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                     </StackPanel>
@@ -62,8 +62,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE713;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="General" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Output location, overwrite behavior, notifications" 
+                                <TextBlock x:Uid="SettingsWindow_Item_005" Text="General" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_006" Text="Output location, overwrite behavior, notifications" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -76,13 +76,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="OutputDirectoryTextBox"
+                            <TextBox x:Uid="SettingsWindow_OutputDirectoryTextBox" x:Name="OutputDirectoryTextBox"
                                      Header="Default output folder"
                                      PlaceholderText="Same as input file"
                                      Style="{StaticResource PremiumTextBoxStyle}"
                                      IsReadOnly="True"
                                 AutomationProperties.AutomationId="OutputDirectoryTextBox"/>
-                            <Button Grid.Column="1" 
+                            <Button x:Uid="SettingsWindow_SettingsWindowButton01" Grid.Column="1" 
                                     Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
@@ -92,21 +92,21 @@
                         </Grid>
 
                         <!-- Overwrite Behavior -->
-                        <ComboBox x:Name="OverwriteBehaviorComboBox"
+                        <ComboBox x:Uid="SettingsWindow_OverwriteBehaviorComboBox" x:Name="OverwriteBehaviorComboBox"
                                   Header="When output file exists"
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="OverwriteBehaviorComboBox">
-                            <ComboBoxItem Content="Ask each time"/>
-                            <ComboBoxItem Content="Always overwrite"/>
-                            <ComboBoxItem Content="Never overwrite (rename)"/>
-                            <ComboBoxItem Content="Skip file"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_010" Content="Ask each time"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_011" Content="Always overwrite"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_012" Content="Never overwrite (rename)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_013" Content="Skip file"/>
                         </ComboBox>
 
                         <!-- Post-conversion source action -->
-                        <ComboBox x:Name="PostConversionActionComboBox"
+                        <ComboBox x:Uid="SettingsWindow_PostConversionActionComboBox" x:Name="PostConversionActionComboBox"
                                   Header="After successful conversion"
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
@@ -114,9 +114,9 @@
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="PostConversionActionComboBox"
                             AutomationProperties.HelpText="Choose whether original source files are kept, moved to an archive folder, or permanently deleted after output is created.">
-                            <ComboBoxItem Content="Keep original files"/>
-                            <ComboBoxItem Content="Move originals to archive folder"/>
-                            <ComboBoxItem Content="Permanently delete originals"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_015" Content="Keep original files"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_016" Content="Move originals to archive folder"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_017" Content="Permanently delete originals"/>
                         </ComboBox>
 
                         <Grid>
@@ -124,13 +124,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="PostConversionArchiveTextBox"
+                            <TextBox x:Uid="SettingsWindow_PostConversionArchiveTextBox" x:Name="PostConversionArchiveTextBox"
                                      Header="Archive folder for moved originals"
                                      PlaceholderText="_converted-sources or an absolute path"
                                      Style="{StaticResource PremiumTextBoxStyle}"
                                      TextChanged="SettingsText_Changed"
                                 AutomationProperties.AutomationId="PostConversionArchiveTextBox"/>
-                            <Button x:Name="BrowsePostConversionArchiveButton"
+                            <Button x:Uid="SettingsWindow_BrowsePostConversionArchiveButton" x:Name="BrowsePostConversionArchiveButton"
                                     Grid.Column="1"
                                     Content="Browse"
                                     Margin="8,0,0,0"
@@ -140,13 +140,13 @@
                                 AutomationProperties.AutomationId="BrowsePostConversionArchiveButton"/>
                         </Grid>
 
-                        <TextBlock Text="Delete permanently removes originals after a verified output exists. Move is the safer cleanup option."
+                        <TextBlock x:Uid="SettingsWindow_Item_020" Text="Delete permanently removes originals after a verified output exists. Move is the safer cleanup option."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <!-- Notifications -->
-                        <ToggleSwitch x:Name="NotificationsToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_NotificationsToggle" x:Name="NotificationsToggle"
                                       Header="Show notifications"
                                       OffContent="Disabled"
                                       OnContent="Enabled"
@@ -155,7 +155,7 @@
                             AutomationProperties.AutomationId="NotificationsToggle"/>
 
                         <!-- Sound -->
-                        <ToggleSwitch x:Name="SoundToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_SoundToggle" x:Name="SoundToggle"
                                       Header="Play sound when complete"
                                       OffContent="Silent"
                                       OnContent="Enabled"
@@ -163,17 +163,17 @@
                                       Toggled="SettingsToggle_Changed"
                             AutomationProperties.AutomationId="SoundToggle"/>
 
-                        <ComboBox x:Name="QueueCompletionActionComboBox"
+                        <ComboBox x:Uid="SettingsWindow_QueueCompletionActionComboBox" x:Name="QueueCompletionActionComboBox"
                                   Header="After a queue completes"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="QueueCompletionAction_Changed"
                                   HorizontalAlignment="Stretch"
                                   AutomationProperties.AutomationId="QueueCompletionActionComboBox">
-                            <ComboBoxItem Content="Do nothing"/>
-                            <ComboBoxItem Content="Show notification"/>
-                            <ComboBoxItem Content="Put the computer to sleep"/>
-                            <ComboBoxItem Content="Shut down the computer"/>
-                            <ComboBoxItem Content="Run PowerShell script"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_024" Content="Do nothing"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_025" Content="Show notification"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_026" Content="Put the computer to sleep"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_027" Content="Shut down the computer"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_028" Content="Run PowerShell script"/>
                         </ComboBox>
 
                         <Grid>
@@ -181,13 +181,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="QueueCompletionScriptTextBox"
+                            <TextBox x:Uid="SettingsWindow_QueueCompletionScriptTextBox" x:Name="QueueCompletionScriptTextBox"
                                      Header="Post-queue script"
                                      PlaceholderText="PowerShell .ps1"
                                      Style="{StaticResource PremiumTextBoxStyle}"
                                      TextChanged="SettingsText_Changed"
                                      AutomationProperties.AutomationId="QueueCompletionScriptTextBox"/>
-                            <Button x:Name="BrowseQueueCompletionScriptButton"
+                            <Button x:Uid="SettingsWindow_BrowseQueueCompletionScriptButton" x:Name="BrowseQueueCompletionScriptButton"
                                     Grid.Column="1"
                                     Content="Browse"
                                     Margin="8,0,0,0"
@@ -197,7 +197,7 @@
                                     AutomationProperties.AutomationId="BrowseQueueCompletionScriptButton"/>
                         </Grid>
 
-                        <TextBlock Text="Sleep and shutdown run only when every queue item succeeds. Shutdown is scheduled with a 60-second Windows cancellation window. Scripts receive a JSON summary path as their first argument."
+                        <TextBlock x:Uid="SettingsWindow_Item_031" Text="Sleep and shutdown run only when every queue item succeeds. Shutdown is scheduled with a 60-second Windows cancellation window. Scripts receive a JSON summary path as their first argument."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -214,8 +214,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE9D9;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Quality &amp; Performance" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Default quality, hardware acceleration, parallel processing" 
+                                <TextBlock x:Uid="SettingsWindow_Item_032" Text="Quality &amp; Performance" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_033" Text="Default quality, hardware acceleration, parallel processing" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -223,39 +223,39 @@
                     </Expander.Header>
                     <StackPanel Spacing="16" Padding="0,16,0,0">
                         <!-- Default Quality -->
-                        <ComboBox x:Name="DefaultQualityComboBox"
+                        <ComboBox x:Uid="SettingsWindow_DefaultQualityComboBox" x:Name="DefaultQualityComboBox"
                                   Header="Default quality preset"
                                   SelectedIndex="3"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="DefaultQualityComboBox">
-                            <ComboBoxItem Content="Lowest - Smallest file size"/>
-                            <ComboBoxItem Content="Low"/>
-                            <ComboBoxItem Content="Medium - Balanced"/>
-                            <ComboBoxItem Content="High - Recommended"/>
-                            <ComboBoxItem Content="Highest - Largest files"/>
-                            <ComboBoxItem Content="Lossless - No quality loss"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_035" Content="Lowest - Smallest file size"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_036" Content="Low"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_037" Content="Medium - Balanced"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_038" Content="High - Recommended"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_039" Content="Highest - Largest files"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_040" Content="Lossless - No quality loss"/>
                         </ComboBox>
 
                         <!-- Hardware Acceleration -->
-                        <ComboBox x:Name="HardwareAccelComboBox"
+                        <ComboBox x:Uid="SettingsWindow_HardwareAccelComboBox" x:Name="HardwareAccelComboBox"
                                   Header="Hardware acceleration"
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="HardwareAccelComboBox">
-                            <ComboBoxItem Content="Auto-detect"/>
-                            <ComboBoxItem Content="NVIDIA NVENC (CUDA)"/>
-                            <ComboBoxItem Content="Intel Quick Sync"/>
-                            <ComboBoxItem Content="AMD AMF"/>
-                            <ComboBoxItem Content="Disabled (CPU only)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_042" Content="Auto-detect"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_043" Content="NVIDIA NVENC (CUDA)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_044" Content="Intel Quick Sync"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_045" Content="AMD AMF"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_046" Content="Disabled (CPU only)"/>
                         </ComboBox>
 
                         <!-- Parallel Conversions -->
                         <StackPanel>
-                            <TextBlock Text="Maximum parallel conversions" Margin="0,0,0,8"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_047" Text="Maximum parallel conversions" Margin="0,0,0,8"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -280,7 +280,7 @@
                         </StackPanel>
 
                         <!-- Preserve Metadata -->
-                        <ToggleSwitch x:Name="PreserveMetadataToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_PreserveMetadataToggle" x:Name="PreserveMetadataToggle"
                                       Header="Preserve metadata"
                                       OffContent="Strip metadata"
                                       OnContent="Keep EXIF, tags, etc."
@@ -300,8 +300,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE90F;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Converter Tools" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Manage FFmpeg, ImageMagick, and other CLI tools" 
+                                <TextBlock x:Uid="SettingsWindow_Item_049" Text="Converter Tools" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_050" Text="Manage FFmpeg, ImageMagick, and other CLI tools" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -314,13 +314,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="ToolsPathTextBox"
+                            <TextBox x:Uid="SettingsWindow_ToolsPathTextBox" x:Name="ToolsPathTextBox"
                                      Header="Tools directory"
                                      PlaceholderText="Default location"
                                      Style="{StaticResource PremiumTextBoxStyle}"
                                      IsReadOnly="True"
                                 AutomationProperties.AutomationId="ToolsPathTextBox"/>
-                            <Button Grid.Column="1" 
+                            <Button x:Uid="SettingsWindow_SettingsWindowButton02" Grid.Column="1" 
                                     Content="Browse"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Bottom"
@@ -378,7 +378,7 @@
                         </ListView>
 
                         <!-- Download All Button -->
-                        <Button x:Name="DownloadAllToolsButton"
+                        <Button x:Uid="SettingsWindow_DownloadAllToolsButton" x:Name="DownloadAllToolsButton"
                                 Content="Install missing tools"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 HorizontalAlignment="Right"
@@ -398,15 +398,15 @@
                             <FontIcon Glyph="&#xE74C;" FontSize="20" Margin="0,0,16,0"
                                       Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Trusted Plugins" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Review local sidecars before they can run"
+                                <TextBlock x:Uid="SettingsWindow_Item_054" Text="Trusted Plugins" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_055" Text="Review local sidecars before they can run"
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Expander.Header>
                     <StackPanel Spacing="14" Padding="0,16,0,0">
-                        <TextBlock Text="Dropped plugins are quarantined by default. Trust covers the SHA-256 of every file; any change disables execution until you review and trust the new hash. Links and reparse points are rejected."
+                        <TextBlock x:Uid="SettingsWindow_Item_056" Text="Dropped plugins are quarantined by default. Trust covers the SHA-256 of every file; any change disables execution until you review and trust the new hash. Links and reparse points are rejected."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <ListView x:Name="PluginsListView"
@@ -445,11 +445,11 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock x:Name="NoPluginsText"
+                        <TextBlock x:Uid="SettingsWindow_NoPluginsText" x:Name="NoPluginsText"
                                    Text="No plugins found. Drop a plugin directory containing manifest.json into the local plugins folder."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
-                        <Button Content="Open plugins folder"
+                        <Button x:Uid="SettingsWindow_OpenPluginsFolderButton" Content="Open plugins folder"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Right"
                                 Click="OpenPluginsFolder_Click"
@@ -467,8 +467,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE8B7;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Shell Integration" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Windows Explorer context menu options" 
+                                <TextBlock x:Uid="SettingsWindow_Item_059" Text="Shell Integration" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_060" Text="Windows Explorer context menu options" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -476,7 +476,7 @@
                     </Expander.Header>
                     <StackPanel Spacing="16" Padding="0,16,0,0">
                         <!-- Enable Context Menu -->
-                        <ToggleSwitch x:Name="ContextMenuToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_ContextMenuToggle" x:Name="ContextMenuToggle"
                                       Header="Show in Explorer context menu"
                                       OffContent="Disabled"
                                       OnContent="Enabled"
@@ -485,7 +485,7 @@
                             AutomationProperties.AutomationId="ContextMenuToggle"/>
 
                         <!-- Context Menu Style -->
-                        <ComboBox x:Name="ContextMenuStyleComboBox"
+                        <ComboBox x:Uid="SettingsWindow_ContextMenuStyleComboBox" x:Name="ContextMenuStyleComboBox"
                                   Header="Context menu style"
                                   SelectedIndex="0"
                                   Style="{StaticResource PremiumComboBoxStyle}"
@@ -493,36 +493,36 @@
                                   HorizontalAlignment="Stretch"
                                   IsEnabled="{Binding IsOn, ElementName=ContextMenuToggle}"
                             AutomationProperties.AutomationId="ContextMenuStyleComboBox">
-                            <ComboBoxItem Content="Cascading menu (Convert to →)"/>
-                            <ComboBoxItem Content="Flat menu (individual formats)"/>
-                            <ComboBoxItem Content="Single item (opens app)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_063" Content="Cascading menu (Convert to →)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_064" Content="Flat menu (individual formats)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_065" Content="Single item (opens app)"/>
                         </ComboBox>
 
                         <!-- Quick Convert Presets -->
-                        <TextBlock Text="Quick convert presets in context menu" Margin="0,8,0,0"/>
+                        <TextBlock x:Uid="SettingsWindow_Item_066" Text="Quick convert presets in context menu" Margin="0,8,0,0"/>
                         <StackPanel Spacing="8">
-                            <CheckBox x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetWebpCheckBox" x:Name="PresetWebpCheckBox" Content="Convert to WebP" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetWebpCheckBox"/>
-                            <CheckBox x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetPngCheckBox" x:Name="PresetPngCheckBox" Content="Convert to PNG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetPngCheckBox"/>
-                            <CheckBox x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetJpgCheckBox" x:Name="PresetJpgCheckBox" Content="Convert to JPG" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetJpgCheckBox"/>
-                            <CheckBox x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetMp4CheckBox" x:Name="PresetMp4CheckBox" Content="Convert to MP4" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetMp4CheckBox"/>
-                            <CheckBox x:Name="PresetMp3CheckBox" Content="Extract audio as MP3" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetMp3CheckBox" x:Name="PresetMp3CheckBox" Content="Extract audio as MP3" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetMp3CheckBox"/>
-                            <CheckBox x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
+                            <CheckBox x:Uid="SettingsWindow_PresetPdfCheckBox" x:Name="PresetPdfCheckBox" Content="Convert to PDF" IsChecked="True" Checked="SettingsCheck_Changed" Unchecked="SettingsCheck_Changed"
                                 AutomationProperties.AutomationId="PresetPdfCheckBox"/>
                         </StackPanel>
 
                         <!-- Register/Unregister Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-                            <Button x:Name="RegisterShellButton"
+                            <Button x:Uid="SettingsWindow_RegisterShellButton" x:Name="RegisterShellButton"
                                     Content="Register menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="RegisterShell_Click"
                                 AutomationProperties.AutomationId="RegisterShellButton"/>
-                            <Button x:Name="UnregisterShellButton"
+                            <Button x:Uid="SettingsWindow_UnregisterShellButton" x:Name="UnregisterShellButton"
                                     Content="Remove menu"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="UnregisterShell_Click"
@@ -541,22 +541,22 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE943;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Advanced" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Power-user command review and editing"
+                                <TextBlock x:Uid="SettingsWindow_Item_075" Text="Advanced" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_076" Text="Power-user command review and editing"
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Expander.Header>
                     <StackPanel Spacing="12" Padding="0,16,0,0">
-                        <ToggleSwitch x:Name="FfmpegCommandEditingToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_FfmpegCommandEditingToggle" x:Name="FfmpegCommandEditingToggle"
                                       Header="Allow FFmpeg command editing before run"
                                       OffContent="Read-only command previews"
                                       OnContent="Editing enabled"
                                       IsOn="False"
                                       Toggled="SettingsToggle_Changed"
                                       AutomationProperties.AutomationId="FfmpegCommandEditingToggle"/>
-                        <TextBlock Text="Edited commands are parsed as an argument vector without a shell. Input/output placeholders are mandatory, and shell metacharacters are rejected."
+                        <TextBlock x:Uid="SettingsWindow_Item_078" Text="Edited commands are parsed as an argument vector without a shell. Input/output placeholders are mandatory, and shell metacharacters are rejected."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -573,8 +573,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE790;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Appearance" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Theme, accent color, window behavior" 
+                                <TextBlock x:Uid="SettingsWindow_Item_079" Text="Appearance" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_080" Text="Theme, accent color, window behavior" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -582,51 +582,71 @@
                     </Expander.Header>
                     <StackPanel Spacing="16" Padding="0,16,0,0">
                         <!-- Theme -->
-                        <ComboBox x:Name="ThemeComboBox"
+                        <ComboBox x:Uid="SettingsWindow_ThemeComboBox" x:Name="ThemeComboBox"
                                   Header="App theme"
                                   SelectedIndex="1"
                                   Style="{StaticResource PremiumComboBoxStyle}"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="ThemeComboBox_SelectionChanged"
                             AutomationProperties.AutomationId="ThemeComboBox">
-                            <ComboBoxItem Content="Light"/>
-                            <ComboBoxItem Content="Dark"/>
-                            <ComboBoxItem Content="Use system setting"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_082" Content="Light"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_083" Content="Dark"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_084" Content="Use system setting"/>
                         </ComboBox>
+
+                        <ComboBox x:Uid="SettingsWindow_LanguageComboBox"
+                                  x:Name="LanguageComboBox"
+                                  Header="Display language"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="SettingsSelection_Changed"
+                                  AutomationProperties.AutomationId="LanguageComboBox">
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageSystem" Content="Use Windows language"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageEnglish" Content="English"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageGerman" Content="German"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageFrench" Content="French"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageSpanish" Content="Spanish"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguagePolish" Content="Polish"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_LanguageChinese" Content="Simplified Chinese"/>
+                        </ComboBox>
+                        <TextBlock x:Uid="SettingsWindow_LanguageRestartNote"
+                                   Text="Language changes apply after restarting the app."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
 
                         <!-- Accent Color -->
                         <StackPanel>
-                            <TextBlock Text="Accent color" Margin="0,0,0,8"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_085" Text="Accent color" Margin="0,0,0,8"/>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button x:Name="AccentGreenButton" 
+                                <Button x:Uid="SettingsWindow_AccentGreenButton" x:Name="AccentGreenButton" 
                                         Width="40" Height="40" 
                                         Background="#22c55e"
                                         AutomationProperties.Name="Green accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#22c55e"
                                     AutomationProperties.AutomationId="AccentGreenButton"/>
-                                <Button x:Name="AccentBlueButton" 
+                                <Button x:Uid="SettingsWindow_AccentBlueButton" x:Name="AccentBlueButton" 
                                         Width="40" Height="40" 
                                         Background="#60a5fa"
                                         AutomationProperties.Name="Blue accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#60a5fa"
                                     AutomationProperties.AutomationId="AccentBlueButton"/>
-                                <Button x:Name="AccentPurpleButton" 
+                                <Button x:Uid="SettingsWindow_AccentPurpleButton" x:Name="AccentPurpleButton" 
                                         Width="40" Height="40" 
                                         Background="#a78bfa"
                                         AutomationProperties.Name="Purple accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#a78bfa"
                                     AutomationProperties.AutomationId="AccentPurpleButton"/>
-                                <Button x:Name="AccentOrangeButton" 
+                                <Button x:Uid="SettingsWindow_AccentOrangeButton" x:Name="AccentOrangeButton" 
                                         Width="40" Height="40" 
                                         Background="#fb923c"
                                         AutomationProperties.Name="Orange accent"
                                         CornerRadius="20"
                                         Click="AccentColor_Click" Tag="#fb923c"
                                     AutomationProperties.AutomationId="AccentOrangeButton"/>
-                                <Button x:Name="AccentRedButton" 
+                                <Button x:Uid="SettingsWindow_AccentRedButton" x:Name="AccentRedButton" 
                                         Width="40" Height="40" 
                                         Background="#f87171"
                                         AutomationProperties.Name="Red accent"
@@ -637,7 +657,7 @@
                         </StackPanel>
 
                         <!-- Minimize to Tray -->
-                        <ToggleSwitch x:Name="MinimizeToTrayToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_MinimizeToTrayToggle" x:Name="MinimizeToTrayToggle"
                                       Header="Minimize to system tray"
                                       OffContent="Close to taskbar"
                                       OnContent="Minimize to tray"
@@ -645,7 +665,7 @@
                             AutomationProperties.AutomationId="MinimizeToTrayToggle"/>
 
                         <!-- Start Minimized -->
-                        <ToggleSwitch x:Name="StartMinimizedToggle"
+                        <ToggleSwitch x:Uid="SettingsWindow_StartMinimizedToggle" x:Name="StartMinimizedToggle"
                                       Header="Start minimized"
                                       OffContent="Show window on startup"
                                       OnContent="Start in background"
@@ -664,8 +684,8 @@
                             </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xE946;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="About" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock Text="Version info, updates, licenses" 
+                                <TextBlock x:Uid="SettingsWindow_Item_093" Text="About" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock x:Uid="SettingsWindow_Item_094" Text="Version info, updates, licenses" 
                                            Style="{StaticResource MutedTextStyle}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                             </StackPanel>
@@ -673,26 +693,26 @@
                     </Expander.Header>
                     <StackPanel Spacing="16" Padding="0,16,0,0">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
-                            <TextBlock x:Name="VersionText" 
+                            <TextBlock x:Uid="SettingsWindow_Item_095" Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
+                            <TextBlock x:Uid="SettingsWindow_VersionText" x:Name="VersionText" 
                                        Text="Version 2.22.1"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 
-                        <TextBlock Text="A local file conversion workspace with optional Windows Explorer integration."
+                        <TextBlock x:Uid="SettingsWindow_Item_097" Text="A local file conversion workspace with optional Windows Explorer integration."
                                    TextWrapping="Wrap"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX"
+                            <HyperlinkButton x:Uid="SettingsWindow_SettingsWindowHyperlinkButton01" Content="GitHub" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX"
                                 AutomationProperties.AutomationId="SettingsWindowHyperlinkButton01"/>
-                            <HyperlinkButton Content="Documentation" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX#readme"
+                            <HyperlinkButton x:Uid="SettingsWindow_SettingsWindowHyperlinkButton02" Content="Documentation" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX#readme"
                                 AutomationProperties.AutomationId="SettingsWindowHyperlinkButton02"/>
-                            <HyperlinkButton Content="Report Issue" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX/issues/new"
+                            <HyperlinkButton x:Uid="SettingsWindow_SettingsWindowHyperlinkButton03" Content="Report Issue" NavigateUri="https://github.com/SysAdminDoc/UniversalConverterX/issues/new"
                                 AutomationProperties.AutomationId="SettingsWindowHyperlinkButton03"/>
                         </StackPanel>
 
-                        <InfoBar x:Name="UpdateStatusInfoBar"
+                        <InfoBar x:Uid="SettingsWindow_UpdateStatusInfoBar" x:Name="UpdateStatusInfoBar"
                                  IsOpen="False"
                                  IsClosable="True"
                                  Severity="Informational"
@@ -701,12 +721,12 @@
                                  AutomationProperties.AutomationId="Settings_UpdateStatusInfoBar"/>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="CheckUpdatesButton"
+                            <Button x:Uid="SettingsWindow_CheckUpdatesButton" x:Name="CheckUpdatesButton"
                                     Content="Check for updates"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="CheckUpdates_Click"
                                     AutomationProperties.AutomationId="CheckUpdatesButton"/>
-                            <Button x:Name="OpenReleaseButton"
+                            <Button x:Uid="SettingsWindow_OpenReleaseButton" x:Name="OpenReleaseButton"
                                     Content="Open release"
                                     Visibility="Collapsed"
                                     Style="{StaticResource SecondaryButtonStyle}"
@@ -715,8 +735,8 @@
                         </StackPanel>
 
                         <!-- Credits -->
-                        <TextBlock Text="Local engines:" Margin="0,16,0,0"/>
-                        <TextBlock Text="• FFmpeg - Video/Audio processing (LGPL/GPL)&#x0a;• ImageMagick - Image processing (Apache 2.0)&#x0a;• Pandoc - Document conversion (GPL)&#x0a;• LibreOffice - Office documents (MPL)&#x0a;• Ghostscript - PDF processing (AGPL)&#x0a;• Inkscape - Vector graphics (GPL)&#x0a;• Calibre - Ebook conversion (GPL)"
+                        <TextBlock x:Uid="SettingsWindow_Item_104" Text="Local engines:" Margin="0,16,0,0"/>
+                        <TextBlock x:Uid="SettingsWindow_Item_105" Text="• FFmpeg - Video/Audio processing (LGPL/GPL)&#x0a;• ImageMagick - Image processing (Apache 2.0)&#x0a;• Pandoc - Document conversion (GPL)&#x0a;• LibreOffice - Office documents (MPL)&#x0a;• Ghostscript - PDF processing (AGPL)&#x0a;• Inkscape - Vector graphics (GPL)&#x0a;• Calibre - Ebook conversion (GPL)"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="12"/>
                     </StackPanel>
@@ -737,24 +757,24 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Button x:Name="ResetButton"
+                    <Button x:Uid="SettingsWindow_ResetButton" x:Name="ResetButton"
                             Content="Reset defaults"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="ResetSettings_Click"
                         AutomationProperties.AutomationId="ResetButton"/>
-                    <TextBlock x:Name="UnsavedStatusText"
+                    <TextBlock x:Uid="SettingsWindow_UnsavedStatusText" x:Name="UnsavedStatusText"
                                Text="No unsaved changes"
                                Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="CancelButton"
+                    <Button x:Uid="SettingsWindow_CancelButton" x:Name="CancelButton"
                             Content="Cancel"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Click="Cancel_Click"
                         AutomationProperties.AutomationId="CancelButton"/>
-                    <Button x:Name="SaveButton"
+                    <Button x:Uid="SettingsWindow_SaveButton" x:Name="SaveButton"
                             Content="Save"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"

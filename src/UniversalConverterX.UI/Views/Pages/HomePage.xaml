@@ -122,7 +122,7 @@
 
         <!-- App/tool update banner. Hidden by default; shown only when the
              UpdateCheckService cache reports updates. -->
-        <InfoBar x:Name="UpdateBanner"
+        <InfoBar x:Uid="HomePage_UpdateBanner" x:Name="UpdateBanner"
                  Grid.Row="0"
                  Margin="32,16,32,0"
                  IsOpen="False"
@@ -132,7 +132,7 @@
                  Message=""
                  AutomationProperties.AutomationId="HomePage_UpdateBanner">
             <InfoBar.ActionButton>
-                <Button x:Name="UpdateBannerActionButton"
+                <Button x:Uid="HomePage_UpdateBannerActionButton" x:Name="UpdateBannerActionButton"
                         Content="Open release notes"
                         Click="UpdateBannerAction_Click"
                         AutomationProperties.AutomationId="HomePage_UpdateBannerActionButton"/>
@@ -167,25 +167,25 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                                          VerticalAlignment="Center"/>
-                                <TextBlock Text="LOCAL MEDIA WORKSPACE"
+                                <TextBlock x:Uid="HomePage_Item_003" Text="LOCAL MEDIA WORKSPACE"
                                            Style="{StaticResource EyebrowTextStyle}"
                                            Foreground="{StaticResource AccentPrimaryBrush}"/>
                             </StackPanel>
                         </Border>
-                        <TextBlock Text="Convert, compress, download, record, and inspect media locally."
+                        <TextBlock x:Uid="HomePage_Item_004" Text="Convert, compress, download, record, and inspect media locally."
                                    Style="{StaticResource HeroTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
-                        <TextBlock Text="Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow."
+                        <TextBlock x:Uid="HomePage_Item_005" Text="Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow."
                                    Style="{StaticResource SubtitleTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
                         <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,10,0,0">
-                            <Button Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
+                            <Button x:Uid="HomePage_HomePageButton01" Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenConverter_Click"
                                 AutomationProperties.AutomationId="HomePageButton01"/>
-                            <Button Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="HomePage_HomePageButton02" Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="OpenAiLab_Click"
                                 AutomationProperties.AutomationId="HomePageButton02"/>
-                            <Button Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
+                            <Button x:Uid="HomePage_HomePageButton03" Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
                                     Click="OpenToolbox_Click"
                                 AutomationProperties.AutomationId="HomePageButton03"/>
                         </StackPanel>
@@ -196,8 +196,8 @@
                             CornerRadius="20" Padding="22" VerticalAlignment="Stretch">
                         <StackPanel Spacing="18">
                             <StackPanel Spacing="4">
-                                <TextBlock Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
-                                <TextBlock Text="Workspace behavior" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <TextBlock x:Uid="HomePage_Item_009" Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Uid="HomePage_Item_010" Text="Workspace behavior" Style="{StaticResource PanelTitleTextStyle}"/>
                             </StackPanel>
                             <Grid RowSpacing="10">
                                 <Grid.RowDefinitions>
@@ -212,8 +212,8 @@
                                         <FontIcon Glyph="&#xE73E;" FontSize="15"
                                                   Foreground="{StaticResource AccentGreenBrush}"/>
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="Local by default" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock Text="Files stay on disk unless a workflow says otherwise." Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_011" Text="Local by default" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_012" Text="Files stay on disk unless a workflow says otherwise." Style="{StaticResource MutedTextStyle}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -223,8 +223,8 @@
                                         <FontIcon Glyph="&#xE8FD;" FontSize="15"
                                                   Foreground="{StaticResource AccentBlueBrush}"/>
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="Queue based" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock Text="Progress, cancellation, and results stay visible." Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_013" Text="Queue based" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_014" Text="Progress, cancellation, and results stay visible." Style="{StaticResource MutedTextStyle}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -234,8 +234,8 @@
                                         <FontIcon Glyph="&#xE946;" FontSize="15"
                                                   Foreground="{StaticResource AccentOrangeBrush}"/>
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="Readiness shown" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock Text="Unavailable tools explain what is missing." Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_015" Text="Readiness shown" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_016" Text="Unavailable tools explain what is missing." Style="{StaticResource MutedTextStyle}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -245,8 +245,8 @@
                                         <FontIcon Glyph="&#xE72E;" FontSize="15"
                                                   Foreground="{StaticResource AccentGreenBrush}"/>
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="No telemetry" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock Text="No usage tracking is sent from the app." Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_017" Text="No telemetry" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock x:Uid="HomePage_Item_018" Text="No usage tracking is sent from the app." Style="{StaticResource MutedTextStyle}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -258,7 +258,7 @@
 
             <Border Grid.Row="1" Style="{StaticResource CardStyle}"
                     CornerRadius="20" Padding="14,8">
-                <AutoSuggestBox x:Name="TaskSearchBox"
+                <AutoSuggestBox x:Uid="HomePage_TaskSearchBox" x:Name="TaskSearchBox"
                                 PlaceholderText="Search tasks: convert, compress, record, inspect, frames"
                                 QueryIcon="Find"
                                 TextChanged="TaskSearchBox_TextChanged"
@@ -279,8 +279,8 @@
 
             <StackPanel Grid.Row="2" Spacing="16">
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock x:Uid="HomePage_Item_020" Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock x:Uid="HomePage_Item_021" Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -291,8 +291,8 @@
 
             <StackPanel Grid.Row="3" Spacing="16">
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Availability shown" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock x:Uid="HomePage_Item_022" Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock x:Uid="HomePage_Item_023" Text="Availability shown" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -303,8 +303,8 @@
 
             <StackPanel Grid.Row="4" Spacing="12">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock Text="Specialized utilities" Style="{StaticResource MutedTextStyle}"
+                    <TextBlock x:Uid="HomePage_Item_024" Text="Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
+                    <TextBlock x:Uid="HomePage_Item_025" Text="Specialized utilities" Style="{StaticResource MutedTextStyle}"
                                VerticalAlignment="Bottom"/>
                 </StackPanel>
                 <GridView x:Name="ClustersGrid" SelectionMode="None" IsItemClickEnabled="True"
@@ -324,19 +324,19 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="6">
-                        <TextBlock Text="DIAGNOSTICS" Style="{StaticResource MetricLabelTextStyle}"/>
-                        <TextBlock Text="Local logs and crash bundles" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="DiagnosticsStatusText"
+                        <TextBlock x:Uid="HomePage_Item_026" Text="DIAGNOSTICS" Style="{StaticResource MetricLabelTextStyle}"/>
+                        <TextBlock x:Uid="HomePage_Item_027" Text="Local logs and crash bundles" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="HomePage_DiagnosticsStatusText" x:Name="DiagnosticsStatusText"
                                    Text="No issues recorded this session."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <Button x:Name="OpenLogFolderButton"
+                        <Button x:Uid="HomePage_OpenLogFolderButton" x:Name="OpenLogFolderButton"
                                 Content="Open log folder"
                                 Click="OpenLogFolder_Click"
                                 AutomationProperties.AutomationId="HomePage_OpenLogFolder"/>
-                        <Button x:Name="ExportCrashBundleButton"
+                        <Button x:Uid="HomePage_ExportCrashBundleButton" x:Name="ExportCrashBundleButton"
                                 Content="Export crash bundle"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="ExportCrashBundle_Click"
@@ -349,17 +349,17 @@
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>
-                <TextBlock Text="UniversalConverter X v2.22.1"
+                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.22.1"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"
                         VerticalAlignment="Center"/>
-                <TextBlock Text="Local-first processing"
+                <TextBlock x:Uid="HomePage_Item_032" Text="Local-first processing"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"
                         VerticalAlignment="Center"/>
-                <TextBlock Text="No telemetry"
+                <TextBlock x:Uid="HomePage_Item_033" Text="No telemetry"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
             </StackPanel>

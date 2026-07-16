@@ -15,8 +15,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
-            <TextBlock x:Name="ModuleTitle" Text="Module" Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock x:Name="ModuleSubtitle" Text="Module description"
+            <TextBlock x:Uid="PlaceholderPage_ModuleTitle" x:Name="ModuleTitle" Text="Module" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock x:Uid="PlaceholderPage_ModuleSubtitle" x:Name="ModuleSubtitle" Text="Module description"
                        Style="{StaticResource SubtitleTextStyle}"/>
         </StackPanel>
 
@@ -35,17 +35,17 @@
                         CornerRadius="14"
                         Padding="12,5"
                         HorizontalAlignment="Center">
-                    <TextBlock x:Name="StatusBadge" Text="Not available yet"
+                    <TextBlock x:Uid="PlaceholderPage_StatusBadge" x:Name="StatusBadge" Text="Not available yet"
                                Style="{StaticResource PillTextStyle}"
                                Foreground="{StaticResource AccentYellowBrush}"/>
                 </Border>
 
-                <TextBlock x:Name="HeadlineText" Text="Tool not available yet"
+                <TextBlock x:Uid="PlaceholderPage_HeadlineText" x:Name="HeadlineText" Text="Tool not available yet"
                            Style="{StaticResource TitleTextStyle}"
                            TextAlignment="Center"
                            TextWrapping="Wrap"/>
 
-                <TextBlock x:Name="DescriptionText"
+                <TextBlock x:Uid="PlaceholderPage_DescriptionText" x:Name="DescriptionText"
                            Text="This tool is tracked, but its runnable workflow is not wired into this build."
                            TextAlignment="Center"
                            Style="{StaticResource SubtitleTextStyle}"
@@ -73,20 +73,20 @@
                         Margin="0,6,0,0"
                         MaxWidth="520">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Readiness requirements"
+                        <TextBlock x:Uid="PlaceholderPage_Item_006" Text="Readiness requirements"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="A tool is marked Ready only when import, progress, cancellation, export, failure recovery, and local-processing details are wired."
+                        <TextBlock x:Uid="PlaceholderPage_Item_007" Text="A tool is marked Ready only when import, progress, cancellation, export, failure recovery, and local-processing details are wired."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,0">
-                    <Button Content="Browse Tools"
+                    <Button x:Uid="PlaceholderPage_PlaceholderPageButton01" Content="Browse Tools"
                             Style="{StaticResource PrimaryButtonStyle}"
                             Click="OpenToolbox_Click"
                         AutomationProperties.AutomationId="PlaceholderPageButton01"/>
-                    <Button Content="Back to Home"
+                    <Button x:Uid="PlaceholderPage_PlaceholderPageButton02" Content="Back to Home"
                             Style="{StaticResource GhostButtonStyle}"
                             Click="OpenHome_Click"
                         AutomationProperties.AutomationId="PlaceholderPageButton02"/>

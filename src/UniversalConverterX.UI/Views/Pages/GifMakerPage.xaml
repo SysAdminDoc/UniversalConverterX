@@ -54,7 +54,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="GifMakerPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveQueued_Click"
@@ -68,7 +68,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="GifMakerPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -112,7 +112,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="GifMakerPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -137,17 +137,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="GIF Maker" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Convert video clips to high-quality animated GIFs via two-pass FFmpeg palettegen + paletteuse."
+                <TextBlock x:Uid="GifMakerPage_Item_004" Text="GIF Maker" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="GifMakerPage_Item_005" Text="Convert video clips to high-quality animated GIFs via two-pass FFmpeg palettegen + paletteuse."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="GifMakerPage_GifMakerPageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="GifMakerPageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="GifMakerPage_RunButton" x:Name="RunButton"
                         Content="Make GIFs"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -171,7 +171,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="GifMakerPage_GifMakerPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="GifMakerPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -183,16 +183,16 @@
                                     <FontIcon Glyph="&#xE909;" FontSize="48"
                                               Foreground="{StaticResource AccentGreenBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video files here"
+                                <TextBlock x:Uid="GifMakerPage_Item_009" Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each file becomes one GIF using the settings on the right. Defaults are sized for social embedding."
+                                <TextBlock x:Uid="GifMakerPage_Item_010" Text="Each file becomes one GIF using the settings on the right. Defaults are sized for social embedding."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="420"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="GifMakerPage_GifMakerPageButton02" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -207,7 +207,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="GifMakerPage_GifMakerPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="GifMakerPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -219,10 +219,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No GIFs rendered yet"
+                                <TextBlock x:Uid="GifMakerPage_Item_013" Text="No GIFs rendered yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Successful and failed renders show up here so you can open the output folder."
+                                <TextBlock x:Uid="GifMakerPage_Item_014" Text="Successful and failed renders show up here so you can open the output folder."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -239,56 +239,56 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Render Settings" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="GifMakerPage_Item_015" Text="Render Settings" Style="{StaticResource PanelTitleTextStyle}"/>
 
-                        <ComboBox x:Name="WidthCombo"
+                        <ComboBox x:Uid="GifMakerPage_WidthCombo" x:Name="WidthCombo"
                                   Header="Width"
                                   SelectedIndex="1"
                                   SelectionChanged="Settings_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="WidthCombo">
-                            <ComboBoxItem Content="240 px (tiny)"  Tag="240"/>
-                            <ComboBoxItem Content="480 px (social)" Tag="480"/>
-                            <ComboBoxItem Content="720 px (HD)"    Tag="720"/>
-                            <ComboBoxItem Content="1080 px (full)" Tag="1080"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_017" Content="240 px (tiny)"  Tag="240"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_018" Content="480 px (social)" Tag="480"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_019" Content="720 px (HD)"    Tag="720"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_020" Content="1080 px (full)" Tag="1080"/>
                         </ComboBox>
 
-                        <ComboBox x:Name="FpsCombo"
+                        <ComboBox x:Uid="GifMakerPage_FpsCombo" x:Name="FpsCombo"
                                   Header="Frame rate"
                                   SelectedIndex="1"
                                   SelectionChanged="Settings_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="FpsCombo">
-                            <ComboBoxItem Content="10 fps" Tag="10"/>
-                            <ComboBoxItem Content="15 fps" Tag="15"/>
-                            <ComboBoxItem Content="20 fps" Tag="20"/>
-                            <ComboBoxItem Content="24 fps" Tag="24"/>
-                            <ComboBoxItem Content="30 fps" Tag="30"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_022" Content="10 fps" Tag="10"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_023" Content="15 fps" Tag="15"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_024" Content="20 fps" Tag="20"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_025" Content="24 fps" Tag="24"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_026" Content="30 fps" Tag="30"/>
                         </ComboBox>
 
-                        <ComboBox x:Name="LoopCombo"
+                        <ComboBox x:Uid="GifMakerPage_LoopCombo" x:Name="LoopCombo"
                                   Header="Loop"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="LoopCombo">
-                            <ComboBoxItem Content="Infinite" Tag="0"/>
-                            <ComboBoxItem Content="Play once" Tag="-1"/>
-                            <ComboBoxItem Content="Loop 3×" Tag="3"/>
-                            <ComboBoxItem Content="Loop 5×" Tag="5"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_028" Content="Infinite" Tag="0"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_029" Content="Play once" Tag="-1"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_030" Content="Loop 3×" Tag="3"/>
+                            <ComboBoxItem x:Uid="GifMakerPage_Item_031" Content="Loop 5×" Tag="5"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Trim (seconds)" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="StartBox"
+                        <TextBlock x:Uid="GifMakerPage_Item_032" Text="Trim (seconds)" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="GifMakerPage_StartBox" x:Name="StartBox"
                                  Header="Start"
                                  PlaceholderText="0"
                                  TextChanged="Settings_Text_Changed"
                             AutomationProperties.AutomationId="StartBox"/>
-                        <TextBox x:Name="DurationBox"
+                        <TextBox x:Uid="GifMakerPage_DurationBox" x:Name="DurationBox"
                                  Header="Duration (blank = to end)"
                                  PlaceholderText="5"
                                  TextChanged="Settings_Text_Changed"
@@ -298,8 +298,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="GifMakerPage_Item_035" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="GifMakerPage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText"
@@ -321,7 +321,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="GifMakerPage_ClearButton" Grid.Column="1"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -329,7 +329,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="GifMakerPage_CancelButton" Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

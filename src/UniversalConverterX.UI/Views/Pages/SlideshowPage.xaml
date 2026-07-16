@@ -54,7 +54,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="SlideshowPage_SlideshowRemoveButton" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from slideshow"
                             AutomationProperties.AutomationId="SlideshowRemoveButton"
@@ -69,7 +69,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress"
+                        <ProgressBar x:Uid="SlideshowPage_Item_002" AutomationProperties.Name="Progress"
                                      Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
@@ -96,19 +96,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="SLIDESHOW MAKER"
+                <TextBlock x:Uid="SlideshowPage_Item_003" Text="SLIDESHOW MAKER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Turn image sets into polished videos with motion, transitions, text, and music."
+                <TextBlock x:Uid="SlideshowPage_Item_004" Text="Turn image sets into polished videos with motion, transitions, text, and music."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="820" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Add Images"
+                <Button x:Uid="SlideshowPage_SlideshowAddImagesButton" Content="Add Images"
                         AutomationProperties.AutomationId="SlideshowAddImagesButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseImages_Click"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="SlideshowPage_SlideshowAddFolderButton" Content="Add Folder"
                         AutomationProperties.AutomationId="SlideshowAddFolderButton"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"/>
@@ -138,16 +138,16 @@
                             <FontIcon Glyph="&#xE786;" FontSize="48"
                                       Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="Drop images or folders"
+                        <TextBlock x:Uid="SlideshowPage_Item_007" Text="Drop images or folders"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="JPG, PNG, WebP, BMP, TIFF, AVIF, HEIC, and HEIF files are sorted naturally by filename."
+                        <TextBlock x:Uid="SlideshowPage_Item_008" Text="JPG, PNG, WebP, BMP, TIFF, AVIF, HEIC, and HEIF files are sorted naturally by filename."
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Center"
                                    TextWrapping="Wrap"
                                    MaxWidth="480"
                                    TextAlignment="Center"/>
-                        <Button Content="Browse Images"
+                        <Button x:Uid="SlideshowPage_SlideshowBrowseImagesButton" Content="Browse Images"
                                 AutomationProperties.AutomationId="SlideshowBrowseImagesButton"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="BrowseImages_Click"
@@ -165,20 +165,20 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Motion" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SlideshowPage_Item_010" Text="Motion" Style="{StaticResource PanelTitleTextStyle}"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <NumberBox x:Name="DurationBox"
+                            <NumberBox x:Uid="SlideshowPage_DurationBox" x:Name="DurationBox"
                                        AutomationProperties.AutomationId="SlideshowDurationBox"
                                        Header="Seconds per slide"
                                        Minimum="0.5" Maximum="30" Value="3"
                                        SmallChange="0.5" LargeChange="1"
                                        SpinButtonPlacementMode="Inline"
                                        ValueChanged="Settings_Number_Changed"/>
-                            <NumberBox x:Name="FpsBox"
+                            <NumberBox x:Uid="SlideshowPage_FpsBox" x:Name="FpsBox"
                                        Grid.Column="1"
                                        AutomationProperties.AutomationId="SlideshowFpsBox"
                                        Header="Frame rate"
@@ -187,67 +187,67 @@
                                        SpinButtonPlacementMode="Inline"
                                        ValueChanged="Settings_Number_Changed"/>
                         </Grid>
-                        <ComboBox x:Name="TransitionCombo"
+                        <ComboBox x:Uid="SlideshowPage_TransitionCombo" x:Name="TransitionCombo"
                                   AutomationProperties.AutomationId="SlideshowTransitionCombo"
                                   Header="Transition"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed">
-                            <ComboBoxItem Content="Fade" Tag="fade" IsSelected="True"/>
-                            <ComboBoxItem Content="Wipe left" Tag="wipe"/>
-                            <ComboBoxItem Content="Zoom blend" Tag="zoom"/>
-                            <ComboBoxItem Content="Cut" Tag="cut"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_014" Content="Fade" Tag="fade" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_015" Content="Wipe left" Tag="wipe"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_016" Content="Zoom blend" Tag="zoom"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_017" Content="Cut" Tag="cut"/>
                         </ComboBox>
-                        <ComboBox x:Name="MotionCombo"
+                        <ComboBox x:Uid="SlideshowPage_MotionCombo" x:Name="MotionCombo"
                                   AutomationProperties.AutomationId="SlideshowMotionCombo"
                                   Header="Slide motion"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed">
-                            <ComboBoxItem Content="Ken Burns push" Tag="kenburns" IsSelected="True"/>
-                            <ComboBoxItem Content="Zoom in" Tag="zoom-in"/>
-                            <ComboBoxItem Content="Zoom out" Tag="zoom-out"/>
-                            <ComboBoxItem Content="None" Tag="none"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_019" Content="Ken Burns push" Tag="kenburns" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_020" Content="Zoom in" Tag="zoom-in"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_021" Content="Zoom out" Tag="zoom-out"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_022" Content="None" Tag="none"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="SlideshowPage_Item_023" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="ResolutionCombo"
+                            <ComboBox x:Uid="SlideshowPage_ResolutionCombo" x:Name="ResolutionCombo"
                                       AutomationProperties.AutomationId="SlideshowResolutionCombo"
                                       Header="Resolution"
                                       HorizontalAlignment="Stretch"
                                       SelectionChanged="Settings_Changed">
-                                <ComboBoxItem Content="1080p (1920x1080)" Tag="1920x1080" IsSelected="True"/>
-                                <ComboBoxItem Content="4K (3840x2160)" Tag="3840x2160"/>
-                                <ComboBoxItem Content="Square (1080x1080)" Tag="1080x1080"/>
-                                <ComboBoxItem Content="Vertical (1080x1920)" Tag="1080x1920"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_025" Content="1080p (1920x1080)" Tag="1920x1080" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_026" Content="4K (3840x2160)" Tag="3840x2160"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_027" Content="Square (1080x1080)" Tag="1080x1080"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_028" Content="Vertical (1080x1920)" Tag="1080x1920"/>
                             </ComboBox>
-                            <ComboBox x:Name="FormatCombo"
+                            <ComboBox x:Uid="SlideshowPage_FormatCombo" x:Name="FormatCombo"
                                       Grid.Column="1"
                                       AutomationProperties.AutomationId="SlideshowFormatCombo"
                                       Header="Format"
                                       HorizontalAlignment="Stretch"
                                       SelectionChanged="Settings_Changed">
-                                <ComboBoxItem Content="MP4 (H.264)" Tag="mp4" IsSelected="True"/>
-                                <ComboBoxItem Content="MOV (H.264)" Tag="mov"/>
-                                <ComboBoxItem Content="WebM (VP9)" Tag="webm"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_030" Content="MP4 (H.264)" Tag="mp4" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_031" Content="MOV (H.264)" Tag="mov"/>
+                                <ComboBoxItem x:Uid="SlideshowPage_Item_032" Content="WebM (VP9)" Tag="webm"/>
                             </ComboBox>
                         </Grid>
-                        <ComboBox x:Name="FitCombo"
+                        <ComboBox x:Uid="SlideshowPage_FitCombo" x:Name="FitCombo"
                                   AutomationProperties.AutomationId="SlideshowFitCombo"
                                   Header="Image fit"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed">
-                            <ComboBoxItem Content="Cover frame" Tag="cover" IsSelected="True"/>
-                            <ComboBoxItem Content="Contain with bars" Tag="contain"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_034" Content="Cover frame" Tag="cover" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="SlideshowPage_Item_035" Content="Contain with bars" Tag="contain"/>
                         </ComboBox>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBox x:Uid="SlideshowPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  AutomationProperties.AutomationId="SlideshowOutputDirBox"
                                  Header="Save to"
                                  PlaceholderText="Same folder as first image"
@@ -257,11 +257,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Browse"
+                            <Button x:Uid="SlideshowPage_SlideshowBrowseOutputButton" Grid.Column="0" Content="Browse"
                                     AutomationProperties.AutomationId="SlideshowBrowseOutputButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"/>
-                            <Button Grid.Column="1" Content="Same as images"
+                            <Button x:Uid="SlideshowPage_SlideshowSameAsImagesButton" Grid.Column="1" Content="Same as images"
                                     AutomationProperties.AutomationId="SlideshowSameAsImagesButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsImages_Click"/>
@@ -271,13 +271,13 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Text and Music" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OverlayTextBox"
+                        <TextBlock x:Uid="SlideshowPage_Item_039" Text="Text and Music" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="SlideshowPage_OverlayTextBox" x:Name="OverlayTextBox"
                                  AutomationProperties.AutomationId="SlideshowOverlayTextBox"
                                  Header="Overlay text"
                                  PlaceholderText="Optional title or caption"
                                  TextChanged="Settings_Text_Changed"/>
-                        <TextBox x:Name="MusicPathBox"
+                        <TextBox x:Uid="SlideshowPage_MusicPathBox" x:Name="MusicPathBox"
                                  AutomationProperties.AutomationId="SlideshowMusicPathBox"
                                  Header="Background music"
                                  PlaceholderText="Optional audio file"
@@ -287,16 +287,16 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Browse Music"
+                            <Button x:Uid="SlideshowPage_SlideshowBrowseMusicButton" Grid.Column="0" Content="Browse Music"
                                     AutomationProperties.AutomationId="SlideshowBrowseMusicButton"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseMusic_Click"/>
-                            <Button Grid.Column="1" Content="Clear Music"
+                            <Button x:Uid="SlideshowPage_SlideshowClearMusicButton" Grid.Column="1" Content="Clear Music"
                                     AutomationProperties.AutomationId="SlideshowClearMusicButton"
                                     Style="{StaticResource GhostButtonStyle}"
                                     Click="ClearMusic_Click"/>
                         </Grid>
-                        <Slider x:Name="MusicVolumeSlider"
+                        <Slider x:Uid="SlideshowPage_MusicVolumeSlider" x:Name="MusicVolumeSlider"
                                 AutomationProperties.AutomationId="SlideshowMusicVolumeSlider"
                                 Header="Music volume"
                                 Minimum="0" Maximum="100" Value="65"
@@ -318,16 +318,16 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" Content="Clear Slides"
+            <Button x:Uid="SlideshowPage_ClearButton" Grid.Column="1" Content="Clear Slides"
                     x:Name="ClearButton"
                     AutomationProperties.AutomationId="SlideshowClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"/>
-            <Button Grid.Column="2" Content="Open Output"
+            <Button x:Uid="SlideshowPage_SlideshowOpenOutputButton" Grid.Column="2" Content="Open Output"
                     AutomationProperties.AutomationId="SlideshowOpenOutputButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click" Margin="0,0,12,0"/>
-            <Button Grid.Column="3" Content="Create Video"
+            <Button x:Uid="SlideshowPage_CreateButton" Grid.Column="3" Content="Create Video"
                     x:Name="CreateButton"
                     AutomationProperties.AutomationId="SlideshowCreateButton"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -342,9 +342,9 @@
                     MinWidth="440"
                     MaxWidth="560">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle" Text="Creating slideshow..."
+                    <TextBlock x:Uid="SlideshowPage_ProgressTitle" x:Name="ProgressTitle" Text="Creating slideshow..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress"
+                    <ProgressBar x:Uid="SlideshowPage_ProgressBar" AutomationProperties.Name="Progress"
                                  x:Name="ProgressBar" Height="8" CornerRadius="4"
                                  Minimum="0" Maximum="100"/>
                     <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
@@ -355,7 +355,7 @@
                                    TextWrapping="Wrap"/>
                     </ScrollViewer>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                        <Button x:Name="CancelButton" Content="Cancel"
+                        <Button x:Uid="SlideshowPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                                 AutomationProperties.AutomationId="SlideshowCancelButton"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"/>

@@ -54,7 +54,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="RecorderPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove session" ToolTipService.ToolTip="Remove session"
                             Click="RemoveQueued_Click"
@@ -68,7 +68,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="RecorderPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress}"
@@ -118,7 +118,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="RecorderPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -143,17 +143,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Recorder" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Record the Windows desktop with local FFmpeg capture, progress, and finished results."
+                <TextBlock x:Uid="RecorderPage_Item_004" Text="Recorder" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="RecorderPage_Item_005" Text="Record the Windows desktop with local FFmpeg capture, progress, and finished results."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Session"
+                <Button x:Uid="RecorderPage_RecorderPageButton01" Content="Add Session"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddSession_Click"
                     AutomationProperties.AutomationId="RecorderPageButton01"/>
-                <Button Content="Record All"
+                <Button x:Uid="RecorderPage_RecordButton" Content="Record All"
                         x:Name="RecordButton"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Background="{StaticResource AccentRedBrush}"
@@ -173,7 +173,7 @@
                     CornerRadius="22"
                     Padding="18">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Recording"
+                    <PivotItem x:Uid="RecorderPage_RecorderPagePivotItem01" Header="Recording"
                         AutomationProperties.AutomationId="RecorderPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
@@ -185,16 +185,16 @@
                                     <FontIcon Glyph="&#xE7C8;" FontSize="48"
                                               Foreground="{StaticResource AccentRedBrush}"/>
                                 </Border>
-                                <TextBlock Text="Build a recording queue"
+                                <TextBlock x:Uid="RecorderPage_Item_009" Text="Build a recording queue"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Capture desktop sessions as MP4 files. Select Webcam mode and choose devices from the panel."
+                                <TextBlock x:Uid="RecorderPage_Item_010" Text="Capture desktop sessions as MP4 files. Select Webcam mode and choose devices from the panel."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="420"/>
-                                <Button Content="Add Current Setup"
+                                <Button x:Uid="RecorderPage_RecorderPageButton02" Content="Add Current Setup"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="AddSession_Click"
                                         HorizontalAlignment="Center"
@@ -209,7 +209,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="RecorderPage_RecorderPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="RecorderPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -221,10 +221,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished recordings yet"
+                                <TextBlock x:Uid="RecorderPage_Item_013" Text="No finished recordings yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed, failed, and cancelled recording sessions appear here."
+                                <TextBlock x:Uid="RecorderPage_Item_014" Text="Completed, failed, and cancelled recording sessions appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -241,14 +241,14 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Capture Source"
+                        <TextBlock x:Uid="RecorderPage_Item_015" Text="Capture Source"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ToggleButton x:Name="ScreenToggle"
+                            <ToggleButton x:Uid="RecorderPage_ScreenToggle" x:Name="ScreenToggle"
                                           Grid.Column="0"
                                           Content="Screen"
                                           IsChecked="True"
@@ -256,7 +256,7 @@
                                           Click="SourceToggle_Click"
                                           HorizontalAlignment="Stretch"
                                 AutomationProperties.AutomationId="ScreenToggle"/>
-                            <ToggleButton x:Name="WebcamToggle"
+                            <ToggleButton x:Uid="RecorderPage_WebcamToggle" x:Name="WebcamToggle"
                                           Grid.Column="1"
                                           Content="Webcam"
                                           IsChecked="False"
@@ -270,8 +270,8 @@
                         <StackPanel x:Name="WebcamDevicePanel"
                                     Visibility="Collapsed"
                                     Spacing="6">
-                            <TextBlock Text="Webcam device" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox x:Name="WebcamDeviceCombo"
+                            <TextBlock x:Uid="RecorderPage_Item_018" Text="Webcam device" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Uid="RecorderPage_WebcamDeviceCombo" x:Name="WebcamDeviceCombo"
                                       HorizontalAlignment="Stretch"
                                       PlaceholderText="Loading devices..."
                                       SelectionChanged="Option_Changed"
@@ -280,8 +280,8 @@
 
                         <!-- Microphone section (always visible) -->
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Microphone (optional)" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox x:Name="AudioDeviceCombo"
+                            <TextBlock x:Uid="RecorderPage_Item_020" Text="Microphone (optional)" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Uid="RecorderPage_AudioDeviceCombo" x:Name="AudioDeviceCombo"
                                       HorizontalAlignment="Stretch"
                                       PlaceholderText="Loading devices..."
                                       SelectionChanged="Option_Changed"
@@ -289,18 +289,18 @@
                         </StackPanel>
 
                         <!-- System audio loopback (#52) -->
-                        <CheckBox x:Name="SystemAudioCheck"
+                        <CheckBox x:Uid="RecorderPage_SystemAudioCheck" x:Name="SystemAudioCheck"
                                   Content="Capture system audio (loopback)"
                                   Click="Option_BoolChanged"
                             AutomationProperties.AutomationId="SystemAudioCheck"/>
-                        <ComboBox x:Name="SystemAudioCombo"
+                        <ComboBox x:Uid="RecorderPage_SystemAudioCombo" x:Name="SystemAudioCombo"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="auto-detect (Stereo Mix / loopback)"
                                   Visibility="Collapsed"
                                   SelectionChanged="Option_Changed"
                             AutomationProperties.AutomationId="SystemAudioCombo"/>
 
-                        <Button x:Name="RefreshDevicesButton"
+                        <Button x:Uid="RecorderPage_RefreshDevicesButton" x:Name="RefreshDevicesButton"
                                 Content="Refresh Devices"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 HorizontalAlignment="Stretch"
@@ -312,18 +312,18 @@
                 <!-- Region capture (#53) -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Region (screen mode only)"
+                        <TextBlock x:Uid="RecorderPage_Item_025" Text="Region (screen mode only)"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="RegionCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="0"
                                   SelectionChanged="Option_Changed"
                             AutomationProperties.AutomationId="RegionCombo">
-                            <ComboBoxItem Content="Full screen" Tag=""/>
-                            <ComboBoxItem Content="1920×1080 at (0,0)"  Tag="0,0,1920,1080"/>
-                            <ComboBoxItem Content="1280×720 at (0,0)"   Tag="0,0,1280,720"/>
-                            <ComboBoxItem Content="800×600 at (0,0)"    Tag="0,0,800,600"/>
-                            <ComboBoxItem Content="Custom..."           Tag="custom"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_026" Content="Full screen" Tag=""/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_027" Content="1920×1080 at (0,0)"  Tag="0,0,1920,1080"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_028" Content="1280×720 at (0,0)"   Tag="0,0,1280,720"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_029" Content="800×600 at (0,0)"    Tag="0,0,800,600"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_030" Content="Custom..."           Tag="custom"/>
                         </ComboBox>
                         <Grid ColumnSpacing="8" RowSpacing="6"
                               x:Name="CustomRegionGrid"
@@ -336,13 +336,13 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <TextBox x:Name="RegionXBox" Header="X"     PlaceholderText="0"     Grid.Row="0" Grid.Column="0" TextChanged="Option_TextChanged"
+                            <TextBox x:Uid="RecorderPage_RegionXBox" x:Name="RegionXBox" Header="X"     PlaceholderText="0"     Grid.Row="0" Grid.Column="0" TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="RegionXBox"/>
-                            <TextBox x:Name="RegionYBox" Header="Y"     PlaceholderText="0"     Grid.Row="0" Grid.Column="1" TextChanged="Option_TextChanged"
+                            <TextBox x:Uid="RecorderPage_RegionYBox" x:Name="RegionYBox" Header="Y"     PlaceholderText="0"     Grid.Row="0" Grid.Column="1" TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="RegionYBox"/>
-                            <TextBox x:Name="RegionWBox" Header="Width" PlaceholderText="1920"  Grid.Row="1" Grid.Column="0" TextChanged="Option_TextChanged"
+                            <TextBox x:Uid="RecorderPage_RegionWBox" x:Name="RegionWBox" Header="Width" PlaceholderText="1920"  Grid.Row="1" Grid.Column="0" TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="RegionWBox"/>
-                            <TextBox x:Name="RegionHBox" Header="Height" PlaceholderText="1080" Grid.Row="1" Grid.Column="1" TextChanged="Option_TextChanged"
+                            <TextBox x:Uid="RecorderPage_RegionHBox" x:Name="RegionHBox" Header="Height" PlaceholderText="1080" Grid.Row="1" Grid.Column="1" TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="RegionHBox"/>
                         </Grid>
                     </StackPanel>
@@ -350,52 +350,52 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Recording Setup"
+                        <TextBlock x:Uid="RecorderPage_Item_035" Text="Recording Setup"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="DurationCombo"
+                        <ComboBox x:Uid="RecorderPage_DurationCombo" x:Name="DurationCombo"
                                   Header="Duration"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="DurationCombo">
-                            <ComboBoxItem Content="15 seconds" Tag="15"/>
-                            <ComboBoxItem Content="30 seconds" Tag="30"/>
-                            <ComboBoxItem Content="1 minute" Tag="60"/>
-                            <ComboBoxItem Content="5 minutes" Tag="300"/>
-                            <ComboBoxItem Content="10 minutes" Tag="600"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_037" Content="15 seconds" Tag="15"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_038" Content="30 seconds" Tag="30"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_039" Content="1 minute" Tag="60"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_040" Content="5 minutes" Tag="300"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_041" Content="10 minutes" Tag="600"/>
                         </ComboBox>
-                        <ComboBox x:Name="FrameRateCombo"
+                        <ComboBox x:Uid="RecorderPage_FrameRateCombo" x:Name="FrameRateCombo"
                                   Header="Frame rate"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="FrameRateCombo">
-                            <ComboBoxItem Content="24 fps" Tag="24"/>
-                            <ComboBoxItem Content="30 fps" Tag="30"/>
-                            <ComboBoxItem Content="60 fps" Tag="60"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_043" Content="24 fps" Tag="24"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_044" Content="30 fps" Tag="30"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_045" Content="60 fps" Tag="60"/>
                         </ComboBox>
-                        <ComboBox x:Name="QualityCombo"
+                        <ComboBox x:Uid="RecorderPage_QualityCombo" x:Name="QualityCombo"
                                   Header="Quality"
                                   SelectedIndex="1"
                                   SelectionChanged="Option_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="QualityCombo">
-                            <ComboBoxItem Content="Archive quality (CRF 18)" Tag="18"/>
-                            <ComboBoxItem Content="Balanced (CRF 20)" Tag="20"/>
-                            <ComboBoxItem Content="Compact (CRF 24)" Tag="24"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_047" Content="Archive quality (CRF 18)" Tag="18"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_048" Content="Balanced (CRF 20)" Tag="20"/>
+                            <ComboBoxItem x:Uid="RecorderPage_Item_049" Content="Compact (CRF 24)" Tag="24"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location"
+                        <TextBlock x:Uid="RecorderPage_Item_050" Text="File Location"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBox x:Uid="RecorderPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  IsReadOnly="True"
                             AutomationProperties.AutomationId="OutputDirectoryBox"/>
-                        <Button Content="Browse"
+                        <Button x:Uid="RecorderPage_RecorderPageButton03" Content="Browse"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="BrowseOutputFolder_Click"
                             AutomationProperties.AutomationId="RecorderPageButton03"/>
@@ -404,9 +404,9 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary"
+                        <TextBlock x:Uid="RecorderPage_Item_053" Text="Queue Summary"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="RecorderPage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 pending / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText"
@@ -429,13 +429,13 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="RecorderPage_RecorderPageButton04" Grid.Column="1"
                     Content="Open Output Folder"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"
                 AutomationProperties.AutomationId="RecorderPageButton04"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="RecorderPage_ClearQueueButton" Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -443,7 +443,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearQueueButton"/>
-            <Button Grid.Column="3"
+            <Button x:Uid="RecorderPage_CancelButton" Grid.Column="3"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

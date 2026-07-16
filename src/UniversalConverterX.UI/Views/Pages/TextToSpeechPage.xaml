@@ -21,19 +21,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="TEXT TO SPEECH"
+                <TextBlock x:Uid="TextToSpeechPage_Item_001" Text="TEXT TO SPEECH"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages."
+                <TextBlock x:Uid="TextToSpeechPage_Item_002" Text="Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Refresh Voices"
+                <Button x:Uid="TextToSpeechPage_TextToSpeechPageButton01" Content="Refresh Voices"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="RefreshVoices_Click"
                     AutomationProperties.AutomationId="TextToSpeechPageButton01"/>
-                <Button x:Name="GenerateButton"
+                <Button x:Uid="TextToSpeechPage_GenerateButton" x:Name="GenerateButton"
                         Content="Generate Audio"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Generate_Click"
@@ -56,9 +56,9 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Script" Style="{StaticResource PanelTitleTextStyle}"/>
+                    <TextBlock x:Uid="TextToSpeechPage_Item_005" Grid.Row="0" Text="Script" Style="{StaticResource PanelTitleTextStyle}"/>
 
-                    <TextBox x:Name="ScriptBox"
+                    <TextBox x:Uid="TextToSpeechPage_ScriptBox" x:Name="ScriptBox"
                              Grid.Row="1"
                              PlaceholderText="Type or paste your script text here..."
                              AcceptsReturn="True"
@@ -75,12 +75,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="CharCountLabel"
+                        <TextBlock x:Uid="TextToSpeechPage_CharCountLabel" x:Name="CharCountLabel"
                                    Grid.Column="0"
                                    Text="0 characters"
                                    Style="{StaticResource MutedTextStyle}"
                                    VerticalAlignment="Center"/>
-                        <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
+                        <ProgressBar x:Uid="TextToSpeechPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar"
                                      Grid.Column="1"
                                      Width="220"
                                      Height="6"
@@ -95,28 +95,28 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Voice" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="LocaleCombo"
+                        <TextBlock x:Uid="TextToSpeechPage_Item_009" Text="Voice" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="TextToSpeechPage_LocaleCombo" x:Name="LocaleCombo"
                                   Header="Locale filter"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="LocaleCombo_SelectionChanged"
                             AutomationProperties.AutomationId="LocaleCombo">
-                            <ComboBoxItem Content="English (any)" Tag="en"/>
-                            <ComboBoxItem Content="English (US)" Tag="en-US"/>
-                            <ComboBoxItem Content="English (UK)" Tag="en-GB"/>
-                            <ComboBoxItem Content="English (AU)" Tag="en-AU"/>
-                            <ComboBoxItem Content="Spanish" Tag="es"/>
-                            <ComboBoxItem Content="French" Tag="fr"/>
-                            <ComboBoxItem Content="German" Tag="de"/>
-                            <ComboBoxItem Content="Italian" Tag="it"/>
-                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
-                            <ComboBoxItem Content="Japanese" Tag="ja"/>
-                            <ComboBoxItem Content="Chinese" Tag="zh"/>
-                            <ComboBoxItem Content="Russian" Tag="ru"/>
-                            <ComboBoxItem Content="(all locales)" Tag=""/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_011" Content="English (any)" Tag="en"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_012" Content="English (US)" Tag="en-US"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_013" Content="English (UK)" Tag="en-GB"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_014" Content="English (AU)" Tag="en-AU"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_015" Content="Spanish" Tag="es"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_016" Content="French" Tag="fr"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_017" Content="German" Tag="de"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_018" Content="Italian" Tag="it"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_019" Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_020" Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_021" Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_022" Content="Russian" Tag="ru"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_023" Content="(all locales)" Tag=""/>
                         </ComboBox>
-                        <ComboBox x:Name="VoiceCombo"
+                        <ComboBox x:Uid="TextToSpeechPage_VoiceCombo" x:Name="VoiceCombo"
                                   Header="Voice"
                                   HorizontalAlignment="Stretch"
                                   PlaceholderText="Loading..."
@@ -130,24 +130,24 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Delivery" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <Slider x:Name="RateSlider"
+                        <TextBlock x:Uid="TextToSpeechPage_Item_025" Text="Delivery" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Slider x:Uid="TextToSpeechPage_RateSlider" x:Name="RateSlider"
                                 Header="Rate"
                                 Minimum="-50" Maximum="100" Value="0"
                                 StepFrequency="5"
                                 ValueChanged="Setting_Slider_Changed"
                             AutomationProperties.AutomationId="RateSlider"/>
-                        <TextBlock x:Name="RateLabel"
+                        <TextBlock x:Uid="TextToSpeechPage_RateLabel" x:Name="RateLabel"
                                    Text="0% (normal)"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
-                        <Slider x:Name="PitchSlider"
+                        <Slider x:Uid="TextToSpeechPage_PitchSlider" x:Name="PitchSlider"
                                 Header="Pitch (Hz)"
                                 Minimum="-50" Maximum="50" Value="0"
                                 StepFrequency="5"
                                 ValueChanged="Setting_Slider_Changed"
                             AutomationProperties.AutomationId="PitchSlider"/>
-                        <TextBlock x:Name="PitchLabel"
+                        <TextBlock x:Uid="TextToSpeechPage_PitchLabel" x:Name="PitchLabel"
                                    Text="0 Hz"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
@@ -156,21 +156,21 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo"
+                        <TextBlock x:Uid="TextToSpeechPage_Item_030" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="TextToSpeechPage_FormatCombo" x:Name="FormatCombo"
                                   Header="Format"
                                   SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Setting_Combo_Changed"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="MP3" Tag=".mp3"/>
-                            <ComboBoxItem Content="WAV" Tag=".wav"/>
-                            <ComboBoxItem Content="FLAC" Tag=".flac"/>
-                            <ComboBoxItem Content="OGG Vorbis" Tag=".ogg"/>
-                            <ComboBoxItem Content="Opus" Tag=".opus"/>
-                            <ComboBoxItem Content="AAC (.m4a)" Tag=".m4a"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_032" Content="MP3" Tag=".mp3"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_033" Content="WAV" Tag=".wav"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_034" Content="FLAC" Tag=".flac"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_035" Content="OGG Vorbis" Tag=".ogg"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_036" Content="Opus" Tag=".opus"/>
+                            <ComboBoxItem x:Uid="TextToSpeechPage_Item_037" Content="AAC (.m4a)" Tag=".m4a"/>
                         </ComboBox>
-                        <Button Content="Save to..."
+                        <Button x:Uid="TextToSpeechPage_TextToSpeechPageButton02" Content="Save to..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="ChooseOutput_Click"
                                 HorizontalAlignment="Stretch"
@@ -194,7 +194,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="TextToSpeechPage_OpenOutputButton" Grid.Column="1"
                     Content="Open Output"
                     x:Name="OpenOutputButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -202,7 +202,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="OpenOutputButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="TextToSpeechPage_CancelButton" Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

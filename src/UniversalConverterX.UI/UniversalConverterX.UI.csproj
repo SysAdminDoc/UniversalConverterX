@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <UseWinUI>true</UseWinUI>
     <RootNamespace>UniversalConverterX.UI</RootNamespace>
     <AssemblyName>UniversalConverterX</AssemblyName>

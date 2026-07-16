@@ -18,9 +18,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
-            <TextBlock Text="VMAF Quality Analysis"
+            <TextBlock x:Uid="VmafAnalysisPage_Item_001" Text="VMAF Quality Analysis"
                        Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock Text="Score a distorted (compressed / re-encoded) clip against its high-quality reference. VMAF runs frame-by-frame; results show pooled mean, Netflix-style harmonic mean (more sensitive to worst frames), and the percentage of frames below 70 (visible degradation)."
+            <TextBlock x:Uid="VmafAnalysisPage_Item_002" Text="Score a distorted (compressed / re-encoded) clip against its high-quality reference. VMAF runs frame-by-frame; results show pooled mean, Netflix-style harmonic mean (more sensitive to worst frames), and the percentage of frames below 70 (visible degradation)."
                        Style="{StaticResource SubtitleTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
@@ -37,31 +37,31 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Reference"
+                <TextBlock x:Uid="VmafAnalysisPage_Item_003" Text="Reference"
                            Style="{StaticResource LabelTextStyle}"
                            VerticalAlignment="Center"/>
-                <TextBlock x:Name="ReferenceLabel"
+                <TextBlock x:Uid="VmafAnalysisPage_ReferenceLabel" x:Name="ReferenceLabel"
                            Grid.Column="1"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"
                            Text="(pick the original master clip)"/>
-                <Button Grid.Column="2"
+                <Button x:Uid="VmafAnalysisPage_VmafAnalysisPageButton01" Grid.Column="2"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Content="Browse..."
                         Click="PickReference_Click"
                     AutomationProperties.AutomationId="VmafAnalysisPageButton01"/>
 
-                <TextBlock Grid.Row="1" Text="Distorted"
+                <TextBlock x:Uid="VmafAnalysisPage_Item_006" Grid.Row="1" Text="Distorted"
                            Style="{StaticResource LabelTextStyle}"
                            VerticalAlignment="Center"/>
-                <TextBlock x:Name="DistortedLabel"
+                <TextBlock x:Uid="VmafAnalysisPage_DistortedLabel" x:Name="DistortedLabel"
                            Grid.Row="1" Grid.Column="1"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"
                            Text="(pick the compressed clip to evaluate)"/>
-                <Button Grid.Row="1" Grid.Column="2"
+                <Button x:Uid="VmafAnalysisPage_VmafAnalysisPageButton02" Grid.Row="1" Grid.Column="2"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Content="Browse..."
                         Click="PickDistorted_Click"
@@ -74,11 +74,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar AutomationProperties.Name="Progress" x:Name="VmafProgress"
+            <ProgressBar x:Uid="VmafAnalysisPage_VmafProgress" AutomationProperties.Name="Progress" x:Name="VmafProgress"
                          Minimum="0" Maximum="100"
                          IsIndeterminate="False"
                          VerticalAlignment="Center"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="VmafAnalysisPage_RunButton" Grid.Column="1"
                     x:Name="RunButton"
                     Content="Run VMAF"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -101,22 +101,22 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Spacing="3">
-                        <TextBlock Text="Mean (pooled)" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="StatMean" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_Item_011" Text="Mean (pooled)" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_StatMean" x:Name="StatMean" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Spacing="3">
-                        <TextBlock Text="Harmonic mean" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="StatHarmonic" Text="--" Style="{StaticResource TitleTextStyle}"
+                        <TextBlock x:Uid="VmafAnalysisPage_Item_013" Text="Harmonic mean" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_StatHarmonic" x:Name="StatHarmonic" Text="--" Style="{StaticResource TitleTextStyle}"
                                    FontSize="28" Foreground="{StaticResource AccentBlueBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Spacing="3">
-                        <TextBlock Text="Min frame" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="StatMin" Text="--" Style="{StaticResource TitleTextStyle}"
+                        <TextBlock x:Uid="VmafAnalysisPage_Item_015" Text="Min frame" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_StatMin" x:Name="StatMin" Text="--" Style="{StaticResource TitleTextStyle}"
                                    FontSize="28" Foreground="{StaticResource AccentRedBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="3" Spacing="3">
-                        <TextBlock Text="Frames &lt; 70" Style="{StaticResource MutedTextStyle}"/>
-                        <TextBlock x:Name="StatBelow70" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_Item_017" Text="Frames &lt; 70" Style="{StaticResource MutedTextStyle}"/>
+                        <TextBlock x:Uid="VmafAnalysisPage_StatBelow70" x:Name="StatBelow70" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
                     </StackPanel>
                 </Grid>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -128,7 +128,7 @@
             </Grid>
         </Border>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="VmafAnalysisPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Pick a reference + distorted clip to start."/>

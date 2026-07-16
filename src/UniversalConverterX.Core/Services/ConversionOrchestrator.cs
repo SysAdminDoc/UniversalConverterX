@@ -5,6 +5,7 @@ using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Detection;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Localization;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Utilities;
 
@@ -133,13 +134,17 @@ public class ConversionOrchestrator : IConversionOrchestrator
             {
                 job.Status = ConversionStatus.Failed;
                 job.CompletedAt = DateTime.UtcNow;
-                return ConversionResult.Failed(job, "Input path is required.", DateTime.UtcNow - startedAt);
+                return ConversionResult.Failed(
+                    job, LocalizedText.Get("Core_InputPathRequired", "Input path is required."),
+                    DateTime.UtcNow - startedAt);
             }
             if (string.IsNullOrWhiteSpace(job.OutputPath))
             {
                 job.Status = ConversionStatus.Failed;
                 job.CompletedAt = DateTime.UtcNow;
-                return ConversionResult.Failed(job, "Output path is required.", DateTime.UtcNow - startedAt);
+                return ConversionResult.Failed(
+                    job, LocalizedText.Get("Core_OutputPathRequired", "Output path is required."),
+                    DateTime.UtcNow - startedAt);
             }
 
             // Apply overwrite behavior at the orchestrator boundary so every
@@ -158,7 +163,10 @@ public class ConversionOrchestrator : IConversionOrchestrator
                     job.CompletedAt = DateTime.UtcNow;
                     return ConversionResult.Skipped(
                         job,
-                        $"Output already exists at '{job.OutputPath}' and OverwriteBehavior=Skip.",
+                        LocalizedText.Format(
+                            "Core_OutputExistsSkip",
+                            "Output already exists at '{0}' and the overwrite policy is Skip.",
+                            job.OutputPath),
                         DateTime.UtcNow - startedAt);
 
                 case OverwriteBehavior.Never when File.Exists(job.OutputPath):
@@ -216,8 +224,11 @@ public class ConversionOrchestrator : IConversionOrchestrator
                     job.CompletedAt = DateTime.UtcNow;
                     return ConversionResult.Failed(
                         job,
-                        $"Forced converter '{job.Options.ForceConverter}' is not registered. " +
-                        $"Available: {string.Join(", ", _converters.Select(c => c.Id))}",
+                        LocalizedText.Format(
+                            "Core_ForcedConverterNotRegistered",
+                            "Forced converter '{0}' is not registered. Available: {1}",
+                            job.Options.ForceConverter,
+                            string.Join(", ", _converters.Select(c => c.Id))),
                         DateTime.UtcNow - startedAt);
                 }
                 var src = job.SourceFormat ?? new FileFormat(sourceExtension, GetMimeType(sourceExtension), DetermineCategory(sourceExtension));
@@ -228,7 +239,10 @@ public class ConversionOrchestrator : IConversionOrchestrator
                     job.CompletedAt = DateTime.UtcNow;
                     return ConversionResult.Failed(
                         job,
-                        $"Forced converter '{forced.Id}' cannot convert {sourceExtension} → {job.OutputExtension}.",
+                        LocalizedText.Format(
+                            "Core_ForcedConverterCannotConvert",
+                            "Forced converter '{0}' cannot convert {1} → {2}.",
+                            forced.Id, sourceExtension, job.OutputExtension),
                         DateTime.UtcNow - startedAt);
                 }
                 converter = forced;
@@ -248,7 +262,10 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
                     return ConversionResult.Failed(
                         job,
-                        $"No converter available for {sourceExtension} → {job.OutputExtension}",
+                        LocalizedText.Format(
+                            "Core_NoConverterAvailable",
+                            "No converter is available for {0} → {1}.",
+                            sourceExtension, job.OutputExtension),
                         DateTime.UtcNow - startedAt);
                 }
             }
@@ -297,7 +314,10 @@ public class ConversionOrchestrator : IConversionOrchestrator
             OutputPath = result.OutputPath,
             OutputSize = result.OutputSize,
             Duration = result.Duration,
-            ErrorMessage = $"Conversion succeeded but post-conversion source action failed: {postResult.ErrorMessage}",
+            ErrorMessage = LocalizedText.Format(
+                "Core_PostActionFailed",
+                "Conversion succeeded, but the post-conversion source action failed: {0}",
+                postResult.ErrorMessage),
             ExitCode = -1,
             StandardOutput = result.StandardOutput,
             StandardError = result.StandardError,

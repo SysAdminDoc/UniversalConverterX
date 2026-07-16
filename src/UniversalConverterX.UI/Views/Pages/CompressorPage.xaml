@@ -52,7 +52,7 @@
                                    TextAlignment="Center"/>
                     </Border>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="CompressorPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click" Tag="{Binding}">
@@ -65,7 +65,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
+                        <ProgressBar x:Uid="CompressorPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="6" CornerRadius="3"
                                      VerticalAlignment="Center"/>
@@ -106,7 +106,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="CompressorPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
                             Click="OpenFinishedFolder_Click"
@@ -130,15 +130,15 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Batch-compress videos with target profiles, progress, and finished results."
+                <TextBlock x:Uid="CompressorPage_Item_004" Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="CompressorPage_Item_005" Text="Batch-compress videos with target profiles, progress, and finished results."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="CompressorPage_CompressorPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="CompressorPageButton01"/>
-                <Button Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
+                <Button x:Uid="CompressorPage_CompressorPageButton02" Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="CompressorPageButton02"/>
             </StackPanel>
@@ -159,7 +159,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Compressing"
+                    <PivotItem x:Uid="CompressorPage_CompressorPagePivotItem01" Header="Compressing"
                         AutomationProperties.AutomationId="CompressorPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -171,13 +171,13 @@
                                     <FontIcon Glyph="&#xE91F;" FontSize="48"
                                               Foreground="{StaticResource AccentCyanBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video files to compress"
+                                <TextBlock x:Uid="CompressorPage_Item_009" Text="Drop video files to compress"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="MP4, MKV, MOV, AVI, WebM, FLV, WMV, TS, MTS, and M4V."
+                                <TextBlock x:Uid="CompressorPage_Item_010" Text="MP4, MKV, MOV, AVI, WebM, FLV, WMV, TS, MTS, and M4V."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="CompressorPage_CompressorPageButton03" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -192,7 +192,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="CompressorPage_CompressorPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="CompressorPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -204,10 +204,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No finished compressions yet"
+                                <TextBlock x:Uid="CompressorPage_Item_013" Text="No finished compressions yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed, failed, and cancelled jobs appear here."
+                                <TextBlock x:Uid="CompressorPage_Item_014" Text="Completed, failed, and cancelled jobs appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -227,18 +227,18 @@
                 <StackPanel Spacing="14" Padding="0,0,4,0">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Hardware Acceleration" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="CompressorPage_Item_015" Text="Hardware Acceleration" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="HwAccelCombo"
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="HwAccel_SelectionChanged"
                             AutomationProperties.AutomationId="HwAccelCombo">
-                            <ComboBoxItem Content="Software (CPU)" Tag="none" IsSelected="True"/>
-                            <ComboBoxItem Content="NVIDIA NVENC" Tag="nvenc"/>
-                            <ComboBoxItem Content="AMD AMF" Tag="amf"/>
-                            <ComboBoxItem Content="Intel QSV" Tag="qsv"/>
-                            <ComboBoxItem Content="D3D12 (Windows)" Tag="d3d12"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_016" Content="Software (CPU)" Tag="none" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_017" Content="NVIDIA NVENC" Tag="nvenc"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_018" Content="AMD AMF" Tag="amf"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_019" Content="Intel QSV" Tag="qsv"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_020" Content="D3D12 (Windows)" Tag="d3d12"/>
                         </ComboBox>
-                        <TextBlock Text="GPU encoding is faster but may produce larger files at the same CRF."
+                        <TextBlock x:Uid="CompressorPage_Item_021" Text="GPU encoding is faster but may produce larger files at the same CRF."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
@@ -247,21 +247,21 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Preset Profile" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <RadioButton x:Name="PresetWeb" Content="Web upload (1080p, CRF 23)"
+                        <TextBlock x:Uid="CompressorPage_Item_022" Text="Preset Profile" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <RadioButton x:Uid="CompressorPage_PresetWeb" x:Name="PresetWeb" Content="Web upload (1080p, CRF 23)"
                                      GroupName="Preset"
                                      Tag="web-1080p"
                                      IsChecked="True"
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="PresetWeb"/>
-                        <RadioButton x:Name="PresetEmail" Content="Email friendly (~9.5 MB)"
+                        <RadioButton x:Uid="CompressorPage_PresetEmail" x:Name="PresetEmail" Content="Email friendly (~9.5 MB)"
                                      GroupName="Preset"
                                      Tag="email-10mb"
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="PresetEmail"/>
-                        <RadioButton x:Name="PresetTarget" Content="Target file size"
+                        <RadioButton x:Uid="CompressorPage_PresetTarget" x:Name="PresetTarget" Content="Target file size"
                                      GroupName="Preset"
                                      Tag="__target__"
                                      Checked="Preset_Checked"
@@ -270,19 +270,19 @@
                         <StackPanel x:Name="TargetSizePanel"
                                     Visibility="Collapsed"
                                     Spacing="8">
-                            <ComboBox x:Name="SocialTargetCombo"
+                            <ComboBox x:Uid="CompressorPage_SocialTargetCombo" x:Name="SocialTargetCombo"
                                       Header="Platform size limit"
                                       HorizontalAlignment="Stretch"
                                       SelectedIndex="0"
                                       SelectionChanged="SocialTarget_Changed"
                                 AutomationProperties.AutomationId="CompressorSocialTargetCombo">
-                                <ComboBoxItem Content="Discord 10 MB" Tag="discord-10mb"/>
-                                <ComboBoxItem Content="Discord 25 MB" Tag="discord-25mb"/>
-                                <ComboBoxItem Content="Discord 50 MB" Tag="discord-50mb"/>
-                                <ComboBoxItem Content="Email 25 MB" Tag="email-25mb"/>
-                                <ComboBoxItem Content="Custom limit" Tag="custom"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_027" Content="Discord 10 MB" Tag="discord-10mb"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_028" Content="Discord 25 MB" Tag="discord-25mb"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_029" Content="Discord 50 MB" Tag="discord-50mb"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_030" Content="Email 25 MB" Tag="email-25mb"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_031" Content="Custom limit" Tag="custom"/>
                             </ComboBox>
-                            <NumberBox x:Name="TargetSizeBox"
+                            <NumberBox x:Uid="CompressorPage_TargetSizeBox" x:Name="TargetSizeBox"
                                        Header="Maximum size (MB)"
                                        Value="10"
                                        Minimum="1"
@@ -292,12 +292,12 @@
                                        IsEnabled="False"
                                        ValueChanged="TargetSize_Changed"
                                 AutomationProperties.AutomationId="CompressorTargetSizeBox"/>
-                            <TextBlock Text="Target-size mode uses CPU two-pass encoding and reserves 5% for MP4 overhead."
+                            <TextBlock x:Uid="CompressorPage_Item_033" Text="Target-size mode uses CPU two-pass encoding and reserves 5% for MP4 overhead."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
                                        FontSize="11"/>
                         </StackPanel>
-                        <RadioButton x:Name="PresetVmaf" Content="Smart quality target (VMAF)"
+                        <RadioButton x:Uid="CompressorPage_PresetVmaf" x:Name="PresetVmaf" Content="Smart quality target (VMAF)"
                                      GroupName="Preset"
                                      Tag="__vmaf__"
                                      Checked="Preset_Checked"
@@ -306,7 +306,7 @@
                         <StackPanel x:Name="VmafTargetPanel"
                                     Visibility="Collapsed"
                                     Spacing="8">
-                            <NumberBox x:Name="VmafTargetBox"
+                            <NumberBox x:Uid="CompressorPage_VmafTargetBox" x:Name="VmafTargetBox"
                                        Header="Minimum VMAF quality"
                                        Value="93"
                                        Minimum="50"
@@ -315,63 +315,63 @@
                                        SpinButtonPlacementMode="Inline"
                                        ValueChanged="VmafTarget_Changed"
                                 AutomationProperties.AutomationId="CompressorVmafTargetBox"/>
-                            <ComboBox x:Name="VmafEncoderCombo"
+                            <ComboBox x:Uid="CompressorPage_VmafEncoderCombo" x:Name="VmafEncoderCombo"
                                       Header="Video encoder"
                                       HorizontalAlignment="Stretch"
                                       SelectedIndex="0"
                                       SelectionChanged="VmafEncoder_Changed"
                                 AutomationProperties.AutomationId="CompressorVmafEncoderCombo">
-                                <ComboBoxItem Content="AV1 (SVT-AV1, smallest)" Tag="libsvtav1"/>
-                                <ComboBoxItem Content="H.265 / HEVC (compatible)" Tag="libx265"/>
-                                <ComboBoxItem Content="H.264 / AVC (most compatible)" Tag="libx264"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_037" Content="AV1 (SVT-AV1, smallest)" Tag="libsvtav1"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_038" Content="H.265 / HEVC (compatible)" Tag="libx265"/>
+                                <ComboBoxItem x:Uid="CompressorPage_Item_039" Content="H.264 / AVC (most compatible)" Tag="libx264"/>
                             </ComboBox>
-                            <TextBlock x:Name="VmafHealthText"
+                            <TextBlock x:Uid="CompressorPage_VmafHealthText" x:Name="VmafHealthText"
                                        Text="ab-av1 availability is checked before each smart compression."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
                                        FontSize="11"/>
-                            <TextBlock Text="Smart mode samples CRF candidates, encodes the smallest result meeting the target, then verifies the finished file with a full VMAF pass."
+                            <TextBlock x:Uid="CompressorPage_Item_041" Text="Smart mode samples CRF candidates, encodes the smallest result meeting the target, then verifies the finished file with a full VMAF pass."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
                                        FontSize="11"/>
                         </StackPanel>
-                        <RadioButton x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
+                        <RadioButton x:Uid="CompressorPage_PresetArchive" x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
                                      GroupName="Preset"
                                      Tag="archive-av1"
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="PresetArchive"/>
-                        <RadioButton x:Name="PresetPro" Content="Professional / archival ▾"
+                        <RadioButton x:Uid="CompressorPage_PresetPro" x:Name="PresetPro" Content="Professional / archival ▾"
                                      GroupName="Preset"
                                      Tag="__pro__"
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="PresetPro"/>
-                        <ComboBox x:Name="ProPresetCombo"
+                        <ComboBox x:Uid="CompressorPage_ProPresetCombo" x:Name="ProPresetCombo"
                                   Header="Intermediate / archival codec"
                                   HorizontalAlignment="Stretch"
                                   SelectedIndex="2"
                                   SelectionChanged="ProPreset_Changed"
                                   Visibility="Collapsed"
                             AutomationProperties.AutomationId="ProPresetCombo">
-                            <ComboBoxItem Content="ProRes 422 Proxy (low-res rough cut)" Tag="prores-422-proxy"/>
-                            <ComboBoxItem Content="ProRes 422 LT (offline edit)"        Tag="prores-422-lt"/>
-                            <ComboBoxItem Content="ProRes 422 (online edit)"            Tag="prores-422"/>
-                            <ComboBoxItem Content="ProRes 422 HQ (master / colour grade)" Tag="prores-422-hq"/>
-                            <ComboBoxItem Content="ProRes 4444 (alpha + grading)"       Tag="prores-4444"/>
-                            <ComboBoxItem Content="DNxHR SQ (Avid offline edit)"        Tag="dnxhr-sq"/>
-                            <ComboBoxItem Content="DNxHR HQ (Avid online edit)"         Tag="dnxhr-hq"/>
-                            <ComboBoxItem Content="DNxHR HQX (10-bit master)"           Tag="dnxhr-hqx"/>
-                            <ComboBoxItem Content="DNxHR 444 (4:4:4 grading)"           Tag="dnxhr-444"/>
-                            <ComboBoxItem Content="FFV1 + FLAC archival (lossless, MKV)" Tag="archive-ffv1"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_045" Content="ProRes 422 Proxy (low-res rough cut)" Tag="prores-422-proxy"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_046" Content="ProRes 422 LT (offline edit)"        Tag="prores-422-lt"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_047" Content="ProRes 422 (online edit)"            Tag="prores-422"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_048" Content="ProRes 422 HQ (master / colour grade)" Tag="prores-422-hq"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_049" Content="ProRes 4444 (alpha + grading)"       Tag="prores-4444"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_050" Content="DNxHR SQ (Avid offline edit)"        Tag="dnxhr-sq"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_051" Content="DNxHR HQ (Avid online edit)"         Tag="dnxhr-hq"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_052" Content="DNxHR HQX (10-bit master)"           Tag="dnxhr-hqx"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_053" Content="DNxHR 444 (4:4:4 grading)"           Tag="dnxhr-444"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_054" Content="FFV1 + FLAC archival (lossless, MKV)" Tag="archive-ffv1"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBlock x:Uid="CompressorPage_Item_055" Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBox x:Uid="CompressorPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  PlaceholderText="Same as source file"
                                  IsReadOnly="True"
@@ -381,11 +381,11 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Browse"
+                            <Button x:Uid="CompressorPage_CompressorPageButton04" Grid.Column="0" Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="CompressorPageButton04"/>
-                            <Button Grid.Column="1" Content="Same as source"
+                            <Button x:Uid="CompressorPage_CompressorPageButton05" Grid.Column="1" Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
                                 AutomationProperties.AutomationId="CompressorPageButton05"/>
@@ -398,7 +398,7 @@
                         <FontIcon Glyph="&#xE946;" FontSize="16"
                                   Foreground="{StaticResource AccentCyanBrush}"
                                   VerticalAlignment="Top"/>
-                        <TextBlock Text="Compression keeps originals by default and writes finished outputs to the selected folder or beside each source."
+                        <TextBlock x:Uid="CompressorPage_Item_059" Text="Compression keeps originals by default and writes finished outputs to the selected folder or beside each source."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -406,7 +406,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Size comparison" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="CompressorPage_Item_060" Text="Size comparison" Style="{StaticResource PanelTitleTextStyle}"/>
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -414,8 +414,8 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="3">
-                                <TextBlock Text="SOURCE" Style="{StaticResource MetricLabelTextStyle}"/>
-                                <TextBlock x:Name="SourceSizeText" Text="0 B"
+                                <TextBlock x:Uid="CompressorPage_Item_061" Text="SOURCE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Uid="CompressorPage_SourceSizeText" x:Name="SourceSizeText" Text="0 B"
                                            Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentBlueBrush}"/>
                             </StackPanel>
@@ -423,13 +423,13 @@
                                       Foreground="{StaticResource TextMutedBrush}"
                                       VerticalAlignment="Bottom" Margin="0,0,0,4"/>
                             <StackPanel Grid.Column="2" Spacing="3">
-                                <TextBlock Text="RESULT" Style="{StaticResource MetricLabelTextStyle}"/>
-                                <TextBlock x:Name="ResultSizeText" Text="0 B"
+                                <TextBlock x:Uid="CompressorPage_Item_063" Text="RESULT" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Uid="CompressorPage_ResultSizeText" x:Name="ResultSizeText" Text="0 B"
                                            Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>
                             </StackPanel>
                         </Grid>
-                        <TextBlock x:Name="SavingsText" Text="Savings appear after compression."
+                        <TextBlock x:Uid="CompressorPage_SavingsText" x:Name="SavingsText" Text="Savings appear after compression."
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
@@ -448,16 +448,16 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" Content="Clear Queue"
+            <Button x:Uid="CompressorPage_ClearButton" Grid.Column="1" Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="Clear_Click" Margin="0,0,12,0" IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2" Content="Open Output"
+            <Button x:Uid="CompressorPage_CompressorPageButton06" Grid.Column="2" Content="Open Output"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click" Margin="0,0,12,0"
                 AutomationProperties.AutomationId="CompressorPageButton06"/>
-            <Button Grid.Column="3" Content="Compress All"
+            <Button x:Uid="CompressorPage_CompressButton" Grid.Column="3" Content="Compress All"
                     x:Name="CompressButton"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Click="Compress_Click" IsEnabled="False"
@@ -472,9 +472,9 @@
                     MinWidth="440"
                     MaxWidth="560">
                 <StackPanel Spacing="14">
-                    <TextBlock x:Name="ProgressTitle" Text="Compressing..."
+                    <TextBlock x:Uid="CompressorPage_ProgressTitle" x:Name="ProgressTitle" Text="Compressing..."
                                Style="{StaticResource TitleTextStyle}"/>
-                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar" Height="8" CornerRadius="4"
+                    <ProgressBar x:Uid="CompressorPage_ProgressBar" AutomationProperties.Name="Progress" x:Name="ProgressBar" Height="8" CornerRadius="4"
                                  Minimum="0" Maximum="100"/>
                     <TextBlock x:Name="ProgressStage" Style="{StaticResource SubtitleTextStyle}"/>
                     <TextBlock x:Name="ProgressEta" Style="{StaticResource MutedTextStyle}"/>
@@ -484,7 +484,7 @@
                                    TextWrapping="Wrap"/>
                     </ScrollViewer>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                        <Button x:Name="CancelButton" Content="Cancel"
+                        <Button x:Uid="CompressorPage_CancelButton" x:Name="CancelButton" Content="Cancel"
                                 Style="{StaticResource DangerButtonStyle}"
                                 Click="Cancel_Click"
                             AutomationProperties.AutomationId="CancelButton"/>

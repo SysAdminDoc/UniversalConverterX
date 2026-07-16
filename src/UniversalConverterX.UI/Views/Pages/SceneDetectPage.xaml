@@ -59,18 +59,18 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Scene Detection"
+                <TextBlock x:Uid="SceneDetectPage_Item_001" Text="Scene Detection"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Find scene cuts in a video via PySceneDetect. Export to CSV (spreadsheets) or EDL CMX 3600 (DaVinci Resolve / Premiere Pro), or copy the timecode list straight into ClipForge for batch trim."
+                <TextBlock x:Uid="SceneDetectPage_Item_002" Text="Find scene cuts in a video via PySceneDetect. Export to CSV (spreadsheets) or EDL CMX 3600 (DaVinci Resolve / Premiere Pro), or copy the timecode list straight into ClipForge for batch trim."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Open Video"
+                <Button x:Uid="SceneDetectPage_SceneDetectPageButton01" Content="Open Video"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="OpenFile_Click"
                     AutomationProperties.AutomationId="SceneDetectPageButton01"/>
-                <Button x:Name="DetectButton"
+                <Button x:Uid="SceneDetectPage_DetectButton" x:Name="DetectButton"
                         Content="Detect"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Detect_Click"
@@ -86,14 +86,14 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox x:Name="DetectorCombo"
+                <ComboBox x:Uid="SceneDetectPage_DetectorCombo" x:Name="DetectorCombo"
                           Header="Detector"
                           SelectedIndex="0"
                     AutomationProperties.AutomationId="DetectorCombo">
-                    <ComboBoxItem Content="Content (HSV + edge)" Tag="content"/>
-                    <ComboBoxItem Content="Threshold (raw pixel diff -- catches fades)" Tag="threshold"/>
+                    <ComboBoxItem x:Uid="SceneDetectPage_Item_006" Content="Content (HSV + edge)" Tag="content"/>
+                    <ComboBoxItem x:Uid="SceneDetectPage_Item_007" Content="Threshold (raw pixel diff -- catches fades)" Tag="threshold"/>
                 </ComboBox>
-                <NumberBox Grid.Column="1"
+                <NumberBox x:Uid="SceneDetectPage_ThresholdBox" Grid.Column="1"
                            Header="Threshold (lower = more cuts)"
                            x:Name="ThresholdBox"
                            Value="27"
@@ -101,7 +101,7 @@
                            SmallChange="1" LargeChange="5"
                            SpinButtonPlacementMode="Inline"
                     AutomationProperties.AutomationId="ThresholdBox"/>
-                <NumberBox Grid.Column="2"
+                <NumberBox x:Uid="SceneDetectPage_MinLenBox" Grid.Column="2"
                            Header="Min scene length (frames)"
                            x:Name="MinLenBox"
                            Value="15"
@@ -118,18 +118,18 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar AutomationProperties.Name="Progress" x:Name="DetectProgress"
+            <ProgressBar x:Uid="SceneDetectPage_DetectProgress" AutomationProperties.Name="Progress" x:Name="DetectProgress"
                          Minimum="0" Maximum="100"
                          IsIndeterminate="False"
                          VerticalAlignment="Center"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="SceneDetectPage_ExportCsvButton" Grid.Column="1"
                     x:Name="ExportCsvButton"
                     Content="Export CSV"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ExportCsv_Click"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ExportCsvButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="SceneDetectPage_ExportEdlButton" Grid.Column="2"
                     x:Name="ExportEdlButton"
                     Content="Export EDL"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -148,10 +148,10 @@
                         <FontIcon Glyph="&#xE71D;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No scenes yet"
+                    <TextBlock x:Uid="SceneDetectPage_Item_013" Text="No scenes yet"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Open a video, tweak the threshold if needed, and click Detect."
+                    <TextBlock x:Uid="SceneDetectPage_Item_014" Text="Open a video, tweak the threshold if needed, and click Detect."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
@@ -164,7 +164,7 @@
             </Grid>
         </Border>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="SceneDetectPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Open a video to begin."/>

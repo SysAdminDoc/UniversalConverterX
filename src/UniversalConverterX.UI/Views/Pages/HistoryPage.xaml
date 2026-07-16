@@ -47,23 +47,23 @@
                                    FontSize="11"
                                    Visibility="{x:Bind ErrorVisibility}"
                                    TextTrimming="CharacterEllipsis">
-                            <Run Text="error:"/>
+                            <Run x:Uid="HistoryPage_Item_001" Text="error:"/>
                             <Run Text="{x:Bind ErrorDetails}" Foreground="{StaticResource AccentRedBrush}"/>
                         </TextBlock>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="HistoryPage_Item_002" Grid.Column="2"
                             Content="Open"
                             Style="{StaticResource SecondaryButtonStyle}"
                             ToolTipService.ToolTip="Reveal output in Explorer"
                             Click="Reveal_Click"
                             Tag="{x:Bind OutputPath}"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="HistoryPage_Item_003" Grid.Column="3"
                             Content="Re-run"
                             Style="{StaticResource SecondaryButtonStyle}"
                             ToolTipService.ToolTip="Re-run with the same parameters"
                             Click="Rerun_Click"
                             Tag="{x:Bind Id}"/>
-                    <Button Grid.Column="4"
+                    <Button x:Uid="HistoryPage_Item_004" Grid.Column="4"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Forget this entry" ToolTipService.ToolTip="Forget this entry"
                             Click="Delete_Click"
@@ -91,23 +91,23 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="CONVERSION HISTORY"
+                <TextBlock x:Uid="HistoryPage_Item_005" Text="CONVERSION HISTORY"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Persistent SQLite log of every job. Search, re-run, or forget any entry."
+                <TextBlock x:Uid="HistoryPage_Item_006" Text="Persistent SQLite log of every job. Search, re-run, or forget any entry."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Export report"
+                <Button x:Uid="HistoryPage_HistoryPageButton03" Content="Export report"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Export_Click"
                         AutomationProperties.AutomationId="HistoryPageButton03"/>
-                <Button Content="Refresh"
+                <Button x:Uid="HistoryPage_HistoryPageButton01" Content="Refresh"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Refresh_Click"
                     AutomationProperties.AutomationId="HistoryPageButton01"/>
-                <Button Content="Clear history"
+                <Button x:Uid="HistoryPage_HistoryPageButton02" Content="Clear history"
                         Style="{StaticResource DangerButtonStyle}"
                         Click="Clear_Click"
                     AutomationProperties.AutomationId="HistoryPageButton02"/>
@@ -124,35 +124,35 @@
                 </Grid.ColumnDefinitions>
                 <Border Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Total jobs" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
-                    <TextBlock x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="24" FontWeight="SemiBold"/>
+                    <TextBlock x:Uid="HistoryPage_Item_010" Text="Total jobs" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_StatTotal" x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="24" FontWeight="SemiBold"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Succeeded" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
-                    <TextBlock x:Name="StatOk" Text="0" Style="{StaticResource TitleTextStyle}"
+                    <TextBlock x:Uid="HistoryPage_Item_012" Text="Succeeded" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_StatOk" x:Name="StatOk" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentGreenBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="2" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Failed" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
-                    <TextBlock x:Name="StatFail" Text="0" Style="{StaticResource TitleTextStyle}"
+                    <TextBlock x:Uid="HistoryPage_Item_014" Text="Failed" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_StatFail" x:Name="StatFail" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentRedBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="3" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Space saved" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
-                    <TextBlock x:Name="StatSaved" Text="0 B" Style="{StaticResource TitleTextStyle}"
+                    <TextBlock x:Uid="HistoryPage_Item_016" Text="Space saved" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_StatSaved" x:Name="StatSaved" Text="0 B" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}"/>
                 </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <AutoSuggestBox Grid.Row="2"
+        <AutoSuggestBox x:Uid="HistoryPage_SearchBox" Grid.Row="2"
                         x:Name="SearchBox"
                         PlaceholderText="Filter by engine, action, file path, preset..."
                         QueryIcon="Find"
@@ -170,10 +170,10 @@
                         <FontIcon Glyph="&#xE81C;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="No history yet"
+                    <TextBlock x:Uid="HistoryPage_Item_019" Text="No history yet"
                                Style="{StaticResource TitleTextStyle}"
                                HorizontalAlignment="Center" FontSize="18"/>
-                    <TextBlock Text="Run a conversion or compression and it will appear here."
+                    <TextBlock x:Uid="HistoryPage_Item_020" Text="Run a conversion or compression and it will appear here."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextWrapping="Wrap"

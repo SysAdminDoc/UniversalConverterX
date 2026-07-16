@@ -60,7 +60,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="FormatInspectorPage_Item_001" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress}"
@@ -92,17 +92,17 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Format Inspector" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Probe codecs, streams, signatures, size, duration, and conversion readiness before sending files into a queue."
+                <TextBlock x:Uid="FormatInspectorPage_Item_002" Text="Format Inspector" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="FormatInspectorPage_Item_003" Text="Probe codecs, streams, signatures, size, duration, and conversion readiness before sending files into a queue."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="FormatInspectorPage_FormatInspectorPageButton01" Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFiles_Click"
                     AutomationProperties.AutomationId="FormatInspectorPageButton01"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="FormatInspectorPage_FormatInspectorPageButton02" Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="FormatInspectorPageButton02"/>
@@ -134,15 +134,15 @@
                             <FontIcon Glyph="&#xE946;" FontSize="48"
                                       Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
-                        <TextBlock Text="Drop files to inspect"
+                        <TextBlock x:Uid="FormatInspectorPage_Item_006" Text="Drop files to inspect"
                                    Style="{StaticResource SubtitleTextStyle}"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="UCX checks signatures locally and uses FFprobe for audio/video stream details when available."
+                        <TextBlock x:Uid="FormatInspectorPage_Item_007" Text="UCX checks signatures locally and uses FFprobe for audio/video stream details when available."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    MaxWidth="460"/>
-                        <Button Content="Browse Files"
+                        <Button x:Uid="FormatInspectorPage_FormatInspectorPageButton03" Content="Browse Files"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="BrowseFiles_Click"
                                 HorizontalAlignment="Center"
@@ -161,7 +161,7 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Trust Check"
+                        <TextBlock x:Uid="FormatInspectorPage_Item_009" Text="Trust Check"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="ToolStatusText"
                                    Style="{StaticResource MutedTextStyle}"
@@ -180,10 +180,10 @@
                                 <FontIcon Glyph="&#xE9D9;" FontSize="48"
                                           Foreground="{StaticResource TextMutedBrush}"/>
                             </Border>
-                            <TextBlock Text="Select a file to view the report"
+                            <TextBlock x:Uid="FormatInspectorPage_Item_010" Text="Select a file to view the report"
                                        Style="{StaticResource SubtitleTextStyle}"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="Reports include detected type, codec streams, tags, conversion targets, and local processing notes."
+                            <TextBlock x:Uid="FormatInspectorPage_Item_011" Text="Reports include detected type, codec streams, tags, conversion targets, and local processing notes."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextAlignment="Center"
                                        TextWrapping="Wrap"
@@ -226,7 +226,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="FormatInspectorPage_OpenFolderButton" Grid.Column="1"
                     Content="Open Folder"
                     x:Name="OpenFolderButton"
                     Style="{StaticResource SecondaryButtonStyle}"
@@ -234,7 +234,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="OpenFolderButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="FormatInspectorPage_ClearButton" Grid.Column="2"
                     Content="Clear List"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -242,7 +242,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="3"
+            <Button x:Uid="FormatInspectorPage_InspectButton" Grid.Column="3"
                     Content="Inspect All"
                     x:Name="InspectButton"
                     Style="{StaticResource PrimaryButtonStyle}"

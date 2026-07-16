@@ -51,21 +51,21 @@
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Button Content="Run"
+                            <Button x:Uid="PresetsPage_Item_001" Content="Run"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Padding="14,9"
                                     Click="RunPreset_Click"
                                     Tag="{Binding Name}"
                                     IsEnabled="{Binding CanRun}"
                                     ToolTipService.ToolTip="{Binding HealthDetail}"/>
-                            <Button Content="Edit"
+                            <Button x:Uid="PresetsPage_Item_002" Content="Edit"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Padding="12,9"
                                     Click="EditPreset_Click"
                                     Tag="{Binding SourcePath}"
                                     IsEnabled="{Binding CanEdit}"
                                     ToolTipService.ToolTip="{Binding EditHint}"/>
-                            <Button Content="Duplicate"
+                            <Button x:Uid="PresetsPage_Item_003" Content="Duplicate"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Padding="12,9"
                                     Click="DuplicatePreset_Click"
@@ -99,9 +99,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="Presets"
+                <TextBlock x:Uid="PresetsPage_Item_004" Text="Presets"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Browse shipped and user-defined presets, filter by engine, and run the same workflows used by the CLI and Explorer menu."
+                <TextBlock x:Uid="PresetsPage_Item_005" Text="Browse shipped and user-defined presets, filter by engine, and run the same workflows used by the CLI and Explorer menu."
                            Style="{StaticResource SubtitleTextStyle}" FontSize="13"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -109,11 +109,11 @@
                         Orientation="Horizontal"
                         Spacing="8"
                         VerticalAlignment="Center">
-                <Button Content="New preset"
+                <Button x:Uid="PresetsPage_PresetsCreatePresetButton" Content="New preset"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="CreatePreset_Click"
                         AutomationProperties.AutomationId="PresetsCreatePresetButton"/>
-                <Button Content="Reload"
+                <Button x:Uid="PresetsPage_PresetsReloadButton" Content="Reload"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Reload_Click"
                         AutomationProperties.AutomationId="PresetsReloadButton"/>
@@ -127,26 +127,26 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <AutoSuggestBox x:Name="SearchBox"
+                <AutoSuggestBox x:Uid="PresetsPage_SearchBox" x:Name="SearchBox"
                                 PlaceholderText="Filter by name, folder, engine..."
                                 QueryIcon="Find"
                                 TextChanged="Search_TextChanged"
                     AutomationProperties.AutomationId="SearchBox"/>
-                <ComboBox Grid.Column="1"
+                <ComboBox x:Uid="PresetsPage_EngineFilter" Grid.Column="1"
                           x:Name="EngineFilter"
                           Header="Engine filter"
                           SelectionChanged="EngineFilter_Changed"
                     AutomationProperties.AutomationId="EngineFilter">
-                    <ComboBoxItem Content="All engines" Tag=""/>
+                    <ComboBoxItem x:Uid="PresetsPage_Item_010" Content="All engines" Tag=""/>
                 </ComboBox>
-                <ComboBox Grid.Column="2"
+                <ComboBox x:Uid="PresetsPage_FamilyFilter" Grid.Column="2"
                           x:Name="FamilyFilter"
                           Header="Preset family"
                           SelectionChanged="FamilyFilter_Changed"
                           AutomationProperties.AutomationId="PresetsFamilyFilter">
-                    <ComboBoxItem Content="All families" Tag=""/>
-                    <ComboBoxItem Content="Preservation" Tag="Preservation"/>
-                    <ComboBoxItem Content="Production" Tag="Production"/>
+                    <ComboBoxItem x:Uid="PresetsPage_Item_012" Content="All families" Tag=""/>
+                    <ComboBoxItem x:Uid="PresetsPage_Item_013" Content="Preservation" Tag="Preservation"/>
+                    <ComboBoxItem x:Uid="PresetsPage_Item_014" Content="Production" Tag="Production"/>
                 </ComboBox>
             </Grid>
         </Border>
@@ -165,10 +165,10 @@
                           FontSize="20"
                           VerticalAlignment="Top"/>
                 <StackPanel Grid.Column="1" Spacing="4">
-                    <TextBlock x:Name="HealthPanelTitle"
+                    <TextBlock x:Uid="PresetsPage_HealthPanelTitle" x:Name="HealthPanelTitle"
                                Text="Preset health"
                                Style="{StaticResource PanelTitleTextStyle}"/>
-                    <TextBlock x:Name="HealthPanelSummary"
+                    <TextBlock x:Uid="PresetsPage_HealthPanelSummary" x:Name="HealthPanelSummary"
                                Text="Checking visible preset engines..."
                                Style="{StaticResource MutedTextStyle}"
                                TextWrapping="Wrap"/>
@@ -193,10 +193,10 @@
                     <FontIcon Glyph="&#xE71D;" FontSize="38"
                               Foreground="{StaticResource AccentOrangeBrush}"/>
                 </Border>
-                <TextBlock Text="No presets match this filter"
+                <TextBlock x:Uid="PresetsPage_Item_017" Text="No presets match this filter"
                            Style="{StaticResource SectionHeaderTextStyle}"
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="Clear the search, choose All engines, or add a compatible *.preset.xml file to your UCX presets folder."
+                <TextBlock x:Uid="PresetsPage_Item_018" Text="Clear the search, choose All engines, or add a compatible *.preset.xml file to your UCX presets folder."
                            Style="{StaticResource MutedTextStyle}"
                            TextAlignment="Center"
                            TextWrapping="Wrap"/>
@@ -207,7 +207,7 @@
             </ScrollViewer>
         </Grid>
 
-        <TextBlock Grid.Row="4"
+        <TextBlock x:Uid="PresetsPage_StatusText" Grid.Row="4"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Loading presets..."/>

@@ -40,7 +40,7 @@
                         <TextBlock Text="{Binding PlanSummary}" Style="{StaticResource MutedTextStyle}"
                                    FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Style="{StaticResource IconButtonStyle}"
+                    <Button x:Uid="VideoEnhancerPage_Item_001" Grid.Column="3" Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove" ToolTipService.ToolTip="Remove" Click="RemoveQueued_Click" Tag="{Binding}">
                         <FontIcon Glyph="&#xE711;" FontSize="14"
                                   Foreground="{StaticResource TextMutedBrush}"/>
@@ -50,7 +50,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                        <ProgressBar x:Uid="VideoEnhancerPage_Item_002" AutomationProperties.Name="Progress" Minimum="0" Maximum="100" Value="{Binding Progress}"
                                      Height="6" CornerRadius="3" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding StatusText}"
                                    Style="{StaticResource MutedTextStyle}"
@@ -81,7 +81,7 @@
                         <TextBlock Text="{Binding Details}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="Open folder"
+                    <Button x:Uid="VideoEnhancerPage_Item_003" Grid.Column="2" Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}" Padding="14,8"
                             Click="OpenFinishedFolder_Click" Tag="{Binding OutputPath}"
                             IsEnabled="{Binding CanOpenFolder}"/>
@@ -103,19 +103,19 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock Text="VIDEO ENHANCER"
+                <TextBlock x:Uid="VideoEnhancerPage_Item_004" Text="VIDEO ENHANCER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Restore and upscale video with portable Real-ESRGAN or the optional CUDA-only SeedVR2 diffusion engine."
+                <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore and upscale video with portable Real-ESRGAN or the optional CUDA-only SeedVR2 diffusion engine."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="VideoEnhancerPage_VideoEnhancerPageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="VideoEnhancerPageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="VideoEnhancerPage_RunButton" x:Name="RunButton"
                         Content="Enhance Video"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -136,7 +136,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="VideoEnhancerPage_VideoEnhancerPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="VideoEnhancerPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
@@ -145,14 +145,14 @@
                                     <FontIcon Glyph="&#xE799;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop video files here"
+                                <TextBlock x:Uid="VideoEnhancerPage_Item_009" Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Choose an engine, then queue clips for local restoration. SeedVR2 is substantially slower and requires its optional model pack."
+                                <TextBlock x:Uid="VideoEnhancerPage_Item_010" Text="Choose an engine, then queue clips for local restoration. SeedVR2 is substantially slower and requires its optional model pack."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
-                                <Button Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
+                                <Button x:Uid="VideoEnhancerPage_VideoEnhancerPageButton02" Content="Browse Files" Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click" HorizontalAlignment="Center"
                                     AutomationProperties.AutomationId="VideoEnhancerPageButton02"/>
                             </StackPanel>
@@ -161,7 +161,7 @@
                                       ItemTemplate="{StaticResource VeQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="VideoEnhancerPage_VideoEnhancerPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="VideoEnhancerPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -171,7 +171,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No upscaled videos yet"
+                                <TextBlock x:Uid="VideoEnhancerPage_Item_013" Text="No upscaled videos yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -186,38 +186,38 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Engine" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="EngineCombo" Header="Restoration engine"
+                        <TextBlock x:Uid="VideoEnhancerPage_Item_014" Text="Engine" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="VideoEnhancerPage_EngineCombo" x:Name="EngineCombo" Header="Restoration engine"
                                   HorizontalAlignment="Stretch" SelectedIndex="0"
                                   SelectionChanged="Engine_Changed"
                                   AutomationProperties.AutomationId="EngineCombo">
-                            <ComboBoxItem Content="Real-ESRGAN (portable)" Tag="realesrgan"/>
-                            <ComboBoxItem Content="SeedVR2 3B FP8 (CUDA, optional)" Tag="seedvr2"/>
+                            <ComboBoxItem x:Uid="VideoEnhancerPage_Item_016" Content="Real-ESRGAN (portable)" Tag="realesrgan"/>
+                            <ComboBoxItem x:Uid="VideoEnhancerPage_Item_017" Content="SeedVR2 3B FP8 (CUDA, optional)" Tag="seedvr2"/>
                         </ComboBox>
                         <StackPanel x:Name="RealEsrganModelPanel" Spacing="8">
-                            <ComboBox x:Name="ModelCombo" Header="Model"
+                            <ComboBox x:Uid="VideoEnhancerPage_ModelCombo" x:Name="ModelCombo" Header="Model"
                                       HorizontalAlignment="Stretch"
                                       PlaceholderText="Discovering..."
                                       SelectionChanged="Settings_Changed"
                                 AutomationProperties.AutomationId="ModelCombo"/>
                             <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
-                            <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
+                            <Button x:Uid="VideoEnhancerPage_VideoEnhancerPageButton03" Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
                                     Click="RefreshModels_Click" HorizontalAlignment="Stretch"
                                 AutomationProperties.AutomationId="VideoEnhancerPageButton03"/>
                         </StackPanel>
                         <StackPanel x:Name="SeedVr2ModelPanel" Visibility="Collapsed" Spacing="8">
-                            <TextBlock Text="SeedVR2 3B FP8 restoration pack"
+                            <TextBlock x:Uid="VideoEnhancerPage_Item_020" Text="SeedVR2 3B FP8 restoration pack"
                                        Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Text="Pinned local runtime and weights · Apache-2.0 · approximately 3.9 GB. Requires NVIDIA CUDA with at least 10 GB VRAM; 12 GB or more is recommended."
+                            <TextBlock x:Uid="VideoEnhancerPage_Item_021" Text="Pinned local runtime and weights · Apache-2.0 · approximately 3.9 GB. Requires NVIDIA CUDA with at least 10 GB VRAM; 12 GB or more is recommended."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
-                            <Button x:Name="DownloadSeedVr2ModelButton"
+                            <Button x:Uid="VideoEnhancerPage_DownloadSeedVr2ModelButton" x:Name="DownloadSeedVr2ModelButton"
                                     Content="Review &amp; download model"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     HorizontalAlignment="Stretch"
                                     Click="DownloadSeedVr2Model_Click"
                                     AutomationProperties.AutomationId="DownloadSeedVr2ModelButton"/>
-                            <TextBlock x:Name="SeedVr2ModelStatus"
+                            <TextBlock x:Uid="VideoEnhancerPage_SeedVr2ModelStatus" x:Name="SeedVr2ModelStatus"
                                        Text="Checking local model pack..."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
@@ -228,7 +228,7 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Windows AI VSR" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VideoEnhancerPage_Item_024" Text="Windows AI VSR" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="WindowsVsrStatusText"
                                    Style="{StaticResource BodyTextStyle}"
                                    TextWrapping="Wrap"/>
@@ -240,37 +240,37 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VideoEnhancerPage_Item_025" Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel x:Name="RealEsrganQualityPanel" Spacing="8">
-                            <ComboBox x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"
+                            <ComboBox x:Uid="VideoEnhancerPage_ScaleCombo" x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"
                                       HorizontalAlignment="Stretch"
                                       SelectionChanged="Settings_Changed"
                                 AutomationProperties.AutomationId="ScaleCombo">
-                                <ComboBoxItem Content="2× (recommended)" Tag="2"/>
-                                <ComboBoxItem Content="3× (slower)"      Tag="3"/>
-                                <ComboBoxItem Content="4× (slowest)"     Tag="4"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_027" Content="2× (recommended)" Tag="2"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_028" Content="3× (slower)"      Tag="3"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_029" Content="4× (slowest)"     Tag="4"/>
                             </ComboBox>
-                            <Slider x:Name="CrfSlider"
+                            <Slider x:Uid="VideoEnhancerPage_CrfSlider" x:Name="CrfSlider"
                                     Header="x264 CRF"
                                     Minimum="14" Maximum="32" Value="20"
                                     StepFrequency="1"
                                     ValueChanged="Crf_Changed"
                                 AutomationProperties.AutomationId="CrfSlider"/>
-                            <TextBlock x:Name="CrfLabel"
+                            <TextBlock x:Uid="VideoEnhancerPage_CrfLabel" x:Name="CrfLabel"
                                        Text="CRF 20 (high quality)"
                                        Style="{StaticResource MutedTextStyle}"
                                        HorizontalAlignment="Right"/>
                         </StackPanel>
                         <StackPanel x:Name="SeedVr2QualityPanel" Visibility="Collapsed" Spacing="8">
-                            <ComboBox x:Name="SeedVr2ResolutionCombo" Header="Target short side" SelectedIndex="1"
+                            <ComboBox x:Uid="VideoEnhancerPage_SeedVr2ResolutionCombo" x:Name="SeedVr2ResolutionCombo" Header="Target short side" SelectedIndex="1"
                                       HorizontalAlignment="Stretch"
                                       SelectionChanged="Settings_Changed"
                                       AutomationProperties.AutomationId="SeedVr2ResolutionCombo">
-                                <ComboBoxItem Content="540p (lower VRAM)" Tag="540"/>
-                                <ComboBoxItem Content="720p (recommended)" Tag="720"/>
-                                <ComboBoxItem Content="1080p (slowest)" Tag="1080"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_033" Content="540p (lower VRAM)" Tag="540"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_034" Content="720p (recommended)" Tag="720"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Item_035" Content="1080p (slowest)" Tag="1080"/>
                             </ComboBox>
-                            <TextBlock Text="Uses streaming, CPU offload, BlockSwap, and tiled VAE processing. The source and result stay local."
+                            <TextBlock x:Uid="VideoEnhancerPage_Item_036" Text="Uses streaming, CPU offload, BlockSwap, and tiled VAE processing. The source and result stay local."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -279,8 +279,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText" Text="0 queued / 0 finished"
+                        <TextBlock x:Uid="VideoEnhancerPage_Item_037" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VideoEnhancerPage_QueueSummaryText" x:Name="QueueSummaryText" Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
@@ -296,11 +296,11 @@
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText" Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
+            <Button x:Uid="VideoEnhancerPage_ClearButton" Grid.Column="1" x:Name="ClearButton" Content="Clear Queue"
                     Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"
                     Margin="0,0,12,0" IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
+            <Button x:Uid="VideoEnhancerPage_CancelButton" Grid.Column="2" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click" IsEnabled="False"
                 AutomationProperties.AutomationId="CancelButton"/>

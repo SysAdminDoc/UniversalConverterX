@@ -55,7 +55,7 @@
                                    TextAlignment="Center"
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <Button x:Uid="ImageConverterPage_Item_001" Grid.Column="3" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveQueued_Click"
@@ -68,7 +68,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="ImageConverterPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="7" CornerRadius="4"
@@ -118,7 +118,7 @@
                                    FontSize="10"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="ImageConverterPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,10"
@@ -143,18 +143,18 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="IMAGE CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Convert between HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP. Preserves ICC + EXIF by default."
+                <TextBlock x:Uid="ImageConverterPage_Item_004" Text="IMAGE CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="ImageConverterPage_Item_005" Text="Convert between HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP. Preserves ICC + EXIF by default."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Content="Browse Files"
+                <Button x:Uid="ImageConverterPage_ImageConverterPageButton01" Content="Browse Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="ImageConverterPageButton01"/>
-                <Button x:Name="RunButton"
+                <Button x:Uid="ImageConverterPage_RunButton" x:Name="RunButton"
                         Content="Convert"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
@@ -178,7 +178,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Queue"
+                    <PivotItem x:Uid="ImageConverterPage_ImageConverterPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="ImageConverterPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,12,0,0">
                             <StackPanel x:Name="EmptyState"
@@ -190,18 +190,18 @@
                                     <FontIcon Glyph="&#xEB9F;" FontSize="52"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop image files here"
+                                <TextBlock x:Uid="ImageConverterPage_Item_009" Text="Drop image files here"
                                            Style="{StaticResource TitleTextStyle}"
                                            HorizontalAlignment="Center"
                                            FontSize="17" TextWrapping="Wrap"
                                            MaxWidth="280"/>
-                                <TextBlock Text="Each file converts to the target format using the settings on the right."
+                                <TextBlock x:Uid="ImageConverterPage_Item_010" Text="Each file converts to the target format using the settings on the right."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="420"/>
-                                <Button Content="Browse Files"
+                                <Button x:Uid="ImageConverterPage_ImageConverterPageButton02" Content="Browse Files"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="Browse_Click"
                                         HorizontalAlignment="Center"
@@ -214,7 +214,7 @@
                                       ItemTemplate="{StaticResource ImgQueueTemplate}"/>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="ImageConverterPage_ImageConverterPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="ImageConverterPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -226,7 +226,7 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No conversions yet"
+                                <TextBlock x:Uid="ImageConverterPage_Item_013" Text="No conversions yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -246,33 +246,33 @@
             <StackPanel Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo"
+                        <TextBlock x:Uid="ImageConverterPage_Item_014" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="ImageConverterPage_FormatCombo" x:Name="FormatCombo"
                                   Header="Format"
                                   SelectedIndex="0"
                                   SelectionChanged="Settings_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="JPEG (.jpg)"  Tag="jpeg"/>
-                            <ComboBoxItem Content="PNG (.png)"   Tag="png"/>
-                            <ComboBoxItem Content="WebP (.webp)" Tag="webp"/>
-                            <ComboBoxItem Content="AVIF (.avif)" Tag="avif"/>
-                            <ComboBoxItem Content="HEIC (.heic)" Tag="heic"/>
-                            <ComboBoxItem Content="JPEG XL (.jxl)" Tag="jxl"/>
-                            <ComboBoxItem Content="TIFF (.tiff)" Tag="tiff"/>
-                            <ComboBoxItem Content="BMP (.bmp)"   Tag="bmp"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_016" Content="JPEG (.jpg)"  Tag="jpeg"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_017" Content="PNG (.png)"   Tag="png"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_018" Content="WebP (.webp)" Tag="webp"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_019" Content="AVIF (.avif)" Tag="avif"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_020" Content="HEIC (.heic)" Tag="heic"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_021" Content="JPEG XL (.jxl)" Tag="jxl"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_022" Content="TIFF (.tiff)" Tag="tiff"/>
+                            <ComboBoxItem x:Uid="ImageConverterPage_Item_023" Content="BMP (.bmp)"   Tag="bmp"/>
                         </ComboBox>
-                        <Slider x:Name="QualitySlider"
+                        <Slider x:Uid="ImageConverterPage_QualitySlider" x:Name="QualitySlider"
                                 Header="Quality (lossy formats only)"
                                 Minimum="40" Maximum="100" Value="85"
                                 StepFrequency="1"
                                 ValueChanged="Quality_Changed"
                             AutomationProperties.AutomationId="QualitySlider"/>
-                        <TextBlock x:Name="QualityValueText"
+                        <TextBlock x:Uid="ImageConverterPage_QualityValueText" x:Name="QualityValueText"
                                    Text="85"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
-                        <NumberBox x:Name="TargetSizeBox"
+                        <NumberBox x:Uid="ImageConverterPage_TargetSizeBox" x:Name="TargetSizeBox"
                                    Header="Target size (KB, optional)"
                                    Minimum="0"
                                    Maximum="100000"
@@ -281,7 +281,7 @@
                                    SpinButtonPlacementMode="Compact"
                                    ValueChanged="TargetSize_Changed"
                                    AutomationProperties.AutomationId="TargetSizeBox"/>
-                        <TextBlock Text="When set, quality is searched automatically. A warning is reported when the target cannot be reached within 5%."
+                        <TextBlock x:Uid="ImageConverterPage_Item_027" Text="When set, quality is searched automatically. A warning is reported when the target cannot be reached within 5%."
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
                                    TextWrapping="Wrap"/>
@@ -289,21 +289,21 @@
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
-                    <Expander Header="Batch adjustments">
+                    <Expander x:Uid="ImageConverterPage_Item_028" Header="Batch adjustments">
                         <StackPanel Spacing="10" Padding="0,10,0,0">
-                            <ComboBox x:Name="EditPresetCombo"
+                            <ComboBox x:Uid="ImageConverterPage_EditPresetCombo" x:Name="EditPresetCombo"
                                       Header="Look preset"
                                       SelectedIndex="0"
                                       SelectionChanged="Settings_Changed"
                                       HorizontalAlignment="Stretch"
                                       AutomationProperties.AutomationId="EditPresetCombo">
-                                <ComboBoxItem Content="None" Tag=""/>
-                                <ComboBoxItem Content="Vivid" Tag="vivid"/>
-                                <ComboBoxItem Content="Muted" Tag="muted"/>
-                                <ComboBoxItem Content="Black &amp; white" Tag="bw"/>
-                                <ComboBoxItem Content="Vintage" Tag="vintage"/>
-                                <ComboBoxItem Content="Cold" Tag="cold"/>
-                                <ComboBoxItem Content="Warm" Tag="warm"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_030" Content="None" Tag=""/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_031" Content="Vivid" Tag="vivid"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_032" Content="Muted" Tag="muted"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_033" Content="Black &amp; white" Tag="bw"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_034" Content="Vintage" Tag="vintage"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_035" Content="Cold" Tag="cold"/>
+                                <ComboBoxItem x:Uid="ImageConverterPage_Item_036" Content="Warm" Tag="warm"/>
                             </ComboBox>
                             <Grid ColumnSpacing="10" RowSpacing="8">
                                 <Grid.ColumnDefinitions>
@@ -316,51 +316,51 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <NumberBox x:Name="BrightnessBox" Grid.Row="0" Grid.Column="0"
+                                <NumberBox x:Uid="ImageConverterPage_BrightnessBox" x:Name="BrightnessBox" Grid.Row="0" Grid.Column="0"
                                            Header="Brightness" Minimum="-100" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="BrightnessBox"/>
-                                <NumberBox x:Name="ContrastBox" Grid.Row="0" Grid.Column="1"
+                                <NumberBox x:Uid="ImageConverterPage_ContrastBox" x:Name="ContrastBox" Grid.Row="0" Grid.Column="1"
                                            Header="Contrast" Minimum="-100" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="ContrastBox"/>
-                                <NumberBox x:Name="SaturationBox" Grid.Row="1" Grid.Column="0"
+                                <NumberBox x:Uid="ImageConverterPage_SaturationBox" x:Name="SaturationBox" Grid.Row="1" Grid.Column="0"
                                            Header="Saturation" Minimum="-100" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="SaturationBox"/>
-                                <NumberBox x:Name="SharpnessBox" Grid.Row="1" Grid.Column="1"
+                                <NumberBox x:Uid="ImageConverterPage_SharpnessBox" x:Name="SharpnessBox" Grid.Row="1" Grid.Column="1"
                                            Header="Sharpness" Minimum="0" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="SharpnessBox"/>
-                                <NumberBox x:Name="BlurBox" Grid.Row="2" Grid.Column="0"
+                                <NumberBox x:Uid="ImageConverterPage_BlurBox" x:Name="BlurBox" Grid.Row="2" Grid.Column="0"
                                            Header="Blur px" Minimum="0" Maximum="20" Value="0"
                                            SmallChange="0.5" ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="BlurBox"/>
-                                <NumberBox x:Name="HueBox" Grid.Row="2" Grid.Column="1"
+                                <NumberBox x:Uid="ImageConverterPage_HueBox" x:Name="HueBox" Grid.Row="2" Grid.Column="1"
                                            Header="Hue °" Minimum="0" Maximum="360" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="HueBox"/>
-                                <NumberBox x:Name="VignetteBox" Grid.Row="3" Grid.Column="0"
+                                <NumberBox x:Uid="ImageConverterPage_VignetteBox" x:Name="VignetteBox" Grid.Row="3" Grid.Column="0"
                                            Header="Vignette" Minimum="0" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="VignetteBox"/>
-                                <NumberBox x:Name="GrainBox" Grid.Row="3" Grid.Column="1"
+                                <NumberBox x:Uid="ImageConverterPage_GrainBox" x:Name="GrainBox" Grid.Row="3" Grid.Column="1"
                                            Header="Grain" Minimum="0" Maximum="100" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="GrainBox"/>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Spacing="12">
-                                <CheckBox x:Name="GrayscaleCheck" Content="Grayscale"
+                                <CheckBox x:Uid="ImageConverterPage_GrayscaleCheck" x:Name="GrayscaleCheck" Content="Grayscale"
                                           Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
                                           AutomationProperties.AutomationId="GrayscaleCheck"/>
-                                <CheckBox x:Name="SepiaCheck" Content="Sepia"
+                                <CheckBox x:Uid="ImageConverterPage_SepiaCheck" x:Name="SepiaCheck" Content="Sepia"
                                           Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
                                           AutomationProperties.AutomationId="SepiaCheck"/>
-                                <CheckBox x:Name="InvertCheck" Content="Invert"
+                                <CheckBox x:Uid="ImageConverterPage_InvertCheck" x:Name="InvertCheck" Content="Invert"
                                           Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
                                           AutomationProperties.AutomationId="InvertCheck"/>
                             </StackPanel>
-                            <TextBox x:Name="TintBox"
+                            <TextBox x:Uid="ImageConverterPage_TintBox" x:Name="TintBox"
                                      Header="Tint (colour@strength)"
                                      PlaceholderText="#3a6ea5@20"
                                      TextChanged="EditText_Changed"
@@ -370,16 +370,16 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <NumberBox x:Name="BorderBox" Grid.Column="0"
+                                <NumberBox x:Uid="ImageConverterPage_BorderBox" x:Name="BorderBox" Grid.Column="0"
                                            Header="Border px" Minimum="0" Maximum="1000" Value="0"
                                            ValueChanged="EditNumber_Changed"
                                            AutomationProperties.AutomationId="BorderBox"/>
-                                <TextBox x:Name="BorderColorBox" Grid.Column="1"
+                                <TextBox x:Uid="ImageConverterPage_BorderColorBox" x:Name="BorderColorBox" Grid.Column="1"
                                          Header="Border colour" Text="#ffffff"
                                          TextChanged="EditText_Changed"
                                          AutomationProperties.AutomationId="BorderColorBox"/>
                             </Grid>
-                            <TextBlock Text="Adjustments apply to every frame. Alpha is preserved for compatible outputs."
+                            <TextBlock x:Uid="ImageConverterPage_Item_051" Text="Adjustments apply to every frame. Alpha is preserved for compatible outputs."
                                        Style="{StaticResource MutedTextStyle}"
                                        FontSize="11" TextWrapping="Wrap"/>
                         </StackPanel>
@@ -388,14 +388,14 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Metadata" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <CheckBox x:Name="StripExifCheck"
+                        <TextBlock x:Uid="ImageConverterPage_Item_052" Text="Metadata" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <CheckBox x:Uid="ImageConverterPage_StripExifCheck" x:Name="StripExifCheck"
                                   Content="Strip EXIF metadata"
                                   IsChecked="False"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
                             AutomationProperties.AutomationId="StripExifCheck"/>
-                        <CheckBox x:Name="StripIccCheck"
+                        <CheckBox x:Uid="ImageConverterPage_StripIccCheck" x:Name="StripIccCheck"
                                   Content="Strip ICC colour profile"
                                   IsChecked="False"
                                   Checked="Settings_Bool_Changed"
@@ -406,8 +406,8 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="ImageConverterPage_Item_055" Text="Queue Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="ImageConverterPage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock x:Name="CurrentSetupText"
@@ -430,7 +430,7 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="ImageConverterPage_ClearButton" Grid.Column="1"
                     Content="Clear Queue"
                     x:Name="ClearButton"
                     Style="{StaticResource GhostButtonStyle}"
@@ -438,7 +438,7 @@
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ClearButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="ImageConverterPage_CancelButton" Grid.Column="2"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

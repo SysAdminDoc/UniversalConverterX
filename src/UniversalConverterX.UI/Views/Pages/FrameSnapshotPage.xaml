@@ -61,7 +61,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
 
-                    <Button Grid.Column="3"
+                    <Button x:Uid="FrameSnapshotPage_Item_001" Grid.Column="3"
                             Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
@@ -77,7 +77,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0"
+                        <ProgressBar x:Uid="FrameSnapshotPage_Item_002" AutomationProperties.Name="Progress" Grid.Column="0"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress}"
@@ -128,7 +128,7 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button Grid.Column="2"
+                    <Button x:Uid="FrameSnapshotPage_Item_003" Grid.Column="2"
                             Content="Open folder"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Padding="14,8"
@@ -153,21 +153,21 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock Text="Frame Snapshot" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Export precise video stills or image-sequence samples with local FFmpeg processing."
+                <TextBlock x:Uid="FrameSnapshotPage_Item_004" Text="Frame Snapshot" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="FrameSnapshotPage_Item_005" Text="Export precise video stills or image-sequence samples with local FFmpeg processing."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Add Files"
+                <Button x:Uid="FrameSnapshotPage_FrameSnapshotPageButton01" Content="Add Files"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFiles_Click"
                     AutomationProperties.AutomationId="FrameSnapshotPageButton01"/>
-                <Button Content="Add Folder"
+                <Button x:Uid="FrameSnapshotPage_FrameSnapshotPageButton02" Content="Add Folder"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="BrowseFolder_Click"
                     AutomationProperties.AutomationId="FrameSnapshotPageButton02"/>
-                <Button Content="Extract"
+                <Button x:Uid="FrameSnapshotPage_ExtractButton" Content="Extract"
                         x:Name="ExtractButton"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Extract_Click"
@@ -191,7 +191,7 @@
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
-                    <PivotItem Header="Snapshots"
+                    <PivotItem x:Uid="FrameSnapshotPage_FrameSnapshotPagePivotItem01" Header="Snapshots"
                         AutomationProperties.AutomationId="FrameSnapshotPagePivotItem01">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
@@ -203,16 +203,16 @@
                                     <FontIcon Glyph="&#xE722;" FontSize="48"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
-                                <TextBlock Text="Drop videos to extract frames"
+                                <TextBlock x:Uid="FrameSnapshotPage_Item_010" Text="Drop videos to extract frames"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Create stills for thumbnails, contact sheets, review notes, and image-sequence handoff."
+                                <TextBlock x:Uid="FrameSnapshotPage_Item_011" Text="Create stills for thumbnails, contact sheets, review notes, and image-sequence handoff."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            TextWrapping="Wrap"
                                            TextAlignment="Center"
                                            MaxWidth="440"/>
-                                <Button Content="Browse Videos"
+                                <Button x:Uid="FrameSnapshotPage_FrameSnapshotPageButton03" Content="Browse Videos"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Click="BrowseFiles_Click"
                                         HorizontalAlignment="Center"
@@ -227,7 +227,7 @@
                         </Grid>
                     </PivotItem>
 
-                    <PivotItem Header="Finished"
+                    <PivotItem x:Uid="FrameSnapshotPage_FrameSnapshotPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="FrameSnapshotPagePivotItem02">
                         <Grid MinHeight="430" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
@@ -239,10 +239,10 @@
                                     <FontIcon Glyph="&#xE73E;" FontSize="48"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
-                                <TextBlock Text="No exported snapshots yet"
+                                <TextBlock x:Uid="FrameSnapshotPage_Item_014" Text="No exported snapshots yet"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Completed, failed, and cancelled snapshot jobs appear here."
+                                <TextBlock x:Uid="FrameSnapshotPage_Item_015" Text="Completed, failed, and cancelled snapshot jobs appear here."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -259,7 +259,7 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Engine"
+                        <TextBlock x:Uid="FrameSnapshotPage_Item_016" Text="Engine"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Name="FfmpegStatusText"
                                    Style="{StaticResource MutedTextStyle}"
@@ -269,30 +269,30 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Snapshot Plan"
+                        <TextBlock x:Uid="FrameSnapshotPage_Item_017" Text="Snapshot Plan"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="FormatCombo"
+                        <ComboBox x:Uid="FrameSnapshotPage_FormatCombo" x:Name="FormatCombo"
                                   Header="Image format"
                                   SelectedIndex="0"
                                   SelectionChanged="Option_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="FormatCombo">
-                            <ComboBoxItem Content="PNG lossless" Tag="png"/>
-                            <ComboBoxItem Content="JPEG compact" Tag="jpg"/>
-                            <ComboBoxItem Content="WebP web-ready" Tag="webp"/>
+                            <ComboBoxItem x:Uid="FrameSnapshotPage_Item_019" Content="PNG lossless" Tag="png"/>
+                            <ComboBoxItem x:Uid="FrameSnapshotPage_Item_020" Content="JPEG compact" Tag="jpg"/>
+                            <ComboBoxItem x:Uid="FrameSnapshotPage_Item_021" Content="WebP web-ready" Tag="webp"/>
                         </ComboBox>
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="StartSecondBox"
+                            <TextBox x:Uid="FrameSnapshotPage_StartSecondBox" x:Name="StartSecondBox"
                                      Grid.Column="0"
                                      Header="Start second"
                                      Text="0"
                                      TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="StartSecondBox"/>
-                            <TextBox x:Name="IntervalSecondBox"
+                            <TextBox x:Uid="FrameSnapshotPage_IntervalSecondBox" x:Name="IntervalSecondBox"
                                      Grid.Column="1"
                                      Header="Interval"
                                      Text="5"
@@ -304,22 +304,22 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="CountBox"
+                            <TextBox x:Uid="FrameSnapshotPage_CountBox" x:Name="CountBox"
                                      Grid.Column="0"
                                      Header="Frames per video"
                                      Text="3"
                                      TextChanged="Option_TextChanged"
                                 AutomationProperties.AutomationId="CountBox"/>
-                            <ComboBox x:Name="QualityCombo"
+                            <ComboBox x:Uid="FrameSnapshotPage_QualityCombo" x:Name="QualityCombo"
                                       Grid.Column="1"
                                       Header="Quality"
                                       SelectedIndex="1"
                                       SelectionChanged="Option_Changed"
                                       HorizontalAlignment="Stretch"
                                 AutomationProperties.AutomationId="QualityCombo">
-                                <ComboBoxItem Content="Highest" Tag="2"/>
-                                <ComboBoxItem Content="Balanced" Tag="4"/>
-                                <ComboBoxItem Content="Compact" Tag="8"/>
+                                <ComboBoxItem x:Uid="FrameSnapshotPage_Item_026" Content="Highest" Tag="2"/>
+                                <ComboBoxItem x:Uid="FrameSnapshotPage_Item_027" Content="Balanced" Tag="4"/>
+                                <ComboBoxItem x:Uid="FrameSnapshotPage_Item_028" Content="Compact" Tag="8"/>
                             </ComboBox>
                         </Grid>
                         <TextBlock x:Name="PlanSummaryText"
@@ -330,9 +330,9 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="File Location"
+                        <TextBlock x:Uid="FrameSnapshotPage_Item_029" Text="File Location"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Name="OutputDirectoryBox"
+                        <TextBox x:Uid="FrameSnapshotPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
                                  Header="Save to"
                                  IsReadOnly="True"
                             AutomationProperties.AutomationId="OutputDirectoryBox"/>
@@ -341,12 +341,12 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
+                            <Button x:Uid="FrameSnapshotPage_FrameSnapshotPageButton04" Grid.Column="0"
                                     Content="Browse"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="BrowseOutputFolder_Click"
                                 AutomationProperties.AutomationId="FrameSnapshotPageButton04"/>
-                            <Button Grid.Column="1"
+                            <Button x:Uid="FrameSnapshotPage_FrameSnapshotPageButton05" Grid.Column="1"
                                     Content="Same as source"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Click="SameAsSource_Click"
@@ -357,12 +357,12 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Queue Summary"
+                        <TextBlock x:Uid="FrameSnapshotPage_Item_033" Text="Queue Summary"
                                    Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                        <TextBlock x:Uid="FrameSnapshotPage_QueueSummaryText" x:Name="QueueSummaryText"
                                    Text="0 queued / 0 finished"
                                    Style="{StaticResource BodyTextStyle}"/>
-                        <TextBlock Text="Local-only extraction. UCX never uploads video content for snapshots."
+                        <TextBlock x:Uid="FrameSnapshotPage_Item_035" Text="Local-only extraction. UCX never uploads video content for snapshots."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -382,21 +382,21 @@
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="FrameSnapshotPage_OpenOutputButton" Grid.Column="1"
                     Content="Open Output Folder"
                     x:Name="OpenOutputButton"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="OpenOutputFolder_Click"
                     Margin="0,0,12,0"
                 AutomationProperties.AutomationId="OpenOutputButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="FrameSnapshotPage_ClearQueueButton" Grid.Column="2"
                     Content="Clear Queue"
                     x:Name="ClearQueueButton"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="ClearQueue_Click"
                     Margin="0,0,12,0"
                 AutomationProperties.AutomationId="ClearQueueButton"/>
-            <Button Grid.Column="3"
+            <Button x:Uid="FrameSnapshotPage_CancelButton" Grid.Column="3"
                     Content="Cancel"
                     x:Name="CancelButton"
                     Style="{StaticResource DangerButtonStyle}"

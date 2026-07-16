@@ -35,7 +35,7 @@
                                Style="{StaticResource MutedTextStyle}"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
-                    <Button Grid.Column="3"
+                    <Button x:Uid="ArchivePage_Item_001" Grid.Column="3"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from list"
                             ToolTipService.ToolTip="Remove from list"
@@ -65,16 +65,16 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Archive Tool"
+                <TextBlock x:Uid="ArchivePage_Item_002" Text="Archive Tool"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Create or extract 7z, ZIP, TAR, GZ, BZ2, XZ, WIM. Read-only support for RAR, ISO, CAB, MSI, LZH. Backed by 7-Zip's CLI -- maximum compatibility."
+                <TextBlock x:Uid="ArchivePage_Item_003" Text="Create or extract 7z, ZIP, TAR, GZ, BZ2, XZ, WIM. Read-only support for RAR, ISO, CAB, MSI, LZH. Backed by 7-Zip's CLI -- maximum compatibility."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
 
         <Pivot Grid.Row="1" x:Name="ModePivot" SelectionChanged="ModePivot_SelectionChanged">
-            <PivotItem Header="Pack"
+            <PivotItem x:Uid="ArchivePage_ArchivePagePivotItem01" Header="Pack"
                 AutomationProperties.AutomationId="ArchivePagePivotItem01">
                 <Border Style="{StaticResource CardStyle}" Padding="14">
                     <Grid ColumnSpacing="20" RowSpacing="10">
@@ -87,18 +87,18 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <ComboBox x:Name="PackFormatCombo"
+                        <ComboBox x:Uid="ArchivePage_PackFormatCombo" x:Name="PackFormatCombo"
                                   Header="Archive format"
                                   SelectedIndex="0"
                             AutomationProperties.AutomationId="PackFormatCombo">
-                            <ComboBoxItem Content="7z (best ratio)" Tag="7z"/>
-                            <ComboBoxItem Content="zip (most compatible)" Tag="zip"/>
-                            <ComboBoxItem Content="tar (no compression)" Tag="tar"/>
-                            <ComboBoxItem Content="tar.gz (-> .tar.gz)" Tag="gz"/>
-                            <ComboBoxItem Content="tar.xz (-> .tar.xz)" Tag="xz"/>
-                            <ComboBoxItem Content="tar.bz2 (-> .tar.bz2)" Tag="bz2"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_006" Content="7z (best ratio)" Tag="7z"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_007" Content="zip (most compatible)" Tag="zip"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_008" Content="tar (no compression)" Tag="tar"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_009" Content="tar.gz (-> .tar.gz)" Tag="gz"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_010" Content="tar.xz (-> .tar.xz)" Tag="xz"/>
+                            <ComboBoxItem x:Uid="ArchivePage_Item_011" Content="tar.bz2 (-> .tar.bz2)" Tag="bz2"/>
                         </ComboBox>
-                        <Slider Grid.Column="1"
+                        <Slider x:Uid="ArchivePage_LevelSlider" Grid.Column="1"
                                 x:Name="LevelSlider"
                                 Header="Compression level (0 store - 9 ultra)"
                                 Minimum="0" Maximum="9"
@@ -106,18 +106,18 @@
                                 Value="5"
                                 TickPlacement="BottomRight" TickFrequency="1"
                             AutomationProperties.AutomationId="LevelSlider"/>
-                        <PasswordBox Grid.Column="2"
+                        <PasswordBox x:Uid="ArchivePage_PackPasswordBox" Grid.Column="2"
                                      x:Name="PackPasswordBox"
                                      Header="Password (optional)"
                                      PlaceholderText="(none)"
                             AutomationProperties.AutomationId="PackPasswordBox"/>
-                        <TextBox Grid.Row="1" Grid.ColumnSpan="2"
+                        <TextBox x:Uid="ArchivePage_PackOutputBox" Grid.Row="1" Grid.ColumnSpan="2"
                                  x:Name="PackOutputBox"
                                  Header="Output archive"
                                  IsReadOnly="True"
                                  PlaceholderText="(pick where to save)"
                             AutomationProperties.AutomationId="PackOutputBox"/>
-                        <Button Grid.Row="1" Grid.Column="2"
+                        <Button x:Uid="ArchivePage_ArchivePageButton01" Grid.Row="1" Grid.Column="2"
                                 Content="Save as..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
@@ -126,7 +126,7 @@
                     </Grid>
                 </Border>
             </PivotItem>
-            <PivotItem Header="Unpack"
+            <PivotItem x:Uid="ArchivePage_ArchivePagePivotItem02" Header="Unpack"
                 AutomationProperties.AutomationId="ArchivePagePivotItem02">
                 <Border Style="{StaticResource CardStyle}" Padding="14">
                     <Grid ColumnSpacing="20" RowSpacing="10">
@@ -139,25 +139,25 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBox x:Name="UnpackArchiveBox"
+                        <TextBox x:Uid="ArchivePage_UnpackArchiveBox" x:Name="UnpackArchiveBox"
                                  Header="Archive"
                                  IsReadOnly="True"
                                  Grid.ColumnSpan="2"
                                  PlaceholderText="(pick an archive to extract)"
                             AutomationProperties.AutomationId="UnpackArchiveBox"/>
-                        <Button Grid.Column="2"
+                        <Button x:Uid="ArchivePage_ArchivePageButton02" Grid.Column="2"
                                 Content="Pick archive..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
                                 Click="PickUnpackInput_Click"
                             AutomationProperties.AutomationId="ArchivePageButton02"/>
-                        <TextBox Grid.Row="1" Grid.ColumnSpan="2"
+                        <TextBox x:Uid="ArchivePage_UnpackOutputDirBox" Grid.Row="1" Grid.ColumnSpan="2"
                                  x:Name="UnpackOutputDirBox"
                                  Header="Extract to"
                                  IsReadOnly="True"
                                  PlaceholderText="(pick destination folder)"
                             AutomationProperties.AutomationId="UnpackOutputDirBox"/>
-                        <Button Grid.Row="1" Grid.Column="2"
+                        <Button x:Uid="ArchivePage_ArchivePageButton03" Grid.Row="1" Grid.Column="2"
                                 Content="Pick folder..."
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 VerticalAlignment="Bottom"
@@ -181,10 +181,10 @@
                         <FontIcon Glyph="&#xE7B8;" FontSize="36"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Drop files / folders here"
+                    <TextBlock x:Uid="ArchivePage_Item_021" Text="Drop files / folders here"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="EmptyHint"
+                    <TextBlock x:Uid="ArchivePage_EmptyHint" x:Name="EmptyHint"
                                Text="Pack mode: drop the items you want to archive."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
@@ -205,19 +205,19 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar AutomationProperties.Name="Progress"
+            <ProgressBar x:Uid="ArchivePage_WorkProgress" AutomationProperties.Name="Progress"
                          x:Name="WorkProgress"
                          Minimum="0" Maximum="100"
                          IsIndeterminate="False"
                          VerticalAlignment="Center"/>
-            <Button Grid.Column="1"
+            <Button x:Uid="ArchivePage_ListButton" Grid.Column="1"
                     x:Name="ListButton"
                     Content="List contents"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Click="ListContents_Click"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="ListButton"/>
-            <Button Grid.Column="2"
+            <Button x:Uid="ArchivePage_GoButton" Grid.Column="2"
                     x:Name="GoButton"
                     Content="Pack"
                     Style="{StaticResource PrimaryButtonStyle}"
@@ -235,7 +235,7 @@
                        TextWrapping="Wrap"/>
         </ScrollViewer>
 
-        <TextBlock Grid.Row="5"
+        <TextBlock x:Uid="ArchivePage_StatusText" Grid.Row="5"
                    x:Name="StatusText"
                    Style="{StaticResource MutedTextStyle}"
                    Text="Pick mode: Pack to compress, Unpack to extract."/>
