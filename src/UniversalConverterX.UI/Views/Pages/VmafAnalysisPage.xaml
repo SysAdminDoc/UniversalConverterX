@@ -74,10 +74,17 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Uid="VmafAnalysisPage_VmafProgress" AutomationProperties.Name="Progress" x:Name="VmafProgress"
-                         Minimum="0" Maximum="100"
-                         IsIndeterminate="False"
-                         VerticalAlignment="Center"/>
+            <StackPanel VerticalAlignment="Center" Spacing="8">
+                <ToggleSwitch x:Uid="VmafAnalysisPage_ProxyToggle" x:Name="ProxyToggle"
+                              Header="Fast proxy pass (480p approximate)"
+                              OffContent="Full-resolution VMAF"
+                              OnContent="Proxy both inputs to 480p for a quick approximate score"
+                              AutomationProperties.AutomationId="VmafProxyToggle"/>
+                <ProgressBar x:Uid="VmafAnalysisPage_VmafProgress" AutomationProperties.Name="Progress" x:Name="VmafProgress"
+                             Minimum="0" Maximum="100"
+                             IsIndeterminate="False"
+                             VerticalAlignment="Center"/>
+            </StackPanel>
             <Button x:Uid="VmafAnalysisPage_RunButton" Grid.Column="1"
                     x:Name="RunButton"
                     Content="Run VMAF"

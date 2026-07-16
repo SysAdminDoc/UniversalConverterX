@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- VMAF Quality Analysis can now run a fast proxy pass: a new clipforge `proxy` op generates a 480p preview proxy of both the reference and distorted clips, and a "Fast proxy pass" toggle scores those proxies for a quick approximate VMAF before committing to a full-resolution run.
 - Subtitle Converter now handles broadcast closed captions via a new `ccextract` FFmpeg sidecar: it decodes Scenarist SCC to SRT/VTT/ASS, extracts an embedded caption track from a video file (MP4/MKV/MOV/TS and more), and falls back to CEA/EIA-608 carried in the video bitstream when no container track is present. The page accepts video and SCC inputs alongside the existing subtitle formats and routes each source to the right engine.
 
 ## [2.24.0] - 2026-07-16

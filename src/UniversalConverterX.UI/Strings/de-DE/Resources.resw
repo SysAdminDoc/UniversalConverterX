@@ -5676,6 +5676,15 @@
   <data name="VmafAnalysisPage_Item_017.Text" xml:space="preserve">
     <value>Rahmen &lt; 70</value>
   </data>
+  <data name="VmafAnalysisPage_ProxyToggle.Header" xml:space="preserve">
+    <value>Fast proxy pass (480p approximate)</value>
+  </data>
+  <data name="VmafAnalysisPage_ProxyToggle.OffContent" xml:space="preserve">
+    <value>Full-resolution VMAF</value>
+  </data>
+  <data name="VmafAnalysisPage_ProxyToggle.OnContent" xml:space="preserve">
+    <value>Proxy both inputs to 480p for a quick approximate score</value>
+  </data>
   <data name="VmafAnalysisPage_ReferenceLabel.Text" xml:space="preserve">
     <value>(wählen Sie den Original-Masterclip)</value>
   </data>

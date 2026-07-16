@@ -55,14 +55,6 @@ Impact: 3 · Effort: 4 · Type: leapfrog
 
 ---
 
-### 74. Proxy File Generation for Faster Preview
-
-Auto-generate 480p/5Mbps proxy files for faster preview in VmafAnalysisPage and CompressorPage.
-
-Impact: 2 · Effort: 3 · Type: UX + performance
-
----
-
 ### 98. PyAV v17 Hardware-Memory Zero-Copy Path
 
 Audit sidecars touching hardware-decoded video. Migrate hot loops to PyAV v17 with cuvid + dlpack export. Avoids CPU↔GPU copies on long-form video.

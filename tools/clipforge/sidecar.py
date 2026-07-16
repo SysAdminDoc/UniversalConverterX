@@ -838,6 +838,58 @@ def op_keyframes(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_proxy(args: argparse.Namespace) -> int:
+    """Generate a fast, low-resolution preview proxy. Defaults to 480p at
+    ~5 Mbps with the ultrafast x264 preset and +faststart so previews and
+    quick VMAF passes run far faster than against a full-resolution master."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found.")
+
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(src))
+    duration = 0.0
+    try:
+        duration = float((info or {}).get("format", {}).get("duration", 0) or 0)
+    except (TypeError, ValueError):
+        duration = 0.0
+
+    height = max(120, int(args.height))
+    bitrate = str(args.bitrate)
+    try:
+        buf = f"{int(str(bitrate).rstrip('k') or 0) * 2}k"
+    except ValueError:
+        buf = bitrate
+
+    cmd = [
+        ffmpeg, "-y", "-i", str(src),
+        "-vf", f"scale=-2:{height}",
+        "-c:v", "libx264", "-preset", "ultrafast",
+        "-b:v", bitrate, "-maxrate", bitrate, "-bufsize", buf,
+        "-c:a", "aac", "-b:a", "128k",
+        "-movflags", "+faststart",
+        str(out_path),
+    ]
+    emit("progress", percent=0, stage="proxy", eta_seconds=None)
+    rc = run_ffmpeg(cmd, duration, "proxy")
+    if rc != 0 or not out_path.is_file() or out_path.stat().st_size == 0:
+        out_path.unlink(missing_ok=True)
+        return fail("ffmpeg_failed", f"Proxy generation failed (exit {rc}).")
+
+    emit("proxy", input=str(src), output=str(out_path),
+         height=height, size_bytes=out_path.stat().st_size)
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size, count=1)
+    return 0
+
+
 def op_vmaf(args: argparse.Namespace) -> int:
     """VMAF quality comparison: distorted vs. reference. Runs ffmpeg `libvmaf`
     with JSON log output, parses the file, emits per-frame `vmaf` events plus a
@@ -2177,6 +2229,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="List video keyframe timestamps for lossless-cut snapping")
     keyframes.add_argument("--input", required=True)
 
+    proxy = sub.add_parser(
+        "proxy",
+        help="Generate a fast low-resolution preview proxy (default 480p / 5 Mbps)")
+    proxy.add_argument("--input", required=True)
+    proxy.add_argument("--output", required=True)
+    proxy.add_argument("--height", type=int, default=480,
+                       help="Proxy height in pixels (default 480; width auto).")
+    proxy.add_argument("--bitrate", default="5000k",
+                       help="Target video bitrate, e.g. 5000k (default).")
+
     # ── vmaf ──────────────────────────────────────────────────────────────────
     vmaf = sub.add_parser("vmaf",
                           help="VMAF quality comparison: distorted vs. reference (libvmaf)")
@@ -2211,6 +2273,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_timeline(args)
         if args.op == "keyframes":
             return op_keyframes(args)
+        if args.op == "proxy":
+            return op_proxy(args)
         if args.op == "track-list":
             return op_track_list(args)
         if args.op == "track-remove":

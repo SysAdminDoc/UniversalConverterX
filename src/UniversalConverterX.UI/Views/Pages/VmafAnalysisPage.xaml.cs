@@ -64,13 +64,44 @@ public sealed partial class VmafAnalysisPage : Page
         if (_reference is null || _distorted is null) return;
         ResetStats();
         RunButton.IsEnabled = false;
-        StatusText.Text = "Running VMAF -- this may take a few minutes for long clips.";
+
+        var reference = _reference;
+        var distorted = _distorted;
+        var proxied = false;
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
+
+        // ROADMAP Item 74 — optional 480p proxy pass. Downscaling both inputs
+        // to a fast proxy gives an approximate VMAF far quicker than a
+        // full-resolution run; useful for iterating on encode settings before
+        // confirming the final score at full resolution.
+        if (ProxyToggle.IsOn)
+        {
+            StatusText.Text = "Generating 480p proxies...";
+            var proxyReference = await GenerateProxyAsync(_reference, "reference", cts.Token);
+            var proxyDistorted = proxyReference is null
+                ? null
+                : await GenerateProxyAsync(_distorted, "distorted", cts.Token);
+            if (proxyReference is null || proxyDistorted is null)
+            {
+                StatusText.Text = "Could not generate proxies; run without the fast pass or check the clipforge engine.";
+                RunButton.IsEnabled = true;
+                return;
+            }
+            reference = proxyReference;
+            distorted = proxyDistorted;
+            proxied = true;
+        }
+
+        StatusText.Text = proxied
+            ? "Running approximate VMAF on 480p proxies..."
+            : "Running VMAF -- this may take a few minutes for long clips.";
 
         var args = new List<string>
         {
             "vmaf",
-            "--reference", _reference,
-            "--distorted", _distorted,
+            "--reference", reference,
+            "--distorted", distorted,
         };
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
@@ -82,7 +113,6 @@ public sealed partial class VmafAnalysisPage : Page
             LogText.Text += $"[{l.Level}] {l.Message}\n";
         }));
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
         var result = await _runner.RunAsync(
             "clipforge", args, progress, log, cts.Token,
             onRawEvent: (evName, root) => DispatcherQueue.TryEnqueue(() =>
@@ -99,10 +129,35 @@ public sealed partial class VmafAnalysisPage : Page
             }));
 
         StatusText.Text = result.Success
-            ? "VMAF complete. Higher mean = closer to reference (90+ is excellent, 70- is visibly degraded)."
+            ? proxied
+                ? "Approximate VMAF complete (480p proxies). Re-run without the fast pass to confirm the full-resolution score."
+                : "VMAF complete. Higher mean = closer to reference (90+ is excellent, 70- is visibly degraded)."
             : $"VMAF failed: {result.ErrorMessage ?? result.ErrorCode}";
         VmafProgress.Value = result.Success ? 100 : 0;
         RunButton.IsEnabled = true;
+    }
+
+    /// <summary>
+    /// Generates a 480p preview proxy of <paramref name="source"/> via the
+    /// clipforge proxy op, returning the proxy path or null on failure.
+    /// </summary>
+    private async Task<string?> GenerateProxyAsync(string source, string label, CancellationToken ct)
+    {
+        var cacheDir = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(), "UniversalConverterX", "vmaf-proxies");
+        try { System.IO.Directory.CreateDirectory(cacheDir); }
+        catch { return null; }
+
+        var proxyPath = System.IO.Path.Combine(
+            cacheDir,
+            $"{System.IO.Path.GetFileNameWithoutExtension(source)}-{label}-{Math.Abs(source.GetHashCode()):x8}-480p.mp4");
+
+        var result = await _runner.RunAsync(
+            "clipforge",
+            ["proxy", "--input", source, "--output", proxyPath, "--height", "480"],
+            ct: ct);
+
+        return result.Success && System.IO.File.Exists(proxyPath) ? proxyPath : null;
     }
 
     private void ResetStats()
