@@ -41,6 +41,8 @@ Impact: 3 · Effort: 1 · Type: parity
 
 Upgrade from WinAppSDK 1.x to 2.0. Key gains: `SystemBackdropElement` (in-app Mica/Acrylic panels), `Microsoft.Windows.Storage.Pickers` (file type grouping), `IXamlCondition` (parse-time feature flags). **Caveat:** WinAppSDK 2.0 bundles ONNX RT 1.24.5, below UCX's ≥1.25.1 floor — Python sidecars keep their own pin. Breaking changes: review `DispatcherQueue` API surface and `AppWindow` interop.
 
+> **2026-07-16 research note:** Already done in substance — `UniversalConverterX.UI.csproj` references `Microsoft.WindowsAppSDK` **2.2.0**. Close this item after verifying the 2.x API adoptions above; blocked Item 64 (SystemBackdropElement, `Roadmap_Blocked.md`) is now unblocked.
+
 Impact: 3 · Effort: 3 · Type: platform
 
 ---
@@ -48,6 +50,8 @@ Impact: 3 · Effort: 3 · Type: platform
 ### 28. FFmpeg 8.x Sidecar Refresh
 
 Audit all FFmpeg-dependent sidecars. Pin to ≥7.1 (current stable), test against 8.1 "Hoare". Notable 8.x gains: D3D12 encode/filter pipeline, Vulkan ProRes, libavcodec 62.x. Carry a pinned FFmpeg build in `tools/ffmpeg/`.
+
+> **2026-07-16 research note:** Urgency escalated — CVE-2026-8461 "PixelSmash" (MagicYUV heap OOB → RCE via crafted AVI/MKV/MOV, CVSS 8.8) is fixed only in **8.1.2**; 21 further disclosed zero-days are rolling into 8.1.x point releases. The floor for this item is now ≥8.1.2, and Item 99 adds a runtime version gate.
 
 Impact: 3 · Effort: 2 · Type: platform + security
 
@@ -286,3 +290,194 @@ Impact: 3 · Effort: 2 · Type: performance
 - [ ] P3 — Refactor shared sidecar utilities (find_ffmpeg, probe, run_ffmpeg, emit) into a common module
   Why: Duplicate implementations across 190 sidecars with subtle differences that will continue to drift.
   Touches: `tools/_lib/`, all sidecar.py files.
+
+### 2026-07-16 additions (continue Item numbering from 98)
+
+- [ ] P0 — Item 99: July 2026 security dependency-floor refresh + runtime version gates
+  Why: The 2026-05→07 CVE wave hits UCX's convert-untrusted-files threat model directly: FFmpeg <8.1.2 (CVE-2026-8461 RCE via crafted AVI/MKV/MOV), Calibre <9.10.0 (CVE-2026-53511 Python exec() on reading ebook metadata + 3 traversal RCEs), Pillow <12.3.0 (CVE-2026-55380), ImageMagick <7.1.2-15 (CVE-2026-56379 MVG injection via SVG), 7-Zip <26.01 (CVE-2026-48095), LibreOffice <25.8.7 (CVE-2026-4430/-8356/-8357), yt-dlp <2026.07.04 (4 CVEs). Floors normalized in June (`da3e379`) are behind again.
+  Evidence: JFrog PixelSmash advisory; GHSA-v772-658q-978p; thehackerwire CVE-2026-53511; Pillow 12.3.0 release notes; socprime CVE-2026-48095; yt-dlp 2026.07.04 release.
+  Touches: all `tools/*/requirements.txt` Pillow floors → `>=12.3.0`; `SidecarHealthService.cs` + `ucx tools check` gain minimum-version warnings for discovered FFmpeg (≥8.1.2), Calibre (≥9.10), ImageMagick (≥7.1.2-15), 7-Zip (≥26.01), LibreOffice (≥25.8.7); `tools/streamkeep` yt-dlp floor; installer .NET runtime → 10.0.9+.
+  Acceptance: `dotnet test` green; sidecar contract green; `ucx tools check` reports a version warning when pointed at an FFmpeg <8.1.2; no requirements.txt pins Pillow <12.3.0.
+  Complexity: M
+
+- [ ] P0 — Item 100: Harden ImageMagick and Calibre invocations against malicious inputs
+  Why: CVE-2026-56379 is MVG command injection through a crafted SVG — a hardened `policy.xml` (disable MVG/MSL/URL coders, resource limits) mitigates the class, and no policy.xml exists anywhere in the repo (verified). Calibre's CVE-2026-53511 class executes on metadata read, so ebook-convert should run with plugins disabled and a sandboxed job directory.
+  Evidence: GHSA-v772-658q-978p; ImageMagick security advisories through 7.1.2-27; thehackerwire Calibre RCE writeups; repo-wide `policy.xml` search = 0 hits.
+  Touches: `src/UniversalConverterX.Core/Converters/` ImageMagick strategy (ship + pass `MAGICK_CONFIGURE_PATH` policy), `tools/ebookconvert/sidecar.py` (job-dir isolation, no-plugins flags), docs.
+  Acceptance: ImageMagick conversions run with the shipped policy (verifiable via `identify -list policy`); ebookconvert smoke passes with hardened flags; a crafted-SVG MVG probe is rejected.
+  Complexity: M
+
+- [ ] P1 — Item 101: Propagate Mark-of-the-Web (Zone.Identifier) to extracted and converted outputs
+  Why: 7-Zip ≤26.02 silently drops MotW on RAR5 ADS extraction (CVE-2026-58052, unpatched upstream); UCX re-stamping `Zone.Identifier` on outputs derived from internet-zone inputs closes the gap regardless of archiver version — a trust/data-safety differentiator no converter ships.
+  Evidence: GHSA-fx33-p83c-vpr5; Windows MotW semantics.
+  Touches: `src/UniversalConverterX.Core/Utilities/PostConversionHandler.cs` (read source ADS, write output ADS), `tools/archive/` extraction paths, tests.
+  Acceptance: converting/extracting a file carrying `Zone.Identifier` yields outputs carrying the same zone; covered by a new Core test.
+  Complexity: S
+
+- [ ] P1 — Item 102: Fix the WinUI full-build blocker via Microsoft.Windows.SDK.BuildTools.WinApp
+  Why: Every CHANGELOG entry since v2.21.1 ends with "full solution build remains blocked by the missing Windows App SDK PRI task" — upstream now ships `Microsoft.Windows.SDK.BuildTools.WinApp` + single-project MSIX tooling that makes VS-free `dotnet` WinUI builds work, ending the chronic verification gap.
+  Evidence: Microsoft Learn single-project MSIX docs; `dotnet new WinUI` template announcements (Build 2026); CLAUDE.md build-blocker residue.
+  Touches: `src/UniversalConverterX.UI/UniversalConverterX.UI.csproj`, `build.ps1`, CLAUDE.md build notes.
+  Acceptance: `.\build.ps1 -Target Build -Configuration Release` completes the WinUI x64 build end-to-end on this machine without full Visual Studio.
+  Complexity: M
+
+- [ ] P1 — Item 103: Deno JS-runtime provisioning + yt-dlp update channel for the Downloader
+  Why: Since yt-dlp 2025.11.12, full YouTube extraction requires an external JS runtime (Deno recommended); without it formats silently degrade. `tools/streamkeep/` has no Deno provisioning (verified), and yt-dlp's monthly CVE cadence (4 in 2026) demands a managed update path. Also verify no code path passes `--downloader aria2c` — upstream removed HLS/DASH-via-aria2c after an RCE.
+  Evidence: yt-dlp issue #15012 (Deno announcement); GHSA-vx4q-3cr2-7cg2; yt-dlp 2026.06.09/2026.07.04 release notes.
+  Touches: `tools/streamkeep/` (Deno discovery + health warning), `ToolDownloader.cs` (verified Deno + yt-dlp portable downloads), `SidecarHealthService.cs`, DownloaderPage health surface.
+  Acceptance: DownloaderPage shows a health warning when Deno is absent; `ucx tools download` can install Deno + yt-dlp with SHA-256 verification; grep confirms no aria2c downloader flags.
+  Complexity: M
+
+- [ ] P1 — Item 104: Compressor "Target file size" mode + social size presets
+  Why: videocrush already implements size-targeted two-pass encoding (`tools/videocrush/sidecar.py:456`) but CompressorPage never exposes it (verified — no TargetSize binding). HandBrake made "Social 10MB" presets its 1.10 headline; Discord/IG/TikTok size targets are the most-requested compressor UX.
+  Evidence: HandBrake 1.10 release coverage; `tools/videocrush/sidecar.py` size-targeted mode; ImgConverter `--target-kb` precedent.
+  Touches: `CompressorPage.xaml(.cs)` (target-size NumberBox + platform preset dropdown), new presets (discord-10mb/25mb/50mb, email-25mb), preset XML.
+  Acceptance: selecting "Discord 10 MB" produces output ≤10 MB for a sample clip; UIA gate and preset smoke tests pass.
+  Complexity: S
+
+- [ ] P1 — Item 105: VMAF-targeted "smart compress" mode in CompressorPage
+  Why: FileFlows' VMAF-score-targeted "Optimized" mode and Av1an's per-scene target-quality are the strongest 2026 compressor signals; UCX's ab-av1 sidecar (Item 67, shipped) already does target-VMAF CRF search — the gap is a Compressor UI mode ("keep quality ≥ N, minimize size").
+  Evidence: FileFlows version history (Optimized mode); Av1an 0.5.2 target-quality releases; shipped `tools/ab-av1/`.
+  Touches: `CompressorPage.xaml(.cs)` (quality-target mode toggle routing to ab-av1), `SidecarHealthService` (ab-av1 binary preflight).
+  Acceptance: compressing with "Target VMAF 93" runs ab-av1 crf-search then encodes; result reports achieved VMAF; blocked cleanly when ab-av1.exe missing.
+  Complexity: M
+
+- [ ] P1 — Item 106: Preset editor UI (create / edit / duplicate custom presets)
+  Why: 290+ presets are browsable and importable/exportable (Item 45 shipped) but immutable — users cannot create or modify presets without hand-editing XML; every competitor (HandBrake, FastFlix, XMedia Recode) has preset editing.
+  Evidence: repo scan (no editor page exists); HandBrake/FastFlix preset UX.
+  Touches: new `PresetEditorPage.xaml(.cs)`, `UiPresetLoader`/`PresetReader` write path, preset XML schema validation, PresetsPage "Edit/Duplicate" buttons.
+  Acceptance: duplicate a built-in preset, change its arguments, run it, and it survives restart; preset XML smoke tests cover round-trip.
+  Complexity: L
+
+- [ ] P1 — Item 107: WatchFolderService robustness + tests
+  Why: WatchFolderService has zero tests and lacks the failure handling its sister app already debugged: file-stability double-read before processing (network-share partial writes), rename/move handling, bounded seen-file sets for long sessions.
+  Evidence: ImgConverter ROADMAP watch-mode pain-point list (same bug class, documented fixes); UCX test inventory (no WatchFolder tests).
+  Touches: `src/UniversalConverterX.UI/Services/WatchFolderService.cs`, new test class, WatchFoldersPage status surface.
+  Acceptance: unit tests cover stability-wait, rename, and duplicate-suppression paths; a partially-written file is not picked up until size is stable across two reads.
+  Complexity: M
+
+- [ ] P2 — Item 108: Batch image editing pipeline (port ImgConverter `_apply_edits`)
+  Why: UCX has no batch image adjustments (verified — heicshift has none): brightness/contrast/saturation/sharpness/blur/hue, grayscale/sepia/invert, vignette/grain/tint, border, and vivid/muted/bw/vintage/cold/warm presets exist fully tested in the sister app, alpha-preserving and multi-frame-aware.
+  Evidence: `C:\Users\--\repos\ImgConverter\imgconverter.py` `_apply_edits` (~2582–2633), `ADJUST_PRESETS`; UniConverter v17 image-enhancer parity.
+  Touches: `tools/heicshift/` (new edit flags) or new `tools/imageedit/` sidecar, new ImageEditorPage or ImageConverterPage advanced section, presets.
+  Acceptance: batch-converting PNGs with `--adjust-preset vivid --vignette 30` produces edited outputs with alpha intact; sidecar contract green.
+  Complexity: M
+
+- [ ] P2 — Item 109: Image quality binary-search targeting (size / PSNR / SSIMULACRA2)
+  Why: "Make this image ≤500 KB without visible loss" is a solved problem in the sister app (hill-climb quality search with metric verification) and absent in UCX's image pipeline.
+  Evidence: ImgConverter `_binary_search_quality` (~2761–2837), `--target-kb/--target-psnr/--target-ssimulacra2`; ssimulacra2 metrics sidecar already shipped (Item 70).
+  Touches: `tools/heicshift/sidecar.py` (target flags), ImageConverterPage UI (target-size field), presets (web-500kb).
+  Acceptance: converting with `--target-kb 500` emits output within 5% of target or best-achievable warning; tests cover convergence and floor cases.
+  Complexity: M
+
+- [ ] P2 — Item 110: Post-queue automation hooks (notify / sleep / shutdown / run script)
+  Why: MKVToolNix v100 (post-job PowerShell actions), FastFlix, and HandBrake (queue-complete actions) all converged on post-queue hooks; UCX has none (verified). ImgConverter's `--when-done {nothing,close,sleep,shutdown}` is the port template, gated to clean batches.
+  Evidence: MKVToolNix v100 announcement; FastFlix CHANGES; ImgConverter `--when-done`.
+  Touches: ConverterPage/CompressorPage/DownloaderPage queue-complete path, SettingsService (configured action + optional script path), toast notification.
+  Acceptance: queue completion fires the configured action; script hook receives a JSON summary path; destructive actions (shutdown) require the batch to be failure-free.
+  Complexity: M
+
+- [ ] P2 — Item 111: Conversion history "re-run with same settings"
+  Why: FastFlix's encode-history + "Apply Last Used Settings" is cheap, loved UX; UCX's SQLite history dashboard is read-only today.
+  Evidence: FastFlix CHANGES; ImgConverter batch-history dialog precedent; HistoryService (SQLite) in repo.
+  Touches: `HistoryService` (persist full job parameters), HistoryPage (Re-run button → ConverterPage prefill).
+  Acceptance: any history row can repopulate the converter queue with identical settings; covered by a service test.
+  Complexity: M
+
+- [ ] P2 — Item 112: Finish ucx.sidecar.json manifest rollout (52/190 → 190/190)
+  Why: 138 sidecars still resolve health from hard-coded tables in `SidecarHealthService.cs`, which drifts as engines change; manifests are also the foundation Item 52 (plugin system) builds on.
+  Evidence: repo scan (52 manifests present); commit `56daee1`.
+  Touches: `tools/*/ucx.sidecar.json` (138 new), `tests/sidecar_contract/check_contract.py` (require manifest), `SidecarHealthService.cs` (delete hard-coded fallback).
+  Acceptance: contract test fails on any sidecar without a valid manifest; hard-coded engine tables removed.
+  Complexity: M
+
+- [ ] P2 — Item 113: SHA-256 default-deny trust model for the Item 52 plugin system
+  Why: Item 52 (third-party sidecar manifests) must not execute dropped code by default; the sister app ships a proven design — plugins load only when their SHA-256 is recorded in a trust manifest, changed files are flagged and skipped, symlinks rejected.
+  Evidence: ImgConverter `_load_plugins` (~938–1001), `PluginTrustDialog`, `PLUGINS.md` trust model.
+  Touches: Item 52 design (`tools/<name>/manifest.json` loader), new trust store under `%LOCALAPPDATA%`, Settings "Trusted plugins" panel.
+  Acceptance: an untrusted dropped plugin is listed but never executed until explicitly trusted; hash change re-quarantines it; tests cover trust/changed/symlink paths.
+  Complexity: M
+
+- [ ] P2 — Item 114: APV (Advanced Professional Video) conversion presets
+  Why: Galaxy S26 Ultra ships APV capture (RFC 9924, Android 16 native) and mainstream tools can't open it; FFmpeg 8.x decodes/encodes via libopenapv — a near-zero-competition preset family (APV → H.265/ProRes/H.264).
+  Evidence: RFC 9924; FFmpeg 8.x libopenapv support; S26 Ultra APV reviews.
+  Touches: `tools/videocrush/` or `tools/videopro/` (APV input handling), 3 new presets, format detection magic bytes.
+  Acceptance: an APV sample converts to H.265 via preset; FormatInspector identifies APV.
+  Complexity: S
+
+- [ ] P2 — Item 115: Preservation + Production preset families
+  Why: HandBrake 1.11 validated demand for named archival (FFV1+FLAC+MKV) and production (ProRes/DNxHR/MOV) preset families; UCX has scattered ProRes/DNxHR presets but no curated archival family or MOV-container story.
+  Evidence: HandBrake 1.11.0 release notes; existing videocrush ProRes/DNxHR presets.
+  Touches: new preset XML files (archive-ffv1, production-prores-422, production-dnxhr), PresetsPage category, docs.
+  Acceptance: "Preservation — FFV1/FLAC" preset produces a lossless-verifiable MKV; presets surface under a Preservation filter.
+  Complexity: S
+
+- [ ] P2 — Item 116: Lossless crop + aspect-ratio override without re-encode
+  Why: LosslessCut 3.69 shipped crop/aspect override via container/bitstream metadata only — no re-encode; complements shipped lossless trim (Item 42) and is cheap via FFmpeg `-c copy` + container flags.
+  Evidence: LosslessCut 3.69.0 release; `tools/clipforge/` trim --lossless precedent.
+  Touches: `tools/clipforge/sidecar.py` (new `crop-meta`/`aspect-override` ops), preset, EditorPage or LosslessCutPage surface.
+  Acceptance: output plays cropped/re-aspected in mpv without re-encode (stream hash unchanged); sidecar contract green.
+  Complexity: S
+
+- [ ] P2 — Item 117: UltraHDR / ISO 21496-1 gain-map preservation (unblock path for Item 89)
+  Why: iPhone/Android photos carry ISO 21496-1 gain maps that virtually all converters strip; libvips 8.18 ships native `uhdrload`/`uhdrsave` and libultrahdr encodes the standard — a concrete implementation path Item 89 lacked (it waits on pillow-avif-plugin).
+  Evidence: libvips 8.18 release notes; google/libultrahdr#271; ISO 21496-1.
+  Touches: libvips converter strategy version bump, or new `tools/uhdr/` sidecar; `tools/heicshift/` gain-map passthrough flag; Item 89 cross-reference.
+  Acceptance: JPG-with-gain-map → JPG/AVIF conversion preserves the gain map (verifiable via exiftool/libultrahdr probe).
+  Complexity: M
+
+- [ ] P2 — Item 118: Face-blur privacy filter
+  Why: Shutter Encoder 20.0 shipped face-blur; it pairs directly with UCX's privacy positioning (dashcam/screen-recording redaction) and composes existing pieces — the inpaint sidecar already does YOLO auto-masking.
+  Evidence: Shutter Encoder changelog (20.0); `tools/inpaint/` YOLOv11 auto-mask.
+  Touches: `tools/clipforge/` or new op (detect faces per frame → boxblur regions via FFmpeg), preset, Toolbox tile.
+  Acceptance: a test clip with faces produces output with all detected faces blurred; runs offline.
+  Complexity: M
+
+- [ ] P2 — Item 119: Scan review table for ConverterPage (thumbnails, est. size, warnings)
+  Why: The sister app's pre-conversion review table (sortable File/Format/Size/Est-Output/Warnings columns + async 48px thumbnails + drag-out) is its strongest UX surface; UCX's converter queue is a flat list and the shipped OutputSizeEstimator (Item 68) feeds it naturally.
+  Evidence: ImgConverter `_populate_review_table` (~8529–8600), `_ThumbnailLoader`; shipped `OutputSizeEstimator`.
+  Touches: `ConverterPage.xaml(.cs)` queue ListView → table with thumbnail column (mediathumb sidecar for thumbs), est-size column, warning badges.
+  Acceptance: queued files show thumbnail, current size, estimated output size, and per-file warnings before conversion; UIA gate passes.
+  Complexity: L
+
+- [ ] P2 — Item 120: Structured batch report export (JSON/CSV)
+  Why: Per-file status/sizes/timing/warnings/metadata-integrity reports make batch outcomes auditable (the sister app's `--report` is heavily used); UCX history has the data but no export.
+  Evidence: ImgConverter `--report` + CSV export (~9165–9210); HistoryService SQLite store.
+  Touches: HistoryPage export button, `ucx` CLI `--report` flag, Core report writer.
+  Acceptance: a batch produces a JSON/CSV report listing every file with status, byte delta, duration, and warnings.
+  Complexity: S
+
+- [ ] P2 — Item 121: Test-coverage drain: HistoryService, shell-extension command layer, preset execution smoke
+  Why: The three untested subsystems most likely to regress silently: SQLite history (no tests), Explorer shell-extension quoting/preset resolution (no tests, per prior research too), and end-to-end preset execution (only XML smoke exists).
+  Evidence: test inventory scan (37 test files, none covering these); RESEARCH.md 2026-06-30 shell-extension finding.
+  Touches: `tests/UniversalConverterX.Core.Tests/` new classes; extract shell-extension command building into a testable layer.
+  Acceptance: history CRUD + retention, shell-extension argument quoting (spaces/quotes/unicode), and one real preset execution are covered in CI-runnable tests.
+  Complexity: M
+
+- [ ] P2 — Item 122: ONNX Runtime 1.27 CUDA-13 migration audit
+  Why: ORT 1.27 (2026-06-15) removed CUDA 12 support — bumping ORT floors without auditing GPU sidecars' CUDA pins will break every CUDA-12 user; 1.27 also brings memory-mapped `.ort` loading (RAM win for rembg/ESRGAN).
+  Evidence: onnxruntime v1.27.0 release notes.
+  Touches: `tools/*/requirements.txt` onnxruntime floors, `SidecarHealthService` GPU runtime warnings, docs.
+  Acceptance: a written compatibility matrix (sidecar × ORT × CUDA) exists in CLAUDE.md; floors bumped only where CUDA-13-safe.
+  Complexity: S
+
+- [ ] P3 — Item 123: Parakeet TDT v3 as a selectable STT engine
+  Why: NVIDIA Parakeet TDT 0.6B v3 (CC-BY-4.0) beats Whisper large-v3 on WER (6.32 vs 7.44) at ~3000x realtime with near-zero silence hallucination across 25 European languages — as an additional engine beside faster-whisper, not a replacement.
+  Evidence: HF model card nvidia/parakeet-tdt-0.6b-v3; 2026 open-ASR benchmark roundups.
+  Touches: `tools/whisper-stt/` (engine flag) or new `tools/parakeet-stt/` sidecar (onnx export path preferred over NeMo), SpeechToTextPage engine picker.
+  Acceptance: STT page offers Parakeet for supported languages; output SRT parity with whisper path; model download is explicit opt-in.
+  Complexity: L
+
+- [ ] P3 — Item 124: SeedVR2 one-step diffusion video restoration (optional model pack)
+  Why: SeedVR2 (Apache-2.0) is the credible open answer to Topaz — one-step diffusion restoration for video and image SR; community "studio" pipelines already combine it with RIFE/face-restore by hand. Multi-GB models and VRAM demands mean explicit opt-in model-pack gating.
+  Evidence: arXiv 2506.05301; ComfyUI-SeedVR2 node ecosystem.
+  Touches: new `tools/seedvr2/` sidecar (GPU-gated), VideoEnhancerPage engine option, model download consent flow.
+  Acceptance: a low-res clip restores via SeedVR2 on a CUDA GPU; page blocks cleanly without GPU/model.
+  Complexity: XL
+
+- [ ] P3 — Item 125: Refresh stemkit default separation models to BS-RoFormer SW / Mel-RoFormer
+  Why: Community leaderboards (MVSEP) now rank BS-RoFormer SW #1 for 6-stem separation (vocal SDR >11 dB, ~0.5 dB over prior RoFormer); stemkit already wraps audio-separator so this is largely a model-catalog + default refresh.
+  Evidence: MVSEP/Multisong leaderboard analyses 2026-02; Mel-RoFormer paper (arXiv 2409.04702); shipped `tools/stemkit/`.
+  Touches: `tools/stemkit/sidecar.py` model catalog + default, presets, VocalRemoverPage model list.
+  Acceptance: default vocal-removal run uses a RoFormer-class model; old models remain selectable.
+  Complexity: S
