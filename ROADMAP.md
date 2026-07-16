@@ -63,14 +63,6 @@ Impact: 3 · Effort: 4 · Type: leapfrog
 
 ---
 
-### 66. FFmpeg 8.1 D3D12 Filter Pipeline — remaining: FFmpeg binary upgrade + filter chain
-
-D3D12 encoder presets shipped (h264/av1_d3d12va via videocrush). **Remaining:** upgrade bundled FFmpeg binary to ≥8.1 and wire `scale_d3d12` + `deinterlace_d3d12` GPU zero-copy filter chains.
-
-Impact: 3 · Effort: 2 · Type: platform + leapfrog
-
----
-
 ### 74. Proxy File Generation for Faster Preview
 
 Auto-generate 480p/5Mbps proxy files for faster preview in VmafAnalysisPage and CompressorPage.
