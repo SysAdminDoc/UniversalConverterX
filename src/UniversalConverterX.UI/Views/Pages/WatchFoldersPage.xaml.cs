@@ -15,7 +15,7 @@ public sealed partial class WatchFoldersPage : Page
         InitializeComponent();
         _service = App.Services.GetRequiredService<IWatchFolderService>();
         ProfilesList.ItemsSource = _service.Profiles;
-        EventList.ItemsSource    = _service.Recent;
+        EventList.ItemsSource = _service.Recent;
         _service.Profiles.CollectionChanged += (_, _) => UpdateUi();
         _service.Recent.CollectionChanged += (_, _) => UpdateUi();
         UpdateUi();
@@ -23,10 +23,12 @@ public sealed partial class WatchFoldersPage : Page
 
     private void UpdateUi()
     {
-        EmptyState.Visibility    = _service.Profiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        EmptyState.Visibility = _service.Profiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProfilesScroll.Visibility = _service.Profiles.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         RecentEmptyState.Visibility = _service.Recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         EventScroll.Visibility = _service.Recent.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        var status = _service.Status;
+        WatchStatusText.Text = $"{status.ActiveProfiles} active · {status.InFlightFiles} settling/running · {status.RememberedFiles} recent files remembered";
     }
 
     private void ProfileToggled(object sender, RoutedEventArgs e)
@@ -68,9 +70,9 @@ public sealed partial class WatchFoldersPage : Page
 
     private async Task<WatchProfile?> ShowProfileDialogAsync(WatchProfile? source)
     {
-        var nameBox   = new TextBox { Header = "Display name", Text = source?.Name ?? "Watch" };
-        var pathBox   = new TextBox { Header = "Folder to monitor", Text = source?.Path ?? "", IsReadOnly = true };
-        var browseBtn = new Button  { Content = "Browse", Style = (Style)Application.Current.Resources["SecondaryButtonStyle"] };
+        var nameBox = new TextBox { Header = "Display name", Text = source?.Name ?? "Watch" };
+        var pathBox = new TextBox { Header = "Folder to monitor", Text = source?.Path ?? "", IsReadOnly = true };
+        var browseBtn = new Button { Content = "Browse", Style = (Style)Application.Current.Resources["SecondaryButtonStyle"] };
         browseBtn.Click += async (_, __) =>
         {
             var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.VideosLibrary };
@@ -89,9 +91,12 @@ public sealed partial class WatchFoldersPage : Page
         pathRow.Children.Add(pathBox);
         pathRow.Children.Add(browseBtn);
 
-        var filterBox = new TextBox { Header = "File filters",
-                                      PlaceholderText = "*.mp4;*.mkv;*.mov",
-                                      Text = source?.Filter ?? "*.mp4;*.mkv;*.mov;*.avi;*.webm;*.m4v" };
+        var filterBox = new TextBox
+        {
+            Header = "File filters",
+            PlaceholderText = "*.mp4;*.mkv;*.mov",
+            Text = source?.Filter ?? "*.mp4;*.mkv;*.mov;*.avi;*.webm;*.m4v"
+        };
 
         var actionCombo = new ComboBox { Header = "Action", SelectedIndex = source?.Action == WatchAction.Convert ? 1 : 0 };
         actionCombo.Items.Add(new ComboBoxItem { Content = "Compress (videocrush)", Tag = "compress" });
@@ -112,19 +117,25 @@ public sealed partial class WatchFoldersPage : Page
         var idx = Array.FindIndex(compressPresets, t => t.Item1 == (source?.Preset ?? "web-1080p"));
         presetCombo.SelectedIndex = idx >= 0 ? idx : 0;
 
-        var formatBox = new TextBox { Header = "Convert target extension",
-                                      PlaceholderText = "mp4",
-                                      Text = source?.TargetFormat ?? "mp4" };
+        var formatBox = new TextBox
+        {
+            Header = "Convert target extension",
+            PlaceholderText = "mp4",
+            Text = source?.TargetFormat ?? "mp4"
+        };
 
-        var outputBox = new TextBox { Header = "Output folder (optional)",
-                                      Text = source?.OutputDir ?? "",
-                                      PlaceholderText = "Same as source folder" };
+        var outputBox = new TextBox
+        {
+            Header = "Output folder (optional)",
+            Text = source?.OutputDir ?? "",
+            PlaceholderText = "Same as source folder"
+        };
 
         void OnActionChanged(object? _, SelectionChangedEventArgs __)
         {
             var isCompress = (actionCombo.SelectedItem as ComboBoxItem)?.Tag as string == "compress";
             presetCombo.Visibility = isCompress ? Visibility.Visible : Visibility.Collapsed;
-            formatBox.Visibility   = isCompress ? Visibility.Collapsed : Visibility.Visible;
+            formatBox.Visibility = isCompress ? Visibility.Collapsed : Visibility.Visible;
         }
         actionCombo.SelectionChanged += OnActionChanged;
         OnActionChanged(null, null!);

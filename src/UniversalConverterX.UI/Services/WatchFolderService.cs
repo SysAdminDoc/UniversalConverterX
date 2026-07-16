@@ -9,7 +9,9 @@ namespace UniversalConverterX.UI.Services;
 
 public enum WatchAction { Convert, Compress }
 
-public enum WatchEventStatus { Picked, Running, Done, Failed, Skipped }
+public enum WatchEventStatus { Settling, Picked, Running, Done, Failed, Skipped }
+
+public sealed record WatchFolderStatus(int ActiveProfiles, int InFlightFiles, int RememberedFiles);
 
 public sealed record WatchProfile
 {
@@ -52,6 +54,7 @@ public interface IWatchFolderService
 {
     ObservableCollection<WatchProfile> Profiles { get; }
     ObservableCollection<WatchEvent> Recent { get; }
+    WatchFolderStatus Status { get; }
     void Add(WatchProfile profile);
     void Update(WatchProfile profile);
     void Remove(string id);
@@ -62,8 +65,9 @@ public interface IWatchFolderService
 public sealed class WatchFolderService : IWatchFolderService, IDisposable
 {
     private const int RecentEventCap = 200;
+    private const int SeenFileCap = 4096;
     private static readonly TimeSpan StableCheckInterval = TimeSpan.FromSeconds(2);
-    private const int StableSamplesNeeded = 3;
+    private const int StableSamplesNeeded = 2;
     private static readonly TimeSpan StableTimeout = TimeSpan.FromMinutes(15);
 
     private readonly ISidecarRunner _runner;
@@ -72,8 +76,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private readonly string _configPath;
     private readonly ConcurrentDictionary<string, FileSystemWatcher> _watchers = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _profileCts = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentDictionary<string, byte> _processing = new(
-        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+    private readonly WatchFileAdmission _admission = new(SeenFileCap);
     private readonly object _saveLock = new();
     private Task _lastSaveTask = Task.CompletedTask;
     /// <summary>
@@ -85,6 +88,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
 
     public ObservableCollection<WatchProfile> Profiles { get; } = [];
     public ObservableCollection<WatchEvent> Recent { get; } = [];
+    public WatchFolderStatus Status => new(_watchers.Count, _admission.InFlightCount, _admission.RememberedCount);
 
     public WatchFolderService(ISidecarRunner runner, IHistoryService history)
     {
@@ -216,7 +220,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             var p = Profiles[i] with { IsEnabled = enabled };
             Profiles[i] = p;
             if (enabled) StartWatcher(p);
-            else         StopWatcher(id);
+            else StopWatcher(id);
             Save();
             return;
         }
@@ -261,7 +265,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             {
                 IncludeSubdirectories = false,
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
-                EnableRaisingEvents = true,
+                EnableRaisingEvents = false,
             };
         }
         catch (Exception ex)
@@ -274,6 +278,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             return;
         }
         fsw.Created += (_, e) => OnArrival(profile, e.FullPath);
+        fsw.Changed += (_, e) => OnArrival(profile, e.FullPath);
         fsw.Renamed += (_, e) => OnArrival(profile, e.FullPath);
         // The Error event fires when the buffer overflows (too many fast
         // events) — log it so the user knows files may have been missed.
@@ -288,6 +293,16 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
         // for this profile rather than leaving the job running until natural
         // completion. Linked to _shutdownCts so app exit also cancels.
         _profileCts[profile.Id] = CancellationTokenSource.CreateLinkedTokenSource(_shutdownCts.Token);
+        try
+        {
+            fsw.EnableRaisingEvents = true;
+        }
+        catch (Exception ex)
+        {
+            StopWatcher(profile.Id);
+            PostEvent(profile, profile.Path, WatchEventStatus.Failed,
+                      $"Could not start folder watch: {ex.Message}");
+        }
     }
 
     private void StopWatcher(string id)
@@ -305,17 +320,31 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
     private void OnArrival(WatchProfile profile, string path)
     {
         if (!MatchesFilter(profile.Filter, path)) return;
-        if (!_processing.TryAdd(path, 0)) return; // already in-flight
+        if (_admission.IsSuppressedOutput(path)) return;
+        if (!_admission.TryBegin(path)) return; // already in-flight
         var profileToken = _profileCts.TryGetValue(profile.Id, out var startingCts)
             ? startingCts.Token
             : _shutdownCts.Token;
+        PostEvent(profile, path, WatchEventStatus.Settling, "waiting for two stable reads");
 
         _ = Task.Run(async () =>
         {
             try
             {
-                if (!await WaitForStableAsync(path, profileToken)) {
+                var stableObservation = await WatchFileStability.WaitAsync(
+                    path,
+                    StableCheckInterval,
+                    StableTimeout,
+                    StableSamplesNeeded,
+                    profileToken);
+                if (stableObservation is null)
+                {
                     PostEvent(profile, path, WatchEventStatus.Skipped, "file never settled");
+                    return;
+                }
+                if (!_admission.TryRemember(path, stableObservation.Value))
+                {
+                    PostEvent(profile, path, WatchEventStatus.Skipped, "unchanged duplicate event");
                     return;
                 }
                 profileToken.ThrowIfCancellationRequested();
@@ -328,6 +357,10 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                     return;
                 }
 
+                // Register the planned artifact before spawning the sidecar so
+                // Created/Changed events raised during the write cannot feed the
+                // watcher's own output back into another job.
+                _admission.SuppressOutput(output);
                 PostEvent(profile, path, WatchEventStatus.Running, $"{tool} -> {Path.GetFileName(output)}");
                 var startedAt = DateTime.UtcNow;
                 // Use the per-profile cancellation token so disabling or
@@ -346,18 +379,18 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                 long? outBytes = result.Success ? (result.SizeBytes ?? TryFileSize(output)) : null;
                 _ = _history.LogAsync(new HistoryRecord
                 {
-                    Timestamp        = startedAt,
-                    Engine           = tool,
-                    Action           = profile.Action == WatchAction.Compress ? "compress" : "convert",
-                    SourcePath       = path,
-                    OutputPath       = result.Success ? output : null,
-                    SourceBytes      = srcBytes,
-                    OutputBytes      = outBytes,
-                    DurationSeconds  = (DateTime.UtcNow - startedAt).TotalSeconds,
-                    Success          = result.Success,
-                    ErrorCode        = result.ErrorCode,
-                    ErrorMessage     = result.ErrorMessage,
-                    Profile          = profile.Action == WatchAction.Compress ? profile.Preset : profile.TargetFormat,
+                    Timestamp = startedAt,
+                    Engine = tool,
+                    Action = profile.Action == WatchAction.Compress ? "compress" : "convert",
+                    SourcePath = path,
+                    OutputPath = result.Success ? output : null,
+                    SourceBytes = srcBytes,
+                    OutputBytes = outBytes,
+                    DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds,
+                    Success = result.Success,
+                    ErrorCode = result.ErrorCode,
+                    ErrorMessage = result.ErrorMessage,
+                    Profile = profile.Action == WatchAction.Compress ? profile.Preset : profile.TargetFormat,
                 });
             }
             catch (OperationCanceledException)
@@ -371,7 +404,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             }
             finally
             {
-                _processing.TryRemove(path, out _);
+                _admission.End(path);
             }
         });
     }
@@ -428,38 +461,6 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             TimeSpan.FromMilliseconds(250));
     }
 
-    /// <summary>Wait until file size hasn't changed for several samples or timeout.</summary>
-    private static async Task<bool> WaitForStableAsync(string path, CancellationToken ct)
-    {
-        var lastSize = -1L;
-        var sameCount = 0;
-        var deadline = DateTime.UtcNow + StableTimeout;
-        while (DateTime.UtcNow < deadline)
-        {
-            ct.ThrowIfCancellationRequested();
-            try
-            {
-                var size = new FileInfo(path).Length;
-                if (size == lastSize) sameCount++;
-                else                  { sameCount = 0; lastSize = size; }
-                if (sameCount >= StableSamplesNeeded)
-                {
-                    // Final exclusive-open probe to reject files still held by the writer.
-                    try
-                    {
-                        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        return true;
-                    }
-                    catch (IOException) { sameCount = 0; }
-                }
-            }
-            catch (FileNotFoundException) { return false; }
-            catch (IOException)           { sameCount = 0; }
-            await Task.Delay(StableCheckInterval, ct).ConfigureAwait(false);
-        }
-        return false;
-    }
-
     private static (string? tool, IEnumerable<string>? args, string output) BuildJob(WatchProfile p, string path)
     {
         var stem = Path.GetFileNameWithoutExtension(path);
@@ -470,34 +471,34 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
         switch (p.Action)
         {
             case WatchAction.Compress:
-            {
-                var ext = Path.GetExtension(path);
-                if (string.IsNullOrEmpty(ext)) ext = ".mp4";
-                var output = Path.Combine(outDir, $"{stem}_compressed{ext}");
-                var args = new List<string>
+                {
+                    var ext = Path.GetExtension(path);
+                    if (string.IsNullOrEmpty(ext)) ext = ".mp4";
+                    var output = Path.Combine(outDir, $"{stem}_compressed{ext}");
+                    var args = new List<string>
                 {
                     "--input", path,
                     "--output", output,
                     "--preset", string.IsNullOrWhiteSpace(p.Preset) ? "web-1080p" : p.Preset!,
                 };
-                return ("videocrush", args, output);
-            }
+                    return ("videocrush", args, output);
+                }
             case WatchAction.Convert:
-            {
-                var fmt = NormalizeExtension(p.TargetFormat, "mp4");
-                var output = Path.Combine(outDir, $"{stem}.{fmt}");
-                // We use clipforge `op_rewrap` for like-codec container swaps; for a
-                // real encode pipeline, the converter sidecar would be a better fit
-                // but isn't a single binary -- watch profiles ship the rewrap path
-                // for now, which is correct for "drop a .mov, get a .mp4" workflows.
-                var args = new List<string>
+                {
+                    var fmt = NormalizeExtension(p.TargetFormat, "mp4");
+                    var output = Path.Combine(outDir, $"{stem}.{fmt}");
+                    // We use clipforge `op_rewrap` for like-codec container swaps; for a
+                    // real encode pipeline, the converter sidecar would be a better fit
+                    // but isn't a single binary -- watch profiles ship the rewrap path
+                    // for now, which is correct for "drop a .mov, get a .mp4" workflows.
+                    var args = new List<string>
                 {
                     "rewrap",
                     "--input",  path,
                     "--output", output,
                 };
-                return ("clipforge", args, output);
-            }
+                    return ("clipforge", args, output);
+                }
             default:
                 return (null, null, "");
         }

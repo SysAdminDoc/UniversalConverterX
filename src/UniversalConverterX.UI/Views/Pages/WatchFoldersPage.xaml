@@ -139,9 +139,20 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Recent activity"
-                           Style="{StaticResource LabelTextStyle}"
-                           FontWeight="SemiBold" FontSize="13"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Recent activity"
+                               Style="{StaticResource LabelTextStyle}"
+                               FontWeight="SemiBold" FontSize="13"/>
+                    <TextBlock x:Name="WatchStatusText"
+                               Grid.Column="1"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontSize="11"
+                               AutomationProperties.AutomationId="WatchFolderStatusText"/>
+                </Grid>
                 <StackPanel x:Name="RecentEmptyState"
                             Grid.Row="1"
                             HorizontalAlignment="Center"
