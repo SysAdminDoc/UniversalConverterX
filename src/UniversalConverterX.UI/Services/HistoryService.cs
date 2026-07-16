@@ -21,6 +21,7 @@ public sealed record HistoryRecord
     public string? ErrorCode { get; init; }
     public string? ErrorMessage { get; init; }
     public string? Profile { get; init; }
+    public string? RerunParameters { get; init; }
     public string ErrorDetails =>
         string.IsNullOrWhiteSpace(ErrorMessage) ? "No error details were provided." : ErrorMessage;
 
@@ -75,6 +76,7 @@ public sealed record HistoryRecord
         ErrorCode = ErrorCode,
         ErrorMessage = ErrorMessage,
         Profile = Profile,
+        RerunParameters = RerunParameters,
     };
 
     internal static HistoryRecord FromEntry(ConversionHistoryEntry entry) => new()
@@ -92,6 +94,7 @@ public sealed record HistoryRecord
         ErrorCode = entry.ErrorCode,
         ErrorMessage = entry.ErrorMessage,
         Profile = entry.Profile,
+        RerunParameters = entry.RerunParameters,
     };
 }
 
@@ -108,6 +111,7 @@ public interface IHistoryService
     ObservableCollection<HistoryRecord> Recent { get; }
     Task LogAsync(HistoryRecord record);
     Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500);
+    Task<HistoryRecord?> GetAsync(long id);
     Task<HistorySummary> SummarizeAsync(string? search = null);
     Task<int> ExportAsync(string path, string? search = null);
     Task DeleteAsync(long id);
@@ -179,6 +183,13 @@ public sealed class HistoryService : IHistoryService, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         var entries = await _store.QueryAsync(search, limit).ConfigureAwait(false);
         return entries.Select(HistoryRecord.FromEntry).ToList();
+    }
+
+    public async Task<HistoryRecord?> GetAsync(long id)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var entry = await _store.GetAsync(id).ConfigureAwait(false);
+        return entry is null ? null : HistoryRecord.FromEntry(entry);
     }
 
     public async Task<HistorySummary> SummarizeAsync(string? search = null)

@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.Storage.Pickers;
 
@@ -140,26 +142,61 @@ public sealed partial class HistoryPage : Page
         }
     }
 
-    private void Rerun_Click(object sender, RoutedEventArgs e)
+    private async void Rerun_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button b || b.Tag is not long id) return;
-        var record = _history.Recent.FirstOrDefault(r => r.Id == id);
+        var record = await _history.GetAsync(id);
         if (record is null)
         {
-            StatusText.Text = "Re-run target not in recent cache; refresh to reload from disk.";
+            StatusText.Text = "That history row no longer exists.";
             return;
         }
-        // Route the user to the right page with the source pre-set. We use the existing
-        // route map, then leave the page to handle file pre-fill via App.RequestNavigation.
-        var route = record.Engine switch
+
+        ConversionRerunRequest? request;
+        if (!ConversionRerunRequestCodec.TryDeserialize(
+                record.RerunParameters,
+                out request,
+                out _))
         {
-            "videocrush" => "compressor",
-            "clipforge"  => "editor",
-            "heicshift"  => "image-converter",
-            "gifstudio"  => "gif-maker",
-            _            => "converter",
+            request = BuildLegacyRerun(record);
+        }
+
+        if (request is null)
+        {
+            StatusText.Text = "This legacy row has no usable source/output settings to restore.";
+            return;
+        }
+
+        var missing = request.SourcePaths.FirstOrDefault(path => !File.Exists(path));
+        if (missing is not null)
+        {
+            StatusText.Text = $"Cannot re-run because the source is missing: {Path.GetFileName(missing)}";
+            return;
+        }
+
+        App.RequestNavigation("converter", request);
+    }
+
+    private static ConversionRerunRequest? BuildLegacyRerun(HistoryRecord record)
+    {
+        if (string.IsNullOrWhiteSpace(record.SourcePath) || !File.Exists(record.SourcePath))
+            return null;
+
+        var outputFormat = Path.GetExtension(record.OutputPath)?.TrimStart('.') ?? "";
+        if (!PathSafety.TryNormalizeExtension(outputFormat, out var normalizedFormat)
+            && !PathSafety.TryNormalizeExtension(record.Profile, out normalizedFormat))
+        {
+            return null;
+        }
+
+        return new ConversionRerunRequest
+        {
+            SourcePaths = [record.SourcePath],
+            OutputFormat = normalizedFormat,
+            OutputDirectory = string.IsNullOrWhiteSpace(record.OutputPath)
+                ? null
+                : Path.GetDirectoryName(record.OutputPath),
+            OutputPath = record.OutputPath,
         };
-        App.RequestNavigation(route);
-        StatusText.Text = $"Open file from {Path.GetFileName(record.SourcePath)} on the {route} page to re-run.";
     }
 }

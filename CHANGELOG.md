@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Converter now records every per-file result in History with a versioned, validated re-run payload. Re-run restores the source, output format/location, conversion options, post-source action, forced engine, and advanced FFmpeg template; SQLite upgrades existing history databases in place and legacy rows receive a safe best-effort prefill.
 - Conversion batches can now emit structured JSON or RFC 4180 CSV reports with per-file status, source/output sizes, byte delta, duration, engine, profile, warnings, and errors. `ucx convert --report` writes live results, while the History page exports its current filtered view through the same Core report writer.
 - Editor and ClipForge now support lossless display-crop metadata for H.264/H.265 and container-only display aspect overrides. Crop metadata rewrites only SPS display edges while preserving coded picture samples; aspect overrides stream-copy compressed packets unchanged. A 16:9 lossless metadata preset is included.
 - Added curated Preservation and Production video families: lossless FFV1+FLAC/MKV archival, ProRes 422/MOV, and DNxHR HQ/MOV. The Presets page now has dedicated Preservation and Production filters, and the lossless VideoCrush path is covered by decoded-frame and PCM verification.

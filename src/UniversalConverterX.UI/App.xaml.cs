@@ -174,7 +174,8 @@ public partial class App : Application
 
     internal static void Register(MainWindow window) => _mainWindow = window;
 
-    public static void RequestNavigation(string routeKey) => _mainWindow?.RequestNavigation(routeKey);
+    public static void RequestNavigation(string routeKey, object? parameter = null) =>
+        _mainWindow?.RequestNavigation(routeKey, parameter);
 
     public static void RequestPlaceholderNavigation(PlaceholderInfo info) =>
         _mainWindow?.NavigateToPlaceholder(info);

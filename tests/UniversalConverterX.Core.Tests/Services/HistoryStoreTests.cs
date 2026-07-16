@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Data.Sqlite;
 using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Core.Tests.Services;
@@ -25,6 +26,7 @@ public sealed class HistoryStoreTests : IDisposable
             DurationSeconds = 2.5,
             Success = true,
             Profile = "Web résumé",
+            RerunParameters = "{\"schemaVersion\":1}",
         });
         var secondId = await store.AddAsync(new ConversionHistoryEntry
         {
@@ -45,6 +47,12 @@ public sealed class HistoryStoreTests : IDisposable
         all.Select(entry => entry.Id).Should().Equal(secondId, firstId);
         all[0].ErrorMessage.Should().Be("Invalid image");
         all[1].OutputPath.Should().EndWith("café output.mp4");
+        all[1].RerunParameters.Should().Be("{\"schemaVersion\":1}");
+
+        var byId = await store.GetAsync(firstId);
+        byId.Should().NotBeNull();
+        byId!.SourcePath.Should().EndWith("café source.mov");
+        (await store.GetAsync(long.MaxValue)).Should().BeNull();
 
         var search = await store.QueryAsync("résumé");
         search.Should().ContainSingle().Which.Id.Should().Be(firstId);
@@ -123,6 +131,32 @@ public sealed class HistoryStoreTests : IDisposable
         var rows = await store.QueryAsync(limit: 100);
         rows.Should().HaveCount(40);
         rows.Select(row => row.SourcePath).Should().OnlyHaveUniqueItems();
+    }
+
+    [Fact]
+    public async Task Store_ShouldMigrateLegacySchemaForRerunParameters()
+    {
+        var path = Path.Combine(_tempDirectory, "legacy.db");
+        using (var initial = new HistoryStore(path)) { }
+        using (var connection = new SqliteConnection($"Data Source={path}"))
+        {
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = "ALTER TABLE history DROP COLUMN rerun_json;";
+            command.ExecuteNonQuery();
+        }
+
+        using var migrated = new HistoryStore(path);
+        var id = await migrated.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "converter",
+            Action = "convert",
+            SourcePath = "input.mov",
+            Success = true,
+            RerunParameters = "{\"schemaVersion\":1}",
+        });
+
+        (await migrated.GetAsync(id))!.RerunParameters.Should().Be("{\"schemaVersion\":1}");
     }
 
     public void Dispose()

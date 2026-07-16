@@ -44,6 +44,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Local Processing — all conversions happen on your machine. No telemetry.
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
+- Conversion History — search/export past jobs and restore exact Converter settings for a re-run.
 - Watch Folders — process stable new or renamed files automatically with duplicate and self-output loop protection.
 - Modern UI — WinUI 3 with dark theme and Mica effects.
 - CLI Support — full command-line interface for automation (`ucx`).

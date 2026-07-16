@@ -7,11 +7,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
+using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -52,6 +54,7 @@ public sealed partial class ConverterPage : Page
 
     private readonly IConversionOrchestrator _orchestrator;
     private readonly IBatchQueueStore _queueStore;
+    private readonly IHistoryService _history;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
     private CancellationTokenSource? _cancellationTokenSource;
@@ -68,11 +71,115 @@ public sealed partial class ConverterPage : Page
         // 13 converter strategies for no reason.
         _orchestrator = App.Services.GetRequiredService<IConversionOrchestrator>();
         _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
+        _history = App.Services.GetRequiredService<IHistoryService>();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
         RestorePersistedQueue();
         UpdateUI();
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is ConversionRerunRequest request)
+            ApplyRerunRequest(request);
+    }
+
+    private void ApplyRerunRequest(ConversionRerunRequest request)
+    {
+        if (!PathSafety.TryNormalizeExtension(request.OutputFormat, out var outputFormat))
+        {
+            StatusText.Text = "The saved re-run output format is invalid.";
+            return;
+        }
+
+        if (_files.Count > 0
+            && ((string.IsNullOrWhiteSpace(_selectedFormat)
+                 || !_selectedFormat.Equals(outputFormat, StringComparison.OrdinalIgnoreCase))
+                || !PathsEqual(_outputDirectory, request.OutputDirectory)))
+        {
+            StatusText.Text = "The current queue uses different settings and was preserved. Finish or clear it before restoring this history row.";
+            return;
+        }
+
+        if (!SelectFormat(outputFormat))
+        {
+            var supported = request.SourcePaths.All(path =>
+                _orchestrator.CanConvert(
+                    Path.GetExtension(path).TrimStart('.'),
+                    outputFormat));
+            if (!supported)
+            {
+                StatusText.Text = $"The Converter cannot restore the saved {outputFormat.ToUpperInvariant()} route.";
+                return;
+            }
+
+            var restoredItem = new ComboBoxItem
+            {
+                Content = $"{outputFormat.ToUpperInvariant()} - Restored",
+                Tag = outputFormat,
+            };
+            FormatSelector.Items.Add(restoredItem);
+            FormatSelector.SelectedItem = restoredItem;
+        }
+
+        _outputDirectory = request.OutputDirectory;
+        OutputDirectoryBox.Text = request.OutputDirectory ?? "";
+        if (!string.IsNullOrWhiteSpace(request.FfmpegCommandTemplate))
+        {
+            SetFfmpegCommandText(request.FfmpegCommandTemplate);
+            AdvancedFfmpegExpander.IsExpanded = true;
+            var advancedEnabled = App.Services
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+                .Value.EnableFfmpegCommandEditing;
+            if (advancedEnabled)
+                EditFfmpegCommandToggle.IsOn = true;
+        }
+
+        var restored = 0;
+        foreach (var sourcePath in request.SourcePaths)
+        {
+            if (!File.Exists(sourcePath))
+                continue;
+
+            AddFile(sourcePath, updateUi: false);
+            var item = _files.First(file =>
+                file.Path.Equals(sourcePath, StringComparison.OrdinalIgnoreCase));
+            var perFileRequest = request with
+            {
+                SourcePaths = [sourcePath],
+                OutputPath = request.SourcePaths.Count == 1 ? request.OutputPath : null,
+            };
+            item.RerunParameters = ConversionRerunRequestCodec.Serialize(perFileRequest);
+            item.OutputPath = perFileRequest.OutputPath;
+            item.StatusText = "Restored from history";
+            restored++;
+        }
+
+        PersistQueue();
+        UpdateUI();
+        StatusText.Text = restored > 0
+            ? $"Restored {restored} file(s) with the saved {outputFormat.ToUpperInvariant()} settings."
+            : "The saved source file is no longer available.";
+    }
+
+    private static bool PathsEqual(string? left, string? right)
+    {
+        if (string.IsNullOrWhiteSpace(left) && string.IsNullOrWhiteSpace(right))
+            return true;
+        if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
+            return false;
+        try
+        {
+            return Path.GetFullPath(left).Equals(
+                Path.GetFullPath(right),
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return left.Equals(right, StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -526,16 +633,18 @@ public sealed partial class ConverterPage : Page
         };
     }
 
-    private void SelectFormat(string format)
+    private bool SelectFormat(string format)
     {
         foreach (var item in FormatSelector.Items.OfType<ComboBoxItem>())
         {
             if (string.Equals(item.Tag?.ToString(), format, StringComparison.OrdinalIgnoreCase))
             {
                 FormatSelector.SelectedItem = item;
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 
     private static FileCategory CategorizeExtension(string extension)
@@ -554,7 +663,8 @@ public sealed partial class ConverterPage : Page
 
     private async void ConvertButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_files.Count == 0 || string.IsNullOrEmpty(_selectedFormat))
+        var selectedFormat = _selectedFormat;
+        if (_files.Count == 0 || string.IsNullOrEmpty(selectedFormat))
             return;
 
         if (!TryValidateFfmpegOverrideForQueue(out var commandError))
@@ -588,16 +698,30 @@ public sealed partial class ConverterPage : Page
             .Select(f =>
             {
                 var outputPath = string.IsNullOrWhiteSpace(f.OutputPath)
-                    ? BuildOutputPath(f.Path, _selectedFormat)
+                    ? BuildOutputPath(f.Path, selectedFormat)
                     : f.OutputPath!;
                 f.OutputPath = outputPath;
-                f.PersistedArgs = BuildRetryArgs(_selectedFormat, outputPath);
+                f.PersistedArgs = BuildRetryArgs(selectedFormat, outputPath);
                 f.ErrorMessage = null;
                 if (!f.StatusText.StartsWith("Failed", StringComparison.OrdinalIgnoreCase)
                     && !f.StatusText.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase)
                     && !f.StatusText.StartsWith("Interrupted", StringComparison.OrdinalIgnoreCase))
                     f.StatusText = "Queued";
-                return new QueuedConversion(f, CreateJob(f.Path, _selectedFormat, outputPath));
+                var savedRequest = TryGetRerunRequest(f.RerunParameters);
+                var commandTemplate = EditFfmpegCommandToggle.IsOn
+                    ? FfmpegCommandBox.Text
+                    : savedRequest?.FfmpegCommandTemplate;
+                return new QueuedConversion(
+                    f,
+                    CreateJob(
+                        f.Path,
+                        selectedFormat,
+                        outputPath,
+                        savedRequest?.Options,
+                        commandTemplate),
+                    selectedFormat,
+                    _outputDirectory,
+                    commandTemplate);
             })
             .ToList();
         PersistQueue();
@@ -656,6 +780,7 @@ public sealed partial class ConverterPage : Page
                     });
 
                     var result = await _orchestrator.ConvertAsync(queued.Job, progress, cancellation.Token);
+                    await LogHistoryAsync(queued, result);
 
                     if (result.Success || result.WasSkipped)
                     {
@@ -698,6 +823,10 @@ public sealed partial class ConverterPage : Page
                 catch (OperationCanceledException)
                 {
                     Interlocked.Increment(ref cancelled);
+                    var duration = queued.Job.StartedAt is DateTime started
+                        ? DateTime.UtcNow - started
+                        : TimeSpan.Zero;
+                    await LogHistoryAsync(queued, ConversionResult.Cancelled(queued.Job, duration));
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         queued.File.StatusText = "Cancelled - ready to retry";
@@ -708,6 +837,10 @@ public sealed partial class ConverterPage : Page
                 catch (Exception ex)
                 {
                     Interlocked.Increment(ref failed);
+                    var duration = queued.Job.StartedAt is DateTime started
+                        ? DateTime.UtcNow - started
+                        : TimeSpan.Zero;
+                    await LogHistoryAsync(queued, ConversionResult.Failed(queued.Job, ex.Message, duration));
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         queued.File.StatusText = "Failed - ready to retry";
@@ -812,35 +945,119 @@ public sealed partial class ConverterPage : Page
             _finishedFiles.RemoveAt(_finishedFiles.Count - 1);
     }
 
-    private ConversionJob CreateJob(string inputPath, string outputFormat, string? outputPathOverride = null)
+    private async Task LogHistoryAsync(QueuedConversion queued, ConversionResult result)
+    {
+        try
+        {
+            var rerun = new ConversionRerunRequest
+            {
+                SourcePaths = [queued.Job.InputPath],
+                OutputFormat = queued.OutputFormat,
+                OutputDirectory = queued.OutputDirectory,
+                OutputPath = result.OutputPath ?? queued.Job.OutputPath,
+                Options = queued.Job.Options,
+                FfmpegCommandTemplate = queued.FfmpegCommandTemplate,
+            };
+            var errorCode = result switch
+            {
+                { WasCancelled: true } => "cancelled",
+                { WasSkipped: true } => "skipped",
+                { ExitCode: not 0 } => $"exit_{result.ExitCode}",
+                _ => null,
+            };
+
+            await _history.LogAsync(new HistoryRecord
+            {
+                Timestamp = queued.Job.StartedAt ?? queued.Job.CreatedAt,
+                Engine = result.ConverterUsed ?? queued.Job.Options.ForceConverter ?? "converter",
+                Action = "convert",
+                SourcePath = queued.Job.InputPath,
+                OutputPath = result.Success ? result.OutputPath : null,
+                SourceBytes = queued.Job.InputFileSize > 0
+                    ? queued.Job.InputFileSize
+                    : queued.File.Size,
+                OutputBytes = result.Success ? result.OutputSize : null,
+                DurationSeconds = result.Duration.TotalSeconds,
+                Success = result.Success,
+                ErrorCode = errorCode,
+                ErrorMessage = result.ErrorMessage,
+                Profile = queued.OutputFormat,
+                RerunParameters = ConversionRerunRequestCodec.Serialize(rerun),
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"History logging failed: {ex}");
+        }
+    }
+
+    private ConversionJob CreateJob(
+        string inputPath,
+        string outputFormat,
+        string? outputPathOverride = null,
+        ConversionOptions? optionsOverride = null,
+        string? ffmpegCommandTemplate = null)
     {
         var outputPath = string.IsNullOrWhiteSpace(outputPathOverride)
             ? BuildOutputPath(inputPath, outputFormat)
             : outputPathOverride;
-        var appOptions = App.Services
-            .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
-            .Value;
-        var conversionOptions = new ConversionOptions
+        ConversionOptions conversionOptions;
+        if (optionsOverride is not null)
         {
-            PostConversionAction = appOptions.PostConversionAction,
-            PostConversionArchiveFolder = appOptions.PostConversionArchiveFolder,
-            DeleteSourceOnSuccess = appOptions.DeleteSourceOnSuccess
-        };
+            conversionOptions = CloneOptions(optionsOverride);
+        }
+        else
+        {
+            var appOptions = App.Services
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+                .Value;
+            conversionOptions = new ConversionOptions
+            {
+                PostConversionAction = appOptions.PostConversionAction,
+                PostConversionArchiveFolder = appOptions.PostConversionArchiveFolder,
+                DeleteSourceOnSuccess = appOptions.DeleteSourceOnSuccess,
+            };
+        }
 
-        if (EditFfmpegCommandToggle.IsOn
-            && FfmpegCommandTemplate.TryMaterialize(
-                FfmpegCommandBox.Text,
-                inputPath,
-                outputPath,
-                out var overrideArguments,
-                out _))
+        ffmpegCommandTemplate ??= EditFfmpegCommandToggle.IsOn
+            ? FfmpegCommandBox.Text
+            : null;
+        if (!string.IsNullOrWhiteSpace(ffmpegCommandTemplate))
         {
+            if (!FfmpegCommandTemplate.TryMaterialize(
+                    ffmpegCommandTemplate,
+                    inputPath,
+                    outputPath,
+                    out var overrideArguments,
+                    out var error))
+            {
+                throw new InvalidDataException(error);
+            }
             conversionOptions.ForceConverter = "ffmpeg";
             conversionOptions.FfmpegArgumentOverride = [.. overrideArguments];
         }
 
         return ConversionJob.Create(inputPath, outputPath, conversionOptions);
     }
+
+    private static ConversionOptions CloneOptions(ConversionOptions options)
+    {
+        var payload = new ConversionRerunRequest
+        {
+            SourcePaths = ["clone"],
+            OutputFormat = "tmp",
+            Options = options,
+        };
+        var json = ConversionRerunRequestCodec.Serialize(payload);
+        return ConversionRerunRequestCodec.TryDeserialize(json, out var clone, out _)
+            ? clone!.Options
+            : throw new InvalidDataException("Saved conversion options could not be restored.");
+    }
+
+    private static ConversionRerunRequest? TryGetRerunRequest(string? json) =>
+        ConversionRerunRequestCodec.TryDeserialize(json, out var request, out _)
+            ? request
+            : null;
 
     private void EditFfmpegCommandToggle_Toggled(object sender, RoutedEventArgs e)
     {
@@ -929,7 +1146,12 @@ public sealed partial class ConverterPage : Page
     private bool TryValidateFfmpegOverrideForQueue(out string? error)
     {
         error = null;
-        if (EditFfmpegCommandToggle?.IsOn != true)
+        var uiTemplate = EditFfmpegCommandToggle?.IsOn == true
+            ? FfmpegCommandBox.Text
+            : null;
+        var hasSavedTemplate = _files.Any(file =>
+            !string.IsNullOrWhiteSpace(TryGetRerunRequest(file.RerunParameters)?.FfmpegCommandTemplate));
+        if (string.IsNullOrWhiteSpace(uiTemplate) && !hasSavedTemplate)
             return true;
 
         var appOptions = App.Services
@@ -944,6 +1166,11 @@ public sealed partial class ConverterPage : Page
         var ffmpeg = new FFmpegConverter(appOptions.ToolsBasePath);
         foreach (var file in _files)
         {
+            var template = uiTemplate
+                ?? TryGetRerunRequest(file.RerunParameters)?.FfmpegCommandTemplate;
+            if (string.IsNullOrWhiteSpace(template))
+                continue;
+
             var source = file.Extension.TrimStart('.');
             if (!ffmpeg.GetOutputFormatsFor(source).Contains(_selectedFormat!, StringComparer.OrdinalIgnoreCase))
             {
@@ -955,7 +1182,7 @@ public sealed partial class ConverterPage : Page
                 ? BuildOutputPath(file.Path, _selectedFormat!)
                 : file.OutputPath!;
             if (!FfmpegCommandTemplate.TryMaterialize(
-                    FfmpegCommandBox.Text,
+                    template,
                     file.Path,
                     output,
                     out _,
@@ -1079,7 +1306,12 @@ public sealed partial class ConverterPage : Page
         Document,
     }
 
-    private sealed record QueuedConversion(FileItem File, ConversionJob Job);
+    private sealed record QueuedConversion(
+        FileItem File,
+        ConversionJob Job,
+        string OutputFormat,
+        string? OutputDirectory,
+        string? FfmpegCommandTemplate);
 }
 
 public class FileItem : INotifyPropertyChanged
@@ -1099,6 +1331,7 @@ public class FileItem : INotifyPropertyChanged
     public string? OutputPath { get; set; }
     public string? ErrorMessage { get; set; }
     public List<string> PersistedArgs { get; set; } = [];
+    public string? RerunParameters { get; set; }
     public string EstimatedSizeLabel { get; set; } = "";
     public string EstimatedSizeCaveat { get; set; } = "";
     public Microsoft.UI.Xaml.Visibility HasEstimatedSize =>

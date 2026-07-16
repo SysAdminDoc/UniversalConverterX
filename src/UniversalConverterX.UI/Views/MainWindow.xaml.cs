@@ -122,13 +122,13 @@ public sealed partial class MainWindow : Window
         return null;
     }
 
-    public void RequestNavigation(string routeKey)
+    public void RequestNavigation(string routeKey, object? parameter = null)
     {
-        NavigateTo(routeKey);
+        NavigateTo(routeKey, parameter);
         SelectMenuItem(GetNavigationSelectionTag(routeKey));
     }
 
-    public void NavigateTo(string routeKey)
+    public void NavigateTo(string routeKey, object? parameter = null)
     {
         // "presets:meshconvert" -> nav to PresetsPage with "meshconvert" engine filter.
         string? routeParam = null;
@@ -195,7 +195,7 @@ public sealed partial class MainWindow : Window
             _ => typeof(PlaceholderPage)
         };
 
-        object? parameter = routeParam;
+        parameter ??= routeParam;
         if (pageType == typeof(PresetsPage) && parameter is null && routeKey == "ai-portrait")
             parameter = "facerestore";
 

@@ -21,6 +21,7 @@ public sealed record ConversionHistoryEntry
     public string? ErrorCode { get; init; }
     public string? ErrorMessage { get; init; }
     public string? Profile { get; init; }
+    public string? RerunParameters { get; init; }
 }
 
 public sealed record ConversionHistorySummary(
@@ -79,11 +80,11 @@ public sealed class HistoryStore : IDisposable
                 INSERT INTO history
                     (timestamp_utc, engine, action, source_path, output_path,
                      source_bytes, output_bytes, duration_sec, success,
-                     error_code, error_message, profile)
+                     error_code, error_message, profile, rerun_json)
                 VALUES
                     (@ts, @engine, @action, @src, @out,
                      @sb, @ob, @dur, @ok,
-                     @ec, @em, @prof);
+                     @ec, @em, @prof, @rerun);
                 SELECT last_insert_rowid();
                 """;
             var timestamp = entry.Timestamp.Kind == DateTimeKind.Utc
@@ -101,6 +102,7 @@ public sealed class HistoryStore : IDisposable
             command.Parameters.AddWithValue("@ec", (object?)entry.ErrorCode ?? DBNull.Value);
             command.Parameters.AddWithValue("@em", (object?)entry.ErrorMessage ?? DBNull.Value);
             command.Parameters.AddWithValue("@prof", (object?)entry.Profile ?? DBNull.Value);
+            command.Parameters.AddWithValue("@rerun", (object?)entry.RerunParameters ?? DBNull.Value);
             var id = (long)(command.ExecuteScalar() ?? 0L);
 
             Prune(connection, transaction);
@@ -122,6 +124,14 @@ public sealed class HistoryStore : IDisposable
         return Task.Run<IReadOnlyList<ConversionHistoryEntry>>(
             () => Query(search, limit),
             cancellationToken);
+    }
+
+    public Task<ConversionHistoryEntry?> GetAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return Task.Run(() => Get(id), cancellationToken);
     }
 
     public Task<ConversionHistorySummary> SummarizeAsync(
@@ -189,7 +199,7 @@ public sealed class HistoryStore : IDisposable
         command.CommandText = $"""
             SELECT id, timestamp_utc, engine, action, source_path, output_path,
                    source_bytes, output_bytes, duration_sec, success,
-                   error_code, error_message, profile
+                   error_code, error_message, profile, rerun_json
             FROM history
             {where}
             ORDER BY id DESC
@@ -201,35 +211,56 @@ public sealed class HistoryStore : IDisposable
 
         using var reader = command.ExecuteReader();
         while (reader.Read())
-        {
-            if (!DateTime.TryParse(
-                    reader.GetString(1),
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var timestamp))
-            {
-                timestamp = DateTime.UnixEpoch;
-            }
-
-            entries.Add(new ConversionHistoryEntry
-            {
-                Id = reader.GetInt64(0),
-                Timestamp = timestamp,
-                Engine = reader.GetString(2),
-                Action = reader.GetString(3),
-                SourcePath = reader.GetString(4),
-                OutputPath = reader.IsDBNull(5) ? null : reader.GetString(5),
-                SourceBytes = reader.IsDBNull(6) ? null : reader.GetInt64(6),
-                OutputBytes = reader.IsDBNull(7) ? null : reader.GetInt64(7),
-                DurationSeconds = reader.GetDouble(8),
-                Success = reader.GetInt64(9) == 1,
-                ErrorCode = reader.IsDBNull(10) ? null : reader.GetString(10),
-                ErrorMessage = reader.IsDBNull(11) ? null : reader.GetString(11),
-                Profile = reader.IsDBNull(12) ? null : reader.GetString(12),
-            });
-        }
+            entries.Add(ReadEntry(reader));
 
         return entries;
+    }
+
+    private ConversionHistoryEntry? Get(long id)
+    {
+        using var connection = Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT id, timestamp_utc, engine, action, source_path, output_path,
+                   source_bytes, output_bytes, duration_sec, success,
+                   error_code, error_message, profile, rerun_json
+            FROM history
+            WHERE id = @id
+            LIMIT 1;
+            """;
+        command.Parameters.AddWithValue("@id", id);
+        using var reader = command.ExecuteReader();
+        return reader.Read() ? ReadEntry(reader) : null;
+    }
+
+    private static ConversionHistoryEntry ReadEntry(SqliteDataReader reader)
+    {
+        if (!DateTime.TryParse(
+                reader.GetString(1),
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind,
+                out var timestamp))
+        {
+            timestamp = DateTime.UnixEpoch;
+        }
+
+        return new ConversionHistoryEntry
+        {
+            Id = reader.GetInt64(0),
+            Timestamp = timestamp,
+            Engine = reader.GetString(2),
+            Action = reader.GetString(3),
+            SourcePath = reader.GetString(4),
+            OutputPath = reader.IsDBNull(5) ? null : reader.GetString(5),
+            SourceBytes = reader.IsDBNull(6) ? null : reader.GetInt64(6),
+            OutputBytes = reader.IsDBNull(7) ? null : reader.GetInt64(7),
+            DurationSeconds = reader.GetDouble(8),
+            Success = reader.GetInt64(9) == 1,
+            ErrorCode = reader.IsDBNull(10) ? null : reader.GetString(10),
+            ErrorMessage = reader.IsDBNull(11) ? null : reader.GetString(11),
+            Profile = reader.IsDBNull(12) ? null : reader.GetString(12),
+            RerunParameters = reader.IsDBNull(13) ? null : reader.GetString(13),
+        };
     }
 
     private ConversionHistorySummary Summarize(string? search)
@@ -290,13 +321,38 @@ public sealed class HistoryStore : IDisposable
                 success         INTEGER NOT NULL,
                 error_code      TEXT,
                 error_message   TEXT,
-                profile         TEXT
+                profile         TEXT,
+                rerun_json      TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_history_ts     ON history(timestamp_utc);
             CREATE INDEX IF NOT EXISTS idx_history_engine ON history(engine);
             CREATE INDEX IF NOT EXISTS idx_history_id     ON history(id DESC);
             """;
         command.ExecuteNonQuery();
+        EnsureColumn(connection, "rerun_json", "TEXT");
+    }
+
+    private static void EnsureColumn(SqliteConnection connection, string columnName, string declaration)
+    {
+        var exists = false;
+        using (var inspect = connection.CreateCommand())
+        {
+            inspect.CommandText = "PRAGMA table_info(history);";
+            using var reader = inspect.ExecuteReader();
+            while (reader.Read())
+            {
+                if (!reader.GetString(1).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                exists = true;
+                break;
+            }
+        }
+        if (exists)
+            return;
+
+        using var alter = connection.CreateCommand();
+        alter.CommandText = $"ALTER TABLE history ADD COLUMN {columnName} {declaration};";
+        alter.ExecuteNonQuery();
     }
 
     private SqliteConnection Open()
