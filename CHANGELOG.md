@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Video background removal now honours the chosen output format. The Background Remover passed short format tags (webm / mp4 / mov / png_sequence) that the AlphaCut sidecar validated against display-name keys, so every export silently fell back to the first format and failed; the sidecar now maps those tags to AlphaCut's real format codes and validates against them. PNG-sequence output (a directory of frames) is also no longer misreported as a missing file. WebM/VP9 transparency, ProRes-alpha MOV, MP4, and PNG sequences now all export correctly.
+
 ### Added
 
 - Added an offline **Colorize** tool that adds colour to black-and-white photos and video entirely on the CPU (no GPU or PyTorch), backed by a new `colorize` sidecar using OpenCV's DNN colourisation model. The ~123 MB BSD-2-Clause model is downloaded once behind an explicit licence-consent dialog and SHA-256 verified; colourisation itself never downloads. Images preview instantly; video is colourised frame-by-frame and remuxed with its original audio in a single lossless-intermediate h264 encode. Reachable from search and the AI tool set.

@@ -31,14 +31,6 @@ programmability (CLI + REST + PS module), and AI depth.
 
 ## Tier 3 — Later _(v2.27+)_
 
-### 49. AI Video Background Removal
-
-Segment and replace video background using BRIA-RMBG 2.0 or MODNet. Output: VP9/WebM with transparency, PNG sequence, or chroma-key fill. GPU-gated.
-
-Impact: 3 · Effort: 4 · Type: leapfrog
-
----
-
 ### 55. Video Summarizer (AI Condensed Highlight)
 
 3-sidecar orchestration: Whisper → local LLM (llama.cpp or Phi Silica) → FFmpeg concat. Ships the "Planned" Video Summarizer tile in AiLabPage.

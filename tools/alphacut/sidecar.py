@@ -128,11 +128,28 @@ def run_bgremove(args: argparse.Namespace) -> int:
         emit("log", level="warn",
              message=f"Model '{args.model}' not found; using '{model_key}'")
 
-    # Resolve output format
-    available_formats = getattr(AlphaCut, "OUTPUT_FORMATS", {})
-    out_format = args.format
-    if out_format not in available_formats and available_formats:
-        out_format = next(iter(available_formats))
+    # Resolve output format. AlphaCut's ProcessingWorker expects the short
+    # format CODE (the values of OUTPUT_FORMATS: mp4, webm, png_seq, prores,
+    # ...), not the human-readable display-name keys. Map the UI/CLI aliases
+    # onto those codes and validate against the real code set so a valid
+    # request is never silently downgraded to the first format.
+    format_codes = set(getattr(AlphaCut, "OUTPUT_FORMATS", {}).values())
+    format_aliases = {
+        "png_sequence": "png_seq",
+        "png-sequence": "png_seq",
+        "sequence": "png_seq",
+        "mov": "prores",
+        "chroma": "greenscreen",
+        "green": "greenscreen",
+        "webp": "webp_anim",
+        "gif": "gif_anim",
+    }
+    requested = (args.format or "mp4").strip().lower()
+    out_format = format_aliases.get(requested, requested)
+    if format_codes and out_format not in format_codes:
+        emit("log", level="warn",
+             message=f"Unknown output format '{args.format}'; falling back to mp4.")
+        out_format = "mp4"
 
     # Resolve ffmpeg
     find_ffmpeg = getattr(AlphaCut, "find_ffmpeg", None)
@@ -217,9 +234,22 @@ def run_bgremove(args: argparse.Namespace) -> int:
     if _had_error:
         return 1
 
-    # Determine output
+    # Determine output. A PNG sequence writes frames into a directory rather
+    # than a single file, so validate the frame set instead of a lone path.
     result_path = finished_output[0] if finished_output else str(out_path)
     result_file = Path(result_path)
+
+    if out_format == "png_seq":
+        frame_dir = result_file if result_file.is_dir() else result_file.parent
+        frames = sorted(frame_dir.glob("*.png")) if frame_dir.is_dir() else []
+        if not frames:
+            return fail("output_missing",
+                        f"No PNG frames were produced in {frame_dir}.")
+        size = sum(f.stat().st_size for f in frames)
+        emit("progress", percent=100.0, stage="Complete", eta_seconds=0)
+        emit("complete", output=str(frame_dir), size_bytes=size, count=len(frames))
+        return 0
+
     if not result_file.is_file():
         return fail("output_missing",
                     f"Expected output file was not produced: {result_path}")
