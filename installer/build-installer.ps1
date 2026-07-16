@@ -97,6 +97,18 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 }
 
+$msixOutput = Join-Path $outputDir "UniversalConverterX_$Version.msix"
+$msiOutput = Join-Path $outputDir "UniversalConverterX_$Version.msi"
+$releaseManifest = Join-Path $outputDir "UniversalConverterX_$Version.release.json"
+$staleOutputs = @($releaseManifest)
+if ($Type -eq 'msix' -or $Type -eq 'all') { $staleOutputs += $msixOutput }
+if ($Type -eq 'msi' -or $Type -eq 'all') { $staleOutputs += $msiOutput }
+foreach ($staleOutput in $staleOutputs) {
+    if (Test-Path -LiteralPath $staleOutput) {
+        Remove-Item -LiteralPath $staleOutput -Force
+    }
+}
+
 # Build the application first
 Write-Header "Building UniversalConverter X"
 
@@ -164,8 +176,6 @@ if ($Type -eq 'msix' -or $Type -eq 'all') {
     Write-Header "Building MSIX Package"
     
     $msixDir = Join-Path $scriptDir "msix"
-    $msixOutput = Join-Path $outputDir "UniversalConverterX_$Version.msix"
-    
     Write-Step "Creating MSIX package..."
     
     # Copy manifest and assets
@@ -242,8 +252,6 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
     Write-Header "Building MSI Installer"
     
     $wixDir = Join-Path $scriptDir "wix"
-    $msiOutput = Join-Path $outputDir "UniversalConverterX_$Version.msi"
-    
     Write-Step "Checking for WiX Toolset..."
     
     # Check for WiX v4 (dotnet tool) or WiX v3
@@ -348,6 +356,35 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         }
     }
 }
+
+# Generate release metadata only after packaging and signing so every digest
+# describes the exact bytes that will be uploaded. Missing requested artifacts
+# are fatal; stale files from a previous build must never satisfy this check.
+$releaseArtifacts = New-Object System.Collections.Generic.List[string]
+if ($Type -eq 'msix' -or $Type -eq 'all') {
+    if (-not (Test-Path -LiteralPath $msixOutput -PathType Leaf) -or
+        (Get-Item -LiteralPath $msixOutput).Length -eq 0) {
+        throw "Requested MSIX artifact was not produced: $msixOutput"
+    }
+    $releaseArtifacts.Add($msixOutput) | Out-Null
+}
+if ($Type -eq 'msi' -or $Type -eq 'all') {
+    if (-not (Test-Path -LiteralPath $msiOutput -PathType Leaf) -or
+        (Get-Item -LiteralPath $msiOutput).Length -eq 0) {
+        throw "Requested MSI artifact was not produced: $msiOutput"
+    }
+    $releaseArtifacts.Add($msiOutput) | Out-Null
+}
+
+$manifestScript = Join-Path $scriptDir 'New-ReleaseManifest.ps1'
+Write-Step "Generating release manifest..."
+& $manifestScript `
+    -Version $Version `
+    -ArtifactPath $releaseArtifacts.ToArray() `
+    -BundleRoot (Join-Path $publishDir 'win-x64') `
+    -OutputPath $releaseManifest `
+    -RuntimeIdentifier 'win-x64' | Out-Null
+Write-Success "Release manifest created: $releaseManifest"
 
 Write-Header "Build Complete"
 Write-Host "Output directory: $outputDir"
