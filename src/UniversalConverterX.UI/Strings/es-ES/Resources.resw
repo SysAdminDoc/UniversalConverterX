@@ -2869,7 +2869,7 @@
     <value>Registros locales y paquetes de accidentes</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.25.0</value>
+    <value>UniversalConverter X v2.26.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Procesamiento local en primer lugar</value>
@@ -4669,7 +4669,7 @@
     <value>Actualizar estado</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.25.0</value>
+    <value>Version 2.26.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>

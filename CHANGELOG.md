@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.26.0] - 2026-07-16
+
 ### Fixed
 
 - Video background removal now honours the chosen output format. The Background Remover passed short format tags (webm / mp4 / mov / png_sequence) that the AlphaCut sidecar validated against display-name keys, so every export silently fell back to the first format and failed; the sidecar now maps those tags to AlphaCut's real format codes and validates against them. PNG-sequence output (a directory of frames) is also no longer misreported as a missing file. WebM/VP9 transparency, ProRes-alpha MOV, MP4, and PNG sequences now all export correctly.
