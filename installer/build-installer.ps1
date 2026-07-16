@@ -154,6 +154,20 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Step "Publishing FFmpeg command proxy..."
+dotnet publish "$rootDir\src\UniversalConverterX.FfmpegProxy\UniversalConverterX.FfmpegProxy.csproj" `
+    -c $Configuration `
+    -r win-x64 `
+    --self-contained false `
+    -p:PublishSingleFile=false `
+    -p:Version=$Version `
+    -o "$publishDir\win-x64\tools\ffmpeg-proxy"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to publish FFmpeg command proxy"
+    exit 1
+}
+
 Write-Success "Build completed"
 
 # Stage preset XML files alongside the published binaries so WiX can pull

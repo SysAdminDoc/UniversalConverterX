@@ -26,7 +26,7 @@ public sealed partial class SettingsWindow : Window
     private readonly IToolDownloader? _toolDownloader;
     private readonly ObservableCollection<ToolViewModel> _tools = [];
     private string? _availableReleaseUrl;
-    
+
     private bool _isDirty = false;
 
     public SettingsWindow(IServiceProvider serviceProvider)
@@ -87,6 +87,9 @@ public sealed partial class SettingsWindow : Window
         MinimizeToTrayToggle.IsOn = _options.MinimizeToTray;
         StartMinimizedToggle.IsOn = _options.StartMinimized;
 
+        // Advanced
+        FfmpegCommandEditingToggle.IsOn = _options.EnableFfmpegCommandEditing;
+
         // Version
         var version = typeof(SettingsWindow).Assembly.GetName().Version;
         VersionText.Text = $"Version {version?.Major ?? 1}.{version?.Minor ?? 0}.{version?.Build ?? 0}";
@@ -101,11 +104,11 @@ public sealed partial class SettingsWindow : Window
         ToolsListView.ItemsSource = _tools;
 
         var tools = _toolManager.GetAvailableTools();
-        
+
         foreach (var tool in tools)
         {
-            var version = tool.IsInstalled 
-                ? await _toolManager.GetToolVersionAsync(tool.Id) 
+            var version = tool.IsInstalled
+                ? await _toolManager.GetToolVersionAsync(tool.Id)
                 : null;
             var assessment = ToolVersionPolicy.Assess(tool.Id, version);
             var hasVersionWarning = tool.IsInstalled
@@ -204,7 +207,7 @@ public sealed partial class SettingsWindow : Window
 
         if (_toolDownloader == null)
         {
-            await ShowMessageAsync("Tool Download", 
+            await ShowMessageAsync("Tool Download",
                 "Tool downloading is not available. Please install tools manually.");
             return;
         }
@@ -278,9 +281,9 @@ public sealed partial class SettingsWindow : Window
             {
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    DownloadAllToolsButton.Content = 
+                    DownloadAllToolsButton.Content =
                         $"Downloading {p.CurrentTool} ({p.ToolsCompleted + 1}/{p.TotalTools})...";
-                    
+
                     var tool = _tools.FirstOrDefault(t => t.Id == p.CurrentTool);
                     if (tool != null)
                     {
@@ -544,8 +547,8 @@ public sealed partial class SettingsWindow : Window
     private void SaveSettings()
     {
         // General
-        _options.DefaultOutputDirectory = string.IsNullOrWhiteSpace(OutputDirectoryTextBox.Text) 
-            ? null 
+        _options.DefaultOutputDirectory = string.IsNullOrWhiteSpace(OutputDirectoryTextBox.Text)
+            ? null
             : OutputDirectoryTextBox.Text;
         _options.OverwriteBehavior = (OverwriteBehavior)OverwriteBehaviorComboBox.SelectedIndex;
         _options.PostConversionAction = (PostConversionAction)Math.Clamp(
@@ -586,6 +589,9 @@ public sealed partial class SettingsWindow : Window
         _options.Theme = (AppTheme)ThemeComboBox.SelectedIndex;
         _options.MinimizeToTray = MinimizeToTrayToggle.IsOn;
         _options.StartMinimized = StartMinimizedToggle.IsOn;
+
+        // Advanced
+        _options.EnableFfmpegCommandEditing = FfmpegCommandEditingToggle.IsOn;
 
         // Save to file
         _options.Save();

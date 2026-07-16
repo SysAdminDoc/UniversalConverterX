@@ -30,6 +30,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UniversalConverterX.Core\UniversalConverterX.Core.csproj" />
+    <ProjectReference Include="..\..\src\UniversalConverterX.FfmpegProxy\UniversalConverterX.FfmpegProxy.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -107,6 +107,14 @@ function Invoke-Publish {
         if ($LASTEXITCODE -ne 0) {
             throw "UI publish failed"
         }
+
+        Write-Host "Publishing FFmpeg command proxy..." -ForegroundColor Yellow
+        $proxyPath = Join-Path $PublishPath "tools/ffmpeg-proxy"
+        dotnet publish "$SrcPath/UniversalConverterX.FfmpegProxy/UniversalConverterX.FfmpegProxy.csproj" `
+            -c $Configuration -r win-x64 --self-contained false -o $proxyPath --nologo
+        if ($LASTEXITCODE -ne 0) {
+            throw "FFmpeg command proxy publish failed"
+        }
     }
     
     # Copy README and LICENSE

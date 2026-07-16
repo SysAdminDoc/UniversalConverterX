@@ -63,6 +63,14 @@ public class ConversionOptions
     public List<string> CustomArguments { get; set; } = [];
 
     /// <summary>
+    /// Validated, per-run FFmpeg argument vector supplied by Advanced Mode.
+    /// It is never persisted; callers must materialize it from a command
+    /// template for the current job's exact input and output paths.
+    /// </summary>
+    [JsonIgnore]
+    public List<string>? FfmpegArgumentOverride { get; set; }
+
+    /// <summary>
     /// Timeout for the conversion
     /// </summary>
     public TimeSpan? Timeout { get; set; }

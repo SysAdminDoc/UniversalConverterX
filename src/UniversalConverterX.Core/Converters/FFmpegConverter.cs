@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Core.Converters;
 
@@ -10,7 +11,7 @@ namespace UniversalConverterX.Core.Converters;
 /// </summary>
 public partial class FFmpegConverter : BaseConverterStrategy
 {
-    public FFmpegConverter(string toolsBasePath, ILogger<FFmpegConverter>? logger = null) 
+    public FFmpegConverter(string toolsBasePath, ILogger<FFmpegConverter>? logger = null)
         : base(toolsBasePath, logger) { }
 
     public override string Id => "ffmpeg";
@@ -79,6 +80,20 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
     public override string[] BuildArguments(ConversionJob job, ConversionOptions options)
     {
+        if (options.FfmpegArgumentOverride is { Count: > 0 } commandOverride)
+        {
+            if (!FfmpegCommandTemplate.ValidateMaterialized(
+                    commandOverride,
+                    job.InputPath,
+                    job.OutputPath,
+                    out var error))
+            {
+                throw new InvalidDataException(error);
+            }
+
+            return [.. commandOverride];
+        }
+
         var args = new List<string>();
 
         // Always overwrite and hide banner

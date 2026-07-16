@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
@@ -57,6 +58,7 @@ public sealed partial class ConverterPage : Page
     private string? _selectedFormat;
     private string? _outputDirectory;
     private bool _restoringQueue;
+    private bool _updatingFfmpegCommand;
 
     public ConverterPage()
     {
@@ -463,6 +465,8 @@ public sealed partial class ConverterPage : Page
         QueueSummaryText.Text = $"{_files.Count} queued / {_finishedFiles.Count} finished";
         RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
+        if (EditFfmpegCommandToggle?.IsOn != true)
+            UpdateFfmpegCommandPreview();
     }
 
     private void UpdateFooterStatus()
@@ -553,6 +557,14 @@ public sealed partial class ConverterPage : Page
         if (_files.Count == 0 || string.IsNullOrEmpty(_selectedFormat))
             return;
 
+        if (!TryValidateFfmpegOverrideForQueue(out var commandError))
+        {
+            AdvancedFfmpegExpander.IsExpanded = true;
+            SetFfmpegCommandStatus(false, commandError!);
+            StatusText.Text = commandError!;
+            return;
+        }
+
         if (_outputDirectory is not null)
         {
             try { Directory.CreateDirectory(_outputDirectory); }
@@ -594,7 +606,7 @@ public sealed partial class ConverterPage : Page
         var cancelled = 0;
         var cancellation = _cancellationTokenSource
             ?? throw new InvalidOperationException("Conversion cancellation source was not initialized.");
-        
+
         // Get max parallel jobs from settings
         var options = App.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>().Value;
         var maxParallel = Math.Max(1, options.MaxParallelConversions);
@@ -815,7 +827,161 @@ public sealed partial class ConverterPage : Page
             DeleteSourceOnSuccess = appOptions.DeleteSourceOnSuccess
         };
 
+        if (EditFfmpegCommandToggle.IsOn
+            && FfmpegCommandTemplate.TryMaterialize(
+                FfmpegCommandBox.Text,
+                inputPath,
+                outputPath,
+                out var overrideArguments,
+                out _))
+        {
+            conversionOptions.ForceConverter = "ffmpeg";
+            conversionOptions.FfmpegArgumentOverride = [.. overrideArguments];
+        }
+
         return ConversionJob.Create(inputPath, outputPath, conversionOptions);
+    }
+
+    private void EditFfmpegCommandToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (FfmpegCommandBox is null)
+            return;
+
+        var appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+            .Value;
+        if (EditFfmpegCommandToggle.IsOn && !appOptions.EnableFfmpegCommandEditing)
+        {
+            EditFfmpegCommandToggle.IsOn = false;
+            SetFfmpegCommandStatus(false, "Enable FFmpeg command editing in Settings > Advanced first.");
+            return;
+        }
+
+        FfmpegCommandBox.IsReadOnly = !EditFfmpegCommandToggle.IsOn;
+        if (EditFfmpegCommandToggle.IsOn)
+            ValidateCurrentFfmpegCommand();
+        else
+            UpdateFfmpegCommandPreview();
+    }
+
+    private void FfmpegCommandBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!_updatingFfmpegCommand && EditFfmpegCommandToggle?.IsOn == true)
+            ValidateCurrentFfmpegCommand();
+    }
+
+    private void UpdateFfmpegCommandPreview()
+    {
+        if (FfmpegCommandBox is null || FfmpegCommandInfoBar is null)
+            return;
+
+        var appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+            .Value;
+        EditFfmpegCommandToggle.IsEnabled = appOptions.EnableFfmpegCommandEditing;
+
+        if (_files.Count == 0 || string.IsNullOrWhiteSpace(_selectedFormat))
+        {
+            SetFfmpegCommandText("");
+            SetFfmpegCommandStatus(true, "Add a media file and choose an FFmpeg-compatible output.");
+            return;
+        }
+
+        var first = _files[0];
+        var source = first.Extension.TrimStart('.');
+        var ffmpeg = new FFmpegConverter(appOptions.ToolsBasePath);
+        if (!ffmpeg.GetOutputFormatsFor(source).Contains(_selectedFormat, StringComparer.OrdinalIgnoreCase))
+        {
+            SetFfmpegCommandText("");
+            EditFfmpegCommandToggle.IsEnabled = false;
+            SetFfmpegCommandStatus(true, "The current source/output route does not use FFmpeg.");
+            return;
+        }
+
+        var job = CreateJob(first.Path, _selectedFormat, BuildOutputPath(first.Path, _selectedFormat));
+        var arguments = ffmpeg.BuildArguments(job, job.Options);
+        SetFfmpegCommandText(FfmpegCommandTemplate.Create(arguments, job.InputPath, job.OutputPath));
+        var editHint = appOptions.EnableFfmpegCommandEditing
+            ? "Turn on Edit before run to customize this argument template."
+            : "Preview only. Enable editing in Settings > Advanced.";
+        SetFfmpegCommandStatus(true, editHint);
+    }
+
+    private void ValidateCurrentFfmpegCommand()
+    {
+        if (_files.Count == 0 || string.IsNullOrWhiteSpace(_selectedFormat))
+        {
+            SetFfmpegCommandStatus(false, "Add a media file and select an output before editing.");
+            return;
+        }
+
+        var first = _files[0];
+        var output = BuildOutputPath(first.Path, _selectedFormat);
+        var valid = FfmpegCommandTemplate.TryMaterialize(
+            FfmpegCommandBox.Text,
+            first.Path,
+            output,
+            out _,
+            out var error);
+        SetFfmpegCommandStatus(valid, valid ? "Command template is valid and will be applied to every queued job." : error!);
+    }
+
+    private bool TryValidateFfmpegOverrideForQueue(out string? error)
+    {
+        error = null;
+        if (EditFfmpegCommandToggle?.IsOn != true)
+            return true;
+
+        var appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
+            .Value;
+        if (!appOptions.EnableFfmpegCommandEditing)
+        {
+            error = "FFmpeg command editing is disabled in Settings > Advanced.";
+            return false;
+        }
+
+        var ffmpeg = new FFmpegConverter(appOptions.ToolsBasePath);
+        foreach (var file in _files)
+        {
+            var source = file.Extension.TrimStart('.');
+            if (!ffmpeg.GetOutputFormatsFor(source).Contains(_selectedFormat!, StringComparer.OrdinalIgnoreCase))
+            {
+                error = $"FFmpeg cannot apply this command to {file.FileName} ({source} -> {_selectedFormat}).";
+                return false;
+            }
+
+            var output = string.IsNullOrWhiteSpace(file.OutputPath)
+                ? BuildOutputPath(file.Path, _selectedFormat!)
+                : file.OutputPath!;
+            if (!FfmpegCommandTemplate.TryMaterialize(
+                    FfmpegCommandBox.Text,
+                    file.Path,
+                    output,
+                    out _,
+                    out error))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void SetFfmpegCommandText(string value)
+    {
+        _updatingFfmpegCommand = true;
+        FfmpegCommandBox.Text = value;
+        _updatingFfmpegCommand = false;
+    }
+
+    private void SetFfmpegCommandStatus(bool valid, string message)
+    {
+        FfmpegCommandInfoBar.Severity = valid
+            ? InfoBarSeverity.Informational
+            : InfoBarSeverity.Error;
+        FfmpegCommandInfoBar.Title = valid ? "Command preview" : "Command blocked";
+        FfmpegCommandInfoBar.Message = message;
     }
 
     private string BuildOutputPath(string inputPath, string outputFormat)

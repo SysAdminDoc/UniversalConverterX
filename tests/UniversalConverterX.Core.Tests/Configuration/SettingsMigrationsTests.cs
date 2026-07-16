@@ -107,6 +107,12 @@ public class SettingsMigrationsTests
     }
 
     [Fact]
+    public void NewInstance_DisablesFfmpegCommandEditingByDefault()
+    {
+        new ConverterXOptions().EnableFfmpegCommandEditing.Should().BeFalse();
+    }
+
+    [Fact]
     public void LoadFromJson_InvalidRoot_Throws()
     {
         // The Load() entry point catches this and falls back to defaults; the

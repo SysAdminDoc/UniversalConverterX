@@ -260,6 +260,48 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void BuildArguments_WithValidatedOverride_ShouldReturnExactArgumentVector()
+    {
+        var job = CreateTestJob("input.mp4", "output.mkv");
+        var options = new ConversionOptions
+        {
+            FfmpegArgumentOverride = ["-y", "-i", job.InputPath, "-c", "copy", job.OutputPath],
+        };
+
+        var arguments = _converter.BuildArguments(job, options);
+
+        arguments.Should().Equal(options.FfmpegArgumentOverride);
+    }
+
+    [Fact]
+    public void BuildArguments_WithOverrideForDifferentFile_ShouldFailClosed()
+    {
+        var job = CreateTestJob("input.mp4", "output.mkv");
+        var options = new ConversionOptions
+        {
+            FfmpegArgumentOverride = ["-i", "different.mp4", job.OutputPath],
+        };
+
+        FluentActions.Invoking(() => _converter.BuildArguments(job, options))
+            .Should().Throw<InvalidDataException>()
+            .WithMessage("*exact input and output paths*");
+    }
+
+    [Fact]
+    public void BuildArguments_WithInjectedOverrideToken_ShouldFailClosed()
+    {
+        var job = CreateTestJob("input.mp4", "output.mkv");
+        var options = new ConversionOptions
+        {
+            FfmpegArgumentOverride = ["-i", job.InputPath, "; calc", job.OutputPath],
+        };
+
+        FluentActions.Invoking(() => _converter.BuildArguments(job, options))
+            .Should().Throw<InvalidDataException>()
+            .WithMessage("*forbidden shell metacharacter*");
+    }
+
+    [Fact]
     public void ParseProgress_ValidProgressLine_ShouldReturnProgress()
     {
         var job = CreateTestJob("input.mp4", "output.mp4");
@@ -280,7 +322,7 @@ public class FFmpegConverterTests
         var durationLine = "Duration: 00:05:30.00, start: 0.000000";
 
         var progress1 = _converter.ParseProgress(durationLine, job);
-        
+
         // Now parse a time progress line
         var timeLine = "frame=  100 fps=30.0 time=00:02:45.00 speed=1.0x";
         var progress2 = _converter.ParseProgress(timeLine, job);

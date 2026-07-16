@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.IO.Pipes;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
@@ -48,12 +50,21 @@ public interface ISidecarRunner
 public sealed class SidecarRunner : ISidecarRunner
 {
     private readonly ConverterXOptions? _options;
+    private readonly IFfmpegCommandReviewService? _ffmpegCommandReview;
 
     /// <summary>Default constructor for callers that don't need options injection.</summary>
     public SidecarRunner() { }
 
     /// <summary>DI-aware constructor — used by App.xaml.cs ServiceProvider.</summary>
     public SidecarRunner(IOptions<ConverterXOptions> options) { _options = options?.Value; }
+
+    public SidecarRunner(
+        IOptions<ConverterXOptions> options,
+        IFfmpegCommandReviewService ffmpegCommandReview)
+    {
+        _options = options?.Value;
+        _ffmpegCommandReview = ffmpegCommandReview;
+    }
 
     public string? Locate(string toolName)
     {
@@ -175,6 +186,8 @@ public sealed class SidecarRunner : ISidecarRunner
                 : toolsBin + Path.PathSeparator + inheritedPath;
         }
 
+        var ffmpegReview = ConfigureFfmpegReview(psi, toolsBin, log);
+
         using var process = new Process { StartInfo = psi };
 
         string? finalOutput = null;
@@ -195,7 +208,36 @@ public sealed class SidecarRunner : ISidecarRunner
             try { watchdogCts.CancelAfter(effectiveTimeout); }
             catch (ObjectDisposedException) { /* race with completion — ignore */ }
         }
+
+        void SuspendWatchdog()
+        {
+            try { watchdogCts.CancelAfter(Timeout.InfiniteTimeSpan); }
+            catch (ObjectDisposedException) { /* race with completion — ignore */ }
+        }
         ResetWatchdog();
+
+        using var reviewCts = CancellationTokenSource.CreateLinkedTokenSource(lct);
+        var reviewServerTask = ffmpegReview is null
+            ? Task.CompletedTask
+            : RunFfmpegReviewServerAsync(
+                ffmpegReview,
+                SuspendWatchdog,
+                ResetWatchdog,
+                log,
+                reviewCts.Token);
+
+        async Task StopFfmpegReviewAsync()
+        {
+            reviewCts.Cancel();
+            try { await reviewServerTask.ConfigureAwait(false); }
+            catch (OperationCanceledException) { }
+            catch (Exception exception)
+            {
+                log?.Report(new SidecarLog(
+                    "warn",
+                    $"FFmpeg command review stopped unexpectedly: {exception.Message}"));
+            }
+        }
 
         try
         {
@@ -203,6 +245,7 @@ public sealed class SidecarRunner : ISidecarRunner
         }
         catch (Exception ex)
         {
+            await StopFfmpegReviewAsync().ConfigureAwait(false);
             return new SidecarResult(
                 Success: false,
                 OutputPath: null,
@@ -362,6 +405,8 @@ public sealed class SidecarRunner : ISidecarRunner
         }
         catch { /* both tasks swallow internally; this is paranoia */ }
 
+        await StopFfmpegReviewAsync().ConfigureAwait(false);
+
         if (stuckByWatchdog)
         {
             log?.Report(new SidecarLog(
@@ -457,6 +502,187 @@ public sealed class SidecarRunner : ISidecarRunner
 
         return null;
     }
+
+    private FfmpegReviewConfiguration? ConfigureFfmpegReview(
+        ProcessStartInfo sidecarStartInfo,
+        string? toolsBin,
+        IProgress<SidecarLog>? log)
+    {
+        if (_options?.EnableFfmpegCommandEditing != true || _ffmpegCommandReview is null)
+            return null;
+
+        var realFfmpeg = ResolveRealFfmpegPath(toolsBin);
+        if (realFfmpeg is null)
+            return null;
+
+        var proxy = ResolveFfmpegProxyPath();
+        if (proxy is null)
+        {
+            log?.Report(new SidecarLog(
+                "warn",
+                "FFmpeg command editing is enabled, but the packaged review proxy was not found. The sidecar will use the generated command unchanged."));
+            return null;
+        }
+
+        var pipeName = $"ucx-ffmpeg-{Guid.NewGuid():N}";
+        sidecarStartInfo.EnvironmentVariables["UCX_FFMPEG_PIPE"] = pipeName;
+        sidecarStartInfo.EnvironmentVariables["UCX_REAL_FFMPEG"] = realFfmpeg;
+        sidecarStartInfo.EnvironmentVariables["FFMPEG_PATH"] = proxy;
+
+        var proxyDirectory = Path.GetDirectoryName(proxy)!;
+        var inheritedPath = sidecarStartInfo.EnvironmentVariables["PATH"] ?? "";
+        sidecarStartInfo.EnvironmentVariables["PATH"] = string.IsNullOrWhiteSpace(inheritedPath)
+            ? proxyDirectory
+            : proxyDirectory + Path.PathSeparator + inheritedPath;
+        return new FfmpegReviewConfiguration(pipeName);
+    }
+
+    private string? ResolveRealFfmpegPath(string? toolsBin)
+    {
+        var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+        if (!string.IsNullOrWhiteSpace(toolsBin))
+        {
+            var managed = Path.Combine(toolsBin, executable);
+            if (File.Exists(managed))
+                return Path.GetFullPath(managed);
+        }
+
+        var path = Environment.GetEnvironmentVariable("PATH") ?? "";
+        foreach (var directory in path.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            try
+            {
+                var candidate = Path.Combine(directory.Trim(), executable);
+                if (File.Exists(candidate))
+                    return Path.GetFullPath(candidate);
+            }
+            catch { }
+        }
+
+        return null;
+    }
+
+    private static string? ResolveFfmpegProxyPath()
+    {
+        var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+        var directCandidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "tools", "ffmpeg-proxy", executable),
+            Path.Combine(AppContext.BaseDirectory, "ffmpeg-proxy", executable),
+        };
+        foreach (var candidate in directCandidates)
+        {
+            if (File.Exists(candidate))
+                return Path.GetFullPath(candidate);
+        }
+
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var projectDirectory = Path.Combine(directory.FullName, "src", "UniversalConverterX.FfmpegProxy", "bin");
+            if (Directory.Exists(projectDirectory))
+            {
+                try
+                {
+                    var candidate = Directory
+                        .EnumerateFiles(projectDirectory, executable, SearchOption.AllDirectories)
+                        .OrderByDescending(File.GetLastWriteTimeUtc)
+                        .FirstOrDefault();
+                    if (candidate is not null)
+                        return Path.GetFullPath(candidate);
+                }
+                catch { }
+            }
+            directory = directory.Parent;
+        }
+
+        return null;
+    }
+
+    private async Task RunFfmpegReviewServerAsync(
+        FfmpegReviewConfiguration configuration,
+        Action suspendWatchdog,
+        Action reportActivity,
+        IProgress<SidecarLog>? log,
+        CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                await using var pipe = new NamedPipeServerStream(
+                    configuration.PipeName,
+                    PipeDirection.InOut,
+                    1,
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+                await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                reportActivity();
+
+                using var reader = new StreamReader(pipe, new UTF8Encoding(false), leaveOpen: true);
+                using var writer = new StreamWriter(pipe, new UTF8Encoding(false), leaveOpen: true)
+                {
+                    AutoFlush = true,
+                };
+                var line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                ProxyReviewResponse response;
+                if (string.IsNullOrWhiteSpace(line) || line.Length > 1_000_000)
+                {
+                    response = new(false, null, "FFmpeg review proxy sent an invalid request.");
+                }
+                else
+                {
+                    var request = JsonSerializer.Deserialize<ProxyReviewRequest>(
+                        line,
+                        new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                    if (request is null || request.Arguments is null or { Length: 0 })
+                    {
+                        response = new(false, null, "FFmpeg review proxy sent an empty argument vector.");
+                    }
+                    else
+                    {
+                        FfmpegCommandReviewResult reviewed;
+                        suspendWatchdog();
+                        try
+                        {
+                            reviewed = await _ffmpegCommandReview!.ReviewAsync(
+                                new FfmpegCommandReviewRequest(request.ProcessId, request.Arguments),
+                                cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            reportActivity();
+                        }
+                        response = new(
+                            reviewed.Approved,
+                            reviewed.Approved ? reviewed.Arguments.ToArray() : null,
+                            reviewed.Error);
+                    }
+                }
+
+                await writer.WriteLineAsync(JsonSerializer.Serialize(
+                    response,
+                    new JsonSerializerOptions(JsonSerializerDefaults.Web))).ConfigureAwait(false);
+                reportActivity();
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception exception)
+            {
+                log?.Report(new SidecarLog(
+                    "warn",
+                    $"FFmpeg command review rejected a proxy request: {exception.Message}"));
+            }
+        }
+    }
+
+    private sealed record FfmpegReviewConfiguration(string PipeName);
+
+    private sealed record ProxyReviewRequest(int ProcessId, string[]? Arguments);
+
+    private sealed record ProxyReviewResponse(bool Approved, string[]? Arguments, string? Error);
 
     /// <summary>
     /// Scan a sidecar argv for <c>--input &lt;path&gt;</c> and return the path.

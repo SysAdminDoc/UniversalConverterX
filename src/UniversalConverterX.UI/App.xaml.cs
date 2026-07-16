@@ -50,6 +50,7 @@ public partial class App : Application
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IFfmpegCommandReviewService, FfmpegCommandReviewService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
         services.AddSingleton<IHistoryService, HistoryService>();
         services.AddSingleton<IWatchFolderService, WatchFolderService>();

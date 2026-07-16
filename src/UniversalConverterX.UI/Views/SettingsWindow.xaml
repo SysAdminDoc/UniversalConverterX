@@ -422,6 +422,38 @@
                     </StackPanel>
                 </Expander>
 
+                <!-- Advanced -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE943;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Advanced" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock Text="Power-user command review and editing"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Padding="0,16,0,0">
+                        <ToggleSwitch x:Name="FfmpegCommandEditingToggle"
+                                      Header="Allow FFmpeg command editing before run"
+                                      OffContent="Read-only command previews"
+                                      OnContent="Editing enabled"
+                                      IsOn="False"
+                                      Toggled="SettingsToggle_Changed"
+                                      AutomationProperties.AutomationId="FfmpegCommandEditingToggle"/>
+                        <TextBlock Text="Edited commands are parsed as an argument vector without a shell. Input/output placeholders are mandatory, and shell metacharacters are rejected."
+                                   TextWrapping="Wrap"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </StackPanel>
+                </Expander>
+
                 <!-- Appearance -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>

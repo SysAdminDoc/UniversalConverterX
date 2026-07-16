@@ -223,6 +223,13 @@ public class ConverterXOptions
     /// </summary>
     public bool CheckForUpdates { get; set; } = true;
 
+    /// <summary>
+    /// Allow Advanced Mode to pause FFmpeg dispatch so the generated argument
+    /// vector can be edited. Off by default because edited commands bypass the
+    /// normal codec/profile guardrails.
+    /// </summary>
+    public bool EnableFfmpegCommandEditing { get; set; } = false;
+
     #endregion
 
     #region Conversion History
@@ -406,6 +413,7 @@ public class ConverterXOptions
         AutoDownloadTools = defaults.AutoDownloadTools;
         VerifyToolIntegrity = defaults.VerifyToolIntegrity;
         CheckForUpdates = defaults.CheckForUpdates;
+        EnableFfmpegCommandEditing = defaults.EnableFfmpegCommandEditing;
         EnableHistory = defaults.EnableHistory;
         MaxHistoryEntries = defaults.MaxHistoryEntries;
         HistoryRetentionDays = defaults.HistoryRetentionDays;
@@ -419,7 +427,7 @@ public class ConverterXOptions
         var locations = new[]
         {
             Path.Combine(AppContext.BaseDirectory, "tools"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "UniversalConverterX", "tools"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 "UniversalConverterX", "tools")

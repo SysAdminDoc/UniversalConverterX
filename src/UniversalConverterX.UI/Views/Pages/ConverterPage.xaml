@@ -277,6 +277,42 @@
                     </StackPanel>
                 </Border>
 
+                <Expander x:Name="AdvancedFfmpegExpander"
+                          Header="Advanced FFmpeg command"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch"
+                          AutomationProperties.AutomationId="ConverterAdvancedFfmpegExpander">
+                    <StackPanel Spacing="10" Padding="0,12,0,0">
+                        <TextBlock Text="The preview is a batch-safe template. Each job replaces {input} and {output} with its own paths."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <ToggleSwitch x:Name="EditFfmpegCommandToggle"
+                                      Header="Edit before run"
+                                      OffContent="Read-only"
+                                      OnContent="Custom argument vector"
+                                      IsEnabled="False"
+                                      Toggled="EditFfmpegCommandToggle_Toggled"
+                                      AutomationProperties.AutomationId="EditFfmpegCommandToggle"/>
+                        <TextBox x:Name="FfmpegCommandBox"
+                                 Header="Command template"
+                                 IsReadOnly="True"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="112"
+                                 MaxHeight="220"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 TextChanged="FfmpegCommandBox_TextChanged"
+                                 AutomationProperties.AutomationId="FfmpegCommandBox"/>
+                        <InfoBar x:Name="FfmpegCommandInfoBar"
+                                 IsOpen="True"
+                                 IsClosable="False"
+                                 Severity="Informational"
+                                 Title="Command preview"
+                                 Message="Add a media file and choose an FFmpeg-compatible output."
+                                 AutomationProperties.AutomationId="FfmpegCommandInfoBar"/>
+                    </StackPanel>
+                </Expander>
+
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Output Profile" Style="{StaticResource PanelTitleTextStyle}"/>

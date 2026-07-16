@@ -57,6 +57,7 @@
       <ComponentGroupRef Id="ApplicationFiles" />
       <ComponentGroupRef Id="PresetFiles" />
       <ComponentGroupRef Id="BundledFfmpeg" />
+      <ComponentGroupRef Id="FfmpegCommandProxy" />
       <ComponentRef Id="ApplicationShortcut" />
       <ComponentRef Id="DesktopShortcut" />
       <ComponentRef Id="RegistryEntries" />
@@ -87,6 +88,7 @@
         <Directory Id="ToolsFolder" Name="tools">
           <Directory Id="ToolsBinFolder" Name="bin" />
           <Directory Id="FfmpegMetadataFolder" Name="ffmpeg" />
+          <Directory Id="FfmpegProxyFolder" Name="ffmpeg-proxy" />
         </Directory>
       </Directory>
     </StandardDirectory>
@@ -137,6 +139,17 @@
       <Component Id="BundledFfmpegMetadata" Directory="FfmpegMetadataFolder" Guid="A37E9F70-2B1E-4D58-9C39-2B61CDEF2002">
         <File Id="BundledFfmpegManifest" Source="$(var.PublishDir)tools\ffmpeg\bundle.json" KeyPath="yes" />
         <File Id="BundledFfmpegVersion" Source="$(var.PublishDir)tools\ffmpeg\ffmpeg.version" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="FfmpegCommandProxy">
+      <Component Id="FfmpegCommandProxyFiles" Directory="FfmpegProxyFolder" Guid="A37E9F70-2B1E-4D58-9C39-2B61CDEF2003">
+        <File Id="FfmpegProxyExe" Source="$(var.PublishDir)tools\ffmpeg-proxy\ffmpeg.exe" KeyPath="yes" />
+        <File Id="FfmpegProxyDll" Source="$(var.PublishDir)tools\ffmpeg-proxy\ffmpeg.dll" />
+        <File Id="FfmpegProxyDeps" Source="$(var.PublishDir)tools\ffmpeg-proxy\ffmpeg.deps.json" />
+        <File Id="FfmpegProxyRuntimeConfig" Source="$(var.PublishDir)tools\ffmpeg-proxy\ffmpeg.runtimeconfig.json" />
       </Component>
     </ComponentGroup>
   </Fragment>
