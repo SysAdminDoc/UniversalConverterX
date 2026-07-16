@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.PresetEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Back"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Cancel_Click"
+                    VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="PresetEditorBackButton"/>
+            <StackPanel Grid.Column="1" Spacing="6">
+                <TextBlock x:Name="PageTitle"
+                           Text="Create preset"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Name="PageSubtitle"
+                           Text="Build a reusable local preset. Arguments are passed directly to the selected sidecar."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           FontSize="13"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Grid>
+
+        <InfoBar Grid.Row="1"
+                 x:Name="ValidationInfo"
+                 IsOpen="False"
+                 IsClosable="True"
+                 Severity="Error"
+                 Title="Preset could not be saved"/>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16" Padding="0,0,12,16">
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Identity and matching"
+                                   Style="{StaticResource SectionHeaderTextStyle}"/>
+                        <TextBlock Text="Custom presets are stored under your Windows profile and override shipped presets only when their names match."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <Grid ColumnSpacing="14" RowSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBox x:Name="NameBox"
+                                     Header="Preset name"
+                                     PlaceholderText="My H.264 encode"
+                                     TextChanged="EditorField_Changed"
+                                     AutomationProperties.AutomationId="PresetEditorNameBox"/>
+                            <TextBox Grid.Column="1"
+                                     x:Name="EngineBox"
+                                     Header="Sidecar engine"
+                                     PlaceholderText="videocrush"
+                                     TextChanged="EditorField_Changed"
+                                     AutomationProperties.AutomationId="PresetEditorEngineBox"/>
+                            <TextBox Grid.Row="1"
+                                     x:Name="FolderBox"
+                                     Header="Category"
+                                     PlaceholderText="Video/Custom"
+                                     TextChanged="EditorField_Changed"
+                                     AutomationProperties.AutomationId="PresetEditorFolderBox"/>
+                            <TextBox Grid.Row="1" Grid.Column="1"
+                                     x:Name="InputTypesBox"
+                                     Header="Input extensions"
+                                     PlaceholderText="mp4, mkv, mov (blank means any)"
+                                     TextChanged="EditorField_Changed"
+                                     AutomationProperties.AutomationId="PresetEditorInputTypesBox"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Output and invocation"
+                                   Style="{StaticResource SectionHeaderTextStyle}"/>
+                        <TextBox x:Name="OutputTemplateBox"
+                                 Header="Output filename template"
+                                 PlaceholderText="{}{dir}/{stem}_custom"
+                                 TextChanged="EditorField_Changed"
+                                 AutomationProperties.AutomationId="PresetEditorOutputTemplateBox"/>
+                        <Grid ColumnSpacing="14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="OutputExtensionBox"
+                                     Header="Output extension"
+                                     PlaceholderText="mkv, tar.gz, or __dir__"
+                                     TextChanged="EditorField_Changed"
+                                     AutomationProperties.AutomationId="PresetEditorOutputExtensionBox"/>
+                            <ComboBox Grid.Column="1"
+                                      x:Name="InvocationModeCombo"
+                                      Header="Invocation mode"
+                                      SelectionChanged="InvocationMode_Changed"
+                                      AutomationProperties.AutomationId="PresetEditorInvocationModeCombo">
+                                <ComboBoxItem Content="One run per file" Tag="per-file"/>
+                                <ComboBoxItem Content="Batch input list" Tag="batch-input-list"/>
+                                <ComboBoxItem Content="Batch with output folder" Tag="batch-output-dir"/>
+                                <ComboBoxItem Content="Batch to one output" Tag="batch-single-output"/>
+                                <ComboBoxItem Content="Extract each input" Tag="extract-each"/>
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock Text="Tokens: {dir}, {stem}, {ext}, and {preset}. Use __dir__ when the preset creates a folder instead of a file."
+                                   Style="{StaticResource SubtleTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Sidecar arguments"
+                                   Style="{StaticResource SectionHeaderTextStyle}"/>
+                        <TextBlock Text="Enter exactly one argument per line. Input and output arguments are appended by the selected invocation mode."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBox x:Name="ArgumentsBox"
+                                 AcceptsReturn="True"
+                                 TextWrapping="NoWrap"
+                                 MinHeight="180"
+                                 FontFamily="Consolas"
+                                 PlaceholderText="encode&#x0a;--codec&#x0a;libx264&#x0a;--crf&#x0a;20"
+                                 TextChanged="EditorField_Changed"
+                                 AutomationProperties.AutomationId="PresetEditorArgumentsBox"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Name="RequiresExtraInputToggle"
+                                      Header="Ask for an additional input"
+                                      OffContent="No extra input"
+                                      OnContent="Extra input required"
+                                      Toggled="RequiresExtraInput_Toggled"
+                                      AutomationProperties.AutomationId="PresetEditorExtraInputToggle"/>
+                        <TextBox x:Name="ExtraInputPromptBox"
+                                 Header="Extra input prompt"
+                                 PlaceholderText="Explain what additional file the user should choose"
+                                 IsEnabled="False"
+                                 TextChanged="EditorField_Changed"
+                                 AutomationProperties.AutomationId="PresetEditorExtraInputPromptBox"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource SurfaceLightBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="14">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Local preset preview"
+                                   Style="{StaticResource LabelTextStyle}"/>
+                        <TextBlock x:Name="PreviewText"
+                                   Text="Complete the required fields to preview this preset."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="3"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,16,0,0">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="SaveLocationText"
+                           Text="Saved presets remain available after restart."
+                           Style="{StaticResource SubtleTextStyle}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button Grid.Column="1"
+                        Content="Cancel"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Cancel_Click"
+                        AutomationProperties.AutomationId="PresetEditorCancelButton"/>
+                <Button Grid.Column="2"
+                        x:Name="SaveButton"
+                        Content="Save preset"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Save_Click"
+                        AutomationProperties.AutomationId="PresetEditorSaveButton"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

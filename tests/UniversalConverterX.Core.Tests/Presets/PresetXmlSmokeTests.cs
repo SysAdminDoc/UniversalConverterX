@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using FluentAssertions;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Core.Tests.Presets;
 
@@ -25,6 +26,16 @@ public class PresetXmlSmokeTests
     {
         foreach (var file in Directory.EnumerateFiles(PresetsDir, "*.preset.xml"))
             yield return [file];
+    }
+
+    [Theory]
+    [MemberData(nameof(PresetFiles))]
+    public void Preset_ShouldPassEditableSchema(string path)
+    {
+        var result = PresetDocument.Load(path);
+
+        result.Succeeded.Should().BeTrue(
+            $"{Path.GetFileName(path)} must be editable: {string.Join("; ", result.Errors)}");
     }
 
     [Theory]

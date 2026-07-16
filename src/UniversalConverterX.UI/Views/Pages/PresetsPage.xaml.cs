@@ -17,7 +17,13 @@ public sealed class PresetCardItem : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public required UiPreset Preset { get; init; }
     public string Name => Preset.Name;
+    public string SourcePath => Preset.SourcePath;
     public string Glyph { get; init; } = "\uE8B7";
+    public bool CanEdit => UiPresetLoader.IsUserPreset(Preset.SourcePath);
+    public string OriginLabel => CanEdit ? "Custom" : "Built-in";
+    public string EditHint => CanEdit
+        ? "Edit this custom preset"
+        : "Built-in presets are read-only; duplicate one to customize it";
 
     public string Subtitle
     {
@@ -221,6 +227,31 @@ public sealed partial class PresetsPage : Page
     }
 
     private async void Reload_Click(object sender, RoutedEventArgs e) => await ReloadAsync();
+
+    private void CreatePreset_Click(object sender, RoutedEventArgs e) =>
+        Frame.Navigate(
+            typeof(PresetEditorPage),
+            new PresetEditorRequest(PresetEditorMode.Create));
+
+    private void EditPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string sourcePath } && UiPresetLoader.IsUserPreset(sourcePath))
+        {
+            Frame.Navigate(
+                typeof(PresetEditorPage),
+                new PresetEditorRequest(PresetEditorMode.Edit, sourcePath));
+        }
+    }
+
+    private void DuplicatePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string sourcePath })
+        {
+            Frame.Navigate(
+                typeof(PresetEditorPage),
+                new PresetEditorRequest(PresetEditorMode.Duplicate, sourcePath));
+        }
+    }
 
     private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {

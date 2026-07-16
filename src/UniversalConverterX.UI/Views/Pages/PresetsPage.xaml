@@ -29,10 +29,19 @@
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Name}"
-                                   Style="{StaticResource LabelTextStyle}"
-                                   FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Name}"
+                                       Style="{StaticResource LabelTextStyle}"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <Border Background="{StaticResource SurfaceLightBrush}"
+                                    CornerRadius="8"
+                                    Padding="7,2">
+                                <TextBlock Text="{Binding OriginLabel}"
+                                           Style="{StaticResource SubtleTextStyle}"
+                                           FontSize="10"/>
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text="{Binding Subtitle}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="12"
@@ -40,14 +49,29 @@
                                    MaxLines="2"
                                    LineHeight="17"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="6">
-                        <Button Content="Run"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Padding="16,10"
-                                Click="RunPreset_Click"
-                                Tag="{Binding Name}"
-                                IsEnabled="{Binding CanRun}"
-                                ToolTipService.ToolTip="{Binding HealthDetail}"/>
+                    <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Content="Run"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="14,9"
+                                    Click="RunPreset_Click"
+                                    Tag="{Binding Name}"
+                                    IsEnabled="{Binding CanRun}"
+                                    ToolTipService.ToolTip="{Binding HealthDetail}"/>
+                            <Button Content="Edit"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Padding="12,9"
+                                    Click="EditPreset_Click"
+                                    Tag="{Binding SourcePath}"
+                                    IsEnabled="{Binding CanEdit}"
+                                    ToolTipService.ToolTip="{Binding EditHint}"/>
+                            <Button Content="Duplicate"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Padding="12,9"
+                                    Click="DuplicatePreset_Click"
+                                    Tag="{Binding SourcePath}"
+                                    ToolTipService.ToolTip="Create an editable custom copy"/>
+                        </StackPanel>
                         <TextBlock Text="{Binding StatusText, Mode=OneWay}"
                                    Style="{StaticResource SubtleTextStyle}"
                                    TextAlignment="Center" FontSize="10"
@@ -81,12 +105,19 @@
                            Style="{StaticResource SubtitleTextStyle}" FontSize="13"
                            TextWrapping="Wrap"/>
             </StackPanel>
-            <Button Grid.Column="1"
-                    Content="Reload"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Click="Reload_Click"
-                    VerticalAlignment="Center"
-                AutomationProperties.AutomationId="PresetsPageButton01"/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center">
+                <Button Content="New preset"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="CreatePreset_Click"
+                        AutomationProperties.AutomationId="PresetsCreatePresetButton"/>
+                <Button Content="Reload"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Reload_Click"
+                        AutomationProperties.AutomationId="PresetsReloadButton"/>
+            </StackPanel>
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">

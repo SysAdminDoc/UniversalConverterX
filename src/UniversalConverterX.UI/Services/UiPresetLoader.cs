@@ -1,5 +1,3 @@
-using System.Xml;
-using System.Xml.Linq;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
@@ -57,7 +55,9 @@ public sealed record UiPreset(
     string Engine,
     PresetInvocationMode Mode,
     IReadOnlyList<string> Args,
-    string SourcePath)
+    string SourcePath,
+    bool RequiresExtraInput = false,
+    string? ExtraInputPrompt = null)
 {
     public string DisplayCategory => Folder ?? "Uncategorized";
 
@@ -76,20 +76,16 @@ public sealed record UiPreset(
 /// </summary>
 public static class UiPresetLoader
 {
-    private const string Ns = "https://universalconverterx.io/preset/v1";
-    private static readonly XmlReaderSettings XmlSettings = new()
-    {
-        DtdProcessing = DtdProcessing.Prohibit,
-        XmlResolver = null,
-    };
+    public static string UserPresetDirectory => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "UniversalConverterX",
+        "presets");
 
     public static IReadOnlyList<string> ResolvePresetDirs()
     {
         var dirs = new List<string>();
 
-        var local = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "presets");
+        var local = UserPresetDirectory;
         if (Directory.Exists(local)) dirs.Add(local);
 
         try
@@ -146,77 +142,76 @@ public static class UiPresetLoader
 
     public static UiPreset? TryLoad(string path)
     {
-        try
-        {
-            using var reader = XmlReader.Create(path, XmlSettings);
-            var doc = XDocument.Load(reader, LoadOptions.None);
-            var root = doc.Root;
-            if (root is null || root.Name.LocalName != "Preset") return null;
-
-            string Get(string name) =>
-                root.Element(XName.Get(name, Ns))?.Value
-                ?? root.Element(name)?.Value
-                ?? "";
-
-            var name = Get("Name").Trim();
-            if (name.Length == 0) return null;
-
-            var folder = Get("Folder");
-            var template = Get("OutputFileNameTemplate");
-            var rawExt = Get("OutputExtension").Trim();
-            var ext = string.Empty;
-            var engine = Get("Engine");
-            if (!string.IsNullOrEmpty(rawExt) &&
-                !PathSafety.TryNormalizeExtension(rawExt, out ext, allowDirectorySentinel: true))
-                return null;
-            if (!IsSafeToolName(engine))
-                return null;
-
-            var inputTypesElem =
-                root.Element(XName.Get("InputTypes", Ns))
-                ?? root.Element("InputTypes");
-            var inputTypes = inputTypesElem?
-                .Elements()
-                .Select(e => e.Value.Trim().TrimStart('.').ToLowerInvariant())
-                .Where(s => s.Length > 0)
-                .ToList() ?? [];
-
-            var modeStr = Get("InvocationMode").ToLowerInvariant();
-            var mode = modeStr switch
-            {
-                "batch-output-dir"    => PresetInvocationMode.BatchOutputDir,
-                "batch-single-output" => PresetInvocationMode.BatchSingleOutput,
-                "extract-each"        => PresetInvocationMode.ExtractEach,
-                _                     => PresetInvocationMode.PerFile,
-            };
-
-            var argsElem =
-                root.Element(XName.Get("Args", Ns))
-                ?? root.Element("Args");
-            var args = argsElem?.Elements().Select(e => e.Value).ToList() ?? [];
-
-            return new UiPreset(
-                Name: name,
-                Folder: string.IsNullOrEmpty(folder) ? null : folder,
-                InputTypes: inputTypes,
-                OutputFileNameTemplate: template,
-                OutputExtension: ext,
-                Engine: engine,
-                Mode: mode,
-                Args: args,
-                SourcePath: path);
-        }
-        catch
-        {
+        var loaded = PresetDocument.Load(path);
+        if (!loaded.Succeeded || loaded.Preset is null)
             return null;
-        }
+
+        var preset = loaded.Preset;
+        var mode = preset.InvocationMode switch
+        {
+            "batch-output-dir" => PresetInvocationMode.BatchOutputDir,
+            "batch-single-output" => PresetInvocationMode.BatchSingleOutput,
+            "extract-each" => PresetInvocationMode.ExtractEach,
+            _ => PresetInvocationMode.PerFile,
+        };
+
+        return new UiPreset(
+            preset.Name,
+            preset.Folder,
+            preset.InputTypes,
+            preset.OutputFileNameTemplate,
+            preset.OutputExtension,
+            preset.Engine,
+            mode,
+            preset.Args,
+            path,
+            preset.RequiresExtraInput,
+            preset.ExtraInputPrompt);
     }
 
-    private static bool IsSafeToolName(string value)
+    public static bool IsUserPreset(string path)
     {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        if (value is "." or "..") return false;
-        return value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+        var relative = Path.GetRelativePath(
+            Path.GetFullPath(UserPresetDirectory),
+            Path.GetFullPath(path));
+        return !Path.IsPathRooted(relative)
+            && !string.Equals(relative, "..", StringComparison.Ordinal)
+            && !relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            && !relative.StartsWith(".." + Path.AltDirectorySeparatorChar, StringComparison.Ordinal);
+    }
+
+    public static PresetDocumentSaveResult SaveCustom(
+        PresetDefinition preset,
+        string? existingPath = null)
+    {
+        string destination;
+        var overwrite = false;
+        if (!string.IsNullOrWhiteSpace(existingPath))
+        {
+            if (!IsUserPreset(existingPath))
+            {
+                return new PresetDocumentSaveResult(
+                    false,
+                    null,
+                    ["Built-in presets cannot be overwritten. Duplicate the preset instead."]);
+            }
+            destination = Path.GetFullPath(existingPath);
+            overwrite = true;
+        }
+        else
+        {
+            Directory.CreateDirectory(UserPresetDirectory);
+            var safeName = PathSafety.SanitizeFileNameComponent(preset.Name, "custom-preset");
+            if (safeName.Length > 100)
+                safeName = safeName[..100].Trim();
+            destination = Path.Combine(UserPresetDirectory, safeName + ".preset.xml");
+            for (var suffix = 2; File.Exists(destination); suffix++)
+                destination = Path.Combine(UserPresetDirectory, $"{safeName}-{suffix}.preset.xml");
+        }
+
+        return PresetDocument.Save(preset, destination, overwrite);
     }
 
     public static string ResolveOutputPath(UiPreset preset, string source)

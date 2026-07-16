@@ -1,6 +1,3 @@
-using System.Xml;
-using System.Xml.Linq;
-
 namespace UniversalConverterX.Core.Utilities;
 
 /// <summary>
@@ -10,14 +7,6 @@ namespace UniversalConverterX.Core.Utilities;
 /// </summary>
 public static class PresetPortability
 {
-    private const string PresetNs = "https://universalconverterx.io/preset/v1";
-
-    private static readonly XmlReaderSettings SafeReaderSettings = new()
-    {
-        DtdProcessing = DtdProcessing.Prohibit,
-        XmlResolver = null,
-    };
-
     public sealed record ImportResult(
         bool Success,
         string? DestinationPath,
@@ -40,57 +29,12 @@ public static class PresetPortability
     /// </summary>
     public static ValidationResult Validate(string presetPath)
     {
-        var errors = new List<string>();
-
-        if (!File.Exists(presetPath))
-        {
-            errors.Add($"File not found: '{presetPath}'");
-            return new ValidationResult(false, null, null, errors);
-        }
-
-        XDocument doc;
-        try
-        {
-            using var reader = XmlReader.Create(presetPath, SafeReaderSettings);
-            doc = XDocument.Load(reader, LoadOptions.None);
-        }
-        catch (XmlException ex)
-        {
-            errors.Add($"Invalid XML: {ex.Message}");
-            return new ValidationResult(false, null, null, errors);
-        }
-
-        var root = doc.Root;
-        if (root is null || root.Name.LocalName != "Preset")
-        {
-            errors.Add("Root element must be <Preset>.");
-            return new ValidationResult(false, null, null, errors);
-        }
-
-        string Get(string name) =>
-            root.Element(XName.Get(name, PresetNs))?.Value
-            ?? root.Element(name)?.Value
-            ?? "";
-
-        var name = Get("Name").Trim();
-        if (string.IsNullOrEmpty(name))
-            errors.Add("Missing or empty <Name> element.");
-
-        var engine = Get("Engine").Trim();
-        if (string.IsNullOrEmpty(engine))
-            errors.Add("Missing or empty <Engine> element.");
-        else if (!IsSafeToolName(engine))
-            errors.Add($"Unsafe engine name: '{engine}'. Must not contain path separators.");
-
-        var template = Get("OutputFileNameTemplate");
-        if (!string.IsNullOrEmpty(template) && template.Contains(".."))
-            errors.Add("OutputFileNameTemplate contains '..' path traversal.");
-
-        var ext = Get("OutputExtension").Trim();
-        if (!string.IsNullOrEmpty(ext) && ext.IndexOfAny(['/', '\\', ':', '\0']) >= 0)
-            errors.Add($"Unsafe OutputExtension: '{ext}'.");
-
-        return new ValidationResult(errors.Count == 0, name, engine, errors);
+        var loaded = PresetDocument.Load(presetPath);
+        return new ValidationResult(
+            loaded.Succeeded,
+            loaded.Preset?.Name,
+            loaded.Preset?.Engine,
+            loaded.Errors);
     }
 
     /// <summary>
@@ -156,12 +100,5 @@ public static class PresetPortability
         File.Copy(presetPath, exportPath, overwrite: true);
 
         return new ExportResult(true, exportPath, null);
-    }
-
-    private static bool IsSafeToolName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        if (value is "." or "..") return false;
-        return value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
     }
 }
