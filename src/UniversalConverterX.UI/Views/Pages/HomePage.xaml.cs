@@ -213,7 +213,7 @@ public sealed partial class HomePage : Page
         }
     }
 
-    private void ExportCrashBundle_Click(object sender, RoutedEventArgs e)
+    private async void ExportCrashBundle_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -224,7 +224,7 @@ public sealed partial class HomePage : Page
                 return;
             }
             logger.Info("diagnostics", "user-initiated crash bundle export");
-            var sidecarHealth = BuildSidecarHealthSnapshot();
+            var sidecarHealth = await BuildSidecarHealthSnapshotAsync();
             var path = CrashBundle.Capture(logger, exception: null,
                 note: "User-initiated bundle export from Home dashboard.",
                 sidecarHealth: sidecarHealth);
@@ -247,7 +247,7 @@ public sealed partial class HomePage : Page
         }
     }
 
-    private static IReadOnlyList<SidecarHealthReport> BuildSidecarHealthSnapshot()
+    private static async Task<IReadOnlyList<SidecarHealthReport>> BuildSidecarHealthSnapshotAsync()
     {
         try
         {
@@ -256,7 +256,7 @@ public sealed partial class HomePage : Page
             if (cache is null || health is null)
                 return [];
 
-            return health.EvaluateAll(cache.Get());
+            return await health.EvaluateAllAsync(cache.Get());
         }
         catch
         {

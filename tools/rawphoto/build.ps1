@@ -17,7 +17,7 @@ if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
 
 & $python -m pip install --quiet --upgrade pip pyinstaller
-& $python -m pip install --quiet 'rawpy>=0.21,<1' 'Pillow>=10' numpy
+& $python -m pip install --quiet 'rawpy>=0.21,<1' 'Pillow>=12.3.0' numpy
 
 & $python -m PyInstaller `
     --name rawphoto `

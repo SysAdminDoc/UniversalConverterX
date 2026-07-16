@@ -105,6 +105,17 @@ public sealed partial class SettingsWindow : Window
             var version = tool.IsInstalled 
                 ? await _toolManager.GetToolVersionAsync(tool.Id) 
                 : null;
+            var assessment = ToolVersionPolicy.Assess(tool.Id, version);
+            var hasVersionWarning = tool.IsInstalled
+                && assessment.HasRequirement
+                && !assessment.MeetsMinimum;
+            var statusText = !tool.IsInstalled
+                ? $"Not installed • {tool.Description}"
+                : hasVersionWarning
+                    ? assessment.VersionKnown
+                        ? $"Security update required: {assessment.DetectedVersion} < {assessment.Requirement!.MinimumVersion}"
+                        : $"Version unverified; requires {assessment.Requirement!.MinimumVersion}+"
+                    : $"Installed • {tool.Description}";
 
             _tools.Add(new ToolViewModel
             {
@@ -112,13 +123,11 @@ public sealed partial class SettingsWindow : Window
                 Name = tool.Name,
                 Version = version ?? "",
                 IsInstalled = tool.IsInstalled,
-                StatusGlyph = tool.IsInstalled ? "\uE73E" : "\uE711",
-                StatusColor = tool.IsInstalled 
+                StatusGlyph = tool.IsInstalled && !hasVersionWarning ? "\uE73E" : "\uE711",
+                StatusColor = tool.IsInstalled && !hasVersionWarning
                     ? (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"]
                     : (SolidColorBrush)Application.Current.Resources["AccentOrangeBrush"],
-                StatusText = tool.IsInstalled 
-                    ? $"Installed • {tool.Description}" 
-                    : $"Not installed • {tool.Description}",
+                StatusText = statusText,
                 ActionText = tool.IsInstalled ? "Update" : "Install"
             });
         }

@@ -44,6 +44,7 @@ public class ToolManagerTests
     [InlineData("pandoc")]
     [InlineData("calibre")]
     [InlineData("libreoffice")]
+    [InlineData("7zip")]
     [InlineData("inkscape")]
     [InlineData("ghostscript")]
     public void GetToolPath_KnownTool_ShouldReturnPath(string toolName)
@@ -56,6 +57,7 @@ public class ToolManagerTests
                              toolName == "ghostscript" ? "gs" :
                              toolName == "calibre" ? "ebook-convert" :
                              toolName == "libreoffice" ? "soffice" :
+                             toolName == "7zip" ? "7z" :
                              toolName);
     }
 
@@ -116,6 +118,7 @@ public class ToolManagerTests
         tools.Should().Contain(t => t.Id == "pandoc");
         tools.Should().Contain(t => t.Id == "calibre");
         tools.Should().Contain(t => t.Id == "libreoffice");
+        tools.Should().Contain(t => t.Id == "7zip");
         tools.Should().Contain(t => t.Id == "inkscape");
         tools.Should().Contain(t => t.Id == "ghostscript");
     }

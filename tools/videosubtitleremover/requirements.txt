@@ -4,7 +4,7 @@
 # Core
 numpy>=1.21.0
 opencv-python>=4.10.0
-Pillow>=12.2.0
+Pillow>=12.3.0
 
 # Pin ONNX Runtime ≥ 1.25.1 to inherit the heap-OOB / Pad-Reflect / transpose
 # CPU-kernel security patches (15+ CVEs vs 1.25.0). rapidocr-onnxruntime below

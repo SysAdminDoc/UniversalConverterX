@@ -32,6 +32,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         ["pandoc"] = new("pandoc", "Pandoc", "https://pandoc.org/", "Document conversion"),
         ["calibre"] = new("ebook-convert", "Calibre", "https://calibre-ebook.com/", "Ebook conversion"),
         ["libreoffice"] = new("soffice", "LibreOffice", "https://www.libreoffice.org/", "Office document conversion"),
+        ["7zip"] = new("7z", "7-Zip", "https://www.7-zip.org/", "Archive extraction"),
         ["inkscape"] = new("inkscape", "Inkscape", "https://inkscape.org/", "Vector graphics"),
         ["ghostscript"] = new("gs", "Ghostscript", "https://www.ghostscript.com/", "PDF processing"),
     };
@@ -98,11 +99,29 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
             cancellationToken.ThrowIfCancellationRequested();
             var (found, version, path) = await FindTool(tool.Executable, toolsPath, cancellationToken);
 
-            var status = found ? "[green]✓ Found[/]" : "[red]✗ Not Found[/]";
+            var assessment = ToolVersionPolicy.Assess(id, version);
+            var status = !found
+                ? "[red]✗ Not Found[/]"
+                : assessment.HasRequirement && !assessment.VersionKnown
+                    ? "[yellow]⚠ Unverified[/]"
+                    : assessment.HasRequirement && !assessment.MeetsMinimum
+                        ? "[yellow]⚠ Outdated[/]"
+                        : "[green]✓ Found[/]";
             var versionStr = version ?? "[dim]N/A[/]";
             var pathStr = found ? $"[dim]{TruncatePath(path!, 40)}[/]" : "[dim]N/A[/]";
 
             table.AddRow(tool.Name, status, versionStr, pathStr);
+
+            if (found && assessment.HasRequirement && !assessment.MeetsMinimum)
+            {
+                var requirement = assessment.Requirement!;
+                var detected = assessment.VersionKnown
+                    ? $"detected {assessment.DetectedVersion}"
+                    : "version could not be determined";
+                AnsiConsole.MarkupLine(
+                    $"[yellow]Warning:[/] {tool.Name} requires >= {requirement.MinimumVersion} " +
+                    $"for {requirement.SecurityReason}; {detected}.");
+            }
         }
 
         AnsiConsole.Write(table);
@@ -272,6 +291,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
                 "pandoc" => "--version",
                 "ebook-convert" => "--version",
                 "soffice" => "--version",
+                "7z" => "i",
                 "inkscape" => "--version",
                 "gs" => "--version",
                 _ => "--version"
@@ -295,7 +315,10 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
             await process.WaitForExitAsync(cancellationToken);
 
             // Extract version from first line
-            var firstLine = output.Split('\n').FirstOrDefault()?.Trim();
+            var firstLine = output
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line.Trim())
+                .FirstOrDefault(line => line.Length > 0);
             if (!string.IsNullOrEmpty(firstLine))
             {
                 // Try to extract just the version number
@@ -331,6 +354,11 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
                 "magick" => [$@"{programFiles}\ImageMagick-7.1.1-Q16-HDRI\magick.exe"],
                 "soffice" => [$@"{programFiles}\LibreOffice\program\soffice.exe"],
                 "ebook-convert" => [$@"{programFiles}\Calibre2\ebook-convert.exe"],
+                "7z" => [
+                    $@"{programFiles}\7-Zip\7z.exe",
+                    $@"{programFilesX86}\7-Zip\7z.exe",
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "7-Zip", "7z.exe")
+                ],
                 "inkscape" => [$@"{programFiles}\Inkscape\bin\inkscape.exe"],
                 "gs" => [$@"{programFiles}\gs\gs10.02.1\bin\gswin64c.exe"],
                 _ => []
@@ -357,6 +385,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         "pandoc" => "JohnMacFarlane.Pandoc",
         "calibre" => "calibre.calibre",
         "libreoffice" => "TheDocumentFoundation.LibreOffice",
+        "7zip" => "7zip.7zip",
         "inkscape" => "Inkscape.Inkscape",
         "ghostscript" => "ArtifexSoftware.GhostScript",
         _ => toolId
@@ -366,6 +395,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     {
         "imagemagick" => "imagemagick",
         "libreoffice" => "libreoffice",
+        "7zip" => "sevenzip",
         _ => toolId
     };
 
@@ -373,6 +403,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     {
         "imagemagick" => "imagemagick",
         "libreoffice" => "libreoffice",
+        "7zip" => "p7zip-full",
         "ghostscript" => "ghostscript",
         _ => toolId
     };

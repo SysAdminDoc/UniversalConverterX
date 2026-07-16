@@ -435,13 +435,13 @@ def check_known_events(path: Path, tree: ast.AST) -> list[Violation]:
 
 
 SECURITY_FLOORS: dict[str, tuple[str, str]] = {
-    "Pillow": ("12.2.0", "GHSA-pwv6-vv43-88gr image parsing CVEs"),
-    "pillow": ("12.2.0", "GHSA-pwv6-vv43-88gr image parsing CVEs"),
+    "Pillow": ("12.3.0", "Pillow 12.3.0 parser and decompression-bomb security fixes"),
+    "pillow": ("12.3.0", "Pillow 12.3.0 parser and decompression-bomb security fixes"),
     "onnxruntime": ("1.25.1", "15+ CVEs fixed in ORT 1.25.0/1.25.1"),
     "onnxruntime-gpu": ("1.25.1", "15+ CVEs fixed in ORT 1.25.0/1.25.1"),
     "opencv-python": ("4.10.0", "pre-4.10 heap/buffer overflow fixes"),
     "opencv-python-headless": ("4.10.0", "pre-4.10 heap/buffer overflow fixes"),
-    "yt-dlp": ("2026.02.21", "CVE-2026-26331 command injection"),
+    "yt-dlp": ("2026.07.04", "2026 downloader security rollup"),
     "pillow-jxl-plugin": ("1.3.4", "libjxl CVE-2025-12474 + CVE-2026-1837"),
 }
 

@@ -16,7 +16,7 @@ public class ToolManager : IToolManager
     private readonly ConverterXOptions _options;
     private readonly IToolDownloader? _downloader;
     private readonly Dictionary<string, ToolDefinition> _toolDefinitions;
-    private readonly Dictionary<string, string?> _versionCache = [];
+    private readonly Dictionary<string, string?> _versionCache = new(StringComparer.OrdinalIgnoreCase);
 
     public ToolManager(IOptions<ConverterXOptions> options, ILogger<ToolManager>? logger = null)
     {
@@ -218,6 +218,7 @@ public class ToolManager : IToolManager
             ["pandoc"] = new("pandoc", "Pandoc", "--version", "Universal document converter"),
             ["calibre"] = new("ebook-convert", "Calibre", "--version", "E-book conversion"),
             ["libreoffice"] = new("soffice", "LibreOffice", "--version", "Office document conversion"),
+            ["7zip"] = new("7z", "7-Zip", "i", "Archive extraction"),
             ["inkscape"] = new("inkscape", "Inkscape", "--version", "Vector graphics editor"),
             ["ghostscript"] = new(OperatingSystem.IsWindows() ? "gswin64c" : "gs", "Ghostscript", "--version", "PDF and PostScript processing"),
         };
@@ -244,6 +245,13 @@ public class ToolManager : IToolManager
                 ],
                 "ebook-convert" => [
                     $@"{programFiles}\Calibre2\ebook-convert.exe"
+                ],
+                "7z" => [
+                    $@"{programFiles}\7-Zip\7z.exe",
+                    $@"{programFilesX86}\7-Zip\7z.exe",
+                    Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "Programs", "7-Zip", "7z.exe")
                 ],
                 "inkscape" => [
                     $@"{programFiles}\Inkscape\bin\inkscape.exe"
@@ -273,8 +281,10 @@ public class ToolManager : IToolManager
         if (string.IsNullOrWhiteSpace(output))
             return null;
 
-        var lines = output.Split('\n');
-        var firstLine = lines.FirstOrDefault()?.Trim();
+        var firstLine = output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Trim())
+            .FirstOrDefault(line => line.Length > 0);
 
         if (string.IsNullOrEmpty(firstLine))
             return null;

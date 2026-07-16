@@ -5,5 +5,5 @@ facexlib>=0.3.0
 realesrgan>=0.3.0
 opencv-python-headless>=4.10
 numpy>=1.24
-Pillow>=12.2.0
+Pillow>=12.3.0
 torch>=2.4

@@ -2,6 +2,14 @@
 
 All notable changes to UniversalConverterX will be documented in this file.
 
+## [Unreleased]
+
+### Security
+
+- Raised all Pillow sidecar floors to 12.3.0 and yt-dlp to 2026.07.04, with the sidecar contract gate enforcing both floors.
+- Added shared minimum-version policy checks for FFmpeg 8.1.2, ImageMagick 7.1.2-15, Calibre 9.10, 7-Zip 26.01, and LibreOffice 26.2.4. The CLI, Settings tool inventory, and preset health surface now warn when an installed parser is outdated or cannot be verified.
+- Installer publishing now refuses to build on .NET runtimes older than 10.0.9 and resolves the latest installed servicing patch.
+
 ## [2.22.1] - 2026-07-01
 
 ### Security

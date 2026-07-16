@@ -26,7 +26,7 @@ if ($Clean) {
 Write-Host '[heicshift] Ensuring runtime deps...'
 # pillow-jxl-plugin is opt-in: succeed even if it fails to install (some
 # environments lack libjxl prebuilt wheels). The sidecar degrades gracefully.
-& $Python -m pip install --quiet 'Pillow>=10.0.0' 'pillow-heif>=0.16.0' pyinstaller
+& $Python -m pip install --quiet 'Pillow>=12.3.0' 'pillow-heif>=0.16.0' pyinstaller
 if ($LASTEXITCODE -ne 0) { throw 'pip install failed.' }
 
 # ROADMAP Item 88: pin pillow-jxl-plugin to a version that bundles

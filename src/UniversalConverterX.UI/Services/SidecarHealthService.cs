@@ -23,8 +23,10 @@ public sealed record SidecarHealthReport(
 
 public interface ISidecarHealthService
 {
-    SidecarHealthReport Evaluate(UiPreset preset);
-    IReadOnlyList<SidecarHealthReport> EvaluateAll(IEnumerable<UiPreset> presets);
+    Task<SidecarHealthReport> EvaluateAsync(UiPreset preset, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SidecarHealthReport>> EvaluateAllAsync(
+        IEnumerable<UiPreset> presets,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class SidecarHealthService : ISidecarHealthService
@@ -173,7 +175,9 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string Display = "",
         bool Managed = false);
 
-    public SidecarHealthReport Evaluate(UiPreset preset)
+    public async Task<SidecarHealthReport> EvaluateAsync(
+        UiPreset preset,
+        CancellationToken cancellationToken = default)
     {
         var rows = new List<SidecarHealthRequirement>();
         var sidecarPath = _runner.Locate(preset.Engine);
@@ -182,7 +186,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
             : Ready(preset.Engine, "sidecar", $"{preset.Engine}.exe", "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
 
         foreach (var tool in ToolRequirementsFor(preset))
-            rows.Add(EvaluateTool(preset.Engine, tool));
+            rows.Add(await EvaluateToolAsync(preset.Engine, tool, cancellationToken));
 
         if (HasModels(preset.Engine))
             rows.Add(EvaluateModelCache(preset.Engine, sidecarPath));
@@ -222,11 +226,25 @@ public sealed class SidecarHealthService : ISidecarHealthService
             Requirements: rows);
     }
 
-    public IReadOnlyList<SidecarHealthReport> EvaluateAll(IEnumerable<UiPreset> presets)
+    public async Task<IReadOnlyList<SidecarHealthReport>> EvaluateAllAsync(
+        IEnumerable<UiPreset> presets,
+        CancellationToken cancellationToken = default)
     {
-        return presets
+        var reports = new List<SidecarHealthReport>();
+        var representativePresets = presets
             .GroupBy(p => p.Engine, StringComparer.OrdinalIgnoreCase)
-            .Select(g => Evaluate(g.First()))
+            .Select(g => g.First())
+            .ToList();
+
+        // Keep probes serialized. ToolManager caches the first result for each
+        // executable, while serialization avoids concurrent process/file races.
+        foreach (var preset in representativePresets)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            reports.Add(await EvaluateAsync(preset, cancellationToken));
+        }
+
+        return reports
             .OrderBy(r => r.CanRun)
             .ThenBy(r => r.Engine, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -253,13 +271,61 @@ public sealed class SidecarHealthService : ISidecarHealthService
         }
     }
 
-    private SidecarHealthRequirement EvaluateTool(string engine, ToolRequirement tool)
+    private async Task<SidecarHealthRequirement> EvaluateToolAsync(
+        string engine,
+        ToolRequirement tool,
+        CancellationToken cancellationToken)
     {
-        var path = tool.IsManaged
-            ? GetManagedToolPath(tool.Id)
+        var canonicalId = ToolVersionPolicy.Canonicalize(tool.Id);
+        var requirement = ToolVersionPolicy.GetRequirement(canonicalId);
+        var path = tool.IsManaged || requirement is not null
+            ? GetManagedToolPath(canonicalId) ?? FindExecutable(tool.Executable)
             : FindExecutable(tool.Executable);
         if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
         {
+            if (requirement is not null)
+            {
+                string? version = null;
+                try
+                {
+                    version = await _toolManager.GetToolVersionAsync(canonicalId, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    // An unreadable version is reported as a warning below.
+                }
+
+                var assessment = ToolVersionPolicy.Assess(canonicalId, version);
+                if (!assessment.MeetsMinimum)
+                {
+                    var detail = assessment.VersionKnown
+                        ? $"{tool.DisplayName} {assessment.DetectedVersion} is below the security floor {requirement.MinimumVersion}."
+                        : $"{tool.DisplayName} was found, but its version could not be verified against the security floor {requirement.MinimumVersion}.";
+                    return new SidecarHealthRequirement(
+                        engine,
+                        "external-tool",
+                        tool.DisplayName,
+                        "Warning",
+                        detail,
+                        $"Upgrade {tool.DisplayName} to {requirement.MinimumVersion} or newer ({requirement.SecurityReason}).",
+                        path,
+                        SizeOf(path));
+                }
+
+                return Ready(
+                    engine,
+                    "external-tool",
+                    tool.DisplayName,
+                    $"{tool.DisplayName} {assessment.DetectedVersion} meets the security floor {requirement.MinimumVersion}.",
+                    "",
+                    path,
+                    SizeOf(path));
+            }
+
             return Ready(
                 engine,
                 "external-tool",

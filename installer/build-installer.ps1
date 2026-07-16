@@ -22,6 +22,18 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir = Split-Path -Parent $scriptDir
 $publishDir = Join-Path $rootDir "publish"
 $outputDir = Join-Path $rootDir "installer\output"
+$minimumDotnetRuntime = [Version]'10.0.9'
+
+$installedDotnetRuntimes = @(dotnet --list-runtimes 2>$null |
+    Where-Object { $_ -match '^Microsoft\.NETCore\.App\s+(\d+\.\d+\.\d+)' } |
+    ForEach-Object { [Version]$Matches[1] })
+$latestDotnetRuntime = $installedDotnetRuntimes |
+    Where-Object { $_.Major -eq 10 } |
+    Sort-Object -Descending |
+    Select-Object -First 1
+if ($null -eq $latestDotnetRuntime -or $latestDotnetRuntime -lt $minimumDotnetRuntime) {
+    throw "UniversalConverterX installer builds require .NET runtime 10.0.9 or newer. Install the current .NET 10 SDK/runtime before publishing."
+}
 
 # Colors for output
 function Write-Header($text) {

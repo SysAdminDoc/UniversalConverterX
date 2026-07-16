@@ -1,4 +1,4 @@
 psd-tools>=1.10
 gimpformats>=2024.0
-Pillow>=12.2.0
+Pillow>=12.3.0
 numpy>=1.24

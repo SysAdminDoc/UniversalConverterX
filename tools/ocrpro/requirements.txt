@@ -3,4 +3,4 @@ pdf2image>=1.17
 torch>=2.4
 torchvision>=0.19
 transformers>=4.46
-Pillow>=12.2.0
+Pillow>=12.3.0

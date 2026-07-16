@@ -8,6 +8,10 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Resolve the newest installed servicing patch for framework-dependent
+         and self-contained outputs. The installer script enforces 10.0.9+. -->
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <RollForward>LatestPatch</RollForward>
   </PropertyGroup>
 
   <PropertyGroup>

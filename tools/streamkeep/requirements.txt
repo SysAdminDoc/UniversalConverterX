@@ -1,7 +1,7 @@
 # Core runtime dependencies for source checkouts.
 PyQt6>=6.6
-Pillow>=12.2.0
-yt-dlp>=2026.03.17
+Pillow>=12.3.0
+yt-dlp>=2026.07.04
 send2trash>=1.8
 websocket-client>=1.7
 

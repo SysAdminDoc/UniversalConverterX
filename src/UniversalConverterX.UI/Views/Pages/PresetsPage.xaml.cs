@@ -86,15 +86,15 @@ public sealed partial class PresetsPage : Page
         PresetList.ItemsSource = _displayed;
     }
 
-    protected override void OnNavigatedTo(NavigationEventArgs e)
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
         if (e.Parameter is string filter && !string.IsNullOrWhiteSpace(filter))
             InitialEngineFilter = filter;
-        Reload();
+        await ReloadAsync();
     }
 
-    private void Reload()
+    private async Task ReloadAsync()
     {
         // Force-refresh from disk on explicit reload — the user clicking the
         // refresh button is a clear signal they expect a fresh scan even if
@@ -106,7 +106,7 @@ public sealed partial class PresetsPage : Page
             Preset = p,
             Glyph = GlyphFor(p.Engine),
         }).ToList();
-        RefreshHealth();
+        await RefreshHealthAsync();
 
         // Populate engine filter combo (first item "(all engines)" stays).
         var engines = presets.Select(p => p.Engine).Distinct()
@@ -145,10 +145,10 @@ public sealed partial class PresetsPage : Page
                                                         Path.AltDirectorySeparatorChar))));
     }
 
-    private void RefreshHealth()
+    private async Task RefreshHealthAsync()
     {
         _healthByEngine.Clear();
-        foreach (var report in _health.EvaluateAll(_all.Select(c => c.Preset)))
+        foreach (var report in await _health.EvaluateAllAsync(_all.Select(c => c.Preset)))
             _healthByEngine[report.Engine] = report;
 
         foreach (var card in _all)
@@ -220,7 +220,7 @@ public sealed partial class PresetsPage : Page
                 : "All visible preset engines have their sidecar binary and required external tools available.";
     }
 
-    private void Reload_Click(object sender, RoutedEventArgs e) => Reload();
+    private async void Reload_Click(object sender, RoutedEventArgs e) => await ReloadAsync();
 
     private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
@@ -253,7 +253,7 @@ public sealed partial class PresetsPage : Page
         var card = _all.FirstOrDefault(c => c.Name == presetName);
         if (card is null) return;
         var preset = card.Preset;
-        var health = _health.Evaluate(preset);
+        var health = await _health.EvaluateAsync(preset);
         _healthByEngine[preset.Engine] = health;
         card.CanRun = health.CanRun;
         card.StatusText = health.Summary;
