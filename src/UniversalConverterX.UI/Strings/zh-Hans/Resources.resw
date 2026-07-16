@@ -3198,8 +3198,92 @@
   <data name="LipReadingPage_ThresholdValueText.Text" xml:space="preserve">
     <value>0.06</value>
   </data>
+  <data name="LosslessCutPage_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="LosslessCutPage_ExportButton.Content" xml:space="preserve">
+    <value>Export cut</value>
+  </data>
+  <data name="LosslessCutPage_InLabel.Text" xml:space="preserve">
+    <value>00:00.000</value>
+  </data>
+  <data name="LosslessCutPage_Item_001.Text" xml:space="preserve">
+    <value>LOSSLESS CUT</value>
+  </data>
+  <data name="LosslessCutPage_Item_002.Text" xml:space="preserve">
+    <value>Cut a clip on keyframe boundaries with no re-encode — a stream copy that keeps the exact source quality.</value>
+  </data>
+  <data name="LosslessCutPage_Item_004.Text" xml:space="preserve">
+    <value>Drop a video to cut</value>
+  </data>
+  <data name="LosslessCutPage_Item_005.Text" xml:space="preserve">
+    <value>MP4, MKV, MOV, AVI, WebM, TS and more. Lossless cutting keeps the original codec untouched.</value>
+  </data>
+  <data name="LosslessCutPage_Item_006.Content" xml:space="preserve">
+    <value>Open Video</value>
+  </data>
+  <data name="LosslessCutPage_Item_007.Text" xml:space="preserve">
+    <value>IN</value>
+  </data>
+  <data name="LosslessCutPage_Item_010.Text" xml:space="preserve">
+    <value>OUT</value>
+  </data>
+  <data name="LosslessCutPage_Item_012.Text" xml:space="preserve">
+    <value>Cut points</value>
+  </data>
+  <data name="LosslessCutPage_Item_016.Text" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="LosslessCutPage_Item_019.Text" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="LosslessCutPage_Item_021.Content" xml:space="preserve">
+    <value>Choose output…</value>
+  </data>
+  <data name="LosslessCutPage_KeyframeHint.Text" xml:space="preserve">
+    <value>Keyframes: —</value>
+  </data>
+  <data name="LosslessCutPage_LosslessCutOpenButton.Content" xml:space="preserve">
+    <value>Open Video</value>
+  </data>
+  <data name="LosslessCutPage_LosslessCutSetInButton.Content" xml:space="preserve">
+    <value>Set In to playhead</value>
+  </data>
+  <data name="LosslessCutPage_LosslessCutSetOutButton.Content" xml:space="preserve">
+    <value>Set Out to playhead</value>
+  </data>
+  <data name="LosslessCutPage_LosslessToggle.Header" xml:space="preserve">
+    <value>Lossless (stream copy)</value>
+  </data>
+  <data name="LosslessCutPage_LosslessToggle.OffContent" xml:space="preserve">
+    <value>Off — re-encode for frame-exact cuts</value>
+  </data>
+  <data name="LosslessCutPage_LosslessToggle.OnContent" xml:space="preserve">
+    <value>On — snaps to keyframes</value>
+  </data>
+  <data name="LosslessCutPage_OutLabel.Text" xml:space="preserve">
+    <value>00:00.000</value>
+  </data>
+  <data name="LosslessCutPage_OutputBox.Header" xml:space="preserve">
+    <value>Destination file</value>
+  </data>
+  <data name="LosslessCutPage_OutputBox.PlaceholderText" xml:space="preserve">
+    <value>Choose an output file…</value>
+  </data>
+  <data name="LosslessCutPage_PlayheadLabel.Text" xml:space="preserve">
+    <value>00:00.000</value>
+  </data>
+  <data name="LosslessCutPage_SelectionSummary.Text" xml:space="preserve">
+    <value>Whole clip</value>
+  </data>
+  <data name="LosslessCutPage_StatusText.Text" xml:space="preserve">
+    <value>Open a video to begin.</value>
+  </data>
   <data name="MainWindow_Item_001.Title" xml:space="preserve">
     <value>UniversalConverter X</value>
+  </data>
+  <data name="MainWindow_Item_001_2.Content" xml:space="preserve">
+    <value>Lossless Cut</value>
   </data>
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
     <value>UCX</value>

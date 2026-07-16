@@ -31,14 +31,6 @@ programmability (CLI + REST + PS module), and AI depth.
 
 ## Tier 3 — Later _(v2.27+)_
 
-### 42. Lossless Trim / Cut — remaining: timeline scrubber UI
-
-Sidecar layer shipped (clipforge `trim --lossless` + preset). **Remaining:** `LosslessCutPage.xaml` with keyframe-aware timeline scrubber.
-
-Impact: 4 · Effort: 3 · Type: parity
-
----
-
 ### 43. DVD Rip / Copy (Non-DRM Discs Only)
 
 Read unprotected DVD VIDEO_TS → MP4/MKV via `libdvdread` + FFmpeg. Scope: menu-free ISOs, non-commercial home videos. DRM exclusion documented in UI.

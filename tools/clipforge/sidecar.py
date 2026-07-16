@@ -789,6 +789,55 @@ def op_timeline(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_keyframes(args: argparse.Namespace) -> int:
+    """List the video keyframe timestamps so a lossless-cut UI can snap in/out
+    points to a keyframe boundary. Stream-copy trims can only cut on keyframes,
+    so exposing them lets the host show the exact frames a lossless cut will
+    land on. Emits one `keyframes` event carrying the sorted timestamp list."""
+    ffprobe = find_ffprobe()
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found.")
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+
+    cmd = [
+        ffprobe, "-v", "quiet",
+        "-select_streams", "v:0",
+        "-skip_frame", "nokey",
+        "-show_entries", "frame=pts_time,best_effort_timestamp_time",
+        "-of", "json",
+        str(src),
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    except (subprocess.SubprocessError, OSError) as exc:
+        return fail("ffprobe_failed", f"Keyframe probe failed: {exc}")
+    if result.returncode != 0:
+        return fail("ffprobe_failed", f"Keyframe probe exited {result.returncode}.")
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return fail("ffprobe_failed", "Keyframe probe returned invalid JSON.")
+
+    times: list[float] = []
+    for frame in payload.get("frames", []):
+        raw = frame.get("pts_time")
+        if raw in (None, "N/A"):
+            raw = frame.get("best_effort_timestamp_time")
+        if raw in (None, "N/A"):
+            continue
+        try:
+            times.append(round(float(raw), 3))
+        except (TypeError, ValueError):
+            continue
+
+    times = sorted(set(times))
+    emit("keyframes", input=str(src), count=len(times), timestamps=times)
+    emit("complete", output=str(src), size_bytes=0, count=len(times))
+    return 0
+
+
 def op_vmaf(args: argparse.Namespace) -> int:
     """VMAF quality comparison: distorted vs. reference. Runs ffmpeg `libvmaf`
     with JSON log output, parses the file, emits per-frame `vmaf` events plus a
@@ -2122,6 +2171,12 @@ def build_parser() -> argparse.ArgumentParser:
     timeline.add_argument("--waveform-color", default="0x6dd3ff", dest="waveform_color",
                           help="Waveform fill colour (default brand cyan).")
 
+    # ── keyframes ─────────────────────────────────────────────────────────────
+    keyframes = sub.add_parser(
+        "keyframes",
+        help="List video keyframe timestamps for lossless-cut snapping")
+    keyframes.add_argument("--input", required=True)
+
     # ── vmaf ──────────────────────────────────────────────────────────────────
     vmaf = sub.add_parser("vmaf",
                           help="VMAF quality comparison: distorted vs. reference (libvmaf)")
@@ -2154,6 +2209,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_vmaf(args)
         if args.op == "timeline":
             return op_timeline(args)
+        if args.op == "keyframes":
+            return op_keyframes(args)
         if args.op == "track-list":
             return op_track_list(args)
         if args.op == "track-remove":

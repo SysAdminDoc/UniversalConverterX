@@ -83,6 +83,11 @@
                         <FontIcon Glyph="&#xE70F;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Uid="MainWindow_Item_001_2" Tag="lossless-cut" Content="Lossless Cut">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8C6;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_010" Tag="downloader" Content="Downloader">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE896;"/>
