@@ -248,6 +248,8 @@
                             AutomationProperties.AutomationId="OperationCombo">
                             <ComboBoxItem Content="Trim" Tag="trim" IsSelected="True"/>
                             <ComboBoxItem Content="Crop" Tag="crop"/>
+                            <ComboBoxItem Content="Crop Metadata (lossless)" Tag="crop-meta"/>
+                            <ComboBoxItem Content="Aspect Override (lossless)" Tag="aspect-override"/>
                             <ComboBoxItem Content="Rotate / Flip" Tag="rotate"/>
                             <ComboBoxItem Content="Normalize Audio" Tag="loudnorm"/>
                             <ComboBoxItem Content="Rewrap Container" Tag="rewrap"/>
@@ -379,6 +381,63 @@
                                      LostFocus="TrimText_LostFocus"
                                 AutomationProperties.AutomationId="CropYBox"/>
                         </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Codec metadata crop panel -->
+                <Border x:Name="CropMetaPanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Lossless Display Crop"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock Text="Set H.264/H.265 edge-crop metadata without decoding frames. Coded pictures stay intact; players display the smaller rectangle."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CropMetaLeftBox" Grid.Column="0"
+                                     Header="Left edge" Text="0" InputScope="Number"
+                                     TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
+                                     AutomationProperties.AutomationId="CropMetaLeftBox"/>
+                            <TextBox x:Name="CropMetaRightBox" Grid.Column="1"
+                                     Header="Right edge" Text="0" InputScope="Number"
+                                     TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
+                                     AutomationProperties.AutomationId="CropMetaRightBox"/>
+                        </Grid>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CropMetaTopBox" Grid.Column="0"
+                                     Header="Top edge" Text="0" InputScope="Number"
+                                     TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
+                                     AutomationProperties.AutomationId="CropMetaTopBox"/>
+                            <TextBox x:Name="CropMetaBottomBox" Grid.Column="1"
+                                     Header="Bottom edge" Text="0" InputScope="Number"
+                                     TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
+                                     AutomationProperties.AutomationId="CropMetaBottomBox"/>
+                        </Grid>
+                        <TextBlock Text="Offsets replace existing SPS crop metadata. Some chroma formats require even values; unsupported offsets fail without creating a successful export."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Container aspect metadata panel -->
+                <Border x:Name="AspectOverridePanel" Visibility="Collapsed" Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Display Aspect Override"
+                                   Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock Text="Change only the container display ratio. Compressed video and audio packets are copied byte-for-byte."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBox x:Name="AspectRatioBox"
+                                 Header="Display ratio" Text="16:9" PlaceholderText="16:9"
+                                 TextChanged="TrimText_Changed" LostFocus="TrimText_LostFocus"
+                                 AutomationProperties.AutomationId="AspectRatioBox"/>
                     </StackPanel>
                 </Border>
 

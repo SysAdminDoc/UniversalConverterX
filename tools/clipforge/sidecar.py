@@ -3,6 +3,8 @@
 Supported ops:
   trim      Trim a clip by start/end seconds (lossless stream-copy or re-encode).
   crop      Crop video to W:H:X:Y via -vf crop.
+  crop-meta Set H.264/H.265 SPS display-crop metadata without decoding frames.
+  aspect-override Set container display aspect ratio without changing packets.
   rotate    Rotate/flip video via -vf transpose / hflip / vflip.
   loudnorm  EBU R128 loudness normalisation via -af loudnorm.
   rewrap    Change container without re-encoding (-c copy stream copy).
@@ -12,6 +14,7 @@ Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import json
 try:
     import orjson
@@ -21,6 +24,7 @@ except ImportError:
     def _dumps(obj):
         return json.dumps(obj, ensure_ascii=False)
 import os
+import math
 import re
 import shutil
 import subprocess
@@ -76,10 +80,11 @@ _TIME_RE = re.compile(r"out_time_ms=(\d+)")
 def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str) -> int:
     proc = subprocess.Popen(
         cmd + ["-progress", "pipe:1", "-nostats"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         text=True, bufsize=1)
     started = time.monotonic()
     last_pct = -1.0
+    error_tail: deque[str] = deque(maxlen=15)
     try:
         assert proc.stdout is not None
         for line in proc.stdout:
@@ -99,10 +104,18 @@ def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str) -> int:
                          eta_seconds=int(eta) if eta and eta < 86400 else None)
             elif line.startswith("progress=end"):
                 emit("progress", percent=100, stage=stage, eta_seconds=0)
+            elif not line.startswith((
+                "frame=", "fps=", "stream_", "bitrate=", "total_size=",
+                "out_time_", "out_time=", "dup_frames=", "drop_frames=",
+                "speed=", "progress=",
+            )):
+                error_tail.append(line)
     finally:
+        if proc.stdout is not None:
+            proc.stdout.close()
         proc.wait()
-        if proc.returncode != 0 and proc.stderr is not None:
-            for ln in proc.stderr.read().splitlines()[-15:]:
+        if proc.returncode != 0:
+            for ln in error_tail:
                 emit("log", level="error", message=ln)
     return proc.returncode
 
@@ -200,6 +213,169 @@ def op_crop(args: argparse.Namespace) -> int:
     if not out_path.is_file():
         return fail("output_missing", f"Output not produced: {out_path}")
     emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
+    return 0
+
+
+def _first_video_stream(info: dict) -> dict | None:
+    return next(
+        (stream for stream in info.get("streams", [])
+         if stream.get("codec_type") == "video"),
+        None,
+    )
+
+
+def _stream_copy_command(ffmpeg: str, in_path: Path, out_path: Path) -> list[str]:
+    command = [
+        ffmpeg, "-y", "-i", str(in_path),
+        "-map", "0", "-c", "copy",
+        "-map_metadata", "0", "-map_chapters", "0",
+    ]
+    if out_path.suffix.lower() in (".mp4", ".m4v", ".mov"):
+        command += ["-movflags", "+faststart"]
+    return command
+
+
+def op_crop_meta(args: argparse.Namespace) -> int:
+    """Set codec display-crop metadata without decoding or re-encoding.
+
+    H.264 and H.265 carry cropping offsets in the SPS. FFmpeg's metadata
+    bitstream filters rewrite those headers while copying every coded picture
+    unchanged. Packet hashes can therefore differ at SPS packets, but decoded
+    samples remain lossless when cropping is disabled by the decoder.
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    crop = {
+        "left": args.left,
+        "right": args.right,
+        "top": args.top,
+        "bottom": args.bottom,
+    }
+    if any(value < 0 for value in crop.values()):
+        return fail("invalid_crop", "Crop offsets must be zero or greater.")
+    if not any(crop.values()):
+        return fail("invalid_crop", "At least one crop offset must be greater than zero.")
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    video = _first_video_stream(info)
+    if video is None:
+        return fail("missing_video", "Input has no video stream.")
+
+    codec = str(video.get("codec_name", "")).lower()
+    if codec not in {"h264", "hevc"}:
+        return fail(
+            "unsupported_codec",
+            f"Lossless crop metadata supports H.264/H.265; input codec is {codec or 'unknown'}.",
+        )
+
+    width = int(video.get("width") or 0)
+    height = int(video.get("height") or 0)
+    expected_width = width - crop["left"] - crop["right"]
+    expected_height = height - crop["top"] - crop["bottom"]
+    if width <= 0 or height <= 0:
+        return fail("probe_failed", "Could not determine source dimensions.")
+    if expected_width <= 0 or expected_height <= 0:
+        return fail("invalid_crop", "Crop offsets remove the entire video frame.")
+
+    filter_name = "h264_metadata" if codec == "h264" else "hevc_metadata"
+    filter_options = ":".join(
+        f"crop_{edge}={value}" for edge, value in crop.items()
+    )
+    command = _stream_copy_command(ffmpeg, in_path, out_path)
+    command += ["-bsf:v:0", f"{filter_name}={filter_options}", str(out_path)]
+    duration = float(info.get("format", {}).get("duration") or 0)
+    emit("log", level="info",
+         message=f"{codec.upper()} display crop -> {expected_width}x{expected_height}; coded pictures are copied.")
+    emit("progress", percent=0, stage="crop metadata (stream copy)", eta_seconds=None)
+    rc = run_ffmpeg(command, duration, "crop metadata (stream copy)")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file() or out_path.stat().st_size <= 0:
+        return fail("output_missing", f"Output not produced: {out_path}")
+
+    output_info = probe(ffprobe, str(out_path)) or {}
+    output_video = _first_video_stream(output_info)
+    if output_video is None or int(output_video.get("width") or 0) != expected_width \
+            or int(output_video.get("height") or 0) != expected_height:
+        return fail(
+            "verification_failed",
+            f"Output did not report the requested {expected_width}x{expected_height} display crop.",
+        )
+
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size,
+         codec=codec, width=expected_width, height=expected_height,
+         reencoded=False)
+    return 0
+
+
+def _parse_aspect_ratio(value: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"\s*(\d{1,5})\s*[:/]\s*(\d{1,5})\s*", value)
+    if not match:
+        return None
+    numerator, denominator = (int(match.group(1)), int(match.group(2)))
+    if numerator <= 0 or denominator <= 0:
+        return None
+    divisor = math.gcd(numerator, denominator)
+    return numerator // divisor, denominator // divisor
+
+
+def op_aspect_override(args: argparse.Namespace) -> int:
+    """Override display aspect in the output container with packet stream-copy."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    in_path = Path(args.input)
+    if not in_path.is_file():
+        return fail("missing_input", f"Input file does not exist: {args.input}")
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    aspect = _parse_aspect_ratio(args.aspect)
+    if aspect is None:
+        return fail("invalid_aspect", "Aspect must be a positive ratio such as 16:9 or 4/3.")
+
+    info = probe(ffprobe, str(in_path))
+    if not info:
+        return fail("probe_failed", "Could not read input metadata.")
+    if _first_video_stream(info) is None:
+        return fail("missing_video", "Input has no video stream.")
+
+    aspect_text = f"{aspect[0]}:{aspect[1]}"
+    command = _stream_copy_command(ffmpeg, in_path, out_path)
+    command += ["-aspect:v:0", aspect_text, str(out_path)]
+    duration = float(info.get("format", {}).get("duration") or 0)
+    emit("log", level="info",
+         message=f"Display aspect -> {aspect_text}; compressed packets are copied unchanged.")
+    emit("progress", percent=0, stage="aspect override (stream copy)", eta_seconds=None)
+    rc = run_ffmpeg(command, duration, "aspect override (stream copy)")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not out_path.is_file() or out_path.stat().st_size <= 0:
+        return fail("output_missing", f"Output not produced: {out_path}")
+
+    output_info = probe(ffprobe, str(out_path)) or {}
+    output_video = _first_video_stream(output_info)
+    reported = str((output_video or {}).get("display_aspect_ratio") or "")
+    if _parse_aspect_ratio(reported) != aspect:
+        return fail(
+            "verification_failed",
+            f"Output reports display aspect {reported or 'unknown'}, expected {aspect_text}.",
+        )
+
+    emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size,
+         display_aspect_ratio=aspect_text, reencoded=False)
     return 0
 
 
@@ -1514,6 +1690,25 @@ def build_parser() -> argparse.ArgumentParser:
     crop.add_argument("--crf", type=int, default=18)
     crop.add_argument("--preset", default="medium")
 
+    crop_meta = sub.add_parser(
+        "crop-meta",
+        help="Set H.264/H.265 display-crop metadata without re-encoding")
+    crop_meta.add_argument("--input", required=True)
+    crop_meta.add_argument("--output", required=True)
+    crop_meta.add_argument("--left", type=int, default=0)
+    crop_meta.add_argument("--right", type=int, default=0)
+    crop_meta.add_argument("--top", type=int, default=0)
+    crop_meta.add_argument("--bottom", type=int, default=0)
+
+    aspect_override = sub.add_parser(
+        "aspect-override",
+        help="Override display aspect ratio with packet stream-copy")
+    aspect_override.add_argument("--input", required=True)
+    aspect_override.add_argument("--output", required=True)
+    aspect_override.add_argument(
+        "--aspect", required=True,
+        help="Display aspect ratio, for example 16:9 or 4/3")
+
     # ── rotate ────────────────────────────────────────────────────────────────
     rotate = sub.add_parser("rotate", help="Rotate or flip video")
     rotate.add_argument("--input", required=True)
@@ -1778,6 +1973,10 @@ def main(argv: list[str] | None = None) -> int:
             return op_trim(args)
         if args.op == "crop":
             return op_crop(args)
+        if args.op == "crop-meta":
+            return op_crop_meta(args)
+        if args.op == "aspect-override":
+            return op_aspect_override(args)
         if args.op == "rotate":
             return op_rotate(args)
         if args.op == "loudnorm":

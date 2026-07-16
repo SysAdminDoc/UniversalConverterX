@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Editor and ClipForge now support lossless display-crop metadata for H.264/H.265 and container-only display aspect overrides. Crop metadata rewrites only SPS display edges while preserving coded picture samples; aspect overrides stream-copy compressed packets unchanged. A 16:9 lossless metadata preset is included.
 - Added curated Preservation and Production video families: lossless FFV1+FLAC/MKV archival, ProRes 422/MOV, and DNxHR HQ/MOV. The Presets page now has dedicated Preservation and Production filters, and the lossless VideoCrush path is covered by decoded-frame and PCM verification.
 - Added APV camera-master support backed by the bundled FFmpeg 8.1.2 codec: Format Inspector recognizes RFC 9924 raw bitstreams, and presets convert APV to H.265 10-bit, ProRes 422 HQ, or compatible H.264. Raw streams without container duration now run with indeterminate progress instead of failing, and professional/lossless VideoCrush presets correctly bypass lossy CRF validation.
 - Subtitle Studio now runs a complete local Whisper-to-caption workflow with optional Helsinki OPUS-MT translation through ONNX Runtime, editable text and cue timing preview, SRT/VTT/ASS export, and post-preview video burn-in. The AI Lab and Home tiles now open the ready workflow.
@@ -33,6 +34,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- ClipForge now drains FFmpeg diagnostics and progress from one combined pipe with a bounded error tail, preventing long FFmpeg banners or error output from deadlocking any editor operation.
 - Added a platform regression gate that requires the WinUI project to remain on Microsoft Windows App SDK 2.x or newer with the supported Windows target and self-contained runtime configuration.
 - Sidecar processes now force UTF-8 at the Python producer boundary, preventing Unicode file paths from failing when NDJSON output is redirected on legacy Windows code pages.
 - StreamKeep download completion now trusts yt-dlp's reported regular file or selects only files created or modified by the current run. The fallback ignores directories, symlinks, unchanged downloads, partial artifacts, and ranks subtitle/metadata companions behind primary media instead of returning an unrelated path.

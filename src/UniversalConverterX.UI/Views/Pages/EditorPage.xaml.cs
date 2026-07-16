@@ -264,6 +264,8 @@ public sealed partial class EditorPage : Page
         var showQuality = op == "crop" || op == "rotate" || (op == "trim" && LosslessCheck.IsChecked != true);
         QualityPanel.Visibility = showQuality ? Visibility.Visible : Visibility.Collapsed;
         CropPanel.Visibility = op == "crop" ? Visibility.Visible : Visibility.Collapsed;
+        CropMetaPanel.Visibility = op == "crop-meta" ? Visibility.Visible : Visibility.Collapsed;
+        AspectOverridePanel.Visibility = op == "aspect-override" ? Visibility.Visible : Visibility.Collapsed;
         RotatePanel.Visibility = op == "rotate" ? Visibility.Visible : Visibility.Collapsed;
         LoudnormPanel.Visibility = op == "loudnorm" ? Visibility.Visible : Visibility.Collapsed;
         RewrapPanel.Visibility = op == "rewrap" ? Visibility.Visible : Visibility.Collapsed;
@@ -467,7 +469,30 @@ public sealed partial class EditorPage : Page
 
     private bool TryBuildTrimOptions(out TrimOptions options)
     {
-        if (SelectedOperation() != "trim")
+        var operation = SelectedOperation();
+        if (operation == "crop-meta")
+        {
+            var cropValues = new[]
+            {
+                CropMetaLeftBox.Text, CropMetaRightBox.Text,
+                CropMetaTopBox.Text, CropMetaBottomBox.Text,
+            };
+            if (cropValues.Any(value => !int.TryParse(value?.Trim(), out var parsed) || parsed < 0)
+                || cropValues.All(value => int.TryParse(value?.Trim(), out var parsed) && parsed == 0))
+            {
+                StatusText.Text = "Lossless crop edges must be non-negative integers, with at least one value above zero.";
+                options = default;
+                return false;
+            }
+        }
+        else if (operation == "aspect-override" && !IsValidAspectRatio(AspectRatioBox.Text))
+        {
+            StatusText.Text = "Display ratio must use positive values such as 16:9 or 4/3.";
+            options = default;
+            return false;
+        }
+
+        if (operation != "trim")
         {
             // Non-trim ops don't need start/end validation
             options = new TrimOptions(0, null, Lossless: LosslessCheck.IsChecked == true, Crf: (int)CrfSlider.Value);
@@ -513,6 +538,8 @@ public sealed partial class EditorPage : Page
         return op switch
         {
             "crop" => BuildCropArgs(inputPath, outputPath, crf),
+            "crop-meta" => BuildCropMetadataArgs(inputPath, outputPath),
+            "aspect-override" => BuildAspectOverrideArgs(inputPath, outputPath),
             "rotate" => BuildRotateArgs(inputPath, outputPath, crf),
             "loudnorm" => BuildLoudnormArgs(inputPath, outputPath),
             "rewrap" => ["rewrap", "--input", inputPath, "--output", outputPath],
@@ -561,6 +588,30 @@ public sealed partial class EditorPage : Page
             "--x", x.ToString(), "--y", y.ToString(),
             "--crf", crf, "--preset", "medium"];
     }
+
+    private List<string> BuildCropMetadataArgs(string inputPath, string outputPath)
+    {
+        static string EdgeValue(TextBox box) =>
+            int.TryParse(box.Text?.Trim(), out var value) && value >= 0
+                ? value.ToString(CultureInfo.InvariantCulture)
+                : "0";
+
+        return [
+            "crop-meta",
+            "--input", inputPath, "--output", outputPath,
+            "--left", EdgeValue(CropMetaLeftBox),
+            "--right", EdgeValue(CropMetaRightBox),
+            "--top", EdgeValue(CropMetaTopBox),
+            "--bottom", EdgeValue(CropMetaBottomBox),
+        ];
+    }
+
+    private List<string> BuildAspectOverrideArgs(string inputPath, string outputPath) =>
+        [
+            "aspect-override",
+            "--input", inputPath, "--output", outputPath,
+            "--aspect", AspectRatioBox.Text.Trim(),
+        ];
 
     private List<string> BuildRotateArgs(string inputPath, string outputPath, string crf)
     {
@@ -661,6 +712,11 @@ public sealed partial class EditorPage : Page
                 CropXBox.Text = snap.CropX;
                 CropYBox.Text = snap.CropY;
             }
+            CropMetaLeftBox.Text = snap.CropMetaLeft;
+            CropMetaRightBox.Text = snap.CropMetaRight;
+            CropMetaTopBox.Text = snap.CropMetaTop;
+            CropMetaBottomBox.Text = snap.CropMetaBottom;
+            AspectRatioBox.Text = snap.AspectRatio;
             RotateAngleCombo.SelectedIndex = snap.RotateIndex;
             LufsBox.Text = snap.LufsText;
             RewrapFormatCombo.SelectedIndex = snap.RewrapIndex;
@@ -688,6 +744,11 @@ public sealed partial class EditorPage : Page
         CropHeightBox?.Text ?? "",
         CropXBox?.Text ?? "",
         CropYBox?.Text ?? "",
+        CropMetaLeftBox?.Text ?? "0",
+        CropMetaRightBox?.Text ?? "0",
+        CropMetaTopBox?.Text ?? "0",
+        CropMetaBottomBox?.Text ?? "0",
+        AspectRatioBox?.Text ?? "16:9",
         RotateAngleCombo?.SelectedIndex ?? 0,
         LufsBox?.Text ?? "",
         RewrapFormatCombo?.SelectedIndex ?? 0);
@@ -737,6 +798,12 @@ public sealed partial class EditorPage : Page
         return op switch
         {
             "crop" => shortLabel ? "Crop" : $"Crop {CropWidthBox?.Text?.Trim() ?? "?"} x {CropHeightBox?.Text?.Trim() ?? "?"} at ({CropXBox?.Text?.Trim() ?? "0"}, {CropYBox?.Text?.Trim() ?? "0"})",
+            "crop-meta" => shortLabel
+                ? "Lossless display crop"
+                : $"Lossless display crop L{CropMetaLeftBox?.Text?.Trim() ?? "0"} R{CropMetaRightBox?.Text?.Trim() ?? "0"} T{CropMetaTopBox?.Text?.Trim() ?? "0"} B{CropMetaBottomBox?.Text?.Trim() ?? "0"}",
+            "aspect-override" => shortLabel
+                ? $"Aspect {AspectRatioBox?.Text?.Trim() ?? "16:9"}"
+                : $"Display aspect override {AspectRatioBox?.Text?.Trim() ?? "16:9"} (stream copy)",
             "rotate" => shortLabel ? $"Rotate {SelectedRotateAngle()}" : $"Rotate / flip: {(RotateAngleCombo?.SelectedItem is ComboBoxItem ri ? ri.Content : SelectedRotateAngle())}",
             "loudnorm" => shortLabel ? $"Normalize {LufsBox?.Text?.Trim() ?? "-14"} LUFS" : $"EBU R128 normalize to {LufsBox?.Text?.Trim() ?? "-14"} LUFS",
             "rewrap" => shortLabel ? $"Rewrap → {SelectedRewrapExtension()}" : $"Rewrap container to {SelectedRewrapExtension()} (stream copy)",
@@ -782,6 +849,8 @@ public sealed partial class EditorPage : Page
         var suffix = op switch
         {
             "crop" => "_cropped",
+            "crop-meta" => "_display-cropped",
+            "aspect-override" => "_aspect",
             "rotate" => "_rotated",
             "loudnorm" => "_normalized",
             "rewrap" => "_rewrapped",
@@ -841,6 +910,18 @@ public sealed partial class EditorPage : Page
         return double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out seconds);
     }
 
+    private static bool IsValidAspectRatio(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+        var parts = value.Split([':', '/'], StringSplitOptions.TrimEntries);
+        return parts.Length == 2
+            && int.TryParse(parts[0], out var numerator)
+            && int.TryParse(parts[1], out var denominator)
+            && numerator > 0
+            && denominator > 0;
+    }
+
     private static string FormatSize(long bytes)
     {
         string[] s = ["B", "KB", "MB", "GB", "TB"];
@@ -868,6 +949,11 @@ internal sealed record EditorSnapshot(
     string CropHeight,
     string CropX,
     string CropY,
+    string CropMetaLeft,
+    string CropMetaRight,
+    string CropMetaTop,
+    string CropMetaBottom,
+    string AspectRatio,
     int RotateIndex,
     string LufsText,
     int RewrapIndex);

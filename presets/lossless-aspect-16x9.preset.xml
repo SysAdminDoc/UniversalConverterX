@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Lossless display aspect — 16:9</Name>
+    <Folder>Video/Edit/Lossless Metadata</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>m4v</Extension>
+        <Extension>mov</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_aspect-16x9</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>clipforge</Engine>
+    <Args>
+        <Arg>aspect-override</Arg>
+        <Arg>--aspect</Arg>
+        <Arg>16:9</Arg>
+    </Args>
+</Preset>
