@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -188,10 +189,7 @@ public sealed class UpdateCheckService : IUpdateCheckService
                 };
             }
 
-            var latest = NormalizeVersion(release.TagName);
-            var installedNorm = installed is null ? null : NormalizeVersion(installed);
-            var hasUpdate = installedNorm is not null && latest is not null
-                && !string.Equals(installedNorm, latest, StringComparison.OrdinalIgnoreCase);
+            var hasUpdate = VersionOrdering.IsUpdateAvailable(installed, release.TagName);
 
             return new UpdateInfo
             {
@@ -215,14 +213,6 @@ public sealed class UpdateCheckService : IUpdateCheckService
                 Error = ex.GetType().Name,
             };
         }
-    }
-
-    private static string? NormalizeVersion(string? raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw)) return null;
-        var s = raw.Trim();
-        if (s.StartsWith('v') || s.StartsWith('V')) s = s[1..];
-        return s;
     }
 
     private void TryWriteCache(UpdateCheckCache cache)
