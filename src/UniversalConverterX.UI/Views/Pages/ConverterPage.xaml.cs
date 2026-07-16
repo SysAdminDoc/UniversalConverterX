@@ -591,7 +591,9 @@ public sealed partial class ConverterPage : Page
         PersistQueue();
         var completed = 0;
         var failed = 0;
-        var cancelled = false;
+        var cancelled = 0;
+        var cancellation = _cancellationTokenSource
+            ?? throw new InvalidOperationException("Conversion cancellation source was not initialized.");
         
         // Get max parallel jobs from settings
         var options = App.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>().Value;
@@ -602,11 +604,12 @@ public sealed partial class ConverterPage : Page
         {
             var tasks = queuedJobs.Select(async queued =>
             {
-                await semaphore.WaitAsync(_cancellationTokenSource.Token);
+                var enteredSemaphore = false;
                 try
                 {
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                        return;
+                    await semaphore.WaitAsync(cancellation.Token);
+                    enteredSemaphore = true;
+                    cancellation.Token.ThrowIfCancellationRequested();
 
                     DispatcherQueue.TryEnqueue(() =>
                     {
@@ -640,7 +643,7 @@ public sealed partial class ConverterPage : Page
                         });
                     });
 
-                    var result = await _orchestrator.ConvertAsync(queued.Job, progress, _cancellationTokenSource.Token);
+                    var result = await _orchestrator.ConvertAsync(queued.Job, progress, cancellation.Token);
 
                     if (result.Success || result.WasSkipped)
                     {
@@ -655,6 +658,18 @@ public sealed partial class ConverterPage : Page
                             PersistQueue();
                         });
                     }
+                    else if (result.WasCancelled || cancellation.IsCancellationRequested)
+                    {
+                        Interlocked.Increment(ref cancelled);
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            AddFinishedItem(result);
+                            queued.File.OutputPath = result.OutputPath ?? result.Job.OutputPath;
+                            queued.File.StatusText = "Cancelled - ready to retry";
+                            queued.File.ErrorMessage = result.ErrorMessage ?? "Conversion cancelled by user.";
+                            PersistQueue();
+                        });
+                    }
                     else
                     {
                         Interlocked.Increment(ref failed);
@@ -662,53 +677,56 @@ public sealed partial class ConverterPage : Page
                         {
                             AddFinishedItem(result);
                             queued.File.OutputPath = result.OutputPath ?? result.Job.OutputPath;
-                            queued.File.StatusText = result.WasCancelled
-                                ? "Cancelled - ready to retry"
-                                : "Failed - ready to retry";
+                            queued.File.StatusText = "Failed - ready to retry";
                             queued.File.ErrorMessage = result.ErrorMessage;
                             PersistQueue();
                         });
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    Interlocked.Increment(ref cancelled);
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        queued.File.StatusText = "Cancelled - ready to retry";
+                        queued.File.ErrorMessage = "Conversion cancelled by user.";
+                        PersistQueue();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Interlocked.Increment(ref failed);
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        queued.File.StatusText = "Failed - ready to retry";
+                        queued.File.ErrorMessage = ex.Message;
+                        PersistQueue();
+                    });
+                }
                 finally
                 {
-                    semaphore.Release();
+                    if (enteredSemaphore)
+                        semaphore.Release();
                 }
             });
 
             await Task.WhenAll(tasks);
+            var outcome = new ConversionBatchOutcome(
+                completed,
+                failed,
+                cancelled,
+                cancellation.IsCancellationRequested);
 
             DispatcherQueue.TryEnqueue(() =>
             {
-                ProgressTitle.Text = cancelled
-                    ? "Cancelled"
-                    : failed == 0 ? "Complete" : "Completed with errors";
-                ProgressStatus.Text = $"{completed} succeeded, {failed} failed";
-                ConversionProgress.Value = cancelled ? ConversionProgress.Value : 100;
+                ProgressTitle.Text = outcome.Title;
+                ProgressStatus.Text = outcome.Status;
+                if (!outcome.WasCancelled)
+                    ConversionProgress.Value = 100;
                 ConversionProgress.IsIndeterminate = false;
                 CancelButton.Content = "Close";
                 QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
             });
-        }
-        catch (OperationCanceledException)
-        {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                foreach (var file in _files.Where(f =>
-                    f.StatusText.Equals("Converting", StringComparison.OrdinalIgnoreCase)
-                    || f.StatusText.EndsWith("%", StringComparison.Ordinal)
-                    || f.StatusText.Equals("Queued", StringComparison.OrdinalIgnoreCase)))
-                {
-                    file.StatusText = "Interrupted - ready to retry";
-                    file.ErrorMessage = "Conversion interrupted before completion.";
-                }
-
-                ProgressTitle.Text = "Cancelled";
-                ProgressStatus.Text = $"{completed} completed before cancellation";
-                CancelButton.Content = "Close";
-                PersistQueue();
-            });
-            cancelled = true;
         }
         finally
         {
