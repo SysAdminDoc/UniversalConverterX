@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -74,6 +75,36 @@ KNOWN_FORMATS = [
 _PCT_RE = re.compile(r"^\s*(\d{1,3})%")
 
 
+def build_calibre_environment(job_dir: Path) -> dict[str, str]:
+    """Return an isolated Calibre environment with no user-installed plugins."""
+    env = os.environ.copy()
+    for unsafe_name in ("CALIBRE_DEVELOP_FROM", "PYTHONHOME", "PYTHONPATH"):
+        env.pop(unsafe_name, None)
+
+    directories = {
+        "CALIBRE_CONFIG_DIRECTORY": job_dir / "config",
+        "CALIBRE_CACHE_DIRECTORY": job_dir / "cache",
+        "CALIBRE_TEMP_DIR": job_dir / "temp",
+    }
+    for name, directory in directories.items():
+        directory.mkdir(parents=True, exist_ok=True)
+        env[name] = str(directory)
+
+    # An empty per-job config directory prevents discovery of user-installed
+    # plugins. ebook-convert has no supported global --ignore-plugins switch.
+    env["CALIBRE_ALLOW_PYTHON_TEMPLATES"] = "0"
+    return env
+
+
+def promote_output(staged_path: Path, destination: Path) -> None:
+    """Validate a staged output before atomically replacing the destination."""
+    if staged_path.is_symlink() or not staged_path.is_file():
+        raise RuntimeError("Calibre did not produce a regular output file")
+    if staged_path.stat().st_size == 0:
+        raise RuntimeError("Calibre produced an empty output file")
+    os.replace(staged_path, destination)
+
+
 def op_convert(args: argparse.Namespace) -> int:
     calibre = find_calibre()
     if not calibre:
@@ -86,6 +117,8 @@ def op_convert(args: argparse.Namespace) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     target = args.format.lower().lstrip(".")
+    if not re.fullmatch(r"[a-z0-9]{1,16}", target):
+        return fail("invalid_format", "Target format must be a simple extension token")
     if target not in KNOWN_FORMATS:
         emit("log", level="warn",
              message=f"Format '{target}' is not in the curated list; Calibre "
@@ -104,44 +137,66 @@ def op_convert(args: argparse.Namespace) -> int:
     started = time.monotonic()
     for i, src in enumerate(inputs):
         out_path = out_dir / (src.stem + "." + target)
-        cmd = [calibre, str(src), str(out_path)]
-        if args.title:    cmd += ["--title", args.title]
-        if args.authors:  cmd += ["--authors", args.authors]
-        if args.language: cmd += ["--language", args.language]
+        with tempfile.TemporaryDirectory(prefix="ucx-ebook-") as job_dir_raw:
+            job_dir = Path(job_dir_raw)
+            input_dir = job_dir / "input"
+            output_dir = job_dir / "output"
+            input_dir.mkdir()
+            output_dir.mkdir()
 
-        proc = subprocess.Popen(cmd,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                text=True, bufsize=1)
-        try:
-            assert proc.stdout is not None
-            for raw in proc.stdout:
-                line = raw.rstrip()
-                if not line: continue
-                m = _PCT_RE.match(line)
-                if m:
-                    inner = float(m.group(1))
-                    # Combine inner-file progress with batch progress so the UI
-                    # bar moves smoothly across the whole queue.
-                    overall = (i + inner / 100.0) / total * 100.0
-                    elapsed = time.monotonic() - started
-                    local = overall / 100.0
-                    eta = (elapsed / local - elapsed) if local > 0.01 else None
-                    emit("progress",
-                         percent=round(overall, 1),
-                         stage=f"{i + 1}/{total}: {line}",
-                         eta_seconds=int(eta) if eta and eta < 86400 else None)
-                else:
-                    emit("log", level="info", message=line)
-        finally:
-            proc.wait()
+            # Copy the source into the job root so HTML and archive parsers cannot
+            # traverse sibling files beside the user's original document.
+            staged_input = input_dir / src.name
+            staged_output = output_dir / (src.stem + "." + target)
+            shutil.copyfile(src.resolve(), staged_input)
 
-        if proc.returncode != 0:
-            return fail("calibre_failed",
-                        f"ebook-convert exited {proc.returncode} on {src.name}")
-        if not out_path.is_file():
-            return fail("output_missing",
-                        f"Calibre didn't produce output for {src.name}")
+            cmd = [calibre, str(staged_input), str(staged_output)]
+            if args.title:    cmd += ["--title", args.title]
+            if args.authors:  cmd += ["--authors", args.authors]
+            if args.language: cmd += ["--language", args.language]
+
+            proc = subprocess.Popen(
+                cmd,
+                cwd=job_dir,
+                env=build_calibre_environment(job_dir),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            try:
+                assert proc.stdout is not None
+                for raw in proc.stdout:
+                    line = raw.rstrip()
+                    if not line:
+                        continue
+                    m = _PCT_RE.match(line)
+                    if m:
+                        inner = float(m.group(1))
+                        # Combine inner-file progress with batch progress so the UI
+                        # bar moves smoothly across the whole queue.
+                        overall = (i + inner / 100.0) / total * 100.0
+                        elapsed = time.monotonic() - started
+                        local = overall / 100.0
+                        eta = (elapsed / local - elapsed) if local > 0.01 else None
+                        emit("progress",
+                             percent=round(overall, 1),
+                             stage=f"{i + 1}/{total}: {line}",
+                             eta_seconds=int(eta) if eta and eta < 86400 else None)
+                    else:
+                        emit("log", level="info", message=line)
+            finally:
+                proc.wait()
+
+            if proc.returncode != 0:
+                return fail("calibre_failed",
+                            f"ebook-convert exited {proc.returncode} on {src.name}")
+            try:
+                promote_output(staged_output, out_path)
+            except RuntimeError as ex:
+                return fail("output_invalid", f"{ex} for {src.name}")
 
         emit("ebook",
              input=str(src),

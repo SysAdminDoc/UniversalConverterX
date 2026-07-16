@@ -33,6 +33,11 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
                 exit 0
             }
 
+            if ($Mode -eq 'environment') {
+                Set-Content -LiteralPath $OutputPath -Value $env:UCX_TEST_PROCESS_POLICY -NoNewline
+                exit 0
+            }
+
             Write-Error 'forced failure'
             exit 2
             """);
@@ -96,6 +101,18 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         job.Status.Should().Be(ConversionStatus.Completed);
     }
 
+    [Fact]
+    public async Task ConvertAsync_AppliesEngineSpecificProcessEnvironment()
+    {
+        var converter = new FakeConverterStrategy(_scriptPath, "environment");
+        var job = CreateJob();
+
+        var result = await converter.ConvertAsync(job);
+
+        result.Success.Should().BeTrue();
+        File.ReadAllText(job.OutputPath).Should().Be("hardened");
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
@@ -153,6 +170,11 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         ];
 
         public override ConversionProgress? ParseProgress(string outputLine, ConversionJob job) => null;
+
+        protected override void ConfigureProcessStartInfo(
+            System.Diagnostics.ProcessStartInfo startInfo,
+            ConversionJob job) =>
+            startInfo.Environment["UCX_TEST_PROCESS_POLICY"] = "hardened";
 
         protected override string GetExecutablePath() =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");

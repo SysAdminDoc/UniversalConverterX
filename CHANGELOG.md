@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Security
 
+- ImageMagick conversions now force a shipped policy that blocks MVG, MSL, internal MSVG, and remote URL coders while bounding CPU, memory, disk, dimensions, and sequence length. Calibre sidecar jobs now use isolated config/cache/temp roots with custom plugins and Python templates disabled, stage copied inputs and outputs in a private job directory, and atomically promote only non-empty regular outputs.
 - Raised all Pillow sidecar floors to 12.3.0 and yt-dlp to 2026.07.04, with the sidecar contract gate enforcing both floors.
 - Added shared minimum-version policy checks for FFmpeg 8.1.2, ImageMagick 7.1.2-15, Calibre 9.10, 7-Zip 26.01, and LibreOffice 26.2.4. The CLI, Settings tool inventory, and preset health surface now warn when an installed parser is outdated or cannot be verified.
 - Installer publishing now refuses to build on .NET runtimes older than 10.0.9 and resolves the latest installed servicing patch.

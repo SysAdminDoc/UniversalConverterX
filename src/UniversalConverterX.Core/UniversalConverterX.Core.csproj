@@ -26,6 +26,13 @@
     <InternalsVisibleTo Include="UniversalConverterX.Core.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Security\ImageMagick\policy.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->
 
   <!-- Cross-namespace global usings — Core's Interfaces and Models reference each other,

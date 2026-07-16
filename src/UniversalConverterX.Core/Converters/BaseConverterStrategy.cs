@@ -272,26 +272,30 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         var stdout = new StringBuilder();
         var stderr = new StringBuilder();
 
-        using var process = new Process
+        var startInfo = new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = executable,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                // Redirect stdin so we can immediately close it. Without this, CLI
-                // tools that quietly read from stdin (Ghostscript, Pandoc with no
-                // input, ImageMagick in some interactive flows) block forever.
-                RedirectStandardInput = true,
-                StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding  = Encoding.UTF8,
-            },
-            EnableRaisingEvents = true
+            FileName = executable,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            // Redirect stdin so we can immediately close it. Without this, CLI
+            // tools that quietly read from stdin (Ghostscript, Pandoc with no
+            // input, ImageMagick in some interactive flows) block forever.
+            RedirectStandardInput = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding  = Encoding.UTF8,
         };
         foreach (var argument in arguments)
-            process.StartInfo.ArgumentList.Add(argument);
+            startInfo.ArgumentList.Add(argument);
+
+        ConfigureProcessStartInfo(startInfo, job);
+
+        using var process = new Process
+        {
+            StartInfo = startInfo,
+            EnableRaisingEvents = true
+        };
 
         process.OutputDataReceived += (_, e) =>
         {
@@ -350,6 +354,14 @@ public abstract class BaseConverterStrategy : IConverterStrategy
             StandardError = stderr.ToString(),
             ErrorMessage = success ? null : GetErrorMessage(stderr.ToString(), exitCode)
         };
+    }
+
+    /// <summary>
+    /// Allows a converter to add engine-specific environment isolation without
+    /// replacing the common hidden-process, cancellation, and output handling.
+    /// </summary>
+    protected virtual void ConfigureProcessStartInfo(ProcessStartInfo startInfo, ConversionJob job)
+    {
     }
 
     protected virtual ConversionResult? ValidateSuccessfulOutput(

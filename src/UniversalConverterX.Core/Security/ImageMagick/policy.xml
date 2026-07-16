@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policymap [
+  <!ELEMENT policymap (policy)*>
+  <!ATTLIST policymap xmlns CDATA #FIXED "">
+  <!ELEMENT policy EMPTY>
+  <!ATTLIST policy xmlns CDATA #FIXED "">
+  <!ATTLIST policy domain NMTOKEN #REQUIRED>
+  <!ATTLIST policy name NMTOKEN #IMPLIED>
+  <!ATTLIST policy pattern CDATA #IMPLIED>
+  <!ATTLIST policy rights NMTOKEN #IMPLIED>
+  <!ATTLIST policy stealth NMTOKEN #IMPLIED>
+  <!ATTLIST policy value CDATA #IMPLIED>
+]>
+<policymap>
+  <!-- Bound hostile decompression bombs and runaway image sequences. -->
+  <policy domain="resource" name="thread" value="4"/>
+  <policy domain="resource" name="time" value="600"/>
+  <policy domain="resource" name="file" value="256"/>
+  <policy domain="resource" name="memory" value="512MiB"/>
+  <policy domain="resource" name="map" value="1GiB"/>
+  <policy domain="resource" name="area" value="256MP"/>
+  <policy domain="resource" name="disk" value="2GiB"/>
+  <policy domain="resource" name="list-length" value="256"/>
+  <policy domain="resource" name="width" value="32KP"/>
+  <policy domain="resource" name="height" value="32KP"/>
+  <policy domain="system" name="max-memory-request" value="256MiB"/>
+
+  <!-- Block command-bearing vector languages and remote pseudo-coders. -->
+  <policy domain="coder" rights="none" pattern="{MVG,MSL,MSVG,URL,HTTP,HTTPS,FTP}"/>
+  <policy domain="delegate" rights="none" pattern="{URL,HTTP,HTTPS,FTP}"/>
+  <policy domain="filter" rights="none" pattern="*"/>
+
+  <!-- Disallow indirect reads such as @/path/to/file and stdin/stdout paths. -->
+  <policy domain="path" rights="none" pattern="@*"/>
+  <policy domain="path" rights="none" pattern="-"/>
+</policymap>

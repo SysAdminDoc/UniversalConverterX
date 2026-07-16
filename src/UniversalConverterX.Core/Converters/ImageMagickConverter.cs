@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
@@ -10,6 +11,8 @@ namespace UniversalConverterX.Core.Converters;
 /// </summary>
 public partial class ImageMagickConverter : BaseConverterStrategy
 {
+    private const string PolicyRelativePath = "Security/ImageMagick";
+
     public ImageMagickConverter(string toolsBasePath, ILogger<ImageMagickConverter>? logger = null) 
         : base(toolsBasePath, logger) { }
 
@@ -17,6 +20,8 @@ public partial class ImageMagickConverter : BaseConverterStrategy
     public override string Name => "ImageMagick";
     public override int Priority => 90;
     public override string ExecutableName => "magick";
+
+    internal string SecurityPolicyDirectory => ResolveSecurityPolicyDirectory();
 
     [GeneratedRegex(@"(\d+)%", RegexOptions.Compiled)]
     private static partial Regex PercentRegex();
@@ -152,6 +157,22 @@ public partial class ImageMagickConverter : BaseConverterStrategy
 
         return [.. args];
     }
+
+    protected override void ConfigureProcessStartInfo(ProcessStartInfo startInfo, ConversionJob job)
+    {
+        var policyDirectory = ResolveSecurityPolicyDirectory();
+        var policyPath = Path.Combine(policyDirectory, "policy.xml");
+        if (!File.Exists(policyPath))
+        {
+            throw new InvalidOperationException(
+                $"The required ImageMagick security policy was not found: {policyPath}");
+        }
+
+        startInfo.Environment["MAGICK_CONFIGURE_PATH"] = policyDirectory;
+    }
+
+    private static string ResolveSecurityPolicyDirectory() =>
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, PolicyRelativePath));
 
     private static string BuildResizeGeometry(ImageOptions image)
     {

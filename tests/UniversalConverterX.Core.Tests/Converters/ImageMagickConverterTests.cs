@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -36,6 +38,36 @@ public class ImageMagickConverterTests
     public void ExecutableName_ShouldBeMagick()
     {
         _converter.ExecutableName.Should().Be("magick");
+    }
+
+    [Fact]
+    public void SecurityPolicy_ShouldShipWithDangerousCodersDisabledAndResourceLimits()
+    {
+        var policyPath = Path.Combine(_converter.SecurityPolicyDirectory, "policy.xml");
+
+        File.Exists(policyPath).Should().BeTrue();
+        var policies = XDocument.Load(policyPath).Root!.Elements("policy").ToArray();
+        policies.Should().Contain(policy =>
+            (string?)policy.Attribute("domain") == "coder" &&
+            (string?)policy.Attribute("rights") == "none" &&
+            ((string?)policy.Attribute("pattern"))!.Contains("MVG", StringComparison.Ordinal) &&
+            ((string?)policy.Attribute("pattern"))!.Contains("MSVG", StringComparison.Ordinal));
+        policies.Should().Contain(policy =>
+            (string?)policy.Attribute("domain") == "resource" &&
+            (string?)policy.Attribute("name") == "memory");
+        policies.Should().Contain(policy =>
+            (string?)policy.Attribute("domain") == "resource" &&
+            (string?)policy.Attribute("name") == "time");
+    }
+
+    [Fact]
+    public void ConfigureProcessStartInfo_ShouldForceShippedPolicyDirectory()
+    {
+        var converter = new TestableImageMagickConverter(_toolsBasePath);
+        var startInfo = converter.CreateStartInfo(CreateTestJob("input.png", "output.jpg"));
+
+        startInfo.Environment["MAGICK_CONFIGURE_PATH"]
+            .Should().Be(converter.SecurityPolicyDirectory);
     }
 
     [Theory]
@@ -238,5 +270,16 @@ public class ImageMagickConverterTests
             OutputPath = output,
             Options = new ConversionOptions()
         };
+    }
+
+    private sealed class TestableImageMagickConverter(string toolsBasePath)
+        : ImageMagickConverter(toolsBasePath)
+    {
+        public ProcessStartInfo CreateStartInfo(ConversionJob job)
+        {
+            var startInfo = new ProcessStartInfo();
+            ConfigureProcessStartInfo(startInfo, job);
+            return startInfo;
+        }
     }
 }
