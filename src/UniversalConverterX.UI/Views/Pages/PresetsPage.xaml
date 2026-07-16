@@ -125,6 +125,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <AutoSuggestBox x:Name="SearchBox"
                                 PlaceholderText="Filter by name, folder, engine..."
@@ -137,6 +138,15 @@
                           SelectionChanged="EngineFilter_Changed"
                     AutomationProperties.AutomationId="EngineFilter">
                     <ComboBoxItem Content="All engines" Tag=""/>
+                </ComboBox>
+                <ComboBox Grid.Column="2"
+                          x:Name="FamilyFilter"
+                          Header="Preset family"
+                          SelectionChanged="FamilyFilter_Changed"
+                          AutomationProperties.AutomationId="PresetsFamilyFilter">
+                    <ComboBoxItem Content="All families" Tag=""/>
+                    <ComboBoxItem Content="Preservation" Tag="Preservation"/>
+                    <ComboBoxItem Content="Production" Tag="Production"/>
                 </ComboBox>
             </Grid>
         </Border>

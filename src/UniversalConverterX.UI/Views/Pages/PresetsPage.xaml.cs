@@ -72,6 +72,7 @@ public sealed partial class PresetsPage : Page
     private List<PresetCardItem> _all = [];
     private readonly Dictionary<string, SidecarHealthReport> _healthByEngine = new(StringComparer.OrdinalIgnoreCase);
     private string? _engineFilter;
+    private string? _familyFilter;
     private string? _searchTerm;
 
     /// <summary>Per-card lock so the same Run button can't double-fire if the user double-clicks.</summary>
@@ -90,6 +91,7 @@ public sealed partial class PresetsPage : Page
         _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
         _health      = App.Services.GetRequiredService<ISidecarHealthService>();
         PresetList.ItemsSource = _displayed;
+        FamilyFilter.SelectedIndex = 0;
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -178,6 +180,10 @@ public sealed partial class PresetsPage : Page
         IEnumerable<PresetCardItem> q = _all;
         if (!string.IsNullOrEmpty(_engineFilter))
             q = q.Where(c => string.Equals(c.Preset.Engine, _engineFilter, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(_familyFilter))
+            q = q.Where(c => c.Preset.Folder?.Contains(
+                _familyFilter,
+                StringComparison.OrdinalIgnoreCase) == true);
         if (!string.IsNullOrWhiteSpace(_searchTerm))
         {
             var s = _searchTerm.Trim();
@@ -275,6 +281,14 @@ public sealed partial class PresetsPage : Page
     {
         _engineFilter = (EngineFilter.SelectedItem as ComboBoxItem)?.Tag as string;
         if (string.IsNullOrEmpty(_engineFilter)) _engineFilter = null;
+        ApplyFilter();
+    }
+
+    private void FamilyFilter_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        _familyFilter = (FamilyFilter.SelectedItem as ComboBoxItem)?.Tag as string;
+        if (string.IsNullOrEmpty(_familyFilter))
+            _familyFilter = null;
         ApplyFilter();
     }
 

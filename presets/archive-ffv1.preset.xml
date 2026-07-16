@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Preservation — FFV1 + FLAC (lossless archival)</Name>
+    <Folder>Video/Preservation</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+        <Extension>mxf</Extension>
+        <Extension>apv</Extension>
+        <Extension>ts</Extension>
+        <Extension>mts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_preservation</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>videocrush</Engine>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>archive-ffv1</Arg>
+    </Args>
+</Preset>

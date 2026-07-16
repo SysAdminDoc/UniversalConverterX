@@ -100,4 +100,27 @@ public class PresetXmlSmokeTests
         Directory.GetFiles(PresetsDir, "*.preset.xml")
             .Should().NotBeEmpty("the presets/ directory should contain preset XML files");
     }
+
+    [Fact]
+    public void PreservationAndProductionFamilies_ShouldExposeCuratedPresets()
+    {
+        var expected = new Dictionary<string, (string Folder, string Output, string SidecarPreset)>
+        {
+            ["archive-ffv1.preset.xml"] = ("Video/Preservation", "mkv", "archive-ffv1"),
+            ["production-prores-422.preset.xml"] = ("Video/Production", "mov", "prores-422"),
+            ["production-dnxhr.preset.xml"] = ("Video/Production", "mov", "dnxhr-hq"),
+        };
+
+        foreach (var (fileName, contract) in expected)
+        {
+            var path = Path.Combine(PresetsDir, fileName);
+            File.Exists(path).Should().BeTrue($"{fileName} is part of the curated family");
+            var preset = PresetDocument.Load(path);
+            preset.Succeeded.Should().BeTrue();
+            preset.Preset!.Folder.Should().Be(contract.Folder);
+            preset.Preset.OutputExtension.Should().Be(contract.Output);
+            preset.Preset.Engine.Should().Be("videocrush");
+            preset.Preset.Args.Should().ContainInOrder("--preset", contract.SidecarPreset);
+        }
+    }
 }
