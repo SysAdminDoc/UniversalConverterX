@@ -11,13 +11,24 @@ public sealed class WatchFileAdmissionTests
         try
         {
             await File.WriteAllBytesAsync(path, new byte[100]);
-            var waitTask = WatchFileStability.WaitAsync(
+            Task<WatchFileObservation?> waitTask;
+            await using (var writer = new FileStream(
                 path,
-                checkInterval: TimeSpan.FromMilliseconds(25),
-                timeout: TimeSpan.FromSeconds(2));
+                FileMode.Open,
+                FileAccess.Write,
+                FileShare.Read))
+            {
+                writer.Position = writer.Length;
+                waitTask = WatchFileStability.WaitAsync(
+                    path,
+                    checkInterval: TimeSpan.FromMilliseconds(25),
+                    timeout: TimeSpan.FromSeconds(2));
 
-            await Task.Delay(10);
-            await File.AppendAllTextAsync(path, new string('x', 100));
+                await Task.Delay(75);
+                Assert.False(waitTask.IsCompleted);
+                await writer.WriteAsync(new byte[100]);
+                await writer.FlushAsync();
+            }
 
             var stable = await waitTask;
             Assert.NotNull(stable);
