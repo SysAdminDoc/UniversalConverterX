@@ -5,7 +5,8 @@ UCX Whisper STT Sidecar — headless NDJSON wrapper for local Whisper transcript
 Backends tried in order:
   1. faster-whisper (ctranslate2, significantly faster than openai-whisper)
   2. openai-whisper  (reference implementation, slower)
-  Both are auto-installed via bootstrap() if missing.
+  Dependencies must be provisioned by the sidecar build or its managed
+  environment; runtime conversion never installs packages.
 
 Usage:
     sidecar.py --input <path> --output <path.srt|.txt|.vtt|.json>
@@ -50,66 +51,37 @@ def error_exit(code: str, message: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Bootstrap
+# Backend discovery
 # ---------------------------------------------------------------------------
 
-def _pip_install(*packages: str) -> bool:
-    for extra in [[], ["--user"], ["--break-system-packages"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--quiet", *packages, *extra],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            return True
-    return False
-
-
 def bootstrap() -> str:
-    """Install faster-whisper or openai-whisper and return which backend was used."""
-    # When frozen with PyInstaller, sys.executable is this sidecar exe — a pip
-    # install would re-spawn this exe and fork-bomb the host. Bundle deps at
-    # build time instead of relying on runtime install.
-    if getattr(sys, "frozen", False):
-        try:
-            import faster_whisper  # noqa: F401
-            return "faster-whisper"
-        except ImportError:
-            pass
-        try:
-            import whisper  # noqa: F401
-            return "openai-whisper"
-        except ImportError:
-            error_exit("missing_dep",
-                       "Neither faster-whisper nor openai-whisper is bundled into "
-                       "this frozen sidecar. Rebuild with PyInstaller after "
-                       "`pip install faster-whisper`.")
-
-    # Try faster-whisper first
+    """Return an available backend without mutating the Python environment."""
     try:
         import faster_whisper  # noqa: F401
         return "faster-whisper"
     except ImportError:
         pass
 
-    log("faster-whisper not found — installing...")
-    progress(0.5, "Installing faster-whisper...")
-    if _pip_install("faster-whisper>=1.1.0"):
-        log("faster-whisper installed.")
-        return "faster-whisper"
-
-    # Fall back to openai-whisper
     try:
         import whisper  # noqa: F401
         return "openai-whisper"
     except ImportError:
         pass
 
-    log("openai-whisper not found — installing...", "warn")
-    progress(0.5, "Installing openai-whisper...")
-    if not _pip_install("openai-whisper>=20240930"):
-        error_exit("install_failed", "Could not install openai-whisper or faster-whisper.")
-    log("openai-whisper installed.")
-    return "openai-whisper"
+    if getattr(sys, "frozen", False):
+        message = (
+            "Neither faster-whisper nor openai-whisper is bundled into this "
+            "sidecar. Reinstall Universal Converter X or rebuild the sidecar "
+            "with its declared dependencies."
+        )
+    else:
+        message = (
+            "Neither faster-whisper nor openai-whisper is installed in the "
+            "sidecar environment. Provision faster-whisper>=1.1.0 in the "
+            "managed environment, then retry."
+        )
+    error_exit("missing_dep", message)
+    raise AssertionError("error_exit must terminate")
 
 
 # ---------------------------------------------------------------------------

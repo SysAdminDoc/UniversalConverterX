@@ -51,25 +51,10 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
     emit("progress", **payload)
 
 
-# ── Bootstrap ────────────────────────────────────────────────────────────────
+# ── Dependency discovery ─────────────────────────────────────────────────────
 
 def _ensure_deps() -> None:
-    """Install Pillow + pillow_heif if missing.
-
-    PyInstaller fork-bomb guard: when frozen, sys.executable is the sidecar
-    exe — a pip-install spawn would loop forever. Bundle deps at build time.
-    """
-    if getattr(sys, "frozen", False):
-        try:
-            import PIL  # noqa: F401
-            import pillow_heif  # noqa: F401
-            return
-        except ImportError:
-            fail("missing_dep",
-                 "Pillow / pillow-heif not bundled into this frozen sidecar. "
-                 "Rebuild after `pip install Pillow pillow-heif`.")
-            sys.exit(1)
-
+    """Require bundled/managed dependencies without installing at runtime."""
     try:
         import PIL  # noqa: F401
         import pillow_heif  # noqa: F401
@@ -77,18 +62,19 @@ def _ensure_deps() -> None:
     except ImportError:
         pass
 
-    log("info", "Pillow / pillow-heif not found — installing...")
-    import subprocess
-    for extra in [[], ["--user"], ["--break-system-packages"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--quiet",
-             "Pillow>=10.0.0", "pillow-heif>=0.16.0", *extra],
-            capture_output=True, text=True,
+    if getattr(sys, "frozen", False):
+        message = (
+            "Pillow or pillow-heif is not bundled into this sidecar. Reinstall "
+            "Universal Converter X or rebuild the sidecar with its declared "
+            "dependencies."
         )
-        if result.returncode == 0:
-            log("info", "Dependencies installed.")
-            return
-    fail("install_failed", "Could not install Pillow / pillow-heif.")
+    else:
+        message = (
+            "Pillow or pillow-heif is not installed in the sidecar environment. "
+            "Provision Pillow>=12.3.0 and pillow-heif>=0.16.0 in the managed "
+            "environment, then retry."
+        )
+    fail("missing_dep", message)
     sys.exit(1)
 
 
