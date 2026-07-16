@@ -1,0 +1,1 @@
+# ccextract uses FFmpeg only; no Python runtime deps.

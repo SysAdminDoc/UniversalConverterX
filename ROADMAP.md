@@ -47,14 +47,6 @@ Impact: 3 · Effort: 4 · Type: leapfrog
 
 ---
 
-### 50. CEA-608/708 Closed Caption Extraction
-
-Wrap CCExtractor for broadcast caption extraction (MPEG-TS, MXF, MPEG-2 PS). Extend `ccextract` sidecar scope to include VOBSUB/PGS OCR and SCC input format.
-
-Impact: 2 · Effort: 3 · Type: parity
-
----
-
 ### 55. Video Summarizer (AI Condensed Highlight)
 
 3-sidecar orchestration: Whisper → local LLM (llama.cpp or Phi Silica) → FFmpeg concat. Ships the "Planned" Video Summarizer tile in AiLabPage.

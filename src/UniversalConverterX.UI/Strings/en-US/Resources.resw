@@ -5033,7 +5033,7 @@ libx264
     <value>SUBTITLE CONVERTER</value>
   </data>
   <data name="SubtitleConverterPage_Item_003.Text" xml:space="preserve">
-    <value>Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP. Optional millisecond shift and framerate retiming for files captured at the wrong fps. Backed by pysubs2.</value>
+    <value>Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP, decode broadcast Scenarist SCC, and extract embedded captions from video files. Optional millisecond shift and framerate retiming. Backed by pysubs2 and FFmpeg.</value>
   </data>
   <data name="SubtitleConverterPage_Item_007.Content" xml:space="preserve">
     <value>SRT (SubRip)</value>
@@ -5087,7 +5087,7 @@ libx264
     <value>Add subtitle files</value>
   </data>
   <data name="SubtitleConverterPage_Item_031.Text" xml:space="preserve">
-    <value>SRT, VTT, ASS, SSA, SUB, TMP. Pick a target format and run.</value>
+    <value>SRT, VTT, ASS, SSA, SUB, TMP, SCC, or a video file. Pick a target format and run.</value>
   </data>
   <data name="SubtitleConverterPage_OutEncodingCombo.Header" xml:space="preserve">
     <value>Output encoding</value>

@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Subtitle Converter now handles broadcast closed captions via a new `ccextract` FFmpeg sidecar: it decodes Scenarist SCC to SRT/VTT/ASS, extracts an embedded caption track from a video file (MP4/MKV/MOV/TS and more), and falls back to CEA/EIA-608 carried in the video bitstream when no container track is present. The page accepts video and SCC inputs alongside the existing subtitle formats and routes each source to the right engine.
+
 ## [2.24.0] - 2026-07-16
 
 ### Added

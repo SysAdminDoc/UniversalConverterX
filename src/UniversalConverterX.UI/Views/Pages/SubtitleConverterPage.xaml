@@ -73,7 +73,7 @@
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="SubtitleConverterPage_Item_002" Text="SUBTITLE CONVERTER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock x:Uid="SubtitleConverterPage_Item_003" Text="Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP. Optional millisecond shift and framerate retiming for files captured at the wrong fps. Backed by pysubs2."
+                <TextBlock x:Uid="SubtitleConverterPage_Item_003" Text="Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP, decode broadcast Scenarist SCC, and extract embedded captions from video files. Optional millisecond shift and framerate retiming. Backed by pysubs2 and FFmpeg."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
@@ -193,7 +193,7 @@
                     <TextBlock x:Uid="SubtitleConverterPage_Item_030" Text="Add subtitle files"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock x:Uid="SubtitleConverterPage_Item_031" Text="SRT, VTT, ASS, SSA, SUB, TMP. Pick a target format and run."
+                    <TextBlock x:Uid="SubtitleConverterPage_Item_031" Text="SRT, VTT, ASS, SSA, SUB, TMP, SCC, or a video file. Pick a target format and run."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>

@@ -29,6 +29,15 @@ public sealed partial class SubtitleConverterPage : Page
     private static readonly string[] SubExts =
         [".srt", ".vtt", ".ass", ".ssa", ".sub", ".tmp"];
 
+    // Broadcast Scenarist captions and video containers are handled by the
+    // ccextract sidecar (FFmpeg) instead of subconvert (pysubs2): SCC is read
+    // and decoded to text, and video files have their embedded caption track
+    // extracted. ccextract writes text formats only (srt/vtt/ass).
+    private static readonly string[] CaptionExts = [".scc"];
+    private static readonly string[] VideoExts =
+        [".mp4", ".mkv", ".mov", ".m4v", ".ts", ".mts", ".m2ts", ".webm", ".avi"];
+    private static readonly string[] CcExtractFormats = ["srt", "vtt", "ass"];
+
     private readonly ISidecarRunner _runner;
     private readonly IHistoryService _history;
     private readonly ObservableCollection<SubFileItem> _files = [];
@@ -48,7 +57,8 @@ public sealed partial class SubtitleConverterPage : Page
         {
             SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
         };
-        foreach (var ext in SubExts) picker.FileTypeFilter.Add(ext);
+        foreach (var ext in SubExts.Concat(CaptionExts).Concat(VideoExts))
+            picker.FileTypeFilter.Add(ext);
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
         WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
         var files = await picker.PickMultipleFilesAsync();
@@ -111,6 +121,27 @@ public sealed partial class SubtitleConverterPage : Page
             return;
         }
 
+        // SCC files and video containers go through ccextract (FFmpeg); plain
+        // subtitle files stay on the subconvert (pysubs2) batch path.
+        bool IsCaptionSource(SubFileItem f)
+        {
+            var ext = System.IO.Path.GetExtension(f.Path).ToLowerInvariant();
+            return CaptionExts.Contains(ext) || VideoExts.Contains(ext);
+        }
+        var ccFiles = _files.Where(IsCaptionSource).ToList();
+        var subFiles = _files.Where(f => !IsCaptionSource(f)).ToList();
+
+        if (ccFiles.Count > 0)
+            await ExtractCaptionsAsync(ccFiles, fmt, outDir);
+
+        if (subFiles.Count == 0)
+        {
+            StatusText.Text = $"Done -- {ccFiles.Count} caption source(s) -> .{fmt}.";
+            WorkProgress.Value = 100;
+            ConvertButton.IsEnabled = true;
+            return;
+        }
+
         var args = new List<string>
         {
             "convert",
@@ -128,7 +159,7 @@ public sealed partial class SubtitleConverterPage : Page
             args.AddRange(["--fps-out", FpsOutBox.Value.ToString("0.###", CultureInfo.InvariantCulture)]);
         }
         args.Add("--input");
-        args.AddRange(_files.Select(f => f.Path));
+        args.AddRange(subFiles.Select(f => f.Path));
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
@@ -157,9 +188,9 @@ public sealed partial class SubtitleConverterPage : Page
             StatusText.Text = "subconvert sidecar not built. Run pwsh tools/subconvert/build.ps1.";
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {_files.Count} subtitle(s) -> .{fmt}.";
+            StatusText.Text = $"Done -- {subFiles.Count} subtitle(s) -> .{fmt}.";
             WorkProgress.Value = 100;
-            foreach (var f in _files)
+            foreach (var f in subFiles)
             {
                 _ = _history.LogAsync(new HistoryRecord
                 {
@@ -170,7 +201,7 @@ public sealed partial class SubtitleConverterPage : Page
                     OutputPath = System.IO.Path.Combine(outDir,
                         System.IO.Path.GetFileNameWithoutExtension(f.Path) + ".") + fmt,
                     SourceBytes = TryFileSize(f.Path),
-                    DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds / Math.Max(1, _files.Count),
+                    DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds / Math.Max(1, subFiles.Count),
                     Success = true,
                     Profile = fmt,
                 });
@@ -179,10 +210,86 @@ public sealed partial class SubtitleConverterPage : Page
         else
         {
             StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
-            foreach (var f in _files.Where(f => f.StatusText == "Pending"))
+            foreach (var f in subFiles.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }
         ConvertButton.IsEnabled = true;
+    }
+
+    /// <summary>
+    /// Extracts captions from video containers (embedded track, with a CEA-608
+    /// bitstream fallback) and decodes broadcast SCC files to the chosen text
+    /// format via the ccextract sidecar. ccextract writes SRT/VTT/ASS only.
+    /// </summary>
+    private async Task ExtractCaptionsAsync(List<SubFileItem> ccFiles, string fmt, string outDir)
+    {
+        if (!CcExtractFormats.Contains(fmt))
+        {
+            foreach (var f in ccFiles)
+                f.StatusText = "Skipped -- choose SRT/VTT/ASS for video/SCC";
+            return;
+        }
+
+        foreach (var f in ccFiles)
+        {
+            var ext = System.IO.Path.GetExtension(f.Path).ToLowerInvariant();
+            var isVideo = VideoExts.Contains(ext);
+            var outPath = System.IO.Path.Combine(
+                outDir, System.IO.Path.GetFileNameWithoutExtension(f.Path) + "." + fmt);
+            var ccArgs = new List<string>
+            {
+                isVideo ? "extract" : "convert",
+                "--input", f.Path,
+                "--output", outPath,
+                "--format", fmt,
+            };
+            f.StatusText = isVideo ? "Extracting..." : "Reading SCC...";
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(15));
+            var result = await _runner.RunAsync("ccextract", ccArgs, null, null, cts.Token);
+
+            if (result.ErrorCode == "sidecar_not_found")
+            {
+                f.StatusText = "ccextract not built (tools/ccextract/build.ps1)";
+                continue;
+            }
+            if (!result.Success && isVideo && result.ErrorCode == "no_captions")
+            {
+                // Some broadcast sources carry CEA-608 only in the video
+                // bitstream (SEI); retry through the subcc extraction path.
+                ccArgs.Add("--embedded-608");
+                result = await _runner.RunAsync("ccextract", ccArgs, null, null, cts.Token);
+                f.StatusText = result.Success ? "Done (embedded 608)" : "No captions found";
+                if (result.Success)
+                    LogCaption(f, outPath, fmt);
+                continue;
+            }
+
+            if (result.Success)
+            {
+                f.StatusText = "Done";
+                LogCaption(f, outPath, fmt);
+            }
+            else
+            {
+                f.StatusText = $"Failed: {result.ErrorCode}";
+            }
+        }
+    }
+
+    private void LogCaption(SubFileItem f, string outPath, string fmt)
+    {
+        _ = _history.LogAsync(new HistoryRecord
+        {
+            Timestamp = DateTime.UtcNow,
+            Engine = "ccextract",
+            Action = "extract",
+            SourcePath = f.Path,
+            OutputPath = outPath,
+            SourceBytes = TryFileSize(f.Path),
+            Success = true,
+            Profile = fmt,
+        });
     }
 
     private static long? TryFileSize(string path)
