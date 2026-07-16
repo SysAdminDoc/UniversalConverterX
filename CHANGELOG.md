@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.25.0] - 2026-07-16
+
 ### Added
 
 - VMAF Quality Analysis can now run a fast proxy pass: a new clipforge `proxy` op generates a 480p preview proxy of both the reference and distorted clips, and a "Fast proxy pass" toggle scores those proxies for a quick approximate VMAF before committing to a full-resolution run.
