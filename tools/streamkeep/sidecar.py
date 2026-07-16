@@ -302,9 +302,82 @@ class _ProgressBridge:
             emit("log", level="error", message=d.get("error") or "Unknown yt-dlp error")
 
 
+_INCOMPLETE_DOWNLOAD_SUFFIXES = (".part", ".ytdl", ".tmp", ".temp")
+_AUXILIARY_DOWNLOAD_SUFFIXES = {
+    ".ass", ".description", ".jpeg", ".jpg", ".json", ".lrc",
+    ".png", ".srt", ".ssa", ".vtt", ".webp",
+}
+
+
+def _snapshot_output_files(output_dir: Path) -> dict[str, tuple[int, int]]:
+    """Capture regular output files before a download starts."""
+    snapshot: dict[str, tuple[int, int]] = {}
+    try:
+        entries = list(output_dir.iterdir())
+    except OSError:
+        return snapshot
+    for path in entries:
+        try:
+            if path.is_symlink() or not path.is_file():
+                continue
+            stat = path.stat()
+            snapshot[str(path.resolve())] = (stat.st_mtime_ns, stat.st_size)
+        except OSError:
+            continue
+    return snapshot
+
+
+def _reported_output_file(reported: str | None, output_dir: Path) -> Path | None:
+    """Resolve yt-dlp's authoritative output only when it is a local regular file."""
+    if not reported:
+        return None
+    candidate = Path(reported)
+    if not candidate.is_absolute():
+        candidate = output_dir / candidate
+    try:
+        if candidate.is_symlink() or not candidate.is_file():
+            return None
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(output_dir.resolve(strict=True))
+        return resolved
+    except (OSError, ValueError):
+        return None
+
+
+def _select_download_output(
+        output_dir: Path,
+        before: dict[str, tuple[int, int]],
+        reported: str | None = None) -> Path | None:
+    """Select the reported file or a new/changed regular file from this run.
+
+    The fallback never considers directories, symlinks, unchanged pre-existing
+    files, or incomplete yt-dlp artifacts. Sidecar metadata and subtitle files
+    rank behind primary media when multiple new files share the directory.
+    """
+    authoritative = _reported_output_file(reported, output_dir)
+    if authoritative is not None:
+        return authoritative
+
+    candidates: list[tuple[bool, int, int, str, Path]] = []
+    for raw_path, fingerprint in _snapshot_output_files(output_dir).items():
+        if before.get(raw_path) == fingerprint:
+            continue
+        path = Path(raw_path)
+        lower_name = path.name.lower()
+        if lower_name.endswith(_INCOMPLETE_DOWNLOAD_SUFFIXES):
+            continue
+        is_auxiliary = path.suffix.lower() in _AUXILIARY_DOWNLOAD_SUFFIXES
+        modified_ns, size = fingerprint
+        candidates.append((is_auxiliary, -modified_ns, -size, lower_name, path))
+
+    candidates.sort()
+    return candidates[0][-1] if candidates else None
+
+
 def _external_download(executable: str, args: argparse.Namespace, runtime: dict) -> int:
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    files_before_download = _snapshot_output_files(output_dir)
     fmt = "bestaudio/best" if args.audio_only else args.format
     cmd = [
         executable,
@@ -379,17 +452,14 @@ def _external_download(executable: str, args: argparse.Namespace, runtime: dict)
     if return_code != 0:
         return fail("yt_dlp_nonzero", f"yt-dlp returned {return_code}")
 
-    if not output_path or not Path(output_path).is_file():
-        candidates = sorted(
-            (path for path in output_dir.iterdir() if path.is_file()),
-            key=lambda path: path.stat().st_mtime,
-            reverse=True,
-        )
-        output_path = str(candidates[0]) if candidates else None
-    if not output_path:
+    selected_output = _select_download_output(
+        output_dir,
+        files_before_download,
+        output_path)
+    if selected_output is None:
         return fail("download_failed", "yt-dlp completed without reporting an output file.")
 
-    emit("complete", output=output_path, size_bytes=Path(output_path).stat().st_size)
+    emit("complete", output=str(selected_output), size_bytes=selected_output.stat().st_size)
     return 0
 
 
@@ -407,6 +477,7 @@ def op_download(args: argparse.Namespace) -> int:
 
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    files_before_download = _snapshot_output_files(output_dir)
 
     bridge = _ProgressBridge()
 
@@ -466,14 +537,14 @@ def op_download(args: argparse.Namespace) -> int:
     if rc != 0:
         return fail("yt_dlp_nonzero", f"yt-dlp returned {rc}")
 
-    if not bridge.output_path or not Path(bridge.output_path).is_file():
-        # Find the most-recent file in output_dir as a fallback.
-        candidates = sorted(output_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True)
-        if candidates:
-            bridge.output_path = str(candidates[0])
+    selected_output = _select_download_output(
+        output_dir,
+        files_before_download,
+        bridge.output_path)
+    if selected_output is None:
+        return fail("download_failed", "yt-dlp completed without producing a new output file.")
 
-    size = Path(bridge.output_path).stat().st_size if bridge.output_path else 0
-    emit("complete", output=bridge.output_path, size_bytes=size)
+    emit("complete", output=str(selected_output), size_bytes=selected_output.stat().st_size)
     return 0
 
 

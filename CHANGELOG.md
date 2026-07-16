@@ -22,6 +22,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- StreamKeep download completion now trusts yt-dlp's reported regular file or selects only files created or modified by the current run. The fallback ignores directories, symlinks, unchanged downloads, partial artifacts, and ranks subtitle/metadata companions behind primary media instead of returning an unrelated path.
 - Converter cancellation now records queued, in-flight, and orchestrator-returned cancellations separately from failures, persists each cancelled job as retryable, and always renders the cancelled batch summary even when no cancellation exception escapes the parallel task set.
 - Update checks now compare normalized dotted numeric versions instead of string inequality. Prefixes, tool output labels, missing components, prereleases, date-style versions, and newer nightly builds are ordered correctly; rolling tags such as `latest` or autobuild dates are treated as non-comparable instead of producing false update prompts.
 - Watch folders now wait for two identical size/timestamp observations plus an exclusive-open probe, react to create/change/rename arrivals, suppress concurrent and unchanged duplicate notifications with bounded caches, and exclude their own planned outputs to prevent recursive conversion loops. The page now surfaces active, settling/running, and remembered-file counts.

@@ -2,6 +2,7 @@ import argparse
 import importlib.util
 import io
 import json
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import TestCase, mock
@@ -36,6 +37,59 @@ class _FakeYoutubeDL:
 
 
 class SidecarRuntimeTests(TestCase):
+    def test_output_fallback_ignores_directories_and_preexisting_files(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            existing = output_dir / "older-download.mp4"
+            existing.write_bytes(b"old")
+            before = sidecar._snapshot_output_files(output_dir)
+            (output_dir / "newest-directory").mkdir()
+            downloaded = output_dir / "current-download.mp4"
+            downloaded.write_bytes(b"current")
+
+            selected = sidecar._select_download_output(output_dir, before)
+
+        self.assertEqual(downloaded.resolve(), selected)
+
+    def test_output_fallback_detects_overwritten_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            downloaded = output_dir / "same-name.mp4"
+            downloaded.write_bytes(b"old")
+            before = sidecar._snapshot_output_files(output_dir)
+            downloaded.write_bytes(b"new-content-with-different-size")
+
+            selected = sidecar._select_download_output(output_dir, before)
+
+        self.assertEqual(downloaded.resolve(), selected)
+
+    def test_reported_output_wins_over_newer_auxiliary_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            before = sidecar._snapshot_output_files(output_dir)
+            downloaded = output_dir / "video.mp4"
+            downloaded.write_bytes(b"video")
+            (output_dir / "video.en.vtt").write_text("WEBVTT", encoding="utf-8")
+
+            selected = sidecar._select_download_output(
+                output_dir,
+                before,
+                str(downloaded))
+
+        self.assertEqual(downloaded.resolve(), selected)
+
+    def test_output_fallback_rejects_partial_and_unchanged_files(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            existing = output_dir / "existing.mp4"
+            existing.write_bytes(b"existing")
+            before = sidecar._snapshot_output_files(output_dir)
+            (output_dir / "unfinished.webm.part").write_bytes(b"partial")
+
+            selected = sidecar._select_download_output(output_dir, before)
+
+        self.assertIsNone(selected)
+
     def test_missing_deno_has_actionable_warning(self):
         with mock.patch.object(sidecar, "find_deno", return_value=None):
             status = sidecar.deno_runtime_status()
@@ -87,4 +141,3 @@ class SidecarRuntimeTests(TestCase):
         self.assertNotIn("--downloader", arguments)
         self.assertNotIn("aria2c", arguments)
         self.assertEqual("deno:C:/ucx/tools/bin/deno.exe", arguments[-1])
-
