@@ -12,7 +12,7 @@
     <OutputFileNameTemplate>{dir}/{stem}.chapters</OutputFileNameTemplate>
     <OutputExtension>json</OutputExtension>
     <Engine>chaptermark</Engine>
-    <InvocationMode>batch-output-dir</InvocationMode>
+    <InvocationMode>per-file</InvocationMode>
     <Args>
         <Arg>read</Arg>
     </Args>

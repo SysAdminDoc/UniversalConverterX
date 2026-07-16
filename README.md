@@ -49,6 +49,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Batch Image Editing — apply named looks, colour/tone controls, blur, grain, vignette, tint, and borders while retaining compatible alpha and multi-frame output.
 - Face Blur Privacy Filter — detect and irreversibly obscure frontal faces in every video frame with an offline, fail-closed OpenCV pipeline.
 - Auto Highlight — rank scene-change and visible-motion peaks locally, review clip windows, and export an audio-preserving reel, CMX 3600 EDL, or OpenTimelineIO timeline.
+- Exact Chapter Editor — import, edit, delete, and export MKV/MP4/MOV markers while retaining untouched PTS values; verified stream-copy muxing uses MKVToolNix 97+ for MKV and FFmpeg for MP4/MOV.
 - Conversion History — search/export past jobs and restore exact Converter settings for a re-run.
 - Queue Automation — notify, sleep, safely schedule shutdown, or run a hidden PowerShell hook with a JSON summary.
 - Watch Folders — process stable new or renamed files automatically with duplicate and self-output loop protection.

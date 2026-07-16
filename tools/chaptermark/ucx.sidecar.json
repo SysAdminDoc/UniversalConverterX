@@ -6,6 +6,19 @@
       "executable": "ffmpeg",
       "display": "FFmpeg",
       "managed": true
+    },
+    {
+      "id": "ffprobe",
+      "executable": "ffprobe",
+      "display": "FFprobe",
+      "managed": true
+    },
+    {
+      "id": "mkvmerge",
+      "executable": "mkvmerge",
+      "display": "MKVToolNix 97+ (required for MKV writes)",
+      "managed": false,
+      "required": false
     }
   ]
 }

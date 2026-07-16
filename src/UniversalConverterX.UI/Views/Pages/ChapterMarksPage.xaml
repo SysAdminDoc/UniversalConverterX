@@ -59,17 +59,29 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
                 <TextBlock Text="Chapter Marks Editor" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Read, edit, and rewrite the embedded chapter table for MKV / MP4 / MOV without re-encoding."
+                <TextBlock Text="Read, edit, import, export, and rewrite chapter markers without re-encoding. Exact source PTS values are retained; MKV writes require MKVToolNix 97 or newer."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Button Content="Open File"
+                <Button x:Name="OpenFileButton"
+                        Content="Open Media"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="OpenFile_Click"
                     AutomationProperties.AutomationId="ChapterMarksPageButton01"/>
+                <Button x:Name="ImportButton"
+                        Content="Import Chapters"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Import_Click"
+                    AutomationProperties.AutomationId="ChapterMarksImportButton"/>
+                <Button x:Name="ExportButton"
+                        Content="Export List"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Export_Click"
+                        IsEnabled="False"
+                    AutomationProperties.AutomationId="ChapterMarksExportButton"/>
                 <Button x:Name="SaveButton"
-                        Content="Save As..."
+                        Content="Save Media As..."
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Save_Click"
                         IsEnabled="False"
@@ -95,7 +107,6 @@
                         Content="Add Chapter"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="AddRow_Click"
-                        IsEnabled="False"
                         x:Name="AddButton"
                     AutomationProperties.AutomationId="AddButton"/>
             </Grid>
@@ -112,10 +123,10 @@
                         <FontIcon Glyph="&#xE8B7;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
-                    <TextBlock Text="Open a video file to read its chapters"
+                    <TextBlock Text="Open media or import a chapter list"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="If the file has no chapters, click Add Chapter to start fresh."
+                    <TextBlock Text="JSON, Matroska XML, and simple CHAPTERxx text are supported. You can also start fresh with Add Chapter."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextWrapping="Wrap" TextAlignment="Center"

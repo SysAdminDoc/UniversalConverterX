@@ -156,7 +156,7 @@ public sealed partial class ToolboxPage : Page
 
         // Other
         OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));
-        OtherTools.Add(new ToolboxTile("chapter-marks", "Chapter Marks", "Edit embedded MKV / MP4 chapter markers (no re-encode)", "\uE8B7", blue, "Ready", green, false, "FFmpeg"));
+        OtherTools.Add(new ToolboxTile("chapter-marks", "Chapter Marks", "Exact-PTS MKV / MP4 chapter import, editing, export, and stream-copy muxing", "\uE8B7", blue, "Ready", green, false, "FFmpeg + MKVToolNix 97+"));
         OtherTools.Add(new ToolboxTile("watch-folders", "Watch Folders", "Auto-process files dropped into a watched folder", "\uED25", green, "Ready", green, false, "UCX"));
         OtherTools.Add(new ToolboxTile("history", "History", "Search the persistent log of every job + re-run", "\uE81C", blue, "Ready", green, false, "UCX + SQLite"));
         OtherTools.Add(new ToolboxTile("vmaf", "VMAF Quality", "Score a compressed clip against its reference (mean / harmonic / min)", "\uE9D9", blue, "Ready", green, false, "FFmpeg + libvmaf"));
@@ -185,7 +185,7 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("presets:alphacut", "Video Background Removal", "AI matting on video tracks (U2Net / SAM 2 segmentation)", "\uE91F", red, "Ready", green, false, "U2Net + SAM 2"));
         OtherTools.Add(new ToolboxTile("presets:archive", "Archive Tool", "Pack / unpack / list 7z / zip / tar / rar / iso / cab archives", "\uE7B8", blue, "Ready", green, false, "7-Zip"));
         AudioTools.Add(new ToolboxTile("presets:audiotag", "Audio Metadata Tags", "Read / write / strip ID3 / FLAC / Vorbis / M4A tags", "\uE189", blue, "Ready", green, false, "mutagen"));
-        VideoTools.Add(new ToolboxTile("presets:chaptermark", "Chapter Markers", "Read / write MP4 / MKV / M4B chapter markers", "\uE7C3", blue, "Ready", green, false, "mutagen + mkvmerge"));
+        VideoTools.Add(new ToolboxTile("presets:chaptermark", "Chapter Markers", "Export exact chapter PTS from MP4 / MKV / M4B to JSON", "\uE7C3", blue, "Ready", green, false, "FFprobe"));
         DocumentTools.Add(new ToolboxTile("presets:codeformat", "Source Code Formatter", "prettier / black / gofmt / rustfmt / clang-format auto-format", "\uE943", blue, "Ready", green, false, "OSS formatters"));
         OtherTools.Add(new ToolboxTile("presets:coordfmt", "Coordinate Format", "GPS DD / DMS / UTM / MGRS / Geohash / Plus Codes batch convert", "\uE707", blue, "Ready", green, false, "pyproj + mgrs"));
         AudioTools.Add(new ToolboxTile("presets:demucs", "Audio Stem Separation", "Demucs htdemucs_ft 4-stem (vocals / drums / bass / other)", "\uE767", red, "Ready", green, false, "Demucs"));
