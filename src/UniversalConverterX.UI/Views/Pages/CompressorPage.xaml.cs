@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -27,6 +28,16 @@ public sealed partial class CompressorPage : Page
     private const int ProgressLogMaxChars = 64_000;
     private const int FinishedCap = 200;
     private const int FolderAddCap = 500;
+    private const double TargetSizeHeadroom = 0.95;
+
+    private static readonly IReadOnlyDictionary<string, double> TargetSizeLimitsMb =
+        new Dictionary<string, double>(StringComparer.Ordinal)
+        {
+            ["discord-10mb"] = 10,
+            ["discord-25mb"] = 25,
+            ["discord-50mb"] = 50,
+            ["email-25mb"] = 25,
+        };
 
     private readonly ISidecarRunner _runner;
     private readonly IHistoryService _history;
@@ -268,11 +279,16 @@ public sealed partial class CompressorPage : Page
         // IsChecked="True" on PresetWeb fires this during InitializeComponent() before
         // all Connect() cases have run — bail out until the visual tree is complete.
         if (PresetEmail is null) return;
-        // Show the professional sub-combo only when its radio is selected.
         if (ProPresetCombo is not null)
             ProPresetCombo.Visibility = PresetPro?.IsChecked == true
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+        if (TargetSizePanel is not null)
+            TargetSizePanel.Visibility = IsTargetSizeMode
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        if (HwAccelCombo is not null)
+            HwAccelCombo.IsEnabled = !IsTargetSizeMode;
         UpdatePresetSummaries();
         UpdateStatusText();
     }
@@ -280,6 +296,28 @@ public sealed partial class CompressorPage : Page
     private void ProPreset_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (StatusText is null) return;
+        UpdatePresetSummaries();
+        UpdateStatusText();
+    }
+
+    private void SocialTarget_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (TargetSizeBox is null) return;
+
+        var tag = SelectedTargetPresetTag();
+        var isCustom = tag == "custom";
+        TargetSizeBox.IsEnabled = isCustom;
+        if (!isCustom && TargetSizeLimitsMb.TryGetValue(tag, out var limitMb))
+            TargetSizeBox.Value = limitMb;
+
+        if (StatusText is null) return;
+        UpdatePresetSummaries();
+        UpdateStatusText();
+    }
+
+    private void TargetSize_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (StatusText is null || !IsTargetSizeMode) return;
         UpdatePresetSummaries();
         UpdateStatusText();
     }
@@ -335,9 +373,32 @@ public sealed partial class CompressorPage : Page
                 {
                     "--input", item.Path,
                     "--output", outputPath,
-                    "--preset", preset,
-                    "--hwaccel", SelectedHwAccel(),
                 };
+                if (IsTargetSizeMode)
+                {
+                    var targetPreset = SelectedTargetPresetTag();
+                    if (targetPreset == "custom")
+                    {
+                        args.AddRange(
+                        [
+                            "--target-mb", (SelectedTargetLimitMb() * TargetSizeHeadroom).ToString("0.###", CultureInfo.InvariantCulture),
+                            "--codec", "libx264",
+                            "--ffmpeg-preset", "slow",
+                            "--resolution", "720p",
+                            "--audio-codec", "aac",
+                            "--audio-bitrate", "96",
+                        ]);
+                    }
+                    else
+                    {
+                        args.AddRange(["--preset", targetPreset]);
+                    }
+                    args.AddRange(["--hwaccel", "none"]);
+                }
+                else
+                {
+                    args.AddRange(["--preset", preset, "--hwaccel", SelectedHwAccel()]);
+                }
 
                 item.StatusText = "Compressing";
                 item.Progress = 0;
@@ -397,18 +458,18 @@ public sealed partial class CompressorPage : Page
                     try { srcBytes = new FileInfo(item.Path).Length; } catch { /* deleted mid-job */ }
                     _ = _history.LogAsync(new HistoryRecord
                     {
-                        Timestamp        = jobStartedAt,
-                        Engine           = "videocrush",
-                        Action           = "compress",
-                        SourcePath       = item.Path,
-                        OutputPath       = result.Success ? outputPath : null,
-                        SourceBytes      = srcBytes,
-                        OutputBytes      = result.Success ? result.SizeBytes : null,
-                        DurationSeconds  = (DateTime.UtcNow - jobStartedAt).TotalSeconds,
-                        Success          = result.Success,
-                        ErrorCode        = result.ErrorCode,
-                        ErrorMessage     = result.ErrorMessage,
-                        Profile          = preset,
+                        Timestamp = jobStartedAt,
+                        Engine = "videocrush",
+                        Action = "compress",
+                        SourcePath = item.Path,
+                        OutputPath = result.Success ? outputPath : null,
+                        SourceBytes = srcBytes,
+                        OutputBytes = result.Success ? result.SizeBytes : null,
+                        DurationSeconds = (DateTime.UtcNow - jobStartedAt).TotalSeconds,
+                        Success = result.Success,
+                        ErrorCode = result.ErrorCode,
+                        ErrorMessage = result.ErrorMessage,
+                        Profile = preset,
                     });
                 }
 
@@ -535,6 +596,13 @@ public sealed partial class CompressorPage : Page
 
     private string SelectedPresetTag()
     {
+        if (IsTargetSizeMode)
+        {
+            var targetPreset = SelectedTargetPresetTag();
+            return targetPreset == "custom"
+                ? $"custom-{SelectedTargetLimitMb().ToString("0.##", CultureInfo.InvariantCulture)}mb"
+                : targetPreset;
+        }
         if (PresetEmail.IsChecked == true) return "email-10mb";
         if (PresetArchive.IsChecked == true) return "archive-av1";
         if (PresetPro?.IsChecked == true)
@@ -549,9 +617,38 @@ public sealed partial class CompressorPage : Page
 
     private string SelectedPresetLabel()
     {
+        if (IsTargetSizeMode)
+        {
+            if (SelectedTargetPresetTag() == "custom")
+                return $"Custom {SelectedTargetLimitMb():0.##} MB limit";
+            if (SocialTargetCombo?.SelectedItem is ComboBoxItem targetItem)
+                return targetItem.Content?.ToString() ?? "Target size";
+            return "Target size";
+        }
         if (PresetEmail.IsChecked == true) return "Email";
         if (PresetArchive.IsChecked == true) return "Archive AV1";
+        if (PresetPro?.IsChecked == true && ProPresetCombo?.SelectedItem is ComboBoxItem proItem)
+            return proItem.Content?.ToString() ?? "Professional";
         return "Web 1080p";
+    }
+
+    private bool IsTargetSizeMode => PresetTarget?.IsChecked == true;
+
+    private string SelectedTargetPresetTag()
+    {
+        if (SocialTargetCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return "discord-10mb";
+    }
+
+    private double SelectedTargetLimitMb()
+    {
+        var presetTag = SelectedTargetPresetTag();
+        if (TargetSizeLimitsMb.TryGetValue(presetTag, out var presetLimit))
+            return presetLimit;
+
+        var value = TargetSizeBox?.Value ?? 10;
+        return double.IsFinite(value) && value >= 1 ? value : 10;
     }
 
     private string BuildOutputPath(string inputPath)

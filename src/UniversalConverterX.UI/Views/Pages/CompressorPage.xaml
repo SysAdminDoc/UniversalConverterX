@@ -221,7 +221,10 @@
                 </Pivot>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="14">
+            <ScrollViewer Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="14" Padding="0,0,4,0">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Hardware Acceleration" Style="{StaticResource PanelTitleTextStyle}"/>
@@ -258,6 +261,42 @@
                                      Checked="Preset_Checked"
                                      Foreground="{StaticResource TextPrimaryBrush}"
                             AutomationProperties.AutomationId="PresetEmail"/>
+                        <RadioButton x:Name="PresetTarget" Content="Target file size"
+                                     GroupName="Preset"
+                                     Tag="__target__"
+                                     Checked="Preset_Checked"
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetTarget"/>
+                        <StackPanel x:Name="TargetSizePanel"
+                                    Visibility="Collapsed"
+                                    Spacing="8">
+                            <ComboBox x:Name="SocialTargetCombo"
+                                      Header="Platform size limit"
+                                      HorizontalAlignment="Stretch"
+                                      SelectedIndex="0"
+                                      SelectionChanged="SocialTarget_Changed"
+                                AutomationProperties.AutomationId="CompressorSocialTargetCombo">
+                                <ComboBoxItem Content="Discord 10 MB" Tag="discord-10mb"/>
+                                <ComboBoxItem Content="Discord 25 MB" Tag="discord-25mb"/>
+                                <ComboBoxItem Content="Discord 50 MB" Tag="discord-50mb"/>
+                                <ComboBoxItem Content="Email 25 MB" Tag="email-25mb"/>
+                                <ComboBoxItem Content="Custom limit" Tag="custom"/>
+                            </ComboBox>
+                            <NumberBox x:Name="TargetSizeBox"
+                                       Header="Maximum size (MB)"
+                                       Value="10"
+                                       Minimum="1"
+                                       Maximum="2048"
+                                       SmallChange="0.5"
+                                       SpinButtonPlacementMode="Inline"
+                                       IsEnabled="False"
+                                       ValueChanged="TargetSize_Changed"
+                                AutomationProperties.AutomationId="CompressorTargetSizeBox"/>
+                            <TextBlock Text="Target-size mode uses CPU two-pass encoding and reserves 5% for MP4 overhead."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       FontSize="11"/>
+                        </StackPanel>
                         <RadioButton x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
                                      GroupName="Preset"
                                      Tag="archive-av1"
@@ -356,7 +395,8 @@
                                    Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
-            </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="2">

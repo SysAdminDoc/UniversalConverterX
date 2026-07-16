@@ -14,10 +14,12 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Compressor now offers cap-safe Discord 10/25/50 MB and Email 25 MB profiles plus a custom maximum-size mode. Size-targeted jobs reserve 5% container overhead and use deterministic CPU two-pass encoding; matching presets are available outside the Compressor page.
 - Added managed, SHA-256-verified yt-dlp and Deno release channels with exact platform asset selection, staged version validation, atomic promotion, and rollback backups. Downloader health now explains missing or outdated runtimes and can install both; StreamKeep prefers the managed yt-dlp binary, reports active Deno/EJS status on probes, and ignores external yt-dlp configuration.
 
 ### Fixed
 
+- VideoCrush NDJSON is now safe on legacy Windows console code pages, and FFmpeg output is consumed without a redirected-stderr deadlock during long two-pass encodes.
 - The canonical build script now uses the .NET 10 SDK for full x64 WinUI solution builds and publishing instead of an older Visual Studio MSBuild that could not resolve SDK-style projects. Repaired ten malformed Explorer `/select` invocations that blocked C# compilation and removed the remaining build warning.
 
 ## [2.22.1] - 2026-07-01

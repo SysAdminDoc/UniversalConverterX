@@ -9,14 +9,8 @@ Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
@@ -29,8 +23,14 @@ from pathlib import Path
 # ─── NDJSON emitter ──────────────────────────────────────────────────────────
 
 def emit(event: str, **fields) -> None:
-    """Write a single NDJSON line to stdout and flush."""
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
+    """Write one ASCII-safe NDJSON line and flush.
+
+    Windows console code pages cannot encode every Unicode character. JSON
+    escapes preserve the original text while keeping the host protocol safe
+    whether stdout is a pipe or a legacy console.
+    """
+    payload = json.dumps({"event": event, **fields}, ensure_ascii=True, separators=(",", ":"))
+    sys.stdout.write(payload + "\n")
     sys.stdout.flush()
 
 
@@ -143,6 +143,44 @@ PRESETS = {
     },
     "email-10mb": {
         "target_mb": 9.5,
+        "crf": None,
+        "codec": "libx264",
+        "preset": "slow",
+        "resolution": "720p",
+        "audio_codec": "aac",
+        "audio_bitrate": 96,
+    },
+    # Platform caps reserve 5% for MP4 muxing/metadata overhead so the final
+    # artifact remains at or below the user-visible limit.
+    "discord-10mb": {
+        "target_mb": 9.5,
+        "crf": None,
+        "codec": "libx264",
+        "preset": "slow",
+        "resolution": "720p",
+        "audio_codec": "aac",
+        "audio_bitrate": 96,
+    },
+    "discord-25mb": {
+        "target_mb": 23.75,
+        "crf": None,
+        "codec": "libx264",
+        "preset": "slow",
+        "resolution": "720p",
+        "audio_codec": "aac",
+        "audio_bitrate": 96,
+    },
+    "discord-50mb": {
+        "target_mb": 47.5,
+        "crf": None,
+        "codec": "libx264",
+        "preset": "slow",
+        "resolution": "1080p",
+        "audio_codec": "aac",
+        "audio_bitrate": 128,
+    },
+    "email-25mb": {
+        "target_mb": 23.75,
         "crf": None,
         "codec": "libx264",
         "preset": "slow",
@@ -263,16 +301,20 @@ def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str,
     Returns FFmpeg's exit code. start_pct..end_pct maps the linear ffmpeg
     progress into a sub-range of overall job progress.
     """
-    full_cmd = cmd + ["-progress", "pipe:1", "-nostats"]
+    full_cmd = [
+        cmd[0], "-hide_banner", "-loglevel", "error",
+        "-progress", "pipe:1", "-nostats", *cmd[1:],
+    ]
     proc = subprocess.Popen(
         full_cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
     )
     started = time.monotonic()
     last_pct = -1.0
+    error_tail: deque[str] = deque(maxlen=15)
     try:
         assert proc.stdout is not None
         for line in proc.stdout:
@@ -293,12 +335,16 @@ def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str,
                          eta_seconds=int(eta) if eta and eta < 86400 else None)
             elif line.startswith("progress=end"):
                 emit("progress", percent=end_pct, stage=stage, eta_seconds=0)
+            elif not line.startswith((
+                "frame=", "fps=", "stream_", "bitrate=", "total_size=",
+                "out_time_", "out_time=", "dup_frames=", "drop_frames=",
+                "speed=", "progress=",
+            )):
+                error_tail.append(line)
     finally:
         proc.wait()
-        # Drain stderr for failure diagnostics
-        if proc.returncode != 0 and proc.stderr is not None:
-            tail = proc.stderr.read().splitlines()[-15:]
-            for ln in tail:
+        if proc.returncode != 0:
+            for ln in error_tail:
                 emit("log", level="error", message=ln)
     return proc.returncode
 
@@ -618,7 +664,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output", required=True, help="Output video path")
     p.add_argument("--preset", choices=list(PRESETS.keys()),
                    help="Predefined preset — see PRESETS dict in sidecar.py for the full list "
-                        "(web-1080p, email-10mb, archive-av1, prores-422-{proxy,lt,hq}, prores-4444, "
+                        "(web-1080p, email-10mb, discord-{10mb,25mb,50mb}, email-25mb, "
+                        "archive-av1, prores-422-{proxy,lt,hq}, prores-4444, "
                         "dnxhr-{sq,hq,hqx,444}, archive-ffv1).")
     p.add_argument("--target-mb", type=float, help="Target file size in megabytes")
     p.add_argument("--crf", type=int, help="Constant Rate Factor (quality-targeted)")

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>To Discord (10 MB cap-safe)</Name>
+    <Folder>Video</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>m4v</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_discord_10mb</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>videocrush</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>--preset</Arg>
+        <Arg>discord-10mb</Arg>
+        <Arg>--hwaccel</Arg>
+        <Arg>none</Arg>
+    </Args>
+</Preset>
