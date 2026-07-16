@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -23,6 +24,7 @@ public sealed partial class DownloaderPage : Page
     private readonly IHistoryService _history;
     private readonly ISidecarHealthService _health;
     private readonly IToolManager _toolManager;
+    private readonly IPostQueueActionService _postQueueActions;
     private readonly ObservableCollection<DownloadJobItem> _queue = [];
     private readonly ObservableCollection<FinishedDownloadItem> _finished = [];
     private CancellationTokenSource? _cts;
@@ -36,6 +38,7 @@ public sealed partial class DownloaderPage : Page
         _history = App.Services.GetRequiredService<IHistoryService>();
         _health = App.Services.GetRequiredService<ISidecarHealthService>();
         _toolManager = App.Services.GetRequiredService<IToolManager>();
+        _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         _outputDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "Downloads", "UniversalConverterX");
@@ -443,6 +446,8 @@ public sealed partial class DownloaderPage : Page
 
         var completed = 0;
         var failed = 0;
+        var batchStartedAt = DateTime.UtcNow;
+        var completionItems = new List<QueueCompletionItem>();
         try
         {
             foreach (var job in pending)
@@ -493,6 +498,17 @@ public sealed partial class DownloaderPage : Page
                 }
 
                 AddFinishedItem(job, result);
+                completionItems.Add(new QueueCompletionItem
+                {
+                    Source = job.Url,
+                    Output = result.OutputPath,
+                    Status = result.ErrorCode == "cancelled"
+                        ? QueueCompletionItemStatus.Cancelled
+                        : result.Success
+                            ? QueueCompletionItemStatus.Succeeded
+                            : QueueCompletionItemStatus.Failed,
+                    Message = result.ErrorMessage,
+                });
 
                 // Persist to History so the dashboard tracks downloads, just
                 // like Compressor and the preset pages do. Skip user-cancelled
@@ -530,6 +546,28 @@ public sealed partial class DownloaderPage : Page
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         CancelButton.IsEnabled = false;
         UpdateUi();
+
+        foreach (var unstarted in pending.Skip(completionItems.Count))
+        {
+            completionItems.Add(new QueueCompletionItem
+            {
+                Source = unstarted.Url,
+                Status = QueueCompletionItemStatus.Cancelled,
+                Message = "Not started because the queue was cancelled.",
+            });
+        }
+        if (completionItems.Count > 0)
+        {
+            var actionResult = await _postQueueActions.ExecuteAsync(new QueueCompletionSummary
+            {
+                Workflow = "Downloader",
+                StartedUtc = batchStartedAt,
+                CompletedUtc = DateTime.UtcNow,
+                Items = completionItems,
+            });
+            if (actionResult.Action != QueueCompletionAction.None && !actionResult.Executed)
+                StatusText.Text = actionResult.Message;
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

@@ -113,6 +113,27 @@ public class SettingsMigrationsTests
     }
 
     [Fact]
+    public void LoadFromJson_ShouldPreservePostQueueAutomationSettings()
+    {
+        var json = $$"""
+        {
+          "SchemaVersion": {{ConverterXOptions.CurrentSchemaVersion}},
+          "QueueCompletionAction": "RunScript",
+          "QueueCompletionScriptPath": "C:\\Automation\\after-queue.ps1"
+        }
+        """;
+
+        var loaded = ConverterXOptions.LoadFromJson(json, persistMigrated: false);
+
+        loaded.QueueCompletionAction.Should().Be(QueueCompletionAction.RunScript);
+        loaded.QueueCompletionScriptPath.Should().Be(@"C:\Automation\after-queue.ps1");
+
+        loaded.ResetToDefaults();
+        loaded.QueueCompletionAction.Should().Be(QueueCompletionAction.Notify);
+        loaded.QueueCompletionScriptPath.Should().BeNull();
+    }
+
+    [Fact]
     public void LoadFromJson_InvalidRoot_Throws()
     {
         // The Load() entry point catches this and falls back to defaults; the

@@ -29,10 +29,11 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
-        services.Configure<ConverterXOptions>(options =>
-        {
-            options.ToolsBasePath = GetDefaultToolsPath();
-        });
+        var persistedOptions = ConverterXOptions.Load();
+        if (string.IsNullOrWhiteSpace(persistedOptions.ToolsBasePath))
+            persistedOptions.ToolsBasePath = GetDefaultToolsPath();
+        services.AddSingleton<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(
+            Microsoft.Extensions.Options.Options.Create(persistedOptions));
 
         services.AddSingleton<IConversionOrchestrator, ConversionOrchestrator>();
         services.AddSingleton<IBatchQueueStore>(_ => new JsonBatchQueueStore(
@@ -53,6 +54,7 @@ public partial class App : Application
         services.AddSingleton<IFfmpegCommandReviewService, FfmpegCommandReviewService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
         services.AddSingleton<IHistoryService, HistoryService>();
+        services.AddSingleton<IPostQueueActionService, PostQueueActionService>();
         services.AddSingleton<IWatchFolderService, WatchFolderService>();
         services.AddSingleton<IPresetExecutor, PresetExecutor>();
         services.AddSingleton<IUiPresetCache, UiPresetCache>();

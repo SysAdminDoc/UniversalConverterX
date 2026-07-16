@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -55,6 +56,7 @@ public sealed partial class ConverterPage : Page
     private readonly IConversionOrchestrator _orchestrator;
     private readonly IBatchQueueStore _queueStore;
     private readonly IHistoryService _history;
+    private readonly IPostQueueActionService _postQueueActions;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
     private CancellationTokenSource? _cancellationTokenSource;
@@ -72,6 +74,7 @@ public sealed partial class ConverterPage : Page
         _orchestrator = App.Services.GetRequiredService<IConversionOrchestrator>();
         _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
         _history = App.Services.GetRequiredService<IHistoryService>();
+        _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
@@ -728,6 +731,8 @@ public sealed partial class ConverterPage : Page
         var completed = 0;
         var failed = 0;
         var cancelled = 0;
+        var batchStartedAt = DateTime.UtcNow;
+        var completionItems = new ConcurrentQueue<QueueCompletionItem>();
         var cancellation = _cancellationTokenSource
             ?? throw new InvalidOperationException("Conversion cancellation source was not initialized.");
 
@@ -781,6 +786,7 @@ public sealed partial class ConverterPage : Page
 
                     var result = await _orchestrator.ConvertAsync(queued.Job, progress, cancellation.Token);
                     await LogHistoryAsync(queued, result);
+                    completionItems.Enqueue(BuildCompletionItem(queued.Job.InputPath, result));
 
                     if (result.Success || result.WasSkipped)
                     {
@@ -827,6 +833,12 @@ public sealed partial class ConverterPage : Page
                         ? DateTime.UtcNow - started
                         : TimeSpan.Zero;
                     await LogHistoryAsync(queued, ConversionResult.Cancelled(queued.Job, duration));
+                    completionItems.Enqueue(new QueueCompletionItem
+                    {
+                        Source = queued.Job.InputPath,
+                        Status = QueueCompletionItemStatus.Cancelled,
+                        Message = "Conversion cancelled by user.",
+                    });
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         queued.File.StatusText = "Cancelled - ready to retry";
@@ -841,6 +853,12 @@ public sealed partial class ConverterPage : Page
                         ? DateTime.UtcNow - started
                         : TimeSpan.Zero;
                     await LogHistoryAsync(queued, ConversionResult.Failed(queued.Job, ex.Message, duration));
+                    completionItems.Enqueue(new QueueCompletionItem
+                    {
+                        Source = queued.Job.InputPath,
+                        Status = QueueCompletionItemStatus.Failed,
+                        Message = ex.Message,
+                    });
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         queued.File.StatusText = "Failed - ready to retry";
@@ -872,6 +890,19 @@ public sealed partial class ConverterPage : Page
                 CancelButton.Content = "Close";
                 QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
             });
+
+            if (!completionItems.IsEmpty)
+            {
+                var actionResult = await _postQueueActions.ExecuteAsync(new QueueCompletionSummary
+                {
+                    Workflow = "Converter",
+                    StartedUtc = batchStartedAt,
+                    CompletedUtc = DateTime.UtcNow,
+                    Items = completionItems.ToArray(),
+                });
+                if (actionResult.Action != QueueCompletionAction.None && !actionResult.Executed)
+                    DispatcherQueue.TryEnqueue(() => StatusText.Text = actionResult.Message);
+            }
         }
         finally
         {
@@ -990,6 +1021,23 @@ public sealed partial class ConverterPage : Page
             Debug.WriteLine($"History logging failed: {ex}");
         }
     }
+
+    private static QueueCompletionItem BuildCompletionItem(
+        string sourcePath,
+        ConversionResult result) => new()
+    {
+        Source = sourcePath,
+        Output = result.OutputPath,
+        Status = result switch
+        {
+            { WasCancelled: true } => QueueCompletionItemStatus.Cancelled,
+            { Success: true } or { WasSkipped: true } => QueueCompletionItemStatus.Succeeded,
+            _ => QueueCompletionItemStatus.Failed,
+        },
+        Message = result.Warnings.Count > 0
+            ? string.Join(" ", result.Warnings)
+            : result.ErrorMessage,
+    };
 
     private ConversionJob CreateJob(
         string inputPath,

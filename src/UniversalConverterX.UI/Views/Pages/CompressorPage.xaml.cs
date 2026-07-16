@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Services;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -43,6 +45,7 @@ public sealed partial class CompressorPage : Page
     private readonly ISidecarRunner _runner;
     private readonly ISidecarHealthService _health;
     private readonly IHistoryService _history;
+    private readonly IPostQueueActionService _postQueueActions;
     private readonly ObservableCollection<CompressionFileItem> _files = [];
     private readonly ObservableCollection<CompressionFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
@@ -54,6 +57,7 @@ public sealed partial class CompressorPage : Page
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _health = App.Services.GetRequiredService<ISidecarHealthService>();
         _history = App.Services.GetRequiredService<IHistoryService>();
+        _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         UpdatePresetSummaries();
@@ -408,6 +412,8 @@ public sealed partial class CompressorPage : Page
         var completed = 0;
         var failed = 0;
         long resultBytes = 0;
+        var batchStartedAt = DateTime.UtcNow;
+        var completionItems = new List<QueueCompletionItem>();
 
         _cts = new CancellationTokenSource();
         CompressButton.IsEnabled = false;
@@ -541,6 +547,17 @@ public sealed partial class CompressorPage : Page
                 }
 
                 AddFinishedItem(item, result, verifiedVmaf, finalCrf);
+                completionItems.Add(new QueueCompletionItem
+                {
+                    Source = item.Path,
+                    Output = result.OutputPath,
+                    Status = result.ErrorCode == "cancelled"
+                        ? QueueCompletionItemStatus.Cancelled
+                        : result.Success
+                            ? QueueCompletionItemStatus.Succeeded
+                            : QueueCompletionItemStatus.Failed,
+                    Message = result.ErrorMessage,
+                });
 
                 // Persist every job to the history dashboard. We skip pure cancellations
                 // (user-driven) so the failed-count stat stays meaningful.
@@ -583,6 +600,28 @@ public sealed partial class CompressorPage : Page
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         UpdateTotals(resultBytes);
         UpdateUi();
+
+        foreach (var pending in jobs.Skip(completionItems.Count))
+        {
+            completionItems.Add(new QueueCompletionItem
+            {
+                Source = pending.Path,
+                Status = QueueCompletionItemStatus.Cancelled,
+                Message = "Not started because the queue was cancelled.",
+            });
+        }
+        if (completionItems.Count > 0)
+        {
+            var actionResult = await _postQueueActions.ExecuteAsync(new QueueCompletionSummary
+            {
+                Workflow = "Compressor",
+                StartedUtc = batchStartedAt,
+                CompletedUtc = DateTime.UtcNow,
+                Items = completionItems,
+            });
+            if (actionResult.Action != QueueCompletionAction.None && !actionResult.Executed)
+                StatusText.Text = actionResult.Message;
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

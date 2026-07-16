@@ -162,6 +162,45 @@
                                       IsOn="True"
                                       Toggled="SettingsToggle_Changed"
                             AutomationProperties.AutomationId="SoundToggle"/>
+
+                        <ComboBox x:Name="QueueCompletionActionComboBox"
+                                  Header="After a queue completes"
+                                  Style="{StaticResource PremiumComboBoxStyle}"
+                                  SelectionChanged="QueueCompletionAction_Changed"
+                                  HorizontalAlignment="Stretch"
+                                  AutomationProperties.AutomationId="QueueCompletionActionComboBox">
+                            <ComboBoxItem Content="Do nothing"/>
+                            <ComboBoxItem Content="Show notification"/>
+                            <ComboBoxItem Content="Put the computer to sleep"/>
+                            <ComboBoxItem Content="Shut down the computer"/>
+                            <ComboBoxItem Content="Run PowerShell script"/>
+                        </ComboBox>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="QueueCompletionScriptTextBox"
+                                     Header="Post-queue script"
+                                     PlaceholderText="PowerShell .ps1"
+                                     Style="{StaticResource PremiumTextBoxStyle}"
+                                     TextChanged="SettingsText_Changed"
+                                     AutomationProperties.AutomationId="QueueCompletionScriptTextBox"/>
+                            <Button x:Name="BrowseQueueCompletionScriptButton"
+                                    Grid.Column="1"
+                                    Content="Browse"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseQueueCompletionScript_Click"
+                                    AutomationProperties.AutomationId="BrowseQueueCompletionScriptButton"/>
+                        </Grid>
+
+                        <TextBlock Text="Sleep and shutdown run only when every queue item succeeds. Shutdown is scheduled with a 60-second Windows cancellation window. Scripts receive a JSON summary path as their first argument."
+                                   TextWrapping="Wrap"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
                     </StackPanel>
                 </Expander>
 

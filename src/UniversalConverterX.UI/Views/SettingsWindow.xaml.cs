@@ -59,6 +59,9 @@ public sealed partial class SettingsWindow : Window
         UpdatePostConversionArchiveState();
         NotificationsToggle.IsOn = _options.ShowNotifications;
         SoundToggle.IsOn = _options.PlaySoundOnComplete;
+        QueueCompletionActionComboBox.SelectedIndex = (int)_options.QueueCompletionAction;
+        QueueCompletionScriptTextBox.Text = _options.QueueCompletionScriptPath ?? "";
+        UpdateQueueCompletionScriptState();
 
         // Quality & Performance
         DefaultQualityComboBox.SelectedIndex = (int)_options.DefaultQuality;
@@ -157,6 +160,12 @@ public sealed partial class SettingsWindow : Window
     private void PostConversionAction_Changed(object sender, SelectionChangedEventArgs e)
     {
         UpdatePostConversionArchiveState();
+        SettingsSelection_Changed(sender, e);
+    }
+
+    private void QueueCompletionAction_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateQueueCompletionScriptState();
         SettingsSelection_Changed(sender, e);
     }
 
@@ -325,6 +334,24 @@ public sealed partial class SettingsWindow : Window
             PostConversionArchiveTextBox.Text = folder.Path;
             MarkDirty();
         }
+    }
+
+    private async void BrowseQueueCompletionScript_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker
+        {
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            ViewMode = PickerViewMode.List,
+        };
+        picker.FileTypeFilter.Add(".ps1");
+
+        var hwnd = WindowNative.GetWindowHandle(this);
+        InitializeWithWindow.Initialize(picker, hwnd);
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+
+        QueueCompletionScriptTextBox.Text = file.Path;
+        MarkDirty();
     }
 
     private void ContextMenuToggle_Toggled(object sender, RoutedEventArgs e)
@@ -561,6 +588,13 @@ public sealed partial class SettingsWindow : Window
         _options.DeleteSourceOnSuccess = _options.PostConversionAction == PostConversionAction.Delete;
         _options.ShowNotifications = NotificationsToggle.IsOn;
         _options.PlaySoundOnComplete = SoundToggle.IsOn;
+        _options.QueueCompletionAction = (QueueCompletionAction)Math.Clamp(
+            QueueCompletionActionComboBox.SelectedIndex,
+            (int)QueueCompletionAction.None,
+            (int)QueueCompletionAction.RunScript);
+        _options.QueueCompletionScriptPath = string.IsNullOrWhiteSpace(QueueCompletionScriptTextBox.Text)
+            ? null
+            : QueueCompletionScriptTextBox.Text.Trim();
 
         // Quality & Performance
         _options.DefaultQuality = (Core.Models.QualityPreset)DefaultQualityComboBox.SelectedIndex;
@@ -610,6 +644,16 @@ public sealed partial class SettingsWindow : Window
         BrowsePostConversionArchiveButton.IsEnabled = isMove;
         if (isMove && string.IsNullOrWhiteSpace(PostConversionArchiveTextBox.Text))
             PostConversionArchiveTextBox.PlaceholderText = "_converted-sources";
+    }
+
+    private void UpdateQueueCompletionScriptState()
+    {
+        if (QueueCompletionScriptTextBox is null || BrowseQueueCompletionScriptButton is null)
+            return;
+
+        var enabled = QueueCompletionActionComboBox.SelectedIndex == (int)QueueCompletionAction.RunScript;
+        QueueCompletionScriptTextBox.IsEnabled = enabled;
+        BrowseQueueCompletionScriptButton.IsEnabled = enabled;
     }
 
     private void MarkDirty()

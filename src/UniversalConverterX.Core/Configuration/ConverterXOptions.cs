@@ -103,6 +103,18 @@ public class ConverterXOptions
     public bool PlaySoundOnComplete { get; set; } = true;
 
     /// <summary>
+    /// Optional action after a Converter, Compressor, or Downloader queue completes.
+    /// Power actions are safety-gated to completely successful queues.
+    /// </summary>
+    public QueueCompletionAction QueueCompletionAction { get; set; } = QueueCompletionAction.Notify;
+
+    /// <summary>
+    /// PowerShell script launched for <see cref="Models.QueueCompletionAction.RunScript"/>.
+    /// The first argument is the generated JSON queue-summary path.
+    /// </summary>
+    public string? QueueCompletionScriptPath { get; set; }
+
+    /// <summary>
     /// Maximum concurrent conversions
     /// </summary>
     public int MaxParallelConversions { get; set; } = Math.Max(1, Environment.ProcessorCount / 2);
@@ -392,6 +404,8 @@ public class ConverterXOptions
         PostConversionArchiveFolder = defaults.PostConversionArchiveFolder;
         ShowNotifications = defaults.ShowNotifications;
         PlaySoundOnComplete = defaults.PlaySoundOnComplete;
+        QueueCompletionAction = defaults.QueueCompletionAction;
+        QueueCompletionScriptPath = defaults.QueueCompletionScriptPath;
         MaxParallelConversions = defaults.MaxParallelConversions;
         DefaultTimeout = defaults.DefaultTimeout;
         DefaultQuality = defaults.DefaultQuality;

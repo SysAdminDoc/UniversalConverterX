@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Converter, Compressor, and Downloader queues now share configurable completion actions: notification, sleep, delayed shutdown, or a hidden PowerShell hook. Power actions are refused unless every item succeeds; scripts run for any outcome and receive an atomic per-item JSON summary path.
 - Converter now records every per-file result in History with a versioned, validated re-run payload. Re-run restores the source, output format/location, conversion options, post-source action, forced engine, and advanced FFmpeg template; SQLite upgrades existing history databases in place and legacy rows receive a safe best-effort prefill.
 - Conversion batches can now emit structured JSON or RFC 4180 CSV reports with per-file status, source/output sizes, byte delta, duration, engine, profile, warnings, and errors. `ucx convert --report` writes live results, while the History page exports its current filtered view through the same Core report writer.
 - Editor and ClipForge now support lossless display-crop metadata for H.264/H.265 and container-only display aspect overrides. Crop metadata rewrites only SPS display edges while preserving coded picture samples; aspect overrides stream-copy compressed packets unchanged. A 16:9 lossless metadata preset is included.
@@ -36,6 +37,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- The WinUI service container now loads the persisted `ConverterXOptions` instance at startup, so saved general, queue-action, tool, quality, and advanced settings survive application restarts instead of silently reverting in memory.
 - ClipForge now drains FFmpeg diagnostics and progress from one combined pipe with a bounded error tail, preventing long FFmpeg banners or error output from deadlocking any editor operation.
 - Added a platform regression gate that requires the WinUI project to remain on Microsoft Windows App SDK 2.x or newer with the supported Windows target and self-contained runtime configuration.
 - Sidecar processes now force UTF-8 at the Python producer boundary, preventing Unicode file paths from failing when NDJSON output is redirected on legacy Windows code pages.
