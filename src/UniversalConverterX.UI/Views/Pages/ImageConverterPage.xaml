@@ -240,7 +240,10 @@
                 </Pivot>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="14">
+            <ScrollViewer Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>
@@ -286,6 +289,104 @@
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
+                    <Expander Header="Batch adjustments">
+                        <StackPanel Spacing="10" Padding="0,10,0,0">
+                            <ComboBox x:Name="EditPresetCombo"
+                                      Header="Look preset"
+                                      SelectedIndex="0"
+                                      SelectionChanged="Settings_Changed"
+                                      HorizontalAlignment="Stretch"
+                                      AutomationProperties.AutomationId="EditPresetCombo">
+                                <ComboBoxItem Content="None" Tag=""/>
+                                <ComboBoxItem Content="Vivid" Tag="vivid"/>
+                                <ComboBoxItem Content="Muted" Tag="muted"/>
+                                <ComboBoxItem Content="Black &amp; white" Tag="bw"/>
+                                <ComboBoxItem Content="Vintage" Tag="vintage"/>
+                                <ComboBoxItem Content="Cold" Tag="cold"/>
+                                <ComboBoxItem Content="Warm" Tag="warm"/>
+                            </ComboBox>
+                            <Grid ColumnSpacing="10" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <NumberBox x:Name="BrightnessBox" Grid.Row="0" Grid.Column="0"
+                                           Header="Brightness" Minimum="-100" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="BrightnessBox"/>
+                                <NumberBox x:Name="ContrastBox" Grid.Row="0" Grid.Column="1"
+                                           Header="Contrast" Minimum="-100" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="ContrastBox"/>
+                                <NumberBox x:Name="SaturationBox" Grid.Row="1" Grid.Column="0"
+                                           Header="Saturation" Minimum="-100" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="SaturationBox"/>
+                                <NumberBox x:Name="SharpnessBox" Grid.Row="1" Grid.Column="1"
+                                           Header="Sharpness" Minimum="0" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="SharpnessBox"/>
+                                <NumberBox x:Name="BlurBox" Grid.Row="2" Grid.Column="0"
+                                           Header="Blur px" Minimum="0" Maximum="20" Value="0"
+                                           SmallChange="0.5" ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="BlurBox"/>
+                                <NumberBox x:Name="HueBox" Grid.Row="2" Grid.Column="1"
+                                           Header="Hue °" Minimum="0" Maximum="360" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="HueBox"/>
+                                <NumberBox x:Name="VignetteBox" Grid.Row="3" Grid.Column="0"
+                                           Header="Vignette" Minimum="0" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="VignetteBox"/>
+                                <NumberBox x:Name="GrainBox" Grid.Row="3" Grid.Column="1"
+                                           Header="Grain" Minimum="0" Maximum="100" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="GrainBox"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <CheckBox x:Name="GrayscaleCheck" Content="Grayscale"
+                                          Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
+                                          AutomationProperties.AutomationId="GrayscaleCheck"/>
+                                <CheckBox x:Name="SepiaCheck" Content="Sepia"
+                                          Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
+                                          AutomationProperties.AutomationId="SepiaCheck"/>
+                                <CheckBox x:Name="InvertCheck" Content="Invert"
+                                          Checked="Settings_Bool_Changed" Unchecked="Settings_Bool_Changed"
+                                          AutomationProperties.AutomationId="InvertCheck"/>
+                            </StackPanel>
+                            <TextBox x:Name="TintBox"
+                                     Header="Tint (colour@strength)"
+                                     PlaceholderText="#3a6ea5@20"
+                                     TextChanged="EditText_Changed"
+                                     AutomationProperties.AutomationId="TintBox"/>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <NumberBox x:Name="BorderBox" Grid.Column="0"
+                                           Header="Border px" Minimum="0" Maximum="1000" Value="0"
+                                           ValueChanged="EditNumber_Changed"
+                                           AutomationProperties.AutomationId="BorderBox"/>
+                                <TextBox x:Name="BorderColorBox" Grid.Column="1"
+                                         Header="Border colour" Text="#ffffff"
+                                         TextChanged="EditText_Changed"
+                                         AutomationProperties.AutomationId="BorderColorBox"/>
+                            </Grid>
+                            <TextBlock Text="Adjustments apply to every frame. Alpha is preserved for compatible outputs."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       FontSize="11" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Expander>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Metadata" Style="{StaticResource PanelTitleTextStyle}"/>
                         <CheckBox x:Name="StripExifCheck"
@@ -315,6 +416,7 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="2">

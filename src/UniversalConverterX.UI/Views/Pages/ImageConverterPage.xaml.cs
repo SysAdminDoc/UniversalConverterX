@@ -202,6 +202,23 @@ public sealed partial class ImageConverterPage : Page
     {
         if (RunButton is null) return;
         UpdateQualityControls();
+        RefreshPlanSummary();
+    }
+
+    private void EditNumber_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (RunButton is null) return;
+        RefreshPlanSummary();
+    }
+
+    private void EditText_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (RunButton is null) return;
+        RefreshPlanSummary();
+    }
+
+    private void RefreshPlanSummary()
+    {
         var summary = BuildPlanSummary();
         foreach (var file in _files) file.PlanSummary = summary;
         UpdateStatusText();
@@ -220,6 +237,7 @@ public sealed partial class ImageConverterPage : Page
         var targetKb = TargetSizeBox.IsEnabled && !double.IsNaN(TargetSizeBox.Value)
             ? TargetSizeBox.Value
             : 0;
+        var editArguments = BuildEditArguments();
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -250,6 +268,7 @@ public sealed partial class ImageConverterPage : Page
                     args.Add("--target-kb");
                     args.Add(targetKb.ToString("0.###", CultureInfo.InvariantCulture));
                 }
+                args.AddRange(editArguments);
                 if (stripExif) args.Add("--strip-exif");
                 if (stripIcc)  args.Add("--strip-icc");
 
@@ -392,10 +411,77 @@ public sealed partial class ImageConverterPage : Page
                    (StripIccCheck?.IsChecked  == true ? "" : "ICC");
         if (string.IsNullOrWhiteSpace(meta)) meta = "no metadata";
         else                                 meta = "keep " + meta.Trim();
-        return targetKb > 0 ? $"{format.ToUpper()} ≤{targetKb:0.###} KB · {meta}"
-             : lossy ? $"{format.ToUpper()} q{quality} · {meta}"
-                     : $"{format.ToUpper()} · {meta}";
+        var summary = targetKb > 0 ? $"{format.ToUpper()} ≤{targetKb:0.###} KB · {meta}"
+                    : lossy ? $"{format.ToUpper()} q{quality} · {meta}"
+                            : $"{format.ToUpper()} · {meta}";
+        var preset = SelectedEditPreset();
+        var custom = HasCustomEdits();
+        if (!string.IsNullOrWhiteSpace(preset))
+            summary += $" · {preset}";
+        if (custom)
+            summary += " · custom edits";
+        return summary;
     }
+
+    private List<string> BuildEditArguments()
+    {
+        var arguments = new List<string>();
+        var preset = SelectedEditPreset();
+        if (!string.IsNullOrWhiteSpace(preset))
+        {
+            arguments.Add("--adjust-preset");
+            arguments.Add(preset);
+        }
+
+        AddNumberArgument(arguments, "--brightness", BrightnessBox);
+        AddNumberArgument(arguments, "--contrast", ContrastBox);
+        AddNumberArgument(arguments, "--saturation", SaturationBox);
+        AddNumberArgument(arguments, "--sharpness", SharpnessBox);
+        AddNumberArgument(arguments, "--blur", BlurBox);
+        AddNumberArgument(arguments, "--hue", HueBox);
+        AddNumberArgument(arguments, "--vignette", VignetteBox);
+        AddNumberArgument(arguments, "--grain", GrainBox);
+        if (GrayscaleCheck.IsChecked == true) arguments.Add("--grayscale");
+        if (SepiaCheck.IsChecked == true) arguments.Add("--sepia");
+        if (InvertCheck.IsChecked == true) arguments.Add("--invert");
+        if (!string.IsNullOrWhiteSpace(TintBox.Text))
+        {
+            arguments.Add("--tint");
+            arguments.Add(TintBox.Text.Trim());
+        }
+        if (NumberValue(BorderBox) > 0)
+        {
+            AddNumberArgument(arguments, "--border", BorderBox);
+            arguments.Add("--border-color");
+            arguments.Add(string.IsNullOrWhiteSpace(BorderColorBox.Text)
+                ? "#ffffff"
+                : BorderColorBox.Text.Trim());
+        }
+        return arguments;
+    }
+
+    private bool HasCustomEdits() =>
+        NumberValue(BrightnessBox) != 0 || NumberValue(ContrastBox) != 0 ||
+        NumberValue(SaturationBox) != 0 || NumberValue(SharpnessBox) != 0 ||
+        NumberValue(BlurBox) != 0 || NumberValue(HueBox) != 0 ||
+        NumberValue(VignetteBox) != 0 || NumberValue(GrainBox) != 0 ||
+        NumberValue(BorderBox) != 0 || GrayscaleCheck.IsChecked == true ||
+        SepiaCheck.IsChecked == true || InvertCheck.IsChecked == true ||
+        !string.IsNullOrWhiteSpace(TintBox.Text);
+
+    private string SelectedEditPreset() =>
+        EditPresetCombo?.SelectedItem is ComboBoxItem { Tag: string tag } ? tag : "";
+
+    private static void AddNumberArgument(List<string> arguments, string flag, NumberBox box)
+    {
+        var value = NumberValue(box);
+        if (value == 0) return;
+        arguments.Add(flag);
+        arguments.Add(value.ToString("0.###", CultureInfo.InvariantCulture));
+    }
+
+    private static double NumberValue(NumberBox? box) =>
+        box is null || double.IsNaN(box.Value) ? 0 : box.Value;
 
     private void UpdateQualityControls()
     {

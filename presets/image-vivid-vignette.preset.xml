@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Vivid image with vignette</Name>
+    <Folder>Image</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>png</Extension>
+        <Extension>heic</Extension>
+        <Extension>heif</Extension>
+        <Extension>webp</Extension>
+        <Extension>avif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>tif</Extension>
+        <Extension>bmp</Extension>
+        <Extension>jxl</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_vivid</OutputFileNameTemplate>
+    <OutputExtension>png</OutputExtension>
+    <Engine>heicshift</Engine>
+    <Args>
+        <Arg>--format</Arg>
+        <Arg>png</Arg>
+        <Arg>--adjust-preset</Arg>
+        <Arg>vivid</Arg>
+        <Arg>--vignette</Arg>
+        <Arg>30</Arg>
+    </Args>
+</Preset>

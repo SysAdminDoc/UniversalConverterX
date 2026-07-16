@@ -106,6 +106,16 @@ OUTPUT_FORMATS: dict[str, dict] = {
 }
 
 QUALITY_TARGET_FORMATS = {"jpeg", "webp", "avif", "heic", "jxl"}
+MULTIFRAME_OUTPUT_FORMATS = {"webp", "tiff"}
+
+ADJUST_PRESETS = {
+    "vivid": {"saturation": 30, "contrast": 15},
+    "muted": {"saturation": -30, "contrast": -10},
+    "bw": {"grayscale": True, "contrast": 10},
+    "vintage": {"sepia": True, "saturation": -15, "contrast": -5},
+    "cold": {"saturation": -10, "tint": "#3a6ea5@18"},
+    "warm": {"saturation": 8, "tint": "#e0a04a@16"},
+}
 
 
 # ROADMAP Item 88 — libjxl security floor. pillow-jxl-plugin >= 1.3.4 is the
@@ -320,6 +330,191 @@ def _quality_warning(
     )
 
 
+# ── Batch image editing ─────────────────────────────────────────────────────
+
+def _parse_color(spec: str | None, default=None):
+    if not spec or len(spec) > 64:
+        return default
+    try:
+        from PIL import ImageColor  # type: ignore
+        return ImageColor.getrgb(spec.strip())[:3]
+    except (ValueError, TypeError):
+        return default
+
+
+def _resolve_edits(args: argparse.Namespace) -> dict:
+    preset = ADJUST_PRESETS.get(getattr(args, "adjust_preset", None) or "", {})
+
+    def numeric(name: str, low: int, high: int) -> int:
+        base = int(preset.get(name, 0) or 0)
+        explicit = getattr(args, name, None)
+        value = base + (int(explicit) if explicit is not None else 0)
+        return max(low, min(high, value))
+
+    return {
+        "brightness": numeric("brightness", -100, 100),
+        "contrast": numeric("contrast", -100, 100),
+        "saturation": numeric("saturation", -100, 100),
+        "sharpness": numeric("sharpness", 0, 100),
+        "blur": max(0.0, min(20.0, float(getattr(args, "blur", None) or 0))),
+        "hue": numeric("hue", 0, 360),
+        "grayscale": bool(preset.get("grayscale")) or bool(args.grayscale),
+        "sepia": bool(preset.get("sepia")) or bool(args.sepia),
+        "invert": bool(preset.get("invert")) or bool(args.invert),
+        "vignette": numeric("vignette", 0, 100),
+        "grain": numeric("grain", 0, 100),
+        "tint": getattr(args, "tint", None) or preset.get("tint"),
+        "border": max(0, int(getattr(args, "border", None) or 0)),
+        "border_color": getattr(args, "border_color", "#ffffff"),
+    }
+
+
+def _has_edits(edits: dict) -> bool:
+    return any(
+        edits.get(name)
+        for name in (
+            "brightness", "contrast", "saturation", "sharpness", "blur",
+            "hue", "grayscale", "sepia", "invert", "vignette", "grain",
+            "tint", "border",
+        )
+    )
+
+
+def _apply_hue(rgb, degrees: int):
+    from PIL import Image  # type: ignore
+
+    shift = int(round((degrees % 360) / 360.0 * 255)) & 0xFF
+    if shift == 0:
+        return rgb
+    hue, saturation, value = rgb.convert("HSV").split()
+    hue = hue.point(lambda channel: (channel + shift) & 0xFF)
+    return Image.merge("HSV", (hue, saturation, value)).convert("RGB")
+
+
+def _apply_vignette(rgb, strength: int):
+    from PIL import Image, ImageDraw, ImageEnhance, ImageFilter  # type: ignore
+
+    width, height = rgb.size
+    mask = Image.new("L", (width, height), 0)
+    ImageDraw.Draw(mask).ellipse(
+        (-width * 0.15, -height * 0.15, width * 1.15, height * 1.15),
+        fill=255,
+    )
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=max(width, height) / 8.0))
+    dark = ImageEnhance.Brightness(rgb).enhance(1.0 - strength / 100.0 * 0.85)
+    return Image.composite(rgb, dark, mask)
+
+
+def _apply_grain(rgb, strength: int):
+    from PIL import Image, ImageChops  # type: ignore
+
+    width, height = rgb.size
+    noise = Image.effect_noise((width, height), strength / 100.0 * 48.0)
+    noise_rgb = Image.merge("RGB", (noise, noise, noise))
+    grained = ImageChops.add(rgb, noise_rgb, scale=1.0, offset=-128)
+    return Image.blend(rgb, grained, strength / 100.0)
+
+
+def _apply_tint(rgb, spec: str):
+    from PIL import Image, ImageChops  # type: ignore
+
+    color_spec, _, raw_strength = spec.partition("@")
+    try:
+        strength = int(float(raw_strength)) if raw_strength else 30
+    except ValueError:
+        strength = 30
+    strength = max(0, min(100, strength))
+    color = _parse_color(color_spec)
+    if color is None:
+        raise ValueError(f"Invalid tint colour: {color_spec}")
+    overlay = Image.new("RGB", rgb.size, color)
+    return Image.blend(rgb, ImageChops.multiply(rgb, overlay), strength / 100.0)
+
+
+def _apply_edits(image, edits: dict):
+    """Apply deterministic adjustments while preserving the alpha channel."""
+    if not _has_edits(edits):
+        return image.copy()
+
+    from PIL import ImageEnhance, ImageFilter, ImageOps  # type: ignore
+
+    rgba = image.convert("RGBA") if image.mode in {"RGBA", "LA", "P"} else None
+    alpha = rgba.getchannel("A") if rgba is not None else None
+    rgb = (rgba or image).convert("RGB")
+
+    if edits["brightness"]:
+        rgb = ImageEnhance.Brightness(rgb).enhance(max(0.0, 1 + edits["brightness"] / 100))
+    if edits["contrast"]:
+        rgb = ImageEnhance.Contrast(rgb).enhance(max(0.0, 1 + edits["contrast"] / 100))
+    if edits["saturation"]:
+        rgb = ImageEnhance.Color(rgb).enhance(max(0.0, 1 + edits["saturation"] / 100))
+    if edits["hue"]:
+        rgb = _apply_hue(rgb, edits["hue"])
+    if edits["sharpness"]:
+        rgb = ImageEnhance.Sharpness(rgb).enhance(1 + edits["sharpness"] / 50)
+    if edits["blur"]:
+        rgb = rgb.filter(ImageFilter.GaussianBlur(radius=edits["blur"]))
+    if edits["grayscale"]:
+        rgb = ImageOps.grayscale(rgb).convert("RGB")
+    if edits["sepia"]:
+        gray = ImageOps.grayscale(rgb)
+        rgb = ImageOps.colorize(gray, black=(30, 18, 8), white=(255, 240, 200)).convert("RGB")
+    if edits["invert"]:
+        rgb = ImageOps.invert(rgb)
+    if edits["vignette"]:
+        rgb = _apply_vignette(rgb, edits["vignette"])
+    if edits["grain"]:
+        rgb = _apply_grain(rgb, edits["grain"])
+    if edits["tint"]:
+        rgb = _apply_tint(rgb, edits["tint"])
+
+    if alpha is not None:
+        output = rgb.convert("RGBA")
+        output.putalpha(alpha)
+    else:
+        output = rgb
+
+    if edits["border"]:
+        color = _parse_color(edits["border_color"])
+        if color is None:
+            raise ValueError(f"Invalid border colour: {edits['border_color']}")
+        fill = color + (255,) if output.mode == "RGBA" else color
+        output = ImageOps.expand(output, border=edits["border"], fill=fill)
+    return output
+
+
+def _validate_edit_args(args: argparse.Namespace) -> str | None:
+    for flag, name, low, high in (
+        ("--brightness", "brightness", -100, 100),
+        ("--contrast", "contrast", -100, 100),
+        ("--saturation", "saturation", -100, 100),
+        ("--sharpness", "sharpness", 0, 100),
+        ("--hue", "hue", 0, 360),
+        ("--vignette", "vignette", 0, 100),
+        ("--grain", "grain", 0, 100),
+    ):
+        value = getattr(args, name, None)
+        if value is not None and not low <= value <= high:
+            return f"{flag} must be between {low} and {high}."
+    if args.blur is not None and not 0 <= args.blur <= 20:
+        return "--blur must be between 0 and 20."
+    if args.border is not None and args.border < 0:
+        return "--border must be zero or greater."
+    if args.tint:
+        color, _, raw_strength = args.tint.partition("@")
+        if _parse_color(color) is None:
+            return "--tint must use a #RRGGBB or named colour."
+        try:
+            strength = float(raw_strength) if raw_strength else 30
+        except ValueError:
+            return "--tint strength must be a number from 0 to 100."
+        if not 0 <= strength <= 100:
+            return "--tint strength must be between 0 and 100."
+    if args.border and _parse_color(args.border_color) is None:
+        return "--border-color must use a #RRGGBB or named colour."
+    return None
+
+
 # ── Convert one ──────────────────────────────────────────────────────────────
 
 def op_convert(args: argparse.Namespace) -> int:
@@ -365,6 +560,10 @@ def op_convert(args: argparse.Namespace) -> int:
 
     pillow_heif.register_heif_opener()
     has_jxl = _try_register_jxl()
+    edit_error = _validate_edit_args(args)
+    if edit_error:
+        return fail("invalid_edit", edit_error)
+    edits = _resolve_edits(args)
 
     # JXL needs an explicit dep — bail with a clear hint rather than a generic
     # decode/encode error when the plugin isn't installed.
@@ -377,26 +576,50 @@ def op_convert(args: argparse.Namespace) -> int:
         )
 
     try:
-        img = Image.open(in_path)
-        img.load()  # force decode now so errors surface here
+        with Image.open(in_path) as source:
+            source_info = dict(source.info)
+            source_frame_count = int(getattr(source, "n_frames", 1))
+            keep_frames = fmt in MULTIFRAME_OUTPUT_FORMATS
+            frame_limit = source_frame_count if keep_frames else 1
+            raw_frames = []
+            frame_durations = []
+            for index in range(frame_limit):
+                source.seek(index)
+                frame = source.copy()
+                frame.load()
+                raw_frames.append(frame)
+                frame_durations.append(int(source.info.get("duration", 0) or 0))
     except Exception as exc:
         return fail("decode_failed", f"Could not decode {in_path.name}: {exc}")
 
     progress(40.0, "decoded")
-    log("info", f"{in_path.name}: mode={img.mode} size={img.size}")
+    log(
+        "info",
+        f"{in_path.name}: mode={raw_frames[0].mode} size={raw_frames[0].size} "
+        f"frames={source_frame_count}",
+    )
+    if source_frame_count > 1 and fmt not in MULTIFRAME_OUTPUT_FORMATS:
+        log("warn", f"target {fmt} is single-frame; converting the first frame only")
 
-    # Drop alpha if target format can't carry it.
-    if not meta["supports_alpha"] and img.mode in {"RGBA", "LA", "P"}:
+    def prepare_frame(frame):
+        frame = _apply_edits(frame, edits)
+        if not meta["supports_alpha"] and frame.mode in {"RGBA", "LA", "P"}:
+            rgba = frame.convert("RGBA")
+            background = Image.new("RGB", frame.size, (255, 255, 255))
+            background.paste(rgba.convert("RGB"), mask=rgba.getchannel("A"))
+            return background
+        if frame.mode == "P":
+            return frame.convert("RGBA")
+        if frame.mode not in {"RGB", "RGBA", "L", "LA"}:
+            return frame.convert("RGB")
+        return frame
+
+    if not meta["supports_alpha"] and raw_frames[0].mode in {"RGBA", "LA", "P"}:
         log("info", f"target {fmt} has no alpha — flattening on white background")
-        bg = Image.new("RGB", img.size, (255, 255, 255))
-        if img.mode == "P":
-            img = img.convert("RGBA")
-        bg.paste(img, mask=img.split()[-1] if img.mode in {"RGBA", "LA"} else None)
-        img = bg
-    elif img.mode == "P":
-        img = img.convert("RGBA")
-    elif img.mode not in {"RGB", "RGBA", "L", "LA"}:
-        img = img.convert("RGB")
+    frames = [prepare_frame(frame) for frame in raw_frames]
+    img = frames[0]
+    if _has_edits(edits):
+        log("info", f"applied batch edits to {len(frames)} frame(s)")
 
     # Build save kwargs per format. Quality is honoured for lossy formats.
     save_kwargs: dict = {}
@@ -435,13 +658,20 @@ def op_convert(args: argparse.Namespace) -> int:
         else:
             save_kwargs.update(quality=quality, effort=7)
 
+    if len(frames) > 1:
+        save_kwargs["save_all"] = True
+        save_kwargs["append_images"] = frames[1:]
+        if fmt == "webp":
+            save_kwargs["duration"] = frame_durations
+            save_kwargs["loop"] = int(source_info.get("loop", 0) or 0)
+
     # ICC profile pass-through (preserves colour fidelity across colour spaces).
-    if not args.strip_icc and "icc_profile" in img.info:
-        save_kwargs["icc_profile"] = img.info["icc_profile"]
+    if not args.strip_icc and "icc_profile" in source_info:
+        save_kwargs["icc_profile"] = source_info["icc_profile"]
 
     # EXIF pass-through (or strip if --strip-exif).
     if not args.strip_exif:
-        exif = img.info.get("exif")
+        exif = source_info.get("exif")
         if exif:
             save_kwargs["exif"] = exif
 
@@ -538,6 +768,8 @@ def op_convert(args: argparse.Namespace) -> int:
         format=fmt,
         quality=quality,
         quality_target=target_details,
+        frames=len(frames),
+        edits_applied=_has_edits(edits),
     )
     return 0
 
@@ -569,6 +801,35 @@ def build_parser() -> argparse.ArgumentParser:
     targets.add_argument(
         "--target-ssimulacra2", type=float, default=None, dest="target_ssimulacra2",
         help="Choose the lowest quality meeting this local Vship SSIMULACRA2 score.")
+    edits = conv.add_argument_group("batch image adjustments")
+    edits.add_argument("--adjust-preset", choices=sorted(ADJUST_PRESETS), default=None,
+                       help="Named look: vivid, muted, bw, vintage, cold, or warm.")
+    edits.add_argument("--brightness", type=int, default=None,
+                       help="Brightness adjustment from -100 to 100.")
+    edits.add_argument("--contrast", type=int, default=None,
+                       help="Contrast adjustment from -100 to 100.")
+    edits.add_argument("--saturation", type=int, default=None,
+                       help="Saturation adjustment from -100 to 100.")
+    edits.add_argument("--sharpness", type=int, default=None,
+                       help="Sharpness adjustment from 0 to 100.")
+    edits.add_argument("--blur", type=float, default=None,
+                       help="Gaussian blur radius from 0 to 20 pixels.")
+    edits.add_argument("--hue", type=int, default=None,
+                       help="Hue rotation from 0 to 360 degrees.")
+    edits.add_argument("--grayscale", action="store_true",
+                       help="Convert colours to grayscale while retaining alpha.")
+    edits.add_argument("--sepia", action="store_true", help="Apply a sepia tone.")
+    edits.add_argument("--invert", action="store_true", help="Invert image colours.")
+    edits.add_argument("--vignette", type=int, default=None,
+                       help="Radial edge darkening from 0 to 100.")
+    edits.add_argument("--grain", type=int, default=None,
+                       help="Film grain intensity from 0 to 100.")
+    edits.add_argument("--tint", default=None,
+                       help="Colour tint such as '#3a6ea5@20' or 'teal@30'.")
+    edits.add_argument("--border", type=int, default=None,
+                       help="Solid border width in pixels.")
+    edits.add_argument("--border-color", default="#ffffff",
+                       help="Border colour as #RRGGBB or a named colour.")
     conv.add_argument("--strip-exif", action="store_true",
                       help="Drop EXIF metadata from the output (default: preserve)")
     conv.add_argument("--strip-icc", action="store_true",
