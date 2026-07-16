@@ -39,86 +39,12 @@ function Test-IsWindows {
     return ($IsWindows -or $env:OS -eq "Windows_NT")
 }
 
-function Resolve-MSBuild {
-    $vsWhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
-    if (Test-Path $vsWhere) {
-        $fromVsWhere = & $vsWhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\Current\Bin\amd64\MSBuild.exe" |
-            Select-Object -First 1
-        if ($fromVsWhere -and (Test-Path $fromVsWhere)) {
-            return $fromVsWhere
-        }
-
-        $fromVsWhere = & $vsWhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\Current\Bin\MSBuild.exe" |
-            Select-Object -First 1
-        if ($fromVsWhere -and (Test-Path $fromVsWhere)) {
-            return $fromVsWhere
-        }
-    }
-
-    $candidates = @(
-        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\MSBuild.exe"),
-        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"),
-        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe"),
-        (Join-Path $env:ProgramFiles "Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe")
-    )
-
-    foreach ($candidate in $candidates) {
-        if (Test-Path $candidate) {
-            return $candidate
-        }
-    }
-
-    return $null
-}
-
-function Invoke-VSBuild {
-    param(
-        [Parameter(Mandatory = $true)][string]$ProjectPath,
-        [string]$Target = "Build",
-        [switch]$Restore,
-        [hashtable]$Properties = @{}
-    )
-
-    $msbuild = Resolve-MSBuild
-    if (-not $msbuild) {
-        throw "Visual Studio MSBuild with Windows App SDK build tools is required to build the WinUI project. Install Visual Studio or Build Tools with the Windows application development workload."
-    }
-
-    $args = @(
-        $ProjectPath,
-        "/t:$Target",
-        "/p:Configuration=$Configuration",
-        "/p:Platform=x64",
-        "/nologo",
-        "/v:minimal",
-        "/m"
-    )
-
-    if ($Restore) {
-        $args += "/restore"
-    }
-
-    foreach ($entry in $Properties.GetEnumerator()) {
-        $args += "/p:$($entry.Key)=$($entry.Value)"
-    }
-
-    & $msbuild @args
-    if ($LASTEXITCODE -ne 0) {
-        throw "MSBuild failed for $ProjectPath"
-    }
-}
-
 function Invoke-Clean {
     Write-Step "Cleaning"
-    
-    if (Test-IsWindows) {
-        Invoke-VSBuild $SolutionPath -Target "Clean"
-    }
-    else {
-        dotnet clean $SolutionPath -c $Configuration --nologo -v q
-        if ($LASTEXITCODE -ne 0) {
-            throw "Clean failed"
-        }
+
+    dotnet clean $SolutionPath -c $Configuration --nologo -v q -p:Platform=x64
+    if ($LASTEXITCODE -ne 0) {
+        throw "Clean failed"
     }
     
     if (Test-Path $PublishPath) {
@@ -133,17 +59,13 @@ function Invoke-Clean {
 
 function Invoke-Build {
     Write-Step "Building ($Configuration)"
-    
-    if (Test-IsWindows) {
-        Invoke-VSBuild $SolutionPath -Target "Build" -Restore
-    }
-    else {
-        dotnet restore $SolutionPath --nologo -v q
-        dotnet build $SolutionPath -c $Configuration --nologo --no-restore
 
-        if ($LASTEXITCODE -ne 0) {
-            throw "Build failed"
-        }
+    # All projects are SDK-style. The .NET 10 SDK now carries the WinUI/XAML
+    # targets required for a headless x64 build, so invoking an older Visual
+    # Studio MSBuild would incorrectly fail to resolve Microsoft.NET.Sdk.
+    dotnet build $SolutionPath -c $Configuration --nologo --verbosity minimal -p:Platform=x64
+    if ($LASTEXITCODE -ne 0) {
+        throw "Build failed"
     }
     
     Write-Host "Build complete" -ForegroundColor Green
@@ -171,15 +93,19 @@ function Invoke-Publish {
     Write-Host "Publishing CLI..." -ForegroundColor Yellow
     $cliPath = Join-Path $PublishPath "cli"
     dotnet publish "$SrcPath/UniversalConverterX.Console" -c $Configuration -o $cliPath --nologo
+    if ($LASTEXITCODE -ne 0) {
+        throw "CLI publish failed"
+    }
     
     # Publish UI (Windows only)
     if (Test-IsWindows) {
         Write-Host "Publishing UI..." -ForegroundColor Yellow
         $uiPath = Join-Path $PublishPath "ui"
-        Invoke-VSBuild "$SrcPath/UniversalConverterX.UI/UniversalConverterX.UI.csproj" -Target "Publish" -Restore -Properties @{
-            RuntimeIdentifier = "win-x64"
-            SelfContained = "true"
-            PublishDir = "$uiPath\"
+        dotnet publish "$SrcPath/UniversalConverterX.UI/UniversalConverterX.UI.csproj" `
+            -c $Configuration -r win-x64 --self-contained true -o $uiPath `
+            --nologo -p:Platform=x64
+        if ($LASTEXITCODE -ne 0) {
+            throw "UI publish failed"
         }
     }
     

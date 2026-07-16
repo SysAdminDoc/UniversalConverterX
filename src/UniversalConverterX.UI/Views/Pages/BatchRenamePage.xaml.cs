@@ -13,7 +13,7 @@ namespace UniversalConverterX.UI.Views.Pages;
 
 /// <summary>
 /// Pattern-based batch file rename. Pure-C# (no sidecar): uses
-/// <see cref="System.IO.File.Move"/> with a live preview that flags
+/// <see cref="System.IO.File.Move(string, string)"/> with a live preview that flags
 /// conflicts before any disk mutation.
 ///
 /// Token catalogue (resolved per row):

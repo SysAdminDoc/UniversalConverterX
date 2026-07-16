@@ -12,6 +12,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Added shared minimum-version policy checks for FFmpeg 8.1.2, ImageMagick 7.1.2-15, Calibre 9.10, 7-Zip 26.01, and LibreOffice 26.2.4. The CLI, Settings tool inventory, and preset health surface now warn when an installed parser is outdated or cannot be verified.
 - Installer publishing now refuses to build on .NET runtimes older than 10.0.9 and resolves the latest installed servicing patch.
 
+### Fixed
+
+- The canonical build script now uses the .NET 10 SDK for full x64 WinUI solution builds and publishing instead of an older Visual Studio MSBuild that could not resolve SDK-style projects. Repaired ten malformed Explorer `/select` invocations that blocked C# compilation and removed the remaining build warning.
+
 ## [2.22.1] - 2026-07-01
 
 ### Security

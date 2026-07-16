@@ -475,7 +475,7 @@ public sealed partial class FormatInspectorPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\""{folder}\"""))
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{folder}\"")
             {
                 UseShellExecute = true,
             });

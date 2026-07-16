@@ -822,7 +822,7 @@ public sealed partial class EditorPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\""{folder}\"""))
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{folder}\"")
             {
                 UseShellExecute = true,
             });

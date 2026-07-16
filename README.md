@@ -162,8 +162,7 @@ UniversalConverterX/
 ### Prerequisites
 
 - .NET 10 SDK
-- Windows 10 SDK (for UI project)
-- Visual Studio or Build Tools with MSBuild plus Windows App SDK 2.2 packages restored from NuGet (required for the WinUI project)
+- Windows 10 version 1809 or newer for the WinUI project; Windows SDK and WinUI build tools restore from NuGet
 
 ### Build
 
@@ -174,7 +173,8 @@ UniversalConverterX/
 # Run the focused core test suite
 .\build.ps1 -Target Test -Configuration Release
 
-# CLI/core-only builds can still use dotnet directly
+# SDK-native builds can also use dotnet directly
+dotnet build src/UniversalConverterX.sln -c Release -p:Platform=x64
 dotnet build src/UniversalConverterX.Console/UniversalConverterX.Console.csproj -c Release
 ```
 
