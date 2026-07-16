@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Preset xmlns="https://universalconverterx.io/preset/v1">
-    <Name>Separate vocals (MelBand-RoFormer)</Name>
+    <Name>6-stem split (BS-RoFormer SW)</Name>
     <Folder>Audio/Stems</Folder>
     <InputTypes>
         <Extension>mp3</Extension>
@@ -16,9 +16,9 @@
     <Args>
         <Arg>separate</Arg>
         <Arg>--model</Arg>
-        <Arg>vocals-roformer</Arg>
+        <Arg>bs-roformer-sw</Arg>
         <Arg>--stems</Arg>
-        <Arg>2stem</Arg>
+        <Arg>6stem</Arg>
         <Arg>--format</Arg>
         <Arg>wav</Arg>
     </Args>

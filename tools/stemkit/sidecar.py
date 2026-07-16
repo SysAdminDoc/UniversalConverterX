@@ -2,7 +2,7 @@
 `audio-separator` package, which wraps multiple SOTA model families:
 
   * UVR-MDX-Net      (vocals / instrumental, fast)
-  * MDX23 / Roformer (BS-Roformer, MelBand-Roformer -- best 4-stem 2024+)
+  * MDX23 / RoFormer (BS-RoFormer SW, MelBand-RoFormer, Viperx)
   * Demucs v4        (htdemucs, htdemucs_ft, hdemucs_mmi)
   * VR Arch          (lower quality fallback, CPU-friendly)
   * Spleeter (legacy 2/4/5-stem)
@@ -37,17 +37,82 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
-# Convenience aliases so users don't need to memorize model filenames.
-ALIASES: dict[str, str] = {
-    "vocals":         "UVR-MDX-NET-Inst_HQ_3.onnx",
-    "vocals-roformer":"model_bs_roformer_ep_317_sdr_12.9755.ckpt",
-    "4stem":          "htdemucs_ft.yaml",
-    "4stem-fast":     "htdemucs.yaml",
-    "6stem":          "htdemucs_6s.yaml",
-    "karaoke":        "UVR_MDXNET_KARA_2.onnx",
-    "denoise":        "UVR-DeNoise.pth",
-    "dereverb":       "UVR-DeEcho-DeReverb.pth",
+# Curated aliases from audio-separator's supported model catalog. Keep old
+# aliases stable while advancing vocal work to MelBand-RoFormer and six-stem
+# work to the current BS-RoFormer SW checkpoint.
+MODEL_CATALOG: dict[str, dict[str, str]] = {
+    "bs-roformer-sw": {
+        "filename": "BS-Roformer-SW.ckpt",
+        "family": "BS-RoFormer",
+        "stems": "vocals,drums,bass,guitar,piano,other",
+    },
+    "vocals": {
+        "filename": "vocals_mel_band_roformer.ckpt",
+        "family": "MelBand-RoFormer",
+        "stems": "vocals,instrumental",
+    },
+    "vocals-roformer": {
+        "filename": "vocals_mel_band_roformer.ckpt",
+        "family": "MelBand-RoFormer",
+        "stems": "vocals,instrumental",
+    },
+    "vocals-roformer-viperx": {
+        "filename": "model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+        "family": "BS-RoFormer",
+        "stems": "vocals,instrumental",
+    },
+    "vocals-mel-roformer": {
+        "filename": "vocals_mel_band_roformer.ckpt",
+        "family": "MelBand-RoFormer",
+        "stems": "vocals,instrumental",
+    },
+    "vocals-mdx": {
+        "filename": "UVR-MDX-NET-Inst_HQ_3.onnx",
+        "family": "MDX-Net",
+        "stems": "vocals,instrumental",
+    },
+    "4stem": {
+        "filename": "htdemucs_ft.yaml",
+        "family": "Demucs",
+        "stems": "vocals,drums,bass,other",
+    },
+    "4stem-fast": {
+        "filename": "htdemucs.yaml",
+        "family": "Demucs",
+        "stems": "vocals,drums,bass,other",
+    },
+    "6stem": {
+        "filename": "htdemucs_6s.yaml",
+        "family": "Demucs",
+        "stems": "vocals,drums,bass,guitar,piano,other",
+    },
+    "karaoke": {
+        "filename": "UVR_MDXNET_KARA_2.onnx",
+        "family": "MDX-Net",
+        "stems": "vocals,instrumental",
+    },
+    "denoise": {
+        "filename": "UVR-DeNoise.pth",
+        "family": "VR Arch",
+        "stems": "clean,noise",
+    },
+    "dereverb": {
+        "filename": "UVR-DeEcho-DeReverb.pth",
+        "family": "VR Arch",
+        "stems": "dry,reverb",
+    },
 }
+ALIASES: dict[str, str] = {
+    alias: details["filename"] for alias, details in MODEL_CATALOG.items()
+}
+DEFAULT_MODEL_ALIAS = "vocals-roformer"
+
+
+def resolve_model_alias(model: str, stems: str) -> str:
+    """Keep the six-stem SW model out of two-stem vocal workflows."""
+    if model == "bs-roformer-sw" and stems != "6stem":
+        return DEFAULT_MODEL_ALIAS
+    return model
 
 
 def _imports():
@@ -71,9 +136,24 @@ def op_separate(args: argparse.Namespace) -> int:
     out_dir = Path(args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    model_name = ALIASES.get(args.model, args.model)
+    model_alias = resolve_model_alias(args.model, args.stems)
+    model_name = ALIASES.get(model_alias, model_alias)
     emit("log", level="info", message=f"Loading separator (model={model_name})...")
-    sep = Separator(output_dir=str(out_dir), output_format=args.format.upper())
+    output_single_stem = {
+        "vocals": "Vocals",
+        "accompaniment": "Instrumental",
+    }.get(args.stems)
+    sep = Separator(
+        output_dir=str(out_dir),
+        output_format=args.format.upper(),
+        output_single_stem=output_single_stem,
+        demucs_params={
+            "segment_size": "Default",
+            "shifts": args.shifts,
+            "overlap": 0.25,
+            "segments_enabled": True,
+        },
+    )
     try:
         sep.load_model(model_filename=model_name)
     except Exception as ex:
@@ -125,7 +205,12 @@ def op_models(args: argparse.Namespace) -> int:
                                  "name": str(friendly),
                                  "filename": str(fname)})
     emit("stem_models", count=len(flat), models=flat,
-         aliases=[{"alias": k, "model": v} for k, v in ALIASES.items()])
+         aliases=[{
+             "alias": alias,
+             "model": details["filename"],
+             "family": details["family"],
+             "stems": details["stems"],
+         } for alias, details in MODEL_CATALOG.items()])
     emit("complete", output="", size_bytes=0, count=len(flat))
     return 0
 
@@ -137,8 +222,13 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("separate", help="Split audio into stems.")
     s.add_argument("--input", nargs="+", required=True)
     s.add_argument("--output-dir", required=True, dest="output_dir")
-    s.add_argument("--model", default="4stem",
+    s.add_argument("--model", default=DEFAULT_MODEL_ALIAS,
                    help=f"Model alias or filename. Aliases: {list(ALIASES.keys())}")
+    s.add_argument("--stems", default="2stem",
+                   choices=["2stem", "vocals", "accompaniment", "4stem", "6stem"],
+                   help="Output all model stems or only vocals/instrumental.")
+    s.add_argument("--shifts", type=int, default=0, choices=range(0, 11),
+                   help="Demucs equivariant shifts (ignored by RoFormer models).")
     s.add_argument("--format", default="wav",
                    choices=["wav", "flac", "mp3"],
                    help="Output stem format.")

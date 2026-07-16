@@ -139,7 +139,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
                 <TextBlock Text="Vocal Remover" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Split vocals and instrumentals using Demucs stem separation."
+                <TextBlock Text="Split music with BS-RoFormer, Mel-RoFormer, or Demucs."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -246,7 +246,7 @@
                             <ComboBoxItem Content="Vocals only" Tag="vocals"/>
                             <ComboBoxItem Content="Instrumentals only" Tag="accompaniment"/>
                             <ComboBoxItem Content="4-stem (vocals / drums / bass / other)" Tag="4stem"/>
-                            <ComboBoxItem Content="6-stem (+guitar / piano — needs htdemucs_6s)" Tag="6stem"/>
+                            <ComboBoxItem Content="6-stem (+guitar / piano)" Tag="6stem"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -258,9 +258,12 @@
                                   HorizontalAlignment="Stretch"
                                   SelectionChanged="Settings_Changed"
                             AutomationProperties.AutomationId="ModelCombo">
-                            <ComboBoxItem Content="htdemucs_ft (fine-tuned, recommended)" Tag="htdemucs_ft" IsSelected="True"/>
-                            <ComboBoxItem Content="htdemucs (base)" Tag="htdemucs"/>
-                            <ComboBoxItem Content="mdx_extra (MDX-Net)" Tag="mdx_extra"/>
+                            <ComboBoxItem Content="MelBand-RoFormer (recommended for vocals)" Tag="stemkit:vocals-roformer" IsSelected="True"/>
+                            <ComboBoxItem Content="BS-RoFormer SW (6-stem)" Tag="stemkit:bs-roformer-sw"/>
+                            <ComboBoxItem Content="BS-RoFormer Viperx (legacy)" Tag="stemkit:vocals-roformer-viperx"/>
+                            <ComboBoxItem Content="htdemucs_ft (fine-tuned)" Tag="demucs:htdemucs_ft"/>
+                            <ComboBoxItem Content="htdemucs (base)" Tag="demucs:htdemucs"/>
+                            <ComboBoxItem Content="mdx_extra (legacy MDX-Net)" Tag="demucs:mdx_extra"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>
@@ -402,4 +405,3 @@
         </Grid>
     </Grid>
 </Page>
-

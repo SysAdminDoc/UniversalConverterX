@@ -240,13 +240,8 @@ public sealed partial class VocalRemoverPage : Page
         if (_files.Count == 0 || _cts is not null)
             return;
 
-        var model = SelectedComboTag(ModelCombo) ?? "htdemucs_ft";
         var stems = SelectedComboTag(StemCombo) ?? "2stem";
-        // 6-stem requires the htdemucs_6s model — silently override the model
-        // so users don't get a confusing "no guitar/piano" output if they left
-        // the default htdemucs_ft selected.
-        if (stems == "6stem" && !model.Contains("6s", StringComparison.OrdinalIgnoreCase))
-            model = "htdemucs_6s";
+        var model = ResolveModelSelection(stems);
         var format = SelectedComboTag(FormatCombo) ?? "wav";
         var shifts = ShiftsToggle.IsOn ? 1 : 0;
 
@@ -257,7 +252,7 @@ public sealed partial class VocalRemoverPage : Page
         _cts = new CancellationTokenSource();
         RunButton.IsEnabled = false;
         ProgressLog.Text = "";
-        ShowOverlay($"Separating {jobs.Count} file(s) — {model}");
+        ShowOverlay($"Separating {jobs.Count} file(s) — {model.Model}");
 
         try
         {
@@ -269,15 +264,26 @@ public sealed partial class VocalRemoverPage : Page
                 var outputDir = BuildOutputDir(item.Path);
                 Directory.CreateDirectory(outputDir);
 
-                var args = new List<string>
-                {
-                    "--input", item.Path,
-                    "--output-dir", outputDir,
-                    "--model", model,
-                    "--stems", stems,
-                    "--format", format,
-                    "--shifts", shifts.ToString(),
-                };
+                var args = model.Engine == "stemkit"
+                    ? new List<string>
+                    {
+                        "separate",
+                        "--input", item.Path,
+                        "--output-dir", outputDir,
+                        "--model", model.Model,
+                        "--stems", stems,
+                        "--format", format,
+                        "--shifts", shifts.ToString(),
+                    }
+                    :
+                    [
+                        "--input", item.Path,
+                        "--output-dir", outputDir,
+                        "--model", model.Model,
+                        "--stems", stems,
+                        "--format", format,
+                        "--shifts", shifts.ToString(),
+                    ];
 
                 item.Progress = 0;
                 item.StatusText = "Separating";
@@ -306,7 +312,7 @@ public sealed partial class VocalRemoverPage : Page
                     ProgressLog.Text = combined;
                 }));
 
-                var result = await _runner.RunAsync("demucs", args, progress, log, _cts.Token);
+                var result = await _runner.RunAsync(model.Engine, args, progress, log, _cts.Token);
 
                 if (result.Success)
                 {
@@ -438,9 +444,34 @@ public sealed partial class VocalRemoverPage : Page
             "4stem" => "4-stem",
             _ => "2-stem",
         };
-        var model = SelectedComboTag(ModelCombo) ?? "htdemucs_ft";
+        var model = ResolveModelSelection(SelectedComboTag(StemCombo) ?? "2stem");
         var fmt = SelectedComboTag(FormatCombo)?.ToUpperInvariant() ?? "WAV";
-        return $"{stems} / {model} / {fmt}";
+        return $"{stems} / {model.Model} / {fmt}";
+    }
+
+    private SeparatorModelSelection ResolveModelSelection(string stems)
+    {
+        var selected = SelectedComboTag(ModelCombo) ?? "stemkit:vocals-roformer";
+        var separator = selected.IndexOf(':');
+        var engine = separator > 0 ? selected[..separator] : "demucs";
+        var model = separator > 0 ? selected[(separator + 1)..] : selected;
+
+        // The curated RoFormer default is a six-stem model. Four-stem output
+        // continues through fine-tuned Demucs, while a non-six-stem legacy
+        // choice is promoted to a compatible model when six stems are asked for.
+        if (stems == "4stem" && engine == "stemkit")
+            return new SeparatorModelSelection("demucs", "htdemucs_ft");
+        if (stems == "6stem")
+        {
+            if (engine == "stemkit")
+                return new SeparatorModelSelection("stemkit", "bs-roformer-sw");
+            return new SeparatorModelSelection("demucs", "htdemucs_6s");
+        }
+
+        if (engine == "stemkit" && model == "bs-roformer-sw")
+            return new SeparatorModelSelection("stemkit", "vocals-roformer");
+
+        return new SeparatorModelSelection(engine, model);
     }
 
     private string BuildOutputDir(string inputPath)
@@ -491,6 +522,8 @@ public sealed partial class VocalRemoverPage : Page
         while (v >= 1024 && i < s.Length - 1) { v /= 1024; i++; }
         return $"{v:F1} {s[i]}";
     }
+
+    private sealed record SeparatorModelSelection(string Engine, string Model);
 }
 
 public sealed class VrFileItem : INotifyPropertyChanged
@@ -541,4 +574,3 @@ public sealed class VrFinishedItem
     public Brush? AccentBrush { get; set; }
     public bool CanOpenFolder => !string.IsNullOrWhiteSpace(OutputDir);
 }
-
