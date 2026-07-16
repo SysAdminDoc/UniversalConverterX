@@ -1,6 +1,7 @@
 {
   "engine": "ab-av1",
   "tools": [
-    { "id": "ab-av1", "executable": "ab-av1", "display": "ab-av1", "managed": false }
+    { "id": "ab-av1", "executable": "ab-av1", "display": "ab-av1", "managed": false },
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
   ]
 }

@@ -297,6 +297,44 @@
                                        TextWrapping="Wrap"
                                        FontSize="11"/>
                         </StackPanel>
+                        <RadioButton x:Name="PresetVmaf" Content="Smart quality target (VMAF)"
+                                     GroupName="Preset"
+                                     Tag="__vmaf__"
+                                     Checked="Preset_Checked"
+                                     Foreground="{StaticResource TextPrimaryBrush}"
+                            AutomationProperties.AutomationId="PresetVmaf"/>
+                        <StackPanel x:Name="VmafTargetPanel"
+                                    Visibility="Collapsed"
+                                    Spacing="8">
+                            <NumberBox x:Name="VmafTargetBox"
+                                       Header="Minimum VMAF quality"
+                                       Value="93"
+                                       Minimum="50"
+                                       Maximum="100"
+                                       SmallChange="1"
+                                       SpinButtonPlacementMode="Inline"
+                                       ValueChanged="VmafTarget_Changed"
+                                AutomationProperties.AutomationId="CompressorVmafTargetBox"/>
+                            <ComboBox x:Name="VmafEncoderCombo"
+                                      Header="Video encoder"
+                                      HorizontalAlignment="Stretch"
+                                      SelectedIndex="0"
+                                      SelectionChanged="VmafEncoder_Changed"
+                                AutomationProperties.AutomationId="CompressorVmafEncoderCombo">
+                                <ComboBoxItem Content="AV1 (SVT-AV1, smallest)" Tag="libsvtav1"/>
+                                <ComboBoxItem Content="H.265 / HEVC (compatible)" Tag="libx265"/>
+                                <ComboBoxItem Content="H.264 / AVC (most compatible)" Tag="libx264"/>
+                            </ComboBox>
+                            <TextBlock x:Name="VmafHealthText"
+                                       Text="ab-av1 availability is checked before each smart compression."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       FontSize="11"/>
+                            <TextBlock Text="Smart mode samples CRF candidates, encodes the smallest result meeting the target, then verifies the finished file with a full VMAF pass."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       FontSize="11"/>
+                        </StackPanel>
                         <RadioButton x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
                                      GroupName="Preset"
                                      Tag="archive-av1"

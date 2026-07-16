@@ -11,7 +11,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 ## Modules
 
 - **Converter** — 1000+ formats via FFmpeg, ImageMagick, Pandoc, libvips, libjxl, libheif, Inkscape, Calibre, Assimp, Ghostscript, LibreOffice, resvg, Potrace.
-- **Compressor** — web/archive quality profiles, cap-safe Discord and email size presets, and custom maximum-size two-pass encoding via FFmpeg.
+- **Compressor** — web/archive profiles, cap-safe social size targets, custom maximum-size two-pass encoding, and VMAF-targeted smart compression with verified quality scores.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.

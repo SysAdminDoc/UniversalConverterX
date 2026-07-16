@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Commands;
 
@@ -309,7 +310,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         if (name.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || name == "." || name == "..")
             return null;
 
-        var exe = name + ".exe";
+        var exe = SidecarNaming.ExecutableName(name);
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {

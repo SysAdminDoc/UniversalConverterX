@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -40,6 +41,7 @@ public sealed partial class CompressorPage : Page
         };
 
     private readonly ISidecarRunner _runner;
+    private readonly ISidecarHealthService _health;
     private readonly IHistoryService _history;
     private readonly ObservableCollection<CompressionFileItem> _files = [];
     private readonly ObservableCollection<CompressionFinishedItem> _finished = [];
@@ -50,6 +52,7 @@ public sealed partial class CompressorPage : Page
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _health = App.Services.GetRequiredService<ISidecarHealthService>();
         _history = App.Services.GetRequiredService<IHistoryService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -287,8 +290,12 @@ public sealed partial class CompressorPage : Page
             TargetSizePanel.Visibility = IsTargetSizeMode
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+        if (VmafTargetPanel is not null)
+            VmafTargetPanel.Visibility = IsVmafTargetMode
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         if (HwAccelCombo is not null)
-            HwAccelCombo.IsEnabled = !IsTargetSizeMode;
+            HwAccelCombo.IsEnabled = !IsTargetSizeMode && !IsVmafTargetMode;
         UpdatePresetSummaries();
         UpdateStatusText();
     }
@@ -322,6 +329,20 @@ public sealed partial class CompressorPage : Page
         UpdateStatusText();
     }
 
+    private void VmafTarget_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (StatusText is null || !IsVmafTargetMode) return;
+        UpdatePresetSummaries();
+        UpdateStatusText();
+    }
+
+    private void VmafEncoder_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (StatusText is null || !IsVmafTargetMode) return;
+        UpdatePresetSummaries();
+        UpdateStatusText();
+    }
+
     private void HwAccel_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (StatusText is null) return;
@@ -340,17 +361,49 @@ public sealed partial class CompressorPage : Page
         if (_files.Count == 0 || _cts is not null)
             return;
 
+        var smartQualityMode = IsVmafTargetMode;
+        if (smartQualityMode)
+        {
+            CompressButton.IsEnabled = false;
+            ClearButton.IsEnabled = false;
+            StatusText.Text = "Checking ab-av1 smart-compression requirements...";
+            SidecarHealthReport report;
+            try
+            {
+                report = await _health.EvaluateEngineAsync("ab-av1");
+            }
+            catch (Exception ex)
+            {
+                UpdateUi();
+                VmafHealthText.Text = $"Health check failed: {ex.Message}";
+                StatusText.Text = "Smart compression is unavailable because its requirements could not be checked.";
+                return;
+            }
+
+            VmafHealthText.Text = report.CanRun
+                ? $"{report.Summary}. {report.Detail}"
+                : report.Detail;
+            if (!report.CanRun)
+            {
+                UpdateUi();
+                StatusText.Text = $"Smart compression unavailable — {report.Summary}. {report.Detail}";
+                return;
+            }
+        }
+
         if (_outputDirectory is not null)
         {
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
+                UpdateUi();
                 StatusText.Text = $"Output folder unavailable: {ex.Message}";
                 return;
             }
         }
 
         var preset = SelectedPresetTag();
+        var engine = smartQualityMode ? "ab-av1" : "videocrush";
         var jobs = _files.ToList();
         var completed = 0;
         var failed = 0;
@@ -368,36 +421,49 @@ public sealed partial class CompressorPage : Page
                 if (_cts.IsCancellationRequested)
                     break;
 
-                var outputPath = BuildOutputPath(item.Path);
-                var args = new List<string>
+                var outputPath = BuildOutputPath(item.Path, smartQualityMode);
+                List<string> args;
+                if (smartQualityMode)
                 {
-                    "--input", item.Path,
-                    "--output", outputPath,
-                };
-                if (IsTargetSizeMode)
-                {
-                    var targetPreset = SelectedTargetPresetTag();
-                    if (targetPreset == "custom")
-                    {
-                        args.AddRange(
-                        [
-                            "--target-mb", (SelectedTargetLimitMb() * TargetSizeHeadroom).ToString("0.###", CultureInfo.InvariantCulture),
-                            "--codec", "libx264",
-                            "--ffmpeg-preset", "slow",
-                            "--resolution", "720p",
-                            "--audio-codec", "aac",
-                            "--audio-bitrate", "96",
-                        ]);
-                    }
-                    else
-                    {
-                        args.AddRange(["--preset", targetPreset]);
-                    }
-                    args.AddRange(["--hwaccel", "none"]);
+                    args =
+                    [
+                        "auto-encode",
+                        "--input", item.Path,
+                        "--output", outputPath,
+                        "--encoder", SelectedVmafEncoder(),
+                        "--target-vmaf", SelectedVmafTarget().ToString("0.##", CultureInfo.InvariantCulture),
+                        "--preset", SelectedVmafEncoderPreset(),
+                        "--verify-vmaf",
+                    ];
                 }
                 else
                 {
-                    args.AddRange(["--preset", preset, "--hwaccel", SelectedHwAccel()]);
+                    args = ["--input", item.Path, "--output", outputPath];
+                    if (IsTargetSizeMode)
+                    {
+                        var targetPreset = SelectedTargetPresetTag();
+                        if (targetPreset == "custom")
+                        {
+                            args.AddRange(
+                            [
+                                "--target-mb", (SelectedTargetLimitMb() * TargetSizeHeadroom).ToString("0.###", CultureInfo.InvariantCulture),
+                                "--codec", "libx264",
+                                "--ffmpeg-preset", "slow",
+                                "--resolution", "720p",
+                                "--audio-codec", "aac",
+                                "--audio-bitrate", "96",
+                            ]);
+                        }
+                        else
+                        {
+                            args.AddRange(["--preset", targetPreset]);
+                        }
+                        args.AddRange(["--hwaccel", "none"]);
+                    }
+                    else
+                    {
+                        args.AddRange(["--preset", preset, "--hwaccel", SelectedHwAccel()]);
+                    }
                 }
 
                 item.StatusText = "Compressing";
@@ -433,12 +499,38 @@ public sealed partial class CompressorPage : Page
                 }));
 
                 var jobStartedAt = DateTime.UtcNow;
-                var result = await _runner.RunAsync("videocrush", args, progress, log, _cts.Token);
+                double? verifiedVmaf = null;
+                double? finalCrf = null;
+                Action<string, JsonElement>? rawEvent = null;
+                if (smartQualityMode)
+                {
+                    rawEvent = (eventName, root) =>
+                    {
+                        if (eventName != "complete") return;
+                        var verified = root.TryGetProperty("vmaf_verified", out var verifiedElement)
+                            && verifiedElement.ValueKind == JsonValueKind.True;
+                        if (verified
+                            && root.TryGetProperty("final_vmaf", out var vmafElement)
+                            && vmafElement.ValueKind == JsonValueKind.Number)
+                        {
+                            verifiedVmaf = vmafElement.GetDouble();
+                        }
+                        if (root.TryGetProperty("final_crf", out var crfElement)
+                            && crfElement.ValueKind == JsonValueKind.Number)
+                        {
+                            finalCrf = crfElement.GetDouble();
+                        }
+                    };
+                }
+
+                var result = await _runner.RunAsync(engine, args, progress, log, _cts.Token, rawEvent);
                 if (result.Success)
                 {
                     completed++;
                     item.Progress = 100;
-                    item.StatusText = "Done";
+                    item.StatusText = verifiedVmaf is double vmaf
+                        ? $"Done · VMAF {vmaf:0.00}"
+                        : "Done";
                     item.ResultSizeBytes = result.SizeBytes ?? 0;
                     resultBytes += item.ResultSizeBytes;
                 }
@@ -448,7 +540,7 @@ public sealed partial class CompressorPage : Page
                     item.StatusText = result.ErrorCode == "cancelled" ? "Cancelled" : "Failed";
                 }
 
-                AddFinishedItem(item, result);
+                AddFinishedItem(item, result, verifiedVmaf, finalCrf);
 
                 // Persist every job to the history dashboard. We skip pure cancellations
                 // (user-driven) so the failed-count stat stays meaningful.
@@ -459,7 +551,7 @@ public sealed partial class CompressorPage : Page
                     _ = _history.LogAsync(new HistoryRecord
                     {
                         Timestamp = jobStartedAt,
-                        Engine = "videocrush",
+                        Engine = engine,
                         Action = "compress",
                         SourcePath = item.Path,
                         OutputPath = result.Success ? outputPath : null,
@@ -529,12 +621,19 @@ public sealed partial class CompressorPage : Page
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
-    private void AddFinishedItem(CompressionFileItem item, SidecarResult result)
+    private void AddFinishedItem(
+        CompressionFileItem item,
+        SidecarResult result,
+        double? verifiedVmaf = null,
+        double? finalCrf = null)
     {
         var successBrush = (Brush)Application.Current.Resources["AccentGreenBrush"];
         var errorBrush = (Brush)Application.Current.Resources["AccentRedBrush"];
+        var qualityResult = verifiedVmaf is double vmaf
+            ? $" - Verified VMAF {vmaf:0.00}" + (finalCrf is double crf ? $" at CRF {crf:0.##}" : "")
+            : "";
         var details = result.Success
-            ? $"{item.SourceSummary} -> {FormatSize(result.SizeBytes ?? 0)} - {SavingsLabel(item.SourceSizeBytes, result.SizeBytes ?? 0)}"
+            ? $"{item.SourceSummary} -> {FormatSize(result.SizeBytes ?? 0)} - {SavingsLabel(item.SourceSizeBytes, result.SizeBytes ?? 0)}{qualityResult}"
             : result.ErrorMessage ?? "Compression failed";
 
         _finished.Insert(0, new CompressionFinishedItem
@@ -596,6 +695,11 @@ public sealed partial class CompressorPage : Page
 
     private string SelectedPresetTag()
     {
+        if (IsVmafTargetMode)
+        {
+            var target = SelectedVmafTarget().ToString("0.##", CultureInfo.InvariantCulture);
+            return $"vmaf-{target}-{SelectedVmafEncoder()}";
+        }
         if (IsTargetSizeMode)
         {
             var targetPreset = SelectedTargetPresetTag();
@@ -617,6 +721,8 @@ public sealed partial class CompressorPage : Page
 
     private string SelectedPresetLabel()
     {
+        if (IsVmafTargetMode)
+            return $"Smart VMAF {SelectedVmafTarget():0.##} ({SelectedVmafEncoderLabel()})";
         if (IsTargetSizeMode)
         {
             if (SelectedTargetPresetTag() == "custom")
@@ -633,6 +739,8 @@ public sealed partial class CompressorPage : Page
     }
 
     private bool IsTargetSizeMode => PresetTarget?.IsChecked == true;
+
+    private bool IsVmafTargetMode => PresetVmaf?.IsChecked == true;
 
     private string SelectedTargetPresetTag()
     {
@@ -651,11 +759,42 @@ public sealed partial class CompressorPage : Page
         return double.IsFinite(value) && value >= 1 ? value : 10;
     }
 
-    private string BuildOutputPath(string inputPath)
+    private double SelectedVmafTarget()
+    {
+        var value = VmafTargetBox?.Value ?? 93;
+        return double.IsFinite(value) ? Math.Clamp(value, 50, 100) : 93;
+    }
+
+    private string SelectedVmafEncoder()
+    {
+        if (VmafEncoderCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            return tag;
+        return "libsvtav1";
+    }
+
+    private string SelectedVmafEncoderLabel()
+    {
+        if (VmafEncoderCombo?.SelectedItem is ComboBoxItem item)
+            return item.Content?.ToString() ?? "SVT-AV1";
+        return "SVT-AV1";
+    }
+
+    private string SelectedVmafEncoderPreset() => SelectedVmafEncoder() switch
+    {
+        "libx265" => "medium",
+        "libx264" => "slow",
+        _ => "6",
+    };
+
+    private string BuildOutputPath(string inputPath, bool smartQualityMode = false)
     {
         var dir = _outputDirectory ?? Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory;
         var name = Path.GetFileNameWithoutExtension(inputPath);
-        return EnsureUniquePath(Path.Combine(dir, $"{name}_compressed.mp4"));
+        var suffix = smartQualityMode
+            ? $"_smart_vmaf{SelectedVmafTarget().ToString("0.##", CultureInfo.InvariantCulture)}"
+            : "_compressed";
+        var extension = smartQualityMode ? ".mkv" : ".mp4";
+        return EnsureUniquePath(Path.Combine(dir, name + suffix + extension));
     }
 
     private static string EnsureUniquePath(string path)

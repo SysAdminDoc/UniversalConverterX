@@ -14,11 +14,13 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Compressor smart-quality mode now targets a user-selected VMAF score with AV1, H.265, or H.264 through ab-av1. It preflights the wrapper, upstream binary, and FFmpeg; performs sampled CRF search plus encoding; runs a full-reference VMAF verification; and reports the achieved score and selected CRF with each result.
 - Compressor now offers cap-safe Discord 10/25/50 MB and Email 25 MB profiles plus a custom maximum-size mode. Size-targeted jobs reserve 5% container overhead and use deterministic CPU two-pass encoding; matching presets are available outside the Compressor page.
 - Added managed, SHA-256-verified yt-dlp and Deno release channels with exact platform asset selection, staged version validation, atomic promotion, and rollback backups. Downloader health now explains missing or outdated runtimes and can install both; StreamKeep prefers the managed yt-dlp binary, reports active Deno/EJS status on probes, and ignores external yt-dlp configuration.
 
 ### Fixed
 
+- Resolved the ab-av1 wrapper/upstream executable name collision across WinUI, CLI preset, and local API sidecar discovery; frozen wrappers now consistently use `ab-av1-sidecar.exe` while launching upstream `ab-av1.exe`.
 - VideoCrush NDJSON is now safe on legacy Windows console code pages, and FFmpeg output is consumed without a redirected-stderr deadlock during long two-pass encodes.
 - The canonical build script now uses the .NET 10 SDK for full x64 WinUI solution builds and publishing instead of an older Visual Studio MSBuild that could not resolve SDK-style projects. Repaired ten malformed Explorer `/select` invocations that blocked C# compilation and removed the remaining build warning.
 

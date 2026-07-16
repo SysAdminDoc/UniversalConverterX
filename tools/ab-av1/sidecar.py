@@ -16,13 +16,6 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
@@ -34,7 +27,8 @@ from pathlib import Path
 # ── NDJSON helpers ───────────────────────────────────────────────────────────
 
 def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
+    payload = json.dumps({"event": event, **fields}, ensure_ascii=True, separators=(",", ":"))
+    sys.stdout.write(payload + "\n")
     sys.stdout.flush()
 
 
@@ -52,12 +46,17 @@ def log(level: str, message: str) -> None:
 def _find_ab_av1() -> str | None:
     """PATH-first lookup with fallbacks to a bundled binary next to this
     sidecar or under tools/_bin/."""
+    here = Path(__file__).resolve().parent
+    runtime_dir = (Path(sys.executable).resolve().parent
+                   if getattr(sys, "frozen", False) else here)
     candidates: list[str | None] = [
         os.environ.get("AB_AV1_PATH"),
         shutil.which("ab-av1"),
     ]
-    here = Path(__file__).resolve().parent
     candidates += [
+        str(runtime_dir / "ab-av1.exe"),
+        str(runtime_dir / "ab-av1"),
+        str(runtime_dir.parent / "_bin" / "ab-av1.exe"),
         str(here / "ab-av1.exe"),
         str(here / "ab-av1"),
         str(here.parent / "_bin" / "ab-av1.exe"),
@@ -78,9 +77,28 @@ _PERCENT_RE = re.compile(r"(\d{1,3})\s*%")
 _RECOMMEND_RE = re.compile(
     r"crf\s+(?P<crf>\d+(?:\.\d+)?)\s+(?:.*\s)?vmaf\s+(?P<vmaf>\d+(?:\.\d+)?)",
     re.IGNORECASE)
+_VMAF_RESULT_RE = re.compile(
+    r"\bvmaf(?:\s+score)?\s*[:=]?\s*(?P<vmaf>\d+(?:\.\d+)?)\b",
+    re.IGNORECASE)
 
 
-def _stream(cmd: list[str], stage: str) -> tuple[int, str]:
+def _last_vmaf(transcript: str) -> float | None:
+    for line in reversed(transcript.splitlines()):
+        stripped = line.strip()
+        try:
+            value = float(stripped)
+            if 0 <= value <= 100:
+                return value
+        except ValueError:
+            pass
+        match = _VMAF_RESULT_RE.search(stripped)
+        if match:
+            return float(match.group("vmaf"))
+    return None
+
+
+def _stream(cmd: list[str], stage: str,
+            start_pct: float = 0, end_pct: float = 100) -> tuple[int, str]:
     """Invoke ab-av1, surface progress, and capture the full stderr+stdout
     transcript so the caller can parse the recommended CRF on completion."""
     proc = subprocess.Popen(cmd,
@@ -88,7 +106,13 @@ def _stream(cmd: list[str], stage: str) -> tuple[int, str]:
                             text=True, bufsize=1)
     transcript: list[str] = []
     last_pct = -1
+    last_emitted_pct = round(start_pct)
     last_crf = None
+
+    def map_percent(percent: int) -> int:
+        bounded = max(0, min(100, percent))
+        return round(start_pct + (end_pct - start_pct) * bounded / 100)
+
     try:
         assert proc.stdout is not None
         for line in proc.stdout:
@@ -100,8 +124,13 @@ def _stream(cmd: list[str], stage: str) -> tuple[int, str]:
             crf_m = _PROGRESS_RE.search(line)
             if crf_m:
                 last_crf = float(crf_m.group("crf"))
+                raw_percent = int(pct_m.group(1)) if pct_m else last_pct if last_pct >= 0 else 0
+                if pct_m:
+                    last_pct = raw_percent
+                mapped_percent = max(last_emitted_pct, map_percent(raw_percent))
+                last_emitted_pct = mapped_percent
                 emit("progress",
-                     percent=int(pct_m.group(1)) if pct_m else last_pct if last_pct >= 0 else 0,
+                     percent=mapped_percent,
                      stage=stage,
                      crf=last_crf,
                      vmaf=float(crf_m.group("vmaf")),
@@ -111,7 +140,9 @@ def _stream(cmd: list[str], stage: str) -> tuple[int, str]:
                 pct = int(pct_m.group(1))
                 if pct - last_pct >= 1 and 0 <= pct <= 100:
                     last_pct = pct
-                    emit("progress", percent=pct, stage=stage, eta_seconds=None)
+                    mapped_percent = max(last_emitted_pct, map_percent(pct))
+                    last_emitted_pct = mapped_percent
+                    emit("progress", percent=mapped_percent, stage=stage, eta_seconds=None)
                     continue
             log("info", line)
     finally:
@@ -166,7 +197,10 @@ def op_auto_encode(args: argparse.Namespace) -> int:
 
     log("info", f"auto-encode encoder={encoder} target-vmaf={target_vmaf} -> {out_path.name}")
     emit("progress", percent=0, stage="ab-av1 search", eta_seconds=None)
-    rc, transcript = _stream(cmd, "ab-av1 search")
+    rc, transcript = _stream(
+        cmd,
+        "ab-av1 search + encode",
+        end_pct=85 if args.verify_vmaf else 100)
     if rc != 0:
         for ln in transcript.splitlines()[-15:]:
             log("error", ln)
@@ -183,10 +217,34 @@ def op_auto_encode(args: argparse.Namespace) -> int:
             break
 
     payload = {"output": str(out_path), "size_bytes": out_path.stat().st_size,
-               "encoder": encoder, "target_vmaf": target_vmaf}
+               "encoder": encoder, "target_vmaf": target_vmaf,
+               "vmaf_verified": False}
     if final is not None:
         payload["final_crf"] = final[0]
         payload["final_vmaf"] = final[1]
+
+    if args.verify_vmaf:
+        log("info", "Verifying the completed encode with a full VMAF pass.")
+        emit("progress", percent=85, stage="ab-av1 VMAF verification", eta_seconds=None)
+        verify_cmd = [binary, "vmaf",
+                      "--reference", str(src),
+                      "--distorted", str(out_path)]
+        verify_rc, verify_transcript = _stream(
+            verify_cmd, "ab-av1 VMAF verification", start_pct=85, end_pct=100)
+        if verify_rc != 0:
+            for ln in verify_transcript.splitlines()[-15:]:
+                log("error", ln)
+            return fail("vmaf_verify_failed", f"ab-av1 VMAF verification exited {verify_rc}")
+
+        achieved_vmaf = _last_vmaf(verify_transcript)
+        if achieved_vmaf is None:
+            return fail("vmaf_parse_failed", "The completed encode was produced, but its VMAF score could not be parsed.")
+
+        payload["final_vmaf"] = achieved_vmaf
+        payload["vmaf_verified"] = True
+        log("info", f"Verified VMAF {achieved_vmaf:.2f} (target {target_vmaf:.2f}).")
+        emit("progress", percent=100, stage="ab-av1 VMAF verification", eta_seconds=0)
+
     emit("complete", **payload)
     return 0
 
@@ -320,6 +378,8 @@ def build_parser() -> argparse.ArgumentParser:
     ae.add_argument("--max-crf", type=float, default=None, dest="max_crf")
     ae.add_argument("--xpsnr", action="store_true",
                     help="Use XPSNR instead of VMAF for the search (faster, ab-av1 v0.10+).")
+    ae.add_argument("--verify-vmaf", action="store_true", dest="verify_vmaf",
+                    help="Run a full-reference VMAF pass after encoding and report the achieved score.")
 
     cs = sub.add_parser("crf-search",
                         help="Search-only mode: emit the recommended CRF without encoding.")

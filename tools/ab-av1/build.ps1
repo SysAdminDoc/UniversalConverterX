@@ -20,12 +20,12 @@ if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m pip install --quiet --upgrade pip pyinstaller
 
-& $python -m PyInstaller --name ab-av1 --onefile --console --noconfirm --clean --log-level WARN --paths . sidecar.py
+& $python -m PyInstaller --name ab-av1-sidecar --onefile --console --noconfirm --clean --log-level WARN --paths . sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 # Sidecar shim is named ab-av1-sidecar so it doesn't collide with the upstream
 # ab-av1 binary that lives next to it.
-Copy-Item (Join-Path $here 'dist/ab-av1.exe') (Join-Path $here 'ab-av1-sidecar.exe') -Force
+Copy-Item (Join-Path $here 'dist/ab-av1-sidecar.exe') (Join-Path $here 'ab-av1-sidecar.exe') -Force
 $size = (Get-Item (Join-Path $here 'ab-av1-sidecar.exe')).Length / 1MB
 Write-Host ("[done] ab-av1-sidecar.exe ({0:N1} MB)" -f $size) -ForegroundColor Green
 

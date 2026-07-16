@@ -62,7 +62,7 @@ public sealed class SidecarRunner : ISidecarRunner
         if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
             return null;
 
-        var exeName = toolName + ".exe";
+        var exeName = SidecarNaming.ExecutableName(toolName);
 
         // Walk up from BaseDirectory checking the three layouts a frozen sidecar
         // can take: PyInstaller one-folder builds drop to dist/, classic builds
@@ -133,7 +133,7 @@ public sealed class SidecarRunner : ISidecarRunner
             // (file paths, language names, error text) survive the pipe round-trip
             // without mojibake on the typical Windows codepage.
             StandardOutputEncoding = System.Text.Encoding.UTF8,
-            StandardErrorEncoding  = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Presets;
 
@@ -29,11 +30,11 @@ public static class PresetRunner
 
         return preset.Mode switch
         {
-            InvocationMode.PerFile           => RunPerFile(exe, preset, inputs),
-            InvocationMode.BatchOutputDir    => RunBatchOutputDir(exe, preset, inputs),
+            InvocationMode.PerFile => RunPerFile(exe, preset, inputs),
+            InvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs),
             InvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs),
-            InvocationMode.ExtractEach       => RunExtractEach(exe, preset, inputs),
-            _                                => 4,
+            InvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs),
+            _ => 4,
         };
     }
 
@@ -147,7 +148,7 @@ public static class PresetRunner
         if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
             return null;
 
-        var exeName = toolName + ".exe";
+        var exeName = SidecarNaming.ExecutableName(toolName);
 
         // Walk up from the CLI's BaseDirectory looking for tools/<name>/<name>.exe.
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

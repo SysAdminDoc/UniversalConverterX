@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -203,7 +204,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
         var sidecarPath = _runner.Locate(engine);
         rows.Add(sidecarPath is null
             ? MissingSidecar(engine)
-            : Ready(engine, "sidecar", $"{engine}.exe", "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
+            : Ready(engine, "sidecar", Path.GetFileName(sidecarPath), "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
 
         foreach (var tool in ToolRequirementsFor(engine, presetArgs))
             rows.Add(await EvaluateToolAsync(engine, tool, cancellationToken));
@@ -303,6 +304,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
         var path = tool.IsManaged || requirement is not null
             ? GetManagedToolPath(canonicalId) ?? FindExecutable(tool.Executable)
             : FindExecutable(tool.Executable);
+        path ??= FindBundledExecutable(engine, tool.Executable);
         if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
         {
             if (requirement is not null)
@@ -441,10 +443,10 @@ public sealed class SidecarHealthService : ISidecarHealthService
         new(
             engine,
             "sidecar",
-            $"{engine}.exe",
+            SidecarNaming.ExecutableName(engine),
             "Missing",
             $"UCX could not locate the frozen {engine} sidecar.",
-            $"Build it with `pwsh tools/{engine}/build.ps1` or place {engine}.exe under %LocalAppData%/UniversalConverterX/tools/{engine}/{engine}.exe.",
+            $"Build it with `pwsh tools/{engine}/build.ps1` or place {SidecarNaming.ExecutableName(engine)} under %LocalAppData%/UniversalConverterX/tools/{engine}/.",
             null,
             null);
 
@@ -527,6 +529,40 @@ public sealed class SidecarHealthService : ISidecarHealthService
             }
             catch { }
         }
+        return null;
+    }
+
+    private string? FindBundledExecutable(string engine, string executable)
+    {
+        var sidecarPath = _runner.Locate(engine);
+        var sidecarDir = sidecarPath is null ? null : Path.GetDirectoryName(sidecarPath);
+        if (string.IsNullOrWhiteSpace(sidecarDir))
+            return null;
+
+        var engineDir = Path.GetFileName(sidecarDir).Equals("dist", StringComparison.OrdinalIgnoreCase)
+            || Path.GetFileName(sidecarDir).Equals("bin", StringComparison.OrdinalIgnoreCase)
+                ? Path.GetDirectoryName(sidecarDir)
+                : sidecarDir;
+        if (string.IsNullOrWhiteSpace(engineDir))
+            return null;
+
+        var exeName = OperatingSystem.IsWindows() && !executable.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+            ? executable + ".exe"
+            : executable;
+        var toolsDir = Path.GetDirectoryName(engineDir);
+        var directories = new[]
+        {
+            sidecarDir,
+            engineDir,
+            toolsDir is null ? null : Path.Combine(toolsDir, "_bin"),
+        };
+        foreach (var directory in directories.Where(d => !string.IsNullOrWhiteSpace(d)).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            var candidate = Path.Combine(directory!, exeName);
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
         return null;
     }
 
