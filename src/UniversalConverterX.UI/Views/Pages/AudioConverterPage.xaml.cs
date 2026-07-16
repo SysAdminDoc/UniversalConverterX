@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -56,6 +57,8 @@ public sealed partial class AudioConverterPage : Page
     private readonly IHistoryService _history;
     private readonly ObservableCollection<AudioConversionFileItem> _files = [];
     private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _waveformCts;
+    private string? _previewedWaveformPath;
     private string? _outputDirectory;
     private bool _viewReady;
 
@@ -502,6 +505,105 @@ public sealed partial class AudioConverterPage : Page
         CancelButton.IsEnabled = _cts is not null;
         if (updateStatus && _cts is null)
             UpdateStatusText();
+        UpdateWaveformPreview();
+    }
+
+    /// <summary>
+    /// Renders a waveform PNG for the most-recently-added file into the preview
+    /// card. Skips work when the target is unchanged, and degrades silently to a
+    /// hidden card when FFmpeg/the mediathumb sidecar is unavailable — the queue
+    /// never depends on the preview.
+    /// </summary>
+    private void UpdateWaveformPreview()
+    {
+        if (WaveformCard is null)
+            return;
+
+        var target = _files.Count > 0 ? _files[^1] : null;
+        if (target is null)
+        {
+            _waveformCts?.Cancel();
+            _previewedWaveformPath = null;
+            WaveformCard.Visibility = Visibility.Collapsed;
+            WaveformImage.Source = null;
+            return;
+        }
+
+        if (string.Equals(target.Path, _previewedWaveformPath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _previewedWaveformPath = target.Path;
+        _waveformCts?.Cancel();
+        _waveformCts = new CancellationTokenSource();
+        _ = RenderWaveformAsync(target.Path, target.FileName, _waveformCts.Token);
+    }
+
+    private async Task RenderWaveformAsync(string sourcePath, string fileName, CancellationToken ct)
+    {
+        if (_runner.Locate("mediathumb") is null)
+        {
+            WaveformCard.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        try
+        {
+            var outputDirectory = Path.Combine(
+                Path.GetTempPath(), "UniversalConverterX", "waveforms");
+            Directory.CreateDirectory(outputDirectory);
+            var outputPath = Path.Combine(
+                outputDirectory,
+                $"{Path.GetFileNameWithoutExtension(sourcePath)}-{Math.Abs(sourcePath.GetHashCode()):x8}.png");
+
+            string? emittedPath = null;
+            var result = await _runner.RunAsync(
+                "mediathumb",
+                [
+                    "waveform",
+                    "--input", sourcePath,
+                    "--output", outputPath,
+                    "--width", "900",
+                    "--height", "160",
+                ],
+                ct: ct,
+                onRawEvent: (eventName, payload) =>
+                {
+                    if (eventName == "waveform_doc"
+                        && payload.TryGetProperty("output", out var output)
+                        && output.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        emittedPath = output.GetString();
+                    }
+                });
+
+            if (ct.IsCancellationRequested)
+                return;
+
+            var image = emittedPath ?? outputPath;
+            if (!result.Success || string.IsNullOrWhiteSpace(image) || !File.Exists(image))
+            {
+                WaveformCard.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ct.IsCancellationRequested || !File.Exists(image))
+                    return;
+                WaveformImage.Source = new BitmapImage(new Uri(image)) { DecodePixelWidth = 900 };
+                WaveformCaption.Text = fileName;
+                WaveformCard.Visibility = Visibility.Visible;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer selection — nothing to clean up.
+        }
+        catch (Exception)
+        {
+            // A preview is optional; hide the card rather than disturb the queue.
+            DispatcherQueue.TryEnqueue(() => WaveformCard.Visibility = Visibility.Collapsed);
+        }
     }
 
     private void UpdateStatusText()

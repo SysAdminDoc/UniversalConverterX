@@ -534,6 +534,9 @@
   <data name="AudioConverterPage_FdkProfileCombo.Header" xml:space="preserve">
     <value>Profile</value>
   </data>
+  <data name="AudioConverterPage_Item_001.Text" xml:space="preserve">
+    <value>Waveform preview</value>
+  </data>
   <data name="AudioConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Conversion progress</value>
   </data>
@@ -4653,6 +4656,9 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_001.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Remove from queue</value>
+  </data>
+  <data name="SpeechToTextPage_Item_001_2.Text" xml:space="preserve">
+    <value>Waveform preview</value>
   </data>
   <data name="SpeechToTextPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Progress</value>

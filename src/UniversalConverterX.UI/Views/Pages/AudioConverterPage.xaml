@@ -124,6 +124,18 @@
 
             <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="14" Padding="0,0,4,0">
+                    <Border x:Name="WaveformCard" Style="{StaticResource CardStyle}" Visibility="Collapsed">
+                        <StackPanel Spacing="10">
+                            <TextBlock x:Uid="AudioConverterPage_Item_001" Text="Waveform preview" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <Border CornerRadius="10" Background="{StaticResource SurfaceLightBrush}"
+                                    Padding="8" MinHeight="128">
+                                <Image x:Name="WaveformImage" Stretch="Uniform" MinHeight="112"
+                                       AutomationProperties.AutomationId="AudioConverterWaveformImage"/>
+                            </Border>
+                            <TextBlock x:Name="WaveformCaption" Text=""
+                                       Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel Spacing="12">
                             <TextBlock x:Uid="AudioConverterPage_Item_010" Text="Output Format" Style="{StaticResource PanelTitleTextStyle}"/>

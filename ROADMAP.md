@@ -47,14 +47,6 @@ Impact: 3 · Effort: 4 · Type: parity
 
 ---
 
-### 46. Audio Waveform Preview
-
-Show waveform thumbnail in `AudioConverterPage` and `SttPage` after file selection. Backend: FFmpeg `showwavespic` filter.
-
-Impact: 3 · Effort: 3 · Type: UX
-
----
-
 ### 48. AI Video Colorization (B&W → Color)
 
 Per-frame colorization of grayscale footage using DeOldify. Requires PyTorch + ~1.5 GB model download (explicit user confirmation required). GPU-gated. Wire to `ColorizeVideoPage.xaml` with single-frame preview.

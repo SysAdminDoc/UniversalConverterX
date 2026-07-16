@@ -249,6 +249,19 @@
             <!-- Settings panel -->
             <StackPanel Grid.Column="1" Spacing="14">
 
+                <Border x:Name="WaveformCard" Style="{StaticResource CardStyle}" Visibility="Collapsed">
+                    <StackPanel Spacing="10">
+                        <TextBlock x:Uid="SpeechToTextPage_Item_001_2" Text="Waveform preview" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Border CornerRadius="10" Background="{StaticResource SurfaceLightBrush}"
+                                Padding="8" MinHeight="128">
+                            <Image x:Name="WaveformImage" Stretch="Uniform" MinHeight="112"
+                                   AutomationProperties.AutomationId="SpeechToTextWaveformImage"/>
+                        </Border>
+                        <TextBlock x:Name="WaveformCaption" Text=""
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock x:Uid="SpeechToTextPage_Item_016" Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>

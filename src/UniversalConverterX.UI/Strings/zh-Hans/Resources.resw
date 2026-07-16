@@ -534,6 +534,9 @@
   <data name="AudioConverterPage_FdkProfileCombo.Header" xml:space="preserve">
     <value>概况简介简介</value>
   </data>
+  <data name="AudioConverterPage_Item_001.Text" xml:space="preserve">
+    <value>Waveform preview</value>
+  </data>
   <data name="AudioConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>转换进度</value>
   </data>
@@ -4647,6 +4650,9 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_001.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>从队列中删除</value>
+  </data>
+  <data name="SpeechToTextPage_Item_001_2.Text" xml:space="preserve">
+    <value>Waveform preview</value>
   </data>
   <data name="SpeechToTextPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>进度</value>

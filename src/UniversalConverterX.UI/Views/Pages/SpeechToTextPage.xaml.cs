@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -31,6 +32,8 @@ public sealed partial class SpeechToTextPage : Page
     private readonly ObservableCollection<SttFileItem> _files = [];
     private readonly ObservableCollection<SttFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _waveformCts;
+    private string? _previewedWaveformPath;
     private string? _outputFolder;
     private bool _parakeetModelReady;
     private bool _modelActionRunning;
@@ -615,6 +618,105 @@ public sealed partial class SpeechToTextPage : Page
 
         if (!hasFiles)
             StatusLabel.Text = "Add audio or video files to transcribe.";
+
+        UpdateWaveformPreview();
+    }
+
+    /// <summary>
+    /// Renders a waveform PNG for the most-recently-added file into the preview
+    /// card. Skips unchanged targets and degrades silently to a hidden card when
+    /// FFmpeg/the mediathumb sidecar is unavailable — transcription never depends
+    /// on the preview.
+    /// </summary>
+    private void UpdateWaveformPreview()
+    {
+        if (WaveformCard is null)
+            return;
+
+        var target = _files.Count > 0 ? _files[^1] : null;
+        if (target is null)
+        {
+            _waveformCts?.Cancel();
+            _previewedWaveformPath = null;
+            WaveformCard.Visibility = Visibility.Collapsed;
+            WaveformImage.Source = null;
+            return;
+        }
+
+        if (string.Equals(target.Path, _previewedWaveformPath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _previewedWaveformPath = target.Path;
+        _waveformCts?.Cancel();
+        _waveformCts = new CancellationTokenSource();
+        _ = RenderWaveformAsync(target.Path, target.FileName, _waveformCts.Token);
+    }
+
+    private async Task RenderWaveformAsync(string sourcePath, string fileName, CancellationToken ct)
+    {
+        if (_runner.Locate("mediathumb") is null)
+        {
+            WaveformCard.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        try
+        {
+            var outputDirectory = Path.Combine(
+                Path.GetTempPath(), "UniversalConverterX", "waveforms");
+            Directory.CreateDirectory(outputDirectory);
+            var outputPath = Path.Combine(
+                outputDirectory,
+                $"{Path.GetFileNameWithoutExtension(sourcePath)}-{Math.Abs(sourcePath.GetHashCode()):x8}.png");
+
+            string? emittedPath = null;
+            var result = await _runner.RunAsync(
+                "mediathumb",
+                [
+                    "waveform",
+                    "--input", sourcePath,
+                    "--output", outputPath,
+                    "--width", "900",
+                    "--height", "160",
+                ],
+                ct: ct,
+                onRawEvent: (eventName, payload) =>
+                {
+                    if (eventName == "waveform_doc"
+                        && payload.TryGetProperty("output", out var output)
+                        && output.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        emittedPath = output.GetString();
+                    }
+                });
+
+            if (ct.IsCancellationRequested)
+                return;
+
+            var image = emittedPath ?? outputPath;
+            if (!result.Success || string.IsNullOrWhiteSpace(image) || !File.Exists(image))
+            {
+                WaveformCard.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (ct.IsCancellationRequested || !File.Exists(image))
+                    return;
+                WaveformImage.Source = new BitmapImage(new Uri(image)) { DecodePixelWidth = 900 };
+                WaveformCaption.Text = fileName;
+                WaveformCard.Visibility = Visibility.Visible;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer selection — nothing to clean up.
+        }
+        catch (Exception)
+        {
+            DispatcherQueue.TryEnqueue(() => WaveformCard.Visibility = Visibility.Collapsed);
+        }
     }
 }
 

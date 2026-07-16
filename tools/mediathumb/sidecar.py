@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -68,6 +69,31 @@ def _video_thumb(src: Path, out_path: Path, ts: float, max_size: int) -> bool:
            "-q:v", "3", str(out_path)]
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     return proc.returncode == 0 and out_path.is_file()
+
+
+def _waveform(src: Path, out_path: Path, width: int, height: int,
+              color: str) -> bool:
+    """Render an audio waveform PNG via FFmpeg's showwavespic filter.
+
+    Accepts any media file that carries an audio stream (audio files and
+    videos alike). Downmixes to mono so the trace is a single readable band,
+    and writes an RGBA PNG so the preview composites over any page background.
+    """
+    cli = _which("ffmpeg")
+    if not cli:
+        return False
+    safe_color = color if re.fullmatch(r"[0-9A-Fa-f]{6}", color) else "8AADF4"
+    cmd = [cli, "-y", "-hide_banner", "-loglevel", "error",
+           "-i", str(src),
+           "-filter_complex",
+           (f"aformat=channel_layouts=mono,"
+            f"showwavespic=s={width}x{height}:colors=#{safe_color}"),
+           "-frames:v", "1", str(out_path)]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    except (subprocess.SubprocessError, OSError):
+        return False
+    return proc.returncode == 0 and out_path.is_file() and out_path.stat().st_size > 0
 
 
 def _pdf_thumb(src: Path, out_path: Path, max_size: int) -> bool:
@@ -224,6 +250,25 @@ def op_bulk_thumb(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_waveform(args: argparse.Namespace) -> int:
+    src = Path(args.input)
+    if not src.is_file():
+        return fail("missing_input", f"file not found: {src}")
+    if not _which("ffmpeg"):
+        return fail("ffmpeg_missing",
+                    "FFmpeg was not found; waveform previews require FFmpeg.")
+    out_path = Path(args.output).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if not _waveform(src, out_path, args.width, args.height, args.color):
+        return fail("waveform_failed",
+                    f"{src.name}: FFmpeg produced no waveform (no audio stream?).")
+    size = out_path.stat().st_size
+    emit("waveform_doc", input=str(src), output=str(out_path),
+         size_bytes=size, format="png", width=args.width, height=args.height)
+    emit("complete", output=str(out_path), size_bytes=size, count=1)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="mediathumb-sidecar",
                                 description="Universal media thumbnail extractor.")
@@ -243,6 +288,14 @@ def build_parser() -> argparse.ArgumentParser:
     bt.add_argument("--size", type=int, default=512)
     bt.add_argument("--time", type=float, default=2.0)
 
+    wf = sub.add_parser("waveform", help="Render an audio waveform PNG via FFmpeg")
+    wf.add_argument("--input", required=True, help="Audio or video file to sample")
+    wf.add_argument("--output", required=True, help="Destination PNG path")
+    wf.add_argument("--width", type=int, default=900, help="Image width (default 900)")
+    wf.add_argument("--height", type=int, default=160, help="Image height (default 160)")
+    wf.add_argument("--color", default="8AADF4",
+                    help="Trace colour as a 6-digit hex RGB (default 8AADF4)")
+
     return p
 
 
@@ -251,6 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "thumb":      return op_thumb(args)
         if args.op == "bulk-thumb": return op_bulk_thumb(args)
+        if args.op == "waveform":   return op_waveform(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         return fail("cancelled", "Cancelled by user.")
