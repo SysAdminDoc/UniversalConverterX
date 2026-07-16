@@ -1,0 +1,2 @@
+opencv-python-headless>=4.11
+numpy>=1.26,<2

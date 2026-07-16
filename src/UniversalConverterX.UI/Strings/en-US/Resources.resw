@@ -1191,6 +1191,54 @@
   <data name="ChapterMarksPage_SourceLabel.Text" xml:space="preserve">
     <value>No file loaded.</value>
   </data>
+  <data name="ColorizeVideoPage_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ColorizeVideoPage_ColorizeButton.Content" xml:space="preserve">
+    <value>Colorize</value>
+  </data>
+  <data name="ColorizeVideoPage_ColorizeChooseOutputButton.Content" xml:space="preserve">
+    <value>Choose output…</value>
+  </data>
+  <data name="ColorizeVideoPage_ColorizeOpenButton.Content" xml:space="preserve">
+    <value>Open image or video…</value>
+  </data>
+  <data name="ColorizeVideoPage_ColorizeOpenEmptyButton.Content" xml:space="preserve">
+    <value>Open image or video…</value>
+  </data>
+  <data name="ColorizeVideoPage_DownloadModelButton.Content" xml:space="preserve">
+    <value>Download model (123 MB)</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_001.Text" xml:space="preserve">
+    <value>COLORIZE</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_002.Text" xml:space="preserve">
+    <value>Add colour to black-and-white photos and video, fully offline on the CPU.</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_004.Text" xml:space="preserve">
+    <value>Drop a B&amp;W photo or video</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_005.Text" xml:space="preserve">
+    <value>JPG, PNG, WEBP images or MP4/MKV/MOV video. Images preview instantly; video colourises frame-by-frame on the CPU.</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_007.Text" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="ColorizeVideoPage_Item_010.Text" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="ColorizeVideoPage_ModelStatus.Text" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="ColorizeVideoPage_OutputBox.Header" xml:space="preserve">
+    <value>Destination file</value>
+  </data>
+  <data name="ColorizeVideoPage_OutputBox.PlaceholderText" xml:space="preserve">
+    <value>Auto (next to the source)</value>
+  </data>
+  <data name="ColorizeVideoPage_StatusText.Text" xml:space="preserve">
+    <value>Open a black-and-white image or video to begin.</value>
+  </data>
   <data name="CompressorPage_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
   </data>

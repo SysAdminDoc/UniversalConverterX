@@ -39,6 +39,7 @@ public sealed partial class MainWindow : Window
         new("Metadata Editor", "ExifTool metadata read, write, and clear presets", "presets:exiftool-meta"),
         new("Subtitle Remover", "VideoSubtitleRemover preset workflow", "presets:videosubtitleremover"),
         new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
+        new("Colorize", "Add colour to black-and-white photos and video offline on the CPU", "ai-colorize"),
         new("AI Portrait", "CodeFormer / GFPGAN portrait upscale + restoration with fidelity slider", "ai-portrait"),
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
@@ -170,6 +171,7 @@ public sealed partial class MainWindow : Window
             "ai-tts" => typeof(TextToSpeechPage),
             "ai-stt" => typeof(SpeechToTextPage),
             "ai-photo-restore" => typeof(PhotoRestorationPage),
+            "ai-colorize" => typeof(ColorizeVideoPage),
             // ROADMAP Item 27 — AI Portrait wires to PresetsPage with the
             // facerestore engine filter (CodeFormer fidelity slider +
             // GFPGAN side-by-side). The fidelity-vs-restoration nuance lives

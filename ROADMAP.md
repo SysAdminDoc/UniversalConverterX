@@ -31,14 +31,6 @@ programmability (CLI + REST + PS module), and AI depth.
 
 ## Tier 3 — Later _(v2.27+)_
 
-### 48. AI Video Colorization (B&W → Color)
-
-Per-frame colorization of grayscale footage using DeOldify. Requires PyTorch + ~1.5 GB model download (explicit user confirmation required). GPU-gated. Wire to `ColorizeVideoPage.xaml` with single-frame preview.
-
-Impact: 3 · Effort: 4 · Type: leapfrog
-
----
-
 ### 49. AI Video Background Removal
 
 Segment and replace video background using BRIA-RMBG 2.0 or MODNet. Output: VP9/WebM with transparency, PNG sequence, or chroma-key fill. GPU-gated.

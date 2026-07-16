@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.ColorizeVideoPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="8">
+                <TextBlock x:Uid="ColorizeVideoPage_Item_001" Text="COLORIZE" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="ColorizeVideoPage_Item_002" Text="Add colour to black-and-white photos and video, fully offline on the CPU."
+                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
+                           MaxWidth="820" LineHeight="30"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button x:Uid="ColorizeVideoPage_ColorizeOpenButton" Content="Open image or video…" Style="{StaticResource SecondaryButtonStyle}"
+                        AutomationProperties.AutomationId="ColorizeOpenButton"
+                        Click="Open_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Body -->
+        <Grid Grid.Row="1" ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="340"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Preview -->
+            <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
+                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    DragOver="DropZone_DragOver" Drop="DropZone_Drop">
+                <Grid>
+                    <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"
+                                VerticalAlignment="Center" Spacing="12">
+                        <Border Width="116" Height="116" CornerRadius="28"
+                                Background="{StaticResource SurfaceLightBrush}">
+                            <FontIcon Glyph="&#xE790;" FontSize="48"
+                                      Foreground="{StaticResource AccentGreenBrush}"/>
+                        </Border>
+                        <TextBlock x:Uid="ColorizeVideoPage_Item_004" Text="Drop a B&amp;W photo or video"
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock x:Uid="ColorizeVideoPage_Item_005" Text="JPG, PNG, WEBP images or MP4/MKV/MOV video. Images preview instantly; video colourises frame-by-frame on the CPU."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"
+                                   TextAlignment="Center" MaxWidth="460"/>
+                        <Button x:Uid="ColorizeVideoPage_ColorizeOpenEmptyButton" Content="Open image or video…" Style="{StaticResource PrimaryButtonStyle}"
+                                AutomationProperties.AutomationId="ColorizeOpenEmptyButton"
+                                HorizontalAlignment="Center" Click="Open_Click"/>
+                    </StackPanel>
+
+                    <Border x:Name="PreviewPanel" Visibility="Collapsed"
+                            CornerRadius="12" Background="Black">
+                        <Image x:Name="PreviewImage" Stretch="Uniform"
+                               AutomationProperties.AutomationId="ColorizePreviewImage"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Controls -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14" Padding="0,0,4,0">
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock x:Uid="ColorizeVideoPage_Item_007" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock x:Uid="ColorizeVideoPage_ModelStatus" x:Name="ModelStatus" Text="Checking…"
+                                       Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                            <Button x:Uid="ColorizeVideoPage_DownloadModelButton" x:Name="DownloadModelButton" Content="Download model (123 MB)"
+                                    HorizontalAlignment="Stretch"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    AutomationProperties.AutomationId="ColorizeDownloadModelButton"
+                                    Click="DownloadModel_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Uid="ColorizeVideoPage_Item_010" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBox x:Uid="ColorizeVideoPage_OutputBox" x:Name="OutputBox" Header="Destination file" IsReadOnly="True"
+                                     PlaceholderText="Auto (next to the source)"
+                                     AutomationProperties.AutomationId="ColorizeOutputBox"/>
+                            <Button x:Uid="ColorizeVideoPage_ColorizeChooseOutputButton" Content="Choose output…" HorizontalAlignment="Stretch"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    AutomationProperties.AutomationId="ColorizeChooseOutputButton"
+                                    Click="ChooseOutput_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button x:Uid="ColorizeVideoPage_ColorizeButton" x:Name="ColorizeButton" Content="Colorize" HorizontalAlignment="Stretch"
+                            Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"
+                            AutomationProperties.AutomationId="ColorizeRunButton"
+                            Click="Colorize_Click"/>
+                    <Button x:Uid="ColorizeVideoPage_CancelButton" x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Stretch"
+                            Style="{StaticResource SecondaryButtonStyle}" IsEnabled="False"
+                            AutomationProperties.AutomationId="ColorizeCancelButton"
+                            Click="Cancel_Click"/>
+                    <ProgressBar x:Name="ColorizeProgress" Minimum="0" Maximum="100" Value="0"
+                                 Visibility="Collapsed"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Status -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="16,12">
+            <TextBlock x:Uid="ColorizeVideoPage_StatusText" x:Name="StatusText" Text="Open a black-and-white image or video to begin."
+                       Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+        </Border>
+    </Grid>
+</Page>

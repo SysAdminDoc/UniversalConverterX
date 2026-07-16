@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added an offline **Colorize** tool that adds colour to black-and-white photos and video entirely on the CPU (no GPU or PyTorch), backed by a new `colorize` sidecar using OpenCV's DNN colourisation model. The ~123 MB BSD-2-Clause model is downloaded once behind an explicit licence-consent dialog and SHA-256 verified; colourisation itself never downloads. Images preview instantly; video is colourised frame-by-frame and remuxed with its original audio in a single lossless-intermediate h264 encode. Reachable from search and the AI tool set.
+
 ## [2.25.0] - 2026-07-16
 
 ### Added
