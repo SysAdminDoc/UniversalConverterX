@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using UniversalConverterX.UI.Services;
+using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
@@ -53,6 +54,32 @@ public sealed partial class HistoryPage : Page
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadAsync();
+
+    private async void Export_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileSavePicker
+        {
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            SuggestedFileName = $"ucx-history-{DateTime.Now:yyyyMMdd-HHmmss}",
+        };
+        picker.FileTypeChoices.Add("JSON report", [".json"]);
+        picker.FileTypeChoices.Add("CSV report", [".csv"]);
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+        var file = await picker.PickSaveFileAsync();
+        if (file is null) return;
+
+        try
+        {
+            var count = await _history.ExportAsync(file.Path, _searchTerm);
+            StatusText.Text = $"Exported {count} history row(s) to {Path.GetFileName(file.Path)}.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Report export failed: {ex.Message}";
+        }
+    }
 
     private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {

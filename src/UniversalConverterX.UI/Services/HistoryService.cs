@@ -109,6 +109,7 @@ public interface IHistoryService
     Task LogAsync(HistoryRecord record);
     Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500);
     Task<HistorySummary> SummarizeAsync(string? search = null);
+    Task<int> ExportAsync(string path, string? search = null);
     Task DeleteAsync(long id);
     Task ClearAsync();
 }
@@ -191,6 +192,15 @@ public sealed class HistoryService : IHistoryService, IDisposable
             summary.TotalSourceBytes,
             summary.TotalOutputBytes,
             summary.SpaceSavedBytes);
+    }
+
+    public async Task<int> ExportAsync(string path, string? search = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var entries = await _store.QueryAsync(search, limit: 10_000).ConfigureAwait(false);
+        var report = ConversionReportWriter.CreateFromHistory(entries);
+        await ConversionReportWriter.WriteAsync(path, report).ConfigureAwait(false);
+        return entries.Count;
     }
 
     public async Task DeleteAsync(long id)

@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Conversion batches can now emit structured JSON or RFC 4180 CSV reports with per-file status, source/output sizes, byte delta, duration, engine, profile, warnings, and errors. `ucx convert --report` writes live results, while the History page exports its current filtered view through the same Core report writer.
 - Editor and ClipForge now support lossless display-crop metadata for H.264/H.265 and container-only display aspect overrides. Crop metadata rewrites only SPS display edges while preserving coded picture samples; aspect overrides stream-copy compressed packets unchanged. A 16:9 lossless metadata preset is included.
 - Added curated Preservation and Production video families: lossless FFV1+FLAC/MKV archival, ProRes 422/MOV, and DNxHR HQ/MOV. The Presets page now has dedicated Preservation and Production filters, and the lossless VideoCrush path is covered by decoded-frame and PCM verification.
 - Added APV camera-master support backed by the bundled FFmpeg 8.1.2 codec: Format Inspector recognizes RFC 9924 raw bitstreams, and presets convert APV to H.265 10-bit, ProRes 422 HQ, or compatible H.264. Raw streams without container duration now run with indeterminate progress instead of failing, and professional/lossless VideoCrush presets correctly bypass lossy CRF validation.

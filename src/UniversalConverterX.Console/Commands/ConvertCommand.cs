@@ -84,6 +84,10 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [CommandOption("--source-archive <PATH>")]
         [Description("Archive folder for --source-action move. Relative paths resolve beside each source file.")]
         public string? SourceArchive { get; set; }
+
+        [CommandOption("--report <PATH>")]
+        [Description("Write a per-file batch report. The path must end in .json or .csv.")]
+        public string? ReportPath { get; set; }
     }
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -109,6 +113,15 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             return 1;
         }
         settings.OutputFormat = normalizedOutputFormat;
+
+        if (!string.IsNullOrWhiteSpace(settings.ReportPath)
+            && !ConversionReportWriter.SupportsPath(settings.ReportPath))
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]Error:[/] Report path [yellow]{Esc(settings.ReportPath)}[/] must end in " +
+                "[cyan].json[/] or [cyan].csv[/].");
+            return 1;
+        }
 
         if (!TryParsePostConversionAction(settings.SourceAction, out var sourceAction))
         {
@@ -172,17 +185,37 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         AnsiConsole.MarkupLine($"[green]Converting[/] {jobs.Count} file(s) to [cyan]{Esc(settings.OutputFormat)}[/]");
         AnsiConsole.WriteLine();
 
-        // Single file conversion
+        (int ExitCode, IReadOnlyList<ConversionResult> Results) outcome;
         if (jobs.Count == 1)
         {
-            return await ConvertSingleFile(orchestrator, jobs[0], settings, cancellationToken);
+            outcome = await ConvertSingleFile(orchestrator, jobs[0], settings, cancellationToken);
+        }
+        else
+        {
+            outcome = await ConvertBatch(orchestrator, jobs, settings, cancellationToken);
         }
 
-        // Batch conversion
-        return await ConvertBatch(orchestrator, jobs, settings, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(settings.ReportPath))
+        {
+            try
+            {
+                var report = ConversionReportWriter.Create(outcome.Results);
+                await ConversionReportWriter.WriteAsync(settings.ReportPath, report, cancellationToken);
+                AnsiConsole.MarkupLine(
+                    $"[green]Report:[/] {Esc(Path.GetFullPath(settings.ReportPath))} " +
+                    $"[dim]({outcome.Results.Count} file(s))[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Report failed:[/] {Esc(ex.Message)}");
+                return 1;
+            }
+        }
+
+        return outcome.ExitCode;
     }
 
-    private async Task<int> ConvertSingleFile(
+    private async Task<(int ExitCode, IReadOnlyList<ConversionResult> Results)> ConvertSingleFile(
         IConversionOrchestrator orchestrator,
         ConversionJob job,
         Settings settings,
@@ -241,28 +274,29 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         if (success && result != null)
         {
             PrintSuccess(result);
-            return 0;
+            return (0, [result]);
         }
         else if (result != null)
         {
             PrintError(result);
-            return 1;
+            return (1, [result]);
         }
 
-        return 1;
+        return (1, []);
     }
 
-    private async Task<int> ConvertBatch(
+    private async Task<(int ExitCode, IReadOnlyList<ConversionResult> Results)> ConvertBatch(
         IConversionOrchestrator orchestrator,
         List<ConversionJob> jobs,
         Settings settings,
         CancellationToken cancellationToken)
     {
         var failedCount = 0;
+        BatchConversionResult? batchResult = null;
 
         if (settings.NoProgress)
         {
-            var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, cancellationToken: cancellationToken);
+            batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, cancellationToken: cancellationToken);
             failedCount = batchResult.FailureCount;
 
             foreach (var result in batchResult.Results)
@@ -307,7 +341,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                         }
                     });
 
-                    var batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, progress, cancellationToken);
+                    batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, progress, cancellationToken);
                     
                     overallTask.Value = jobs.Count;
                     currentTask.Value = 100;
@@ -330,12 +364,12 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         if (failedCount == 0)
         {
             AnsiConsole.MarkupLine($"[green]✓ All {successCount} file(s) converted successfully![/]");
-            return 0;
+            return (0, batchResult?.Results ?? []);
         }
         else
         {
             AnsiConsole.MarkupLine($"[yellow]Completed:[/] {successCount} succeeded, [red]{failedCount} failed[/]");
-            return 1;
+            return (1, batchResult?.Results ?? []);
         }
     }
 

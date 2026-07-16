@@ -99,6 +99,10 @@
                            MaxWidth="720" LineHeight="30"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Content="Export report"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Export_Click"
+                        AutomationProperties.AutomationId="HistoryPageButton03"/>
                 <Button Content="Refresh"
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Refresh_Click"

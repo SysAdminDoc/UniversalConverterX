@@ -36,6 +36,7 @@ public class Program
                 .WithDescription("Convert one or more files to a different format")
                 .WithExample("convert", "video.mp4", "-o", "mp3")
                 .WithExample("convert", "*.png", "-o", "webp", "-q", "high")
+                .WithExample("convert", "*.mov", "-o", "mp4", "--report", "batch.json")
                 .WithExample("convert", "document.docx", "-o", "pdf");
 
             config.AddCommand<ListCommand>("list")

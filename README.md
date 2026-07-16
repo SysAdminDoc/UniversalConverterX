@@ -90,6 +90,9 @@ ucx convert video.mp4 -o mp3
 # Convert multiple files
 ucx convert *.png -o webp -q high
 
+# Export per-file status, sizes, timing, and warnings as JSON or CSV
+ucx convert *.mov -o mp4 --report batch-report.json
+
 # Move originals to an archive folder after verified output is created
 ucx convert *.mov -o mp4 --source-action move --source-archive _converted-sources
 
@@ -125,7 +128,10 @@ ucx info document.pdf
 --hw-accel                Enable hardware acceleration
 --source-action <ACTION>  After success: keep, move, or delete the source
 --source-archive <PATH>   Archive folder for --source-action move
+--report <PATH>           Write a per-file .json or .csv batch report
 ```
+
+The History page can also export the current filtered history view as the same JSON or CSV report schema.
 
 ## Project planning
 
