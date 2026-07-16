@@ -540,8 +540,14 @@
   <data name="AudioConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Progresos en la conversión</value>
   </data>
+  <data name="AudioConverterPage_Item_002_2.Content" xml:space="preserve">
+    <value>Standard (mono / stereo / 5.1)</value>
+  </data>
   <data name="AudioConverterPage_Item_003.Text" xml:space="preserve">
     <value>AUDIO CONVERTER</value>
+  </data>
+  <data name="AudioConverterPage_Item_003_2.Content" xml:space="preserve">
+    <value>Ambisonics ACN/SN3D (4, 9, 16… ch)</value>
   </data>
   <data name="AudioConverterPage_Item_004.Text" xml:space="preserve">
     <value>Convierta audio localmente con calidad VBR con codec-aware y controles avanzados de codificador.</value>
@@ -707,6 +713,9 @@
   </data>
   <data name="AudioConverterPage_Item_075.Text" xml:space="preserve">
     <value>Los originales nunca se modifican. Las salidas existentes reciben un nombre numerado en lugar de ser sobrescrito.</value>
+  </data>
+  <data name="AudioConverterPage_OpusAmbisonicsCombo.Header" xml:space="preserve">
+    <value>Channel layout</value>
   </data>
   <data name="AudioConverterPage_OpusApplicationCombo.Header" xml:space="preserve">
     <value>Aplicación</value>

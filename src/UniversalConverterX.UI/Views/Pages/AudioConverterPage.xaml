@@ -240,6 +240,12 @@
                                     <ComboBoxItem x:Uid="AudioConverterPage_Item_059" Content="40 ms" Tag="40"/>
                                     <ComboBoxItem x:Uid="AudioConverterPage_Item_060" Content="60 ms" Tag="60"/>
                                 </ComboBox>
+                                <ComboBox x:Uid="AudioConverterPage_OpusAmbisonicsCombo" x:Name="OpusAmbisonicsCombo" Header="Channel layout"
+                                          AutomationProperties.AutomationId="AudioConverterOpusAmbisonicsCombo"
+                                          SelectionChanged="Setting_Changed">
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_002_2" Content="Standard (mono / stereo / 5.1)" Tag="off" IsSelected="True"/>
+                                    <ComboBoxItem x:Uid="AudioConverterPage_Item_003_2" Content="Ambisonics ACN/SN3D (4, 9, 16… ch)" Tag="acn-sn3d"/>
+                                </ComboBox>
                             </StackPanel>
 
                             <StackPanel x:Name="FdkPanel" Spacing="10" Visibility="Collapsed">

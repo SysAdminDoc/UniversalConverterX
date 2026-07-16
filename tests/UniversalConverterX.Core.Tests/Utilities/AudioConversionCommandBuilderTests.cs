@@ -61,6 +61,45 @@ public sealed class AudioConversionCommandBuilderTests
     }
 
     [Fact]
+    public void Build_ShouldEmitOpusAmbisonicsOnlyWhenEnabled()
+    {
+        var enabled = AudioConversionCommandBuilder.Build(
+            ["foa.wav"],
+            new AudioConversionOptions
+            {
+                Format = "opus",
+                OutputDirectory = Path.GetTempPath(),
+                Channels = 4,
+                OpusAmbisonics = "acn-sn3d",
+            });
+        enabled.Should().ContainInOrder("--opus-ambisonics", "acn-sn3d");
+
+        var disabled = AudioConversionCommandBuilder.Build(
+            ["stereo.wav"],
+            new AudioConversionOptions
+            {
+                Format = "opus",
+                OutputDirectory = Path.GetTempPath(),
+                OpusAmbisonics = "off",
+            });
+        disabled.Should().NotContain("--opus-ambisonics");
+    }
+
+    [Fact]
+    public void Build_ShouldRejectUnknownOpusAmbisonicsMode()
+    {
+        var action = () => AudioConversionCommandBuilder.Build(
+            ["foa.wav"],
+            new AudioConversionOptions
+            {
+                Format = "opus",
+                OutputDirectory = Path.GetTempPath(),
+                OpusAmbisonics = "b-format",
+            });
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
     public void Build_ShouldMakeManagedVorbisUseBoundedBitrateMode()
     {
         var arguments = AudioConversionCommandBuilder.Build(

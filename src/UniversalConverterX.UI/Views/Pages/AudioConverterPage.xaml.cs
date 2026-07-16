@@ -463,6 +463,7 @@ public sealed partial class AudioConverterPage : Page
             OpusFrameDuration = format == "opus"
                 ? ParseNullableDouble(SelectedTag(OpusFrameCombo, "20"))
                 : null,
+            OpusAmbisonics = format == "opus" ? SelectedTag(OpusAmbisonicsCombo, "off") : null,
             FdkCutoff = format == "fdk-aac" && !double.IsNaN(FdkCutoffBox.Value)
                 ? (int)FdkCutoffBox.Value
                 : null,

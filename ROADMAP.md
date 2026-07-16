@@ -79,14 +79,6 @@ Impact: 2 · Effort: 3 · Type: UX + performance
 
 ---
 
-### 90. Opus 1.5 — remaining: ambisonics channel-layout selector
-
-Opus application/frame-duration controls shipped. **Remaining:** higher-order ambisonics channel-layout selector across multiple sidecars.
-
-Impact: 2 · Effort: 2 · Type: codec coverage
-
----
-
 ### 98. PyAV v17 Hardware-Memory Zero-Copy Path
 
 Audit sidecars touching hardware-decoded video. Migrate hot loops to PyAV v17 with cuvid + dlpack export. Avoids CPU↔GPU copies on long-form video.

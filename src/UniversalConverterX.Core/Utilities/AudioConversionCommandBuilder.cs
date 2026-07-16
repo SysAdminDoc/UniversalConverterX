@@ -19,6 +19,7 @@ public sealed record AudioConversionOptions
     public int? Channels { get; init; }
     public string? OpusApplication { get; init; }
     public double? OpusFrameDuration { get; init; }
+    public string? OpusAmbisonics { get; init; }
     public int? FdkCutoff { get; init; }
     public bool? FdkAfterburner { get; init; }
     public string? FdkProfile { get; init; }
@@ -50,6 +51,10 @@ public static partial class AudioConversionCommandBuilder
 
     private static readonly IReadOnlySet<double> OpusFrameDurations = new HashSet<double>
         { 2.5, 5, 10, 20, 40, 60 };
+
+    private static readonly IReadOnlySet<string> OpusAmbisonicsModes = new HashSet<string>(
+        ["off", "acn-sn3d"],
+        StringComparer.Ordinal);
 
     public static IReadOnlyList<string> Build(
         IReadOnlyList<string> inputFiles,
@@ -121,6 +126,18 @@ public static partial class AudioConversionCommandBuilder
                     throw new ArgumentException($"Unsupported Opus frame duration: '{frameDuration}'.", nameof(options));
                 arguments.Add("--opus-frame-duration");
                 arguments.Add(frameDuration.ToString("0.#", CultureInfo.InvariantCulture));
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.OpusAmbisonics))
+            {
+                var ambisonics = options.OpusAmbisonics.Trim().ToLowerInvariant();
+                if (!OpusAmbisonicsModes.Contains(ambisonics))
+                    throw new ArgumentException($"Unsupported Opus ambisonics mode: '{ambisonics}'.", nameof(options));
+                if (ambisonics != "off")
+                {
+                    arguments.Add("--opus-ambisonics");
+                    arguments.Add(ambisonics);
+                }
             }
         }
 

@@ -30,7 +30,12 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
+from ucx_sidecar import (
+    emit,
+    find_ffmpeg as shared_find_ffmpeg,
+    find_ffprobe as shared_find_ffprobe,
+    probe_media,
+)
 
 
 
@@ -42,6 +47,39 @@ def fail(code: str, message: str) -> int:
 
 def _find_ffmpeg() -> str | None:
     return shared_find_ffmpeg(Path(__file__).resolve().parent)
+
+
+def _find_ffprobe() -> str | None:
+    return shared_find_ffprobe(Path(__file__).resolve().parent)
+
+
+def _ambisonic_order(channels: int) -> int | None:
+    """Return the full-sphere ambisonic order for a channel count, or None if
+    the count is not a valid ACN/SN3D layout. Order n needs (n+1)^2 channels:
+    first order = 4, second = 9, third = 16, ..."""
+    if channels < 4:
+        return None
+    root = round(channels ** 0.5)
+    if root * root == channels and root >= 2:
+        return root - 1
+    return None
+
+
+def _input_channels(src: Path) -> int | None:
+    """Best-effort probe of an input's first audio stream channel count."""
+    ffprobe = _find_ffprobe()
+    if not ffprobe:
+        return None
+    info = probe_media(ffprobe, src)
+    if not info:
+        return None
+    for stream in info.get("streams", []):
+        if stream.get("codec_type") == "audio":
+            try:
+                return int(stream.get("channels"))
+            except (TypeError, ValueError):
+                return None
+    return None
 
 
 # Maps target format alias -> (FFmpeg codec name, output extension, default args).
@@ -153,6 +191,38 @@ def op_convert(args: argparse.Namespace) -> int:
         return fail("bad_arg",
                     f"--opus-frame-duration must be 2.5/5/10/20/40/60 ms, got {opus_frame_duration}.")
 
+    # ROADMAP Item 90 — higher-order ambisonics. Opus mapping family 2 packs an
+    # ACN/SN3D ambisonic stream; the layout is only valid for full-sphere
+    # channel counts ((order+1)^2). Resolve the effective channel count from
+    # --channels (an explicit remap wins) or by probing the first input, and
+    # reject a request that cannot produce a valid ambisonic layout.
+    opus_ambisonics = (getattr(args, "opus_ambisonics", None) or "off").lower()
+    opus_mapping_family: int | None = None
+    if opus_ambisonics == "acn-sn3d":
+        if codec != "libopus":
+            emit("log", level="info",
+                 message=f"--opus-ambisonics ignored — codec is {codec}, not libopus.")
+        else:
+            if args.channels:
+                try:
+                    effective_channels = int(args.channels)
+                except (TypeError, ValueError):
+                    return fail("bad_arg",
+                                f"--channels must be an integer for ambisonics, got '{args.channels}'.")
+            else:
+                effective_channels = _input_channels(inputs[0]) or 0
+            order = _ambisonic_order(effective_channels)
+            if order is None:
+                return fail(
+                    "bad_arg",
+                    "--opus-ambisonics=acn-sn3d needs a full-sphere channel count "
+                    f"(4, 9, 16, 25, ...); got {effective_channels or 'unknown'}. "
+                    "Set --channels to a valid ambisonic count.")
+            opus_mapping_family = 2
+            emit("log", level="info",
+                 message=f"Ambisonics: order {order} ({effective_channels} channels), "
+                         "Opus mapping family 2 (ACN/SN3D).")
+
     # ROADMAP Item 58 — encoder-specific advanced parameters. Each flag
     # only applies to one encoder family; the sidecar matches against the
     # active codec and ignores the others silently so a single advanced
@@ -185,6 +255,8 @@ def op_convert(args: argparse.Namespace) -> int:
                 cmd += ["-application", opus_application]
             if opus_frame_duration is not None:
                 cmd += ["-frame_duration", str(opus_frame_duration)]
+            if opus_mapping_family is not None:
+                cmd += ["-mapping_family", str(opus_mapping_family)]
         elif opus_application or opus_frame_duration is not None:
             emit("log", level="info",
                  message=f"opus-* flags ignored — codec is {codec}, not libopus.")
@@ -292,6 +364,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="libopus packet length in ms: 2.5, 5, 10, 20 (default), "
                         "40, or 60. Smaller = lower latency (RTC); larger = "
                         "better compression. Ignored for non-Opus targets.")
+    c.add_argument("--opus-ambisonics", default="off", dest="opus_ambisonics",
+                   choices=["off", "acn-sn3d"],
+                   help="Encode higher-order ambisonics with libopus mapping "
+                        "family 2 (ACN channel order, SN3D normalisation). "
+                        "Requires a full-sphere channel count: 4 (1st order), "
+                        "9 (2nd), 16 (3rd), ... Ignored for non-Opus targets.")
     c.add_argument("--fdk-cutoff", type=int, default=None, dest="fdk_cutoff",
                    help="libfdk_aac low-pass cutoff in Hz (0..24000). 0 = "
                         "encoder default. Higher values preserve more high-"
