@@ -1,0 +1,3 @@
+# Offline frontal-face detection for the face-blur privacy operation.
+# OpenCV is Apache-2.0 licensed; the headless wheel avoids GUI dependencies.
+opencv-python-headless>=4.10.0,<5

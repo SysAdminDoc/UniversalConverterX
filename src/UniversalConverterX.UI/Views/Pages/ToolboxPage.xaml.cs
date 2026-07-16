@@ -76,6 +76,7 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("track-manager", "Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "\uE93F", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("auto-reframe", "Auto Reframe", "Convert horizontal to 9:16 / 1:1 / 4:5 (static or smart face track)", "\uE740", blue, "Ready", green, true, "Vertigo"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Auto Crop", "Detect crop bounds and apply FFmpeg crop filters", "\uE7A8", blue, "Ready", green, true, "ClipForge"));
+        VideoTools.Add(new ToolboxTile("presets:clipforge", "Face Blur", "Detect and irreversibly obscure frontal faces in local video", "\uE8C8", red, "Ready", green, true, "OpenCV + ClipForge"));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Ready", blue, false, "VideoSubtitleRemover"));
         VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect strong clip candidates", "\uE7C9", blue, "Future", yellow, true, null));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Intro & Outro", "Apply branded intros and outros", "\uE7AD", green, "Ready", green, false, "ClipForge"));
