@@ -33,67 +33,6 @@ public interface ISidecarHealthService
 
 public sealed class SidecarHealthService : ISidecarHealthService
 {
-    private static readonly HashSet<string> ModelEngines = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "alphacut", "bgremove", "demucs", "facerestore", "gfpgan", "inpaint",
-        "lipsight", "ocrpro", "premiumtts", "realesrgan", "anime-upscale",
-        "sdkit", "speechenhance", "stemkit", "superres", "translatekit",
-        "vertigo", "video-face-enhance", "videosubtitleremover", "whisper-cpp",
-        "whisper-stt"
-    };
-
-    private static readonly HashSet<string> VulkanEngines = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "realesrgan", "anime-upscale", "video-face-enhance"
-    };
-
-    private static readonly HashSet<string> CudaOptionalEngines = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "demucs", "facerestore", "gfpgan", "ocrpro", "premiumtts", "sdkit",
-        "speechenhance", "stemkit", "superres", "translatekit", "whisper-stt"
-    };
-
-    private static readonly Dictionary<string, ToolRequirement[]> EngineToolRequirements = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["ab-av1"] = [ToolRequirement.External("ab-av1", "ab-av1", "ab-av1 encoder helper")],
-        ["archive"] = [ToolRequirement.External("7z", "7z", "7-Zip")],
-        ["audio-compressor"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["audiomastering"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["audiomore"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["audiopro"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["auto-edit"] = [ToolRequirement.External("auto-editor", "auto-editor", "auto-editor")],
-        ["chaptermark"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["clipforge"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["docconvert"] = [ToolRequirement.Managed("libreoffice", "soffice", "LibreOffice")],
-        ["ebookconvert"] = [ToolRequirement.Managed("calibre", "ebook-convert", "Calibre")],
-        ["ebookmore"] = [ToolRequirement.Managed("calibre", "ebook-convert", "Calibre")],
-        ["exiftool-meta"] = [ToolRequirement.External("exiftool", "exiftool", "ExifTool")],
-        ["framesnap"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["gifstudio"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["heicshift"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["legacyoffice"] = [ToolRequirement.Managed("libreoffice", "soffice", "LibreOffice")],
-        ["ocr"] = [ToolRequirement.External("tesseract", "tesseract", "Tesseract OCR")],
-        ["pandoc-cli"] = [ToolRequirement.Managed("pandoc", "pandoc", "Pandoc")],
-        ["pdfocr"] = [ToolRequirement.External("tesseract", "tesseract", "Tesseract OCR")],
-        ["recordcast"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["scenedetect"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["slideshow"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["streamkeep"] =
-        [
-            ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg"),
-            ToolRequirement.Managed("yt-dlp", "yt-dlp", "yt-dlp"),
-            ToolRequirement.Recommended("deno", "deno", "Deno JavaScript runtime"),
-        ],
-        ["subocr"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg"), ToolRequirement.External("tesseract", "tesseract", "Tesseract OCR")],
-        ["vectorkit"] = [ToolRequirement.Managed("inkscape", "inkscape", "Inkscape")],
-        ["videocrush"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["video-face-enhance"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["videopro"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["voice-changer"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["whisper-cpp"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["whisper-stt"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-    };
-
     private readonly ISidecarRunner _runner;
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
@@ -114,18 +53,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
         if (_manifestCache.TryGetValue(engine, out var cached))
             return cached;
 
-        var sidecarPath = _runner.Locate(engine);
-        if (sidecarPath is null) return null;
-
-        var manifestPath = Path.Combine(Path.GetDirectoryName(sidecarPath)!, "ucx.sidecar.json");
-        if (!File.Exists(manifestPath))
-        {
-            var toolsDir = Path.GetDirectoryName(Path.GetDirectoryName(sidecarPath));
-            if (toolsDir is not null)
-                manifestPath = Path.Combine(toolsDir, engine, "ucx.sidecar.json");
-        }
-
-        if (!File.Exists(manifestPath)) return null;
+        var manifestPath = FindManifestPath(engine);
+        if (manifestPath is null) return null;
 
         try
         {
@@ -142,28 +71,83 @@ public sealed class SidecarHealthService : ISidecarHealthService
         }
     }
 
+    private string? FindManifestPath(string engine)
+    {
+        if (string.IsNullOrWhiteSpace(engine)
+            || engine is "." or ".."
+            || engine.Any(character =>
+                !(char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.')))
+        {
+            return null;
+        }
+
+        var candidates = new List<string>();
+        var sidecarPath = _runner.Locate(engine);
+        if (!string.IsNullOrWhiteSpace(sidecarPath))
+        {
+            var sidecarDirectory = Path.GetDirectoryName(sidecarPath);
+            if (!string.IsNullOrWhiteSpace(sidecarDirectory))
+            {
+                candidates.Add(Path.Combine(sidecarDirectory, "ucx.sidecar.json"));
+                var directoryName = Path.GetFileName(sidecarDirectory);
+                var engineDirectory = directoryName.Equals("dist", StringComparison.OrdinalIgnoreCase)
+                    || directoryName.Equals("bin", StringComparison.OrdinalIgnoreCase)
+                        ? Path.GetDirectoryName(sidecarDirectory)
+                        : sidecarDirectory;
+                if (!string.IsNullOrWhiteSpace(engineDirectory))
+                    candidates.Add(Path.Combine(engineDirectory, "ucx.sidecar.json"));
+                var toolsDirectory = string.IsNullOrWhiteSpace(engineDirectory)
+                    ? null
+                    : Path.GetDirectoryName(engineDirectory);
+                if (!string.IsNullOrWhiteSpace(toolsDirectory))
+                    candidates.Add(Path.Combine(toolsDirectory, engine, "ucx.sidecar.json"));
+            }
+        }
+
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            candidates.Add(Path.Combine(directory.FullName, "tools", engine, "ucx.sidecar.json"));
+            directory = directory.Parent;
+        }
+
+        candidates.Add(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "UniversalConverterX",
+            "tools",
+            engine,
+            "ucx.sidecar.json"));
+
+        return candidates
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(File.Exists);
+    }
+
     private bool HasModels(string engine)
     {
-        var manifest = LoadManifest(engine);
-        if (manifest?.Models == true) return true;
-        return ModelEngines.Contains(engine);
+        return LoadManifest(engine)?.Models == true;
     }
 
     private string? GpuKind(string engine)
     {
-        var manifest = LoadManifest(engine);
-        if (manifest?.Gpu is not null) return manifest.Gpu;
-        if (VulkanEngines.Contains(engine)) return "vulkan";
-        if (CudaOptionalEngines.Contains(engine)) return "cuda-optional";
-        return null;
+        return LoadManifest(engine)?.Gpu;
     }
 
-    private IEnumerable<ToolRequirement> ManifestTools(string engine)
+    private IEnumerable<ToolRequirement> ManifestTools(
+        string engine,
+        IReadOnlyList<string> presetArgs)
     {
         var manifest = LoadManifest(engine);
         if (manifest?.Tools is null or { Count: 0 }) yield break;
         foreach (var t in manifest.Tools)
         {
+            if (!string.IsNullOrWhiteSpace(t.WhenArgContains)
+                && !presetArgs.Any(argument =>
+                    argument.Contains(t.WhenArgContains, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
             yield return !t.Required
                 ? ToolRequirement.Recommended(t.Id, t.Executable, t.Display)
                 : t.Managed
@@ -183,7 +167,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string Executable = "",
         string Display = "",
         bool Managed = false,
-        bool Required = true);
+        bool Required = true,
+        string? WhenArgContains = null);
 
     public async Task<SidecarHealthReport> EvaluateAsync(
         UiPreset preset,
@@ -275,23 +260,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string engine,
         IReadOnlyList<string> presetArgs)
     {
-        var fromManifest = ManifestTools(engine).ToList();
-        if (fromManifest.Count > 0)
-        {
-            foreach (var tool in fromManifest)
-                yield return tool;
-        }
-        else if (EngineToolRequirements.TryGetValue(engine, out var tools))
-        {
-            foreach (var tool in tools)
-                yield return tool;
-        }
-
-        if (engine.Equals("realesrgan", StringComparison.OrdinalIgnoreCase)
-            && presetArgs.Any(arg => arg.Contains("video", StringComparison.OrdinalIgnoreCase)))
-        {
-            yield return ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg");
-        }
+        foreach (var tool in ManifestTools(engine, presetArgs))
+            yield return tool;
     }
 
     private async Task<SidecarHealthRequirement> EvaluateToolAsync(

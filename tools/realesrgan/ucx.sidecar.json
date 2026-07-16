@@ -1,5 +1,14 @@
 {
   "engine": "realesrgan",
   "models": true,
-  "gpu": "vulkan"
+  "gpu": "vulkan",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContains": "video"
+    }
+  ]
 }

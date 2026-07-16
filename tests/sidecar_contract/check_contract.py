@@ -17,12 +17,18 @@ Scans every tools/*/sidecar.py and enforces the rules that bit us in v2.3:
      progress, log, complete, error, segment, stem, device. New events should
      be added to KNOWN_EVENTS here when intentional, surfacing accidental typos.
 
+  4. Health manifest: every sidecar must carry a valid ucx.sidecar.json whose
+     engine matches its directory. Tool/model/GPU metadata is schema-checked so
+     SidecarHealthService never needs drift-prone hard-coded fallback tables.
+
 Exit code 0 = pass, 1 = violations found. Designed for CI gating.
 """
 
 from __future__ import annotations
 
 import ast
+import json
+import re
 import sys
 from pathlib import Path
 
@@ -301,6 +307,151 @@ def find_sidecars() -> list[Path]:
     return sorted(p for p in TOOLS.glob("*/sidecar.py") if p.is_file())
 
 
+def check_health_manifest(sidecar_path: Path) -> list[Violation]:
+    """Require and validate the declarative sidecar health manifest."""
+    manifest_path = sidecar_path.parent / "ucx.sidecar.json"
+    if not manifest_path.is_file():
+        return [Violation(
+            manifest_path, 1, "health-manifest", "missing ucx.sidecar.json",
+        )]
+
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return [Violation(
+            manifest_path,
+            getattr(exc, "lineno", 1),
+            "health-manifest",
+            f"invalid JSON: {exc}",
+        )]
+
+    violations: list[Violation] = []
+    if not isinstance(payload, dict):
+        return [Violation(
+            manifest_path, 1, "health-manifest", "root must be a JSON object",
+        )]
+
+    allowed_keys = {"engine", "tools", "models", "gpu"}
+    unknown_keys = sorted(set(payload) - allowed_keys)
+    if unknown_keys:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            f"unknown top-level field(s): {', '.join(unknown_keys)}",
+        ))
+
+    expected_engine = sidecar_path.parent.name
+    if payload.get("engine") != expected_engine:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            f"engine must exactly match directory name {expected_engine!r}",
+        ))
+
+    if "models" in payload and not isinstance(payload["models"], bool):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest", "models must be a boolean",
+        ))
+
+    if "gpu" in payload and payload["gpu"] not in {"vulkan", "cuda-optional"}:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "gpu must be 'vulkan' or 'cuda-optional'",
+        ))
+
+    tools = payload.get("tools", [])
+    if not isinstance(tools, list):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest", "tools must be an array",
+        ))
+        return violations
+
+    seen_ids: set[str] = set()
+    safe_name = re.compile(r"^[A-Za-z0-9._-]+$")
+    allowed_tool_keys = {
+        "id", "executable", "display", "managed", "required", "whenArgContains",
+    }
+    for index, tool in enumerate(tools):
+        label = f"tools[{index}]"
+        if not isinstance(tool, dict):
+            violations.append(Violation(
+                manifest_path, 1, "health-manifest", f"{label} must be an object",
+            ))
+            continue
+
+        unknown_tool_keys = sorted(set(tool) - allowed_tool_keys)
+        if unknown_tool_keys:
+            violations.append(Violation(
+                manifest_path, 1, "health-manifest",
+                f"{label} has unknown field(s): {', '.join(unknown_tool_keys)}",
+            ))
+        for field in ("id", "executable", "display"):
+            value = tool.get(field)
+            if not isinstance(value, str) or not value.strip():
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"{label}.{field} must be a non-empty string",
+                ))
+
+        tool_id = tool.get("id")
+        executable = tool.get("executable")
+        if isinstance(tool_id, str):
+            if not safe_name.fullmatch(tool_id):
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"{label}.id contains unsafe characters",
+                ))
+            normalized_id = tool_id.casefold()
+            if normalized_id in seen_ids:
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"duplicate tool id {tool_id!r}",
+                ))
+            seen_ids.add(normalized_id)
+        if isinstance(executable, str) and not safe_name.fullmatch(executable):
+            violations.append(Violation(
+                manifest_path, 1, "health-manifest",
+                f"{label}.executable must be a command name without a path",
+            ))
+        for field in ("managed", "required"):
+            if field in tool and not isinstance(tool[field], bool):
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"{label}.{field} must be a boolean",
+                ))
+        if "whenArgContains" in tool:
+            condition = tool["whenArgContains"]
+            if not isinstance(condition, str) or not condition.strip() or len(condition) > 200:
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"{label}.whenArgContains must be a non-empty string up to 200 characters",
+                ))
+
+    return violations
+
+
+def check_manifest_only_health_service() -> list[Violation]:
+    """Prevent reintroducing per-engine fallback tables in the UI service."""
+    path = REPO / "src" / "UniversalConverterX.UI" / "Services" / "SidecarHealthService.cs"
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return [Violation(
+            path, 1, "health-manifest", f"could not read health service: {exc}",
+        )]
+
+    violations: list[Violation] = []
+    forbidden_fallbacks = (
+        "ModelEngines", "VulkanEngines", "CudaOptionalEngines", "EngineToolRequirements",
+    )
+    for forbidden in forbidden_fallbacks:
+        if forbidden in source:
+            line = source[:source.index(forbidden)].count("\n") + 1
+            violations.append(Violation(
+                path, line, "health-manifest",
+                f"hard-coded fallback {forbidden} belongs in ucx.sidecar.json",
+            ))
+    return violations
+
+
 def check_frozen_guard(path: Path, src: str, tree: ast.AST) -> list[Violation]:
     """If the file calls pip install via subprocess, it must check sys.frozen first."""
     has_pip_call = False
@@ -510,7 +661,9 @@ def main(argv: list[str] | None = None) -> int:
     all_violations: list[Violation] = []
     for path in sidecars:
         all_violations.extend(check_one(path))
+        all_violations.extend(check_health_manifest(path))
         all_violations.extend(check_security_floors(path.parent))
+    all_violations.extend(check_manifest_only_health_service())
 
     if not all_violations:
         print(f"OK — {len(sidecars)} sidecar(s) conform to the NDJSON contract")
