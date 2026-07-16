@@ -4,6 +4,14 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.24.0] - 2026-07-16
+
+### Added
+
+- Added a dedicated **Lossless Cut** page: a keyframe-accurate visual trimmer that stream-copies a clip with no re-encode. It loads a thumbnail-strip timeline (clipforge `timeline`) and the video keyframe list (new clipforge `keyframes` op), lets you scrub, set In/Out points that snap to the nearest keyframe in lossless mode, and export the cut. A re-encode toggle is available for frame-exact cuts. Reachable from the navigation pane and search.
+- Added a **DVD Rip** page and `dvdrip` sidecar for unprotected VIDEO_TS discs. It scans a VIDEO_TS folder (or a mounted ISO / disc drive), lists the ripable titles with duration and part counts, and rips a chosen title to H.264/H.265 MP4 or a stream-copy MKV. Commercial CSS-encrypted discs are never decrypted, and the UI documents the non-commercial scope.
+- Opus encoding can now target higher-order ambisonics. The Audio Converter's Opus panel gains a channel-layout selector (Standard or ACN/SN3D ambisonics), and the audiopro sidecar maps it to libopus mapping family 2, validating that the source has a full-sphere channel count (4, 9, 16, and so on) before encoding.
+
 ## [2.23.0] - 2026-07-16
 
 ### Security
@@ -20,9 +28,6 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
-- Opus encoding can now target higher-order ambisonics. The Audio Converter's Opus panel gains a channel-layout selector (Standard or ACN/SN3D ambisonics), and the audiopro sidecar maps it to libopus mapping family 2, validating that the source has a full-sphere channel count (4, 9, 16, …) before encoding.
-- Added a **DVD Rip** page and `dvdrip` sidecar for unprotected VIDEO_TS discs. It scans a VIDEO_TS folder (or a mounted ISO / disc drive), lists the ripable titles with duration and part counts, and rips a chosen title to H.264/H.265 MP4 or a stream-copy MKV. Commercial CSS-encrypted discs are never decrypted — unreadable titles are reported as such — and the UI documents the non-commercial scope.
-- Added a dedicated **Lossless Cut** page: a keyframe-accurate visual trimmer that stream-copies a clip with no re-encode. It loads a thumbnail-strip timeline (clipforge `timeline`) and the video keyframe list (new clipforge `keyframes` op), lets you scrub, set In/Out points that snap to the nearest keyframe in lossless mode, and export the cut. A re-encode toggle is available for frame-exact cuts. Reachable from the navigation pane and search.
 - Audio Converter and Speech-to-Text now show a live waveform preview of the most recently added file. A new `mediathumb waveform` operation renders the trace offline through FFmpeg's `showwavespic` filter (trace colour is sanitised to a hex value before it reaches the filter graph), and the preview degrades silently to a hidden card when FFmpeg or the sidecar is unavailable.
 - The full WinUI shell is now localizable. Every page's user-visible strings carry `x:Uid` keys backed by compiled `Resources.resw` catalogs for English, German, French, Spanish, Polish, and Simplified Chinese, and Core conversion messages resolve through a host-provided resolver with English fallbacks. A Settings language selector overrides the Windows UI language per user, and `tools/localization/` ships the extraction and machine-translation tooling plus a contract test that keeps every locale key-complete.
 - Chapter Editor now imports and exports exact chapter JSON, Matroska XML, and simple chapter text; preserves untouched integer PTS/time bases; supports delete-all; and verifies every title and timestamp before atomically promoting a stream-copy remux. MKV writes require and enforce MKVToolNix 97+ (including TrueHD-in-MP4 input support), while MP4/MOV use FFmpeg without replacing global metadata.

@@ -3,7 +3,7 @@
 <!-- WiX 4/5 installer for UniversalConverter X.
 
      Build:
-       pwsh installer/build-installer.ps1 -Type msi -Version 2.23.0.0
+       pwsh installer/build-installer.ps1 -Type msi -Version 2.24.0.0
 
      Generated preset fragment build:
        installer/build-installer.ps1 stages every presets/*.preset.xml file
@@ -12,8 +12,8 @@
      Manual WiX build:
        wix build installer/wix/Product.wxs installer/wix/PresetFiles.generated.wxs ^
          -d PublishDir=publish/win-x64/ ^
-         -d Version=2.23.0.0 ^
-         -o installer/output/UniversalConverterX_2.23.0.0.msi
+         -d Version=2.24.0.0 ^
+         -o installer/output/UniversalConverterX_2.24.0.0.msi
 
      Notes:
        * UpgradeCode is stable across versions; ProductCode rotates per build (auto via "*").

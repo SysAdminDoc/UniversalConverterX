@@ -2821,7 +2821,7 @@
     <value>Local logs and crash bundles</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.23.0</value>
+    <value>UniversalConverter X v2.24.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Local-first processing</value>
@@ -4631,7 +4631,7 @@ libx264
     <value>Update status</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.23.0</value>
+    <value>Version 2.24.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
