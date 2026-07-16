@@ -47,6 +47,7 @@ public sealed partial class ImageConverterPage : Page
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
+        UpdateQualityControls();
         UpdateUi();
     }
 
@@ -174,6 +175,7 @@ public sealed partial class ImageConverterPage : Page
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (RunButton is null) return;
+        UpdateQualityControls();
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
@@ -196,6 +198,15 @@ public sealed partial class ImageConverterPage : Page
         UpdateStatusText();
     }
 
+    private void TargetSize_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (RunButton is null) return;
+        UpdateQualityControls();
+        var summary = BuildPlanSummary();
+        foreach (var file in _files) file.PlanSummary = summary;
+        UpdateStatusText();
+    }
+
     // ── Run ──────────────────────────────────────────────────────────────────
 
     private async void Run_Click(object sender, RoutedEventArgs e)
@@ -206,6 +217,9 @@ public sealed partial class ImageConverterPage : Page
         var quality = (int)QualitySlider.Value;
         var stripExif = StripExifCheck.IsChecked == true;
         var stripIcc = StripIccCheck.IsChecked == true;
+        var targetKb = TargetSizeBox.IsEnabled && !double.IsNaN(TargetSizeBox.Value)
+            ? TargetSizeBox.Value
+            : 0;
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -231,6 +245,11 @@ public sealed partial class ImageConverterPage : Page
                     "--format",  format,
                     "--quality", quality.ToString(CultureInfo.InvariantCulture),
                 };
+                if (targetKb > 0)
+                {
+                    args.Add("--target-kb");
+                    args.Add(targetKb.ToString("0.###", CultureInfo.InvariantCulture));
+                }
                 if (stripExif) args.Add("--strip-exif");
                 if (stripIcc)  args.Add("--strip-icc");
 
@@ -363,15 +382,33 @@ public sealed partial class ImageConverterPage : Page
     {
         if (FormatCombo is null) return "";
         var format = SelectedFormat();
-        var lossy = format is "jpeg" or "webp" or "avif" or "heic";
+        var lossy = IsQualityTargetFormat(format);
         var quality = QualitySlider is null ? 85 : (int)QualitySlider.Value;
+        var targetKb = TargetSizeBox is not null && TargetSizeBox.IsEnabled &&
+                       !double.IsNaN(TargetSizeBox.Value)
+            ? TargetSizeBox.Value
+            : 0;
         var meta = (StripExifCheck?.IsChecked == true ? "" : "EXIF ") +
                    (StripIccCheck?.IsChecked  == true ? "" : "ICC");
         if (string.IsNullOrWhiteSpace(meta)) meta = "no metadata";
         else                                 meta = "keep " + meta.Trim();
-        return lossy ? $"{format.ToUpper()} q{quality} · {meta}"
+        return targetKb > 0 ? $"{format.ToUpper()} ≤{targetKb:0.###} KB · {meta}"
+             : lossy ? $"{format.ToUpper()} q{quality} · {meta}"
                      : $"{format.ToUpper()} · {meta}";
     }
+
+    private void UpdateQualityControls()
+    {
+        if (TargetSizeBox is null || QualitySlider is null) return;
+        var supportsQuality = IsQualityTargetFormat(SelectedFormat());
+        TargetSizeBox.IsEnabled = supportsQuality;
+        var hasTarget = supportsQuality && !double.IsNaN(TargetSizeBox.Value) &&
+                        TargetSizeBox.Value > 0;
+        QualitySlider.IsEnabled = supportsQuality && !hasTarget;
+    }
+
+    private static bool IsQualityTargetFormat(string format) =>
+        format is "jpeg" or "webp" or "avif" or "heic" or "jxl";
 
     private string SelectedFormat()
     {

@@ -269,6 +269,19 @@
                                    Text="85"
                                    Style="{StaticResource MutedTextStyle}"
                                    HorizontalAlignment="Right"/>
+                        <NumberBox x:Name="TargetSizeBox"
+                                   Header="Target size (KB, optional)"
+                                   Minimum="0"
+                                   Maximum="100000"
+                                   SmallChange="50"
+                                   Value="0"
+                                   SpinButtonPlacementMode="Compact"
+                                   ValueChanged="TargetSize_Changed"
+                                   AutomationProperties.AutomationId="TargetSizeBox"/>
+                        <TextBlock Text="When set, quality is searched automatically. A warning is reported when the target cannot be reached within 5%."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 

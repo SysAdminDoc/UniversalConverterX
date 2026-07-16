@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Image Converter can now binary-search lossy quality for a target file size, while HEICShift also exposes PSNR and local Vship SSIMULACRA2 score targets. Results report the chosen quality and warn when a requested target is outside the encoder's achievable range; a 500 KB web JPEG preset is included.
 - Converter, Compressor, and Downloader queues now share configurable completion actions: notification, sleep, delayed shutdown, or a hidden PowerShell hook. Power actions are refused unless every item succeeds; scripts run for any outcome and receive an atomic per-item JSON summary path.
 - Converter now records every per-file result in History with a versioned, validated re-run payload. Re-run restores the source, output format/location, conversion options, post-source action, forced engine, and advanced FFmpeg template; SQLite upgrades existing history databases in place and legacy rows receive a safe best-effort prefill.
 - Conversion batches can now emit structured JSON or RFC 4180 CSV reports with per-file status, source/output sizes, byte delta, duration, engine, profile, warnings, and errors. `ucx convert --report` writes live results, while the History page exports its current filtered view through the same Core report writer.

@@ -15,6 +15,7 @@ queue itself — keeps the contract simple.
 from __future__ import annotations
 
 import argparse
+import io
 import json
 try:
     import orjson
@@ -23,8 +24,13 @@ try:
 except ImportError:
     def _dumps(obj):
         return json.dumps(obj, ensure_ascii=False)
+import math
 import os
+import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -99,6 +105,8 @@ OUTPUT_FORMATS: dict[str, dict] = {
     "jxl":  {"ext": ".jxl",  "pil": "JXL",   "supports_alpha": True},
 }
 
+QUALITY_TARGET_FORMATS = {"jpeg", "webp", "avif", "heic", "jxl"}
+
 
 # ROADMAP Item 88 — libjxl security floor. pillow-jxl-plugin >= 1.3.4 is the
 # first wrapper release that bundles libjxl 0.11.2, which carries the
@@ -170,6 +178,148 @@ def op_list_formats(_: argparse.Namespace) -> int:
     return 0
 
 
+# ── Quality targeting ───────────────────────────────────────────────────────
+
+def _psnr(reference, distorted) -> float:
+    """Compute RGB peak signal-to-noise ratio with Pillow only."""
+    from PIL import ImageChops, ImageStat  # type: ignore
+
+    if reference.size != distorted.size:
+        return 0.0
+    difference = ImageChops.difference(
+        reference.convert("RGB"), distorted.convert("RGB"))
+    rms = ImageStat.Stat(difference).rms
+    mse = sum(channel * channel for channel in rms) / max(1, len(rms))
+    if mse <= 0:
+        return 100.0
+    return 20.0 * math.log10(255.0) - 10.0 * math.log10(mse)
+
+
+def _find_vship() -> str | None:
+    """Find the already-supported local Vship evaluator without downloading."""
+    roots = [Path(__file__).resolve().parent]
+    if getattr(sys, "frozen", False):
+        roots.insert(0, Path(sys.executable).resolve().parent)
+    for root in roots:
+        for candidate in (
+            root / "vship.exe",
+            root.parent / "vship-metrics" / "vship.exe",
+            root.parent / "_bin" / "vship.exe",
+        ):
+            if candidate.is_file():
+                return str(candidate)
+    return shutil.which("vship")
+
+
+def _ssimulacra2_score(vship: str, reference: Path, distorted: Path) -> float:
+    completed = subprocess.run(
+        [vship, "--ssimulacra2", str(reference), str(distorted)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+        check=False,
+    )
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout or "unknown error").strip()[-300:]
+        raise RuntimeError(f"vship --ssimulacra2 failed: {detail}")
+    for line in completed.stdout.splitlines():
+        match = re.search(r"[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?", line)
+        if match:
+            return float(match.group())
+    raise RuntimeError("vship returned no SSIMULACRA2 score")
+
+
+def _binary_search_quality(
+    probe,
+    target: float,
+    mode: str,
+    qmin: int = 1,
+    qmax: int = 100,
+    max_iters: int = 8,
+) -> tuple[int, int, float, bool]:
+    """Select the highest size-safe or lowest metric-safe encoder quality.
+
+    ``probe(quality)`` returns ``(size_bytes, metric_or_none)``. The final
+    boolean states whether the requested hard constraint was achievable.
+    """
+    results: dict[int, tuple[int, float]] = {}
+
+    def run(quality: int) -> tuple[int, float]:
+        if quality not in results:
+            size, metric = probe(quality)
+            value = size / 1024.0 if mode == "target-kb" else float(metric)
+            results[quality] = (int(size), value)
+        return results[quality]
+
+    lo, hi = qmin, qmax
+    best_quality: int | None = None
+    for _ in range(max_iters):
+        if lo > hi:
+            break
+        quality = (lo + hi) // 2
+        _, value = run(quality)
+        if mode == "target-kb":
+            if value <= target:
+                best_quality = quality
+                lo = quality + 1
+            else:
+                hi = quality - 1
+        else:
+            if value >= target:
+                best_quality = quality
+                hi = quality - 1
+            else:
+                lo = quality + 1
+
+    if best_quality is None:
+        best_quality = qmin if mode == "target-kb" else qmax
+        size, value = run(best_quality)
+        return best_quality, size, value, False
+
+    size, value = run(best_quality)
+    return best_quality, size, value, True
+
+
+def _quality_target(args: argparse.Namespace) -> tuple[str, float] | None:
+    for attribute, mode in (
+        ("target_kb", "target-kb"),
+        ("target_psnr", "target-psnr"),
+        ("target_ssimulacra2", "target-ssimulacra2"),
+    ):
+        value = getattr(args, attribute, None)
+        if value is not None:
+            return mode, float(value)
+    return None
+
+
+def _quality_warning(
+    mode: str,
+    target: float,
+    quality: int,
+    size_bytes: int,
+    metric: float,
+    hard_target_met: bool,
+) -> str | None:
+    if mode == "target-kb":
+        actual = size_bytes / 1024.0
+        within_five_percent = abs(actual - target) <= target * 0.05
+        if within_five_percent:
+            return None
+        return (
+            f"Target {target:g} KB was not reachable within 5%; best achievable "
+            f"result is {actual:.1f} KB at quality {quality}."
+        )
+    if hard_target_met:
+        return None
+    label = "PSNR" if mode == "target-psnr" else "SSIMULACRA2"
+    return (
+        f"Target {label} {target:g} was not achievable; best score is "
+        f"{metric:.2f} at quality {quality}."
+    )
+
+
 # ── Convert one ──────────────────────────────────────────────────────────────
 
 def op_convert(args: argparse.Namespace) -> int:
@@ -185,6 +335,24 @@ def op_convert(args: argparse.Namespace) -> int:
             f"{', '.join(OUTPUT_FORMATS)}",
         )
     meta = OUTPUT_FORMATS[fmt]
+    quality_target = _quality_target(args)
+    if quality_target is not None:
+        mode, target = quality_target
+        if target <= 0:
+            return fail("invalid_quality_target", "Quality targets must be greater than zero.")
+        if mode == "target-ssimulacra2" and target > 100:
+            return fail("invalid_quality_target", "SSIMULACRA2 targets must be between 0 and 100.")
+        if fmt not in QUALITY_TARGET_FORMATS:
+            return fail(
+                "unsupported_quality_target",
+                f"{fmt} has no lossy quality control; target modes support: "
+                f"{', '.join(sorted(QUALITY_TARGET_FORMATS))}.",
+            )
+        if fmt == "avif" and getattr(args, "avif_lossless", False):
+            return fail(
+                "conflicting_quality_target",
+                "--avif-lossless cannot be combined with a quality target.",
+            )
 
     out_path = Path(args.output)
     if out_path.is_dir() or out_path.suffix == "":
@@ -262,7 +430,7 @@ def op_convert(args: argparse.Namespace) -> int:
         # pillow-jxl-plugin honours `quality` (1-100) and a `lossless` toggle.
         # We expose lossless via quality=100; users who want strict lossless
         # can also pass --strip-icc=False --strip-exif=False --quality=100.
-        if quality >= 100:
+        if quality >= 100 and quality_target is None:
             save_kwargs.update(lossless=True)
         else:
             save_kwargs.update(quality=quality, effort=7)
@@ -277,6 +445,67 @@ def op_convert(args: argparse.Namespace) -> int:
         if exif:
             save_kwargs["exif"] = exif
 
+    target_details: dict | None = None
+    if quality_target is not None:
+        mode, target = quality_target
+        progress(55.0, f"searching {mode}")
+        vship = _find_vship() if mode == "target-ssimulacra2" else None
+        if mode == "target-ssimulacra2" and not vship:
+            return fail(
+                "missing_vship",
+                "--target-ssimulacra2 requires the local vship evaluator. "
+                "Install or provision vship, then retry.",
+            )
+
+        try:
+            with tempfile.TemporaryDirectory(prefix="ucx-quality-") as temp:
+                temp_path = Path(temp)
+                reference_path = temp_path / "reference.png"
+                candidate_path = temp_path / f"candidate{meta['ext']}"
+                if mode == "target-ssimulacra2":
+                    img.convert("RGB").save(reference_path, format="PNG")
+
+                def probe(candidate_quality: int) -> tuple[int, float | None]:
+                    candidate_kwargs = dict(save_kwargs)
+                    candidate_kwargs["quality"] = candidate_quality
+                    candidate_kwargs.pop("lossless", None)
+                    buffer = io.BytesIO()
+                    img.save(buffer, format=meta["pil"], **candidate_kwargs)
+                    payload = buffer.getvalue()
+                    if mode == "target-kb":
+                        return len(payload), None
+                    if mode == "target-psnr":
+                        from PIL import Image  # type: ignore
+                        buffer.seek(0)
+                        with Image.open(buffer) as decoded:
+                            decoded.load()
+                            return len(payload), _psnr(img, decoded)
+                    candidate_path.write_bytes(payload)
+                    return len(payload), _ssimulacra2_score(
+                        vship, reference_path, candidate_path)  # type: ignore[arg-type]
+
+                selected_quality, probe_size, metric, target_met = _binary_search_quality(
+                    probe, target, mode)
+        except Exception as exc:
+            return fail("quality_search_failed", f"Could not evaluate {mode}: {exc}")
+
+        save_kwargs["quality"] = selected_quality
+        save_kwargs.pop("lossless", None)
+        quality = selected_quality
+        target_details = {
+            "mode": mode,
+            "target": target,
+            "selected_quality": selected_quality,
+            "probe_size_bytes": probe_size,
+            "metric": metric,
+            "target_met": target_met,
+        }
+        log(
+            "info",
+            f"{mode}: selected quality {selected_quality}, "
+            f"probe size {probe_size} bytes, metric {metric:.2f}",
+        )
+
     progress(70.0, f"encoding {fmt}")
     try:
         img.save(out_path, format=meta["pil"], **save_kwargs)
@@ -288,8 +517,28 @@ def op_convert(args: argparse.Namespace) -> int:
         return fail("output_missing", f"Encoder reported success but file not present: {out_path}")
 
     size = out_path.stat().st_size
+    if target_details is not None:
+        warning = _quality_warning(
+            target_details["mode"],
+            target_details["target"],
+            target_details["selected_quality"],
+            size,
+            target_details["metric"],
+            target_details["target_met"],
+        )
+        target_details["size_bytes"] = size
+        target_details["warning"] = warning
+        if warning:
+            log("warn", warning)
     progress(100.0, "done")
-    emit("complete", output=str(out_path), size_bytes=size, format=fmt)
+    emit(
+        "complete",
+        output=str(out_path),
+        size_bytes=size,
+        format=fmt,
+        quality=quality,
+        quality_target=target_details,
+    )
     return 0
 
 
@@ -310,6 +559,16 @@ def build_parser() -> argparse.ArgumentParser:
                       help=f"Output format: one of {', '.join(OUTPUT_FORMATS)}")
     conv.add_argument("--quality", type=int, default=85,
                       help="Lossy quality 1–100 (jpeg/webp/avif/heic). Default 85.")
+    targets = conv.add_mutually_exclusive_group()
+    targets.add_argument(
+        "--target-kb", type=float, default=None, dest="target_kb",
+        help="Choose the highest quality that does not exceed this output size in KB.")
+    targets.add_argument(
+        "--target-psnr", type=float, default=None, dest="target_psnr",
+        help="Choose the lowest quality meeting this minimum PSNR score.")
+    targets.add_argument(
+        "--target-ssimulacra2", type=float, default=None, dest="target_ssimulacra2",
+        help="Choose the lowest quality meeting this local Vship SSIMULACRA2 score.")
     conv.add_argument("--strip-exif", action="store_true",
                       help="Drop EXIF metadata from the output (default: preserve)")
     conv.add_argument("--strip-icc", action="store_true",
