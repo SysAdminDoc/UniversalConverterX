@@ -32,6 +32,8 @@ public sealed partial class SpeechToTextPage : Page
     private readonly ObservableCollection<SttFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
     private string? _outputFolder;
+    private bool _parakeetModelReady;
+    private bool _modelActionRunning;
 
     public SpeechToTextPage()
     {
@@ -39,6 +41,7 @@ public sealed partial class SpeechToTextPage : Page
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
+        ApplyBackendCapabilities();
         UpdateUi();
     }
 
@@ -219,6 +222,15 @@ public sealed partial class SpeechToTextPage : Page
     // Settings change
     // -------------------------------------------------------------------------
 
+    private async void Backend_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (TranscribeButton is null) return;
+        ApplyBackendCapabilities();
+        Settings_Changed(sender, e);
+        if (SelectedComboTag(BackendCombo) == "parakeet-stt")
+            await RefreshParakeetModelStatusAsync();
+    }
+
     private void Settings_Changed(object sender, object e)
     {
         if (TranscribeButton is null) return;
@@ -233,6 +245,110 @@ public sealed partial class SpeechToTextPage : Page
         var summary = BuildSettingsSummary();
         foreach (var f in _files)
             f.SettingsSummary = summary;
+    }
+
+    private void ApplyBackendCapabilities()
+    {
+        if (BackendCombo is null || WhisperModelPanel is null) return;
+        var backend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
+        var parakeet = backend == "parakeet-stt";
+
+        WhisperModelPanel.Visibility = parakeet ? Visibility.Collapsed : Visibility.Visible;
+        ParakeetModelPanel.Visibility = parakeet ? Visibility.Visible : Visibility.Collapsed;
+        LanguageCombo.Visibility = parakeet ? Visibility.Collapsed : Visibility.Visible;
+        ParakeetLanguageNote.Visibility = parakeet ? Visibility.Visible : Visibility.Collapsed;
+        BatchSizeBox.IsEnabled = backend == "whisper-stt";
+        VadCheck.IsEnabled = backend != "parakeet-stt";
+        if (parakeet)
+            VadCheck.IsChecked = false;
+        UpdateUi();
+    }
+
+    private async Task RefreshParakeetModelStatusAsync()
+    {
+        if (_modelActionRunning) return;
+        if (_runner.Locate("parakeet-stt") is null)
+        {
+            _parakeetModelReady = false;
+            DownloadParakeetModelButton.IsEnabled = false;
+            ParakeetModelStatus.Text = "Parakeet sidecar is not installed in this build.";
+            UpdateUi();
+            return;
+        }
+        _modelActionRunning = true;
+        _parakeetModelReady = false;
+        DownloadParakeetModelButton.IsEnabled = false;
+        ParakeetModelStatus.Text = "Checking local model pack...";
+        UpdateUi();
+        try
+        {
+            var result = await _runner.RunAsync(
+                "parakeet-stt",
+                ["model-status"],
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromSeconds(30));
+            _parakeetModelReady = result.Success;
+            ParakeetModelStatus.Text = result.Success
+                ? "Model ready — pinned local snapshot found."
+                : result.ErrorCode == "sidecar_not_found"
+                    ? "Parakeet sidecar is not installed in this build."
+                    : "Model not installed. Review the license and download it when ready.";
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadParakeetModelButton.IsEnabled = true;
+            UpdateUi();
+        }
+    }
+
+    private async void DownloadParakeetModel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_modelActionRunning || _runner.Locate("parakeet-stt") is null) return;
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Download NVIDIA Parakeet TDT v3?",
+            Content = "This downloads the pinned approximately 2.5 GB model pack from Hugging Face. " +
+                      "The model is governed by CC-BY-4.0. Downloading confirms that you accept that license. " +
+                      "UCX will not download or update this model during transcription.",
+            PrimaryButtonText = "Accept & download",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        _modelActionRunning = true;
+        _parakeetModelReady = false;
+        DownloadParakeetModelButton.IsEnabled = false;
+        ParakeetModelStatus.Text = "Downloading pinned model pack...";
+        UpdateUi();
+        try
+        {
+            var progress = new Progress<SidecarProgress>(value =>
+                DispatcherQueue.TryEnqueue(() =>
+                    ParakeetModelStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
+                        ? $"Downloading... {value.Percent:F0}%"
+                        : $"{value.Stage} ({value.Percent:F0}%)"));
+            var result = await _runner.RunAsync(
+                "parakeet-stt",
+                ["download-model", "--accept-license"],
+                progress,
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromHours(2));
+            _parakeetModelReady = result.Success;
+            ParakeetModelStatus.Text = result.Success
+                ? "Model ready — pinned local snapshot installed."
+                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadParakeetModelButton.IsEnabled = true;
+            UpdateUi();
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -250,6 +366,11 @@ public sealed partial class SpeechToTextPage : Page
         var wordTs = WordTimestampsToggle.IsOn;
         var useVad = VadCheck?.IsChecked == true;
         var batchSize = SafeBatchSize(BatchSizeBox?.Value);
+        if (backend == "parakeet-stt" && !_parakeetModelReady)
+        {
+            StatusLabel.Text = "Download the Parakeet model pack before transcription.";
+            return;
+        }
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -272,7 +393,19 @@ public sealed partial class SpeechToTextPage : Page
                 //   whisper-cpp:                   `transcribe` subcommand,
                 //                                  output extension drives format.
                 List<string> args;
-                if (backend == "whisper-cpp")
+                if (backend == "parakeet-stt")
+                {
+                    args =
+                    [
+                        "transcribe",
+                        "--input", item.Path,
+                        "--output", outputPath,
+                        "--format", format,
+                        "--language", "auto",
+                    ];
+                    if (wordTs) args.Add("--word-timestamps");
+                }
+                else if (backend == "whisper-cpp")
                 {
                     // whisper-cpp wants the format encoded in the output extension.
                     // Replace whatever we built with the format-driven extension.
@@ -341,7 +474,7 @@ public sealed partial class SpeechToTextPage : Page
                     _finished.Add(new SttFinishedItem
                     {
                         FileName = item.FileName,
-                        Details = $"Transcribed using {model} — {(fi.Exists ? FormatSize(fi.Length) : "?")}",
+                        Details = $"Transcribed using {(backend == "parakeet-stt" ? "Parakeet TDT v3" : model)} — {(fi.Exists ? FormatSize(fi.Length) : "?")}",
                         OutputPath = outputPath,
                         Glyph = "\uE73E",
                         AccentBrush = (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"],
@@ -437,6 +570,8 @@ public sealed partial class SpeechToTextPage : Page
         var model = SelectedComboTag(ModelCombo) ?? "base";
         var format = SelectedComboTag(FormatCombo) ?? "srt";
         var backend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
+        if (backend == "parakeet-stt")
+            return $"Parakeet TDT v3 / .{format} / auto";
         var batch = backend == "whisper-stt" ? $" / b{SafeBatchSize(BatchSizeBox?.Value)}" : "";
         var vad = VadCheck?.IsChecked == true ? " / VAD" : "";
         return $"{model} / .{format}{batch}{vad}";
@@ -473,7 +608,9 @@ public sealed partial class SpeechToTextPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
 
-        TranscribeButton.IsEnabled = hasFiles && _cts is null;
+        var selectedBackend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
+        var modelReady = selectedBackend != "parakeet-stt" || _parakeetModelReady;
+        TranscribeButton.IsEnabled = hasFiles && _cts is null && modelReady && !_modelActionRunning;
         CancelButton.IsEnabled = _cts is not null;
 
         if (!hasFiles)

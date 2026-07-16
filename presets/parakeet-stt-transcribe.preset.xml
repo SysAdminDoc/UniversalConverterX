@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Speech -> Text (Parakeet TDT v3 CUDA)</Name>
+    <Folder>Audio/AI</Folder>
+    <InputTypes>
+        <Extension>mp3</Extension>
+        <Extension>wav</Extension>
+        <Extension>flac</Extension>
+        <Extension>m4a</Extension>
+        <Extension>opus</Extension>
+        <Extension>ogg</Extension>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>mkv</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}</OutputFileNameTemplate>
+    <OutputExtension>srt</OutputExtension>
+    <Engine>parakeet-stt</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>transcribe</Arg>
+    </Args>
+</Preset>

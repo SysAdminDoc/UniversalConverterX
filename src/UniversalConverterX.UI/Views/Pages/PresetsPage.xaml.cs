@@ -402,7 +402,7 @@ public sealed partial class PresetsPage : Page
         "rnnoise"      => "\uE767",   // microphone
         "edge-tts"     => "\uEC4F",   // speech
         "whisper-cpp"  => "\uED1E",
-        "whisper-stt"  => "\uED1E",
+        "whisper-stt" or "parakeet-stt" => "\uED1E",
         "demucs"       => "\uE767",
         "gfpgan"       => "\uE77B",
         "alphacut"     => "\uE91B",

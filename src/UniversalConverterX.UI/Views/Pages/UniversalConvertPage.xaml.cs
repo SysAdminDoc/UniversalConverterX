@@ -319,7 +319,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         "framesnap" => "\uE722",
         "rnnoise" or "demucs" or "stemkit" or "speechenhance" => "\uE767",
         "edge-tts" or "midisynth" or "trackermod" or "audiotag" => "\uEC4F",
-        "whisper-cpp" or "whisper-stt" or "ai-subtitle" => "\uED1E",
+        "whisper-cpp" or "whisper-stt" or "parakeet-stt" or "ai-subtitle" => "\uED1E",
         "vertigo" => "\uE740",
         "realesrgan" or "sdkit" => "\uE799",
         "videosubtitleremover" or "subconvert" => "\uE93B",

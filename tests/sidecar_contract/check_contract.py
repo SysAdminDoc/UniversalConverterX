@@ -351,10 +351,12 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
             manifest_path, 1, "health-manifest", "models must be a boolean",
         ))
 
-    if "gpu" in payload and payload["gpu"] not in {"vulkan", "cuda-optional"}:
+    if "gpu" in payload and payload["gpu"] not in {
+        "vulkan", "cuda-optional", "cuda-required",
+    }:
         violations.append(Violation(
             manifest_path, 1, "health-manifest",
-            "gpu must be 'vulkan' or 'cuda-optional'",
+            "gpu must be 'vulkan', 'cuda-optional', or 'cuda-required'",
         ))
 
     tools = payload.get("tools", [])

@@ -149,7 +149,7 @@
             <StackPanel Grid.Column="0" Spacing="8">
                 <TextBlock Text="SPEECH TO TEXT"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Transcribe audio and video into editable transcript files using local Whisper inference."
+                <TextBlock Text="Transcribe audio and video into editable transcript files using local ASR inference."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
@@ -254,10 +254,11 @@
                         <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="BackendCombo"
                                   HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed"
+                                  SelectionChanged="Backend_Changed"
                             AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
                             <ComboBoxItem Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
+                            <ComboBoxItem Content="Parakeet TDT v3 (CUDA · 25 languages)" Tag="parakeet-stt"/>
                         </ComboBox>
                         <CheckBox x:Name="VadCheck"
                                   Content="VAD pre-filter (skip silence)"
@@ -270,18 +271,38 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo"
-                                  HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed"
-                            AutomationProperties.AutomationId="ModelCombo">
-                            <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
-                            <ComboBoxItem Content="base (fast, good)" Tag="base" IsSelected="True"/>
-                            <ComboBoxItem Content="small (balanced)" Tag="small"/>
-                            <ComboBoxItem Content="medium (accurate)" Tag="medium"/>
-                            <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
-                            <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
-                            <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
-                        </ComboBox>
+                        <StackPanel x:Name="WhisperModelPanel">
+                            <ComboBox x:Name="ModelCombo"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="Settings_Changed"
+                                AutomationProperties.AutomationId="ModelCombo">
+                                <ComboBoxItem Content="tiny (fastest)" Tag="tiny"/>
+                                <ComboBoxItem Content="base (fast, good)" Tag="base" IsSelected="True"/>
+                                <ComboBoxItem Content="small (balanced)" Tag="small"/>
+                                <ComboBoxItem Content="medium (accurate)" Tag="medium"/>
+                                <ComboBoxItem Content="large-v3-turbo (fast + accurate)" Tag="large-v3-turbo"/>
+                                <ComboBoxItem Content="distil-large-v3 (~6x faster, English-mostly)" Tag="distil-large-v3"/>
+                                <ComboBoxItem Content="large-v3 (best)" Tag="large-v3"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel x:Name="ParakeetModelPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock Text="NVIDIA Parakeet TDT 0.6B v3"
+                                       Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Text="Pinned local model · CC-BY-4.0 · approximately 2.5 GB. UCX never downloads it during transcription."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <Button x:Name="DownloadParakeetModelButton"
+                                    Content="Review &amp; download model"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Click="DownloadParakeetModel_Click"
+                                    AutomationProperties.AutomationId="DownloadParakeetModelButton"/>
+                            <TextBlock x:Name="ParakeetModelStatus"
+                                       Text="Checking local model pack..."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -309,6 +330,11 @@
                             <ComboBoxItem Content="Polish" Tag="pl"/>
                             <ComboBoxItem Content="Turkish" Tag="tr"/>
                         </ComboBox>
+                        <TextBlock x:Name="ParakeetLanguageNote"
+                                   Visibility="Collapsed"
+                                   Text="Parakeet auto-detects Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish, French, German, Greek, Hungarian, Italian, Latvian, Lithuanian, Maltese, Polish, Portuguese, Romanian, Slovak, Slovenian, Spanish, Swedish, Russian, and Ukrainian."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 

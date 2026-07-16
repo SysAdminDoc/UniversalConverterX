@@ -218,6 +218,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
                 "Install the vendor GPU driver and CUDA/cuDNN packages only when you want accelerated inference.",
                 null,
                 null));
+        else if (gpu == "cuda-required")
+            rows.Add(EvaluateRequiredCuda(engine));
 
         var blockers = rows.Where(r => r.Status == "Missing").ToList();
         var warnings = rows.Where(r => r.Status == "Warning").ToList();
@@ -415,6 +417,29 @@ public sealed class SidecarHealthService : ISidecarHealthService
                 null,
                 null)
             : Ready(engine, "gpu", "Vulkan GPU runtime", "vulkaninfo.exe is available for GPU capability probing.", "", vulkanInfo, SizeOf(vulkanInfo));
+    }
+
+    private static SidecarHealthRequirement EvaluateRequiredCuda(string engine)
+    {
+        var nvidiaSmi = FindExecutable("nvidia-smi");
+        return nvidiaSmi is null
+            ? new SidecarHealthRequirement(
+                engine,
+                "gpu",
+                "NVIDIA CUDA GPU",
+                "Missing",
+                "No NVIDIA driver runtime was discovered through nvidia-smi.",
+                "Install a current NVIDIA driver or choose a CPU-capable engine such as faster-whisper or whisper.cpp.",
+                null,
+                null)
+            : Ready(
+                engine,
+                "gpu",
+                "NVIDIA CUDA GPU",
+                "NVIDIA driver runtime found; the sidecar performs the final PyTorch CUDA capability check.",
+                "",
+                nvidiaSmi,
+                SizeOf(nvidiaSmi));
     }
 
     private static SidecarHealthRequirement MissingSidecar(string engine) =>

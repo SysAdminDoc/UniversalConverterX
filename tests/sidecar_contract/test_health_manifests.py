@@ -60,7 +60,7 @@ class SidecarHealthManifestTests(unittest.TestCase):
                     {
                         "engine": "sample",
                         "models": True,
-                        "gpu": "cuda-optional",
+                        "gpu": "cuda-required",
                         "tools": [
                             {
                                 "id": "ffmpeg",

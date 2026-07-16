@@ -71,6 +71,7 @@ are appended automatically. Common engines:
 | `rnnoise`       | Audio denoise (RNNoise / arnndn)         |
 | `edge-tts`      | TTS                                      |
 | `whisper-cpp`   | Speech-to-text                           |
+| `parakeet-stt`  | CUDA Parakeet TDT v3 speech-to-text      |
 | `docconvert`    | LibreOffice document conversion          |
 | `archive`       | 7-Zip pack / unpack                      |
 | `pdftools`      | PDF merge / split / rotate / etc.        |
