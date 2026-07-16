@@ -121,6 +121,8 @@ public static class PresetRunner
             UseShellExecute = false,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
+        psi.EnvironmentVariables["PYTHONUTF8"] = "1";
+        psi.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
         try
         {
             using var p = Process.Start(psi)

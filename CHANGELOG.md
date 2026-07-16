@@ -16,6 +16,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Conversion history persistence now lives in a headless Core store with CI coverage for CRUD, search, summaries, row/age retention, and concurrent writers. Explorer preset launches now use a tested argument-vector builder with safe quote/Unicode handling and automatic list-file fallback, and the test suite executes a real preset through its sidecar.
 - Every one of the 190 sidecars now carries a schema-validated `ucx.sidecar.json` health manifest. Model, GPU, external-tool, managed-tool, optional-tool, and argument-conditional requirements are resolved from manifest data; CI rejects missing or mismatched manifests and prevents reintroduction of hard-coded engine fallback tables.
 - Application update checks now consume each release's preset/queue compatibility contract, compare it with user-defined preset schemas, saved queue schemas, and referenced engines, and show actionable pre-update warnings on Home and in Settings. Legacy saved queues default safely to schema v1, while incompatible or unverifiable release metadata fails visibly instead of implying compatibility.
 - Release packaging now publishes a versioned JSON manifest after signing with SHA-256 and size metadata for each MSI/MSIX artifact plus a non-executing inventory of bundled tools and sidecars. Requested package types must exist and be non-empty before the manifest can be emitted.
@@ -26,6 +27,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- Sidecar processes now force UTF-8 at the Python producer boundary, preventing Unicode file paths from failing when NDJSON output is redirected on legacy Windows code pages.
 - StreamKeep download completion now trusts yt-dlp's reported regular file or selects only files created or modified by the current run. The fallback ignores directories, symlinks, unchanged downloads, partial artifacts, and ranks subtitle/metadata companions behind primary media instead of returning an unrelated path.
 - Converter cancellation now records queued, in-flight, and orchestrator-returned cancellations separately from failures, persists each cancelled job as retryable, and always renders the cancelled batch summary even when no cancellation exception escapes the parallel task set.
 - Update checks now compare normalized dotted numeric versions instead of string inequality. Prefixes, tool output labels, missing components, prereleases, date-style versions, and newer nightly builds are ordered correctly; rolling tags such as `latest` or autobuild dates are treated as non-comparable instead of producing false update prompts.

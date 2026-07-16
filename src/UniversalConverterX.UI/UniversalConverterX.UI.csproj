@@ -42,8 +42,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.9" />
-    <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="3.0.3" />
   </ItemGroup>
 
   <!-- XAML / code-behind: the WindowsAppSDK and .NET SDK auto-include Page/ApplicationDefinition/Compile items.

@@ -137,6 +137,12 @@ public sealed class SidecarRunner : ISidecarRunner
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
 
+        // Python chooses the legacy Windows code page for redirected streams
+        // unless told otherwise. Keep the producer and the UTF-8 .NET decoder
+        // aligned so Unicode paths can be emitted in NDJSON events.
+        psi.EnvironmentVariables["PYTHONUTF8"] = "1";
+        psi.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
+
         // Inject the shared model cache directory as an environment variable.
         // ONNX-based sidecars can read UCX_MODEL_DIR to locate/store models in a
         // single location instead of per-tool subdirectories.

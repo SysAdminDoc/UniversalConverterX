@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.ShellExtension.Presets;
 
 namespace UniversalConverterX.ShellExtension;
@@ -248,8 +249,6 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 [ClassInterface(ClassInterfaceType.None)]
 public partial class PresetSubCommand : IExplorerCommand
 {
-    private const int MaxArgListChars = 7000;
-
     private readonly ShellPreset _preset;
     private readonly IReadOnlyList<string> _selection;
     private readonly Guid _canonicalName;
@@ -306,25 +305,11 @@ public partial class PresetSubCommand : IExplorerCommand
             var cli = ConverterExplorerCommand.GetCliPath();
             if (!File.Exists(cli)) return HResult.E_FAIL;
 
-            var psi = new ProcessStartInfo
+            var plan = ExplorerPresetCommandBuilder.Build(_preset.Name, files);
+            var psi = plan.CreateStartInfo(cli);
+            if (plan.UsesInputList)
             {
-                FileName = cli,
-                UseShellExecute = false,
-                CreateNoWindow = false,
-            };
-            psi.ArgumentList.Add("convert-preset");
-            psi.ArgumentList.Add("--preset");
-            psi.ArgumentList.Add(_preset.Name);
-
-            // Estimate joined arg length; if too big, write a list file instead.
-            var estimate = files.Sum(f => f.Length + 3);
-            if (estimate > MaxArgListChars)
-            {
-                var listPath = Path.Combine(Path.GetTempPath(),
-                    $"ucx-input-{Guid.NewGuid():N}.txt");
-                File.WriteAllLines(listPath, files);
-                psi.ArgumentList.Add("--input-files");
-                psi.ArgumentList.Add(listPath);
+                File.WriteAllLines(plan.InputListPath!, plan.InputListEntries);
 
                 try
                 {
@@ -332,22 +317,21 @@ public partial class PresetSubCommand : IExplorerCommand
                     if (p is not null)
                     {
                         p.EnableRaisingEvents = true;
-                        p.Exited += (_, _) => { try { File.Delete(listPath); } catch { } };
+                        p.Exited += (_, _) => { try { File.Delete(plan.InputListPath!); } catch { } };
                     }
                     else
                     {
-                        try { File.Delete(listPath); } catch { }
+                        try { File.Delete(plan.InputListPath!); } catch { }
                     }
                 }
                 catch
                 {
-                    try { File.Delete(listPath); } catch { }
+                    try { File.Delete(plan.InputListPath!); } catch { }
                     throw;
                 }
             }
             else
             {
-                foreach (var f in files) psi.ArgumentList.Add(f);
                 Process.Start(psi);
             }
             return HResult.S_OK;
