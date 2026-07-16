@@ -205,6 +205,11 @@ public sealed class SidecarHealthService : ISidecarHealthService
         return LoadManifest(engine)?.Gpu;
     }
 
+    private string? OnnxRuntimeKind(string engine)
+    {
+        return LoadManifest(engine)?.OnnxRuntime;
+    }
+
     private IEnumerable<ToolRequirement> ManifestTools(
         string engine,
         IReadOnlyList<string> presetArgs)
@@ -239,7 +244,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string? Engine = null,
         List<ManifestTool>? Tools = null,
         bool? Models = null,
-        string? Gpu = null);
+        string? Gpu = null,
+        string? OnnxRuntime = null);
 
     private sealed record ManifestTool(
         string Id = "",
@@ -276,6 +282,19 @@ public sealed class SidecarHealthService : ISidecarHealthService
 
         if (HasModels(engine))
             rows.Add(EvaluateModelCache(engine, sidecarPath));
+
+        if (OnnxRuntimeKind(engine) == "cuda12-transition")
+        {
+            rows.Add(new SidecarHealthRequirement(
+                engine,
+                "gpu-runtime",
+                "ONNX Runtime CUDA transition",
+                "Warning",
+                "This engine's ONNX execution path is validated on ONNX Runtime 1.26 with CUDA 12; ONNX Runtime 1.27 deprecates CUDA 12 and makes its package variant explicit.",
+                "Keep the managed <1.27 requirement unless you install and validate the matching CUDA 13 ONNX Runtime package.",
+                null,
+                null));
+        }
 
         var gpu = GpuKind(engine);
         if (gpu == "vulkan")

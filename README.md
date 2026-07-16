@@ -272,6 +272,19 @@ Subtitle Studio runs a local Whisper → optional Helsinki OPUS-MT ONNX pipeline
 
 Speech-to-Text also offers NVIDIA Parakeet TDT 0.6B v3 for CUDA systems and its 25 supported European languages. Its pinned CC-BY-4.0 model pack is never fetched implicitly: select Parakeet, review the license, and use the explicit model-download action before transcribing. CPU-only systems can continue using faster-whisper or whisper.cpp.
 
+### ONNX Runtime compatibility
+
+ONNX Runtime 1.27 deprecates CUDA 12 and makes CUDA package selection explicit. UCX therefore advances its CPU-only RapidOCR path while holding CUDA-capable engines on the last validated pre-transition line:
+
+| Sidecar | ORT requirement | Execution path | Migration state |
+| --- | --- | --- | --- |
+| `videosubtitleremover` | `>=1.27,<1.28` | RapidOCR CPU; CUDA work uses PyTorch/Paddle | 1.27 enabled |
+| `alphacut` | `>=1.26,<1.27` | Optional ONNX CUDA 12 | Hold for CUDA 13 smoke |
+| `stemkit` | `>=1.26,<1.27` | MDX-Net via optional ONNX CUDA 12 | Hold for CUDA 13 smoke |
+| `translatekit` | `>=1.26,<1.27` | OPUS-MT via optional ONNX CUDA 12 | Hold for CUDA 13 smoke |
+
+Preset health reports the held CUDA transition before launch. Do not override those upper bounds unless the matching CUDA 13 ONNX Runtime package and the complete sidecar stack have been validated together.
+
 For full YouTube format extraction, install both the managed yt-dlp channel and Deno runtime. The Downloader health card reports their current status and can install or update both:
 
 ```powershell

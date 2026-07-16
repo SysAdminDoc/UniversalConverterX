@@ -331,7 +331,7 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
             manifest_path, 1, "health-manifest", "root must be a JSON object",
         )]
 
-    allowed_keys = {"engine", "tools", "models", "gpu"}
+    allowed_keys = {"engine", "tools", "models", "gpu", "onnxRuntime"}
     unknown_keys = sorted(set(payload) - allowed_keys)
     if unknown_keys:
         violations.append(Violation(
@@ -357,6 +357,14 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
         violations.append(Violation(
             manifest_path, 1, "health-manifest",
             "gpu must be 'vulkan', 'cuda-optional', or 'cuda-required'",
+        ))
+
+    if "onnxRuntime" in payload and payload["onnxRuntime"] not in {
+        "cpu", "cuda12-transition",
+    }:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "onnxRuntime must be 'cpu' or 'cuda12-transition'",
         ))
 
     tools = payload.get("tools", [])
@@ -629,6 +637,13 @@ SECURITY_FLOORS: dict[str, tuple[str, str]] = {
     "pillow-jxl-plugin": ("1.3.4", "libjxl CVE-2025-12474 + CVE-2026-1837"),
 }
 
+ONNX_RUNTIME_COMPATIBILITY: dict[str, tuple[str, str, str]] = {
+    "alphacut": ("1.26", "1.27", "cuda12-transition"),
+    "stemkit": ("1.26", "1.27", "cuda12-transition"),
+    "translatekit": ("1.26", "1.27", "cuda12-transition"),
+    "videosubtitleremover": ("1.27", "1.28", "cpu"),
+}
+
 
 def _parse_version(v: str, pad: int = 4) -> tuple[int, ...]:
     parts: list[int] = []
@@ -670,6 +685,45 @@ def check_security_floors(sidecar_dir: Path) -> list[Violation]:
     return violations
 
 
+def check_onnx_runtime_compatibility(sidecar_dir: Path) -> list[Violation]:
+    policy = ONNX_RUNTIME_COMPATIBILITY.get(sidecar_dir.name)
+    if policy is None:
+        return []
+
+    req = sidecar_dir / "requirements.txt"
+    manifest_path = sidecar_dir / "ucx.sidecar.json"
+    floor, ceiling, runtime_kind = policy
+    violations: list[Violation] = []
+    requirement_lines = req.read_text(encoding="utf-8").splitlines() if req.is_file() else []
+    matching = [
+        (lineno, raw.split("#", 1)[0].strip())
+        for lineno, raw in enumerate(requirement_lines, 1)
+        if raw.split("#", 1)[0].strip().lower().startswith("onnxruntime")
+        and not raw.split("#", 1)[0].strip().lower().startswith("onnxruntime-gpu")
+    ]
+    if not matching:
+        violations.append(Violation(
+            req, 1, "onnx-runtime-compatibility",
+            f"missing onnxruntime>={floor},<{ceiling} compatibility pin",
+        ))
+    elif not any(f">={floor}" in line and f"<{ceiling}" in line for _, line in matching):
+        violations.append(Violation(
+            req, matching[0][0], "onnx-runtime-compatibility",
+            f"expected onnxruntime>={floor},<{ceiling} for {runtime_kind}",
+        ))
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return violations
+    if manifest.get("onnxRuntime") != runtime_kind:
+        violations.append(Violation(
+            manifest_path, 1, "onnx-runtime-compatibility",
+            f"onnxRuntime must be {runtime_kind!r} for the audited requirement pin",
+        ))
+    return violations
+
+
 def check_one(path: Path) -> list[Violation]:
     src = path.read_text(encoding="utf-8")
     try:
@@ -695,6 +749,7 @@ def main(argv: list[str] | None = None) -> int:
         all_violations.extend(check_one(path))
         all_violations.extend(check_health_manifest(path))
         all_violations.extend(check_security_floors(path.parent))
+        all_violations.extend(check_onnx_runtime_compatibility(path.parent))
     all_violations.extend(check_manifest_only_health_service())
 
     if not all_violations:

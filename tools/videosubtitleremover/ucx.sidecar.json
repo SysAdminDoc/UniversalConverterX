@@ -1,4 +1,5 @@
 {
   "engine": "videosubtitleremover",
-  "models": true
+  "models": true,
+  "onnxRuntime": "cpu"
 }

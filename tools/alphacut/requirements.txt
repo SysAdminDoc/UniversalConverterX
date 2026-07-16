@@ -2,4 +2,6 @@ PyQt6>=6.4.0
 Pillow>=12.3.0
 numpy>=1.21.0
 scipy>=1.7.0
-onnxruntime>=1.25.1
+# AlphaCut's optional CUDA provider is validated against the CUDA 12 line.
+# ORT 1.27 makes CUDA package selection explicit; hold until CUDA 13 smoke passes.
+onnxruntime>=1.26,<1.27

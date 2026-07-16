@@ -1,4 +1,6 @@
 audio-separator>=0.44.2,<0.45
-onnxruntime>=1.25.1
+# MDX-Net uses audio-separator's ONNX CUDA provider. Keep the validated CUDA 12
+# line until the complete audio-separator stack passes a CUDA 13 smoke.
+onnxruntime>=1.26,<1.27
 torch>=2.2
 numpy>=1.24

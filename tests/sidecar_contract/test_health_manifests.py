@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from check_contract import check_health_manifest
+from check_contract import check_health_manifest, check_onnx_runtime_compatibility
 
 
 class SidecarHealthManifestTests(unittest.TestCase):
@@ -61,6 +61,7 @@ class SidecarHealthManifestTests(unittest.TestCase):
                         "engine": "sample",
                         "models": True,
                         "gpu": "cuda-required",
+                        "onnxRuntime": "cuda12-transition",
                         "tools": [
                             {
                                 "id": "ffmpeg",
@@ -93,6 +94,27 @@ class SidecarHealthManifestTests(unittest.TestCase):
                 "sidecar reports missing_ffmpeg but does not declare the managed ffmpeg tool",
                 details,
             )
+
+    def test_onnx_runtime_matrix_rejects_floor_or_manifest_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            sidecar_dir = Path(temp) / "alphacut"
+            sidecar_dir.mkdir()
+            (sidecar_dir / "requirements.txt").write_text(
+                "onnxruntime>=1.27,<1.28\n",
+                encoding="utf-8",
+            )
+            (sidecar_dir / "ucx.sidecar.json").write_text(
+                json.dumps({"engine": "alphacut", "onnxRuntime": "cpu"}),
+                encoding="utf-8",
+            )
+
+            details = [
+                item.detail
+                for item in check_onnx_runtime_compatibility(sidecar_dir)
+            ]
+
+            self.assertTrue(any("expected onnxruntime>=1.26,<1.27" in item for item in details))
+            self.assertTrue(any("cuda12-transition" in item for item in details))
 
 
 if __name__ == "__main__":

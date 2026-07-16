@@ -1,5 +1,6 @@
 {
   "engine": "translatekit",
   "models": true,
-  "gpu": "cuda-optional"
+  "gpu": "cuda-optional",
+  "onnxRuntime": "cuda12-transition"
 }
