@@ -95,27 +95,11 @@ Impact: 2 · Effort: 3 · Type: UX + performance
 
 ---
 
-### 89. AVIF Gain Map HDR — remaining: gain-map writing
-
-AVIF tuning controls shipped (speed/subsampling/lossless). **Remaining:** full Apple-style JPEG gain-map writing — blocked on pillow-avif-plugin exposing libavif 1.4.x API.
-
-Impact: 3 · Effort: 2 · Type: format coverage
-
----
-
 ### 90. Opus 1.5 — remaining: ambisonics channel-layout selector
 
 Opus application/frame-duration controls shipped. **Remaining:** higher-order ambisonics channel-layout selector across multiple sidecars.
 
 Impact: 2 · Effort: 2 · Type: codec coverage
-
----
-
-### 95. Anime Upscale — remaining: Anime4K GLSL backend
-
-Real-ESRGAN ncnn-vulkan backend shipped. **Remaining:** Anime4K GLSL shader-chain backend (needs realtime-rendering path + mpv-script bridge). Deferred pending community signal.
-
-Impact: 3 · Effort: 3 · Type: AI
 
 ---
 
