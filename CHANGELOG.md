@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.23.0] - 2026-07-16
+
 ### Security
 
 - FFmpeg now ships from a pinned BtbN 8.1.2 build instead of a mutable latest channel. Windows and Linux downloads have platform-specific SHA-256 pins, the installer stages verified FFmpeg/FFprobe/FFplay binaries, BtbN version banners are parsed against the 8.1.2 floor, and every sidecar that can fail on missing FFmpeg now declares the managed dependency.
