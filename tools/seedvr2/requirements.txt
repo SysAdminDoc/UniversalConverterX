@@ -1,0 +1,12 @@
+safetensors>=0.6,<1
+numpy>=1.26,<3
+tqdm>=4.66,<5
+psutil>=5.9,<8
+einops>=0.8,<1
+omegaconf>=2.3,<3
+diffusers>=0.33.1,<1
+peft>=0.17,<1
+rotary-embedding-torch>=0.5.3,<1
+opencv-python>=4.10,<5
+gguf>=0.16,<1
+matplotlib>=3.9,<4

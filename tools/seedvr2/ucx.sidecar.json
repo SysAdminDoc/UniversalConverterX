@@ -1,0 +1,14 @@
+{
+  "engine": "seedvr2",
+  "models": true,
+  "gpu": "cuda-required",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContains": "restore"
+    }
+  ]
+}

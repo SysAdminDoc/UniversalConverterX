@@ -105,7 +105,7 @@
             <StackPanel Spacing="8">
                 <TextBlock Text="VIDEO ENHANCER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock Text="Real-ESRGAN frame-by-frame video upscaler. 2× to 4× super-resolution; longer videos take time."
+                <TextBlock Text="Restore and upscale video with portable Real-ESRGAN or the optional CUDA-only SeedVR2 diffusion engine."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
@@ -116,7 +116,7 @@
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="VideoEnhancerPageButton01"/>
                 <Button x:Name="RunButton"
-                        Content="Upscale Video"
+                        Content="Enhance Video"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
                         IsEnabled="False"
@@ -148,7 +148,7 @@
                                 <TextBlock Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="Each clip is upscaled frame-by-frame; expect minutes per minute of source. Audio is stream-copied."
+                                <TextBlock Text="Choose an engine, then queue clips for local restoration. SeedVR2 is substantially slower and requires its optional model pack."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
@@ -186,16 +186,43 @@
             <StackPanel Grid.Column="1" Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ModelCombo" Header="Model"
-                                  HorizontalAlignment="Stretch"
-                                  PlaceholderText="Discovering..."
-                                  SelectionChanged="Settings_Changed"
-                            AutomationProperties.AutomationId="ModelCombo"/>
-                        <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
-                        <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
-                                Click="RefreshModels_Click" HorizontalAlignment="Stretch"
-                            AutomationProperties.AutomationId="VideoEnhancerPageButton03"/>
+                        <TextBlock Text="Engine" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Name="EngineCombo" Header="Restoration engine"
+                                  HorizontalAlignment="Stretch" SelectedIndex="0"
+                                  SelectionChanged="Engine_Changed"
+                                  AutomationProperties.AutomationId="EngineCombo">
+                            <ComboBoxItem Content="Real-ESRGAN (portable)" Tag="realesrgan"/>
+                            <ComboBoxItem Content="SeedVR2 3B FP8 (CUDA, optional)" Tag="seedvr2"/>
+                        </ComboBox>
+                        <StackPanel x:Name="RealEsrganModelPanel" Spacing="8">
+                            <ComboBox x:Name="ModelCombo" Header="Model"
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Discovering..."
+                                      SelectionChanged="Settings_Changed"
+                                AutomationProperties.AutomationId="ModelCombo"/>
+                            <TextBlock x:Name="ModelHintText" Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
+                            <Button Content="Refresh Models" Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="RefreshModels_Click" HorizontalAlignment="Stretch"
+                                AutomationProperties.AutomationId="VideoEnhancerPageButton03"/>
+                        </StackPanel>
+                        <StackPanel x:Name="SeedVr2ModelPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock Text="SeedVR2 3B FP8 restoration pack"
+                                       Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Text="Pinned local runtime and weights · Apache-2.0 · approximately 3.9 GB. Requires NVIDIA CUDA with at least 10 GB VRAM; 12 GB or more is recommended."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <Button x:Name="DownloadSeedVr2ModelButton"
+                                    Content="Review &amp; download model"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Click="DownloadSeedVr2Model_Click"
+                                    AutomationProperties.AutomationId="DownloadSeedVr2ModelButton"/>
+                            <TextBlock x:Name="SeedVr2ModelStatus"
+                                       Text="Checking local model pack..."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -214,24 +241,39 @@
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"
-                                  HorizontalAlignment="Stretch"
-                                  SelectionChanged="Settings_Changed"
-                            AutomationProperties.AutomationId="ScaleCombo">
-                            <ComboBoxItem Content="2× (recommended)" Tag="2"/>
-                            <ComboBoxItem Content="3× (slower)"      Tag="3"/>
-                            <ComboBoxItem Content="4× (slowest)"     Tag="4"/>
-                        </ComboBox>
-                        <Slider x:Name="CrfSlider"
-                                Header="x264 CRF"
-                                Minimum="14" Maximum="32" Value="20"
-                                StepFrequency="1"
-                                ValueChanged="Crf_Changed"
-                            AutomationProperties.AutomationId="CrfSlider"/>
-                        <TextBlock x:Name="CrfLabel"
-                                   Text="CRF 20 (high quality)"
-                                   Style="{StaticResource MutedTextStyle}"
-                                   HorizontalAlignment="Right"/>
+                        <StackPanel x:Name="RealEsrganQualityPanel" Spacing="8">
+                            <ComboBox x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="Settings_Changed"
+                                AutomationProperties.AutomationId="ScaleCombo">
+                                <ComboBoxItem Content="2× (recommended)" Tag="2"/>
+                                <ComboBoxItem Content="3× (slower)"      Tag="3"/>
+                                <ComboBoxItem Content="4× (slowest)"     Tag="4"/>
+                            </ComboBox>
+                            <Slider x:Name="CrfSlider"
+                                    Header="x264 CRF"
+                                    Minimum="14" Maximum="32" Value="20"
+                                    StepFrequency="1"
+                                    ValueChanged="Crf_Changed"
+                                AutomationProperties.AutomationId="CrfSlider"/>
+                            <TextBlock x:Name="CrfLabel"
+                                       Text="CRF 20 (high quality)"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel x:Name="SeedVr2QualityPanel" Visibility="Collapsed" Spacing="8">
+                            <ComboBox x:Name="SeedVr2ResolutionCombo" Header="Target short side" SelectedIndex="1"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="Settings_Changed"
+                                      AutomationProperties.AutomationId="SeedVr2ResolutionCombo">
+                                <ComboBoxItem Content="540p (lower VRAM)" Tag="540"/>
+                                <ComboBoxItem Content="720p (recommended)" Tag="720"/>
+                                <ComboBoxItem Content="1080p (slowest)" Tag="1080"/>
+                            </ComboBox>
+                            <TextBlock Text="Uses streaming, CPU offload, BlockSwap, and tiled VAE processing. The source and result stay local."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

@@ -29,6 +29,8 @@ public sealed partial class VideoEnhancerPage : Page
     private readonly ObservableCollection<VeFinishedItem> _finished = [];
     private readonly List<VeModel> _models = [];
     private CancellationTokenSource? _cts;
+    private bool _seedVr2ModelReady;
+    private bool _modelActionRunning;
 
     public VideoEnhancerPage()
     {
@@ -40,6 +42,7 @@ public sealed partial class VideoEnhancerPage : Page
         ShowWindowsVideoScalerStatus();
         UpdateUi();
         _ = LoadModelsAsync();
+        _ = RefreshSeedVr2ModelStatusAsync();
     }
 
     private void ShowWindowsVideoScalerStatus()
@@ -47,7 +50,7 @@ public sealed partial class VideoEnhancerPage : Page
         var capability = _healthService.EvaluateWindowsVideoScaler();
         WindowsVsrStatusText.Text = capability.Status == "Ready"
             ? "Available for qualified frame pipelines"
-            : "Unavailable on this system — Real-ESRGAN will be used";
+            : "Unavailable on this system — choose Real-ESRGAN or SeedVR2";
         WindowsVsrDetailText.Text = $"{capability.Detail} {capability.Remediation}".Trim();
     }
 
@@ -79,6 +82,7 @@ public sealed partial class VideoEnhancerPage : Page
         {
             ModelHintText.Text = "Build the realesrgan sidecar first: pwsh tools/realesrgan/build.ps1";
             ModelCombo.PlaceholderText = "Sidecar not built";
+            UpdateUi();
             return;
         }
 
@@ -106,6 +110,109 @@ public sealed partial class VideoEnhancerPage : Page
     }
 
     private async void RefreshModels_Click(object sender, RoutedEventArgs e) => await LoadModelsAsync();
+
+    private void Engine_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (RealEsrganModelPanel is null || SeedVr2ModelPanel is null ||
+            RealEsrganQualityPanel is null || SeedVr2QualityPanel is null || RunButton is null)
+            return;
+        var seedVr2 = IsSeedVr2Selected();
+        RealEsrganModelPanel.Visibility = seedVr2 ? Visibility.Collapsed : Visibility.Visible;
+        SeedVr2ModelPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
+        RealEsrganQualityPanel.Visibility = seedVr2 ? Visibility.Collapsed : Visibility.Visible;
+        SeedVr2QualityPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
+        RunButton.Content = seedVr2 ? "Restore with SeedVR2" : "Upscale Video";
+        var summary = BuildPlanSummary();
+        foreach (var file in _files) file.PlanSummary = summary;
+        UpdateUi();
+    }
+
+    private async Task RefreshSeedVr2ModelStatusAsync()
+    {
+        if (_modelActionRunning) return;
+        if (_runner.Locate("seedvr2") is null)
+        {
+            _seedVr2ModelReady = false;
+            DownloadSeedVr2ModelButton.IsEnabled = false;
+            SeedVr2ModelStatus.Text = "SeedVR2 sidecar is not installed in this build.";
+            UpdateUi();
+            return;
+        }
+
+        _modelActionRunning = true;
+        _seedVr2ModelReady = false;
+        DownloadSeedVr2ModelButton.IsEnabled = false;
+        SeedVr2ModelStatus.Text = "Checking local model pack...";
+        UpdateUi();
+        try
+        {
+            var result = await _runner.RunAsync(
+                "seedvr2",
+                ["model-status"],
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromMinutes(2));
+            _seedVr2ModelReady = result.Success;
+            SeedVr2ModelStatus.Text = result.Success
+                ? "Model ready — pinned local pack found."
+                : result.ErrorCode == "sidecar_not_found"
+                    ? "SeedVR2 sidecar is not installed in this build."
+                    : "Model not installed. Review the license and download it when ready.";
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadSeedVr2ModelButton.IsEnabled = _runner.Locate("seedvr2") is not null;
+            UpdateUi();
+        }
+    }
+
+    private async void DownloadSeedVr2Model_Click(object sender, RoutedEventArgs e)
+    {
+        if (_modelActionRunning || _runner.Locate("seedvr2") is null) return;
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Download the SeedVR2 restoration pack?",
+            Content = "This downloads pinned, SHA-256 verified Apache-2.0 runtime and model snapshots " +
+                      "(approximately 3.9 GB). SeedVR2 requires an NVIDIA CUDA GPU with at least 10 GB VRAM; " +
+                      "12 GB or more is recommended. UCX never downloads or updates this pack during restoration.",
+            PrimaryButtonText = "Accept & download",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        _modelActionRunning = true;
+        _seedVr2ModelReady = false;
+        DownloadSeedVr2ModelButton.IsEnabled = false;
+        SeedVr2ModelStatus.Text = "Downloading pinned SeedVR2 pack...";
+        UpdateUi();
+        try
+        {
+            var progress = new Progress<SidecarProgress>(value =>
+                DispatcherQueue.TryEnqueue(() =>
+                    SeedVr2ModelStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
+                        ? $"Downloading... {value.Percent:F0}%"
+                        : $"{value.Stage} ({value.Percent:F0}%)"));
+            var result = await _runner.RunAsync(
+                "seedvr2",
+                ["download-model", "--accept-license"],
+                progress,
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromHours(4));
+            _seedVr2ModelReady = result.Success;
+            SeedVr2ModelStatus.Text = result.Success
+                ? "Model ready — pinned local pack installed."
+                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadSeedVr2ModelButton.IsEnabled = true;
+            UpdateUi();
+        }
+    }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
@@ -245,12 +352,20 @@ public sealed partial class VideoEnhancerPage : Page
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
         if (_files.Count == 0 || _cts is not null) return;
-        if (ModelCombo.SelectedItem is not ComboBoxItem { Tag: VeModel model })
+        var seedVr2 = IsSeedVr2Selected();
+        VeModel? model = (ModelCombo.SelectedItem as ComboBoxItem)?.Tag as VeModel;
+        if (!seedVr2 && model is null)
         {
             StatusText.Text = "Pick a model first.";
             return;
         }
+        if (seedVr2 && !_seedVr2ModelReady)
+        {
+            StatusText.Text = "Download the SeedVR2 model pack before restoration.";
+            return;
+        }
         var scale = SelectedInt(ScaleCombo, 2);
+        var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
         var crf = (int)CrfSlider.Value;
 
         var jobs = _files.ToList();
@@ -266,20 +381,30 @@ public sealed partial class VideoEnhancerPage : Page
             foreach (var item in jobs)
             {
                 if (_cts.IsCancellationRequested) break;
-                var outputPath = BuildOutputPath(item.Path, scale);
-                var args = new List<string>
-                {
-                    "upscale-video",
-                    "--input",  item.Path,
-                    "--output", outputPath,
-                    "--model",  model.Name,
-                    "--scale",  scale.ToString(CultureInfo.InvariantCulture),
-                    "--crf",    crf.ToString(CultureInfo.InvariantCulture),
-                };
+                var outputPath = BuildOutputPath(item.Path, seedVr2, scale, resolution);
+                var args = seedVr2
+                    ? new List<string>
+                    {
+                        "restore",
+                        "--input", item.Path,
+                        "--output", outputPath,
+                        "--resolution", resolution.ToString(CultureInfo.InvariantCulture),
+                    }
+                    : new List<string>
+                    {
+                        "upscale-video",
+                        "--input",  item.Path,
+                        "--output", outputPath,
+                        "--model",  model!.Name,
+                        "--scale",  scale.ToString(CultureInfo.InvariantCulture),
+                        "--crf",    crf.ToString(CultureInfo.InvariantCulture),
+                    };
 
                 item.Progress = 0;
-                item.StatusText = "Upscaling";
-                StatusText.Text = $"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})";
+                item.StatusText = seedVr2 ? "Restoring" : "Upscaling";
+                StatusText.Text = seedVr2
+                    ? $"Restoring {item.FileName} with SeedVR2 at {resolution}p... ({completed + failed + 1}/{jobs.Count})"
+                    : $"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})";
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -294,8 +419,8 @@ public sealed partial class VideoEnhancerPage : Page
                 try
                 {
                     // Video upscale is slow per minute — generous watchdog timeout.
-                    result = await _runner.RunAsync("realesrgan", args, progress, log, _cts.Token,
-                        silenceTimeout: TimeSpan.FromMinutes(60));
+                    result = await _runner.RunAsync(seedVr2 ? "seedvr2" : "realesrgan", args, progress, log, _cts.Token,
+                        silenceTimeout: seedVr2 ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(60));
                 }
                 catch (OperationCanceledException)
                 {
@@ -372,7 +497,10 @@ public sealed partial class VideoEnhancerPage : Page
     {
         var hasFiles = _files.Count > 0;
         var hasFinished = _finished.Count > 0;
-        var hasModel = ModelCombo?.SelectedItem is not null;
+        var seedVr2 = IsSeedVr2Selected();
+        var hasModel = seedVr2
+            ? _seedVr2ModelReady && _runner.Locate("seedvr2") is not null
+            : ModelCombo?.SelectedItem is not null;
         EmptyState.Visibility = hasFiles ? Visibility.Collapsed : Visibility.Visible;
         FileList.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
@@ -388,23 +516,30 @@ public sealed partial class VideoEnhancerPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop video clips to start an upscale queue."
-            : $"Ready to upscale {_files.Count} clip(s). {BuildPlanSummary()}";
+            ? "Drop video clips to start an enhancement queue."
+            : $"Ready to enhance {_files.Count} clip(s). {BuildPlanSummary()}";
     }
 
     private string BuildPlanSummary()
     {
-        if (ScaleCombo is null) return "";
+        if (ScaleCombo is null || EngineCombo is null) return "";
+        if (IsSeedVr2Selected())
+        {
+            var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
+            return $"SeedVR2 3B FP8 · {resolution}p · CUDA offline";
+        }
         var model = (ModelCombo?.SelectedItem as ComboBoxItem)?.Tag is VeModel m ? m.Name : "no model";
         var scale = SelectedInt(ScaleCombo, 2);
         var crf = CrfSlider is null ? 20 : (int)CrfSlider.Value;
         return $"\u00d7{scale} · {model} · CRF {crf}";
     }
 
-    private static string BuildOutputPath(string inputPath, int scale)
+    private static string BuildOutputPath(string inputPath, bool seedVr2, int scale, int resolution)
     {
         var dir = Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory;
         var name = Path.GetFileNameWithoutExtension(inputPath);
+        if (seedVr2)
+            return EnsureUniquePath(Path.Combine(dir, $"{name}_seedvr2_{resolution}p.mp4"));
         var ext = Path.GetExtension(inputPath);
         if (string.IsNullOrEmpty(ext)) ext = ".mp4";
         return EnsureUniquePath(Path.Combine(dir, $"{name}_x{scale}{ext}"));
@@ -431,6 +566,9 @@ public sealed partial class VideoEnhancerPage : Page
             return v;
         return fallback;
     }
+
+    private bool IsSeedVr2Selected() =>
+        EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } && tag == "seedvr2";
 
     private static void OpenContainingFolder(string? path)
     {

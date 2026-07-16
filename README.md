@@ -15,7 +15,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **APV camera masters** — detect RFC 9924 raw APV and convert locally to H.265 10-bit, ProRes 422 HQ, or H.264 with the bundled FFmpeg build.
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
-- **Video Enhancer** — Real-ESRGAN export with a local Windows App SDK 2.2 VideoScaler capability check; unsupported systems fall back cleanly without downloading components.
+- **Video Enhancer** — portable Real-ESRGAN export, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
@@ -271,6 +271,8 @@ The directory name, `id`, and `engine` must match. Plugin preset files use the s
 Subtitle Studio runs a local Whisper → optional Helsinki OPUS-MT ONNX pipeline, opens the timecoded cues for text/timing edits, and exports SRT, VTT, or ASS. Video sources can also receive a hard-coded caption copy after the edited subtitle file is saved.
 
 Speech-to-Text also offers NVIDIA Parakeet TDT 0.6B v3 for CUDA systems and its 25 supported European languages. Its pinned CC-BY-4.0 model pack is never fetched implicitly: select Parakeet, review the license, and use the explicit model-download action before transcribing. CPU-only systems can continue using faster-whisper or whisper.cpp.
+
+Video Enhancer keeps Real-ESRGAN as its portable default and offers SeedVR2 3B FP8 as an optional diffusion-restoration engine on NVIDIA CUDA systems with at least 10 GB VRAM (12 GB or more recommended). Select SeedVR2, review the Apache-2.0 terms, and explicitly download the pinned approximately 3.9 GB runtime/model pack. UCX verifies immutable revisions and SHA-256 hashes, blocks cleanly when the pack or CUDA is unavailable, and disables all model downloads during restoration.
 
 ### ONNX Runtime compatibility
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Video restore 720p (SeedVR2 3B FP8)</Name>
+    <Folder>AI/Video</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+        <Extension>mts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_seedvr2_720p</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>seedvr2</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>restore</Arg>
+        <Arg>--resolution</Arg>
+        <Arg>720</Arg>
+    </Args>
+</Preset>

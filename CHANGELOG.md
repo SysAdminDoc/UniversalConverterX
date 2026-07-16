@@ -18,6 +18,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Video Enhancer now offers SeedVR2 3B FP8 as an opt-in CUDA restoration engine with 540p, 720p, and 1080p targets. The approximately 3.9 GB Apache-2.0 model/runtime pack requires explicit consent, immutable revision and SHA-256 verification, and at least 10 GB VRAM; inference is forced offline and uses streaming, BlockSwap, CPU offload, and tiled VAE processing. A matching 720p preset and clean missing-model/no-CUDA errors are included.
 - Added default-deny third-party sidecar plugins under the local app-data plugin directory. Manifests and preset paths are validated, links/reparse points are rejected, every plugin file is covered by one SHA-256 approval, changed plugins are re-quarantined before launch, and Settings can trust or revoke plugins that then surface in Presets and Toolbox.
 - Video Enhancer now reports the local Windows App SDK 2.2 VideoScaler readiness state without downloading AI components, keeps Real-ESRGAN as the portable export backend, and includes a headless frame benchmark smoke that runs only on supported hardware.
 - Speech-to-Text now offers NVIDIA Parakeet TDT 0.6B v3 as a CUDA-only engine for 25 European languages, with word-timestamp subtitle generation and SRT/VTT/TXT/JSON parity. Its pinned CC-BY-4.0 model snapshot requires an explicit in-app license confirmation and download; transcription is offline-only and cleanly blocks when the exact model pack or CUDA runtime is absent.
