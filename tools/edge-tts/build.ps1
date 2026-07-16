@@ -35,6 +35,7 @@ Write-Host '[edge-tts] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
+    --paths ../_lib `
     --collect-all edge_tts `
     --hidden-import certifi `
     $Sidecar

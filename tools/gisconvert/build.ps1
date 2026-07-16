@@ -23,7 +23,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m PyInstaller `
     --name gisconvert `
     --onefile --console --noconfirm --clean --log-level WARN `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/gisconvert.exe') (Join-Path $here 'gisconvert.exe') -Force

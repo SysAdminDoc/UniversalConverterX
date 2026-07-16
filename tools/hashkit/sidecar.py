@@ -17,22 +17,15 @@ import argparse
 import binascii
 import hashlib
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import sys
 import time
 import zlib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
+
 
 
 def fail(code: str, message: str) -> int:

@@ -27,7 +27,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
     --collect-all trimesh `
     --hidden-import lxml `
     --hidden-import networkx `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/meshconvert.exe') (Join-Path $here 'meshconvert.exe') -Force

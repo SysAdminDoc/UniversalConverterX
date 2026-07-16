@@ -44,7 +44,7 @@ Write-Host "[freeze] Building videosubtitleremover.exe" -ForegroundColor Cyan
   --noconfirm `
   --clean `
   --log-level WARN `
-  --paths . `
+  --paths . --paths ../_lib `
   --paths backend `
   --collect-all rapidocr `
   --collect-all rapidocr_onnxruntime `

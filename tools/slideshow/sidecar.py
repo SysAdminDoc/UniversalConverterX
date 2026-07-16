@@ -10,20 +10,19 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import (
+    emit,
+    find_ffmpeg as shared_find_ffmpeg,
+    run_ffmpeg as shared_run_ffmpeg,
+)
 
 
 IMAGE_EXTENSIONS = {
@@ -69,9 +68,6 @@ PRESETS = [
 ]
 
 
-def emit(event: str, **fields: object) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:
@@ -80,10 +76,7 @@ def fail(code: str, message: str) -> int:
 
 
 def find_ffmpeg() -> str | None:
-    env = os.environ.get("FFMPEG_PATH")
-    if env and Path(env).is_file():
-        return env
-    return shutil.which("ffmpeg") or shutil.which("ffmpeg.exe")
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 def natural_key(path: Path) -> list[object]:
@@ -277,47 +270,17 @@ def output_encoding_args(fmt: str) -> list[str]:
 
 def run_ffmpeg(cmd: list[str], total_duration: float) -> int:
     emit("progress", percent=3.0, stage="starting", eta_seconds=None)
-    last_progress = 0.0
-    tail: list[str] = []
-
-    proc = subprocess.Popen(
+    result = shared_run_ffmpeg(
         cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
+        total_duration,
+        "encoding",
+        start_percent=5.0,
+        end_percent=98.0,
+        inject_progress_args=False,
     )
-
-    assert proc.stderr is not None
-    for raw in proc.stderr:
-        line = raw.strip()
-        if not line:
-            continue
-        if "=" in line:
-            key, value = line.split("=", 1)
-            if key in {"out_time_ms", "out_time_us"}:
-                try:
-                    seconds = int(value) / 1_000_000.0
-                except ValueError:
-                    continue
-                percent = min(98.0, 5.0 + (seconds / total_duration) * 92.0)
-                if percent - last_progress >= 1.0:
-                    emit("progress", percent=round(percent, 1), stage="encoding", eta_seconds=None)
-                    last_progress = percent
-            continue
-
-        tail.append(line)
-        tail = tail[-8:]
-
-    rc = proc.wait()
-    if rc != 0:
-        for line in tail[-5:]:
-            emit("log", level="error", message=line)
-        return rc
-
-    emit("progress", percent=100.0, stage="done", eta_seconds=0)
-    return 0
+    if result == 0:
+        emit("progress", percent=100.0, stage="done", eta_seconds=0)
+    return result
 
 
 def op_create(args: argparse.Namespace) -> int:
@@ -367,7 +330,7 @@ def op_create(args: argparse.Namespace) -> int:
     else:
         cmd += ["-an"]
     cmd += ["-r", str(int(args.fps)), *output_encoding_args(args.format)]
-    cmd += ["-progress", "pipe:2", "-nostats", str(out_path)]
+    cmd += ["-progress", "pipe:1", "-nostats", str(out_path)]
 
     emit(
         "log",

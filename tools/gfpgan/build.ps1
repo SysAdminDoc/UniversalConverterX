@@ -38,6 +38,7 @@ Write-Host '[gfpgan] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
+    --paths ../_lib `
     --collect-all gfpgan `
     --collect-all basicsr `
     --collect-all facexlib `

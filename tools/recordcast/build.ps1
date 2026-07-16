@@ -17,7 +17,7 @@ if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m pip install --quiet --upgrade pip pyinstaller
 
-& $python -m PyInstaller --name recordcast --onefile --console --noconfirm --clean --log-level WARN sidecar.py
+& $python -m PyInstaller --name recordcast --onefile --console --noconfirm --clean --log-level WARN --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/recordcast.exe') (Join-Path $here 'recordcast.exe') -Force

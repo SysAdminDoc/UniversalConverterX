@@ -43,7 +43,7 @@ Write-Host "[freeze] Building videocrush.exe" -ForegroundColor Cyan
   --noconfirm `
   --clean `
   --log-level WARN `
-  --paths . `
+  --paths . --paths ../_lib `
   sidecar.py
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }

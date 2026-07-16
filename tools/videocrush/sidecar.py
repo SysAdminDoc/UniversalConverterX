@@ -9,15 +9,19 @@ Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 from __future__ import annotations
 
 import argparse
-from collections import deque
 import json
 import os
 import re
-import shutil
-import subprocess
 import sys
-import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import (
+    find_ffmpeg as shared_find_ffmpeg,
+    find_ffprobe as shared_find_ffprobe,
+    probe_media,
+    run_ffmpeg as shared_run_ffmpeg,
+)
 
 
 # ─── NDJSON emitter ──────────────────────────────────────────────────────────
@@ -42,50 +46,15 @@ def fail(code: str, message: str) -> "int":
 # ─── FFmpeg discovery ────────────────────────────────────────────────────────
 
 def find_ffmpeg() -> str | None:
-    candidates = [
-        os.environ.get("FFMPEG_PATH"),
-        shutil.which("ffmpeg"),
-    ]
-    # Bundled locations (next to the sidecar exe, or under tools/_bin/)
-    here = Path(__file__).resolve().parent
-    candidates += [
-        str(here / "ffmpeg.exe"),
-        str(here.parent / "_bin" / "ffmpeg.exe"),
-    ]
-    for c in candidates:
-        if c and Path(c).is_file():
-            return c
-    return None
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 def find_ffprobe() -> str | None:
-    candidates = [
-        os.environ.get("FFPROBE_PATH"),
-        shutil.which("ffprobe"),
-    ]
-    here = Path(__file__).resolve().parent
-    candidates += [
-        str(here / "ffprobe.exe"),
-        str(here.parent / "_bin" / "ffprobe.exe"),
-    ]
-    for c in candidates:
-        if c and Path(c).is_file():
-            return c
-    return None
+    return shared_find_ffprobe(Path(__file__).resolve().parent)
 
 
 def probe(ffprobe: str, path: str) -> dict | None:
-    try:
-        result = subprocess.run(
-            [ffprobe, "-v", "quiet", "-print_format", "json",
-             "-show_format", "-show_streams", path],
-            capture_output=True, text=True, timeout=30
-        )
-        if result.returncode != 0:
-            return None
-        return json.loads(result.stdout)
-    except (subprocess.SubprocessError, json.JSONDecodeError, OSError):
-        return None
+    return probe_media(ffprobe, path)
 
 
 # ─── Hardware accelerator → encoder mapping ──────────────────────────────────
@@ -313,9 +282,6 @@ LOSSLESS_CODECS = {"ffv1"}
 
 # ─── FFmpeg progress parsing ─────────────────────────────────────────────────
 
-_TIME_RE = re.compile(r"out_time_ms=(\d+)")
-
-
 def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str,
                start_pct: float, end_pct: float) -> int:
     """Run FFmpeg with -progress pipe:1, emit NDJSON progress events.
@@ -327,48 +293,15 @@ def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str,
         cmd[0], "-hide_banner", "-loglevel", "error",
         "-progress", "pipe:1", "-nostats", *cmd[1:],
     ]
-    proc = subprocess.Popen(
+    return shared_run_ffmpeg(
         full_cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
+        duration_sec,
+        stage,
+        event_emitter=emit,
+        start_percent=start_pct,
+        end_percent=end_pct,
+        inject_progress_args=False,
     )
-    started = time.monotonic()
-    last_pct = -1.0
-    error_tail: deque[str] = deque(maxlen=15)
-    try:
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            line = line.strip()
-            if not line:
-                continue
-            m = _TIME_RE.search(line)
-            if m and duration_sec > 0:
-                cur_sec = int(m.group(1)) / 1_000_000
-                local = max(0.0, min(1.0, cur_sec / duration_sec))
-                pct = start_pct + (end_pct - start_pct) * local
-                if pct - last_pct >= 0.5:  # throttle to ~200 events max
-                    last_pct = pct
-                    elapsed = time.monotonic() - started
-                    eta = (elapsed / local - elapsed) if local > 0.01 else None
-                    emit("progress", percent=round(pct, 1),
-                         stage=stage,
-                         eta_seconds=int(eta) if eta and eta < 86400 else None)
-            elif line.startswith("progress=end"):
-                emit("progress", percent=end_pct, stage=stage, eta_seconds=0)
-            elif not line.startswith((
-                "frame=", "fps=", "stream_", "bitrate=", "total_size=",
-                "out_time_", "out_time=", "dup_frames=", "drop_frames=",
-                "speed=", "progress=",
-            )):
-                error_tail.append(line)
-    finally:
-        proc.wait()
-        if proc.returncode != 0:
-            for ln in error_tail:
-                emit("log", level="error", message=ln)
-    return proc.returncode
 
 
 # ─── Job ─────────────────────────────────────────────────────────────────────

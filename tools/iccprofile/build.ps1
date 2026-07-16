@@ -22,7 +22,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m PyInstaller `
     --name iccprofile `
     --onefile --console --noconfirm --clean --log-level WARN `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/iccprofile.exe') (Join-Path $here 'iccprofile.exe') -Force

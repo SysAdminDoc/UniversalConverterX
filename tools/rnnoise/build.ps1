@@ -39,7 +39,8 @@ $pyiArgs = @(
     '--name', 'rnnoise',
     '--distpath', $DistDir,
     '--workpath', $BuildDir,
-    '--specpath', $SpecDir
+    '--specpath', $SpecDir,
+    '--paths', '../_lib'
 )
 
 # Ship any models the user has placed under tools/rnnoise/models/ alongside

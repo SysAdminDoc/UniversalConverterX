@@ -60,6 +60,7 @@ Write-Host '[heicshift] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
+    --paths ../_lib `
     --collect-all pillow_heif `
     --collect-all pillow_jxl `
     --hidden-import PIL.ImageCms `

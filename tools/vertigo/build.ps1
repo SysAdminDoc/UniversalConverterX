@@ -37,7 +37,8 @@ $pyiArgs = @(
     '--name', 'vertigo',
     '--distpath', $DistDir,
     '--workpath', $BuildDir,
-    '--specpath', $SpecDir
+    '--specpath', $SpecDir,
+    '--paths', '../_lib'
 )
 
 if (-not $NoSmart) {

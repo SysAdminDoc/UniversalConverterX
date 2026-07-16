@@ -9,7 +9,7 @@ if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m pip install --quiet --upgrade pip pyinstaller
 if (Test-Path (Join-Path $here 'requirements.txt')) { & $python -m pip install --quiet -r (Join-Path $here 'requirements.txt') }
-& $python -m PyInstaller --name gistiles --onefile --console --noconfirm --clean --log-level WARN --paths . sidecar.py
+& $python -m PyInstaller --name gistiles --onefile --console --noconfirm --clean --log-level WARN --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 Copy-Item (Join-Path $here 'dist/gistiles.exe') (Join-Path $here 'gistiles.exe') -Force
 $size = (Get-Item (Join-Path $here 'gistiles.exe')).Length / 1MB

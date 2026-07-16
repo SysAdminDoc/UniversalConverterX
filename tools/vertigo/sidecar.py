@@ -24,28 +24,20 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import math
 import os
 import re
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg, run_ffmpeg
 
 
 # ── NDJSON helpers ───────────────────────────────────────────────────────────
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:
@@ -67,16 +59,7 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
 # ── ffmpeg discovery + probe ─────────────────────────────────────────────────
 
 def find_ffmpeg() -> str | None:
-    here = Path(__file__).resolve().parent
-    for candidate in [
-        os.environ.get("FFMPEG_PATH"),
-        shutil.which("ffmpeg"),
-        str(here / "ffmpeg.exe"),
-        str(here.parent / "_bin" / "ffmpeg.exe"),
-    ]:
-        if candidate and Path(candidate).is_file():
-            return candidate
-    return None
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 def probe_video(ffmpeg: str, path: Path) -> tuple[int, int, float, float]:
@@ -191,46 +174,6 @@ def _smooth(points: list[tuple[float, float]], window: int = 5) -> list[tuple[fl
 
 
 # ── Reframe core ─────────────────────────────────────────────────────────────
-
-_TIME_RE = re.compile(r"out_time_ms=(\d+)")
-
-
-def run_ffmpeg(cmd: list[str], duration_sec: float, stage: str) -> int:
-    proc = subprocess.Popen(
-        cmd + ["-progress", "pipe:1", "-nostats"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1,
-    )
-    started = time.monotonic()
-    last_pct = -1.0
-    try:
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            line = line.strip()
-            if not line:
-                continue
-            m = _TIME_RE.search(line)
-            if m and duration_sec > 0:
-                cur = int(m.group(1)) / 1_000_000
-                pct = max(0.0, min(100.0, cur / duration_sec * 100.0))
-                if pct - last_pct >= 0.5:
-                    last_pct = pct
-                    elapsed = time.monotonic() - started
-                    local = pct / 100.0
-                    eta = (elapsed / local - elapsed) if local > 0.01 else None
-                    progress(pct, stage,
-                             int(eta) if eta and eta < 86400 else None)
-            elif line.startswith("progress=end"):
-                progress(100, stage, 0)
-    finally:
-        proc.wait()
-        if proc.returncode != 0 and proc.stderr is not None:
-            for ln in proc.stderr.read().splitlines()[-20:]:
-                log("error", ln)
-    return proc.returncode
-
 
 def _crop_filter_static(src_w: int, src_h: int, num: int, den: int) -> tuple[str, int, int]:
     """Build a static centre-crop filter. Returns (filter_string, out_w, out_h)."""

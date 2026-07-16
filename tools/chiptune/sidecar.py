@@ -21,13 +21,6 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import shutil
 import subprocess
@@ -36,10 +29,10 @@ import time
 import wave
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
+
 
 
 def fail(code: str, message: str) -> int:
@@ -52,8 +45,7 @@ GME_EXTS = {".nsf", ".nsfe", ".spc", ".vgm", ".vgz", ".gbs", ".hes",
 
 
 def _find_ffmpeg() -> str | None:
-    return (os.environ.get("FFMPEG_PATH")
-            or shutil.which("ffmpeg") or shutil.which("ffmpeg.exe"))
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 def _gme_render(src: Path, out_dir: Path, target: str,

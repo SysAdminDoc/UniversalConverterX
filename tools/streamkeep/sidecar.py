@@ -11,13 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
@@ -25,15 +18,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
+
 try:
     import yt_dlp
 except ImportError:
     yt_dlp = None  # surface a clean error from main()
 
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:
@@ -42,12 +35,7 @@ def fail(code: str, message: str) -> int:
 
 
 def find_ffmpeg() -> str | None:
-    here = Path(__file__).resolve().parent
-    for c in [os.environ.get("FFMPEG_PATH"), shutil.which("ffmpeg"),
-              str(here / "ffmpeg.exe"), str(here.parent / "_bin" / "ffmpeg.exe")]:
-        if c and Path(c).is_file():
-            return c
-    return None
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 def _tool_candidates(name: str, env_name: str) -> list[str | None]:

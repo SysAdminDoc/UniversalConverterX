@@ -17,13 +17,6 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
@@ -31,12 +24,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
+
 
 # ── NDJSON helpers ──────────────────────────────────────────────────
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:
@@ -69,18 +62,7 @@ def _find_vvenc() -> str | None:
 
 
 def _find_ffmpeg() -> str | None:
-    candidates: list[str | None] = [
-        os.environ.get("FFMPEG_PATH"),
-        shutil.which("ffmpeg"),
-    ]
-    here = Path(__file__).resolve().parent
-    for name in ("ffmpeg.exe", "ffmpeg"):
-        candidates.append(str(here.parent / "ffmpeg" / name))
-        candidates.append(str(here.parent / "_bin" / name))
-    for c in candidates:
-        if c and Path(c).is_file():
-            return c
-    return None
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 # ── Process runner ──────────────────────────────────────────────────

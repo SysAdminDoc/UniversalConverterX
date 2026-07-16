@@ -32,6 +32,7 @@ if (-not (Get-Command pyinstaller -ErrorAction SilentlyContinue)) {
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
+    --paths ../_lib `
     $Sidecar
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }

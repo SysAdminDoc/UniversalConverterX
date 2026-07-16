@@ -20,7 +20,7 @@ if (Test-Path (Join-Path $here 'requirements.txt')) {
   & $python -m pip install --quiet -r (Join-Path $here 'requirements.txt')
 }
 
-& $python -m PyInstaller --name dnskit --onefile --console --noconfirm --clean --log-level WARN --paths . sidecar.py
+& $python -m PyInstaller --name dnskit --onefile --console --noconfirm --clean --log-level WARN --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/dnskit.exe') (Join-Path $here 'dnskit.exe') -Force

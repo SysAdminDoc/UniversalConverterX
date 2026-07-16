@@ -21,7 +21,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
   --hidden-import yt_dlp `
   --collect-data yt_dlp `
   --collect-data yt_dlp_ejs `
-  --paths . sidecar.py
+  --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/streamkeep.exe') (Join-Path $here 'streamkeep.exe') -Force

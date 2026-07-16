@@ -92,6 +92,7 @@ Write-Host '[realesrgan] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
+    --paths ../_lib `
     $Sidecar
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }

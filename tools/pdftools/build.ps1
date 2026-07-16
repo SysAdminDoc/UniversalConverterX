@@ -24,7 +24,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
     --name pdftools `
     --onefile --console --noconfirm --clean --log-level WARN `
     --collect-all pikepdf `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/pdftools.exe') (Join-Path $here 'pdftools.exe') -Force

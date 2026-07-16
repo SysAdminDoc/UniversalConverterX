@@ -9,25 +9,21 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import re
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import (
+    emit,
+    find_ffmpeg as shared_find_ffmpeg,
+    run_ffmpeg as shared_run_ffmpeg,
+)
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
+
 
 
 def fail(code: str, message: str) -> int:
@@ -36,62 +32,20 @@ def fail(code: str, message: str) -> int:
 
 
 def find_ffmpeg() -> str | None:
-    here = Path(__file__).resolve().parent
-    for candidate in [
-        os.environ.get("FFMPEG_PATH"),
-        shutil.which("ffmpeg"),
-        str(here / "ffmpeg.exe"),
-        str(here.parent / "_bin" / "ffmpeg.exe"),
-    ]:
-        if candidate and Path(candidate).is_file():
-            return candidate
-    return None
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
-_TIME_RE = re.compile(r"out_time_ms=(\d+)")
 _DSHOW_DEVICE_RE = re.compile(r'^\[dshow[^\]]*\]\s+"(.+)"')
 _DSHOW_TYPE_RE = re.compile(r"DirectShow (video|audio) devices")
 
 
 def run_ffmpeg(cmd: list[str], duration_sec: int, stage: str = "recording") -> int:
-    proc = subprocess.Popen(
-        cmd + ["-progress", "pipe:1", "-nostats"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1,
+    return shared_run_ffmpeg(
+        cmd,
+        duration_sec,
+        stage,
+        completion_stage="finalizing",
     )
-    started = time.monotonic()
-    last_pct = -1.0
-    try:
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            line = line.strip()
-            if not line:
-                continue
-            match = _TIME_RE.search(line)
-            if match and duration_sec > 0:
-                current = int(match.group(1)) / 1_000_000
-                pct = max(0.0, min(100.0, current / duration_sec * 100.0))
-                if pct - last_pct >= 0.5:
-                    last_pct = pct
-                    elapsed = time.monotonic() - started
-                    local = pct / 100.0
-                    eta = (elapsed / local - elapsed) if local > 0.01 else None
-                    emit(
-                        "progress",
-                        percent=round(pct, 1),
-                        stage=stage,
-                        eta_seconds=int(eta) if eta and eta < 86400 else None,
-                    )
-            elif line.startswith("progress=end"):
-                emit("progress", percent=100, stage="finalizing", eta_seconds=0)
-    finally:
-        proc.wait()
-        if proc.returncode != 0 and proc.stderr is not None:
-            for ln in proc.stderr.read().splitlines()[-20:]:
-                emit("log", level="error", message=ln)
-    return proc.returncode
 
 
 def op_list_devices(args: argparse.Namespace) -> int:

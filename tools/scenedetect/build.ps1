@@ -23,7 +23,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
     --name scenedetect `
     --onefile --console --noconfirm --clean --log-level WARN `
     --collect-all scenedetect `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/scenedetect.exe') (Join-Path $here 'scenedetect.exe') -Force

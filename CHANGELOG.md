@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Sidecars now share one dependency-free protocol/runtime module for NDJSON events, managed FFmpeg and FFprobe discovery, media probing, bounded FFmpeg diagnostics, and normalized progress. All standard sidecars and frozen PyInstaller builds consume the common module, with contract tests preventing helper drift.
 - Vocal Remover and StemKit now default vocal work to MelBand-RoFormer and six-stem work to the supported BS-RoFormer SW model, with legacy Viperx, Demucs, and MDX choices retained. A new BS-RoFormer six-stem preset accompanies the refreshed model catalog, while four-stem selections continue to use fine-tuned Demucs.
 - Converter now presents queued files as a sortable preflight table with cached asynchronous 48 px thumbnails, current and estimated output sizes, and per-file warning badges. Missing sources, empty files, and unsupported routes block conversion before work starts; restored queues receive the same estimates and review checks.
 - Added an offline face-blur privacy filter to ClipForge and Toolbox. OpenCV scans every frame, expands and strongly blurs/pixelates each detected face, preserves source audio through FFmpeg, and refuses to write a privacy-labelled output when no face is detected.

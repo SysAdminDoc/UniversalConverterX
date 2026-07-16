@@ -26,7 +26,7 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
     --onefile --console --noconfirm --clean --log-level WARN `
     --collect-all ocrmypdf `
     --collect-all pikepdf `
-    --paths . sidecar.py
+    --paths . --paths ../_lib sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/pdfocr.exe') (Join-Path $here 'pdfocr.exe') -Force

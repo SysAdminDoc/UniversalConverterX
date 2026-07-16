@@ -18,10 +18,10 @@ import tempfile
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
+
 
 
 def fail(code: str, message: str) -> int:
@@ -51,17 +51,7 @@ def runtime_dir() -> Path:
 
 
 def find_ffmpeg() -> str | None:
-    here = runtime_dir()
-    for cand in [
-        os.environ.get("FFMPEG_PATH"),
-        shutil.which("ffmpeg"),
-        str(here / "ffmpeg.exe"),
-        str(here.parent / "_bin" / "ffmpeg.exe"),
-        str(here.parent / "ffmpeg" / "ffmpeg.exe"),
-    ]:
-        if cand and Path(cand).is_file():
-            return cand
-    return None
+    return shared_find_ffmpeg(runtime_dir())
 
 
 def _script_command(script: Path) -> list[str] | None:

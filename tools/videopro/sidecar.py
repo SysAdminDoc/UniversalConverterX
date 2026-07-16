@@ -19,13 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import shutil
 import subprocess
@@ -33,10 +26,10 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg
 
-def emit(event: str, **fields) -> None:
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
-    sys.stdout.flush()
+
 
 
 def fail(code: str, message: str) -> int:
@@ -45,9 +38,7 @@ def fail(code: str, message: str) -> int:
 
 
 def _find_ffmpeg() -> str | None:
-    env = os.environ.get("FFMPEG_PATH")
-    if env and Path(env).is_file(): return env
-    return shutil.which("ffmpeg") or shutil.which("ffmpeg.exe")
+    return shared_find_ffmpeg(Path(__file__).resolve().parent)
 
 
 # Container -> FFmpeg muxer + recommended audio/video codec pair.
