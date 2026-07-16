@@ -1863,6 +1863,63 @@
   <data name="DownloaderPage_UrlBox.PlaceholderText" xml:space="preserve">
     <value>Einfügen einer oder mehrerer URLs, eine pro Zeile</value>
   </data>
+  <data name="DvdRipPage_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DvdRipPage_CrfBox.Header" xml:space="preserve">
+    <value>Quality (CRF, lower = better)</value>
+  </data>
+  <data name="DvdRipPage_DvdRipChooseOutputButton.Content" xml:space="preserve">
+    <value>Choose output…</value>
+  </data>
+  <data name="DvdRipPage_DvdRipOpenButton.Content" xml:space="preserve">
+    <value>Open VIDEO_TS…</value>
+  </data>
+  <data name="DvdRipPage_DvdRipOpenEmptyButton.Content" xml:space="preserve">
+    <value>Open VIDEO_TS…</value>
+  </data>
+  <data name="DvdRipPage_Item_001.Text" xml:space="preserve">
+    <value>DVD RIP</value>
+  </data>
+  <data name="DvdRipPage_Item_002.Text" xml:space="preserve">
+    <value>Convert titles from an unprotected VIDEO_TS folder to MP4 or MKV.</value>
+  </data>
+  <data name="DvdRipPage_Item_004.Text" xml:space="preserve">
+    <value>Home and other non-commercial discs only. Commercial CSS-encrypted DVDs are not decrypted and cannot be ripped. Mount an ISO in Windows Explorer first, then point at its VIDEO_TS folder.</value>
+  </data>
+  <data name="DvdRipPage_Item_005.Text" xml:space="preserve">
+    <value>Drop a VIDEO_TS folder</value>
+  </data>
+  <data name="DvdRipPage_Item_006.Text" xml:space="preserve">
+    <value>Or the parent folder / mounted disc drive that contains it.</value>
+  </data>
+  <data name="DvdRipPage_Item_008.Text" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="DvdRipPage_Item_010.Content" xml:space="preserve">
+    <value>H.264 MP4 (compatible)</value>
+  </data>
+  <data name="DvdRipPage_Item_011.Content" xml:space="preserve">
+    <value>H.265 MP4 (smaller)</value>
+  </data>
+  <data name="DvdRipPage_Item_012.Content" xml:space="preserve">
+    <value>Stream copy → MKV (fastest, keeps MPEG-2)</value>
+  </data>
+  <data name="DvdRipPage_ModeCombo.Header" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="DvdRipPage_OutputBox.Header" xml:space="preserve">
+    <value>Destination file</value>
+  </data>
+  <data name="DvdRipPage_OutputBox.PlaceholderText" xml:space="preserve">
+    <value>Choose an output file…</value>
+  </data>
+  <data name="DvdRipPage_RipButton.Content" xml:space="preserve">
+    <value>Rip title</value>
+  </data>
+  <data name="DvdRipPage_StatusText.Text" xml:space="preserve">
+    <value>Open a VIDEO_TS folder to scan its titles.</value>
+  </data>
   <data name="EbookConverterPage_AuthorsBox.Header" xml:space="preserve">
     <value>Autoren (fakultativ)</value>
   </data>
@@ -3284,6 +3341,9 @@
   </data>
   <data name="MainWindow_Item_001_2.Content" xml:space="preserve">
     <value>Lossless Cut</value>
+  </data>
+  <data name="MainWindow_Item_001_3.Content" xml:space="preserve">
+    <value>DVD Rip</value>
   </data>
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
     <value>UCX</value>

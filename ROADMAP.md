@@ -31,14 +31,6 @@ programmability (CLI + REST + PS module), and AI depth.
 
 ## Tier 3 — Later _(v2.27+)_
 
-### 43. DVD Rip / Copy (Non-DRM Discs Only)
-
-Read unprotected DVD VIDEO_TS → MP4/MKV via `libdvdread` + FFmpeg. Scope: menu-free ISOs, non-commercial home videos. DRM exclusion documented in UI.
-
-Impact: 3 · Effort: 4 · Type: parity
-
----
-
 ### 48. AI Video Colorization (B&W → Color)
 
 Per-frame colorization of grayscale footage using DeOldify. Requires PyTorch + ~1.5 GB model download (explicit user confirmation required). GPU-gated. Wire to `ColorizeVideoPage.xaml` with single-frame preview.

@@ -88,6 +88,11 @@
                         <FontIcon Glyph="&#xE8C6;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Uid="MainWindow_Item_001_3" Tag="dvd-rip" Content="DVD Rip">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE958;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_010" Tag="downloader" Content="Downloader">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE896;"/>
