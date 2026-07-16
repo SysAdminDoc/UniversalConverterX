@@ -5,106 +5,144 @@ namespace UniversalConverterX.Core.Security;
 
 /// <summary>
 /// Windows DPAPI wrapper for at-rest encryption of sensitive configuration and credentials.
-/// Encrypts to LocalMachine scope, making the encrypted blob decryptable by any user on the
-/// same Windows install.
-///
-/// Non-Windows platforms (macOS, Linux) return plaintext (no-op graceful degradation).
+/// Data is protected for the current Windows user and bound to an application-specific entropy
+/// value so unrelated callers cannot unprotect it accidentally.
 /// </summary>
 public static class DpapiProvider
 {
-    /// <summary>
-    /// Encrypt plaintext bytes using Windows DPAPI (LocalMachine scope).
-    /// </summary>
-    /// <param name="plaintext">UTF-8 text to encrypt.</param>
-    /// <returns>Encrypted bytes (safe for at-rest storage on Windows).</returns>
-    public static byte[] Encrypt(string plaintext)
-    {
-        if (string.IsNullOrEmpty(plaintext))
-            return [];
+    private const string EntropyPurpose = "UniversalConverterX.DPAPI.v2";
+    private static readonly byte[] ApplicationEntropy =
+        SHA256.HashData(Encoding.UTF8.GetBytes(EntropyPurpose));
+    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
-        var bytes = Encoding.UTF8.GetBytes(plaintext);
-        return Encrypt(bytes);
+    /// <summary>
+    /// Encrypt UTF-8 text using Windows DPAPI and the supplied optional entropy.
+    /// </summary>
+    public static DpapiResult<byte[]> Encrypt(string plaintext, byte[]? entropy = null)
+    {
+        ArgumentNullException.ThrowIfNull(plaintext);
+        return Encrypt(Encoding.UTF8.GetBytes(plaintext), entropy);
     }
 
     /// <summary>
-    /// Encrypt raw bytes using Windows DPAPI (LocalMachine scope).
+    /// Encrypt bytes using Windows DPAPI and the supplied optional entropy.
     /// </summary>
-    /// <param name="plaintext">Bytes to encrypt.</param>
-    /// <returns>Encrypted bytes (safe for at-rest storage on Windows).</returns>
-    public static byte[] Encrypt(byte[] plaintext)
+    public static DpapiResult<byte[]> Encrypt(byte[] plaintext, byte[]? entropy = null)
     {
-        if (!IsAvailable())
-            return plaintext; // Graceful no-op on non-Windows
+        ArgumentNullException.ThrowIfNull(plaintext);
+
+        if (!OperatingSystem.IsWindows())
+        {
+            return DpapiResult<byte[]>.Failure("Windows DPAPI is not available on this platform.");
+        }
 
         try
         {
-#if WINDOWS
-            return System.Security.Cryptography.ProtectedData.Protect(
-                plaintext, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
-#else
-            return plaintext;
-#endif
+            var ciphertext = ProtectedData.Protect(
+                plaintext,
+                ResolveEntropy(entropy),
+                DataProtectionScope.CurrentUser);
+            return DpapiResult<byte[]>.SuccessResult(ciphertext);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is CryptographicException or PlatformNotSupportedException)
         {
-            // DPAPI failure (GPO restrictions, re-imaged host) — fall back to plaintext
-            // rather than crash. Sidecar logs this; C# side is best-effort.
-            System.Diagnostics.Debug.WriteLine($"DPAPI encryption failed: {ex.Message}");
-            return plaintext;
+            return DpapiResult<byte[]>.Failure($"DPAPI encryption failed: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Decrypt DPAPI-protected bytes (LocalMachine scope).
+    /// Decrypt DPAPI-protected bytes. When <paramref name="allowLegacyWithoutEntropy"/> is true,
+    /// ciphertext created by the previous no-entropy implementation remains readable so callers
+    /// can migrate it on their next successful write.
     /// </summary>
-    /// <param name="ciphertext">Encrypted bytes (from <see cref="Encrypt(byte[])"/>).</param>
-    /// <returns>Original plaintext bytes.</returns>
-    public static byte[] Decrypt(byte[] ciphertext)
+    public static DpapiResult<byte[]> Decrypt(
+        byte[] ciphertext,
+        byte[]? entropy = null,
+        bool allowLegacyWithoutEntropy = true)
     {
-        if (!IsAvailable())
-            return ciphertext; // Graceful no-op on non-Windows
+        ArgumentNullException.ThrowIfNull(ciphertext);
+
+        if (!OperatingSystem.IsWindows())
+        {
+            return DpapiResult<byte[]>.Failure("Windows DPAPI is not available on this platform.");
+        }
 
         try
         {
-#if WINDOWS
-            return System.Security.Cryptography.ProtectedData.Unprotect(
-                ciphertext, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
-#else
-            return ciphertext;
-#endif
+            var plaintext = ProtectedData.Unprotect(
+                ciphertext,
+                ResolveEntropy(entropy),
+                DataProtectionScope.CurrentUser);
+            return DpapiResult<byte[]>.SuccessResult(plaintext);
         }
-        catch (Exception ex)
+        catch (CryptographicException currentError) when (allowLegacyWithoutEntropy && entropy is null)
         {
-            // DPAPI failure (blob corrupted, encrypted on different machine, re-imaged host) —
-            // treat as unencrypted and return as-is. Best-effort graceful degradation.
-            System.Diagnostics.Debug.WriteLine($"DPAPI decryption failed: {ex.Message}");
-            return ciphertext;
+            try
+            {
+                var plaintext = ProtectedData.Unprotect(
+                    ciphertext,
+                    optionalEntropy: null,
+                    DataProtectionScope.CurrentUser);
+                return DpapiResult<byte[]>.SuccessResult(plaintext, usedLegacyProtection: true);
+            }
+            catch (Exception legacyError) when (legacyError is CryptographicException or PlatformNotSupportedException)
+            {
+                return DpapiResult<byte[]>.Failure(
+                    $"DPAPI decryption failed: {currentError.Message}; legacy retry failed: {legacyError.Message}");
+            }
+        }
+        catch (Exception ex) when (ex is CryptographicException or PlatformNotSupportedException)
+        {
+            return DpapiResult<byte[]>.Failure($"DPAPI decryption failed: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Decrypt DPAPI-protected bytes and decode as UTF-8 string.
+    /// Decrypt DPAPI-protected bytes and decode them as strict UTF-8.
     /// </summary>
-    /// <param name="ciphertext">Encrypted bytes.</param>
-    /// <returns>Decrypted string, or empty if decryption fails.</returns>
-    public static string DecryptString(byte[] ciphertext)
+    public static DpapiResult<string> DecryptString(
+        byte[] ciphertext,
+        byte[]? entropy = null,
+        bool allowLegacyWithoutEntropy = true)
     {
+        var result = Decrypt(ciphertext, entropy, allowLegacyWithoutEntropy);
+        if (!result.Succeeded || result.Value is null)
+        {
+            return DpapiResult<string>.Failure(result.Error ?? "DPAPI decryption failed.");
+        }
+
         try
         {
-            var plaintext = Decrypt(ciphertext);
-            return Encoding.UTF8.GetString(plaintext);
+            return DpapiResult<string>.SuccessResult(
+                StrictUtf8.GetString(result.Value),
+                result.UsedLegacyProtection);
         }
-        catch
+        catch (DecoderFallbackException ex)
         {
-            return string.Empty;
+            return DpapiResult<string>.Failure($"Decrypted data is not valid UTF-8: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Return True if DPAPI is available on the current platform (Windows only).
+    /// Return true if DPAPI is available on the current platform.
     /// </summary>
-    public static bool IsAvailable()
-    {
-        return OperatingSystem.IsWindows();
-    }
+    public static bool IsAvailable() => OperatingSystem.IsWindows();
+
+    private static byte[] ResolveEntropy(byte[]? entropy) => entropy ?? ApplicationEntropy;
+}
+
+/// <summary>
+/// The outcome of a DPAPI operation. Failed operations never expose their input as output.
+/// </summary>
+public sealed record DpapiResult<T>(
+    bool Succeeded,
+    T? Value,
+    string? Error,
+    bool UsedLegacyProtection = false)
+{
+    internal static DpapiResult<T> SuccessResult(T value, bool usedLegacyProtection = false) =>
+        new(true, value, null, usedLegacyProtection);
+
+    internal static DpapiResult<T> Failure(string error) =>
+        new(false, default, error);
 }

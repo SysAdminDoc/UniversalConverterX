@@ -1,8 +1,8 @@
 """Platform Account Manager — credential store for authenticated APIs (F48).
 
-Stores per-platform auth tokens/keys in the SQLite library.db with
-optional DPAPI encryption on Windows. Falls back to base64 obfuscation
-when DPAPI is unavailable.
+Stores per-platform auth tokens/keys in the SQLite library.db with mandatory,
+entropy-bound DPAPI encryption. Legacy base64 and plaintext values remain
+readable so they can be replaced, but new writes fail closed.
 
 Supported platforms and their credential types:
   - Twitch:  OAuth token (for Schedule API, subscriber VODs)
@@ -14,9 +14,9 @@ Supported platforms and their credential types:
 import base64
 import json
 import sqlite3
-import sys
 import threading
 
+from . import dpapi
 from .paths import CONFIG_DIR
 
 DB_PATH = CONFIG_DIR / "library.db"
@@ -26,63 +26,21 @@ _WRITE_LOCK = threading.Lock()
 # ── Encryption helpers ──────────────────────────────────────────────
 
 def _encrypt(plaintext):
-    """Encrypt *plaintext* using DPAPI on Windows, base64 fallback elsewhere."""
+    """Encrypt *plaintext* using the shared entropy-bound DPAPI helper."""
     if not plaintext:
         return ""
-    if sys.platform == "win32":
-        try:
-            import ctypes
-            import ctypes.wintypes
-
-            class DATA_BLOB(ctypes.Structure):
-                _fields_ = [
-                    ("cbData", ctypes.wintypes.DWORD),
-                    ("pbData", ctypes.POINTER(ctypes.c_char)),
-                ]
-
-            inp = plaintext.encode("utf-8")
-            blob_in = DATA_BLOB(len(inp), ctypes.create_string_buffer(inp, len(inp)))
-            blob_out = DATA_BLOB()
-            if ctypes.windll.crypt32.CryptProtectData(
-                ctypes.byref(blob_in), None, None, None, None, 0,
-                ctypes.byref(blob_out),
-            ):
-                enc = ctypes.string_at(blob_out.pbData, blob_out.cbData)
-                ctypes.windll.kernel32.LocalFree(blob_out.pbData)
-                return "dpapi:" + base64.b64encode(enc).decode("ascii")
-        except Exception:
-            pass
-    # Fallback: base64 (not secure, but better than plaintext)
-    return "b64:" + base64.b64encode(plaintext.encode("utf-8")).decode("ascii")
+    return dpapi.encrypt_text(plaintext, description="UCX-StreamKeep account")
 
 
 def _decrypt(stored):
     """Decrypt a value produced by ``_encrypt()``."""
     if not stored:
         return ""
-    if stored.startswith("dpapi:") and sys.platform == "win32":
+    if dpapi.is_encrypted_text(stored):
         try:
-            import ctypes
-            import ctypes.wintypes
-
-            class DATA_BLOB(ctypes.Structure):
-                _fields_ = [
-                    ("cbData", ctypes.wintypes.DWORD),
-                    ("pbData", ctypes.POINTER(ctypes.c_char)),
-                ]
-
-            raw = base64.b64decode(stored[6:])
-            blob_in = DATA_BLOB(len(raw), ctypes.create_string_buffer(raw, len(raw)))
-            blob_out = DATA_BLOB()
-            if ctypes.windll.crypt32.CryptUnprotectData(
-                ctypes.byref(blob_in), None, None, None, None, 0,
-                ctypes.byref(blob_out),
-            ):
-                dec = ctypes.string_at(blob_out.pbData, blob_out.cbData)
-                ctypes.windll.kernel32.LocalFree(blob_out.pbData)
-                return dec.decode("utf-8")
-        except Exception:
-            pass
+            return dpapi.decrypt_text(stored)
+        except (dpapi.DpapiUnavailable, OSError, UnicodeDecodeError, ValueError):
+            return ""
     if stored.startswith("b64:"):
         try:
             return base64.b64decode(stored[4:]).decode("utf-8")
@@ -124,9 +82,16 @@ def get_credential(platform):
 
 
 def set_credential(platform, value):
-    """Store an encrypted credential for *platform*."""
+    """Store an encrypted credential and return ``(succeeded, message)``.
+
+    Encryption happens before the database transaction, so a DPAPI failure
+    leaves any previously stored credential untouched.
+    """
     _ensure_table()
-    enc = _encrypt(value)
+    try:
+        enc = _encrypt(value)
+    except (dpapi.DpapiUnavailable, OSError) as exc:
+        return False, f"Credential was not saved because DPAPI protection failed: {exc}"
     with _WRITE_LOCK:
         db = sqlite3.connect(str(DB_PATH), check_same_thread=False, timeout=10)
         try:
@@ -138,6 +103,7 @@ def set_credential(platform, value):
             db.commit()
         finally:
             db.close()
+    return True, "Credential saved with DPAPI protection."
 
 
 def delete_credential(platform):

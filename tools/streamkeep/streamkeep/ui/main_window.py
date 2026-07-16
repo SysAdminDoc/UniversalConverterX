@@ -2387,13 +2387,22 @@ class StreamKeep(QMainWindow):
         from streamkeep.accounts import set_credential, credential_status
         inputs = getattr(self, "_account_inputs", {})
         saved = 0
+        failures = []
         for plat_key, (inp, status_label) in inputs.items():
             val = inp.text().strip()
             if val:
-                set_credential(plat_key, val)
-                inp.clear()
-                saved += 1
+                ok, message = set_credential(plat_key, val)
+                if ok:
+                    inp.clear()
+                    saved += 1
+                else:
+                    failures.append(f"{plat_key}: {message}")
             status_label.setText(credential_status(plat_key))
+        if failures:
+            detail = "; ".join(failures)
+            self._set_status(detail, "error")
+            self._log(f"[ACCOUNTS] {detail}")
+            return
         if saved:
             self._set_status(f"Saved {saved} token(s).", "success")
             self._log(f"[ACCOUNTS] Saved {saved} platform token(s)")

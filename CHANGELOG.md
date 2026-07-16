@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Security
 
+- DPAPI protection now uses current-user scope plus application-specific entropy and reports failures instead of returning or storing plaintext. StreamKeep cookies, account credentials, and config secrets share a versioned DPAPI2 format, retain legacy read compatibility, migrate cookie stores safely, and preserve existing data when protection fails.
 - Successful conversions now preserve a source file's Windows Mark-of-the-Web on derived outputs, including the default keep-source flow. Archive extraction now runs in a private staging tree, rejects links and reparse points, applies the archive's Zone.Identifier to every regular extracted file, and promotes files only after 7-Zip succeeds.
 - ImageMagick conversions now force a shipped policy that blocks MVG, MSL, internal MSVG, and remote URL coders while bounding CPU, memory, disk, dimensions, and sequence length. Calibre sidecar jobs now use isolated config/cache/temp roots with custom plugins and Python templates disabled, stage copied inputs and outputs in a private job directory, and atomically promote only non-empty regular outputs.
 - Raised all Pillow sidecar floors to 12.3.0 and yt-dlp to 2026.07.04, with the sidecar contract gate enforcing both floors.
