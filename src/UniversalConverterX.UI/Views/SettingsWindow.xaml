@@ -387,6 +387,76 @@
                     </StackPanel>
                 </Expander>
 
+                <!-- Third-party plugins -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE74C;" FontSize="20" Margin="0,0,16,0"
+                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Trusted Plugins" Style="{StaticResource LabelTextStyle}"/>
+                                <TextBlock Text="Review local sidecars before they can run"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="14" Padding="0,16,0,0">
+                        <TextBlock Text="Dropped plugins are quarantined by default. Trust covers the SHA-256 of every file; any change disables execution until you review and trust the new hash. Links and reparse points are rejected."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <ListView x:Name="PluginsListView"
+                                  SelectionMode="None"
+                                  IsItemClickEnabled="False"
+                                  MaxHeight="300">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="0,8" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <FontIcon Glyph="{Binding StatusGlyph}"
+                                                  Foreground="{Binding StatusColor}"
+                                                  FontSize="16"/>
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Text="{Binding StatusText}"
+                                                       Style="{StaticResource MutedTextStyle}"
+                                                       TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Sha256Display}"
+                                                       FontFamily="Consolas"
+                                                       Style="{StaticResource MutedTextStyle}"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="2"
+                                                Content="{Binding ActionText}"
+                                                IsEnabled="{Binding CanChangeTrust}"
+                                                Tag="{Binding Id}"
+                                                Click="PluginTrustAction_Click"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                MinWidth="100"
+                                                AutomationProperties.Name="{Binding ActionText}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="NoPluginsText"
+                                   Text="No plugins found. Drop a plugin directory containing manifest.json into the local plugins folder."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <Button Content="Open plugins folder"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HorizontalAlignment="Right"
+                                Click="OpenPluginsFolder_Click"
+                                AutomationProperties.AutomationId="OpenPluginsFolderButton"/>
+                    </StackPanel>
+                </Expander>
+
                 <!-- Shell Integration -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>

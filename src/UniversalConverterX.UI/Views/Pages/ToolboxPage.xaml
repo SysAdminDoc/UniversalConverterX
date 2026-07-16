@@ -169,6 +169,13 @@
                           UseSystemFocusVisuals="True"
                           ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
             </StackPanel>
+
+            <StackPanel x:Name="PluginSection" Spacing="12" Visibility="Collapsed">
+                <TextBlock Text="Trusted Plugins" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <GridView x:Name="PluginGrid" SelectionMode="None" IsItemClickEnabled="True"
+                          UseSystemFocusVisuals="True"
+                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

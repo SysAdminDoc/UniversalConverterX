@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Utilities;
+using UniversalConverterX.Core.Security;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -51,6 +52,7 @@ public sealed class SidecarRunner : ISidecarRunner
 {
     private readonly ConverterXOptions? _options;
     private readonly IFfmpegCommandReviewService? _ffmpegCommandReview;
+    private readonly IPluginTrustService? _pluginTrustService;
 
     /// <summary>Default constructor for callers that don't need options injection.</summary>
     public SidecarRunner() { }
@@ -60,10 +62,12 @@ public sealed class SidecarRunner : ISidecarRunner
 
     public SidecarRunner(
         IOptions<ConverterXOptions> options,
-        IFfmpegCommandReviewService ffmpegCommandReview)
+        IFfmpegCommandReviewService ffmpegCommandReview,
+        IPluginTrustService? pluginTrustService = null)
     {
         _options = options?.Value;
         _ffmpegCommandReview = ffmpegCommandReview;
+        _pluginTrustService = pluginTrustService;
     }
 
     public string? Locate(string toolName)
@@ -102,6 +106,12 @@ public sealed class SidecarRunner : ISidecarRunner
             "UniversalConverterX", "tools", toolName, exeName);
         if (File.Exists(localApp)) return localApp;
 
+        // Third-party plugins are a separate, default-deny execution root.
+        // TryGetTrustedPlugin recomputes the whole-directory SHA-256 before
+        // every launch, so modified or symlinked plugin files never run.
+        if (_pluginTrustService?.TryGetTrustedPlugin(toolName, out var plugin) == true)
+            return plugin!.ExecutablePath;
+
         return null;
     }
 
@@ -125,7 +135,8 @@ public sealed class SidecarRunner : ISidecarRunner
                 ErrorMessage:
                     $"Could not locate '{toolName}.exe'. Build it with " +
                     $"`pwsh tools/{toolName}/build.ps1`, or drop a frozen exe at " +
-                    $"%LocalAppData%/UniversalConverterX/tools/{toolName}/{toolName}.exe.",
+                    $"%LocalAppData%/UniversalConverterX/tools/{toolName}/{toolName}.exe. " +
+                    "Third-party engines must also be explicitly trusted in Settings > Plugins.",
                 ExitCode: -1);
         }
 

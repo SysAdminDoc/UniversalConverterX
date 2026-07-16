@@ -9,6 +9,7 @@ using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Security;
 using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
 using Windows.System;
@@ -24,7 +25,10 @@ public sealed partial class SettingsWindow : Window
     private readonly ConverterXOptions _options;
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
+    private readonly IPluginTrustService _pluginTrustService;
+    private readonly IUiPresetCache _presetCache;
     private readonly ObservableCollection<ToolViewModel> _tools = [];
+    private readonly ObservableCollection<PluginViewModel> _plugins = [];
     private string? _availableReleaseUrl;
 
     private bool _isDirty = false;
@@ -35,6 +39,8 @@ public sealed partial class SettingsWindow : Window
         _options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>().Value;
         _toolManager = serviceProvider.GetRequiredService<IToolManager>();
         _toolDownloader = serviceProvider.GetService<IToolDownloader>();
+        _pluginTrustService = serviceProvider.GetRequiredService<IPluginTrustService>();
+        _presetCache = serviceProvider.GetRequiredService<IUiPresetCache>();
 
         InitializeComponent();
 
@@ -47,6 +53,89 @@ public sealed partial class SettingsWindow : Window
 
         LoadSettings();
         LoadTools();
+        _ = LoadPluginsAsync();
+    }
+
+    private async Task LoadPluginsAsync()
+    {
+        var discovered = await Task.Run(_pluginTrustService.Discover);
+        _plugins.Clear();
+        PluginsListView.ItemsSource = _plugins;
+        foreach (var plugin in discovered)
+        {
+            var trusted = plugin.TrustState == PluginTrustState.Trusted;
+            var invalid = plugin.TrustState == PluginTrustState.Invalid;
+            _plugins.Add(new PluginViewModel
+            {
+                Id = plugin.Id,
+                Name = string.IsNullOrWhiteSpace(plugin.Version)
+                    ? plugin.Name
+                    : $"{plugin.Name} {plugin.Version}",
+                State = plugin.TrustState,
+                StatusGlyph = trusted ? "\uE73E" : invalid ? "\uE711" : "\uE7BA",
+                StatusColor = (SolidColorBrush)Application.Current.Resources[
+                    trusted ? "AccentGreenBrush" : invalid ? "AccentRedBrush" : "AccentOrangeBrush"],
+                StatusText = plugin.StatusDetail,
+                Sha256Display = plugin.Sha256 is null ? "No trusted digest" : "SHA-256 " + plugin.Sha256[..16] + "…",
+                ActionText = plugin.TrustState switch
+                {
+                    PluginTrustState.Trusted => "Revoke",
+                    PluginTrustState.Changed => "Re-trust",
+                    PluginTrustState.Untrusted => "Trust",
+                    _ => "Invalid",
+                },
+                CanChangeTrust = plugin.CanTrust || plugin.IsTrusted,
+            });
+        }
+
+        NoPluginsText.Visibility = _plugins.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PluginsListView.Visibility = _plugins.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private async void PluginTrustAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string pluginId })
+            return;
+        var plugin = (await Task.Run(_pluginTrustService.Discover))
+            .FirstOrDefault(item => item.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase));
+        if (plugin is null)
+        {
+            await ShowMessageAsync("Plugin unavailable", "The plugin was removed before its trust state could be changed.");
+            await LoadPluginsAsync();
+            return;
+        }
+
+        var revoke = plugin.IsTrusted;
+        var dialog = new ContentDialog
+        {
+            Title = revoke ? $"Revoke trust for {plugin.Name}?" : $"Trust {plugin.Name}?",
+            Content = revoke
+                ? "The plugin will disappear from Presets and Toolbox and cannot execute until trusted again."
+                : $"Third-party plugins run with your user permissions. Review the publisher and files before approving.\n\nSHA-256: {plugin.Sha256}",
+            PrimaryButtonText = revoke ? "Revoke" : "Trust this hash",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot,
+        };
+        if (revoke)
+            ApplyDangerPrimary(dialog);
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        var result = await Task.Run(() => revoke
+            ? _pluginTrustService.Revoke(plugin.Id)
+            : _pluginTrustService.Trust(plugin.Id));
+        _presetCache.Invalidate();
+        await LoadPluginsAsync();
+        await ShowMessageAsync(result.Success ? "Plugin trust updated" : "Plugin trust failed", result.Message);
+    }
+
+    private async void OpenPluginsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        Directory.CreateDirectory(_pluginTrustService.PluginDirectory);
+        var folder = await StorageFolder.GetFolderFromPathAsync(_pluginTrustService.PluginDirectory);
+        if (!await Launcher.LaunchFolderAsync(folder))
+            await ShowMessageAsync("Plugins folder", _pluginTrustService.PluginDirectory);
     }
 
     private void LoadSettings()
@@ -723,4 +812,27 @@ public class ToolViewModel : CommunityToolkit.Mvvm.ComponentModel.ObservableObje
     public SolidColorBrush StatusColor { get => _statusColor; set => SetProperty(ref _statusColor, value); }
     public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
     public string ActionText { get => _actionText; set => SetProperty(ref _actionText, value); }
+}
+
+public sealed class PluginViewModel : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
+{
+    private string _id = "";
+    private string _name = "";
+    private PluginTrustState _state;
+    private string _statusGlyph = "";
+    private SolidColorBrush _statusColor = new(Colors.Gray);
+    private string _statusText = "";
+    private string _sha256Display = "";
+    private string _actionText = "";
+    private bool _canChangeTrust;
+
+    public string Id { get => _id; set => SetProperty(ref _id, value); }
+    public string Name { get => _name; set => SetProperty(ref _name, value); }
+    public PluginTrustState State { get => _state; set => SetProperty(ref _state, value); }
+    public string StatusGlyph { get => _statusGlyph; set => SetProperty(ref _statusGlyph, value); }
+    public SolidColorBrush StatusColor { get => _statusColor; set => SetProperty(ref _statusColor, value); }
+    public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
+    public string Sha256Display { get => _sha256Display; set => SetProperty(ref _sha256Display, value); }
+    public string ActionText { get => _actionText; set => SetProperty(ref _actionText, value); }
+    public bool CanChangeTrust { get => _canChangeTrust; set => SetProperty(ref _canChangeTrust, value); }
 }

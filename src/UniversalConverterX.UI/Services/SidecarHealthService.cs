@@ -160,6 +160,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
             if (!string.IsNullOrWhiteSpace(sidecarDirectory))
             {
                 candidates.Add(Path.Combine(sidecarDirectory, "ucx.sidecar.json"));
+                candidates.Add(Path.Combine(sidecarDirectory, "manifest.json"));
                 var directoryName = Path.GetFileName(sidecarDirectory);
                 var engineDirectory = directoryName.Equals("dist", StringComparison.OrdinalIgnoreCase)
                     || directoryName.Equals("bin", StringComparison.OrdinalIgnoreCase)

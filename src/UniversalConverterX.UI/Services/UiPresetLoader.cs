@@ -1,4 +1,5 @@
 using UniversalConverterX.Core.Utilities;
+using UniversalConverterX.Core.Security;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -21,6 +22,12 @@ public sealed class UiPresetCache : IUiPresetCache
     private readonly object _gate = new();
     private IReadOnlyList<UiPreset>? _cached;
     private DateTime _cachedAt = DateTime.MinValue;
+    private readonly IPluginTrustService _pluginTrustService;
+
+    public UiPresetCache(IPluginTrustService pluginTrustService)
+    {
+        _pluginTrustService = pluginTrustService;
+    }
 
     public IReadOnlyList<UiPreset> Get()
     {
@@ -28,7 +35,11 @@ public sealed class UiPresetCache : IUiPresetCache
         {
             if (_cached is not null && DateTime.UtcNow - _cachedAt < Ttl)
                 return _cached;
-            _cached = UiPresetLoader.LoadAll();
+            var pluginPresets = _pluginTrustService.Discover()
+                .Where(plugin => plugin.IsTrusted)
+                .SelectMany(plugin => plugin.PresetPaths)
+                .ToList();
+            _cached = UiPresetLoader.LoadAll(pluginPresets);
             _cachedAt = DateTime.UtcNow;
             return _cached;
         }
@@ -115,7 +126,7 @@ public static class UiPresetLoader
         return dirs;
     }
 
-    public static IReadOnlyList<UiPreset> LoadAll()
+    public static IReadOnlyList<UiPreset> LoadAll(IEnumerable<string>? trustedPluginPresetPaths = null)
     {
         // Case-insensitive so a user override at the same name (regardless of
         // capitalization) shadows the installer-shipped version. The previous
@@ -133,6 +144,16 @@ public static class UiPresetLoader
                 if (p is not null && !byName.ContainsKey(p.Name))
                     byName[p.Name] = p;
             }
+        }
+
+        // Plugin presets are loaded last and therefore cannot shadow a user or
+        // installer preset with the same display name. Paths are supplied only
+        // by PluginTrustService after a whole-directory hash match.
+        foreach (var path in trustedPluginPresetPaths ?? [])
+        {
+            var preset = TryLoad(path);
+            if (preset is not null && !byName.ContainsKey(preset.Name))
+                byName[preset.Name] = preset;
         }
         return byName.Values
             .OrderBy(p => p.DisplayCategory, StringComparer.OrdinalIgnoreCase)

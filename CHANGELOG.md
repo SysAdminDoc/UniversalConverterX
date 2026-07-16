@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added default-deny third-party sidecar plugins under the local app-data plugin directory. Manifests and preset paths are validated, links/reparse points are rejected, every plugin file is covered by one SHA-256 approval, changed plugins are re-quarantined before launch, and Settings can trust or revoke plugins that then surface in Presets and Toolbox.
 - Video Enhancer now reports the local Windows App SDK 2.2 VideoScaler readiness state without downloading AI components, keeps Real-ESRGAN as the portable export backend, and includes a headless frame benchmark smoke that runs only on supported hardware.
 - Speech-to-Text now offers NVIDIA Parakeet TDT 0.6B v3 as a CUDA-only engine for 25 European languages, with word-timestamp subtitle generation and SRT/VTT/TXT/JSON parity. Its pinned CC-BY-4.0 model snapshot requires an explicit in-app license confirmation and download; transcription is offline-only and cleanly blocks when the exact model pack or CUDA runtime is absent.
 - Sidecars now share one dependency-free protocol/runtime module for NDJSON events, managed FFmpeg and FFprobe discovery, media probing, bounded FFmpeg diagnostics, and normalized progress. All standard sidecars and frozen PyInstaller builds consume the common module, with contract tests preventing helper drift.

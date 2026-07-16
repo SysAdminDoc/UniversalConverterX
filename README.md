@@ -247,6 +247,27 @@ The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Conv
 
 Converter exposes generated FFmpeg argument templates in its Advanced panel. Command editing is off by default; enable it under **Settings > Advanced** to edit a batch-safe `{input}`/`{output}` template or review exact commands generated inside sidecars before they run. UCX never sends edited text through a command shell and blocks shell metacharacters introduced by an edit.
 
+### Third-party sidecar plugins
+
+Drop each plugin into `%LOCALAPPDATA%\UniversalConverterX\plugins\<id>\`. A plugin remains quarantined until its complete directory hash is approved under **Settings > Trusted Plugins**; changed files are disabled automatically, and links/reparse points are rejected. Trusted presets appear in Presets and as one Toolbox tile per plugin.
+
+Each directory needs a `manifest.json`, its declared executable, and at least one preset:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "example-plugin",
+  "name": "Example Plugin",
+  "version": "1.0.0",
+  "description": "Local example conversion workflow",
+  "engine": "example-plugin",
+  "executable": "example-plugin.exe",
+  "presets": ["presets/example.preset.xml"]
+}
+```
+
+The directory name, `id`, and `engine` must match. Plugin preset files use the same validated `.preset.xml` schema as built-in workflows.
+
 Subtitle Studio runs a local Whisper → optional Helsinki OPUS-MT ONNX pipeline, opens the timecoded cues for text/timing edits, and exports SRT, VTT, or ASS. Video sources can also receive a hard-coded caption copy after the edited subtitle file is saved.
 
 Speech-to-Text also offers NVIDIA Parakeet TDT 0.6B v3 for CUDA systems and its 25 supported European languages. Its pinned CC-BY-4.0 model pack is never fetched implicitly: select Parakeet, review the license, and use the explicit model-download action before transcribing. CPU-only systems can continue using faster-whisper or whisper.cpp.

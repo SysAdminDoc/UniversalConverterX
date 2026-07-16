@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Security;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
@@ -14,11 +16,13 @@ public sealed partial class ToolboxPage : Page
     public ObservableCollection<ToolboxTile> DocumentTools { get; } = new();
     public ObservableCollection<ToolboxTile> DiscTools { get; } = new();
     public ObservableCollection<ToolboxTile> OtherTools { get; } = new();
+    public ObservableCollection<ToolboxTile> PluginTools { get; } = new();
 
     public ToolboxPage()
     {
         InitializeComponent();
         SeedTiles();
+        SeedPluginTiles();
         // The wave-by-wave SeedTiles() body has accreted over 20+ releases and
         // a few tiles end up with the same RouteKey across waves (e.g.
         // presets:codeformat, presets:audiotag, presets:gisconvert). Dedupe
@@ -30,6 +34,7 @@ public sealed partial class ToolboxPage : Page
         DedupeTiles(DocumentTools);
         DedupeTiles(DiscTools);
         DedupeTiles(OtherTools);
+        DedupeTiles(PluginTools);
 
         ImageGrid.ItemsSource = ImageTools;
         VideoGrid.ItemsSource = VideoTools;
@@ -38,6 +43,29 @@ public sealed partial class ToolboxPage : Page
         DocumentGrid.ItemsSource = DocumentTools;
         DiscGrid.ItemsSource = DiscTools;
         OtherGrid.ItemsSource = OtherTools;
+        PluginGrid.ItemsSource = PluginTools;
+        PluginSection.Visibility = PluginTools.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SeedPluginTiles()
+    {
+        var trustService = App.Services.GetRequiredService<IPluginTrustService>();
+        var blue = (Brush)Application.Current.Resources["AccentBlueBrush"];
+        var green = (Brush)Application.Current.Resources["AccentGreenBrush"];
+        foreach (var plugin in trustService.Discover()
+                     .Where(plugin => plugin.IsTrusted && plugin.PresetPaths.Count > 0))
+        {
+            PluginTools.Add(new ToolboxTile(
+                $"presets:{plugin.Engine}",
+                plugin.Name,
+                plugin.Description,
+                "\uE74C",
+                blue,
+                "Ready",
+                green,
+                plugin.IsAi,
+                $"{plugin.Name} {plugin.Version}"));
+        }
     }
 
     private static void DedupeTiles(ObservableCollection<ToolboxTile> tiles)

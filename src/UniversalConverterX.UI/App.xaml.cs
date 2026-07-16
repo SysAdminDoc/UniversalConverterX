@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Security;
 using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.ViewModels;
 using UniversalConverterX.UI.Views;
@@ -52,6 +53,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IFfmpegCommandReviewService, FfmpegCommandReviewService>();
+        services.AddSingleton<IPluginTrustService, PluginTrustService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
         services.AddSingleton<IHistoryService, HistoryService>();
         services.AddSingleton<IPostQueueActionService, PostQueueActionService>();
