@@ -120,7 +120,7 @@ public sealed partial class HomePage : Page
         Actions.Add(new HomeActionTile("Toolbox", "Open utilities for subtitles, watermarks, audio, discs, and metadata.", "\uE713", orange, greenSurface, "Mapped", "Browse tools", "toolbox"));
 
         AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Create transcript-backed summaries from long recordings.", "\uE8D2", blue, "Planned", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Generate editable caption files and translations.", "\uED1E", green, "Planned", "ai-lab"));
+        AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Transcribe, translate, edit, export, and burn local captions.", "\uED1E", green, "Ready", "ai-subtitle"));
         AiFeatures.Add(new HomeAiFeatureTile("Watermark Remover", "Inpaint selected logos, text, or objects.", "\uE71B", orange, "Planned", "ai-lab"));
         AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Ready", "ai-image-enhancer"));
         AiFeatures.Add(new HomeAiFeatureTile("Noise Remover", "Reduce background noise in speech and camera audio.", "\uE767", blue, "Planned", "ai-lab"));
@@ -149,7 +149,7 @@ public sealed partial class HomePage : Page
             new("VR converter", "Run ClipForge 360 / VR projection presets", "presets:clipforge"),
             new("Metadata editor", "Run ExifTool metadata presets", "presets:exiftool-meta"),
             new("Subtitle remover", "Run VideoSubtitleRemover presets", "presets:videosubtitleremover"),
-            new("Subtitle generator", "View AI Lab status", "ai-lab"),
+            new("Subtitle generator", "Open the local subtitle studio", "ai-subtitle"),
             new("Watermark remover", "View AI Lab status", "ai-lab"),
             new("Background remover", "Open background remover", "ai-bgremove"),
             new("Vocal remover", "View AI Lab status", "ai-lab"),

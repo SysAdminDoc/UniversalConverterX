@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Subtitle Studio now runs a complete local Whisper-to-caption workflow with optional Helsinki OPUS-MT translation through ONNX Runtime, editable text and cue timing preview, SRT/VTT/ASS export, and post-preview video burn-in. The AI Lab and Home tiles now open the ready workflow.
 - Converter now exposes batch-safe FFmpeg command templates with required `{input}` and `{output}` placeholders. An off-by-default Advanced setting enables shell-free argument editing for direct conversions and exact per-invocation command review for FFmpeg calls made inside sidecars; edited vectors reject shell metacharacters before dispatch.
 - Audio Converter is now a complete batch workflow in Toolbox with MP3, AAC, FDK-AAC, Opus, Ogg Vorbis, FLAC, WAV, ALAC, WavPack, AC-3, E-AC-3, and WMA targets. Codec-aware VBR quality (0–9), fixed bitrate, sample-rate/channel overrides, Opus application/frame controls, FDK-AAC cutoff/afterburner/profile controls, and Vorbis managed mode are wired to AudioPro; existing outputs receive unique names instead of being overwritten.
 - Conversion history persistence now lives in a headless Core store with CI coverage for CRUD, search, summaries, row/age retention, and concurrent writers. Explorer preset launches now use a tested argument-vector builder with safe quote/Unicode handling and automatic list-file fallback, and the test suite executes a real preset through its sidecar.

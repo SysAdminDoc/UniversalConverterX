@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 try:
     import orjson
     def _dumps(obj):
@@ -107,8 +108,71 @@ def _load_madlad(model_id: str, tgt: str, device: str):
     return translate
 
 
+def helsinki_model_id(source: str, target: str) -> str:
+    """Return the deterministic OPUS-MT pair used by Subtitle Studio."""
+    source = source.strip().lower()
+    target = target.strip().lower()
+    if not re.fullmatch(r"[a-z]{2,3}(?:-[a-z]{2,4})?", source):
+        raise ValueError(f"Invalid OPUS-MT source language: {source!r}")
+    if not re.fullmatch(r"[a-z]{2,3}(?:-[a-z]{2,4})?", target):
+        raise ValueError(f"Invalid OPUS-MT target language: {target!r}")
+    if source == target:
+        raise ValueError("Source and target languages must differ.")
+    model_codes = {"ja": "jap"}
+    return (
+        "Helsinki-NLP/opus-mt-"
+        f"{model_codes.get(source, source)}-{model_codes.get(target, target)}"
+    )
+
+
+def _load_helsinki_onnx(model_id: str, device: str):
+    """Load a Marian OPUS-MT pair through ONNX Runtime, exporting once when
+    the upstream model does not already publish ONNX weights. The exported
+    graph is cached by Optimum in the normal Hugging Face model cache."""
+    import onnxruntime as ort
+    from optimum.onnxruntime import ORTModelForSeq2SeqLM
+    from transformers import AutoTokenizer
+
+    providers = ort.get_available_providers()
+    wants_cuda = device.lower().startswith("cuda")
+    provider = (
+        "CUDAExecutionProvider"
+        if wants_cuda and "CUDAExecutionProvider" in providers
+        else "CPUExecutionProvider"
+    )
+    if wants_cuda and provider == "CPUExecutionProvider":
+        emit("log", level="warn",
+             message="ONNX Runtime CUDA provider is unavailable; OPUS-MT is using CPU.")
+
+    cache_root = Path(os.environ.get("UCX_MODEL_DIR") or Path.home() / ".cache" / "ucx-models")
+    cache_dir = cache_root / "translatekit" / model_id.replace("/", "--")
+    cached = (cache_dir / "config.json").is_file() and any(cache_dir.glob("*.onnx"))
+    tokenizer = AutoTokenizer.from_pretrained(cache_dir if cached else model_id)
+    if cached:
+        model = ORTModelForSeq2SeqLM.from_pretrained(cache_dir, provider=provider)
+    else:
+        emit("log", level="info",
+             message=f"Exporting {model_id} to ONNX (one-time model cache setup).")
+        model = ORTModelForSeq2SeqLM.from_pretrained(
+            model_id, export=True, provider=provider)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        model.save_pretrained(cache_dir)
+        tokenizer.save_pretrained(cache_dir)
+
+    def translate(text: str) -> str:
+        inputs = tokenizer(text, return_tensors="pt", truncation=True,
+                           max_length=512)
+        out = model.generate(**inputs, max_new_tokens=512, num_beams=4)
+        return tokenizer.batch_decode(out, skip_special_tokens=True)[0]
+    return translate
+
+
 def _build_translator(args):
     model_id = args.model
+    if model_id.lower() in {"helsinki", "opus-mt", "helsinki-opus-mt"}:
+        model_id = helsinki_model_id(args.source, args.target)
+    if model_id.lower().startswith("helsinki-nlp/opus-mt-"):
+        return _load_helsinki_onnx(model_id, args.device)
     if "madlad" in model_id.lower():
         return _load_madlad(model_id, args.target, args.device)
     src = _resolve_nllb(args.source)
@@ -242,7 +306,7 @@ def op_langs(_args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="translatekit-sidecar",
-                                description="Offline neural translation (NLLB-200 / MADLAD-400).")
+                                description="Offline neural translation (OPUS-MT ONNX / NLLB-200 / MADLAD-400).")
     sub = p.add_subparsers(dest="op", required=True)
 
     def add_common(c):
@@ -250,7 +314,8 @@ def build_parser() -> argparse.ArgumentParser:
         c.add_argument("--target", required=True,
                        help="Target language tag (en, es, fr, de, ja, zh, ar, ...)")
         c.add_argument("--model", default="facebook/nllb-200-distilled-600M",
-                       help="HF model id. NLLB: facebook/nllb-200-distilled-600M | "
+                       help="Model id or 'opus-mt' for Helsinki OPUS-MT ONNX. "
+                            "NLLB: facebook/nllb-200-distilled-600M | "
                             "facebook/nllb-200-distilled-1.3B | facebook/nllb-200-3.3B. "
                             "MADLAD: google/madlad400-3b-mt | google/madlad400-7b-mt-bt.")
         c.add_argument("--device", default="cuda")
@@ -274,7 +339,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--output-dir", required=True, dest="output_dir")
     s.add_argument("--source", default="en")
     s.add_argument("--target", required=True)
-    s.add_argument("--model", default="facebook/nllb-200-distilled-600M")
+    s.add_argument("--model", default="facebook/nllb-200-distilled-600M",
+                   help="Model id or 'opus-mt' for Helsinki OPUS-MT ONNX.")
     s.add_argument("--device", default="cuda")
 
     sub.add_parser("langs", help="List supported language codes.")

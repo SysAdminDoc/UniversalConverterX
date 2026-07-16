@@ -2,3 +2,6 @@ transformers>=4.46
 torch>=2.4
 sentencepiece>=0.2
 accelerate>=0.34
+optimum-onnx[onnxruntime]>=0.1.0
+onnxruntime>=1.25.1,<1.27
+sacremoses>=0.1

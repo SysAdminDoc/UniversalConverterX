@@ -28,7 +28,7 @@ public sealed partial class AiLabPage : Page
         Tools.Add(new AiLabToolTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos without cloud processing.", "\uEB9F", cyan, "Ready", "Workflow available", "Real-ESRGAN"));
         Tools.Add(new AiLabToolTile("Background Remover", "Remove or replace video/image backgrounds and preserve alpha exports.", "\uE91B", green, "Ready", "Workflow available", "AlphaCut"));
         Tools.Add(new AiLabToolTile("Watermark Remover", "Inpaint selected logos, captions, objects, or people.", "\uE71B", orange, "Planned", "Needs region selection UI", "VideoSubtitleRemover"));
-        Tools.Add(new AiLabToolTile("AI Subtitle & Translation", "Generate, edit, translate, burn, or export SRT/VTT/ASS captions.", "\uED1E", green, "Planned", "Needs Whisper pipeline", "Whisper"));
+        Tools.Add(new AiLabToolTile("AI Subtitle & Translation", "Generate, edit, translate, burn, or export SRT/VTT/ASS captions.", "\uED1E", green, "Ready", "Full local studio available", "Whisper + OPUS-MT ONNX"));
         Tools.Add(new AiLabToolTile("Video Summarizer", "Extract chapters, highlights, and written summaries from long recordings.", "\uE8D2", blue, "Planned", "Needs transcript pipeline", "Whisper + local LLM"));
         Tools.Add(new AiLabToolTile("Noise Remover", "Reduce steady noise in speech and camera audio.", "\uE767", cyan, "Planned", "Needs audio model", "RNNoise / Demucs"));
         Tools.Add(new AiLabToolTile("Vocal Remover", "Split vocals and instrumentals for music and editing workflows.", "\uEC4F", red, "Planned", "Needs stem preview", "Demucs"));

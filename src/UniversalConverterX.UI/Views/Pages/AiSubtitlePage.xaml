@@ -21,8 +21,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock Text="Auto Subtitle" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock Text="Whisper transcription → SRT/VTT subtitle file. Optional burn-in produces a video with hard-coded captions."
+                <TextBlock Text="Subtitle Studio" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Transcribe with Whisper, translate locally, edit every cue, then export SRT/VTT/ASS or burn captions into video."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -32,7 +32,7 @@
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="AiSubtitlePageButton01"/>
                 <Button x:Name="RunButton"
-                        Content="Generate"
+                        Content="Transcribe &amp; Preview"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="Run_Click"
                         IsEnabled="False"
@@ -53,38 +53,85 @@
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14"
-                            MinHeight="430">
-                    <Border Width="116" Height="116" CornerRadius="28"
-                            Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xED1E;" FontSize="48"
-                                  Foreground="{StaticResource AccentBlueBrush}"/>
-                    </Border>
-                    <TextBlock x:Name="DropZoneLabel"
-                               Text="Drop a video or audio file here"
-                               Style="{StaticResource SubtitleTextStyle}"
-                               HorizontalAlignment="Center"
-                               TextWrapping="Wrap"
-                               TextAlignment="Center"
-                               MaxWidth="460"/>
-                    <TextBlock x:Name="ProgressLabel"
-                               Style="{StaticResource MutedTextStyle}"
-                               HorizontalAlignment="Center"
-                               TextAlignment="Center"
-                               MaxWidth="460"/>
-                    <ProgressBar AutomationProperties.Name="Progress" x:Name="ProgressBar"
-                                 Width="380" Height="6" CornerRadius="3"
-                                 Minimum="0" Maximum="100"
-                                 Visibility="Collapsed"/>
-                    <Button Content="Browse File"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Click="Browse_Click"
-                            HorizontalAlignment="Center"
-                        AutomationProperties.AutomationId="AiSubtitlePageButton02"/>
-                </StackPanel>
+                <Grid MinHeight="430">
+                    <StackPanel x:Name="DropZonePanel"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="14">
+                        <Border Width="116" Height="116" CornerRadius="28"
+                                Background="{StaticResource SurfaceLightBrush}">
+                            <FontIcon Glyph="&#xED1E;" FontSize="48"
+                                      Foreground="{StaticResource AccentBlueBrush}"/>
+                        </Border>
+                        <TextBlock x:Name="DropZoneLabel"
+                                   Text="Drop a video or audio file here"
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   MaxWidth="460"/>
+                        <TextBlock x:Name="ProgressLabel"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   MaxWidth="460"/>
+                        <ProgressBar AutomationProperties.Name="Pipeline progress" x:Name="ProgressBar"
+                                     Width="380" Height="6" CornerRadius="3"
+                                     Minimum="0" Maximum="100"
+                                     Visibility="Collapsed"/>
+                        <Button Content="Browse File"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="Browse_Click"
+                                HorizontalAlignment="Center"
+                                AutomationProperties.AutomationId="AiSubtitlePageButton02"/>
+                    </StackPanel>
+
+                    <Grid x:Name="EditorPanel" Visibility="Collapsed" RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Caption preview" Style="{StaticResource PanelTitleTextStyle}"/>
+                                <TextBlock x:Name="CueSummaryText" Style="{StaticResource MutedTextStyle}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="Times are seconds" Style="{StaticResource MutedTextStyle}"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                        <ListView Grid.Row="1" x:Name="CueList" SelectionMode="None"
+                                  AutomationProperties.Name="Editable subtitle cues">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="4,6" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="38"/>
+                                            <ColumnDefinition Width="104"/>
+                                            <ColumnDefinition Width="104"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Number}" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"/>
+                                        <NumberBox Grid.Column="1" Header="Start" Value="{Binding StartSeconds, Mode=TwoWay}"
+                                                   Minimum="0" SmallChange="0.1" SpinButtonPlacementMode="Compact"/>
+                                        <NumberBox Grid.Column="2" Header="End" Value="{Binding EndSeconds, Mode=TwoWay}"
+                                                   Minimum="0" SmallChange="0.1" SpinButtonPlacementMode="Compact"/>
+                                        <TextBox Grid.Column="3" Header="Caption" Text="{Binding Text, Mode=TwoWay}"
+                                                 AcceptsReturn="True" TextWrapping="Wrap" MinWidth="220"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Grid>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="14">
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="14">
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Backend" Style="{StaticResource PanelTitleTextStyle}"/>
@@ -158,6 +205,42 @@
 
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
+                        <TextBlock Text="Translation" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <CheckBox x:Name="TranslateCheck"
+                                  Content="Translate after transcription"
+                                  Checked="Settings_Bool_Changed"
+                                  Unchecked="Settings_Bool_Changed"
+                                  AutomationProperties.AutomationId="TranslateCheck"/>
+                        <ComboBox x:Name="TranslationModelCombo"
+                                  Header="Local model"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Settings_Changed"
+                                  AutomationProperties.AutomationId="TranslationModelCombo">
+                            <ComboBoxItem Content="Helsinki OPUS-MT (ONNX, lightweight)" Tag="opus-mt"/>
+                            <ComboBoxItem Content="NLLB-200 distilled (broad coverage)" Tag="facebook/nllb-200-distilled-600M"/>
+                        </ComboBox>
+                        <ComboBox x:Name="TargetLanguageCombo"
+                                  Header="Translate to"
+                                  SelectedIndex="0"
+                                  SelectionChanged="Settings_Changed"
+                                  AutomationProperties.AutomationId="TargetLanguageCombo">
+                            <ComboBoxItem Content="Spanish" Tag="es"/>
+                            <ComboBoxItem Content="French" Tag="fr"/>
+                            <ComboBoxItem Content="German" Tag="de"/>
+                            <ComboBoxItem Content="Portuguese" Tag="pt"/>
+                            <ComboBoxItem Content="Italian" Tag="it"/>
+                            <ComboBoxItem Content="Japanese" Tag="ja"/>
+                            <ComboBoxItem Content="Chinese" Tag="zh"/>
+                            <ComboBoxItem Content="Russian" Tag="ru"/>
+                            <ComboBoxItem Content="Korean" Tag="ko"/>
+                        </ComboBox>
+                        <TextBlock Text="Choose the source language above when translating; auto-detect remains available for transcription-only jobs."
+                                   Style="{StaticResource MutedTextStyle}" FontSize="11" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="FormatCombo"
                                   Header="Subtitle format"
@@ -167,19 +250,21 @@
                             AutomationProperties.AutomationId="FormatCombo">
                             <ComboBoxItem Content="SubRip (.srt)" Tag="srt"/>
                             <ComboBoxItem Content="WebVTT (.vtt)" Tag="vtt"/>
+                            <ComboBoxItem Content="Advanced SubStation Alpha (.ass)" Tag="ass"/>
                         </ComboBox>
                         <CheckBox x:Name="BurnInCheck"
                                   Content="Also burn subtitles into a copy of the video"
                                   Checked="Settings_Bool_Changed"
                                   Unchecked="Settings_Bool_Changed"
                             AutomationProperties.AutomationId="BurnInCheck"/>
-                        <TextBlock Text="Burn-in re-encodes the video with hard-coded captions. The original .srt/.vtt is kept alongside."
+                        <TextBlock Text="Export uses the edited preview. Burn-in re-encodes video with the exported caption file and keeps both outputs."
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="11"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="2">
@@ -187,18 +272,25 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="StatusText"
                        Style="{StaticResource MutedTextStyle}"
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
-            <Button Grid.Column="1" x:Name="OpenOutputButton" Content="Open Output"
+            <Button Grid.Column="1" x:Name="ExportButton" Content="Export Preview"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Click="Export_Click"
+                    Margin="0,0,12,0"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="ExportButton"/>
+            <Button Grid.Column="2" x:Name="OpenOutputButton" Content="Open Output"
                     Style="{StaticResource GhostButtonStyle}"
                     Click="OpenOutput_Click"
                     Margin="0,0,12,0"
                     IsEnabled="False"
                 AutomationProperties.AutomationId="OpenOutputButton"/>
-            <Button Grid.Column="2" x:Name="CancelButton" Content="Cancel"
+            <Button Grid.Column="3" x:Name="CancelButton" Content="Cancel"
                     Style="{StaticResource DangerButtonStyle}"
                     Click="Cancel_Click"
                     IsEnabled="False"

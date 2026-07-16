@@ -1,8 +1,15 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Models;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -19,14 +26,20 @@ public sealed partial class AiSubtitlePage : Page
     ];
 
     private readonly ISidecarRunner _runner;
+    private readonly ConverterXOptions _options;
+    private readonly ObservableCollection<EditableSubtitleCue> _cues = [];
     private CancellationTokenSource? _cts;
     private string? _selectedPath;
-    private string? _lastSubtitlePath;
+    private string? _lastOutputPath;
+    private string? _previewLanguageSuffix;
 
     public AiSubtitlePage()
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _options = App.Services.GetRequiredService<IOptions<ConverterXOptions>>().Value;
+        CueList.ItemsSource = _cues;
+        UpdateRunEnabled();
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -39,10 +52,12 @@ public sealed partial class AiSubtitlePage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+            return;
         var items = await e.DataView.GetStorageItemsAsync();
         var first = items.OfType<StorageFile>().FirstOrDefault();
-        if (first is not null) AcceptFile(first.Path);
+        if (first is not null)
+            AcceptFile(first.Path);
     }
 
     private async void Browse_Click(object sender, RoutedEventArgs e)
@@ -52,13 +67,14 @@ public sealed partial class AiSubtitlePage : Page
             ViewMode = PickerViewMode.List,
             SuggestedStartLocation = PickerLocationId.VideosLibrary,
         };
-        foreach (var ext in AcceptedExtensions) picker.FileTypeFilter.Add(ext);
+        foreach (var extension in AcceptedExtensions)
+            picker.FileTypeFilter.Add(extension);
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
         WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
         var file = await picker.PickSingleFileAsync();
-        if (file is not null) AcceptFile(file.Path);
+        if (file is not null)
+            AcceptFile(file.Path);
     }
 
     private void AcceptFile(string path)
@@ -68,9 +84,17 @@ public sealed partial class AiSubtitlePage : Page
             StatusText.Text = $"Unsupported extension {Path.GetExtension(path)}";
             return;
         }
+
         _selectedPath = path;
+        _lastOutputPath = null;
+        _previewLanguageSuffix = null;
+        _cues.Clear();
+        EditorPanel.Visibility = Visibility.Collapsed;
+        DropZonePanel.Visibility = Visibility.Visible;
         DropZoneLabel.Text = Path.GetFileName(path);
+        ProgressLabel.Text = "Choose transcription and translation settings, then generate a preview.";
         StatusText.Text = "Ready.";
+        OpenOutputButton.IsEnabled = false;
         UpdateRunEnabled();
     }
 
@@ -82,157 +106,387 @@ public sealed partial class AiSubtitlePage : Page
 
     private void UpdateRunEnabled()
     {
-        if (RunButton is null) return;
-        RunButton.IsEnabled = _selectedPath is not null && _cts is null;
+        if (RunButton is null)
+            return;
+
+        var busy = _cts is not null;
+        var translate = TranslateCheck?.IsChecked == true;
+        RunButton.IsEnabled = _selectedPath is not null && !busy;
+        if (ExportButton is not null)
+            ExportButton.IsEnabled = _cues.Count > 0 && !busy;
+        if (CancelButton is not null)
+            CancelButton.IsEnabled = busy;
+        if (TranslationModelCombo is not null)
+            TranslationModelCombo.IsEnabled = translate && !busy;
+        if (TargetLanguageCombo is not null)
+            TargetLanguageCombo.IsEnabled = translate && !busy;
     }
 
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedPath is null || _cts is not null) return;
+        if (_selectedPath is null || _cts is not null)
+            return;
 
         var backend = SelectedTag(BackendCombo) ?? "whisper-stt";
         var model = SelectedTag(ModelCombo) ?? "base";
         var language = SelectedTag(LanguageCombo) ?? "auto";
-        var format = SelectedTag(FormatCombo) ?? "srt";
-        var burnIn = BurnInCheck.IsChecked == true;
+        var translate = TranslateCheck.IsChecked == true;
+        var targetLanguage = SelectedTag(TargetLanguageCombo) ?? "es";
+        var translationModel = SelectedTag(TranslationModelCombo) ?? "opus-mt";
         var useVad = VadCheck.IsChecked == true;
         var batchSize = SafeBatchSize(BatchSizeBox.Value);
 
-        // Subtitle output sits next to the source. Burn-in produces a second
-        // file <name>_subtitled<ext>.
-        var dir = Path.GetDirectoryName(_selectedPath) ?? Environment.CurrentDirectory;
-        var stem = Path.GetFileNameWithoutExtension(_selectedPath);
-        var subtitlePath = EnsureUniquePath(Path.Combine(dir, $"{stem}.{format}"));
+        if (translate && language == "auto")
+        {
+            StatusText.Text = "Choose the source language before translation so the local model pair is deterministic.";
+            return;
+        }
+        if (translate && language.Equals(targetLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            StatusText.Text = "Source and translation target languages must differ.";
+            return;
+        }
+
+        var workDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "UniversalConverterX",
+            "subtitle-studio",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(workDirectory);
+        var transcriptPath = Path.Combine(workDirectory, "captions.srt");
 
         _cts = new CancellationTokenSource();
         UpdateRunEnabled();
-        CancelButton.IsEnabled = true;
         ProgressBar.Visibility = Visibility.Visible;
         ProgressBar.Value = 0;
         OpenOutputButton.IsEnabled = false;
         ProgressLabel.Text = $"Transcribing with {backend}, {model} model...";
         StatusText.Text = "Transcribing...";
 
-        // 1. Transcribe → subtitle file.
-        List<string> sttArgs;
-        if (backend == "whisper-cpp")
-        {
-            sttArgs =
-            [
-                "transcribe",
-                "--input",  _selectedPath,
-                "--output", subtitlePath,
-                "--model",  model,
-                "--language", language,
-            ];
-            if (useVad) sttArgs.Add("--vad");
-        }
-        else
-        {
-            sttArgs =
-            [
-                "--input",  _selectedPath,
-                "--output", subtitlePath,
-                "--model",  model,
-                "--language", language,
-                "--format", format,
-            ];
-            if (useVad) sttArgs.Add("--vad");
-            sttArgs.Add("--batch-size");
-            sttArgs.Add(batchSize.ToString(CultureInfo.InvariantCulture));
-        }
-
-        var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
-        {
-            // Reserve the last 15% for an optional burn-in pass.
-            ProgressBar.Value = burnIn ? p.Percent * 0.85 : p.Percent;
-            ProgressLabel.Text = string.IsNullOrEmpty(p.Stage)
-                ? $"Transcribing — {p.Percent:F0}%"
-                : $"{p.Percent:F0}% — {p.Stage}";
-        }));
-        var log = new Progress<SidecarLog>(_ => { });
-
-        SidecarResult sttResult;
         try
         {
-            sttResult = await _runner.RunAsync(backend, sttArgs, progress, log, _cts.Token);
+            var sttArguments = BuildTranscriptionArguments(
+                backend,
+                _selectedPath,
+                transcriptPath,
+                model,
+                language,
+                useVad,
+                batchSize);
+            var transcriptionProgress = new Progress<SidecarProgress>(progress =>
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ProgressBar.Value = progress.Percent * (translate ? 0.7 : 1.0);
+                    ProgressLabel.Text = string.IsNullOrEmpty(progress.Stage)
+                        ? $"Transcribing - {progress.Percent:F0}%"
+                        : $"{progress.Percent:F0}% - {progress.Stage}";
+                }));
+
+            var transcription = await _runner.RunAsync(
+                backend,
+                sttArguments,
+                transcriptionProgress,
+                null,
+                _cts.Token);
+            if (!transcription.Success)
+            {
+                StatusText.Text = transcription.ErrorMessage
+                    ?? $"Transcription failed ({transcription.ErrorCode}).";
+                return;
+            }
+
+            var previewPath = transcription.OutputPath ?? transcriptPath;
+            _previewLanguageSuffix = null;
+            if (translate)
+            {
+                StatusText.Text = "Translating captions locally...";
+                ProgressLabel.Text = $"Translating {language} to {targetLanguage}...";
+                var translationDirectory = Path.Combine(workDirectory, "translated");
+                var translationProgress = new Progress<SidecarProgress>(progress =>
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        ProgressBar.Value = 70 + progress.Percent * 0.3;
+                        ProgressLabel.Text = $"Translating - {progress.Percent:F0}% - {progress.Stage}";
+                    }));
+                var translation = await _runner.RunAsync(
+                    "translatekit",
+                    [
+                        "srt",
+                        "--input", previewPath,
+                        "--output-dir", translationDirectory,
+                        "--source", language,
+                        "--target", targetLanguage,
+                        "--model", translationModel,
+                        "--device", "cpu",
+                    ],
+                    translationProgress,
+                    null,
+                    _cts.Token,
+                    silenceTimeout: TimeSpan.FromMinutes(30));
+                if (!translation.Success)
+                {
+                    StatusText.Text = translation.ErrorMessage
+                        ?? $"Translation failed ({translation.ErrorCode}).";
+                    return;
+                }
+
+                previewPath = Path.Combine(
+                    translationDirectory,
+                    $"{Path.GetFileNameWithoutExtension(previewPath)}.{targetLanguage}.srt");
+                _previewLanguageSuffix = targetLanguage;
+            }
+
+            if (!File.Exists(previewPath))
+            {
+                StatusText.Text = "The pipeline completed without producing a subtitle preview.";
+                return;
+            }
+
+            var content = await File.ReadAllTextAsync(previewPath, _cts.Token);
+            var document = SubtitleDocument.ParseSrt(content);
+            _cues.Clear();
+            foreach (var cue in document.Cues)
+            {
+                _cues.Add(new EditableSubtitleCue
+                {
+                    Number = cue.Number,
+                    StartSeconds = Math.Round(cue.Start.TotalSeconds, 3),
+                    EndSeconds = Math.Round(cue.End.TotalSeconds, 3),
+                    Text = cue.Text,
+                });
+            }
+
+            CueSummaryText.Text = translate
+                ? $"{_cues.Count} cues translated {language} -> {targetLanguage}. Edit text or timing before export."
+                : $"{_cues.Count} cues. Edit text or timing before export.";
+            DropZonePanel.Visibility = Visibility.Collapsed;
+            EditorPanel.Visibility = Visibility.Visible;
+            ProgressBar.Value = 100;
+            StatusText.Text = "Preview ready. Review the cues, then export.";
         }
         catch (OperationCanceledException)
         {
-            sttResult = new SidecarResult(false, null, null, "cancelled", "Cancelled.", 130);
+            StatusText.Text = "Subtitle pipeline cancelled.";
         }
-
-        if (!sttResult.Success)
+        catch (Exception exception)
         {
-            StatusText.Text = sttResult.ErrorMessage ?? $"Transcription failed ({sttResult.ErrorCode}).";
+            StatusText.Text = $"Subtitle pipeline failed: {exception.Message}";
+        }
+        finally
+        {
+            try { Directory.Delete(workDirectory, recursive: true); } catch { }
             FinalCleanup();
+        }
+    }
+
+    private async void Export_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedPath is null || _cues.Count == 0 || _cts is not null)
+            return;
+
+        SubtitleDocument document;
+        try
+        {
+            document = new SubtitleDocument(_cues.Select((cue, index) => new SubtitleCue(
+                index + 1,
+                TimeSpan.FromSeconds(cue.StartSeconds),
+                TimeSpan.FromSeconds(cue.EndSeconds),
+                cue.Text)));
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = $"Fix the preview before export: {exception.Message}";
             return;
         }
 
-        _lastSubtitlePath = sttResult.OutputPath ?? subtitlePath;
+        var format = SelectedTag(FormatCombo) ?? "srt";
+        var sourceDirectory = Path.GetDirectoryName(_selectedPath) ?? Environment.CurrentDirectory;
+        var sourceStem = Path.GetFileNameWithoutExtension(_selectedPath);
+        var languageSuffix = string.IsNullOrWhiteSpace(_previewLanguageSuffix)
+            ? string.Empty
+            : $".{_previewLanguageSuffix}";
+        var subtitlePath = EnsureUniquePath(
+            Path.Combine(sourceDirectory, $"{sourceStem}{languageSuffix}.{format}"));
 
-        // 2. Optional burn-in via FFmpeg `subtitles` filter.
-        if (burnIn && IsVideoFile(_selectedPath))
+        _cts = new CancellationTokenSource();
+        UpdateRunEnabled();
+        StatusText.Text = "Exporting edited preview...";
+        try
         {
-            ProgressLabel.Text = "Burning subtitles into video...";
-            var burnedPath = EnsureUniquePath(
-                Path.Combine(dir, $"{stem}_subtitled{Path.GetExtension(_selectedPath)}"));
-            var success = await BurnInAsync(_selectedPath, _lastSubtitlePath, burnedPath, _cts.Token);
-            if (success)
+            await File.WriteAllTextAsync(
+                subtitlePath,
+                document.Serialize(format),
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+                _cts.Token);
+            _lastOutputPath = subtitlePath;
+
+            if (BurnInCheck.IsChecked == true && IsVideoFile(_selectedPath))
             {
-                _lastSubtitlePath = burnedPath;
-                StatusText.Text = $"Done — {Path.GetFileName(burnedPath)} (subtitle file kept alongside).";
+                StatusText.Text = "Burning edited captions into video...";
+                var burnedPath = EnsureUniquePath(Path.Combine(
+                    sourceDirectory,
+                    $"{sourceStem}{languageSuffix}_subtitled{Path.GetExtension(_selectedPath)}"));
+                var burn = await BurnInAsync(
+                    _selectedPath,
+                    subtitlePath,
+                    burnedPath,
+                    _cts.Token);
+                if (!burn.Success)
+                {
+                    StatusText.Text = $"Caption file exported, but burn-in failed: {burn.Error}";
+                    OpenOutputButton.IsEnabled = true;
+                    return;
+                }
+
+                _lastOutputPath = burnedPath;
+                StatusText.Text = $"Done - {Path.GetFileName(burnedPath)}; {Path.GetFileName(subtitlePath)} kept alongside.";
+            }
+            else if (BurnInCheck.IsChecked == true)
+            {
+                StatusText.Text = $"Done - {Path.GetFileName(subtitlePath)}. Burn-in requires a video source.";
             }
             else
             {
-                StatusText.Text = $"Subtitles generated but burn-in failed. SRT/VTT is at {Path.GetFileName(_lastSubtitlePath)}.";
+                StatusText.Text = $"Done - {Path.GetFileName(subtitlePath)}";
             }
+
+            OpenOutputButton.IsEnabled = true;
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText.Text = "Export cancelled.";
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = $"Export failed: {exception.Message}";
+        }
+        finally
+        {
+            FinalCleanup();
+        }
+    }
+
+    private static List<string> BuildTranscriptionArguments(
+        string backend,
+        string inputPath,
+        string outputPath,
+        string model,
+        string language,
+        bool useVad,
+        int batchSize)
+    {
+        List<string> arguments;
+        if (backend == "whisper-cpp")
+        {
+            arguments =
+            [
+                "transcribe",
+                "--input", inputPath,
+                "--output", outputPath,
+                "--model", model,
+                "--language", language,
+            ];
         }
         else
         {
-            StatusText.Text = $"Done — {Path.GetFileName(_lastSubtitlePath)}";
+            arguments =
+            [
+                "--input", inputPath,
+                "--output", outputPath,
+                "--model", model,
+                "--language", language,
+                "--format", "srt",
+                "--batch-size", batchSize.ToString(CultureInfo.InvariantCulture),
+            ];
         }
 
-        ProgressBar.Value = 100;
-        OpenOutputButton.IsEnabled = true;
-        FinalCleanup();
+        if (useVad)
+            arguments.Add("--vad");
+        return arguments;
     }
 
-    private async Task<bool> BurnInAsync(string videoPath, string subtitlePath, string outputPath, CancellationToken ct)
+    private async Task<(bool Success, string? Error)> BurnInAsync(
+        string videoPath,
+        string subtitlePath,
+        string outputPath,
+        CancellationToken cancellationToken)
     {
-        // Locate ffmpeg the same way the sidecars do.
-        var ffmpeg = FindFFmpeg();
-        if (ffmpeg is null) return false;
+        var ffmpeg = FindFfmpeg(_options.ToolsBasePath);
+        if (ffmpeg is null)
+            return (false, "FFmpeg was not found in the managed tools directory or PATH.");
 
-        // FFmpeg subtitles filter needs forward slashes + colon escaping for Windows paths.
-        var ffPath = subtitlePath.Replace("\\", "/").Replace(":", "\\:");
-        var psi = new ProcessStartInfo
-        {
-            FileName = ffmpeg,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardError = true,
-        };
-        foreach (var arg in new[]
-        {
-            "-y", "-i", videoPath,
-            "-vf", $"subtitles='{ffPath}'",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-            "-c:a", "copy",
-            outputPath,
-        }) psi.ArgumentList.Add(arg);
-
+        var workDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "UniversalConverterX",
+            "subtitle-burn",
+            Guid.NewGuid().ToString("N"));
         try
         {
-            using var proc = Process.Start(psi);
-            if (proc is null) return false;
-            await proc.WaitForExitAsync(ct);
-            return proc.ExitCode == 0 && File.Exists(outputPath);
+            Directory.CreateDirectory(workDirectory);
+            // The subtitles filter has its own expression parser in addition
+            // to normal argv parsing. Stage under a generated safe path so
+            // user filenames containing quotes, brackets, commas, or
+            // semicolons cannot be reinterpreted by that parser.
+            var stagedSubtitle = Path.Combine(workDirectory, "captions" + Path.GetExtension(subtitlePath));
+            File.Copy(subtitlePath, stagedSubtitle, overwrite: false);
+            var escapedSubtitlePath = EscapeSubtitleFilterPath(stagedSubtitle);
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = ffmpeg,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                RedirectStandardError = true,
+            };
+            foreach (var argument in new[]
+            {
+                "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
+                "-i", videoPath,
+                "-vf", $"subtitles='{escapedSubtitlePath}'",
+                "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+                "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                "-c:a", "copy",
+                outputPath,
+            })
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+            using var process = Process.Start(startInfo);
+            if (process is null)
+                return (false, "FFmpeg could not be started.");
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            try
+            {
+                await process.WaitForExitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+                throw;
+            }
+
+            var error = await errorTask;
+            var validOutput = process.ExitCode == 0
+                && File.Exists(outputPath)
+                && new FileInfo(outputPath).Length > 0;
+            return validOutput
+                ? (true, null)
+                : (false, string.IsNullOrWhiteSpace(error)
+                    ? $"FFmpeg exited with code {process.ExitCode}."
+                    : error.Trim());
         }
-        catch
+        catch (OperationCanceledException)
         {
-            return false;
+            throw;
+        }
+        catch (Exception exception)
+        {
+            return (false, exception.Message);
+        }
+        finally
+        {
+            try { Directory.Delete(workDirectory, recursive: true); } catch { }
         }
     }
 
@@ -248,10 +502,11 @@ public sealed partial class AiSubtitlePage : Page
 
     private void OpenOutput_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(_lastSubtitlePath) || !File.Exists(_lastSubtitlePath)) return;
+        if (string.IsNullOrEmpty(_lastOutputPath) || !File.Exists(_lastOutputPath))
+            return;
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{_lastSubtitlePath}\"")
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{_lastOutputPath}\"")
             {
                 UseShellExecute = true,
             });
@@ -268,61 +523,112 @@ public sealed partial class AiSubtitlePage : Page
         UpdateRunEnabled();
     }
 
-    private static string? SelectedTag(ComboBox combo)
-    {
-        if (combo.SelectedItem is ComboBoxItem item && item.Tag is string tag) return tag;
-        return null;
-    }
+    private static string? SelectedTag(ComboBox combo) =>
+        combo.SelectedItem is ComboBoxItem { Tag: string tag } ? tag : null;
 
-    private static int SafeBatchSize(double value)
-    {
-        if (double.IsNaN(value)) return 8;
-        return Math.Clamp((int)Math.Round(value), 1, 32);
-    }
+    private static int SafeBatchSize(double value) =>
+        double.IsNaN(value) ? 8 : Math.Clamp((int)Math.Round(value), 1, 32);
 
     private static bool IsVideoFile(string path)
     {
-        var ext = Path.GetExtension(path).ToLowerInvariant();
-        return ext is ".mp4" or ".mkv" or ".mov" or ".avi" or ".webm" or ".flv"
-                  or ".wmv" or ".ts" or ".mts" or ".m4v";
+        var extension = Path.GetExtension(path).ToLowerInvariant();
+        return extension is ".mp4" or ".mkv" or ".mov" or ".avi" or ".webm" or ".flv"
+            or ".wmv" or ".ts" or ".mts" or ".m4v";
     }
 
-    private static string? FindFFmpeg()
+    private static string EscapeSubtitleFilterPath(string path) =>
+        path.Replace("\\", "/", StringComparison.Ordinal)
+            .Replace(":", "\\:", StringComparison.Ordinal)
+            .Replace("'", "\\'", StringComparison.Ordinal)
+            .Replace("[", "\\[", StringComparison.Ordinal)
+            .Replace("]", "\\]", StringComparison.Ordinal)
+            .Replace(",", "\\,", StringComparison.Ordinal)
+            .Replace(";", "\\;", StringComparison.Ordinal);
+
+    private static string? FindFfmpeg(string toolsBasePath)
     {
-        var fromEnv = Environment.GetEnvironmentVariable("FFMPEG_PATH");
-        if (!string.IsNullOrEmpty(fromEnv) && File.Exists(fromEnv)) return fromEnv;
-
-        var pathDirs = (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator);
-        foreach (var d in pathDirs)
+        var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+        var directCandidates = new[]
         {
-            var candidate = Path.Combine(d, "ffmpeg.exe");
-            if (File.Exists(candidate)) return candidate;
+            Path.Combine(toolsBasePath, "bin", executable),
+            Path.Combine(toolsBasePath, executable),
+            Path.Combine(AppContext.BaseDirectory, "tools", "bin", executable),
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "UniversalConverterX", "tools", "bin", executable),
+        };
+        foreach (var candidate in directCandidates)
+        {
+            if (File.Exists(candidate))
+                return Path.GetFullPath(candidate);
         }
 
-        // Common shared locations
-        var localApp = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        foreach (var c in new[]
+        foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? "")
+                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
         {
-            Path.Combine(AppContext.BaseDirectory, "tools", "_bin", "ffmpeg.exe"),
-            Path.Combine(localApp, "UniversalConverterX", "tools", "_bin", "ffmpeg.exe"),
-        })
-        {
-            if (File.Exists(c)) return c;
+            try
+            {
+                var candidate = Path.Combine(directory.Trim(), executable);
+                if (File.Exists(candidate))
+                    return Path.GetFullPath(candidate);
+            }
+            catch { }
         }
+
         return null;
     }
 
     private static string EnsureUniquePath(string path)
     {
-        if (!File.Exists(path)) return path;
-        var dir = Path.GetDirectoryName(path) ?? ".";
+        if (!File.Exists(path))
+            return path;
+        var directory = Path.GetDirectoryName(path) ?? ".";
         var name = Path.GetFileNameWithoutExtension(path);
-        var ext = Path.GetExtension(path);
-        for (var i = 1; i < 10_000; i++)
+        var extension = Path.GetExtension(path);
+        for (var index = 1; index < 10_000; index++)
         {
-            var candidate = Path.Combine(dir, $"{name} ({i}){ext}");
-            if (!File.Exists(candidate)) return candidate;
+            var candidate = Path.Combine(directory, $"{name} ({index}){extension}");
+            if (!File.Exists(candidate))
+                return candidate;
         }
-        return Path.Combine(dir, $"{name}-{Guid.NewGuid():N}{ext}");
+
+        return Path.Combine(directory, $"{name}-{Guid.NewGuid():N}{extension}");
+    }
+}
+
+public sealed class EditableSubtitleCue : INotifyPropertyChanged
+{
+    private double _startSeconds;
+    private double _endSeconds;
+    private string _text = string.Empty;
+
+    public int Number { get; init; }
+
+    public double StartSeconds
+    {
+        get => _startSeconds;
+        set => SetField(ref _startSeconds, value);
+    }
+
+    public double EndSeconds
+    {
+        get => _endSeconds;
+        set => SetField(ref _endSeconds, value);
+    }
+
+    public string Text
+    {
+        get => _text;
+        set => SetField(ref _text, value);
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return;
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
