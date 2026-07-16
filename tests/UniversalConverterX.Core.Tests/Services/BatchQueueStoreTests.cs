@@ -62,6 +62,40 @@ public sealed class BatchQueueStoreTests : IDisposable
     }
 
     [Fact]
+    public void LoadAll_ShouldReturnEveryPersistedQueueWithSchemaVersion()
+    {
+        var store = new JsonBatchQueueStore(_directory);
+        store.Save(new PersistedBatchQueue { QueueKey = "converter", PageName = "Converter" });
+        store.Save(new PersistedBatchQueue
+        {
+            SchemaVersion = 2,
+            QueueKey = "compressor",
+            PageName = "Compressor",
+        });
+
+        var queues = store.LoadAll();
+
+        queues.Select(queue => queue.QueueKey).Should().Equal("compressor", "converter");
+        queues.Single(queue => queue.QueueKey == "converter").SchemaVersion.Should().Be(1);
+        queues.Single(queue => queue.QueueKey == "compressor").SchemaVersion.Should().Be(2);
+    }
+
+    [Fact]
+    public void Load_LegacyQueueWithoutSchemaVersion_DefaultsToVersionOne()
+    {
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(
+            Path.Combine(_directory, "converter.json"),
+            """{"queueKey":"converter","pageName":"Converter","jobs":[]}""");
+        var store = new JsonBatchQueueStore(_directory);
+
+        var queue = store.Load("converter");
+
+        queue.Should().NotBeNull();
+        queue!.SchemaVersion.Should().Be(PersistedBatchQueue.CurrentSchemaVersion);
+    }
+
+    [Fact]
     public void Load_WithCorruptQueue_ShouldReturnNullAndPreserveBackup()
     {
         Directory.CreateDirectory(_directory);

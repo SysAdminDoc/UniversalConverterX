@@ -12,6 +12,7 @@ using UniversalConverterX.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
 using Windows.System;
+using UniversalConverterX.UI.Services;
 
 namespace UniversalConverterX.UI.Views;
 
@@ -24,6 +25,7 @@ public sealed partial class SettingsWindow : Window
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
     private readonly ObservableCollection<ToolViewModel> _tools = [];
+    private string? _availableReleaseUrl;
     
     private bool _isDirty = false;
 
@@ -372,22 +374,110 @@ public sealed partial class SettingsWindow : Window
     private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         CheckUpdatesButton.IsEnabled = false;
-        CheckUpdatesButton.Content = "Opening...";
+        CheckUpdatesButton.Content = "Checking...";
+        OpenReleaseButton.Visibility = Visibility.Collapsed;
+        _availableReleaseUrl = null;
 
         try
         {
-            var launched = await Launcher.LaunchUriAsync(new Uri(ReleasesUrl));
-            if (!launched)
+            var checker = _serviceProvider.GetRequiredService<IUpdateCheckService>();
+            var results = await checker.CheckAsync(force: true);
+            if (results is null)
             {
-                await ShowMessageAsync("Releases",
-                    "Open the releases page manually to check for updates:\n" + ReleasesUrl);
+                ShowUpdateStatus(
+                    "Update check unavailable",
+                    "No cached or live update information is available.",
+                    InfoBarSeverity.Warning);
+                return;
             }
+
+            var appUpdate = results.Application;
+            var toolUpdates = results.Tools.Where(tool => tool.UpdateAvailable).ToList();
+            if (appUpdate?.UpdateAvailable == true)
+            {
+                _availableReleaseUrl = appUpdate.ReleaseUrl;
+                OpenReleaseButton.Visibility = string.IsNullOrWhiteSpace(_availableReleaseUrl)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+
+                if (appUpdate.CompatibilityWarnings.Count > 0)
+                {
+                    ShowUpdateStatus(
+                        $"Version {appUpdate.LatestVersion ?? "update"} needs review",
+                        "Before updating: " + string.Join(" ", appUpdate.CompatibilityWarnings),
+                        InfoBarSeverity.Warning);
+                }
+                else
+                {
+                    ShowUpdateStatus(
+                        $"Version {appUpdate.LatestVersion ?? "update"} is available",
+                        appUpdate.CompatibilityMetadataAvailable
+                            ? "Custom preset and saved queue compatibility checks passed."
+                            : "No local compatibility issues were reported.",
+                        InfoBarSeverity.Informational);
+                }
+                return;
+            }
+
+            if (toolUpdates.Count > 0)
+            {
+                ShowUpdateStatus(
+                    "Tool updates available",
+                    string.Join(", ", toolUpdates.Select(tool =>
+                        string.IsNullOrWhiteSpace(tool.LatestVersion)
+                            ? tool.DisplayName
+                            : $"{tool.DisplayName} {tool.LatestVersion}")),
+                    InfoBarSeverity.Informational);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(appUpdate?.Error))
+            {
+                ShowUpdateStatus(
+                    "Application update check failed",
+                    appUpdate.Error,
+                    InfoBarSeverity.Warning);
+                return;
+            }
+
+            ShowUpdateStatus(
+                "You're up to date",
+                "No UniversalConverter X or tracked tool updates were found.",
+                InfoBarSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            ShowUpdateStatus(
+                "Update check failed",
+                ex.Message,
+                InfoBarSeverity.Error);
         }
         finally
         {
             CheckUpdatesButton.IsEnabled = true;
-            CheckUpdatesButton.Content = "View Releases";
+            CheckUpdatesButton.Content = "Check again";
         }
+    }
+
+    private async void OpenRelease_Click(object sender, RoutedEventArgs e)
+    {
+        var url = string.IsNullOrWhiteSpace(_availableReleaseUrl)
+            ? ReleasesUrl
+            : _availableReleaseUrl;
+        if (!await Launcher.LaunchUriAsync(new Uri(url)))
+        {
+            await ShowMessageAsync(
+                "Releases",
+                "Open the releases page manually:\n" + url);
+        }
+    }
+
+    private void ShowUpdateStatus(string title, string message, InfoBarSeverity severity)
+    {
+        UpdateStatusInfoBar.Title = title;
+        UpdateStatusInfoBar.Message = message;
+        UpdateStatusInfoBar.Severity = severity;
+        UpdateStatusInfoBar.IsOpen = true;
     }
 
     private async void ResetSettings_Click(object sender, RoutedEventArgs e)

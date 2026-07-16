@@ -45,6 +45,28 @@ public sealed partial class HomePage : Page
             if (cache is null) return;
 
             var pending = cache.Tools.Where(t => t.UpdateAvailable).ToList();
+            var appUpdate = cache.Application;
+            if (appUpdate?.UpdateAvailable == true)
+            {
+                UpdateBanner.Title = $"UniversalConverter X {appUpdate.LatestVersion ?? "update"} available";
+                UpdateBanner.Severity = appUpdate.CompatibilityWarnings.Count > 0
+                    ? InfoBarSeverity.Warning
+                    : InfoBarSeverity.Informational;
+                var compatibility = appUpdate.CompatibilityWarnings.Count > 0
+                    ? " Before updating: " + string.Join(" ", appUpdate.CompatibilityWarnings)
+                    : appUpdate.CompatibilityMetadataAvailable
+                        ? " Custom preset and saved queue compatibility checks passed."
+                        : "";
+                var toolSuffix = pending.Count > 0
+                    ? $" Tool updates are also available for {string.Join(", ", pending.Select(t => t.DisplayName))}."
+                    : "";
+                UpdateBanner.Message = compatibility.TrimStart() + toolSuffix;
+                _primaryUpdateUrl = appUpdate.ReleaseUrl;
+                UpdateBannerActionButton.IsEnabled = !string.IsNullOrWhiteSpace(_primaryUpdateUrl);
+                UpdateBanner.IsOpen = true;
+                return;
+            }
+
             if (pending.Count == 0) return;
 
             var names = string.Join(", ",

@@ -29,11 +29,17 @@ public sealed record PresetDocumentSaveResult(
     string? SavedPath,
     IReadOnlyList<string> Errors);
 
+public sealed record PresetDocumentMetadata(
+    bool Readable,
+    int? SchemaVersion,
+    string? Engine);
+
 /// <summary>
 /// Safely reads, validates, and atomically writes UCX preset v1 XML documents.
 /// </summary>
 public static class PresetDocument
 {
+    public const int CurrentSchemaVersion = 1;
     public const string NamespaceUri = "https://universalconverterx.io/preset/v1";
     public const string DefaultInvocationMode = "per-file";
 
@@ -53,6 +59,38 @@ public static class PresetDocument
         XmlResolver = null,
         MaxCharactersInDocument = 1_000_000,
     };
+
+    /// <summary>
+    /// Reads only compatibility metadata from a preset, including future
+    /// namespace versions that the current editor cannot otherwise load.
+    /// </summary>
+    public static PresetDocumentMetadata InspectMetadata(string path)
+    {
+        if (!File.Exists(path))
+            return new PresetDocumentMetadata(false, null, null);
+
+        try
+        {
+            using var reader = XmlReader.Create(path, SafeReaderSettings);
+            var document = XDocument.Load(reader, LoadOptions.None);
+            var root = document.Root;
+            if (root is null || root.Name.LocalName != "Preset")
+                return new PresetDocumentMetadata(false, null, null);
+
+            var schemaVersion = ParseSchemaVersion(root.Name.NamespaceName);
+            var engine = root.Elements()
+                .FirstOrDefault(element => element.Name.LocalName == "Engine")?
+                .Value.Trim();
+            return new PresetDocumentMetadata(
+                true,
+                schemaVersion,
+                string.IsNullOrWhiteSpace(engine) ? null : engine);
+        }
+        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
+        {
+            return new PresetDocumentMetadata(false, null, null);
+        }
+    }
 
     public static PresetDocumentLoadResult Load(string path)
     {
@@ -318,6 +356,19 @@ public static class PresetDocument
 
     private static string NormalizeInvocationMode(string? value) =>
         string.IsNullOrWhiteSpace(value) ? DefaultInvocationMode : value.Trim().ToLowerInvariant();
+
+    private static int? ParseSchemaVersion(string namespaceName)
+    {
+        if (namespaceName.Length == 0)
+            return CurrentSchemaVersion; // Legacy preset documents are v1.
+
+        const string prefix = "https://universalconverterx.io/preset/v";
+        return namespaceName.StartsWith(prefix, StringComparison.Ordinal)
+            && int.TryParse(namespaceName[prefix.Length..], out var version)
+            && version > 0
+                ? version
+                : null;
+    }
 
     private static bool IsSafeToolName(string value)
     {

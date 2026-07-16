@@ -113,9 +113,9 @@ public partial class App : Application
         _ = Services.GetRequiredService<IHistoryService>();
         _ = Services.GetRequiredService<IWatchFolderService>();
 
-        // ROADMAP Item 7 — fire-and-forget update probe (24h-throttled,
-        // honours ConverterXOptions.CheckForUpdates opt-out, never blocks
-        // launch). Results land in update-cache.json for the dashboard.
+        // Fire-and-forget app/tool update and compatibility probe
+        // (24h-throttled, honours ConverterXOptions.CheckForUpdates opt-out,
+        // never blocks launch). Results land in update-cache.json.
         _ = Task.Run(async () =>
         {
             try

@@ -16,6 +16,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Application update checks now consume each release's preset/queue compatibility contract, compare it with user-defined preset schemas, saved queue schemas, and referenced engines, and show actionable pre-update warnings on Home and in Settings. Legacy saved queues default safely to schema v1, while incompatible or unverifiable release metadata fails visibly instead of implying compatibility.
 - Release packaging now publishes a versioned JSON manifest after signing with SHA-256 and size metadata for each MSI/MSIX artifact plus a non-executing inventory of bundled tools and sidecars. Requested package types must exist and be non-empty before the manifest can be emitted.
 - Presets now have a full custom editor for creating, editing, and duplicating workflows without hand-editing XML. The editor covers input matching, output templates, invocation modes, sidecar arguments, and optional extra-input prompts; built-ins remain read-only while custom presets are schema-validated, atomically saved under the user profile, and available after restart.
 - Compressor smart-quality mode now targets a user-selected VMAF score with AV1, H.265, or H.264 through ab-av1. It preflights the wrapper, upstream binary, and FFmpeg; performs sampled CRF search plus encoding; runs a full-reference VMAF verification; and reports the achieved score and selected CRF with each result.

@@ -6,12 +6,16 @@ namespace UniversalConverterX.Core.Services;
 public interface IBatchQueueStore
 {
     PersistedBatchQueue? Load(string queueKey);
+    IReadOnlyList<PersistedBatchQueue> LoadAll();
     void Save(PersistedBatchQueue queue);
     void Clear(string queueKey);
 }
 
 public sealed record PersistedBatchQueue
 {
+    public const int CurrentSchemaVersion = 1;
+
+    public int SchemaVersion { get; init; } = CurrentSchemaVersion;
     public string QueueKey { get; init; } = "";
     public string PageName { get; init; } = "";
     public DateTime UpdatedUtc { get; init; } = DateTime.UtcNow;
@@ -74,6 +78,36 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
                 PreserveCorruptQueue(path);
                 return null;
             }
+        }
+    }
+
+    public IReadOnlyList<PersistedBatchQueue> LoadAll()
+    {
+        lock (_gate)
+        {
+            if (!Directory.Exists(_directory))
+                return [];
+
+            var queues = new List<PersistedBatchQueue>();
+            foreach (var path in Directory.GetFiles(_directory, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    var queue = JsonSerializer.Deserialize<PersistedBatchQueue>(
+                        File.ReadAllText(path),
+                        JsonOptions);
+                    if (queue is not null && !string.IsNullOrWhiteSpace(queue.QueueKey))
+                        queues.Add(queue);
+                }
+                catch
+                {
+                    PreserveCorruptQueue(path);
+                }
+            }
+
+            return queues
+                .OrderBy(queue => queue.QueueKey, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
     }
 

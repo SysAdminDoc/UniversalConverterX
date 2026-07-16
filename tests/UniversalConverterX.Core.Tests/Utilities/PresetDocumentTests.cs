@@ -131,6 +131,26 @@ public sealed class PresetDocumentTests : IDisposable
         result.Errors.Should().Contain(error => error.Contains("Invalid XML"));
     }
 
+    [Fact]
+    public void InspectMetadata_ReadsFutureSchemaWithoutLoadingPreset()
+    {
+        var path = Path.Combine(_tempDirectory, "future.preset.xml");
+        File.WriteAllText(
+            path,
+            """
+            <Preset xmlns="https://universalconverterx.io/preset/v7">
+              <Name>Future preset</Name>
+              <Engine>future-engine</Engine>
+            </Preset>
+            """);
+
+        var metadata = PresetDocument.InspectMetadata(path);
+        var loaded = PresetDocument.Load(path);
+
+        metadata.Should().Be(new PresetDocumentMetadata(true, 7, "future-engine"));
+        loaded.Succeeded.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData("custom/path")]
     [InlineData("unknown-mode")]

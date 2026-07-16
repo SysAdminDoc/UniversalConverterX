@@ -23,7 +23,14 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputPath,
 
-    [string]$RuntimeIdentifier = 'win-x64'
+    [string]$RuntimeIdentifier = 'win-x64',
+
+    [string]$PresetRoot,
+
+    [int]$MinimumPresetSchemaVersion = 1,
+    [int]$MaximumPresetSchemaVersion = 1,
+    [int]$MinimumQueueSchemaVersion = 1,
+    [int]$MaximumQueueSchemaVersion = 1
 )
 
 Set-StrictMode -Version Latest
@@ -49,11 +56,54 @@ function Get-BundleRelativePath {
     return $fullPath.Substring($rootPrefix.Length).Replace('\', '/')
 }
 
+function Get-PresetEngines {
+    param([string]$Root)
+
+    if ([string]::IsNullOrWhiteSpace($Root)) {
+        return @()
+    }
+    if (-not (Test-Path -LiteralPath $Root -PathType Container)) {
+        throw "Preset root does not exist: $Root"
+    }
+
+    $engines = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+    $settings = New-Object Xml.XmlReaderSettings
+    $settings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
+    $settings.XmlResolver = $null
+
+    foreach ($preset in (Get-ChildItem -LiteralPath $Root -Filter '*.preset.xml' -File | Sort-Object FullName)) {
+        $reader = $null
+        try {
+            $reader = [Xml.XmlReader]::Create($preset.FullName, $settings)
+            $document = New-Object Xml.XmlDocument
+            $document.XmlResolver = $null
+            $document.Load($reader)
+            $engineNode = $document.SelectSingleNode(
+                "/*[local-name()='Preset']/*[local-name()='Engine']")
+            $engine = if ($null -eq $engineNode) { '' } else { $engineNode.InnerText.Trim() }
+            if ([string]::IsNullOrWhiteSpace($engine)) {
+                throw "Preset does not declare an engine: $($preset.FullName)"
+            }
+            $engines.Add($engine) | Out-Null
+        } finally {
+            if ($null -ne $reader) { $reader.Dispose() }
+        }
+    }
+
+    return @($engines | Sort-Object)
+}
+
 if ([string]::IsNullOrWhiteSpace($Version)) {
     throw 'Version must not be empty.'
 }
 if (-not (Test-Path -LiteralPath $BundleRoot -PathType Container)) {
     throw "Bundle root does not exist: $BundleRoot"
+}
+if ($MinimumPresetSchemaVersion -le 0 -or
+    $MaximumPresetSchemaVersion -lt $MinimumPresetSchemaVersion -or
+    $MinimumQueueSchemaVersion -le 0 -or
+    $MaximumQueueSchemaVersion -lt $MinimumQueueSchemaVersion) {
+    throw 'Compatibility schema ranges must be positive and ordered.'
 }
 
 $artifactEntries = @(
@@ -126,6 +176,9 @@ foreach ($relativeRoot in @('tools', 'Sidecars')) {
         }
 }
 
+$supportedEngines = @('converter') + @(Get-PresetEngines -Root $PresetRoot)
+$supportedEngines = @($supportedEngines | Sort-Object -Unique)
+
 $manifest = [ordered]@{
     schemaVersion     = 1
     product           = 'UniversalConverterX'
@@ -134,6 +187,13 @@ $manifest = [ordered]@{
     generatedAtUtc    = [DateTimeOffset]::UtcNow.ToString('o')
     artifacts         = $artifactEntries
     bundledTools      = $toolEntries.ToArray()
+    compatibility     = [ordered]@{
+        minimumPresetSchemaVersion = $MinimumPresetSchemaVersion
+        maximumPresetSchemaVersion = $MaximumPresetSchemaVersion
+        minimumQueueSchemaVersion  = $MinimumQueueSchemaVersion
+        maximumQueueSchemaVersion  = $MaximumQueueSchemaVersion
+        supportedEngines           = $supportedEngines
+    }
 }
 
 $outputFullPath = [IO.Path]::GetFullPath($OutputPath)

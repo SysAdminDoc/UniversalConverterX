@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Services;
@@ -25,6 +26,19 @@ public sealed record UpdateInfo
     public string? Error { get; init; }              // Set when probe failed.
 }
 
+/// <summary>Application release probe plus local preset/queue compatibility.</summary>
+public sealed record ApplicationUpdateInfo
+{
+    public string InstalledVersion { get; init; } = "";
+    public string? LatestVersion { get; init; }
+    public string? ReleaseUrl { get; init; }
+    public string? PublishedAt { get; init; }
+    public bool UpdateAvailable { get; init; }
+    public bool CompatibilityMetadataAvailable { get; init; }
+    public List<string> CompatibilityWarnings { get; init; } = [];
+    public string? Error { get; init; }
+}
+
 /// <summary>
 /// Persisted cache shape — keeps result of the last successful (or partial)
 /// probe so we can surface "updates available" without re-fetching every
@@ -33,6 +47,7 @@ public sealed record UpdateInfo
 public sealed record UpdateCheckCache
 {
     public DateTime LastCheckUtc { get; init; }
+    public ApplicationUpdateInfo? Application { get; init; }
     public List<UpdateInfo> Tools { get; init; } = [];
 }
 
@@ -46,8 +61,8 @@ public interface IUpdateCheckService
 }
 
 /// <summary>
-/// Polls GitHub Releases for the four bundled tools that ship with UCX
-/// (yt-dlp, ffmpeg, whisper, onnxruntime) and caches the result.
+/// Polls GitHub Releases for UCX and four bundled tools (yt-dlp, ffmpeg,
+/// whisper, onnxruntime), assesses release compatibility, and caches the result.
 ///
 /// Charter-aligned: outbound traffic is one-way (HTTP GET on public release
 /// manifests; no telemetry, no user data); the request is gated by the
@@ -65,6 +80,7 @@ public sealed class UpdateCheckService : IUpdateCheckService
 
     private readonly ConverterXOptions _options;
     private readonly IToolManager? _toolManager;
+    private readonly IBatchQueueStore? _queueStore;
     private readonly string _cachePath;
     private readonly object _gate = new();
     private static readonly HttpClient _http = CreateHttpClient();
@@ -85,10 +101,14 @@ public sealed class UpdateCheckService : IUpdateCheckService
 
     private readonly TrackedTool[] _tools;
 
-    public UpdateCheckService(IOptions<ConverterXOptions> options, IToolManager? toolManager = null)
+    public UpdateCheckService(
+        IOptions<ConverterXOptions> options,
+        IToolManager? toolManager = null,
+        IBatchQueueStore? queueStore = null)
     {
         _options = options.Value;
         _toolManager = toolManager;
+        _queueStore = queueStore;
         _cachePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "UniversalConverterX",
@@ -149,11 +169,164 @@ public sealed class UpdateCheckService : IUpdateCheckService
         var fresh = new UpdateCheckCache
         {
             LastCheckUtc = DateTime.UtcNow,
+            Application = await ProbeApplicationAsync(ct).ConfigureAwait(false),
             Tools = results,
         };
 
         TryWriteCache(fresh);
         return fresh;
+    }
+
+    private async Task<ApplicationUpdateInfo> ProbeApplicationAsync(CancellationToken ct)
+    {
+        const string releasesApi =
+            "https://api.github.com/repos/SysAdminDoc/UniversalConverterX/releases/latest";
+        var installed = GetInstalledApplicationVersion();
+
+        try
+        {
+            using var response = await _http.GetAsync(releasesApi, ct).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                return new ApplicationUpdateInfo
+                {
+                    InstalledVersion = installed,
+                    Error = $"HTTP {(int)response.StatusCode}",
+                };
+            }
+
+            var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            var release = await JsonSerializer.DeserializeAsync<GhRelease>(
+                stream,
+                JsonOpts,
+                ct).ConfigureAwait(false);
+            if (release is null)
+            {
+                return new ApplicationUpdateInfo
+                {
+                    InstalledVersion = installed,
+                    Error = "Empty release payload",
+                };
+            }
+
+            var versionComparison = VersionOrdering.TryCompare(installed, release.TagName);
+            if (versionComparison is null)
+            {
+                return new ApplicationUpdateInfo
+                {
+                    InstalledVersion = installed,
+                    LatestVersion = release.TagName,
+                    ReleaseUrl = release.HtmlUrl,
+                    PublishedAt = release.PublishedAt,
+                    Error = "Release version could not be compared",
+                };
+            }
+
+            var updateAvailable = versionComparison < 0;
+            if (!updateAvailable)
+            {
+                return new ApplicationUpdateInfo
+                {
+                    InstalledVersion = installed,
+                    LatestVersion = release.TagName,
+                    ReleaseUrl = release.HtmlUrl,
+                    PublishedAt = release.PublishedAt,
+                };
+            }
+
+            var warnings = new List<string>();
+            var metadataAvailable = false;
+            var manifestAsset = release.Assets.FirstOrDefault(asset =>
+                asset.Name.EndsWith(".release.json", StringComparison.OrdinalIgnoreCase));
+            if (manifestAsset is null || string.IsNullOrWhiteSpace(manifestAsset.DownloadUrl))
+            {
+                warnings.Add(
+                    "This release has no compatibility manifest. Review custom presets and saved queues before updating.");
+            }
+            else
+            {
+                try
+                {
+                    var json = await _http.GetStringAsync(manifestAsset.DownloadUrl, ct).ConfigureAwait(false);
+                    var manifest = ReleaseCompatibilityPolicy.ParseManifest(json);
+                    if (manifest?.Compatibility is null ||
+                        VersionOrdering.TryCompare(manifest.Version, release.TagName) is not 0)
+                    {
+                        warnings.Add(
+                            "The release compatibility manifest is invalid or does not match the release tag.");
+                    }
+                    else
+                    {
+                        metadataAvailable = true;
+                        warnings.AddRange(AssessLocalCompatibility(manifest.Compatibility).Warnings);
+                    }
+                }
+                catch (OperationCanceledException) { throw; }
+                catch
+                {
+                    warnings.Add(
+                        "Release compatibility metadata could not be downloaded. Review custom presets and saved queues before updating.");
+                }
+            }
+
+            return new ApplicationUpdateInfo
+            {
+                InstalledVersion = installed,
+                LatestVersion = release.TagName,
+                ReleaseUrl = release.HtmlUrl,
+                PublishedAt = release.PublishedAt,
+                UpdateAvailable = true,
+                CompatibilityMetadataAvailable = metadataAvailable,
+                CompatibilityWarnings = warnings,
+            };
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex)
+        {
+            return new ApplicationUpdateInfo
+            {
+                InstalledVersion = installed,
+                Error = ex.GetType().Name,
+            };
+        }
+    }
+
+    private ReleaseCompatibilityAssessment AssessLocalCompatibility(
+        ReleaseCompatibilityRequirements requirements)
+    {
+        var presets = new List<LocalPresetCompatibility>();
+        try
+        {
+            if (Directory.Exists(UiPresetLoader.UserPresetDirectory))
+            {
+                foreach (var path in Directory.GetFiles(
+                             UiPresetLoader.UserPresetDirectory,
+                             "*.preset.xml",
+                             SearchOption.TopDirectoryOnly))
+                {
+                    var metadata = PresetDocument.InspectMetadata(path);
+                    presets.Add(new LocalPresetCompatibility(
+                        metadata.Readable,
+                        metadata.SchemaVersion,
+                        metadata.Engine));
+                }
+            }
+        }
+        catch
+        {
+            presets.Add(new LocalPresetCompatibility(false, null, null));
+        }
+
+        IReadOnlyList<PersistedBatchQueue> queues;
+        try { queues = _queueStore?.LoadAll() ?? []; }
+        catch { queues = []; }
+        return ReleaseCompatibilityPolicy.Assess(requirements, presets, queues);
+    }
+
+    private static string GetInstalledApplicationVersion()
+    {
+        var version = typeof(UpdateCheckService).Assembly.GetName().Version;
+        return version is null ? "0.0.0" : $"{version.Major}.{version.Minor}.{version.Build}";
     }
 
     private async Task<UpdateInfo> ProbeOneAsync(TrackedTool tool, CancellationToken ct)
@@ -301,5 +474,12 @@ public sealed class UpdateCheckService : IUpdateCheckService
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("html_url")] public string? HtmlUrl { get; init; }
         [JsonPropertyName("published_at")] public string? PublishedAt { get; init; }
+        [JsonPropertyName("assets")] public List<GhAsset> Assets { get; init; } = [];
+    }
+
+    private sealed record GhAsset
+    {
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("browser_download_url")] public string? DownloadUrl { get; init; }
     }
 }

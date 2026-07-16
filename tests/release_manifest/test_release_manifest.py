@@ -40,6 +40,14 @@ class ReleaseManifestTests(unittest.TestCase):
             sidecar.write_text("print('sample')\n", encoding="utf-8")
             ignored = bundle / "tools" / "ffmpeg" / "license.txt"
             ignored.write_text("license", encoding="utf-8")
+            presets = root / "presets"
+            presets.mkdir()
+            (presets / "sample.preset.xml").write_text(
+                '<Preset xmlns="https://universalconverterx.io/preset/v1">\n'
+                "  <Name>Sample</Name><Engine>ffmpeg</Engine>\n"
+                "</Preset>\n",
+                encoding="utf-8",
+            )
 
             def ps_quote(value: Path) -> str:
                 return "'" + str(value).replace("'", "''") + "'"
@@ -47,7 +55,8 @@ class ReleaseManifestTests(unittest.TestCase):
             command = (
                 f"& {ps_quote(SCRIPT)} -Version '9.8.7.6' "
                 f"-ArtifactPath @({ps_quote(artifact)},{ps_quote(second_artifact)}) "
-                f"-BundleRoot {ps_quote(bundle)} -OutputPath {ps_quote(output)}"
+                f"-BundleRoot {ps_quote(bundle)} -PresetRoot {ps_quote(presets)} "
+                f"-OutputPath {ps_quote(output)}"
             )
             result = subprocess.run(
                 [self.pwsh, "-NoProfile", "-Command", command],
@@ -61,6 +70,16 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(1, payload["schemaVersion"])
             self.assertEqual("9.8.7.6", payload["version"])
             self.assertEqual("win-x64", payload["runtimeIdentifier"])
+            self.assertEqual(
+                {
+                    "minimumPresetSchemaVersion": 1,
+                    "maximumPresetSchemaVersion": 1,
+                    "minimumQueueSchemaVersion": 1,
+                    "maximumQueueSchemaVersion": 1,
+                    "supportedEngines": ["converter", "ffmpeg"],
+                },
+                payload["compatibility"],
+            )
             artifacts = {entry["fileName"]: entry for entry in payload["artifacts"]}
             self.assertEqual({artifact.name, second_artifact.name}, set(artifacts))
             self.assertEqual("msi", artifacts[artifact.name]["type"])

@@ -382,6 +382,7 @@ Write-Step "Generating release manifest..."
     -Version $Version `
     -ArtifactPath $releaseArtifacts.ToArray() `
     -BundleRoot (Join-Path $publishDir 'win-x64') `
+    -PresetRoot $presetsDst `
     -OutputPath $releaseManifest `
     -RuntimeIdentifier 'win-x64' | Out-Null
 Write-Success "Release manifest created: $releaseManifest"
