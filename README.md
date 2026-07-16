@@ -15,6 +15,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **APV camera masters** — detect RFC 9924 raw APV and convert locally to H.265 10-bit, ProRes 422 HQ, or H.264 with the bundled FFmpeg build.
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
+- **Video Enhancer** — Real-ESRGAN export with a local Windows App SDK 2.2 VideoScaler capability check; unsupported systems fall back cleanly without downloading components.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.

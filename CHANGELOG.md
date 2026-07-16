@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Video Enhancer now reports the local Windows App SDK 2.2 VideoScaler readiness state without downloading AI components, keeps Real-ESRGAN as the portable export backend, and includes a headless frame benchmark smoke that runs only on supported hardware.
 - Speech-to-Text now offers NVIDIA Parakeet TDT 0.6B v3 as a CUDA-only engine for 25 European languages, with word-timestamp subtitle generation and SRT/VTT/TXT/JSON parity. Its pinned CC-BY-4.0 model snapshot requires an explicit in-app license confirmation and download; transcription is offline-only and cleanly blocks when the exact model pack or CUDA runtime is absent.
 - Sidecars now share one dependency-free protocol/runtime module for NDJSON events, managed FFmpeg and FFprobe discovery, media probing, bounded FFmpeg diagnostics, and normalized progress. All standard sidecars and frozen PyInstaller builds consume the common module, with contract tests preventing helper drift.
 - Vocal Remover and StemKit now default vocal work to MelBand-RoFormer and six-stem work to the supported BS-RoFormer SW model, with legacy Viperx, Demucs, and MDX choices retained. A new BS-RoFormer six-stem preset accompanies the refreshed model catalog, while four-stem selections continue to use fine-tuned Demucs.

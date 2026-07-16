@@ -200,6 +200,18 @@
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Windows AI VSR" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Name="WindowsVsrStatusText"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="WindowsVsrDetailText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Quality" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Name="ScaleCombo" Header="Upscale factor" SelectedIndex="0"

@@ -29,6 +29,7 @@ $SolutionPath = [System.IO.Path]::Combine($PSScriptRoot, "src", "UniversalConver
 $PublishPath = Join-Path $PSScriptRoot "publish"
 $SrcPath = [System.IO.Path]::Combine($PSScriptRoot, "src")
 $CoreTestsPath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.Core.Tests", "UniversalConverterX.Core.Tests.csproj")
+$VideoScalerSmokePath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.VideoScalerSmoke", "UniversalConverterX.VideoScalerSmoke.csproj")
 
 function Write-Step {
     param([string]$Message)
@@ -78,6 +79,14 @@ function Invoke-Test {
     
     if ($LASTEXITCODE -ne 0) {
         throw "Tests failed"
+    }
+
+    if (Test-IsWindows) {
+        Write-Host "Running Windows AI VideoScaler capability/benchmark smoke..." -ForegroundColor Yellow
+        dotnet run --project $VideoScalerSmokePath -c $Configuration --nologo --verbosity quiet
+        if ($LASTEXITCODE -ne 0) {
+            throw "Windows AI VideoScaler smoke failed"
+        }
     }
     
     Write-Host "Tests complete" -ForegroundColor Green

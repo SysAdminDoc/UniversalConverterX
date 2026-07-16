@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Microsoft.Windows.AI;
+using Microsoft.Windows.AI.Video;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
@@ -29,6 +31,7 @@ public interface ISidecarHealthService
     Task<IReadOnlyList<SidecarHealthReport>> EvaluateAllAsync(
         IEnumerable<UiPreset> presets,
         CancellationToken cancellationToken = default);
+    SidecarHealthRequirement EvaluateWindowsVideoScaler();
 }
 
 public sealed class SidecarHealthService : ISidecarHealthService
@@ -47,6 +50,74 @@ public sealed class SidecarHealthService : ISidecarHealthService
         _toolManager = toolManager;
         _toolDownloader = toolDownloader;
     }
+
+    public SidecarHealthRequirement EvaluateWindowsVideoScaler()
+    {
+        const string engine = "windows-ai-vsr";
+        try
+        {
+            var state = VideoScaler.GetReadyState();
+            return state switch
+            {
+                AIFeatureReadyState.Ready => Ready(
+                    engine,
+                    "platform-capability",
+                    "Windows AI Video Super Resolution",
+                    "Windows App SDK 2.2 reports VideoScaler ready for frame-level acceleration.",
+                    "Real-ESRGAN remains the file-export backend until a representative quality benchmark qualifies Windows AI VSR for general video, not only conversational footage.",
+                    null,
+                    null),
+                AIFeatureReadyState.NotReady => WindowsVideoScalerWarning(
+                    state,
+                    "The Windows AI VSR component is supported but is not installed or ready.",
+                    "UCX will not download an AI component without an explicit consent flow; use the offline Real-ESRGAN backend."),
+                AIFeatureReadyState.DisabledByUser => WindowsVideoScalerWarning(
+                    state,
+                    "Windows AI features are disabled by the current user.",
+                    "Keep Real-ESRGAN selected, or enable Windows AI features in Windows Settings before re-checking."),
+                AIFeatureReadyState.OSUpdateNeeded => WindowsVideoScalerWarning(
+                    state,
+                    "The installed Windows build cannot activate VideoScaler.",
+                    "Install a supported Windows update or keep using Real-ESRGAN."),
+                AIFeatureReadyState.CapabilityMissing or
+                AIFeatureReadyState.NotCompatibleWithSystemHardware or
+                AIFeatureReadyState.NotSupportedOnCurrentSystem => WindowsVideoScalerWarning(
+                    state,
+                    "Windows AI VSR is not available on this system.",
+                    "Real-ESRGAN remains available as the portable Vulkan backend."),
+                _ => WindowsVideoScalerWarning(
+                    state,
+                    "Windows AI VSR returned an unknown readiness state.",
+                    "Keep using Real-ESRGAN and re-check after Windows App SDK servicing updates."),
+            };
+        }
+        catch (Exception exception)
+        {
+            return new SidecarHealthRequirement(
+                engine,
+                "platform-capability",
+                "Windows AI Video Super Resolution",
+                "Warning",
+                $"VideoScaler capability probing failed: {exception.Message}",
+                "Keep using Real-ESRGAN; Windows AI VSR is an optional accelerator.",
+                null,
+                null);
+        }
+    }
+
+    private static SidecarHealthRequirement WindowsVideoScalerWarning(
+        AIFeatureReadyState state,
+        string detail,
+        string remediation) =>
+        new(
+            "windows-ai-vsr",
+            "platform-capability",
+            "Windows AI Video Super Resolution",
+            "Warning",
+            $"{detail} Readiness: {state}.",
+            remediation,
+            null,
+            null);
 
     private SidecarManifest? LoadManifest(string engine)
     {

@@ -24,6 +24,7 @@ public sealed partial class VideoEnhancerPage : Page
     ];
 
     private readonly ISidecarRunner _runner;
+    private readonly ISidecarHealthService _healthService;
     private readonly ObservableCollection<VeFileItem> _files = [];
     private readonly ObservableCollection<VeFinishedItem> _finished = [];
     private readonly List<VeModel> _models = [];
@@ -33,10 +34,21 @@ public sealed partial class VideoEnhancerPage : Page
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _healthService = App.Services.GetRequiredService<ISidecarHealthService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
+        ShowWindowsVideoScalerStatus();
         UpdateUi();
         _ = LoadModelsAsync();
+    }
+
+    private void ShowWindowsVideoScalerStatus()
+    {
+        var capability = _healthService.EvaluateWindowsVideoScaler();
+        WindowsVsrStatusText.Text = capability.Status == "Ready"
+            ? "Available for qualified frame pipelines"
+            : "Unavailable on this system — Real-ESRGAN will be used";
+        WindowsVsrDetailText.Text = $"{capability.Detail} {capability.Remediation}".Trim();
     }
 
     private async Task LoadModelsAsync()
