@@ -52,6 +52,7 @@ KNOWN_EVENTS = {
     "vmaf",          # clipforge.vmaf — per-frame VMAF scores
     "vmaf_summary",  # clipforge.vmaf — pooled mean / harmonic / min / pct<70
     "scene",         # scenedetect — detected scene cut (start/end timecodes)
+    "highlight",     # scenedetect — ranked scene-change/motion candidate
     "thumb",         # clipforge.timeline — generated thumbnail in the strip
     "track",         # clipforge.track-list — enumerated container stream
     "doc",           # docconvert — produced document file (one per input)

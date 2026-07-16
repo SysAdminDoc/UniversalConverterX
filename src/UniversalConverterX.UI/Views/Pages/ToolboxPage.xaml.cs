@@ -106,7 +106,7 @@ public sealed partial class ToolboxPage : Page
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Auto Crop", "Detect crop bounds and apply FFmpeg crop filters", "\uE7A8", blue, "Ready", green, true, "ClipForge"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Face Blur", "Detect and irreversibly obscure frontal faces in local video", "\uE8C8", red, "Ready", green, true, "OpenCV + ClipForge"));
         VideoTools.Add(new ToolboxTile("ai-watermark", "Watermark Editor", "Add or remove text and image watermarks", "\uE71B", yellow, "Ready", blue, false, "VideoSubtitleRemover"));
-        VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Detect strong clip candidates", "\uE7C9", blue, "Future", yellow, true, null));
+        VideoTools.Add(new ToolboxTile("auto-highlight", "Auto Highlight", "Rank scene-change + motion peaks; export reel / EDL / OTIO", "\uE7C9", blue, "Ready", green, false, "PySceneDetect + FFmpeg"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Intro & Outro", "Apply branded intros and outros", "\uE7AD", green, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "Lens Correction", "Fix distortion, rolling shutter, and stabilize clips", "\uE71E", blue, "Ready", green, false, "ClipForge"));
         VideoTools.Add(new ToolboxTile("presets:clipforge", "VR Converter", "Equirectangular, fisheye, and 360° projection conversion", "\uE787", blue, "Ready", green, false, "ClipForge"));

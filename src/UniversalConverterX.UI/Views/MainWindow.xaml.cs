@@ -43,6 +43,7 @@ public sealed partial class MainWindow : Window
         new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
         new("VMAF Quality", "Score a compressed clip against its reference (libvmaf)", "vmaf"),
         new("Scene Detection", "Find scene cuts in a video and export to CSV / EDL", "scene-detect"),
+        new("Auto Highlight", "Rank scene-change and motion peaks, then export a reel / EDL / OTIO", "auto-highlight"),
         new("Timeline Preview", "Render a thumbnail strip + audio waveform for any video", "timeline-preview"),
         new("Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "track-manager"),
         new("Document Converter", "Convert DOCX / PDF / ODT / XLSX / PPTX / EPUB / HTML and friends", "document-converter"),
@@ -180,6 +181,7 @@ public sealed partial class MainWindow : Window
             "history" => typeof(HistoryPage),
             "vmaf" => typeof(VmafAnalysisPage),
             "scene-detect" => typeof(SceneDetectPage),
+            "auto-highlight" => typeof(AutoHighlightPage),
             "timeline-preview" => typeof(TimelinePreviewPage),
             "track-manager" => typeof(TrackManagerPage),
             "document-converter" => typeof(DocumentConverterPage),
@@ -304,7 +306,7 @@ public sealed partial class MainWindow : Window
     private static string GetNavigationSelectionTag(string routeKey) => routeKey switch
     {
         _ when routeKey.StartsWith("presets:", StringComparison.OrdinalIgnoreCase) => "toolbox",
-        "format-inspector" or "frame-snapshot" or "slideshow-maker" or "vmaf" or "scene-detect" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
+        "format-inspector" or "frame-snapshot" or "slideshow-maker" or "vmaf" or "scene-detect" or "auto-highlight" or "timeline-preview" or "track-manager" or "document-converter" or "archive" or "pdf-tools" or "subtitle-converter" or "font-converter" or "ebook-converter" or "ocr" or "batch-rename" => "toolbox",
         "ai-bgremove"
             or "ai-video-enhancer"
             or "ai-image-enhancer"

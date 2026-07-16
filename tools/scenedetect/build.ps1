@@ -17,7 +17,7 @@ if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
 
 & $python -m pip install --quiet --upgrade pip pyinstaller
-& $python -m pip install --quiet 'scenedetect[opencv]>=0.6.7,<0.7' opencv-python-headless
+& $python -m pip install --quiet 'scenedetect[opencv]==0.6.7.1' opencv-python-headless
 
 & $python -m PyInstaller `
     --name scenedetect `

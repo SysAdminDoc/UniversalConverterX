@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.AutoHighlightPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="using:UniversalConverterX.UI.Views.Pages"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="HighlightRowTemplate" x:DataType="p:AutoHighlightRow">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="12,10"
+                    Margin="0,0,0,6">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="64"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                              Click="HighlightSelection_Click"
+                              VerticalAlignment="Center"
+                              AutomationProperties.Name="Include highlight"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{x:Bind RankLabel}"
+                               Style="{StaticResource LabelTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{x:Bind RangeLabel}"
+                               FontFamily="Consolas, Cascadia Mono, monospace"
+                               Style="{StaticResource LabelTextStyle}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="3"
+                               Text="{x:Bind ScoreLabel}"
+                               Foreground="{StaticResource AccentBlueBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="4"
+                               Text="{x:Bind Reason}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Padding="32" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Auto Highlight"
+                           Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Find high-energy moments locally from scene-change peaks and visible motion. Review the ranked windows, then export a highlight reel, CMX 3600 EDL, or OpenTimelineIO timeline."
+                           Style="{StaticResource SubtitleTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="780"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        VerticalAlignment="Center">
+                <Button x:Name="OpenVideoButton"
+                        Content="Open Video"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="OpenVideo_Click"
+                        AutomationProperties.AutomationId="AutoHighlightOpenVideoButton"/>
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Cancel_Click"
+                        Visibility="Collapsed"
+                        AutomationProperties.AutomationId="AutoHighlightCancelButton"/>
+                <Button x:Name="AnalyzeButton"
+                        Content="Analyze"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="Analyze_Click"
+                        IsEnabled="False"
+                        AutomationProperties.AutomationId="AutoHighlightAnalyzeButton"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <NumberBox x:Name="CandidateCountBox"
+                           Header="Highlight candidates"
+                           Value="5"
+                           Minimum="1" Maximum="10"
+                           SmallChange="1"
+                           SpinButtonPlacementMode="Inline"
+                           AutomationProperties.AutomationId="AutoHighlightCandidateCountBox"/>
+                <NumberBox Grid.Column="1"
+                           x:Name="ClipLengthBox"
+                           Header="Clip length (seconds)"
+                           Value="12"
+                           Minimum="3" Maximum="60"
+                           SmallChange="1" LargeChange="5"
+                           SpinButtonPlacementMode="Inline"
+                           AutomationProperties.AutomationId="AutoHighlightClipLengthBox"/>
+                <NumberBox Grid.Column="2"
+                           x:Name="ThresholdBox"
+                           Header="Scene threshold"
+                           Value="27"
+                           Minimum="1" Maximum="100"
+                           SmallChange="1" LargeChange="5"
+                           SpinButtonPlacementMode="Inline"
+                           AutomationProperties.AutomationId="AutoHighlightThresholdBox"/>
+                <NumberBox Grid.Column="3"
+                           x:Name="MinimumGapBox"
+                           Header="Minimum gap (seconds)"
+                           Value="2"
+                           Minimum="0" Maximum="120"
+                           SmallChange="1" LargeChange="5"
+                           SpinButtonPlacementMode="Inline"
+                           AutomationProperties.AutomationId="AutoHighlightMinimumGapBox"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="AnalysisProgress"
+                         Minimum="0" Maximum="100"
+                         VerticalAlignment="Center"
+                         AutomationProperties.Name="Auto Highlight progress"/>
+            <Button Grid.Column="1"
+                    x:Name="ExportReelButton"
+                    Content="Export Reel"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ExportReel_Click"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="AutoHighlightExportReelButton"/>
+            <Button Grid.Column="2"
+                    x:Name="ExportEdlButton"
+                    Content="Export EDL"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ExportEdl_Click"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="AutoHighlightExportEdlButton"/>
+            <Button Grid.Column="3"
+                    x:Name="ExportOtioButton"
+                    Content="Export OTIO"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="ExportOtio_Click"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="AutoHighlightExportOtioButton"/>
+        </Grid>
+
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="14">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="10">
+                    <Border Width="80" Height="80" CornerRadius="20"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE7C9;" FontSize="36"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock Text="No highlights yet"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Open a video and analyze it. Nothing leaves this device."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <ScrollViewer x:Name="HighlightsScroll"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="HighlightsList"
+                                  ItemTemplate="{StaticResource HighlightRowTemplate}"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="4"
+                   x:Name="StatusText"
+                   Text="Open a video to begin."
+                   Style="{StaticResource MutedTextStyle}"
+                   TextWrapping="Wrap"/>
+    </Grid>
+</Page>

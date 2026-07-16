@@ -26,7 +26,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | Category | Tools |
 |---|---|
 | **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
-| **Video** | Smart Trimmer (AI) · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
+| **Video** | Auto Highlight · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
 | **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · OCR (Tesseract) |
@@ -48,6 +48,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
 - Batch Image Editing — apply named looks, colour/tone controls, blur, grain, vignette, tint, and borders while retaining compatible alpha and multi-frame output.
 - Face Blur Privacy Filter — detect and irreversibly obscure frontal faces in every video frame with an offline, fail-closed OpenCV pipeline.
+- Auto Highlight — rank scene-change and visible-motion peaks locally, review clip windows, and export an audio-preserving reel, CMX 3600 EDL, or OpenTimelineIO timeline.
 - Conversion History — search/export past jobs and restore exact Converter settings for a re-run.
 - Queue Automation — notify, sleep, safely schedule shutdown, or run a hidden PowerShell hook with a JSON summary.
 - Watch Folders — process stable new or renamed files automatically with duplicate and self-output loop protection.

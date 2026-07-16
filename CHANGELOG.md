@@ -18,6 +18,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added a fully local Auto Highlight workflow that combines PySceneDetect transition strength with sampled motion energy, lets users review and exclude ranked clip windows, renders an audio-preserving H.264 reel, and exports frame-accurate CMX 3600 EDL or OpenTimelineIO timelines. PySceneDetect is pinned to 0.6.7.1 and a ready-to-run five-clip preset is included.
 - Video Enhancer now offers SeedVR2 3B FP8 as an opt-in CUDA restoration engine with 540p, 720p, and 1080p targets. The approximately 3.9 GB Apache-2.0 model/runtime pack requires explicit consent, immutable revision and SHA-256 verification, and at least 10 GB VRAM; inference is forced offline and uses streaming, BlockSwap, CPU offload, and tiled VAE processing. A matching 720p preset and clean missing-model/no-CUDA errors are included.
 - Added default-deny third-party sidecar plugins under the local app-data plugin directory. Manifests and preset paths are validated, links/reparse points are rejected, every plugin file is covered by one SHA-256 approval, changed plugins are re-quarantined before launch, and Settings can trust or revoke plugins that then surface in Presets and Toolbox.
 - Video Enhancer now reports the local Windows App SDK 2.2 VideoScaler readiness state without downloading AI components, keeps Real-ESRGAN as the portable export backend, and includes a headless frame benchmark smoke that runs only on supported hardware.

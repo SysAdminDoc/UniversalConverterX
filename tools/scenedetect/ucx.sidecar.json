@@ -6,6 +6,12 @@
       "executable": "ffmpeg",
       "display": "FFmpeg",
       "managed": true
+    },
+    {
+      "id": "ffprobe",
+      "executable": "ffprobe",
+      "display": "FFprobe",
+      "managed": true
     }
   ]
 }
