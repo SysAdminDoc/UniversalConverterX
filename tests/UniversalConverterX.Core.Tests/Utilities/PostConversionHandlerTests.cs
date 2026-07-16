@@ -217,6 +217,38 @@ public class PostConversionHandlerTests : IDisposable
     #region Execute — Safety
 
     [Fact]
+    public void Execute_Keep_PropagatesMarkOfTheWebToOutput()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var source = CreateFile("downloaded.docx");
+        var output = CreateFile("converted.pdf");
+        const string zoneIdentifier = "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=https://example.test/file\r\n";
+        File.WriteAllText(source + ":Zone.Identifier", zoneIdentifier);
+
+        var result = PostConversionHandler.Execute(
+            source,
+            output,
+            PostConversionAction.Keep);
+
+        result.Success.Should().BeTrue();
+        File.ReadAllText(output + ":Zone.Identifier").Should().Be(zoneIdentifier);
+    }
+
+    [Fact]
+    public void PropagateMarkOfTheWeb_WhenSourceIsUnmarked_IsSuccessfulNoOp()
+    {
+        var source = CreateFile("local.docx");
+        var output = CreateFile("local.pdf");
+
+        var result = PostConversionHandler.PropagateMarkOfTheWeb(source, output);
+
+        result.Success.Should().BeTrue();
+        result.SourceMarked.Should().BeFalse();
+    }
+
+    [Fact]
     public void Execute_RefusesToDeleteWhenSourceIsOutput()
     {
         var samePath = CreateFile("same.mp4");

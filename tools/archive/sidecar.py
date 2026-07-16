@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -61,13 +62,90 @@ def find_7z() -> str | None:
 
 # 7z prints progress as ' 12%' or ' 12% 23 - some/file.ext' when run with -bsp1.
 _PCT_RE = re.compile(r"(\d{1,3})%")
+_ZONE_IDENTIFIER_SUFFIX = ":Zone.Identifier"
+_MAX_ZONE_IDENTIFIER_BYTES = 64 * 1024
+_FILE_ATTRIBUTE_REPARSE_POINT = 0x0400
+
+
+def read_zone_identifier(path: Path) -> bytes | None:
+    """Read a Windows Mark-of-the-Web stream, or None when not present."""
+    if os.name != "nt":
+        return None
+    try:
+        with open(str(path) + _ZONE_IDENTIFIER_SUFFIX, "rb") as stream:
+            data = stream.read(_MAX_ZONE_IDENTIFIER_BYTES + 1)
+    except FileNotFoundError:
+        return None
+    if len(data) > _MAX_ZONE_IDENTIFIER_BYTES:
+        raise ValueError("Zone.Identifier exceeds the 64 KiB safety limit")
+    return data
+
+
+def _is_link_or_reparse_point(path: Path) -> bool:
+    try:
+        stat = path.stat(follow_symlinks=False)
+    except OSError:
+        return True
+    attributes = getattr(stat, "st_file_attributes", 0)
+    return path.is_symlink() or bool(attributes & _FILE_ATTRIBUTE_REPARSE_POINT)
+
+
+def collect_regular_files(root: Path) -> list[Path]:
+    """Collect extracted files without following symlinks or junctions."""
+    files: list[Path] = []
+    for current, directories, names in os.walk(root, topdown=True, followlinks=False):
+        current_path = Path(current)
+        for directory in list(directories):
+            candidate = current_path / directory
+            if _is_link_or_reparse_point(candidate):
+                raise RuntimeError(f"Archive produced a link or reparse point: {candidate.name}")
+        for name in names:
+            candidate = current_path / name
+            if _is_link_or_reparse_point(candidate):
+                raise RuntimeError(f"Archive produced a link or reparse point: {candidate.name}")
+            if candidate.is_file():
+                files.append(candidate)
+    return files
+
+
+def apply_zone_identifier(files: list[Path], zone_data: bytes | None) -> int:
+    """Apply Mark-of-the-Web to regular staging files before promotion."""
+    if zone_data is None:
+        return 0
+    for path in files:
+        with open(str(path) + _ZONE_IDENTIFIER_SUFFIX, "wb") as stream:
+            stream.write(zone_data)
+            stream.flush()
+            os.fsync(stream.fileno())
+    return len(files)
+
+
+def promote_extracted_tree(staging: Path, destination: Path, files: list[Path]) -> None:
+    """Promote a validated extraction tree only after 7-Zip fully succeeds."""
+    for directory in sorted(
+            (path for path in staging.rglob("*") if path.is_dir()),
+            key=lambda path: len(path.parts)):
+        relative = directory.relative_to(staging)
+        target = destination / relative
+        if target.exists() and not target.is_dir():
+            raise RuntimeError(f"Cannot replace file with extracted directory: {relative}")
+        target.mkdir(parents=True, exist_ok=True)
+
+    for path in files:
+        relative = path.relative_to(staging)
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.exists() and target.is_dir():
+            raise RuntimeError(f"Cannot replace directory with extracted file: {relative}")
+        os.replace(path, target)
 
 
 def _stream_7z(cmd: list[str], stage: str) -> int:
     """Run a 7z command, parse percent progress, surface log lines."""
     proc = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, bufsize=1)
+        stdin=subprocess.DEVNULL, text=True, bufsize=1,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     started = time.monotonic()
     last_pct = -1.0
     try:
@@ -153,25 +231,46 @@ def op_unpack(args: argparse.Namespace) -> int:
         return fail("missing_input", f"Archive not found: {args.input}")
     out_dir = Path(args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    # 7z 'x' preserves directory structure. -aoa = always overwrite.
-    cmd: list[str] = [sevenz, "x",
-                      "-bso1", "-bsp1", "-bse2",
-                      "-y", "-aoa",
-                      f"-o{out_dir}",
-                      str(src)]
-    if args.password:
-        cmd.append(f"-p{args.password}")
+    try:
+        zone_data = read_zone_identifier(src)
+    except (OSError, ValueError) as ex:
+        return fail("motw_read_failed", f"Could not read archive Mark-of-the-Web: {ex}")
 
     emit("log", level="info",
          message=f"Unpack {src.name} -> {out_dir}")
     emit("progress", percent=0, stage="unpack", eta_seconds=None)
-    rc = _stream_7z(cmd, "unpack")
-    if rc != 0:
-        return fail("sevenzip_failed", f"7z exited with code {rc}")
 
-    extracted = sum(1 for _ in out_dir.rglob("*") if _.is_file())
-    total_size = sum(p.stat().st_size for p in out_dir.rglob("*") if p.is_file())
+    with tempfile.TemporaryDirectory(
+            prefix=".ucx-archive-", dir=out_dir.parent) as staging_raw:
+        staging = Path(staging_raw)
+        # 7z 'x' preserves directory structure. Extract into a private staging
+        # tree so failed jobs never leave partial or unmarked destination files.
+        cmd: list[str] = [sevenz, "x",
+                          "-bso1", "-bsp1", "-bse2",
+                          "-y", "-aoa",
+                          f"-o{staging}",
+                          str(src)]
+        if args.password:
+            cmd.append(f"-p{args.password}")
+
+        rc = _stream_7z(cmd, "unpack")
+        if rc != 0:
+            return fail("sevenzip_failed", f"7z exited with code {rc}")
+
+        try:
+            files = collect_regular_files(staging)
+            marked = apply_zone_identifier(files, zone_data)
+            promote_extracted_tree(staging, out_dir, files)
+        except (OSError, RuntimeError) as ex:
+            return fail("unsafe_extraction", f"Extraction was not promoted: {ex}")
+
+    extracted = len(files)
+    total_size = sum(
+        (out_dir / path.relative_to(staging)).stat().st_size
+        for path in files)
+    if marked:
+        emit("log", level="info",
+             message=f"Preserved Mark-of-the-Web on {marked} extracted file(s)")
     emit("complete", output=str(out_dir),
          size_bytes=total_size, file_count=extracted)
     return 0
@@ -190,7 +289,12 @@ def op_list(args: argparse.Namespace) -> int:
     cmd = [sevenz, "l", "-slt", str(src)]
     if args.password:
         cmd.append(f"-p{args.password}")
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(
+        cmd,
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     if proc.returncode != 0:
         for ln in (proc.stderr or proc.stdout).splitlines()[-5:]:
             emit("log", level="error", message=ln)

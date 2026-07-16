@@ -10,6 +10,9 @@ namespace UniversalConverterX.Core.Utilities;
 /// </summary>
 public static class PostConversionHandler
 {
+    private const string ZoneIdentifierSuffix = ":Zone.Identifier";
+    private const int MaxZoneIdentifierBytes = 64 * 1024;
+
     /// <summary>
     /// Result of executing a post-conversion source-file action.
     /// </summary>
@@ -55,7 +58,13 @@ public static class PostConversionHandler
         ILogger? logger = null)
     {
         if (action == PostConversionAction.Keep)
-            return new PostConversionResult(action, true, null, null);
+        {
+            var keepMarkResult = PropagateMarkOfTheWeb(sourcePath, outputPath, logger);
+            return keepMarkResult.Success
+                ? new PostConversionResult(action, true, null, null)
+                : new PostConversionResult(action, false, null,
+                    $"Could not preserve Mark-of-the-Web on the converted output: {keepMarkResult.ErrorMessage}");
+        }
 
         if (!File.Exists(sourcePath))
             return new PostConversionResult(action, false, null,
@@ -83,6 +92,13 @@ public static class PostConversionHandler
                 StringComparison.OrdinalIgnoreCase))
             return new PostConversionResult(PostConversionAction.Keep, true, null, null);
 
+        var markResult = PropagateMarkOfTheWeb(sourcePath, outputPath, logger);
+        if (!markResult.Success)
+        {
+            return new PostConversionResult(action, false, null,
+                $"Could not preserve Mark-of-the-Web on the converted output: {markResult.ErrorMessage}");
+        }
+
         try
         {
             return action switch
@@ -99,6 +115,85 @@ public static class PostConversionHandler
             return new PostConversionResult(action, false, null, ex.Message);
         }
     }
+
+    /// <summary>
+    /// Copies the source file's Windows Zone.Identifier alternate data stream
+    /// to a derived output. Files without Mark-of-the-Web and non-Windows
+    /// platforms are successful no-ops.
+    /// </summary>
+    public static MarkOfTheWebResult PropagateMarkOfTheWeb(
+        string sourcePath,
+        string outputPath,
+        ILogger? logger = null)
+    {
+        if (!OperatingSystem.IsWindows())
+            return new MarkOfTheWebResult(false, true, null);
+
+        var sourceStreamPath = sourcePath + ZoneIdentifierSuffix;
+        byte[] zoneData;
+
+        try
+        {
+            using var sourceStream = new FileStream(
+                sourceStreamPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete,
+                bufferSize: 4096,
+                FileOptions.SequentialScan);
+
+            if (sourceStream.Length > MaxZoneIdentifierBytes)
+            {
+                return new MarkOfTheWebResult(
+                    true,
+                    false,
+                    $"Zone.Identifier is larger than the {MaxZoneIdentifierBytes}-byte safety limit.");
+            }
+
+            zoneData = new byte[(int)sourceStream.Length];
+            sourceStream.ReadExactly(zoneData);
+        }
+        catch (FileNotFoundException)
+        {
+            return new MarkOfTheWebResult(false, true, null);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return new MarkOfTheWebResult(false, true, null);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            logger?.LogWarning(ex, "Unable to read Mark-of-the-Web from '{Source}'", sourcePath);
+            return new MarkOfTheWebResult(true, false, ex.Message);
+        }
+
+        try
+        {
+            using var destinationStream = new FileStream(
+                outputPath + ZoneIdentifierSuffix,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.Read);
+            destinationStream.Write(zoneData);
+            destinationStream.Flush(flushToDisk: true);
+
+            logger?.LogInformation(
+                "Preserved Mark-of-the-Web from '{Source}' on '{Output}'",
+                sourcePath,
+                outputPath);
+            return new MarkOfTheWebResult(true, true, null);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            logger?.LogWarning(ex, "Unable to write Mark-of-the-Web to '{Output}'", outputPath);
+            return new MarkOfTheWebResult(true, false, ex.Message);
+        }
+    }
+
+    public sealed record MarkOfTheWebResult(
+        bool SourceMarked,
+        bool Success,
+        string? ErrorMessage);
 
     private static PostConversionResult ExecuteDelete(string sourcePath, ILogger? logger)
     {

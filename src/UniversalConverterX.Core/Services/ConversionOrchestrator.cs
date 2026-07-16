@@ -277,9 +277,6 @@ public class ConversionOrchestrator : IConversionOrchestrator
             return result;
 
         var action = PostConversionHandler.ResolveAction(result.Job.Options);
-        if (action == PostConversionAction.Keep)
-            return result;
-
         var postResult = PostConversionHandler.Execute(
             result.Job.InputPath,
             result.OutputPath,

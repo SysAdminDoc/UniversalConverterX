@@ -393,6 +393,40 @@ public class ConversionOrchestratorTests
     }
 
     [Fact]
+    public async Task ConvertAsync_WithDefaultKeep_PropagatesMarkOfTheWeb()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var tempDir = CreateTempDirectory();
+        try
+        {
+            var inputPath = Path.Combine(tempDir, "downloaded.mp4");
+            var outputPath = Path.Combine(tempDir, "output.png");
+            File.WriteAllText(inputPath, "source");
+            const string zoneIdentifier = "[ZoneTransfer]\r\nZoneId=3\r\n";
+            File.WriteAllText(inputPath + ":Zone.Identifier", zoneIdentifier);
+            var job = ConversionJob.Create(inputPath, outputPath);
+
+            _converterMock1.Setup(x => x.ConvertAsync(
+                It.IsAny<ConversionJob>(),
+                It.IsAny<IProgress<ConversionProgress>>(),
+                It.IsAny<CancellationToken>()))
+                .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
+                    WriteOutputAndSucceed(j, "converter1"));
+
+            var result = await _orchestrator.ConvertAsync(job);
+
+            result.Success.Should().BeTrue();
+            File.ReadAllText(outputPath + ":Zone.Identifier").Should().Be(zoneIdentifier);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task ConvertAsync_WithFailedConversion_DoesNotDeleteSource()
     {
         var tempDir = CreateTempDirectory();
