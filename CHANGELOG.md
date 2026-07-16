@@ -28,6 +28,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- Added a platform regression gate that requires the WinUI project to remain on Microsoft Windows App SDK 2.x or newer with the supported Windows target and self-contained runtime configuration.
 - Sidecar processes now force UTF-8 at the Python producer boundary, preventing Unicode file paths from failing when NDJSON output is redirected on legacy Windows code pages.
 - StreamKeep download completion now trusts yt-dlp's reported regular file or selects only files created or modified by the current run. The fallback ignores directories, symlinks, unchanged downloads, partial artifacts, and ranks subtitle/metadata companions behind primary media instead of returning an unrelated path.
 - Converter cancellation now records queued, in-flight, and orchestrator-returned cancellations separately from failures, persists each cancelled job as retryable, and always renders the cancelled batch summary even when no cancellation exception escapes the parallel task set.

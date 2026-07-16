@@ -24,6 +24,34 @@ public class VersionConsistencyTests
         AssertActiveFilesContain(repoRoot, version);
     }
 
+    [Fact]
+    public void UiProject_ShouldRemainOnWinAppSdk2OrNewer()
+    {
+        var repoRoot = FindRepoRoot();
+        var projectPath = Path.Combine(
+            repoRoot,
+            "src",
+            "UniversalConverterX.UI",
+            "UniversalConverterX.UI.csproj");
+        var project = XDocument.Load(projectPath);
+        var package = project
+            .Descendants("PackageReference")
+            .Where(element => string.Equals(
+                element.Attribute("Include")?.Value,
+                "Microsoft.WindowsAppSDK",
+                StringComparison.Ordinal))
+            .Should()
+            .ContainSingle()
+            .Which;
+
+        Version.TryParse(package.Attribute("Version")?.Value, out var version).Should().BeTrue();
+        version.Should().NotBeNull();
+        version!.Should().BeGreaterThanOrEqualTo(new Version(2, 0));
+        SingleElementValue(project, "TargetFramework")
+            .Should().StartWith("net10.0-windows10.0.19041.0");
+        SingleElementValue(project, "WindowsAppSDKSelfContained").Should().Be("true");
+    }
+
     private static string FindRepoRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
