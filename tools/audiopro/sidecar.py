@@ -68,6 +68,8 @@ TARGETS = {
     "mp3":      ("libmp3lame", ".mp3", ["-q:a", "2"]),
     "opus":     ("libopus", ".opus", ["-b:a", "128k"]),
     "aac":      ("aac", ".m4a", ["-b:a", "192k"]),
+    "fdk-aac":  ("libfdk_aac", ".m4a", ["-vbr", "4"]),
+    "vorbis":   ("libvorbis", ".ogg", ["-q:a", "6"]),
     "ac3":      ("ac3", ".ac3", ["-b:a", "640k"]),
     "eac3":     ("eac3", ".eac3", ["-b:a", "640k"]),
     "amr":      ("libopencore_amrnb", ".amr", ["-ar", "8000", "-ac", "1", "-b:a", "12.2k"]),
@@ -78,6 +80,17 @@ TARGETS = {
     "musepack": ("mpc", ".mpc", []),
     "au":       ("pcm_s16be", ".au", []),
 }
+
+
+def _unique_output_path(path: Path) -> Path:
+    """Return a non-existing sibling path without overwriting prior output."""
+    if not path.exists():
+        return path
+    for suffix in range(1, 10_000):
+        candidate = path.with_name(f"{path.stem} ({suffix}){path.suffix}")
+        if not candidate.exists():
+            return candidate
+    return path.with_name(f"{path.stem}-{time.time_ns()}{path.suffix}")
 
 
 # Input extensions audiopro is expected to recognize.
@@ -165,13 +178,13 @@ def op_convert(args: argparse.Namespace) -> int:
                     f"--fdk-profile must be aac_low|aac_he|aac_he_v2|aac_ld|aac_eld, got '{fdk_profile}'.")
 
     for i, src in enumerate(inputs):
-        out_path = out_dir / (src.stem + out_ext)
+        out_path = _unique_output_path(out_dir / (src.stem + out_ext))
         cmd = [ffmpeg, "-y", "-i", str(src)]
         if codec: cmd += ["-c:a", codec]
         cmd += fmt_args
         # --bitrate is incompatible with --vbr-quality. The flag wins by being
         # explicit; warn once before the loop body if both are set.
-        if args.bitrate and not use_vbr:
+        if args.bitrate and not use_vbr and not (codec == "libvorbis" and vorbis_managed):
             cmd += ["-b:a", args.bitrate]
         if args.sample_rate: cmd += ["-ar", args.sample_rate]
         if args.channels: cmd += ["-ac", args.channels]
