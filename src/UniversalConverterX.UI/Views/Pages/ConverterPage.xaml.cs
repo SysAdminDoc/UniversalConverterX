@@ -3,11 +3,14 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Interfaces;
@@ -57,13 +60,18 @@ public sealed partial class ConverterPage : Page
     private readonly IBatchQueueStore _queueStore;
     private readonly IHistoryService _history;
     private readonly IPostQueueActionService _postQueueActions;
+    private readonly ISidecarRunner _sidecarRunner;
     private readonly ObservableCollection<FileItem> _files = [];
     private readonly ObservableCollection<FinishedFileItem> _finishedFiles = [];
+    private readonly CancellationTokenSource _thumbnailCts = new();
+    private readonly SemaphoreSlim _thumbnailGate = new(2, 2);
     private CancellationTokenSource? _cancellationTokenSource;
     private string? _selectedFormat;
     private string? _outputDirectory;
     private bool _restoringQueue;
     private bool _updatingFfmpegCommand;
+    private QueueSortColumn _queueSortColumn = QueueSortColumn.File;
+    private bool _queueSortDescending;
 
     public ConverterPage()
     {
@@ -75,6 +83,7 @@ public sealed partial class ConverterPage : Page
         _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
         _history = App.Services.GetRequiredService<IHistoryService>();
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
+        _sidecarRunner = App.Services.GetRequiredService<ISidecarRunner>();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
@@ -87,6 +96,12 @@ public sealed partial class ConverterPage : Page
         base.OnNavigatedTo(e);
         if (e.Parameter is ConversionRerunRequest request)
             ApplyRerunRequest(request);
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        _thumbnailCts.Cancel();
+        base.OnNavigatedFrom(e);
     }
 
     private void ApplyRerunRequest(ConversionRerunRequest request)
@@ -352,20 +367,9 @@ public sealed partial class ConverterPage : Page
             return false;
         }
 
-        var estimate = OutputSizeEstimator.ForLosslessCopy(size);
-        _files.Add(new FileItem
-        {
-            Path = path,
-            FileName = fileInfo.Name,
-            Extension = fileInfo.Extension.TrimStart('.').ToUpperInvariant(),
-            FileSize = FormatSize(size),
-            Size = size,
-            FormatSummary = BuildFormatSummary(fileInfo.Extension),
-            StatusText = "Queued",
-            Progress = 0,
-            EstimatedSizeLabel = $"→ {estimate.DisplayLabel}",
-            EstimatedSizeCaveat = estimate.Caveat ?? "Based on lossless copy estimate",
-        });
+        var queuedFile = CreateFileItem(fileInfo, size, "Queued");
+        _files.Add(queuedFile);
+        QueueThumbnail(queuedFile);
 
         if (updateUi)
         {
@@ -375,6 +379,223 @@ public sealed partial class ConverterPage : Page
 
         return true;
     }
+
+    private FileItem CreateFileItem(FileInfo fileInfo, long size, string status)
+    {
+        var estimate = OutputSizeEstimator.ForLosslessCopy(size);
+        var file = new FileItem
+        {
+            Path = fileInfo.FullName,
+            FileName = fileInfo.Name,
+            Extension = fileInfo.Extension.TrimStart('.').ToUpperInvariant(),
+            FileSize = FormatSize(size),
+            Size = size,
+            FormatSummary = BuildFormatSummary(fileInfo.Extension),
+            StatusText = status,
+            Progress = 0,
+            EstimatedSizeBytes = estimate.Bytes,
+            EstimatedSizeLabel = $"≈ {estimate.DisplayLabel}",
+            EstimatedSizeCaveat =
+                "Planning estimate based on source size; codec settings determine the final output.",
+        };
+        RefreshFileReview(file);
+        return file;
+    }
+
+    private void RefreshFileReview(FileItem file)
+    {
+        var sourceExists = File.Exists(file.Path);
+        bool? routeSupported = string.IsNullOrWhiteSpace(_selectedFormat)
+            ? null
+            : _orchestrator.CanConvert(file.Extension, _selectedFormat);
+        var warnings = ConverterPreflightAnalyzer.Analyze(
+            file.Extension,
+            file.Size,
+            sourceExists,
+            _selectedFormat,
+            routeSupported);
+
+        file.WarningSummary = string.Join(" • ", warnings.Select(item => item.Message));
+        file.WarningBadgeText = warnings.Count switch
+        {
+            0 => "Ready",
+            1 => warnings[0].Message,
+            _ => $"{warnings.Count} warnings",
+        };
+        file.WarningCount = warnings.Count;
+        file.HasBlockingWarning = warnings.Any(item =>
+            item.Severity == ConverterPreflightSeverity.Error);
+    }
+
+    private void QueueThumbnail(FileItem file) => _ = LoadThumbnailAsync(file, _thumbnailCts.Token);
+
+    private async Task LoadThumbnailAsync(FileItem file, CancellationToken cancellationToken)
+    {
+        var cachePath = GetThumbnailCachePath(file);
+        if (File.Exists(cachePath))
+        {
+            SetThumbnail(file, cachePath);
+            return;
+        }
+
+        if (_sidecarRunner.Locate("mediathumb") is null)
+            return;
+
+        try
+        {
+            await _thumbnailGate.WaitAsync(cancellationToken);
+            try
+            {
+                if (!File.Exists(cachePath))
+                {
+                    var outputDirectory = Path.GetDirectoryName(cachePath)!;
+                    Directory.CreateDirectory(outputDirectory);
+                    string? emittedPath = null;
+                    var result = await _sidecarRunner.RunAsync(
+                        "mediathumb",
+                        [
+                            "thumb",
+                            "--input", file.Path,
+                            "--output-dir", outputDirectory,
+                            "--size", "96",
+                        ],
+                        ct: cancellationToken,
+                        onRawEvent: (eventName, payload) =>
+                        {
+                            if (eventName == "thumb_doc"
+                                && payload.TryGetProperty("output", out var output)
+                                && output.ValueKind == System.Text.Json.JsonValueKind.String)
+                            {
+                                emittedPath = output.GetString();
+                            }
+                        });
+
+                    if (!result.Success)
+                        return;
+
+                    if (!string.IsNullOrWhiteSpace(emittedPath) && File.Exists(emittedPath))
+                        cachePath = emittedPath;
+                }
+
+                if (File.Exists(cachePath))
+                    SetThumbnail(file, cachePath);
+            }
+            finally
+            {
+                _thumbnailGate.Release();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Navigating away cancels thumbnail work without affecting the queue.
+        }
+        catch (Exception)
+        {
+            // A preview is optional; keep the file-type glyph when a codec or
+            // cache location is unavailable rather than failing the queue.
+        }
+    }
+
+    private static string GetThumbnailCachePath(FileItem file)
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(localAppData))
+            localAppData = Path.GetTempPath();
+
+        long modifiedTicks;
+        try { modifiedTicks = File.GetLastWriteTimeUtc(file.Path).Ticks; }
+        catch { modifiedTicks = 0; }
+
+        var fingerprint = $"{Path.GetFullPath(file.Path)}\n{file.Size}\n{modifiedTicks}";
+        var digest = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(fingerprint)))
+            .ToLowerInvariant()[..20];
+        return Path.Combine(
+            localAppData,
+            "UniversalConverterX",
+            "cache",
+            "queue-thumbnails",
+            digest,
+            $"{Path.GetFileNameWithoutExtension(file.Path)}.jpg");
+    }
+
+    private void SetThumbnail(FileItem file, string path)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!_files.Contains(file) || !File.Exists(path))
+                return;
+
+            file.ThumbnailSource = new BitmapImage(new Uri(path))
+            {
+                DecodePixelWidth = 96,
+                DecodePixelHeight = 96,
+            };
+        });
+    }
+
+    private void QueueSort_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string tag }
+            || !Enum.TryParse<QueueSortColumn>(tag, ignoreCase: true, out var column))
+        {
+            return;
+        }
+
+        if (_queueSortColumn == column)
+            _queueSortDescending = !_queueSortDescending;
+        else
+        {
+            _queueSortColumn = column;
+            _queueSortDescending = false;
+        }
+
+        ApplyQueueSort();
+        UpdateQueueSortHeaders();
+    }
+
+    private void ApplyQueueSort()
+    {
+        IEnumerable<FileItem> ordered = _queueSortColumn switch
+        {
+            QueueSortColumn.Format => _files
+                .OrderBy(file => file.FormatSummary, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(file => file.FileName, StringComparer.OrdinalIgnoreCase),
+            QueueSortColumn.Size => _files
+                .OrderBy(file => file.Size)
+                .ThenBy(file => file.FileName, StringComparer.OrdinalIgnoreCase),
+            QueueSortColumn.Estimate => _files
+                .OrderBy(file => file.EstimatedSizeBytes ?? long.MaxValue)
+                .ThenBy(file => file.FileName, StringComparer.OrdinalIgnoreCase),
+            QueueSortColumn.Warnings => _files
+                .OrderBy(file => file.WarningCount)
+                .ThenBy(file => file.FileName, StringComparer.OrdinalIgnoreCase),
+            _ => _files.OrderBy(file => file.FileName, StringComparer.OrdinalIgnoreCase),
+        };
+        if (_queueSortDescending)
+            ordered = ordered.Reverse();
+
+        var snapshot = ordered.ToList();
+        for (var targetIndex = 0; targetIndex < snapshot.Count; targetIndex++)
+        {
+            var currentIndex = _files.IndexOf(snapshot[targetIndex]);
+            if (currentIndex != targetIndex)
+                _files.Move(currentIndex, targetIndex);
+        }
+    }
+
+    private void UpdateQueueSortHeaders()
+    {
+        QueueSortFileButton.Content = SortHeader("File", QueueSortColumn.File);
+        QueueSortFormatButton.Content = SortHeader("Format", QueueSortColumn.Format);
+        QueueSortSizeButton.Content = SortHeader("Size", QueueSortColumn.Size);
+        QueueSortEstimateButton.Content = SortHeader("Est. output", QueueSortColumn.Estimate);
+        QueueSortWarningsButton.Content = SortHeader("Warnings", QueueSortColumn.Warnings);
+    }
+
+    private string SortHeader(string label, QueueSortColumn column) =>
+        _queueSortColumn == column
+            ? $"{label} {(_queueSortDescending ? "↓" : "↑")}"
+            : label;
 
     private void RemoveFile_Click(object sender, RoutedEventArgs e)
     {
@@ -460,21 +681,15 @@ public sealed partial class ConverterPage : Page
                     _ => "Queued",
                 };
 
-                _files.Add(new FileItem
-                {
-                    Id = string.IsNullOrWhiteSpace(job.Id) ? Guid.NewGuid().ToString("N") : job.Id,
-                    Path = job.SourcePath,
-                    FileName = info.Name,
-                    Extension = info.Extension.TrimStart('.').ToUpperInvariant(),
-                    FileSize = FormatSize(info.Length),
-                    Size = info.Length,
-                    FormatSummary = BuildFormatSummary(info.Extension),
-                    StatusText = status,
-                    Progress = 0,
-                    OutputPath = job.OutputPath,
-                    ErrorMessage = job.ErrorMessage,
-                    PersistedArgs = [.. job.Args],
-                });
+                var restoredFile = CreateFileItem(info, info.Length, status);
+                restoredFile.Id = string.IsNullOrWhiteSpace(job.Id)
+                    ? Guid.NewGuid().ToString("N")
+                    : job.Id;
+                restoredFile.OutputPath = job.OutputPath;
+                restoredFile.ErrorMessage = job.ErrorMessage;
+                restoredFile.PersistedArgs = [.. job.Args];
+                _files.Add(restoredFile);
+                QueueThumbnail(restoredFile);
                 restored++;
             }
 
@@ -566,13 +781,24 @@ public sealed partial class ConverterPage : Page
     {
         var hasFiles = _files.Count > 0;
         var hasFinished = _finishedFiles.Count > 0;
+        foreach (var file in _files)
+            RefreshFileReview(file);
+        ApplyQueueSort();
+        UpdateQueueSortHeaders();
+        var blockingFiles = _files.Count(file => file.HasBlockingWarning);
+        var warningFiles = _files.Count(file => file.WarningCount > 0);
         EmptyState.Visibility = hasFiles ? Visibility.Collapsed : Visibility.Visible;
-        FileList.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
+        QueueReviewTable.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
-        ConvertButton.IsEnabled = hasFiles && !string.IsNullOrEmpty(_selectedFormat) && _cancellationTokenSource is null;
+        ConvertButton.IsEnabled = hasFiles
+            && !string.IsNullOrEmpty(_selectedFormat)
+            && blockingFiles == 0
+            && _cancellationTokenSource is null;
         SmartMatchButton.IsEnabled = hasFiles && RecommendFormatTag() is not null;
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finishedFiles.Count} finished";
+        QueueSummaryText.Text = warningFiles > 0
+            ? $"{_files.Count} queued / {warningFiles} need review"
+            : $"{_files.Count} queued / {_finishedFiles.Count} finished";
         RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
         if (EditFfmpegCommandToggle?.IsOn != true)
@@ -588,6 +814,8 @@ public sealed partial class ConverterPage : Page
             StatusText.Text = "Add files to start a conversion queue.";
         else if (string.IsNullOrEmpty(_selectedFormat))
             StatusText.Text = "Choose an output profile before starting.";
+        else if (_files.Any(file => file.HasBlockingWarning))
+            StatusText.Text = "Resolve the blocked file routes shown in the queue before converting.";
         else
             StatusText.Text = $"Ready to convert {_files.Count} files to {_selectedFormat.ToUpperInvariant()}.";
     }
@@ -1354,6 +1582,15 @@ public sealed partial class ConverterPage : Page
         Document,
     }
 
+    private enum QueueSortColumn
+    {
+        File,
+        Format,
+        Size,
+        Estimate,
+        Warnings,
+    }
+
     private sealed record QueuedConversion(
         FileItem File,
         ConversionJob Job,
@@ -1367,6 +1604,11 @@ public class FileItem : INotifyPropertyChanged
     private double _progress;
     private string _statusText = "";
     private string _formatSummary = "";
+    private BitmapImage? _thumbnailSource;
+    private string _warningSummary = "";
+    private string _warningBadgeText = "Ready";
+    private int _warningCount;
+    private bool _hasBlockingWarning;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -1380,12 +1622,75 @@ public class FileItem : INotifyPropertyChanged
     public string? ErrorMessage { get; set; }
     public List<string> PersistedArgs { get; set; } = [];
     public string? RerunParameters { get; set; }
+    public long? EstimatedSizeBytes { get; set; }
     public string EstimatedSizeLabel { get; set; } = "";
     public string EstimatedSizeCaveat { get; set; } = "";
     public Microsoft.UI.Xaml.Visibility HasEstimatedSize =>
         string.IsNullOrEmpty(EstimatedSizeLabel)
             ? Microsoft.UI.Xaml.Visibility.Collapsed
             : Microsoft.UI.Xaml.Visibility.Visible;
+
+    public BitmapImage? ThumbnailSource
+    {
+        get => _thumbnailSource;
+        set
+        {
+            if (!SetProperty(ref _thumbnailSource, value))
+                return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ThumbnailVisibility)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ThumbnailPlaceholderVisibility)));
+        }
+    }
+
+    public Microsoft.UI.Xaml.Visibility ThumbnailVisibility =>
+        ThumbnailSource is null
+            ? Microsoft.UI.Xaml.Visibility.Collapsed
+            : Microsoft.UI.Xaml.Visibility.Visible;
+
+    public Microsoft.UI.Xaml.Visibility ThumbnailPlaceholderVisibility =>
+        ThumbnailSource is null
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    public string WarningSummary
+    {
+        get => _warningSummary;
+        set => SetProperty(ref _warningSummary, value);
+    }
+
+    public string WarningBadgeText
+    {
+        get => _warningBadgeText;
+        set => SetProperty(ref _warningBadgeText, value);
+    }
+
+    public int WarningCount
+    {
+        get => _warningCount;
+        set
+        {
+            if (!SetProperty(ref _warningCount, value))
+                return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WarningVisibility)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadyVisibility)));
+        }
+    }
+
+    public bool HasBlockingWarning
+    {
+        get => _hasBlockingWarning;
+        set => SetProperty(ref _hasBlockingWarning, value);
+    }
+
+    public Microsoft.UI.Xaml.Visibility WarningVisibility =>
+        WarningCount > 0
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    public Microsoft.UI.Xaml.Visibility ReadyVisibility =>
+        WarningCount == 0
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
 
     public double Progress
     {
@@ -1405,13 +1710,14 @@ public class FileItem : INotifyPropertyChanged
         set => SetProperty(ref _formatSummary, value);
     }
 
-    private void SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = "")
+    private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = "")
     {
         if (EqualityComparer<T>.Default.Equals(storage, value))
-            return;
+            return false;
 
         storage = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 }
 

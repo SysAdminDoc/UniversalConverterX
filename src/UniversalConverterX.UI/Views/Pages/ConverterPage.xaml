@@ -13,15 +13,19 @@
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="1"
-                    CornerRadius="16"
-                    Padding="16"
-                    Margin="0,0,0,12">
-                <Grid ColumnSpacing="16" RowSpacing="10">
+                    CornerRadius="12"
+                    Padding="12"
+                    Margin="0,0,0,8"
+                    MinWidth="720">
+                <Grid ColumnSpacing="12" RowSpacing="10">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="48"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="85"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="36"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -29,38 +33,68 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="48" Height="48" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE8A5;" FontSize="20"
-                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                        <Grid>
+                            <FontIcon Glyph="&#xE8A5;" FontSize="20"
+                                      Visibility="{Binding ThumbnailPlaceholderVisibility}"
+                                      Foreground="{StaticResource AccentBlueBrush}"/>
+                            <Image Source="{Binding ThumbnailSource}"
+                                   Visibility="{Binding ThumbnailVisibility}"
+                                   Stretch="UniformToFill"
+                                   AutomationProperties.Name="File preview thumbnail"/>
+                        </Grid>
                     </Border>
 
-                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4">
+                    <StackPanel Grid.Column="1" Grid.Row="0" Spacing="3" VerticalAlignment="Center">
                         <TextBlock Text="{Binding FileName}"
                                    Style="{StaticResource LabelTextStyle}"
-                                   TextTrimming="CharacterEllipsis"/>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding FileSize}"
-                                       Style="{StaticResource MutedTextStyle}" FontSize="11"/>
-                            <TextBlock Text="{Binding EstimatedSizeLabel}"
-                                       Style="{StaticResource MutedTextStyle}" FontSize="11"
-                                       Foreground="{StaticResource AccentBlueBrush}"
-                                       Visibility="{Binding HasEstimatedSize}"
-                                       AutomationProperties.Name="Estimated output size"
-                                       ToolTipService.ToolTip="{Binding EstimatedSizeCaveat}"/>
-                        </StackPanel>
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTipService.ToolTip="{Binding Path}"/>
+                        <TextBlock Text="{Binding StatusText}"
+                                   Style="{StaticResource MutedTextStyle}" FontSize="11"/>
                     </StackPanel>
 
-                    <Border Grid.Column="2" Grid.Row="0" VerticalAlignment="Top"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            CornerRadius="10" Padding="12,6">
-                        <TextBlock Text="{Binding FormatSummary}"
-                                   Style="{StaticResource MutedTextStyle}"
-                                   FontWeight="SemiBold"
-                                   TextAlignment="Center" FontSize="11"/>
-                    </Border>
+                    <TextBlock Grid.Column="2" Grid.Row="0"
+                               Text="{Binding FormatSummary}"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" FontSize="11"/>
 
-                    <Button Grid.Column="3" Grid.Row="0"
+                    <TextBlock Grid.Column="3" Grid.Row="0"
+                               Text="{Binding FileSize}"
+                               Style="{StaticResource MutedTextStyle}"
+                               VerticalAlignment="Center" FontSize="11"/>
+
+                    <TextBlock Grid.Column="4" Grid.Row="0"
+                               Text="{Binding EstimatedSizeLabel}"
+                               Style="{StaticResource MutedTextStyle}" FontSize="11"
+                               Foreground="{StaticResource AccentBlueBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding HasEstimatedSize}"
+                               AutomationProperties.Name="Estimated output size"
+                               ToolTipService.ToolTip="{Binding EstimatedSizeCaveat}"/>
+
+                    <StackPanel Grid.Column="5" Grid.Row="0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="5"
+                                    Visibility="{Binding WarningVisibility}"
+                                    ToolTipService.ToolTip="{Binding WarningSummary}">
+                            <FontIcon Glyph="&#xE7BA;" FontSize="12"
+                                      Foreground="{StaticResource AccentOrangeBrush}"/>
+                            <TextBlock Text="{Binding WarningBadgeText}"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       Foreground="{StaticResource AccentOrangeBrush}"
+                                       TextTrimming="CharacterEllipsis" FontSize="11"/>
+                        </StackPanel>
+                        <TextBlock Text="Ready"
+                                   Visibility="{Binding ReadyVisibility}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Foreground="{StaticResource AccentGreenBrush}"
+                                   FontSize="11"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="6" Grid.Row="0"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Remove from queue" ToolTipService.ToolTip="Remove from queue"
                             Click="RemoveFile_Click" Tag="{Binding}">
@@ -68,18 +102,11 @@
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Button>
 
-                    <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <ProgressBar AutomationProperties.Name="Progress" Grid.Column="0" Minimum="0" Maximum="100"
+                    <Grid Grid.Column="1" Grid.ColumnSpan="6" Grid.Row="1">
+                        <ProgressBar AutomationProperties.Name="Progress" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
                                      Height="7" CornerRadius="3"
                                      VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Text="{Binding StatusText}"
-                                   Style="{StaticResource MutedTextStyle}"
-                                   MinWidth="86" TextAlignment="Right" FontSize="11"/>
                     </Grid>
                 </Grid>
             </Border>
@@ -194,11 +221,67 @@
                                     AutomationProperties.AutomationId="ConverterPageButton03"/>
                             </StackPanel>
 
-                            <ListView x:Name="FileList"
-                                      Visibility="Collapsed"
-                                      Background="Transparent"
-                                      SelectionMode="None"
-                                      ItemTemplate="{StaticResource QueuedFileTemplate}"/>
+                            <Grid x:Name="QueueReviewTable" Visibility="Collapsed" RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{StaticResource SurfaceLightBrush}"
+                                        CornerRadius="10" Padding="12,7" MinWidth="720">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="105"/>
+                                            <ColumnDefinition Width="85"/>
+                                            <ColumnDefinition Width="95"/>
+                                            <ColumnDefinition Width="145"/>
+                                            <ColumnDefinition Width="36"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Preview"
+                                                   Style="{StaticResource MutedTextStyle}" FontSize="11"
+                                                   VerticalAlignment="Center"/>
+                                        <Button x:Name="QueueSortFileButton" Grid.Column="1" Content="File ↑"
+                                                Tag="file" Click="QueueSort_Click"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                HorizontalAlignment="Left"
+                                                AutomationProperties.AutomationId="ConverterQueueSortFile"/>
+                                        <Button x:Name="QueueSortFormatButton" Grid.Column="2" Content="Format"
+                                                Tag="format" Click="QueueSort_Click"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                HorizontalAlignment="Left"
+                                                AutomationProperties.AutomationId="ConverterQueueSortFormat"/>
+                                        <Button x:Name="QueueSortSizeButton" Grid.Column="3" Content="Size"
+                                                Tag="size" Click="QueueSort_Click"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                HorizontalAlignment="Left"
+                                                AutomationProperties.AutomationId="ConverterQueueSortSize"/>
+                                        <Button x:Name="QueueSortEstimateButton" Grid.Column="4" Content="Est. output"
+                                                Tag="estimate" Click="QueueSort_Click"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                HorizontalAlignment="Left"
+                                                AutomationProperties.AutomationId="ConverterQueueSortEstimate"/>
+                                        <Button x:Name="QueueSortWarningsButton" Grid.Column="5" Content="Warnings"
+                                                Tag="warnings" Click="QueueSort_Click"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                HorizontalAlignment="Left"
+                                                AutomationProperties.AutomationId="ConverterQueueSortWarnings"/>
+                                    </Grid>
+                                </Border>
+
+                                <ListView x:Name="FileList" Grid.Row="1"
+                                          Background="Transparent"
+                                          SelectionMode="None"
+                                          ItemTemplate="{StaticResource QueuedFileTemplate}">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="Margin" Value="0"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+                            </Grid>
                         </Grid>
                     </PivotItem>
 

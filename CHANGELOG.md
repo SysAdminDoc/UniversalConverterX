@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Converter now presents queued files as a sortable preflight table with cached asynchronous 48 px thumbnails, current and estimated output sizes, and per-file warning badges. Missing sources, empty files, and unsupported routes block conversion before work starts; restored queues receive the same estimates and review checks.
 - Added an offline face-blur privacy filter to ClipForge and Toolbox. OpenCV scans every frame, expands and strongly blurs/pixelates each detected face, preserves source audio through FFmpeg, and refuses to write a privacy-labelled output when no face is detected.
 - Image Converter now applies batch-safe brightness, contrast, saturation, sharpness, blur, hue, grayscale, sepia, invert, vignette, grain, tint, and border edits, plus vivid/muted/B&amp;W/vintage/cold/warm looks. Compatible PNG, WebP, and TIFF outputs preserve alpha, and WebP/TIFF edits process every input frame.
 - Image Converter can now binary-search lossy quality for a target file size, while HEICShift also exposes PSNR and local Vship SSIMULACRA2 score targets. Results report the chosen quality and warn when a requested target is outside the encoder's achievable range; a 500 KB web JPEG preset is included.
