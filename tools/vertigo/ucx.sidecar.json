@@ -1,4 +1,13 @@
 {
   "engine": "vertigo",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContains": "reframe"
+    }
+  ],
   "models": true
 }

@@ -14,7 +14,9 @@ param(
     
     [string]$CertificatePath,
     
-    [string]$CertificatePassword
+    [string]$CertificatePassword,
+
+    [string]$FfmpegArchivePath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -170,6 +172,19 @@ $presetFragmentPath = Join-Path $scriptDir 'wix\PresetFiles.generated.wxs'
 Write-Step "Generating WiX preset fragment..."
 Write-PresetWixFragment -PresetDirectory $presetsDst -OutputPath $presetFragmentPath
 Write-Success "Generated $presetFragmentPath"
+
+# Bundle the exact FFmpeg build declared in tools/ffmpeg/bundle.json. The
+# staging script verifies SHA-256 before extracting any executable.
+Write-Step "Staging pinned FFmpeg..."
+$ffmpegStageArguments = @{
+    ManifestPath = (Join-Path $rootDir 'tools\ffmpeg\bundle.json')
+    DestinationPath = (Join-Path $publishDir 'win-x64\tools\bin')
+}
+if (-not [string]::IsNullOrWhiteSpace($FfmpegArchivePath)) {
+    $ffmpegStageArguments.ArchivePath = $FfmpegArchivePath
+}
+& (Join-Path $scriptDir 'Stage-PinnedFfmpeg.ps1') @ffmpegStageArguments | Out-Null
+Write-Success "Staged FFmpeg 8.1.2 -> $($ffmpegStageArguments.DestinationPath)"
 
 # Build MSIX
 if ($Type -eq 'msix' -or $Type -eq 'all') {

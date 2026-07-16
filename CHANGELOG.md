@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Security
 
+- FFmpeg now ships from a pinned BtbN 8.1.2 build instead of a mutable latest channel. Windows and Linux downloads have platform-specific SHA-256 pins, the installer stages verified FFmpeg/FFprobe/FFplay binaries, BtbN version banners are parsed against the 8.1.2 floor, and every sidecar that can fail on missing FFmpeg now declares the managed dependency.
 - Whisper STT and HEICShift sidecars no longer invoke pip or escalate package installation at conversion time. Missing dependencies now fail closed with actionable managed-environment guidance, while packaged builds require dependencies to be bundled during the trusted build step.
 - DPAPI protection now uses current-user scope plus application-specific entropy and reports failures instead of returning or storing plaintext. StreamKeep cookies, account credentials, and config secrets share a versioned DPAPI2 format, retain legacy read compatibility, migrate cookie stores safely, and preserve existing data when protection fails.
 - Successful conversions now preserve a source file's Windows Mark-of-the-Web on derived outputs, including the default keep-source flow. Archive extraction now runs in a private staging tree, rejects links and reparse points, applies the archive's Zone.Identifier to every regular extracted file, and promotes files only after 7-Zip succeeds.

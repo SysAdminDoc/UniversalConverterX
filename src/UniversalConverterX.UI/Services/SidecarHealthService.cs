@@ -147,6 +147,13 @@ public sealed class SidecarHealthService : ISidecarHealthService
             {
                 continue;
             }
+            if (t.WhenArgContainsAny is { Count: > 0 }
+                && !t.WhenArgContainsAny.Any(condition =>
+                    presetArgs.Any(argument =>
+                        argument.Contains(condition, StringComparison.OrdinalIgnoreCase))))
+            {
+                continue;
+            }
 
             yield return !t.Required
                 ? ToolRequirement.Recommended(t.Id, t.Executable, t.Display)
@@ -168,7 +175,8 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string Display = "",
         bool Managed = false,
         bool Required = true,
-        string? WhenArgContains = null);
+        string? WhenArgContains = null,
+        List<string>? WhenArgContainsAny = null);
 
     public async Task<SidecarHealthReport> EvaluateAsync(
         UiPreset preset,

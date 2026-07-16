@@ -67,7 +67,7 @@ class SidecarHealthManifestTests(unittest.TestCase):
                                 "executable": "ffmpeg",
                                 "display": "FFmpeg",
                                 "managed": True,
-                                "whenArgContains": "video",
+                                "whenArgContainsAny": ["video", "mp4"],
                             }
                         ],
                     }
@@ -76,6 +76,23 @@ class SidecarHealthManifestTests(unittest.TestCase):
             )
 
             self.assertEqual([], check_health_manifest(sidecar))
+
+    def test_missing_ffmpeg_error_requires_manifest_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            sidecar = Path(temp) / "sample" / "sidecar.py"
+            sidecar.parent.mkdir()
+            sidecar.write_text('return fail("missing_ffmpeg")', encoding="utf-8")
+            (sidecar.parent / "ucx.sidecar.json").write_text(
+                json.dumps({"engine": "sample"}),
+                encoding="utf-8",
+            )
+
+            details = [item.detail for item in check_health_manifest(sidecar)]
+
+            self.assertIn(
+                "sidecar reports missing_ffmpeg but does not declare the managed ffmpeg tool",
+                details,
+            )
 
 
 if __name__ == "__main__":

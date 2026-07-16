@@ -284,7 +284,7 @@ public class ToolManager : IToolManager
         return [$"/usr/bin/{executable}", $"/usr/local/bin/{executable}"];
     }
 
-    private static string? ExtractVersion(string output)
+    internal static string? ExtractVersion(string output)
     {
         if (string.IsNullOrWhiteSpace(output))
             return null;
@@ -297,17 +297,9 @@ public class ToolManager : IToolManager
         if (string.IsNullOrEmpty(firstLine))
             return null;
 
-        // Try to extract version number
-        var parts = firstLine.Split(' ');
-        foreach (var part in parts)
-        {
-            if (part.Any(char.IsDigit) && part.Contains('.'))
-            {
-                var cleaned = part.Trim(',', ')', '(', 'v', 'V');
-                if (cleaned.Length > 0 && char.IsDigit(cleaned[0]))
-                    return cleaned;
-            }
-        }
+        var version = ToolVersionText.ExtractFirstDottedToken(firstLine);
+        if (version is not null)
+            return version;
 
         return firstLine.Length > 50 ? firstLine[..50] + "..." : firstLine;
     }

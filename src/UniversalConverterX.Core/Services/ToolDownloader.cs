@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Core.Services;
 
@@ -88,8 +89,9 @@ public class ToolDownloader : IToolDownloader
                 var downloadPath = Path.Combine(tempDir, GetFilenameFromUrl(resolved.Url));
                 await DownloadFileAsync(resolved.Url, downloadPath, progress, cancellationToken);
 
-                var configuredChecksum = NormalizeSha256(downloadInfo.ExpectedChecksum);
-                if (!string.IsNullOrWhiteSpace(downloadInfo.ExpectedChecksum) && configuredChecksum is null)
+                var configuredChecksumValue = GetConfiguredChecksumValue(downloadInfo);
+                var configuredChecksum = NormalizeSha256(configuredChecksumValue);
+                if (!string.IsNullOrWhiteSpace(configuredChecksumValue) && configuredChecksum is null)
                     throw new InvalidDataException($"Invalid SHA-256 checksum configured for {toolName}.");
 
                 var expectedChecksum = configuredChecksum ?? resolved.Sha256;
@@ -233,7 +235,7 @@ public class ToolDownloader : IToolDownloader
                     IsInstalled: false);
             }
 
-            var updateAvailable = !string.Equals(currentVersion, latestVersion, StringComparison.OrdinalIgnoreCase);
+            var updateAvailable = IsToolUpdateAvailable(currentVersion, latestVersion);
 
             return new ToolUpdateInfo(
                 ToolName: toolName,
@@ -676,7 +678,7 @@ public class ToolDownloader : IToolDownloader
         ToolDownloadInfo downloadInfo,
         CancellationToken cancellationToken)
     {
-        var configuredChecksum = NormalizeSha256(downloadInfo.ExpectedChecksum);
+        var configuredChecksum = NormalizeSha256(GetConfiguredChecksumValue(downloadInfo));
 
         // Check for platform-specific URLs
         if (downloadInfo.PlatformUrls != null)
@@ -753,6 +755,9 @@ public class ToolDownloader : IToolDownloader
         return values.GetValueOrDefault(platformKey)
             ?? values.GetValueOrDefault(_platform);
     }
+
+    private static string? GetConfiguredChecksumValue(ToolDownloadInfo downloadInfo) =>
+        downloadInfo.ExpectedChecksum ?? GetPlatformValue(downloadInfo.ExpectedChecksums);
 
     private async Task<string?> TryGetGitHubAssetDigestAsync(
         ToolDownloadInfo downloadInfo,
@@ -831,6 +836,9 @@ public class ToolDownloader : IToolDownloader
 
     private async Task<string?> GetLatestVersionAsync(ToolDownloadInfo downloadInfo, CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(downloadInfo.LatestVersion))
+            return downloadInfo.LatestVersion;
+
         if (!string.IsNullOrEmpty(downloadInfo.GitHubRepo))
         {
             var response = await GetGitHubReleaseAsync(downloadInfo.GitHubRepo, cancellationToken)
@@ -891,11 +899,28 @@ public class ToolDownloader : IToolDownloader
     internal static bool ReleaseVersionMatches(string? reportedVersion, string? releaseVersion)
     {
         var reported = ExtractVersion(reportedVersion ?? "");
-        var release = ExtractVersion(releaseVersion?.TrimStart('v', 'V') ?? "");
-        return reported is not null
-            && release is not null
-            && string.Equals(reported, release, StringComparison.OrdinalIgnoreCase);
+        var release = ExtractVersion(releaseVersion ?? "");
+        if (reported is null || release is null)
+            return false;
+
+        if (string.Equals(reported, release, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!reported.StartsWith(release + "-", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var buildSuffix = reported[(release.Length + 1)..].Split('-', StringSplitOptions.RemoveEmptyEntries);
+        return buildSuffix.Length is 2 or 3
+            && int.TryParse(buildSuffix[0], out _)
+            && buildSuffix[1].Length > 1
+            && buildSuffix[1][0] is 'g' or 'G'
+            && buildSuffix[1][1..].All(char.IsAsciiHexDigit)
+            && (buildSuffix.Length == 2 || buildSuffix[2].All(char.IsAsciiDigit));
     }
+
+    internal static bool IsToolUpdateAvailable(string? currentVersion, string? latestVersion) =>
+        !ReleaseVersionMatches(currentVersion, latestVersion)
+        && VersionOrdering.IsUpdateAvailable(currentVersion, latestVersion);
 
     private static async Task<string?> ProbeExecutableVersionAsync(
         string exePath,
@@ -949,27 +974,7 @@ public class ToolDownloader : IToolDownloader
     }
 
     private static string? ExtractVersion(string output)
-    {
-        if (string.IsNullOrWhiteSpace(output))
-            return null;
-
-        // Try to find version pattern
-        var lines = output.Split('\n');
-        foreach (var line in lines)
-        {
-            var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
-            foreach (var part in parts)
-            {
-                var cleaned = part.Trim().Trim(',', '(', ')', 'v', 'V');
-                if (cleaned.Length > 0 && char.IsDigit(cleaned[0]) && cleaned.Contains('.'))
-                {
-                    return cleaned;
-                }
-            }
-        }
-
-        return null;
-    }
+        => ToolVersionText.ExtractFirstDottedToken(output);
 
     private string GetExecutablePath(string toolName)
     {
@@ -1080,20 +1085,7 @@ public class ToolDownloader : IToolDownloader
     {
         return new Dictionary<string, ToolDownloadInfo>
         {
-            ["ffmpeg"] = new ToolDownloadInfo
-            {
-                ToolName = "ffmpeg",
-                ExecutableName = "ffmpeg",
-                GitHubRepo = "BtbN/FFmpeg-Builds",
-                VersionArg = "-version",
-                Description = "Video and audio processing",
-                PlatformUrls = new Dictionary<string, string>
-                {
-                    ["windows-x64"] = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
-                    ["linux-x64"] = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
-                },
-                AdditionalFiles = ["ffprobe", "ffplay"]
-            },
+            ["ffmpeg"] = LoadPinnedFfmpegDownloadInfo(),
             ["imagemagick"] = new ToolDownloadInfo
             {
                 ToolName = "imagemagick",
@@ -1199,11 +1191,62 @@ public class ToolDownloader : IToolDownloader
         };
     }
 
+    private static ToolDownloadInfo LoadPinnedFfmpegDownloadInfo()
+    {
+        const string resourceName = "UniversalConverterX.Core.Tools.ffmpeg.bundle.json";
+        using var stream = typeof(ToolDownloader).Assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException($"Missing embedded FFmpeg bundle manifest: {resourceName}");
+        var manifest = JsonSerializer.Deserialize<PinnedToolBundleManifest>(
+            stream,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web))
+            ?? throw new InvalidDataException("The embedded FFmpeg bundle manifest is empty.");
+
+        if (manifest.SchemaVersion != 1
+            || !string.Equals(manifest.Tool, "ffmpeg", StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(manifest.Version)
+            || manifest.Files.Count == 0
+            || manifest.Platforms.Count == 0)
+        {
+            throw new InvalidDataException("The embedded FFmpeg bundle manifest is invalid.");
+        }
+
+        return new ToolDownloadInfo
+        {
+            ToolName = manifest.Tool,
+            ExecutableName = manifest.Files[0],
+            GitHubRepo = "BtbN/FFmpeg-Builds",
+            VersionArg = "-version",
+            LatestVersion = manifest.Version,
+            Description = $"Video and audio processing ({manifest.Build})",
+            PlatformUrls = manifest.Platforms.ToDictionary(pair => pair.Key, pair => pair.Value.Url),
+            ExpectedChecksums = manifest.Platforms.ToDictionary(pair => pair.Key, pair => pair.Value.Sha256),
+            AdditionalFiles = manifest.Files.Skip(1).ToArray(),
+            RequireChecksum = true,
+            RequireReleaseVersionMatch = true,
+        };
+    }
+
     private sealed record ResolvedDownload(string Url, string? Sha256, string? Version);
 
     private sealed record RollbackFile(string FileName, string BackupPath, string DestinationPath);
 
     private sealed record RollbackManifest(string ToolName, DateTime InstalledAtUtc, string[] Files);
+
+    private sealed class PinnedToolBundleManifest
+    {
+        public int SchemaVersion { get; set; }
+        public string Tool { get; set; } = "";
+        public string Version { get; set; } = "";
+        public string Build { get; set; } = "";
+        public List<string> Files { get; set; } = [];
+        public Dictionary<string, PinnedToolPlatform> Platforms { get; set; } = [];
+    }
+
+    private sealed class PinnedToolPlatform
+    {
+        public string Url { get; set; } = "";
+        public string Sha256 { get; set; } = "";
+    }
 
     private class GitHubRelease
     {
@@ -1263,6 +1306,7 @@ public class ToolDownloadInfo
     public Dictionary<string, string>? PlatformUrls { get; set; }
     public string? VersionArg { get; set; }
     public string? ExpectedChecksum { get; set; }
+    public Dictionary<string, string>? ExpectedChecksums { get; set; }
     public bool RequireChecksum { get; set; } = false;
     public string? LatestVersion { get; set; }
     public string? Description { get; set; }

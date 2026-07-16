@@ -1,5 +1,14 @@
 {
   "engine": "anime-upscale",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContains": "video"
+    }
+  ],
   "models": true,
   "gpu": "vulkan"
 }

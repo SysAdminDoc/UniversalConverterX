@@ -136,11 +136,49 @@ public class ToolDownloaderTests : IDisposable
         File.ReadAllBytes(ExpectedToolPath("yt-dlp")).Should().Equal(payload);
     }
 
+    [Fact]
+    public void FfmpegDownloadInfo_ShouldUsePinnedChecksumProtectedBuild()
+    {
+        var downloader = CreateDownloader([]);
+
+        var info = downloader.GetToolDownloadInfo("ffmpeg");
+
+        info.Should().NotBeNull();
+        info!.LatestVersion.Should().Be("8.1.2");
+        info.RequireChecksum.Should().BeTrue();
+        info.RequireReleaseVersionMatch.Should().BeTrue();
+        info.PlatformUrls.Should().NotBeNull();
+        info.PlatformUrls!.Values.Should().OnlyContain(url =>
+            url.StartsWith("https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-06-30-13-34/", StringComparison.Ordinal)
+            && !url.Contains("/latest/", StringComparison.OrdinalIgnoreCase));
+        info.ExpectedChecksums.Should().BeEquivalentTo(new Dictionary<string, string>
+        {
+            ["windows-x64"] = "682361e32c9631caec09e5d9f09077101c9ed90c14e275f62014fefa6d397990",
+            ["linux-x64"] = "0ba73bbd93472c7622f6dec26d334c5e62e64d858d072490b2844320970456cd",
+        });
+    }
+
+    [Fact]
+    public async Task CheckForUpdateAsync_UninstalledFfmpeg_ShouldUsePinnedManifestVersion()
+    {
+        var downloader = CreateDownloader([]);
+
+        var result = await downloader.CheckForUpdateAsync("ffmpeg");
+
+        result.Should().NotBeNull();
+        result!.IsInstalled.Should().BeFalse();
+        result.UpdateAvailable.Should().BeTrue();
+        result.LatestVersion.Should().Be("8.1.2");
+    }
+
     [Theory]
     [InlineData("yt-dlp 2026.07.04", "2026.07.04", true)]
     [InlineData("2026.07.04\r\n", "2026.07.04", true)]
     [InlineData("deno 2.9.3", "v2.9.3", true)]
     [InlineData("deno 2.2.0", "v2.9.3", false)]
+    [InlineData("ffmpeg version n8.1.2-21-gce3c09c101-20260630", "8.1.2", true)]
+    [InlineData("ffmpeg version n8.1.3-2-g123abc", "8.1.2", false)]
+    [InlineData("ffmpeg version n8.1.2-rc1", "8.1.2", false)]
     [InlineData("not a version", "v2.9.3", false)]
     public void ReleaseVersionMatches_ShouldRequireExactParsedVersion(
         string reported,
@@ -148,6 +186,19 @@ public class ToolDownloaderTests : IDisposable
         bool expected)
     {
         ToolDownloader.ReleaseVersionMatches(reported, release).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("8.1.2-21-gce3c09c101-20260630", "8.1.2", false)]
+    [InlineData("8.1.1", "8.1.2", true)]
+    [InlineData("2.23.0-nightly.20260716", "2.22.1", false)]
+    [InlineData("unknown", "8.1.2", false)]
+    public void IsToolUpdateAvailable_ShouldUseSemanticPinnedVersionComparison(
+        string current,
+        string latest,
+        bool expected)
+    {
+        ToolDownloader.IsToolUpdateAvailable(current, latest).Should().Be(expected);
     }
 
     public void Dispose()
@@ -209,6 +260,8 @@ public class ToolDownloaderTests : IDisposable
 
     private static void SetAllPlatformUrls(ToolDownloadInfo info, string url)
     {
+        info.ExpectedChecksums = null;
+        info.RequireReleaseVersionMatch = false;
         info.PlatformUrls = new Dictionary<string, string>
         {
             ["windows-x64"] = url,

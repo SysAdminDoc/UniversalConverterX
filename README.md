@@ -69,13 +69,13 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 
 - Windows 10 21H2+ or Windows 11
 - .NET 10 Runtime
-- One or more converter tools (FFmpeg, ImageMagick, etc.)
+- Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
 
 ### Quick Start
 
 1. Download the latest release
 2. Run the installer
-3. Install converter tools (or use `ucx tools download`)
+3. Install any additional converter tools you need (or use `ucx tools download`)
 4. Start converting!
 
 ## CLI Usage
@@ -228,7 +228,7 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 
 ## Installing Converter Tools
 
-Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
+The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools and updates. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
 For full YouTube format extraction, install both the managed yt-dlp channel and Deno runtime. The Downloader health card reports their current status and can install or update both:
 

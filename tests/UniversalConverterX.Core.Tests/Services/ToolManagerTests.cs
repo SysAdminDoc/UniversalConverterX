@@ -178,6 +178,15 @@ public class ToolManagerTests
         path2.Should().Be(path3);
     }
 
+    [Theory]
+    [InlineData("ffmpeg version n8.1.2-21-gce3c09c101 Copyright", "8.1.2-21-gce3c09c101")]
+    [InlineData("deno 2.9.3", "2.9.3")]
+    [InlineData("yt-dlp v2026.07.04", "2026.07.04")]
+    public void ExtractVersion_ShouldReadPrefixedPrimaryVersion(string output, string expected)
+    {
+        ToolManager.ExtractVersion(output).Should().Be(expected);
+    }
+
     private sealed class RecordingToolDownloader(ToolDownloadResult result) : IToolDownloader
     {
         public string? ToolName { get; private set; }

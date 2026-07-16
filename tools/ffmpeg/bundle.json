@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "tool": "ffmpeg",
+  "version": "8.1.2",
+  "build": "n8.1.2-21-gce3c09c101",
+  "license": "GPL-3.0-or-later",
+  "files": [
+    "ffmpeg",
+    "ffprobe",
+    "ffplay"
+  ],
+  "platforms": {
+    "windows-x64": {
+      "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-06-30-13-34/ffmpeg-n8.1.2-21-gce3c09c101-win64-gpl-8.1.zip",
+      "sha256": "682361e32c9631caec09e5d9f09077101c9ed90c14e275f62014fefa6d397990",
+      "archiveType": "zip"
+    },
+    "linux-x64": {
+      "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-06-30-13-34/ffmpeg-n8.1.2-21-gce3c09c101-linux64-gpl-8.1.tar.xz",
+      "sha256": "0ba73bbd93472c7622f6dec26d334c5e62e64d858d072490b2844320970456cd",
+      "archiveType": "tar.xz"
+    }
+  }
+}

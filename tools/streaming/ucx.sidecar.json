@@ -1,3 +1,11 @@
 {
-  "engine": "streaming"
+  "engine": "streaming",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
+  ]
 }

@@ -365,9 +365,11 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
         return violations
 
     seen_ids: set[str] = set()
+    managed_ffmpeg_declared = False
     safe_name = re.compile(r"^[A-Za-z0-9._-]+$")
     allowed_tool_keys = {
-        "id", "executable", "display", "managed", "required", "whenArgContains",
+        "id", "executable", "display", "managed", "required",
+        "whenArgContains", "whenArgContainsAny",
     }
     for index, tool in enumerate(tools):
         label = f"tools[{index}]"
@@ -400,6 +402,8 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
                     f"{label}.id contains unsafe characters",
                 ))
             normalized_id = tool_id.casefold()
+            if normalized_id == "ffmpeg" and tool.get("managed") is True:
+                managed_ffmpeg_declared = True
             if normalized_id in seen_ids:
                 violations.append(Violation(
                     manifest_path, 1, "health-manifest",
@@ -424,6 +428,32 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
                     manifest_path, 1, "health-manifest",
                     f"{label}.whenArgContains must be a non-empty string up to 200 characters",
                 ))
+        if "whenArgContainsAny" in tool:
+            conditions = tool["whenArgContainsAny"]
+            if (
+                not isinstance(conditions, list)
+                or not conditions
+                or any(
+                    not isinstance(condition, str)
+                    or not condition.strip()
+                    or len(condition) > 200
+                    for condition in conditions
+                )
+            ):
+                violations.append(Violation(
+                    manifest_path, 1, "health-manifest",
+                    f"{label}.whenArgContainsAny must be a non-empty array of non-empty strings up to 200 characters",
+                ))
+
+    try:
+        source = sidecar_path.read_text(encoding="utf-8")
+    except OSError:
+        source = ""
+    if "missing_ffmpeg" in source and not managed_ffmpeg_declared:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "sidecar reports missing_ffmpeg but does not declare the managed ffmpeg tool",
+        ))
 
     return violations
 

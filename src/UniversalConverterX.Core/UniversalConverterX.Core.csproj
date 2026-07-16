@@ -34,6 +34,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <EmbeddedResource Include="..\..\tools\ffmpeg\bundle.json"
+                      LogicalName="UniversalConverterX.Core.Tools.ffmpeg.bundle.json" />
   </ItemGroup>
 
   <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->
