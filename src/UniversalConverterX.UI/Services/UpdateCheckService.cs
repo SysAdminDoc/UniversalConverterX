@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Interfaces;
 
 namespace UniversalConverterX.UI.Services;
 
@@ -62,6 +63,7 @@ public sealed class UpdateCheckService : IUpdateCheckService
     };
 
     private readonly ConverterXOptions _options;
+    private readonly IToolManager? _toolManager;
     private readonly string _cachePath;
     private readonly object _gate = new();
     private static readonly HttpClient _http = CreateHttpClient();
@@ -82,9 +84,10 @@ public sealed class UpdateCheckService : IUpdateCheckService
 
     private readonly TrackedTool[] _tools;
 
-    public UpdateCheckService(IOptions<ConverterXOptions> options)
+    public UpdateCheckService(IOptions<ConverterXOptions> options, IToolManager? toolManager = null)
     {
         _options = options.Value;
+        _toolManager = toolManager;
         _cachePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "UniversalConverterX",
@@ -260,13 +263,15 @@ public sealed class UpdateCheckService : IUpdateCheckService
         ? AppContext.BaseDirectory
         : _options.ToolsBasePath;
 
-    private Task<string?> ProbeYtDlpAsync()
+    private async Task<string?> ProbeYtDlpAsync()
     {
-        // streamkeep ships with yt-dlp pinned in requirements; if a frozen exe
-        // exists in tools/streamkeep/, return the embedded version file we
-        // write at build time. Otherwise fall back to "unknown".
+        if (_toolManager is not null)
+            return await _toolManager.GetToolVersionAsync("yt-dlp").ConfigureAwait(false);
+
+        // Compatibility fallback for callers that construct this service
+        // without the tool manager.
         var versionFile = Path.Combine(ToolsBase, "streamkeep", "yt-dlp.version");
-        return Task.FromResult(TryReadVersionFile(versionFile));
+        return TryReadVersionFile(versionFile);
     }
 
     private Task<string?> ProbeFfmpegAsync()

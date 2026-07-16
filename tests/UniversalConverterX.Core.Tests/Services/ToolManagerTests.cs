@@ -18,7 +18,7 @@ public class ToolManagerTests
     public ToolManagerTests()
     {
         _toolsBasePath = Path.Combine(Path.GetTempPath(), "ucx-test-tools");
-        
+
         var options = new ConverterXOptions
         {
             ToolsBasePath = _toolsBasePath,
@@ -26,9 +26,9 @@ public class ToolManagerTests
         };
         _optionsMock = new Mock<IOptions<ConverterXOptions>>();
         _optionsMock.Setup(x => x.Value).Returns(options);
-        
+
         _loggerMock = new Mock<ILogger<ToolManager>>();
-        
+
         _toolManager = new ToolManager(_optionsMock.Object, _loggerMock.Object);
     }
 
@@ -53,7 +53,7 @@ public class ToolManagerTests
 
         path.Should().NotBeNullOrEmpty();
         path.Should().StartWith(_toolsBasePath);
-        path.Should().Contain(toolName == "imagemagick" ? "magick" : 
+        path.Should().Contain(toolName == "imagemagick" ? "magick" :
                              toolName == "ghostscript" ? "gs" :
                              toolName == "calibre" ? "ebook-convert" :
                              toolName == "libreoffice" ? "soffice" :
@@ -83,7 +83,7 @@ public class ToolManagerTests
         // Create a fake tool in the tools directory
         var binDir = Path.Combine(_toolsBasePath, "bin");
         Directory.CreateDirectory(binDir);
-        
+
         var toolPath = Path.Combine(binDir, OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg");
         File.WriteAllText(toolPath, "fake executable");
 
@@ -121,6 +121,8 @@ public class ToolManagerTests
         tools.Should().Contain(t => t.Id == "7zip");
         tools.Should().Contain(t => t.Id == "inkscape");
         tools.Should().Contain(t => t.Id == "ghostscript");
+        tools.Should().Contain(t => t.Id == "yt-dlp");
+        tools.Should().Contain(t => t.Id == "deno");
     }
 
     [Fact]

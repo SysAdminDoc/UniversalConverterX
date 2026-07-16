@@ -15,6 +15,8 @@ public static partial class ToolVersionPolicy
             ["calibre"] = new("calibre", "Calibre", "9.10.0", "CVE-2026-53511"),
             ["7zip"] = new("7zip", "7-Zip", "26.01", "CVE-2026-48095"),
             ["libreoffice"] = new("libreoffice", "LibreOffice", "26.2.4", "CVE-2026-8356, CVE-2026-8357, and CVE-2026-8358"),
+            ["yt-dlp"] = new("yt-dlp", "yt-dlp", "2026.07.04", "2026 downloader security rollup"),
+            ["deno"] = new("deno", "Deno", "2.3.0", "minimum runtime supported by yt-dlp EJS"),
         };
 
     private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)

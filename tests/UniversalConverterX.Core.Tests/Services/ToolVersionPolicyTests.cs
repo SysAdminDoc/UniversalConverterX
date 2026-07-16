@@ -16,6 +16,10 @@ public class ToolVersionPolicyTests
     [InlineData("7zip", "25.01", false, "25.01")]
     [InlineData("soffice", "LibreOffice 26.2.4.2", true, "26.2.4.2")]
     [InlineData("libreoffice", "25.8.7.1", false, "25.8.7.1")]
+    [InlineData("yt-dlp", "2026.07.04", true, "2026.07.04")]
+    [InlineData("yt-dlp", "2026.06.09", false, "2026.06.09")]
+    [InlineData("deno", "deno 2.9.3", true, "2.9.3")]
+    [InlineData("deno", "deno 2.2.0", false, "2.2.0")]
     public void Assess_KnownTool_ComparesNumericComponents(
         string toolId,
         string reportedVersion,

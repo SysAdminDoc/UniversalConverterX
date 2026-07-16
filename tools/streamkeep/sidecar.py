@@ -19,6 +19,7 @@ except ImportError:
     def _dumps(obj):
         return json.dumps(obj, ensure_ascii=False)
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -49,23 +50,187 @@ def find_ffmpeg() -> str | None:
     return None
 
 
+def _tool_candidates(name: str, env_name: str) -> list[str | None]:
+    suffix = ".exe" if os.name == "nt" else ""
+    exe_name = name + suffix
+    here = Path(__file__).resolve().parent
+    frozen_dir = Path(sys.executable).resolve().parent
+    tools_bin = os.environ.get("UCX_TOOLS_BIN")
+    return [
+        os.environ.get(env_name),
+        str(Path(tools_bin) / exe_name) if tools_bin else None,
+        str(frozen_dir / exe_name),
+        str(here / exe_name),
+        str(here.parent / "bin" / exe_name),
+        str(here.parent / "_bin" / exe_name),
+        shutil.which(name),
+    ]
+
+
+def _find_tool(name: str, env_name: str) -> str | None:
+    for candidate in _tool_candidates(name, env_name):
+        if candidate and Path(candidate).is_file():
+            return str(Path(candidate).resolve())
+    return None
+
+
+def find_ytdlp() -> str | None:
+    """Locate the managed portable yt-dlp update before the embedded fallback."""
+    return _find_tool("yt-dlp", "UCX_YTDLP_PATH")
+
+
+def find_deno() -> str | None:
+    return _find_tool("deno", "UCX_DENO_PATH")
+
+
+def _hidden_process_flags() -> int:
+    return getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+
+
+def _parse_version(value: str) -> tuple[int, ...] | None:
+    match = re.search(r"(?<!\d)(\d+(?:\.\d+)+)(?!\d)", value or "")
+    return tuple(int(part) for part in match.group(1).split(".")) if match else None
+
+
+def deno_runtime_status() -> dict:
+    """Return a stable health payload for yt-dlp's recommended EJS runtime."""
+    path = find_deno()
+    if not path:
+        return {
+            "runtime": "deno",
+            "active": False,
+            "path": None,
+            "version": None,
+            "minimum_version": "2.3.0",
+            "detail": "Deno is not installed. Install it from Downloader health or Settings > Converter Tools for full YouTube format extraction.",
+        }
+
+    try:
+        proc = subprocess.run(
+            [path, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+            creationflags=_hidden_process_flags(),
+        )
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        parsed = _parse_version(output)
+        version = ".".join(str(part) for part in parsed) if parsed else None
+        active = proc.returncode == 0 and parsed is not None and parsed >= (2, 3, 0)
+        detail = (
+            f"Deno {version} is active for yt-dlp EJS challenges."
+            if active
+            else f"Deno {version or 'unknown'} is unsupported; update to 2.3.0 or newer."
+        )
+        return {
+            "runtime": "deno",
+            "active": active,
+            "path": path,
+            "version": version,
+            "minimum_version": "2.3.0",
+            "detail": detail,
+        }
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {
+            "runtime": "deno",
+            "active": False,
+            "path": path,
+            "version": None,
+            "minimum_version": "2.3.0",
+            "detail": f"Deno was found but could not be verified: {exc}",
+        }
+
+
+def emit_runtime_status() -> dict:
+    status = deno_runtime_status()
+    emit("runtime_status", **status, yt_dlp_backend="portable" if find_ytdlp() else "embedded")
+    if not status["active"]:
+        emit("log", level="warn", message=status["detail"])
+    return status
+
+
+def _cookie_file() -> str | None:
+    try:
+        from streamkeep import cookies
+        path = cookies.cookies_file_path()
+        return path if path and Path(path).is_file() else None
+    except (ImportError, OSError):
+        return None
+
+
+def _configure_python_ytdlp(options: dict, runtime: dict) -> None:
+    if runtime["active"]:
+        options["js_runtimes"] = {"deno": {"path": runtime["path"]}}
+    cookie_file = _cookie_file()
+    if cookie_file:
+        options["cookiefile"] = cookie_file
+
+
+def _external_base_args(runtime: dict) -> list[str]:
+    args = ["--ignore-config", "--no-update", "--color", "never"]
+    if runtime["active"]:
+        args.extend(["--js-runtimes", f"deno:{runtime['path']}"])
+    ffmpeg = find_ffmpeg()
+    if ffmpeg:
+        args.extend(["--ffmpeg-location", ffmpeg])
+    cookie_file = _cookie_file()
+    if cookie_file:
+        args.extend(["--cookies", cookie_file])
+    return args
+
+
+def _external_probe(executable: str, url: str, runtime: dict) -> tuple[dict | None, str | None]:
+    cmd = [executable, *_external_base_args(runtime), "--dump-single-json",
+           "--skip-download", "--no-playlist", "--no-warnings", "--", url]
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+            check=False,
+            creationflags=_hidden_process_flags(),
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return None, f"Could not run managed yt-dlp: {exc}"
+    if proc.returncode != 0:
+        return None, (proc.stderr or proc.stdout or f"yt-dlp exited {proc.returncode}").strip()
+    try:
+        return json.loads(proc.stdout), None
+    except json.JSONDecodeError as exc:
+        return None, f"Managed yt-dlp returned invalid metadata: {exc}"
+
+
 # ─── Probe ───────────────────────────────────────────────────────────────────
 
 def op_probe(args: argparse.Namespace) -> int:
-    if yt_dlp is None:
+    runtime = emit_runtime_status()
+    portable_ytdlp = find_ytdlp()
+    if yt_dlp is None and portable_ytdlp is None:
         return fail("missing_yt_dlp", "yt-dlp is not installed in the sidecar runtime.")
     ydl_opts = {
         "quiet": True,
         "skip_download": True,
         "noplaylist": True,
     }
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(args.url, download=False)
-    except yt_dlp.utils.DownloadError as exc:
-        return fail("probe_failed", str(exc))
-    except Exception as exc:  # pylint: disable=broad-except
-        return fail("probe_failed", f"{type(exc).__name__}: {exc}")
+    if portable_ytdlp:
+        info, error = _external_probe(portable_ytdlp, args.url, runtime)
+        if error:
+            return fail("probe_failed", error)
+    else:
+        _configure_python_ytdlp(ydl_opts, runtime)
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(args.url, download=False)
+        except yt_dlp.utils.DownloadError as exc:
+            return fail("probe_failed", str(exc))
+        except Exception as exc:  # pylint: disable=broad-except
+            return fail("probe_failed", f"{type(exc).__name__}: {exc}")
 
     if not info:
         return fail("probe_failed", "yt-dlp returned no info.")
@@ -94,6 +259,7 @@ def op_probe(args: argparse.Namespace) -> int:
         "thumbnail": info.get("thumbnail"),
         "is_live": info.get("is_live", False),
         "webpage_url": info.get("webpage_url"),
+        "js_runtime": runtime,
         "formats": formats,
     })
     return 0
@@ -136,7 +302,102 @@ class _ProgressBridge:
             emit("log", level="error", message=d.get("error") or "Unknown yt-dlp error")
 
 
+def _external_download(executable: str, args: argparse.Namespace, runtime: dict) -> int:
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    fmt = "bestaudio/best" if args.audio_only else args.format
+    cmd = [
+        executable,
+        *_external_base_args(runtime),
+        "--newline",
+        "--progress",
+        "--no-playlist",
+        "--no-simulate",
+        "--progress-template",
+        "download:__UCX_PROGRESS__:%(progress._percent_str)s|%(progress.eta)s|%(progress.speed)s",
+        "--print",
+        "after_move:__UCX_OUTPUT__:%(filepath)s",
+        "--output",
+        str(output_dir / "%(title)s [%(id)s].%(ext)s"),
+        "--format",
+        fmt,
+    ]
+    if args.merge:
+        cmd.extend(["--merge-output-format", args.merge_format])
+    if args.audio_only:
+        cmd.extend(["--extract-audio", "--audio-format", args.audio_codec,
+                    "--audio-quality", f"{args.audio_quality}K"])
+    if args.subtitles:
+        langs = "en,all" if args.subtitles == "all" else args.subtitles
+        cmd.extend(["--write-subs", "--sub-langs", langs])
+        if args.embed_subtitles:
+            cmd.append("--embed-subs")
+    if args.sponsorblock:
+        categories = args.sponsorblock_categories or "sponsor,selfpromo,interaction"
+        option = "--sponsorblock-remove" if args.sponsorblock == "remove" else "--sponsorblock-mark"
+        cmd.extend([option, categories])
+    cmd.extend(["--", args.url])
+
+    emit("progress", percent=0, stage="resolving", eta_seconds=None)
+    output_path = None
+    try:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            creationflags=_hidden_process_flags(),
+        )
+    except OSError as exc:
+        return fail("download_failed", f"Could not run managed yt-dlp: {exc}")
+
+    assert process.stdout is not None
+    for raw_line in process.stdout:
+        line = raw_line.strip()
+        if line.startswith("__UCX_OUTPUT__:"):
+            output_path = line.removeprefix("__UCX_OUTPUT__:").strip()
+            continue
+        if line.startswith("__UCX_PROGRESS__:"):
+            parts = line.removeprefix("__UCX_PROGRESS__:").split("|")
+            try:
+                percent = float(parts[0].strip().rstrip("%"))
+            except (ValueError, IndexError):
+                percent = 0.0
+            try:
+                eta = int(parts[1])
+            except (ValueError, IndexError):
+                eta = None
+            emit("progress", percent=percent, stage="downloading", eta_seconds=eta)
+            continue
+        if line:
+            level = "warn" if "WARNING" in line.upper() else "info"
+            emit("log", level=level, message=line[:4096])
+
+    return_code = process.wait()
+    if return_code != 0:
+        return fail("yt_dlp_nonzero", f"yt-dlp returned {return_code}")
+
+    if not output_path or not Path(output_path).is_file():
+        candidates = sorted(
+            (path for path in output_dir.iterdir() if path.is_file()),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        output_path = str(candidates[0]) if candidates else None
+    if not output_path:
+        return fail("download_failed", "yt-dlp completed without reporting an output file.")
+
+    emit("complete", output=output_path, size_bytes=Path(output_path).stat().st_size)
+    return 0
+
+
 def op_download(args: argparse.Namespace) -> int:
+    runtime = emit_runtime_status()
+    portable_ytdlp = find_ytdlp()
+    if portable_ytdlp:
+        return _external_download(portable_ytdlp, args, runtime)
     if yt_dlp is None:
         return fail("missing_yt_dlp", "yt-dlp is not installed in the sidecar runtime.")
 
@@ -162,6 +423,7 @@ def op_download(args: argparse.Namespace) -> int:
         "progress_hooks": [bridge],
         "merge_output_format": args.merge_format if args.merge else None,
     }
+    _configure_python_ytdlp(ydl_opts, runtime)
     if ffmpeg:
         ydl_opts["ffmpeg_location"] = ffmpeg
     if args.audio_only:
@@ -309,6 +571,8 @@ def build_parser() -> argparse.ArgumentParser:
     probe = sub.add_parser("probe", help="Probe a URL (no download) and emit metadata + format list")
     probe.add_argument("--url", required=True)
 
+    sub.add_parser("runtime-status", help="Report yt-dlp, Deno, and EJS runtime readiness")
+
     dl = sub.add_parser("download", help="Download a URL")
     dl.add_argument("--url", required=True)
     dl.add_argument("--output-dir", required=True)
@@ -354,6 +618,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "probe":
             return op_probe(args)
+        if args.op == "runtime-status":
+            emit_runtime_status()
+            emit("complete", output="", size_bytes=0)
+            return 0
         if args.op == "download":
             return op_download(args)
         if args.op == "cookies-status":

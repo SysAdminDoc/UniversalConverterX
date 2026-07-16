@@ -156,6 +156,19 @@ public sealed class SidecarRunner : ISidecarRunner
             }
         }
 
+        // Managed downloader runtimes live together in tools/bin. Expose the
+        // exact directory to StreamKeep and prepend it for child discovery;
+        // this avoids mutating the user's process-wide PATH.
+        var toolsBin = ResolveManagedToolsBin();
+        if (toolsBin is not null)
+        {
+            psi.EnvironmentVariables["UCX_TOOLS_BIN"] = toolsBin;
+            var inheritedPath = psi.EnvironmentVariables["PATH"] ?? "";
+            psi.EnvironmentVariables["PATH"] = string.IsNullOrWhiteSpace(inheritedPath)
+                ? toolsBin
+                : toolsBin + Path.PathSeparator + inheritedPath;
+        }
+
         using var process = new Process { StartInfo = psi };
 
         string? finalOutput = null;
@@ -422,6 +435,23 @@ public sealed class SidecarRunner : ISidecarRunner
             ExitCode: exitCode);
     }
 
+    private string? ResolveManagedToolsBin()
+    {
+        if (!string.IsNullOrWhiteSpace(_options?.ToolsBasePath))
+            return Path.Combine(_options.ToolsBasePath, "bin");
+
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            var candidate = Path.Combine(dir.FullName, "tools", "bin");
+            if (Directory.Exists(candidate))
+                return candidate;
+            dir = dir.Parent;
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Scan a sidecar argv for <c>--input &lt;path&gt;</c> and return the path.
     /// All NDJSON-contract sidecars use this flag (see tools/README.md). When
@@ -505,4 +535,3 @@ public sealed class SidecarRunner : ISidecarRunner
         return null;
     }
 }
-

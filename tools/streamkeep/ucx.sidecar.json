@@ -11,7 +11,14 @@
       "id": "yt-dlp",
       "executable": "yt-dlp",
       "display": "yt-dlp",
-      "managed": false
+      "managed": true
+    },
+    {
+      "id": "deno",
+      "executable": "deno",
+      "display": "Deno JavaScript runtime",
+      "managed": true,
+      "required": false
     }
   ]
 }

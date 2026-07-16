@@ -117,7 +117,7 @@ public class ToolManager : IToolManager
             process.Start();
             var outputTask = process.StandardOutput.ReadToEndAsync(probeToken);
             var errorTask = process.StandardError.ReadToEndAsync(probeToken);
-            
+
             await process.WaitForExitAsync(probeToken);
             var output = await outputTask;
             var error = await errorTask;
@@ -125,7 +125,7 @@ public class ToolManager : IToolManager
             var allOutput = output + error;
             var version = ExtractVersion(allOutput);
             _versionCache[toolName] = version;
-            
+
             return version;
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -148,21 +148,27 @@ public class ToolManager : IToolManager
         }
     }
 
-    public Task<ToolDownloadResult> DownloadToolAsync(
+    public async Task<ToolDownloadResult> DownloadToolAsync(
         string toolName,
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (_downloader is not null)
-            return _downloader.DownloadToolAsync(toolName, progress, cancellationToken);
+        {
+            var result = await _downloader.DownloadToolAsync(toolName, progress, cancellationToken)
+                .ConfigureAwait(false);
+            if (result.Success)
+                _versionCache.Remove(toolName);
+            return result;
+        }
 
         _logger?.LogWarning("Tool downloader is not configured. Please install {Tool} manually.", toolName);
 
-        return Task.FromResult(new ToolDownloadResult(
+        return new ToolDownloadResult(
             Success: false,
             ToolName: toolName,
             Version: null,
-            ErrorMessage: "Tool downloader is not configured. Please install manually."));
+            ErrorMessage: "Tool downloader is not configured. Please install manually.");
     }
 
     public IReadOnlyCollection<ToolInfo> GetAvailableTools()
@@ -174,7 +180,7 @@ public class ToolManager : IToolManager
             var path = GetToolPath(id);
             var isInstalled = File.Exists(path);
             long? size = null;
-            
+
             if (isInstalled)
             {
                 try
@@ -221,6 +227,8 @@ public class ToolManager : IToolManager
             ["7zip"] = new("7z", "7-Zip", "i", "Archive extraction"),
             ["inkscape"] = new("inkscape", "Inkscape", "--version", "Vector graphics editor"),
             ["ghostscript"] = new(OperatingSystem.IsWindows() ? "gswin64c" : "gs", "Ghostscript", "--version", "PDF and PostScript processing"),
+            ["yt-dlp"] = new("yt-dlp", "yt-dlp", "--version", "Downloader extractor and update channel"),
+            ["deno"] = new("deno", "Deno", "--version", "JavaScript runtime for full YouTube extraction"),
         };
     }
 

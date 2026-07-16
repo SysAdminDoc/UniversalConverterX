@@ -22,7 +22,7 @@ public class ToolDownloader : IToolDownloader
     private readonly ConverterXOptions _options;
     private readonly HttpClient _httpClient;
     private readonly Dictionary<string, ToolDownloadInfo> _toolDownloadInfo;
-    
+
     private static readonly string _platform = GetPlatformIdentifier();
     private static readonly string _architecture = GetArchitectureIdentifier();
 
@@ -52,7 +52,7 @@ public class ToolDownloader : IToolDownloader
         CancellationToken cancellationToken = default)
     {
         toolName = toolName.ToLowerInvariant();
-        
+
         if (!_toolDownloadInfo.TryGetValue(toolName, out var downloadInfo))
         {
             return new ToolDownloadResult(
@@ -112,6 +112,7 @@ public class ToolDownloader : IToolDownloader
                 var installPath = Path.Combine(_options.ToolsBasePath, "bin");
                 var stagePath = Path.Combine(tempDir, "stage");
                 await ExtractAndInstallAsync(downloadPath, stagePath, downloadInfo, cancellationToken);
+                await VerifyStagedReleaseAsync(stagePath, downloadInfo, resolved, cancellationToken);
                 await PromoteStagedInstallAsync(stagePath, installPath, downloadInfo, toolName, cancellationToken);
 
                 // Verify installation
@@ -522,8 +523,9 @@ public class ToolDownloader : IToolDownloader
     {
         var expectedName = downloadInfo.ExecutableName + (OperatingSystem.IsWindows() ? ".exe" : "");
         var actualName = Path.GetFileName(sourcePath);
-        var hasExtension = !string.IsNullOrEmpty(Path.GetExtension(actualName));
-        if (hasExtension && !actualName.Equals(expectedName, StringComparison.OrdinalIgnoreCase))
+        var isDeclaredAsset = downloadInfo.AssetNames?.Values.Any(name =>
+            name.Equals(actualName, StringComparison.OrdinalIgnoreCase)) == true;
+        if (!actualName.Equals(expectedName, StringComparison.OrdinalIgnoreCase) && !isDeclaredAsset)
             return false;
 
         var destPath = Path.Combine(installPath, expectedName);
@@ -655,7 +657,7 @@ public class ToolDownloader : IToolDownloader
     private static bool ShouldExtractFile(string fileName, ToolDownloadInfo downloadInfo)
     {
         var name = Path.GetFileName(fileName);
-        
+
         // Check if it matches the executable
         var exeName = downloadInfo.ExecutableName;
         if (OperatingSystem.IsWindows())
@@ -665,7 +667,7 @@ public class ToolDownloader : IToolDownloader
                        name.Equals(f, StringComparison.OrdinalIgnoreCase) ||
                        name.Equals(f + ".exe", StringComparison.OrdinalIgnoreCase)) ?? false);
         }
-        
+
         return name.Equals(exeName, StringComparison.OrdinalIgnoreCase) ||
                (downloadInfo.AdditionalFiles?.Any(f => name.Equals(f, StringComparison.OrdinalIgnoreCase)) ?? false);
     }
@@ -717,16 +719,39 @@ public class ToolDownloader : IToolDownloader
         if (response?.Assets == null)
             return new ResolvedDownload("", configuredChecksum, null);
 
-        // Find the appropriate asset for our platform
-        var assetPattern = GetAssetPattern(downloadInfo);
-        var asset = response.Assets.FirstOrDefault(a => 
-            !string.IsNullOrWhiteSpace(a.Name) &&
-            assetPattern.Any(p => a.Name.Contains(p, StringComparison.OrdinalIgnoreCase)));
+        GitHubAsset? asset;
+        var exactAssetName = GetPlatformValue(downloadInfo.AssetNames);
+        if (downloadInfo.AssetNames is not null)
+        {
+            asset = string.IsNullOrWhiteSpace(exactAssetName)
+                ? null
+                : response.Assets.FirstOrDefault(a =>
+                    string.Equals(a.Name, exactAssetName, StringComparison.OrdinalIgnoreCase));
+        }
+        else
+        {
+            // Legacy tool definitions do not declare an exact artifact. Keep
+            // the existing platform-token selection until each is migrated.
+            var assetPattern = GetAssetPattern(downloadInfo);
+            asset = response.Assets.FirstOrDefault(a =>
+                !string.IsNullOrWhiteSpace(a.Name) &&
+                assetPattern.Any(p => a.Name.Contains(p, StringComparison.OrdinalIgnoreCase)));
+        }
 
         return new ResolvedDownload(
             asset?.BrowserDownloadUrl ?? "",
             configuredChecksum ?? NormalizeSha256(asset?.Digest),
             response.TagName?.TrimStart('v'));
+    }
+
+    private static string? GetPlatformValue(IReadOnlyDictionary<string, string>? values)
+    {
+        if (values is null)
+            return null;
+
+        var platformKey = $"{_platform}-{_architecture}";
+        return values.GetValueOrDefault(platformKey)
+            ?? values.GetValueOrDefault(_platform);
     }
 
     private async Task<string?> TryGetGitHubAssetDigestAsync(
@@ -825,6 +850,58 @@ public class ToolDownloader : IToolDownloader
         if (!_toolDownloadInfo.TryGetValue(toolName, out var downloadInfo))
             return null;
 
+        return await ProbeExecutableVersionAsync(exePath, downloadInfo.VersionArg, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task VerifyStagedReleaseAsync(
+        string stagePath,
+        ToolDownloadInfo downloadInfo,
+        ResolvedDownload resolved,
+        CancellationToken cancellationToken)
+    {
+        if (!downloadInfo.RequireReleaseVersionMatch)
+            return;
+
+        if (string.IsNullOrWhiteSpace(resolved.Version))
+            throw new InvalidDataException(
+                $"Release metadata did not include a version for {downloadInfo.ToolName}; refusing to promote it.");
+
+        var stagedExecutable = GetStagedInstallFiles(stagePath, downloadInfo)
+            .FirstOrDefault(path => Path.GetFileNameWithoutExtension(path)
+                .Equals(downloadInfo.ExecutableName, StringComparison.OrdinalIgnoreCase));
+        if (stagedExecutable is null)
+            throw new InvalidDataException($"Staged {downloadInfo.ToolName} executable was not found.");
+
+        if (!OperatingSystem.IsWindows())
+            await MakeExecutableAsync(stagedExecutable, cancellationToken).ConfigureAwait(false);
+
+        var stagedVersion = await ProbeExecutableVersionAsync(
+            stagedExecutable,
+            downloadInfo.VersionArg,
+            cancellationToken).ConfigureAwait(false);
+        if (!ReleaseVersionMatches(stagedVersion, resolved.Version))
+        {
+            throw new InvalidDataException(
+                $"Staged {downloadInfo.ToolName} version '{stagedVersion ?? "unknown"}' " +
+                $"does not match release {resolved.Version}; the installed tool was left unchanged.");
+        }
+    }
+
+    internal static bool ReleaseVersionMatches(string? reportedVersion, string? releaseVersion)
+    {
+        var reported = ExtractVersion(reportedVersion ?? "");
+        var release = ExtractVersion(releaseVersion?.TrimStart('v', 'V') ?? "");
+        return reported is not null
+            && release is not null
+            && string.Equals(reported, release, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static async Task<string?> ProbeExecutableVersionAsync(
+        string exePath,
+        string? versionArg,
+        CancellationToken cancellationToken)
+    {
         Process? process = null;
         try
         {
@@ -840,7 +917,7 @@ public class ToolDownloader : IToolDownloader
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
-            startInfo.ArgumentList.Add(downloadInfo.VersionArg ?? "--version");
+            startInfo.ArgumentList.Add(versionArg ?? "--version");
 
             process = Process.Start(startInfo);
             if (process == null)
@@ -883,7 +960,7 @@ public class ToolDownloader : IToolDownloader
             var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
             foreach (var part in parts)
             {
-                var cleaned = part.Trim(',', '(', ')', 'v', 'V');
+                var cleaned = part.Trim().Trim(',', '(', ')', 'v', 'V');
                 if (cleaned.Length > 0 && char.IsDigit(cleaned[0]) && cleaned.Contains('.'))
                 {
                     return cleaned;
@@ -1080,6 +1157,44 @@ public class ToolDownloader : IToolDownloader
                 VersionArg = "--version",
                 Description = "HEIC/HEIF image converter",
                 AdditionalFiles = ["heif-enc", "heif-info"]
+            },
+            ["yt-dlp"] = new ToolDownloadInfo
+            {
+                ToolName = "yt-dlp",
+                ExecutableName = "yt-dlp",
+                GitHubRepo = "yt-dlp/yt-dlp",
+                VersionArg = "--version",
+                Description = "Downloader extractor and update channel",
+                RequireChecksum = true,
+                RequireReleaseVersionMatch = true,
+                AssetNames = new Dictionary<string, string>
+                {
+                    ["windows-x64"] = "yt-dlp.exe",
+                    ["windows-arm64"] = "yt-dlp_arm64.exe",
+                    ["linux-x64"] = "yt-dlp_linux",
+                    ["linux-arm64"] = "yt-dlp_linux_aarch64",
+                    ["macos-x64"] = "yt-dlp_macos",
+                    ["macos-arm64"] = "yt-dlp_macos",
+                },
+            },
+            ["deno"] = new ToolDownloadInfo
+            {
+                ToolName = "deno",
+                ExecutableName = "deno",
+                GitHubRepo = "denoland/deno",
+                VersionArg = "--version",
+                Description = "Sandboxed JavaScript runtime for full YouTube extraction",
+                RequireChecksum = true,
+                RequireReleaseVersionMatch = true,
+                AssetNames = new Dictionary<string, string>
+                {
+                    ["windows-x64"] = "deno-x86_64-pc-windows-msvc.zip",
+                    ["windows-arm64"] = "deno-aarch64-pc-windows-msvc.zip",
+                    ["linux-x64"] = "deno-x86_64-unknown-linux-gnu.zip",
+                    ["linux-arm64"] = "deno-aarch64-unknown-linux-gnu.zip",
+                    ["macos-x64"] = "deno-x86_64-apple-darwin.zip",
+                    ["macos-arm64"] = "deno-aarch64-apple-darwin.zip",
+                },
             }
         };
     }
@@ -1153,6 +1268,8 @@ public class ToolDownloadInfo
     public string? Description { get; set; }
     public string? InstallerArgs { get; set; }
     public string[]? AdditionalFiles { get; set; }
+    public Dictionary<string, string>? AssetNames { get; set; }
+    public bool RequireReleaseVersionMatch { get; set; }
 }
 
 /// <summary>

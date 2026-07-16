@@ -229,6 +229,13 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 
 Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
+For full YouTube format extraction, install both the managed yt-dlp channel and Deno runtime. The Downloader health card reports their current status and can install or update both:
+
+```powershell
+ucx tools download yt-dlp
+ucx tools download deno
+```
+
 ### Windows (winget)
 
 ```powershell
@@ -262,6 +269,8 @@ Contributions are welcome! Please read CONTRIBUTING.md for guidelines.
 - [LibreOffice](https://www.libreoffice.org/) - Office documents
 - [Inkscape](https://inkscape.org/) - Vector graphics
 - [Ghostscript](https://www.ghostscript.com/) - PDF processing
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Media extraction and download support
+- [Deno](https://deno.com/) - Sandboxed JavaScript runtime for YouTube extraction
 - [libvips](https://www.libvips.org/) - High-performance image processing
 - [libheif](https://github.com/strukturag/libheif) - HEIC/HEIF support
 - [libjxl](https://github.com/libjxl/libjxl) - JPEG XL support

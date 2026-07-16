@@ -131,6 +131,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
@@ -140,6 +141,35 @@
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                        Background="{StaticResource SurfaceLightBrush}">
+                    <FontIcon Glyph="&#xE9D9;" FontSize="19"
+                              Foreground="{StaticResource AccentBlueBrush}"/>
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                    <TextBlock x:Name="RuntimeHealthTitleText"
+                               Text="Checking downloader runtimes..."
+                               Style="{StaticResource PanelTitleTextStyle}"/>
+                    <TextBlock x:Name="RuntimeHealthDetailText"
+                               Text="Verifying yt-dlp, Deno, and the local sidecar."
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+                <Button x:Name="RuntimeToolsButton" Grid.Column="2"
+                        Content="Install / update runtimes"
+                        AutomationProperties.AutomationId="DownloaderRuntimeToolsButton"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="RuntimeTools_Click"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
             <Grid ColumnSpacing="12" RowSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -208,7 +238,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}">
             <Grid ColumnSpacing="12" RowSpacing="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -280,7 +310,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="3" Style="{StaticResource CardStyle}">
+        <Border Grid.Row="4" Style="{StaticResource CardStyle}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -363,7 +393,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

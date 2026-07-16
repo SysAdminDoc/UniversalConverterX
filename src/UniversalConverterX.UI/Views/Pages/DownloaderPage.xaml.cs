@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Services;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage.Pickers;
@@ -19,9 +21,12 @@ public sealed partial class DownloaderPage : Page
 
     private readonly ISidecarRunner _runner;
     private readonly IHistoryService _history;
+    private readonly ISidecarHealthService _health;
+    private readonly IToolManager _toolManager;
     private readonly ObservableCollection<DownloadJobItem> _queue = [];
     private readonly ObservableCollection<FinishedDownloadItem> _finished = [];
     private CancellationTokenSource? _cts;
+    private bool _runtimeOpInFlight;
     private readonly string _outputDir;
 
     public DownloaderPage()
@@ -29,6 +34,8 @@ public sealed partial class DownloaderPage : Page
         InitializeComponent();
         _runner  = App.Services.GetRequiredService<ISidecarRunner>();
         _history = App.Services.GetRequiredService<IHistoryService>();
+        _health = App.Services.GetRequiredService<ISidecarHealthService>();
+        _toolManager = App.Services.GetRequiredService<IToolManager>();
         _outputDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "Downloads", "UniversalConverterX");
@@ -50,6 +57,77 @@ public sealed partial class DownloaderPage : Page
         // instead of the placeholder "Checking..." string. Background-fired so
         // page activation isn't gated on the sidecar starting up.
         _ = RefreshCookieStatusAsync();
+        _ = RefreshRuntimeHealthAsync();
+    }
+
+    private async Task RefreshRuntimeHealthAsync()
+    {
+        try
+        {
+            var report = await _health.EvaluateEngineAsync("streamkeep");
+            var downloader = report.Requirements.FirstOrDefault(r => r.Name == "yt-dlp");
+            var deno = report.Requirements.FirstOrDefault(r => r.Name.StartsWith("Deno", StringComparison.Ordinal));
+            RuntimeHealthTitleText.Text = report.Summary;
+            RuntimeHealthDetailText.Text = string.Join("  ", new[]
+            {
+                downloader is null ? null : $"yt-dlp: {downloader.Status}.",
+                deno is null ? null : $"Deno: {deno.Status}. {(deno.Status == "Ready" ? deno.Detail : deno.Remediation)}",
+                report.Requirements.Any(r => r.Kind == "sidecar" && r.Status == "Missing")
+                    ? report.Detail
+                    : null,
+            }.Where(text => !string.IsNullOrWhiteSpace(text)));
+        }
+        catch (Exception ex)
+        {
+            RuntimeHealthTitleText.Text = "Downloader health unavailable";
+            RuntimeHealthDetailText.Text = ex.Message;
+        }
+        finally
+        {
+            RuntimeToolsButton.IsEnabled = !_runtimeOpInFlight;
+        }
+    }
+
+    private async void RuntimeTools_Click(object sender, RoutedEventArgs e)
+    {
+        if (_runtimeOpInFlight)
+            return;
+
+        _runtimeOpInFlight = true;
+        RuntimeToolsButton.IsEnabled = false;
+        RuntimeToolsButton.Content = "Installing...";
+        try
+        {
+            var results = new List<ToolDownloadResult>();
+            string[] tools = ["yt-dlp", "deno"];
+            for (var index = 0; index < tools.Length; index++)
+            {
+                var tool = tools[index];
+                var ordinal = index + 1;
+                var progress = new Progress<DownloadProgress>(update =>
+                {
+                    var percent = update.TotalBytes > 0
+                        ? update.BytesDownloaded * 100.0 / update.TotalBytes
+                        : 0;
+                    RuntimeHealthTitleText.Text = $"Installing {tool}";
+                    RuntimeHealthDetailText.Text = $"{ordinal}/{tools.Length} · {percent:F0}%";
+                });
+                results.Add(await _toolManager.DownloadToolAsync(tool, progress));
+            }
+            var failed = results.Where(result => !result.Success).ToList();
+            if (failed.Count > 0)
+            {
+                RuntimeHealthTitleText.Text = "Runtime update incomplete";
+                RuntimeHealthDetailText.Text = string.Join("  ", failed.Select(result =>
+                    $"{result.ToolName}: {result.ErrorMessage}"));
+            }
+        }
+        finally
+        {
+            _runtimeOpInFlight = false;
+            RuntimeToolsButton.Content = "Install / update runtimes";
+            await RefreshRuntimeHealthAsync();
+        }
     }
 
     // ─── Cookie Auth (ROADMAP Item 9 UI completion) ─────────────────────────

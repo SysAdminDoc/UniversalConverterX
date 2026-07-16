@@ -35,6 +35,8 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         ["7zip"] = new("7z", "7-Zip", "https://www.7-zip.org/", "Archive extraction"),
         ["inkscape"] = new("inkscape", "Inkscape", "https://inkscape.org/", "Vector graphics"),
         ["ghostscript"] = new("gs", "Ghostscript", "https://www.ghostscript.com/", "PDF processing"),
+        ["yt-dlp"] = new("yt-dlp", "yt-dlp", "https://github.com/yt-dlp/yt-dlp", "Downloader extractor and update channel"),
+        ["deno"] = new("deno", "Deno", "https://deno.com/", "JavaScript runtime for full YouTube extraction"),
     };
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -173,6 +175,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
 
             AnsiConsole.MarkupLine($"[red]Download failed:[/] {result.ErrorMessage}");
             AnsiConsole.WriteLine();
+            return 1;
         }
 
         AnsiConsole.MarkupLine($"Please install [cyan]{tool.Name}[/] manually from:");
@@ -205,13 +208,13 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     private int ShowToolsPath(Settings settings)
     {
         var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
-        
+
         AnsiConsole.MarkupLine($"[green]Tools path:[/] {toolsPath}");
-        
+
         if (Directory.Exists(toolsPath))
         {
             AnsiConsole.MarkupLine("[dim]Directory exists[/]");
-            
+
             var binPath = Path.Combine(toolsPath, "bin");
             if (Directory.Exists(binPath))
             {
@@ -388,6 +391,8 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         "7zip" => "7zip.7zip",
         "inkscape" => "Inkscape.Inkscape",
         "ghostscript" => "ArtifexSoftware.GhostScript",
+        "yt-dlp" => "yt-dlp.yt-dlp",
+        "deno" => "DenoLand.Deno",
         _ => toolId
     };
 

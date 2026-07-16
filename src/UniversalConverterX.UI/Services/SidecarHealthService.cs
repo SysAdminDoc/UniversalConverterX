@@ -24,6 +24,7 @@ public sealed record SidecarHealthReport(
 public interface ISidecarHealthService
 {
     Task<SidecarHealthReport> EvaluateAsync(UiPreset preset, CancellationToken cancellationToken = default);
+    Task<SidecarHealthReport> EvaluateEngineAsync(string engine, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<SidecarHealthReport>> EvaluateAllAsync(
         IEnumerable<UiPreset> presets,
         CancellationToken cancellationToken = default);
@@ -76,7 +77,12 @@ public sealed class SidecarHealthService : ISidecarHealthService
         ["recordcast"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
         ["scenedetect"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
         ["slideshow"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
-        ["streamkeep"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg"), ToolRequirement.External("yt-dlp", "yt-dlp", "yt-dlp")],
+        ["streamkeep"] =
+        [
+            ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg"),
+            ToolRequirement.Managed("yt-dlp", "yt-dlp", "yt-dlp"),
+            ToolRequirement.Recommended("deno", "deno", "Deno JavaScript runtime"),
+        ],
         ["subocr"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg"), ToolRequirement.External("tesseract", "tesseract", "Tesseract OCR")],
         ["vectorkit"] = [ToolRequirement.Managed("inkscape", "inkscape", "Inkscape")],
         ["videocrush"] = [ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg")],
@@ -157,9 +163,11 @@ public sealed class SidecarHealthService : ISidecarHealthService
         if (manifest?.Tools is null or { Count: 0 }) yield break;
         foreach (var t in manifest.Tools)
         {
-            yield return t.Managed
-                ? ToolRequirement.Managed(t.Id, t.Executable, t.Display)
-                : ToolRequirement.External(t.Id, t.Executable, t.Display);
+            yield return !t.Required
+                ? ToolRequirement.Recommended(t.Id, t.Executable, t.Display)
+                : t.Managed
+                    ? ToolRequirement.Managed(t.Id, t.Executable, t.Display)
+                    : ToolRequirement.External(t.Id, t.Executable, t.Display);
         }
     }
 
@@ -173,30 +181,42 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string Id = "",
         string Executable = "",
         string Display = "",
-        bool Managed = false);
+        bool Managed = false,
+        bool Required = true);
 
     public async Task<SidecarHealthReport> EvaluateAsync(
         UiPreset preset,
         CancellationToken cancellationToken = default)
+        => await EvaluateCoreAsync(preset.Engine, preset.Args, cancellationToken);
+
+    public async Task<SidecarHealthReport> EvaluateEngineAsync(
+        string engine,
+        CancellationToken cancellationToken = default)
+        => await EvaluateCoreAsync(engine, [], cancellationToken);
+
+    private async Task<SidecarHealthReport> EvaluateCoreAsync(
+        string engine,
+        IReadOnlyList<string> presetArgs,
+        CancellationToken cancellationToken)
     {
         var rows = new List<SidecarHealthRequirement>();
-        var sidecarPath = _runner.Locate(preset.Engine);
+        var sidecarPath = _runner.Locate(engine);
         rows.Add(sidecarPath is null
-            ? MissingSidecar(preset.Engine)
-            : Ready(preset.Engine, "sidecar", $"{preset.Engine}.exe", "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
+            ? MissingSidecar(engine)
+            : Ready(engine, "sidecar", $"{engine}.exe", "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
 
-        foreach (var tool in ToolRequirementsFor(preset))
-            rows.Add(await EvaluateToolAsync(preset.Engine, tool, cancellationToken));
+        foreach (var tool in ToolRequirementsFor(engine, presetArgs))
+            rows.Add(await EvaluateToolAsync(engine, tool, cancellationToken));
 
-        if (HasModels(preset.Engine))
-            rows.Add(EvaluateModelCache(preset.Engine, sidecarPath));
+        if (HasModels(engine))
+            rows.Add(EvaluateModelCache(engine, sidecarPath));
 
-        var gpu = GpuKind(preset.Engine);
+        var gpu = GpuKind(engine);
         if (gpu == "vulkan")
-            rows.Add(EvaluateVulkan(preset.Engine));
+            rows.Add(EvaluateVulkan(engine));
         else if (gpu == "cuda-optional")
             rows.Add(new SidecarHealthRequirement(
-                preset.Engine,
+                engine,
                 "gpu",
                 "CUDA / GPU acceleration",
                 "Optional",
@@ -216,10 +236,10 @@ public sealed class SidecarHealthService : ISidecarHealthService
             ? blockers[0].Remediation
             : warnings.Count > 0
                 ? warnings[0].Detail + " " + warnings[0].Remediation
-                : $"All required checks passed for {preset.Engine}.";
+                : $"All required checks passed for {engine}.";
 
         return new SidecarHealthReport(
-            preset.Engine,
+            engine,
             CanRun: blockers.Count == 0,
             Summary: summary,
             Detail: detail.Trim(),
@@ -250,22 +270,24 @@ public sealed class SidecarHealthService : ISidecarHealthService
             .ToList();
     }
 
-    private IEnumerable<ToolRequirement> ToolRequirementsFor(UiPreset preset)
+    private IEnumerable<ToolRequirement> ToolRequirementsFor(
+        string engine,
+        IReadOnlyList<string> presetArgs)
     {
-        var fromManifest = ManifestTools(preset.Engine).ToList();
+        var fromManifest = ManifestTools(engine).ToList();
         if (fromManifest.Count > 0)
         {
             foreach (var tool in fromManifest)
                 yield return tool;
         }
-        else if (EngineToolRequirements.TryGetValue(preset.Engine, out var tools))
+        else if (EngineToolRequirements.TryGetValue(engine, out var tools))
         {
             foreach (var tool in tools)
                 yield return tool;
         }
 
-        if (preset.Engine.Equals("realesrgan", StringComparison.OrdinalIgnoreCase)
-            && preset.Args.Any(arg => arg.Contains("video", StringComparison.OrdinalIgnoreCase)))
+        if (engine.Equals("realesrgan", StringComparison.OrdinalIgnoreCase)
+            && presetArgs.Any(arg => arg.Contains("video", StringComparison.OrdinalIgnoreCase)))
         {
             yield return ToolRequirement.Managed("ffmpeg", "ffmpeg", "FFmpeg");
         }
@@ -341,12 +363,16 @@ public sealed class SidecarHealthService : ISidecarHealthService
             ? $"Install {tool.DisplayName} and add '{tool.Executable}' to PATH or the configured UCX tools folder."
             : $"Install from Settings > Converter Tools or run `ucx tools download {tool.Id}`; SHA-256 verification is required before UCX promotes the download.";
 
+        var status = tool.IsRequired ? "Missing" : "Warning";
+        var missingDetail = tool.IsRequired
+            ? $"{tool.DisplayName} is required before this preset can run."
+            : $"{tool.DisplayName} is required for full YouTube format extraction; other sites can still run.";
         return new SidecarHealthRequirement(
             engine,
             "external-tool",
             tool.DisplayName,
-            "Missing",
-            $"{tool.DisplayName} is required before this preset can run.",
+            status,
+            missingDetail,
             remediation,
             null,
             downloadInfo is null ? null : "Resolved from release metadata during download");
@@ -523,12 +549,16 @@ public sealed class SidecarHealthService : ISidecarHealthService
         string Id,
         string Executable,
         string DisplayName,
-        [property: JsonIgnore] bool IsManaged)
+        [property: JsonIgnore] bool IsManaged,
+        [property: JsonIgnore] bool IsRequired)
     {
         public static ToolRequirement Managed(string id, string executable, string displayName) =>
-            new(id, executable, displayName, true);
+            new(id, executable, displayName, true, true);
 
         public static ToolRequirement External(string id, string executable, string displayName) =>
-            new(id, executable, displayName, false);
+            new(id, executable, displayName, false, true);
+
+        public static ToolRequirement Recommended(string id, string executable, string displayName) =>
+            new(id, executable, displayName, true, false);
     }
 }

@@ -15,11 +15,12 @@ if ($Clean) {
 }
 if (-not (Test-Path .venv)) { python -m venv .venv }
 $python = Join-Path $here '.venv/Scripts/python.exe'
-& $python -m pip install --quiet --upgrade pip pyinstaller yt-dlp
+& $python -m pip install --quiet --upgrade pip pyinstaller "yt-dlp[default]>=2026.07.04"
 
 & $python -m PyInstaller --name streamkeep --onefile --console --noconfirm --clean --log-level WARN `
   --hidden-import yt_dlp `
   --collect-data yt_dlp `
+  --collect-data yt_dlp_ejs `
   --paths . sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
