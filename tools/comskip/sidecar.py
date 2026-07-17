@@ -18,18 +18,12 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import find_ffmpeg, find_ffprobe, probe_media
+from ucx_sidecar import emit, find_ffmpeg, find_ffprobe, probe_media
 
 
 MAX_EDL_BYTES = 10_000_000
 MAX_RANGES = 10_000
 PERCENT_RE = re.compile(r"(?<!\d)(\d{1,3}(?:\.\d+)?)\s*%")
-
-
-def emit(event: str, **fields) -> None:
-    payload = json.dumps({"event": event, **fields}, ensure_ascii=True, separators=(",", ":"))
-    sys.stdout.write(payload + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:

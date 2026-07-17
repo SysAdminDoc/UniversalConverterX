@@ -14,7 +14,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'PyInstaller installation failed.' }
 
     & $python -m PyInstaller --name comskip-sidecar --onefile --console --noconfirm --clean `
-        --log-level WARN --paths . --paths ..\_lib `
+        --log-level WARN --paths . --paths ../_lib `
         --add-data 'comskip.ini;.' --add-data 'runtime-manifest.json;.' sidecar.py
     if ($LASTEXITCODE -ne 0) { throw 'PyInstaller failed.' }
     Copy-Item (Join-Path $here 'dist\comskip-sidecar.exe') `
