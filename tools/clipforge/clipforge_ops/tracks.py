@@ -266,4 +266,3 @@ def op_track_extract(args: argparse.Namespace) -> int:
     emit("complete", output=str(out), size_bytes=out.stat().st_size,
          stream_index=stream_idx, source_codec=src_codec, output_codec=codec)
     return 0
-

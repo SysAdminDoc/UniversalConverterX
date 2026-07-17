@@ -224,4 +224,3 @@ def op_face_blur(args: argparse.Namespace, detector_override=None) -> int:
         if staged_output is not None:
             try: staged_output.unlink(missing_ok=True)
             except OSError: pass
-

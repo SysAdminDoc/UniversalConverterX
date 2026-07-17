@@ -303,4 +303,3 @@ def op_vmaf(args: argparse.Namespace) -> int:
     emit("progress", percent=100, stage="vmaf", eta_seconds=0)
     emit("complete", output="", size_bytes=0, summary=summary)
     return 0
-

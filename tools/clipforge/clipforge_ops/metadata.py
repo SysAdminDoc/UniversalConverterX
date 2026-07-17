@@ -305,7 +305,3 @@ def op_loudnorm(args: argparse.Namespace) -> int:
         return fail("output_missing", f"Output not produced: {out_path}")
     emit("complete", output=str(out_path), size_bytes=out_path.stat().st_size)
     return 0
-
-
-
-
