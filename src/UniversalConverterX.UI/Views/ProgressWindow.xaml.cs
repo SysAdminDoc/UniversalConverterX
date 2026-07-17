@@ -47,7 +47,8 @@ public sealed partial class ProgressWindow : Window
         var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
         appWindow.Resize(new Windows.Graphics.SizeInt32(600, 500));
-        appWindow.Title = "Converting - UniversalConverter X";
+        appWindow.Title = Services.AppLocalizer.Get(
+            "ProgressWindow_Item_001.Title", "Converting - UniversalConverter X");
 
         FileListView.ItemsSource = _items;
 
