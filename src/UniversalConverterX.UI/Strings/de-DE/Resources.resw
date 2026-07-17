@@ -99,6 +99,9 @@
   <data name="AiSubtitlePage_ExportButton.Content" xml:space="preserve">
     <value>Vorschau exportieren</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg-Whisper-Filter (leichtgewichtig · enthalten)</value>
+  </data>
   <data name="AiSubtitlePage_FormatCombo.Header" xml:space="preserve">
     <value>Untertitelformat</value>
   </data>
@@ -131,9 +134,6 @@
   </data>
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>Flüstern.cpp (Vulkan / CUDA · binär)</value>
-  </data>
-  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg-Whisper-Filter (leichtgewichtig · enthalten)</value>
   </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>Modell + Sprache</value>
@@ -1108,7 +1108,7 @@
     <value>Batch-Umbenennung</value>
   </data>
   <data name="BatchRenamePage_Item_003.Text" xml:space="preserve">
-    <value>Musterbasierte Datei mit Live-Vorschau umbenennen. Regex unterstützt. Tokens: {n}, {n:padding}, {stem}, {ext}, {parent}, {date}, {date:format}. Nichts umbenennt, bis Sie auf Anwenden klicken.</value>
+    <value>Vorschau für token- oder regexbasierte Umbenennungen vor dem Anwenden.</value>
   </data>
   <data name="BatchRenamePage_Item_012.Content" xml:space="preserve">
     <value>Keine Veränderung</value>
@@ -1280,6 +1280,9 @@
   </data>
   <data name="CompressorPage_CompressorPagePivotItem02.Header" xml:space="preserve">
     <value>Abgeschlossen</value>
+  </data>
+  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
+    <value>Mit D3D12 deinterlacen (abgesichert)</value>
   </data>
   <data name="CompressorPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Aus der Warteschlange entfernen</value>
@@ -1643,12 +1646,6 @@
   </data>
   <data name="ConverterPage_Item_053.Text" xml:space="preserve">
     <value>Datei-Speicherort</value>
-  </data>
-  <data name="ConverterPage_Item_057.Text" xml:space="preserve">
-    <value>Die Schaltfläche Konvertieren aktiviert, nachdem Dateien ausgewählt wurden und ein Ausgabeprofil ausgewählt wurde. Beendete Ergebnisse bleiben nach dem Löschen der Warteschlange sichtbar.</value>
-  </data>
-  <data name="ConverterPage_Item_058.Text" xml:space="preserve">
-    <value>Batch-Zusammenfassung</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Speichern auf</value>
@@ -2974,7 +2971,7 @@
     <value>Lokale Protokolle und Crashpakete</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.30.0</value>
+    <value>UniversalConverter X v2.31.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Lokale Erstverarbeitung</value>
@@ -3510,9 +3507,6 @@
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
     <value>UCX</value>
   </data>
-  <data name="MainWindow_Item_003.Text" xml:space="preserve">
-    <value>Lokale Medien-Tools</value>
-  </data>
   <data name="MainWindow_Item_005.Content" xml:space="preserve">
     <value>Zum Anfang</value>
   </data>
@@ -3551,9 +3545,6 @@
   </data>
   <data name="MainWindow_Item_017.Text" xml:space="preserve">
     <value>Arbeitsplatz vor Ort</value>
-  </data>
-  <data name="MainWindow_Item_018.Text" xml:space="preserve">
-    <value>Dateien bleiben auf diesem PC, es sei denn, ein Workflow verwendet eindeutig eine netzwerkgestützte Engine.</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
     <value>Suchaufgaben und -werkzeuge</value>
@@ -4774,7 +4765,7 @@
     <value>Status aktualisieren</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.30.0</value>
+    <value>Version 2.31.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Abbrechen</value>
@@ -4947,6 +4938,9 @@
   <data name="SpeechToTextPage_DownloadParakeetModelButton.Content" xml:space="preserve">
     <value>Modell überprüfen &amp; herunterladen</value>
   </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg-Whisper-Filter (leichtgewichtig · enthalten)</value>
+  </data>
   <data name="SpeechToTextPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Aus der Warteschlange entfernen</value>
   </data>
@@ -4991,9 +4985,6 @@
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>Flüster.cpp (Vulkan / CUDA · Einzel binär)</value>
-  </data>
-  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg-Whisper-Filter (leichtgewichtig · enthalten)</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Sittich TDT v3 (CUDA · 25 Sprachen)</value>
@@ -5478,6 +5469,9 @@
   <data name="TrackManagerPage_ApplyButton.Content" xml:space="preserve">
     <value>Änderungen anwenden...</value>
   </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Verzögerung (ms)</value>
+  </data>
   <data name="TrackManagerPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Untertitel-Stream exportieren</value>
   </data>
@@ -5492,9 +5486,6 @@
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
     <value>Spuren hinzufügen oder entfernen und Audiospuren ohne Neukodierung einzeln vorziehen oder verzögern. Verzögerung in Millisekunden einstellen, zu entfernende Spuren markieren und dann Anwenden wählen.</value>
-  </data>
-  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
-    <value>Verzögerung (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>Keine Tracks geladen</value>
@@ -6362,8 +6353,5 @@
   </data>
   <data name="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02.Header" xml:space="preserve">
     <value>Abgeschlossen</value>
-  </data>
-  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
-    <value>Mit D3D12 deinterlacen (abgesichert)</value>
   </data>
 </root>

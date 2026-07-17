@@ -9,13 +9,13 @@
     Background="{StaticResource BackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="32" Spacing="20">
+        <StackPanel Style="{StaticResource PageStackLayoutStyle}">
 
             <!-- Header -->
             <StackPanel Spacing="6">
-                <TextBlock x:Uid="VideoSummarizerPage_Item_001" Text="Video Summarizer" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="VideoSummarizerPage_Item_002" Text="Turn long recordings into a written summary, timestamped chapters, and an optional condensed highlight cut. Runs offline with Whisper transcription and an extractive summarizer — no cloud, no account."
-                           Style="{StaticResource SubtitleTextStyle}"/>
+                <TextBlock x:Uid="VideoSummarizerPage_Item_001" Text="Video Summarizer" Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="VideoSummarizerPage_Item_002" Text="Create offline summaries, chapters, and highlight cuts from long recordings."
+                           Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
 
             <!-- Input area -->

@@ -12,8 +12,8 @@
         <DataTemplate x:Key="SnapshotQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -32,7 +32,7 @@
                             Grid.Column="0"
                             Width="44"
                             Height="44"
-                            CornerRadius="14"
+                            CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE722;"
                                   FontSize="20"
@@ -98,8 +98,8 @@
         <DataTemplate x:Key="SnapshotFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -111,7 +111,7 @@
                     <Border Grid.Column="0"
                             Width="44"
                             Height="44"
-                            CornerRadius="14"
+                            CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}"
                                   FontSize="19"
@@ -140,7 +140,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -153,9 +153,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock x:Uid="FrameSnapshotPage_Item_004" Text="Frame Snapshot" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="FrameSnapshotPage_Item_004" Text="Frame Snapshot" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="FrameSnapshotPage_Item_005" Text="Export precise video stills or image-sequence samples with local FFmpeg processing."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -175,7 +175,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="366"/>
@@ -184,7 +184,7 @@
             <Border x:Name="DropZone"
                     Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
+                    CornerRadius="12"
                     Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"

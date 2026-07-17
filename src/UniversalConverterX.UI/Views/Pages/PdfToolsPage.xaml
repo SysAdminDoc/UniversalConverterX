@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,9 +21,9 @@
 
         <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock x:Uid="PdfToolsPage_Item_001" Text="PDF Tools"
-                       Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock x:Uid="PdfToolsPage_Item_002" Text="Merge, split, extract pages, rotate, encrypt, decrypt, and shrink PDFs. Backed by pikepdf (qpdf under the hood) -- no external binary required."
-                       Style="{StaticResource SubtitleTextStyle}"
+                       Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="PdfToolsPage_Item_002" Text="Merge, split, rotate, secure, and optimize PDFs locally."
+                       Style="{StaticResource PageDescriptionTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
 
@@ -159,7 +159,7 @@
                 <TextBlock x:Uid="PdfToolsPage_ResultsText" x:Name="ResultsText"
                            Style="{StaticResource MutedTextStyle}"
                            FontFamily="Consolas, Cascadia Mono, monospace"
-                           FontSize="12"
+                           FontSize="13"
                            TextWrapping="Wrap"
                            Text="Pick an operation to begin."/>
             </ScrollViewer>
@@ -170,7 +170,7 @@
             <TextBlock x:Name="LogText"
                        Style="{StaticResource MutedTextStyle}"
                        FontFamily="Consolas, Cascadia Mono, monospace"
-                       FontSize="11"
+                       FontSize="12"
                        TextWrapping="Wrap"/>
         </ScrollViewer>
 

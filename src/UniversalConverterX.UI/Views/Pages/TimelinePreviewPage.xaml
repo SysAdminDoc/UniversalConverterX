@@ -24,14 +24,14 @@
                         Padding="4,2">
                     <TextBlock Text="{x:Bind TimecodeLabel}"
                                FontFamily="Consolas, Cascadia Mono, monospace"
-                               FontSize="10"
+                               FontSize="12"
                                Foreground="White"/>
                 </Border>
             </Grid>
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -49,9 +49,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="TimelinePreviewPage_Item_001" Text="Timeline Preview"
-                           Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="TimelinePreviewPage_Item_002" Text="Generate a thumbnail strip + audio waveform image for any video. Useful for visually scrubbing long clips before sending them through ClipForge or VideoCrush. Output drops to a per-clip folder under %TEMP% by default; use Export to move it next to the source."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="TimelinePreviewPage_Item_002" Text="Generate a thumbnail strip and waveform for fast visual review."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -69,7 +69,7 @@
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
-            <Grid ColumnSpacing="20">
+            <Grid ColumnSpacing="14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>

@@ -10,10 +10,10 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ToolboxTileTemplate">
-            <Border Width="224" Height="142" Padding="16" Margin="0,0,12,12"
+            <Border Width="216" Height="124" Padding="14" Margin="0,0,10,10"
                     Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="18"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                    CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
                 <Grid RowSpacing="10">
@@ -35,22 +35,23 @@
                         </Border>
                         <Border Grid.Column="2" Background="{StaticResource SurfaceLightBrush}" CornerRadius="10"
                                 Padding="8,3" Visibility="{Binding ShowAi}">
-                            <TextBlock x:Uid="ToolboxPage_Item_001" Text="AI" FontSize="10" FontWeight="SemiBold"
+                            <TextBlock x:Uid="ToolboxPage_Item_001" Text="AI" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                     </Grid>
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,10,0,0">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource LabelTextStyle}"
                                    TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding Description}" FontSize="11"
+                        <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="2" LineHeight="16"/>
+                                   TextWrapping="Wrap" MaxLines="2" LineHeight="17"
+                                   TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
                         <Ellipse Width="7" Height="7"
                                  Fill="{Binding StatusBrush}"
                                  VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding StatusBadge}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{Binding StatusBrush}"/>
                     </StackPanel>
                 </Grid>
@@ -59,34 +60,36 @@
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
-        <StackPanel Padding="32" Spacing="26">
-            <Border Background="{StaticResource HeroGradientBrush}"
+        <StackPanel Style="{StaticResource PageStackLayoutStyle}">
+            <Border Background="Transparent"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="24"
-                    Padding="32">
-                <Grid ColumnSpacing="28">
+                    BorderThickness="0"
+                    CornerRadius="0"
+                    Padding="0">
+                <Grid ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="0"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="10">
-                        <TextBlock x:Uid="ToolboxPage_Item_002" Text="TOOLBOX" Style="{StaticResource EyebrowTextStyle}"/>
+                        <TextBlock x:Uid="ToolboxPage_Item_002" Text="Toolbox" Style="{StaticResource PageTitleTextStyle}"/>
                         <TextBlock x:Uid="ToolboxPage_Item_003" Text="Specialized tools for finishing, repairing, extracting, and preparing media."
-                                   Style="{StaticResource TitleTextStyle}"
+                                   Style="{StaticResource PageDescriptionTextStyle}"
                                    TextWrapping="Wrap"
-                                   MaxWidth="720" LineHeight="30"/>
+                                   MaxWidth="720"/>
                         <TextBlock x:Uid="ToolboxPage_Item_004" Text="Ready tools open directly. Planned tools stay disabled and explain what is missing."
                                    Style="{StaticResource SubtitleTextStyle}" FontSize="13"
+                                   Visibility="Collapsed"
                                    TextWrapping="Wrap"
                                    MaxWidth="760"/>
                     </StackPanel>
                     <Border Grid.Column="1"
                             Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="20"
-                            Padding="22">
+                            BorderThickness="0"
+                            CornerRadius="12"
+                            Padding="16"
+                            Visibility="Collapsed">
                         <StackPanel Spacing="12">
                             <TextBlock x:Uid="ToolboxPage_Item_005" Text="Status key" Style="{StaticResource PanelTitleTextStyle}"/>
                             <Grid RowSpacing="10">
@@ -110,7 +113,7 @@
                                 </StackPanel>
                                 <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10">
                                     <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="8" Padding="6,2">
-                                        <TextBlock x:Uid="ToolboxPage_Item_009" Text="AI" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="ToolboxPage_Item_009" Text="AI" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentBlueBrush}"/>
                                     </Border>
                                     <TextBlock x:Uid="ToolboxPage_Item_010" Text="Model-backed tool" Style="{StaticResource MutedTextStyle}"/>

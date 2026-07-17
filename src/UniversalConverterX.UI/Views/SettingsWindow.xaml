@@ -10,53 +10,54 @@
 
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="112"/>
+            <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="{StaticResource ShellGradientBrush}"
+                Background="{StaticResource SurfaceMutedBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="30,20">
+                Padding="28,14">
             <Grid ColumnSpacing="18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Spacing="5">
-                    <TextBlock x:Uid="SettingsWindow_Item_002" Text="Settings" Style="{StaticResource TitleTextStyle}"/>
+                    <TextBlock x:Uid="SettingsWindow_Item_002" Text="Settings" Style="{StaticResource PageTitleTextStyle}"/>
                     <TextBlock x:Uid="SettingsWindow_Item_003" Text="Set defaults, local tool paths, Explorer integration, and appearance."
-                               Style="{StaticResource SubtitleTextStyle}"
+                               Style="{StaticResource PageDescriptionTextStyle}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
                 <Border Grid.Column="1"
                         Background="{StaticResource SurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="18"
-                        Padding="14,10"
-                        VerticalAlignment="Center">
+                        CornerRadius="8"
+                        Padding="10,6"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE83D;" FontSize="15"
                                   Foreground="{StaticResource AccentGreenBrush}"/>
                         <TextBlock x:Uid="SettingsWindow_Item_004" Text="Local defaults"
-                                   Style="{StaticResource PillTextStyle}"
+                                   Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="1" Padding="30,26">
-            <Grid MaxWidth="920">
+        <ScrollViewer Grid.Row="1" Padding="28,18">
+            <Grid MaxWidth="960">
                 <!-- Keep a solid panel under Mica for unsupported/RDP configurations. -->
-                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="20"/>
+                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="12"/>
                 <SystemBackdropElement x:Name="SettingsBackdropHost"
-                                       CornerRadius="20"
+                                       CornerRadius="12"
                                        IsHitTestVisible="False"/>
-                <StackPanel Spacing="18" Padding="20">
+                <StackPanel Spacing="14" Padding="16">
                 
                 <!-- General Settings -->
                 <Expander IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
@@ -701,7 +702,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock x:Uid="SettingsWindow_Item_095" Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
                             <TextBlock x:Uid="SettingsWindow_VersionText" x:Name="VersionText" 
-                                       Text="Version 2.30.0"
+                                       Text="Version 2.31.0"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 
@@ -744,7 +745,7 @@
                         <TextBlock x:Uid="SettingsWindow_Item_104" Text="Local engines:" Margin="0,16,0,0"/>
                         <TextBlock x:Uid="SettingsWindow_Item_105" Text="• FFmpeg - Video/Audio processing (LGPL/GPL)&#x0a;• ImageMagick - Image processing (Apache 2.0)&#x0a;• Pandoc - Document conversion (GPL)&#x0a;• LibreOffice - Office documents (MPL)&#x0a;• Ghostscript - PDF processing (AGPL)&#x0a;• Inkscape - Vector graphics (GPL)&#x0a;• Calibre - Ebook conversion (GPL)"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="12"/>
+                                   FontSize="13"/>
                     </StackPanel>
                 </Expander>
 
@@ -756,7 +757,7 @@
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,1,0,0"
-                Padding="30,16">
+                Padding="28,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

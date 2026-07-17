@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -21,12 +21,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock x:Uid="TextToSpeechPage_Item_001" Text="TEXT TO SPEECH"
-                           Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="TextToSpeechPage_Item_001" Text="Text to Speech"
+                           Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="TextToSpeechPage_Item_002" Text="Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages."
-                           Style="{StaticResource TitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="TextToSpeechPage_TextToSpeechPageButton01" Content="Refresh Voices"
@@ -42,13 +42,13 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}" CornerRadius="22" Padding="18">
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" CornerRadius="12" Padding="18">
                 <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

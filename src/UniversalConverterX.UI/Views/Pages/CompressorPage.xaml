@@ -12,8 +12,8 @@
         <DataTemplate x:Key="CompressionQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -29,7 +29,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE91F;" FontSize="20"
                                   Foreground="{StaticResource AccentCyanBrush}"/>
@@ -80,8 +80,8 @@
         <DataTemplate x:Key="CompressionFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -90,7 +90,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}" FontSize="19"
                                   Foreground="{Binding AccentBrush}"/>
@@ -117,7 +117,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -130,9 +130,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock x:Uid="CompressorPage_Item_004" Text="Compressor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="CompressorPage_Item_004" Text="Compressor" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="CompressorPage_Item_005" Text="Batch-compress videos with target profiles, progress, and finished results."
-                           Style="{StaticResource SubtitleTextStyle}"/>
+                           Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button x:Uid="CompressorPage_CompressorPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
@@ -144,7 +144,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -152,7 +152,7 @@
 
             <Border x:Name="DropZone" Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
+                    CornerRadius="12"
                     Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
@@ -241,7 +241,7 @@
                         <TextBlock x:Uid="CompressorPage_Item_021" Text="GPU encoding is faster but may produce larger files at the same CRF."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
-                                   FontSize="11"/>
+                                   FontSize="12"/>
                         <CheckBox x:Uid="CompressorPage_D3D12DeinterlaceToggle"
                                   x:Name="D3D12DeinterlaceToggle"
                                   Content="Deinterlace with D3D12 (guarded)"
@@ -300,7 +300,7 @@
                             <TextBlock x:Uid="CompressorPage_Item_033" Text="Target-size mode uses CPU two-pass encoding and reserves 5% for MP4 overhead."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
-                                       FontSize="11"/>
+                                       FontSize="12"/>
                         </StackPanel>
                         <RadioButton x:Uid="CompressorPage_PresetVmaf" x:Name="PresetVmaf" Content="Smart quality target (VMAF)"
                                      GroupName="Preset"
@@ -334,11 +334,11 @@
                                        Text="ab-av1 availability is checked before each smart compression."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
-                                       FontSize="11"/>
+                                       FontSize="12"/>
                             <TextBlock x:Uid="CompressorPage_Item_041" Text="Smart mode samples CRF candidates, encodes the smallest result meeting the target, then verifies the finished file with a full VMAF pass."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
-                                       FontSize="11"/>
+                                       FontSize="12"/>
                         </StackPanel>
                         <RadioButton x:Uid="CompressorPage_PresetArchive" x:Name="PresetArchive" Content="Archive (AV1, CRF 28)"
                                      GroupName="Preset"

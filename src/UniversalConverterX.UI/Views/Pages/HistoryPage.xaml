@@ -13,7 +13,7 @@
         <DataTemplate x:Key="HistoryRowTemplate" x:DataType="svc:HistoryRecord">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="16"
+                    BorderThickness="0" CornerRadius="12" Padding="16"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -38,13 +38,13 @@
                                    FontSize="13"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    LineHeight="18"
                                    TextTrimming="CharacterEllipsis">
                             <Run Text="{x:Bind SourcePath}"/>
                         </TextBlock>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    Visibility="{x:Bind ErrorVisibility}"
                                    TextTrimming="CharacterEllipsis">
                             <Run x:Uid="HistoryPage_Item_001" Text="error:"/>
@@ -76,7 +76,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -91,12 +91,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="HistoryPage_Item_005" Text="CONVERSION HISTORY"
-                           Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="HistoryPage_Item_005" Text="History"
+                           Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="HistoryPage_Item_006" Text="Persistent SQLite log of every job. Search, re-run, or forget any entry."
-                           Style="{StaticResource TitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="HistoryPage_HistoryPageButton03" Content="Export report"
@@ -124,27 +124,27 @@
                 </Grid.ColumnDefinitions>
                 <Border Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock x:Uid="HistoryPage_Item_010" Text="Total jobs" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_Item_010" Text="Total jobs" Style="{StaticResource MutedTextStyle}" FontSize="12"/>
                     <TextBlock x:Uid="HistoryPage_StatTotal" x:Name="StatTotal" Text="0" Style="{StaticResource TitleTextStyle}" FontSize="24" FontWeight="SemiBold"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock x:Uid="HistoryPage_Item_012" Text="Succeeded" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_Item_012" Text="Succeeded" Style="{StaticResource MutedTextStyle}" FontSize="12"/>
                     <TextBlock x:Uid="HistoryPage_StatOk" x:Name="StatOk" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentGreenBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="2" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock x:Uid="HistoryPage_Item_014" Text="Failed" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_Item_014" Text="Failed" Style="{StaticResource MutedTextStyle}" FontSize="12"/>
                     <TextBlock x:Uid="HistoryPage_StatFail" x:Name="StatFail" Text="0" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentRedBrush}"/>
                 </StackPanel>
                 </Border>
                 <Border Grid.Column="3" Style="{StaticResource MetricTileStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock x:Uid="HistoryPage_Item_016" Text="Space saved" Style="{StaticResource MutedTextStyle}" FontSize="11"/>
+                    <TextBlock x:Uid="HistoryPage_Item_016" Text="Space saved" Style="{StaticResource MutedTextStyle}" FontSize="12"/>
                     <TextBlock x:Uid="HistoryPage_StatSaved" x:Name="StatSaved" Text="0 B" Style="{StaticResource TitleTextStyle}"
                                FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}"/>
                 </StackPanel>
@@ -165,7 +165,7 @@
                 <StackPanel x:Name="EmptyState" Visibility="Collapsed"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="12">
-                    <Border Width="88" Height="88" CornerRadius="22"
+                    <Border Width="88" Height="88" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE81C;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>

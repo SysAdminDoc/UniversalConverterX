@@ -12,7 +12,7 @@
         <DataTemplate x:Key="ChapterRowTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="14" Padding="12"
+                    BorderThickness="0" CornerRadius="10" Padding="12"
                     Margin="0,0,0,8">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -44,7 +44,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -58,9 +58,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock x:Uid="ChapterMarksPage_Item_005" Text="Chapter Marks Editor" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="ChapterMarksPage_Item_006" Text="Read, edit, import, export, and rewrite chapter markers without re-encoding. Exact source PTS values are retained; MKV writes require MKVToolNix 97 or newer."
-                           Style="{StaticResource SubtitleTextStyle}"
+                <TextBlock x:Uid="ChapterMarksPage_Item_005" Text="Chapter Marks Editor" Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="ChapterMarksPage_Item_006" Text="Edit and export chapter markers without re-encoding."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -112,13 +112,13 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" CornerRadius="22" Padding="16">
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" CornerRadius="12" Padding="16">
             <Grid>
                 <StackPanel x:Name="EmptyState"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Spacing="10">
-                    <Border Width="96" Height="96" CornerRadius="24"
+                    <Border Width="96" Height="96" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE8B7;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>

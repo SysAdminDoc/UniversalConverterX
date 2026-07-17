@@ -12,7 +12,7 @@
         <DataTemplate x:Key="FontFileTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="14"
+                    BorderThickness="0" CornerRadius="12" Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -34,7 +34,7 @@
                     <TextBlock Grid.Column="2"
                                Text="{Binding StatusText, Mode=OneWay}"
                                Style="{StaticResource MutedTextStyle}"
-                               FontSize="11"
+                               FontSize="12"
                                TextAlignment="Right"
                                VerticalAlignment="Center"/>
                     <Button x:Uid="FontConverterPage_Item_001" Grid.Column="3"
@@ -51,7 +51,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -66,12 +66,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="FontConverterPage_Item_002" Text="FONT CONVERTER"
-                           Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock x:Uid="FontConverterPage_Item_003" Text="Convert TTF / OTF / WOFF / WOFF2. WOFF and WOFF2 are the modern web-font wrappers (the latter uses Brotli compression). Backed by fonttools."
-                           Style="{StaticResource TitleTextStyle}"
+                <TextBlock x:Uid="FontConverterPage_Item_002" Text="Font Converter"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="FontConverterPage_Item_003" Text="Convert desktop and web fonts between TTF, OTF, WOFF, and WOFF2."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="FontConverterPage_FontConverterPageButton01" Content="Add fonts"
@@ -123,7 +123,7 @@
                 <StackPanel x:Name="EmptyState"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="12">
-                    <Border Width="88" Height="88" CornerRadius="22"
+                    <Border Width="88" Height="88" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE8D2;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>

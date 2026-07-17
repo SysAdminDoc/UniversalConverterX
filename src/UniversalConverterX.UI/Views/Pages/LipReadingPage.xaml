@@ -12,8 +12,8 @@
         <DataTemplate x:Key="LrQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -28,7 +28,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE909;" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -75,8 +75,8 @@
         <DataTemplate x:Key="LrFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -85,7 +85,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}" FontSize="19"
                                   Foreground="{Binding AccentBrush}"/>
@@ -112,7 +112,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -126,9 +126,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock x:Uid="LipReadingPage_Item_004" Text="Lip Reading" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="LipReadingPage_Item_004" Text="Lip Reading" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="LipReadingPage_Item_005" Text="Transcribe speech from silent or muted video using AI visual speech recognition."
-                           Style="{StaticResource SubtitleTextStyle}"/>
+                           Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Button x:Uid="LipReadingPage_LipReadingPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
@@ -141,7 +141,7 @@
         </Grid>
 
         <!-- Main content -->
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -150,7 +150,7 @@
             <!-- Drop zone + queue -->
             <Border x:Name="DropZone" Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
+                    CornerRadius="12"
                     Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
@@ -387,7 +387,7 @@
                     <TextBlock x:Name="ProgressLog" Text=""
                                Style="{StaticResource MutedTextStyle}"
                                FontFamily="Consolas"
-                               FontSize="11"
+                               FontSize="12"
                                TextWrapping="Wrap"/>
                 </ScrollViewer>
                 <Button x:Uid="LipReadingPage_CancelButton" x:Name="CancelButton" Content="Cancel"

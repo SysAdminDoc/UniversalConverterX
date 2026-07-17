@@ -21,33 +21,33 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
                     <!-- Surfaces -->
-                    <Color x:Key="BrandBackground">#0f1117</Color>
-                    <Color x:Key="BrandSurface">#1c1f2a</Color>
-                    <Color x:Key="BrandSurfaceMuted">#15181f</Color>
-                    <Color x:Key="BrandSurfaceLight">#1f2338</Color>
+                    <Color x:Key="BrandBackground">#0b0f14</Color>
+                    <Color x:Key="BrandSurface">#151c27</Color>
+                    <Color x:Key="BrandSurfaceMuted">#10161f</Color>
+                    <Color x:Key="BrandSurfaceLight">#1b2533</Color>
                     <Color x:Key="BrandSurfaceSoft">#162a20</Color>
                     <Color x:Key="BrandSurfaceWarm">#1e160a</Color>
                     <Color x:Key="BrandSurfaceDanger">#200d0d</Color>
                     <Color x:Key="BrandSurfaceInfo">#0c1629</Color>
                     <!-- Borders -->
-                    <Color x:Key="BrandBorder">#252a38</Color>
-                    <Color x:Key="BrandBorderStrong">#333a52</Color>
-                    <Color x:Key="BrandDivider">#1a1e2b</Color>
+                    <Color x:Key="BrandBorder">#2a3443</Color>
+                    <Color x:Key="BrandBorderStrong">#3a4658</Color>
+                    <Color x:Key="BrandDivider">#222c39</Color>
                     <!-- Accents -->
-                    <Color x:Key="BrandAccentPrimary">#5b8af7</Color>
-                    <Color x:Key="BrandAccentPrimaryHover">#7aa3f9</Color>
-                    <Color x:Key="BrandAccentPrimaryPressed">#4070e8</Color>
+                    <Color x:Key="BrandAccentPrimary">#3b82f6</Color>
+                    <Color x:Key="BrandAccentPrimaryHover">#5b9af8</Color>
+                    <Color x:Key="BrandAccentPrimaryPressed">#2563eb</Color>
                     <Color x:Key="BrandAccentBlue">#60a5fa</Color>
                     <Color x:Key="BrandAccentCyan">#22d3ee</Color>
-                    <Color x:Key="BrandAccentGreen">#34d399</Color>
+                    <Color x:Key="BrandAccentGreen">#2dd4a7</Color>
                     <Color x:Key="BrandAccentOrange">#fb923c</Color>
                     <Color x:Key="BrandAccentYellow">#fbbf24</Color>
                     <Color x:Key="BrandAccentRed">#f87171</Color>
                     <!-- Text -->
-                    <Color x:Key="BrandTextPrimary">#e8ecf3</Color>
-                    <Color x:Key="BrandTextSecondary">#94a3b8</Color>
-                    <Color x:Key="BrandTextMuted">#6d7d96</Color>
-                    <Color x:Key="BrandTextSubtle">#4a5568</Color>
+                    <Color x:Key="BrandTextPrimary">#f3f6fa</Color>
+                    <Color x:Key="BrandTextSecondary">#aab4c3</Color>
+                    <Color x:Key="BrandTextMuted">#8793a6</Color>
+                    <Color x:Key="BrandTextSubtle">#667387</Color>
                     <Color x:Key="BrandTextInverse">#0f172a</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
@@ -122,54 +122,56 @@
             <SolidColorBrush x:Key="AccentPrimaryPressedBrush" Color="{ThemeResource BrandAccentPrimaryPressed}"/>
 
             <!-- ════════════════════════════════════════════════════════════════
-                 GRADIENTS (hero / shell accents)
-                 ════════════════════════════════════════════════════════════════ -->
-
-            <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#1a2040" Offset="0"/>
-                <GradientStop Color="#0f1520" Offset="0.45"/>
-                <GradientStop Color="#0f2018" Offset="1"/>
-            </LinearGradientBrush>
-            <LinearGradientBrush x:Key="AiGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0c1a30" Offset="0"/>
-                <GradientStop Color="#101728" Offset="0.55"/>
-                <GradientStop Color="#131922" Offset="1"/>
-            </LinearGradientBrush>
-            <LinearGradientBrush x:Key="ShellGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#1e2235" Offset="0"/>
-                <GradientStop Color="#161b2e" Offset="0.56"/>
-                <GradientStop Color="#14201a" Offset="1"/>
-            </LinearGradientBrush>
-
-            <!-- ════════════════════════════════════════════════════════════════
                  TYPOGRAPHY
-                 Display 32 / Title 24 / Section 18 / Panel 15 /
-                 Subtitle 14 / Body 14 / Muted 12 / Subtle 11 / Eyebrow 11 (caps)
+                 Page 28 / Title 24 / Section 18 / Panel 16 /
+                 Body 15 / Subtitle 14 / Muted 13 / Subtle 12
                  ════════════════════════════════════════════════════════════════ -->
 
             <Style x:Key="DisplayTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="32"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+                <Setter Property="FontSize" Value="30"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="LineHeight" Value="40"/>
+                <Setter Property="LineHeight" Value="36"/>
             </Style>
 
             <!-- HeroTextStyle: hero-section headlines (slightly larger than Display) -->
             <Style x:Key="HeroTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="34"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+                <Setter Property="FontSize" Value="30"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="LineHeight" Value="42"/>
+                <Setter Property="LineHeight" Value="36"/>
             </Style>
 
             <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
                 <Setter Property="FontSize" Value="24"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="LineHeight" Value="30"/>
             </Style>
 
+            <Style x:Key="PageTitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="LineHeight" Value="34"/>
+            </Style>
+
+            <Style x:Key="PageDescriptionTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="LineHeight" Value="20"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="MaxLines" Value="2"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+
             <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
                 <Setter Property="FontSize" Value="18"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
@@ -177,63 +179,63 @@
             </Style>
 
             <Style x:Key="PanelTitleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="16"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <Style x:Key="SubtitleTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                <Setter Property="LineHeight" Value="22"/>
+                <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <Style x:Key="BodyTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="15"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
                 <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <Style x:Key="MutedTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="13"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
                 <Setter Property="LineHeight" Value="18"/>
             </Style>
 
             <!-- LabelTextStyle: compact section labels (settings expanders, tile titles) -->
             <Style x:Key="LabelTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="15"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="LineHeight" Value="20"/>
             </Style>
 
             <Style x:Key="SubtleTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
                 <Setter Property="LineHeight" Value="16"/>
             </Style>
 
             <Style x:Key="EyebrowTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+                <Setter Property="FontSize" Value="12"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CharacterSpacing" Value="80"/>
+                <Setter Property="CharacterSpacing" Value="40"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-            </Style>
-
-            <Style x:Key="PillTextStyle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="11"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CharacterSpacing" Value="20"/>
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             </Style>
 
             <!-- CodeTextStyle: monospaced output, log panels -->
             <Style x:Key="CodeTextStyle" TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Courier New"/>
-                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
                 <Setter Property="LineHeight" Value="17"/>
             </Style>
@@ -262,17 +264,17 @@
             <Style x:Key="CardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="16"/>
-                <Setter Property="Padding" Value="20"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="16"/>
             </Style>
 
             <Style x:Key="SubtleCardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="14"/>
-                <Setter Property="Padding" Value="16"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="14"/>
             </Style>
 
             <Style x:Key="SectionDividerStyle" TargetType="Border">
@@ -280,36 +282,38 @@
                 <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
             </Style>
 
-            <Style x:Key="StatusPillStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="999"/>
-                <Setter Property="Padding" Value="10,4"/>
-            </Style>
-
             <Style x:Key="InfoBannerStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceInfoBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="14"/>
-                <Setter Property="Padding" Value="14,12"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="12,10"/>
             </Style>
 
             <Style x:Key="QuietSurfaceStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="12"/>
-                <Setter Property="Padding" Value="12"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="10"/>
             </Style>
 
             <Style x:Key="MetricTileStyle" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="14"/>
-                <Setter Property="Padding" Value="14,12"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Padding" Value="12,10"/>
+            </Style>
+
+            <Style x:Key="PageLayoutStyle" TargetType="Grid">
+                <Setter Property="Padding" Value="28,20,28,24"/>
+                <Setter Property="RowSpacing" Value="14"/>
+            </Style>
+
+            <Style x:Key="PageStackLayoutStyle" TargetType="StackPanel">
+                <Setter Property="Padding" Value="28,20,28,24"/>
+                <Setter Property="Spacing" Value="14"/>
             </Style>
 
             <!-- ════════════════════════════════════════════════════════════════
@@ -324,29 +328,29 @@
                 <Setter Property="Background" Value="{StaticResource AccentPrimaryBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextInverseBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource AccentPrimaryBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="FontSize" Value="13"/>
-                <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="MinHeight" Value="38"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="Padding" Value="16,8"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
             </Style>
 
             <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="Background" Value="{StaticResource SurfaceLightBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="MinHeight" Value="38"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="Padding" Value="16,8"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -359,12 +363,12 @@
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="BorderBrush" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="MinHeight" Value="40"/>
-                <Setter Property="Padding" Value="14,9"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="MinHeight" Value="38"/>
+                <Setter Property="Padding" Value="12,8"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -375,13 +379,13 @@
                 <Setter Property="Background" Value="{StaticResource SurfaceDangerBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource AccentRedBrush}"/>
                 <Setter Property="BorderBrush" Value="#7f1d1d"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="MinHeight" Value="38"/>
                 <Setter Property="MinWidth" Value="104"/>
-                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="Padding" Value="16,8"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -408,24 +412,24 @@
                  ════════════════════════════════════════════════════════════════ -->
 
             <Style x:Key="PremiumTextBoxStyle" TargetType="TextBox">
-                <Setter Property="MinHeight" Value="40"/>
-                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="MinHeight" Value="38"/>
+                <Setter Property="CornerRadius" Value="8"/>
                 <Setter Property="Padding" Value="12,7"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontSize" Value="14"/>
             </Style>
 
             <Style x:Key="PremiumComboBoxStyle" TargetType="ComboBox">
-                <Setter Property="MinHeight" Value="40"/>
-                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="MinHeight" Value="38"/>
+                <Setter Property="CornerRadius" Value="8"/>
                 <Setter Property="Padding" Value="10,6"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontSize" Value="14"/>
             </Style>
 
             <Style TargetType="TextBox" BasedOn="{StaticResource PremiumTextBoxStyle}"/>
             <Style TargetType="ComboBox" BasedOn="{StaticResource PremiumComboBoxStyle}"/>
             <Style TargetType="AutoSuggestBox">
-                <Setter Property="MinHeight" Value="40"/>
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="MinHeight" Value="38"/>
+                <Setter Property="FontSize" Value="14"/>
             </Style>
 
         </ResourceDictionary>

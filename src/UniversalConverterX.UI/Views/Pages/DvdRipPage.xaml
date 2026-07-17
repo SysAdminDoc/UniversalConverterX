@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,10 +22,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="DvdRipPage_Item_001" Text="DVD RIP" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="DvdRipPage_Item_001" Text="DVD Rip" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="DvdRipPage_Item_002" Text="Convert titles from an unprotected VIDEO_TS folder to MP4 or MKV."
-                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
-                           MaxWidth="820" LineHeight="30"/>
+                           Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap"
+                           MaxWidth="820"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="DvdRipPage_DvdRipOpenButton" Content="Open VIDEO_TS…" Style="{StaticResource SecondaryButtonStyle}"
@@ -35,7 +35,7 @@
         </Grid>
 
         <!-- Body -->
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -43,7 +43,7 @@
 
             <!-- Titles -->
             <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop">
                 <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
@@ -88,14 +88,14 @@
                             <DataTemplate>
                                 <Border Background="{StaticResource SurfaceBrush}"
                                         BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="1" CornerRadius="14" Padding="14" Margin="0,0,0,8">
+                                        BorderThickness="0" CornerRadius="10" Padding="14" Margin="0,0,0,8">
                                     <Grid ColumnSpacing="14">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="44"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="44" Height="44" CornerRadius="14"
+                                        <Border Width="44" Height="44" CornerRadius="10"
                                                 Background="{StaticResource SurfaceLightBrush}">
                                             <FontIcon Glyph="&#xE714;" FontSize="18"
                                                       Foreground="{StaticResource AccentGreenBrush}"/>

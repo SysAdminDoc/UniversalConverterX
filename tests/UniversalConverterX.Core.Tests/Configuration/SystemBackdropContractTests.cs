@@ -6,7 +6,7 @@ namespace UniversalConverterX.Core.Tests.Configuration;
 public class SystemBackdropContractTests
 {
     [Fact]
-    public void RequiredUiSurfaces_ShouldUseGuardedElementBackdropsWithSolidFallbacks()
+    public void ShellBackdrops_ShouldRemainGuarded_AndDiscoveryCardsShouldStayTonal()
     {
         var repoRoot = FindRepoRoot();
         var uiRoot = Path.Combine(repoRoot, "src", "UniversalConverterX.UI");
@@ -28,13 +28,16 @@ public class SystemBackdropContractTests
             "SettingsBackdropHost");
 
         var aiLab = XDocument.Load(Path.Combine(uiRoot, "Views", "Pages", "AiLabPage.xaml"));
-        aiLab.Descendants().Where(IsBackdropElement).Should().NotBeEmpty();
+        aiLab.Descendants().Where(IsBackdropElement).Should().BeEmpty(
+            "discovery cards use restrained tonal surfaces instead of repeated acrylic effects");
         aiLab.Descendants()
             .Should()
             .Contain(element =>
                 element.Name.LocalName == "Border" &&
                 element.Attribute("Background") != null &&
-                element.Attribute("Background")!.Value.Contains("SurfaceBrush", StringComparison.Ordinal));
+                element.Attribute("Background")!.Value.Contains("SurfaceBrush", StringComparison.Ordinal) &&
+                (element.Attribute("BorderThickness") == null ||
+                 element.Attribute("BorderThickness")!.Value == "0"));
 
         var service = File.ReadAllText(Path.Combine(
             uiRoot,

@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,10 +22,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="LosslessCutPage_Item_001" Text="LOSSLESS CUT" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="LosslessCutPage_Item_001" Text="Lossless Cut" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="LosslessCutPage_Item_002" Text="Cut a clip on keyframe boundaries with no re-encode — a stream copy that keeps the exact source quality."
-                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
-                           MaxWidth="820" LineHeight="30"/>
+                           Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap"
+                           MaxWidth="820"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="LosslessCutPage_LosslessCutOpenButton" Content="Open Video" Style="{StaticResource SecondaryButtonStyle}"
@@ -35,7 +35,7 @@
         </Grid>
 
         <!-- Body -->
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="360"/>
@@ -43,7 +43,7 @@
 
             <!-- Preview + timeline -->
             <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop">
                 <Grid>
                     <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"

@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -29,10 +29,10 @@
             <StackPanel Grid.Column="1" Spacing="6">
                 <TextBlock x:Uid="PresetEditorPage_PageTitle" x:Name="PageTitle"
                            Text="Create preset"
-                           Style="{StaticResource TitleTextStyle}"/>
+                           Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="PresetEditorPage_PageSubtitle" x:Name="PageSubtitle"
                            Text="Build a reusable local preset. Arguments are passed directly to the selected sidecar."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            FontSize="13"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -164,7 +164,7 @@
 
                 <Border Background="{StaticResource SurfaceLightBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
+                        BorderThickness="0"
                         CornerRadius="12"
                         Padding="14">
                     <StackPanel Spacing="4">

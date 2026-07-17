@@ -13,7 +13,7 @@
         <DataTemplate x:Key="SceneRowTemplate" x:DataType="p:SceneRow">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="10,8"
+                    BorderThickness="0" CornerRadius="10" Padding="10,8"
                     Margin="0,0,0,4">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -44,7 +44,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -60,9 +60,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="SceneDetectPage_Item_001" Text="Scene Detection"
-                           Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="SceneDetectPage_Item_002" Text="Find scene cuts in a video via PySceneDetect. Export to CSV (spreadsheets) or EDL CMX 3600 (DaVinci Resolve / Premiere Pro), or copy the timecode list straight into ClipForge for batch trim."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="SceneDetectPage_Item_002" Text="Find scene cuts and export timecodes for editing workflows."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -80,7 +80,7 @@
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="14">
-            <Grid ColumnSpacing="20" RowSpacing="6">
+            <Grid ColumnSpacing="14" RowSpacing="6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>

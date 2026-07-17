@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Title="Converting - UniversalConverter X">
 
-    <Grid Background="{StaticResource BackgroundBrush}" Padding="24">
+    <Grid Background="{StaticResource BackgroundBrush}" Padding="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,13 +17,13 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,24">
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
             <TextBlock x:Uid="ProgressWindow_TitleText" x:Name="TitleText" 
                        Text="Converting files"
-                       Style="{StaticResource TitleTextStyle}"/>
+                       Style="{StaticResource PageTitleTextStyle}"/>
             <TextBlock x:Uid="ProgressWindow_StatusText" x:Name="StatusText" 
                        Text="Preparing queue..."
-                       Style="{StaticResource SubtitleTextStyle}"/>
+                       Style="{StaticResource PageDescriptionTextStyle}"/>
         </StackPanel>
 
         <!-- File List -->

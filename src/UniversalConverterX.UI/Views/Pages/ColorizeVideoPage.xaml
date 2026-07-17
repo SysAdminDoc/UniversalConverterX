@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,10 +22,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="ColorizeVideoPage_Item_001" Text="COLORIZE" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="ColorizeVideoPage_Item_001" Text="Colorize" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="ColorizeVideoPage_Item_002" Text="Add colour to black-and-white photos and video, fully offline on the CPU."
-                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
-                           MaxWidth="820" LineHeight="30"/>
+                           Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap"
+                           MaxWidth="820"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="ColorizeVideoPage_ColorizeOpenButton" Content="Open image or video…" Style="{StaticResource SecondaryButtonStyle}"
@@ -35,7 +35,7 @@
         </Grid>
 
         <!-- Body -->
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -43,7 +43,7 @@
 
             <!-- Preview -->
             <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop">
                 <Grid>
                     <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"

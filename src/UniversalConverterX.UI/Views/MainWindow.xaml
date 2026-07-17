@@ -11,18 +11,18 @@
 
     <Grid Background="{StaticResource BackgroundBrush}">
         <!-- Solid theme fallback remains visible when compositor materials are unavailable. -->
-        <Border Width="232"
+        <Border Width="216"
                 HorizontalAlignment="Left"
                 Background="{StaticResource SurfaceBrush}"/>
         <controls:SystemBackdropElement x:Name="NavigationBackdropHost"
-                                        Width="232"
+                                        Width="216"
                                         HorizontalAlignment="Left"
                                         IsHitTestVisible="False"/>
         <NavigationView x:Name="MainNav"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
                         PaneDisplayMode="Left"
-                        OpenPaneLength="232"
+                        OpenPaneLength="216"
                         IsTitleBarAutoPaddingEnabled="False"
                         SelectionChanged="MainNav_SelectionChanged"
                         Background="Transparent">
@@ -33,24 +33,22 @@
             </NavigationView.Resources>
 
             <NavigationView.PaneHeader>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,14,0,14">
-                    <Border Width="36" Height="36" CornerRadius="12"
-                            Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE895;" FontSize="17"
-                                  Foreground="{StaticResource AccentPrimaryBrush}"/>
-                    </Border>
-                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                        <TextBlock x:Uid="MainWindow_Item_002" Text="UCX" Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock x:Uid="MainWindow_Item_003" Text="Local media tools"
-                                   Style="{StaticResource SubtleTextStyle}"
-                                   Foreground="{StaticResource TextMutedBrush}"/>
-                    </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,10,0,10">
+                    <Image Width="32" Height="32"
+                           Source="ms-appx:///Assets/AppLogo.png"
+                           Stretch="Uniform"/>
+                    <TextBlock x:Uid="MainWindow_Item_002"
+                               Text="UniversalConverter X"
+                               Style="{StaticResource LabelTextStyle}"
+                               FontSize="14"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </NavigationView.PaneHeader>
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Uid="MainWindow_NavSearchBox" x:Name="NavSearchBox"
-                                PlaceholderText="Search tasks and tools"
+                                PlaceholderText="Search tools"
                                 QueryIcon="Find"
                                 TextChanged="NavSearchBox_TextChanged"
                                 SuggestionChosen="NavSearchBox_SuggestionChosen"
@@ -60,7 +58,7 @@
                         <DataTemplate>
                             <StackPanel Padding="4">
                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                                <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                                <TextBlock Text="{Binding Subtitle}" FontSize="12"
                                            Foreground="{StaticResource TextMutedBrush}"
                                            TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
@@ -150,20 +148,15 @@
             </NavigationView.FooterMenuItems>
 
             <NavigationView.PaneFooter>
-                <Border Margin="12,10,12,14"
+                <Border Margin="12,8,12,12"
                         Style="{StaticResource QuietSurfaceStyle}">
-                    <StackPanel Spacing="8">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="7" Height="7"
-                                     Fill="{StaticResource AccentGreenBrush}"
-                                     VerticalAlignment="Center"/>
-                            <TextBlock x:Uid="MainWindow_Item_017" Text="Local-first workspace"
-                                       Style="{StaticResource PillTextStyle}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                        </StackPanel>
-                        <TextBlock x:Uid="MainWindow_Item_018" Text="Files stay on this PC unless a workflow clearly uses a network-backed engine."
-                                   Style="{StaticResource SubtleTextStyle}"
-                                   TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="7" Height="7"
+                                 Fill="{StaticResource AccentGreenBrush}"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock x:Uid="MainWindow_Item_017" Text="Local-first"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
                     </StackPanel>
                 </Border>
             </NavigationView.PaneFooter>

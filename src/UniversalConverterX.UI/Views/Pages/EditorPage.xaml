@@ -12,8 +12,8 @@
         <DataTemplate x:Key="EditQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -29,7 +29,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE714;" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -87,8 +87,8 @@
         <DataTemplate x:Key="EditFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -100,7 +100,7 @@
                     <Border Grid.Column="0"
                             Width="44"
                             Height="44"
-                            CornerRadius="14"
+                            CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}"
                                   FontSize="19"
@@ -129,7 +129,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -142,9 +142,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock x:Uid="EditorPage_Item_004" Text="Editor" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="EditorPage_Item_004" Text="Editor" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="EditorPage_Item_005" Text="Batch-trim clips with local ClipForge processing, progress, and finished results."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -159,7 +159,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -168,7 +168,7 @@
             <Border x:Name="DropZone"
                     Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
+                    CornerRadius="12"
                     Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
@@ -289,7 +289,7 @@
                         <TextBlock x:Uid="EditorPage_Item_028" Text="Lossless is fast and preserves quality, but cuts on keyframes. Re-encode for frame-accurate trims."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
-                                   FontSize="11"/>
+                                   FontSize="12"/>
                     </StackPanel>
                 </Border>
 
@@ -308,7 +308,7 @@
                                           AutomationProperties.Name="Lock quality value"
                                           ToolTipService.ToolTip="Lock CRF value across operation/preset changes"
                                           Padding="6,4" MinWidth="0" MinHeight="0">
-                                <FontIcon Glyph="&#xE72E;" FontSize="12"/>
+                                <FontIcon Glyph="&#xE72E;" FontSize="13"/>
                             </ToggleButton>
                         </Grid>
                         <Slider x:Name="CrfSlider"
@@ -339,7 +339,7 @@
                                           AutomationProperties.Name="Lock crop values"
                                           ToolTipService.ToolTip="Lock crop values across operation/preset changes"
                                           Padding="6,4" MinWidth="0" MinHeight="0">
-                                <FontIcon Glyph="&#xE72E;" FontSize="12"/>
+                                <FontIcon Glyph="&#xE72E;" FontSize="13"/>
                             </ToggleButton>
                         </Grid>
                         <TextBlock x:Uid="EditorPage_Item_034" Text="All values in pixels. Output = W x H region starting at (X, Y)."
@@ -422,7 +422,7 @@
                         </Grid>
                         <TextBlock x:Uid="EditorPage_Item_045" Text="Offsets replace existing SPS crop metadata. Some chroma formats require even values; unsupported offsets fail without creating a successful export."
                                    Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap" FontSize="11"/>
+                                   TextWrapping="Wrap" FontSize="12"/>
                     </StackPanel>
                 </Border>
 
@@ -477,7 +477,7 @@
                         <TextBlock x:Uid="EditorPage_Item_058" Text="Default -14 LUFS suits streaming platforms (YouTube, Spotify)."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
-                                   FontSize="11"/>
+                                   FontSize="12"/>
                     </StackPanel>
                 </Border>
 

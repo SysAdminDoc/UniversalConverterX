@@ -12,7 +12,7 @@
         <DataTemplate x:Key="ProfileRowTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="16"
+                    BorderThickness="0" CornerRadius="12" Padding="16"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -33,11 +33,11 @@
                                    FontSize="13"/>
                         <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    LineHeight="18"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    TextTrimming="CharacterEllipsis">
                             <Run x:Uid="WatchFoldersPage_Item_001" Text="filter: "/>
                             <Run Text="{Binding Filter}" FontWeight="SemiBold"/>
@@ -71,7 +71,7 @@
                     Margin="0,0,0,6">
                 <TextBlock Text="{Binding Display}"
                            Style="{StaticResource MutedTextStyle}"
-                           FontSize="11"
+                           FontSize="12"
                            FontFamily="Cascadia Mono, monospace"
                            LineHeight="16"
                            TextTrimming="CharacterEllipsis"/>
@@ -79,7 +79,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -92,12 +92,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="WatchFoldersPage_Item_005" Text="WATCH FOLDERS"
-                           Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="WatchFoldersPage_Item_005" Text="Watch Folders"
+                           Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="WatchFoldersPage_Item_006" Text="Drop a file into any watched folder to auto-convert or auto-compress it. Profiles persist across launches."
-                           Style="{StaticResource TitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <Button x:Uid="WatchFoldersPage_WatchFoldersPageButton01" Grid.Column="1"
                     Content="New Watch"
@@ -112,7 +112,7 @@
                 <StackPanel x:Name="EmptyState" Visibility="Collapsed"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="12">
-                    <Border Width="88" Height="88" CornerRadius="22"
+                    <Border Width="88" Height="88" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xED25;" FontSize="40"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -150,7 +150,7 @@
                     <TextBlock x:Name="WatchStatusText"
                                Grid.Column="1"
                                Style="{StaticResource MutedTextStyle}"
-                               FontSize="11"
+                               FontSize="12"
                                AutomationProperties.AutomationId="WatchFolderStatusText"/>
                 </Grid>
                 <StackPanel x:Name="RecentEmptyState"
@@ -165,7 +165,7 @@
                     </Border>
                     <TextBlock x:Uid="WatchFoldersPage_Item_011" Text="No activity yet"
                                Style="{StaticResource MutedTextStyle}"
-                               HorizontalAlignment="Center" FontSize="12"/>
+                               HorizontalAlignment="Center" FontSize="13"/>
                 </StackPanel>
                 <ScrollViewer x:Name="EventScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl x:Name="EventList"

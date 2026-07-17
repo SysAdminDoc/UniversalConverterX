@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -21,9 +21,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
-                <TextBlock x:Uid="AiSubtitlePage_Item_001" Text="Subtitle Studio" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="AiSubtitlePage_Item_001" Text="Subtitle Studio" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="AiSubtitlePage_Item_002" Text="Transcribe with Whisper, translate locally, edit every cue, then export SRT/VTT/ASS or burn captions into video."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -40,7 +40,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -48,8 +48,8 @@
 
             <Border Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
-                    Padding="24"
+                    CornerRadius="12"
+                    Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
@@ -236,7 +236,7 @@
                             <ComboBoxItem x:Uid="AiSubtitlePage_Item_055" Content="Korean" Tag="ko"/>
                         </ComboBox>
                         <TextBlock x:Uid="AiSubtitlePage_Item_056" Text="Choose the source language above when translating; auto-detect remains available for transcription-only jobs."
-                                   Style="{StaticResource MutedTextStyle}" FontSize="11" TextWrapping="Wrap"/>
+                                   Style="{StaticResource MutedTextStyle}" FontSize="12" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 
@@ -260,7 +260,7 @@
                             AutomationProperties.AutomationId="BurnInCheck"/>
                         <TextBlock x:Uid="AiSubtitlePage_Item_063" Text="Export uses the edited preview. Burn-in re-encodes video with the exported caption file and keeps both outputs."
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>

@@ -19,7 +19,7 @@
     <value>Start Converter</value>
   </data>
   <data name="AiLabPage_Item_001.Text" xml:space="preserve">
-    <value>AI LAB</value>
+    <value>AI Lab</value>
   </data>
   <data name="AiLabPage_Item_002.Text" xml:space="preserve">
     <value>AI tools show readiness before you start.</value>
@@ -99,6 +99,9 @@
   <data name="AiSubtitlePage_ExportButton.Content" xml:space="preserve">
     <value>Export Preview</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg whisper filter (lightweight · bundled)</value>
+  </data>
   <data name="AiSubtitlePage_FormatCombo.Header" xml:space="preserve">
     <value>Subtitle format</value>
   </data>
@@ -131,9 +134,6 @@
   </data>
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>whisper.cpp (Vulkan / CUDA · binary)</value>
-  </data>
-  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg whisper filter (lightweight · bundled)</value>
   </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>Model + Language</value>
@@ -307,7 +307,7 @@
     <value>Archive Tool</value>
   </data>
   <data name="ArchivePage_Item_003.Text" xml:space="preserve">
-    <value>Create or extract 7z, ZIP, TAR, GZ, BZ2, XZ, WIM. Read-only support for RAR, ISO, CAB, MSI, LZH. Backed by 7-Zip's CLI -- maximum compatibility.</value>
+    <value>Create or extract common archives with local 7-Zip tooling.</value>
   </data>
   <data name="ArchivePage_Item_006.Content" xml:space="preserve">
     <value>7z (best ratio)</value>
@@ -409,10 +409,10 @@
     <value>Progress</value>
   </data>
   <data name="AudioCompressorPage_Item_003.Text" xml:space="preserve">
-    <value>AUDIO COMPRESSOR</value>
+    <value>Audio Compressor</value>
   </data>
   <data name="AudioCompressorPage_Item_004.Text" xml:space="preserve">
-    <value>Apply dynamic-range compression to audio (or video audio tracks). Tame loud peaks, lift quiet passages, level a podcast guest.</value>
+    <value>Balance loud peaks and quiet passages in audio or video tracks.</value>
   </data>
   <data name="AudioCompressorPage_Item_007.Text" xml:space="preserve">
     <value>Drop audio files to compress</value>
@@ -547,7 +547,7 @@
     <value>Standard (mono / stereo / 5.1)</value>
   </data>
   <data name="AudioConverterPage_Item_003.Text" xml:space="preserve">
-    <value>AUDIO CONVERTER</value>
+    <value>Audio Converter</value>
   </data>
   <data name="AudioConverterPage_Item_003_2.Content" xml:space="preserve">
     <value>Ambisonics ACN/SN3D (4, 9, 16… ch)</value>
@@ -778,7 +778,7 @@
     <value>Auto Highlight</value>
   </data>
   <data name="AutoHighlightPage_Item_003.Text" xml:space="preserve">
-    <value>Find high-energy moments locally from scene-change peaks and visible motion. Review the ranked windows, then export a highlight reel, CMX 3600 EDL, or OpenTimelineIO timeline.</value>
+    <value>Find high-energy moments locally and export a reel or editing timeline.</value>
   </data>
   <data name="AutoHighlightPage_Item_015.Text" xml:space="preserve">
     <value>No highlights yet</value>
@@ -841,7 +841,7 @@
     <value>Auto Reframe</value>
   </data>
   <data name="AutoReframePage_Item_005.Text" xml:space="preserve">
-    <value>Convert horizontal video to vertical (9:16), square (1:1), or portrait social (4:5). Static centre-crop or smart MediaPipe face tracking.</value>
+    <value>Reframe horizontal video for vertical, square, or portrait delivery.</value>
   </data>
   <data name="AutoReframePage_Item_009.Text" xml:space="preserve">
     <value>Drop video files here</value>
@@ -1108,7 +1108,7 @@
     <value>Batch Rename</value>
   </data>
   <data name="BatchRenamePage_Item_003.Text" xml:space="preserve">
-    <value>Pattern-based file rename with live preview. Regex supported. Tokens: {n}, {n:padding}, {stem}, {ext}, {parent}, {date}, {date:format}. Nothing renames until you click Apply.</value>
+    <value>Preview token- or regex-based renames before applying them.</value>
   </data>
   <data name="BatchRenamePage_Item_012.Content" xml:space="preserve">
     <value>No change</value>
@@ -1183,7 +1183,7 @@
     <value>Chapter Marks Editor</value>
   </data>
   <data name="ChapterMarksPage_Item_006.Text" xml:space="preserve">
-    <value>Read, edit, import, export, and rewrite chapter markers without re-encoding. Exact source PTS values are retained; MKV writes require MKVToolNix 97 or newer.</value>
+    <value>Edit and export chapter markers without re-encoding.</value>
   </data>
   <data name="ChapterMarksPage_Item_013.Text" xml:space="preserve">
     <value>Open media or import a chapter list</value>
@@ -1219,7 +1219,7 @@
     <value>Download model (123 MB)</value>
   </data>
   <data name="ColorizeVideoPage_Item_001.Text" xml:space="preserve">
-    <value>COLORIZE</value>
+    <value>Colorize</value>
   </data>
   <data name="ColorizeVideoPage_Item_002.Text" xml:space="preserve">
     <value>Add colour to black-and-white photos and video, fully offline on the CPU.</value>
@@ -1280,6 +1280,9 @@
   </data>
   <data name="CompressorPage_CompressorPagePivotItem02.Header" xml:space="preserve">
     <value>Finished</value>
+  </data>
+  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
+    <value>Deinterlace with D3D12 (guarded)</value>
   </data>
   <data name="CompressorPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Remove from queue</value>
@@ -1644,12 +1647,6 @@
   <data name="ConverterPage_Item_053.Text" xml:space="preserve">
     <value>File Location</value>
   </data>
-  <data name="ConverterPage_Item_057.Text" xml:space="preserve">
-    <value>The Convert button enables after files and an output profile are selected. Finished results remain visible after the queue clears.</value>
-  </data>
-  <data name="ConverterPage_Item_058.Text" xml:space="preserve">
-    <value>Batch Summary</value>
-  </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Save to</value>
   </data>
@@ -1684,7 +1681,7 @@
     <value>Smart Match</value>
   </data>
   <data name="ConverterPage_StatusText.Text" xml:space="preserve">
-    <value>Add files to start a conversion queue.</value>
+    <value>Add files and choose an output profile.</value>
   </data>
   <data name="Core_ConversionCancelled" xml:space="preserve">
     <value>Conversion was cancelled</value>
@@ -1753,7 +1750,7 @@
     <value>Choose a folder for the disc</value>
   </data>
   <data name="DiscBurnPage_Item_001.Text" xml:space="preserve">
-    <value>DISC BURNER</value>
+    <value>Disc Burner</value>
   </data>
   <data name="DiscBurnPage_Item_002.Text" xml:space="preserve">
     <value>Create or burn data CD/DVD, DVD-Video, and single-title Blu-ray media.</value>
@@ -1846,10 +1843,10 @@
     <value>Remove from queue</value>
   </data>
   <data name="DocumentConverterPage_Item_002.Text" xml:space="preserve">
-    <value>DOCUMENT CONVERTER</value>
+    <value>Document Converter</value>
   </data>
   <data name="DocumentConverterPage_Item_003.Text" xml:space="preserve">
-    <value>Convert DOCX, PDF, ODT, RTF, XLSX, ODS, CSV, PPTX, ODP, EPUB, HTML, and more via LibreOffice headless. Drag in a folder of mixed documents and pick a target format.</value>
+    <value>Convert office documents and mixed folders with local LibreOffice tooling.</value>
   </data>
   <data name="DocumentConverterPage_Item_009.Text" xml:space="preserve">
     <value>Drop documents here</value>
@@ -2041,7 +2038,7 @@
     <value>Open VIDEO_TS…</value>
   </data>
   <data name="DvdRipPage_Item_001.Text" xml:space="preserve">
-    <value>DVD RIP</value>
+    <value>DVD Rip</value>
   </data>
   <data name="DvdRipPage_Item_002.Text" xml:space="preserve">
     <value>Convert titles from an unprotected VIDEO_TS folder to MP4 or MKV.</value>
@@ -2104,10 +2101,10 @@
     <value>Remove from queue</value>
   </data>
   <data name="EbookConverterPage_Item_002.Text" xml:space="preserve">
-    <value>EBOOK CONVERTER</value>
+    <value>Ebook Converter</value>
   </data>
   <data name="EbookConverterPage_Item_003.Text" xml:space="preserve">
-    <value>Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX / HTML and more via Calibre's ebook-convert. Optional metadata overrides for title / authors / language.</value>
+    <value>Convert common ebook formats and optionally update their metadata.</value>
   </data>
   <data name="EbookConverterPage_Item_007.Content" xml:space="preserve">
     <value>EPUB</value>
@@ -2500,10 +2497,10 @@
     <value>Remove from queue</value>
   </data>
   <data name="FontConverterPage_Item_002.Text" xml:space="preserve">
-    <value>FONT CONVERTER</value>
+    <value>Font Converter</value>
   </data>
   <data name="FontConverterPage_Item_003.Text" xml:space="preserve">
-    <value>Convert TTF / OTF / WOFF / WOFF2. WOFF and WOFF2 are the modern web-font wrappers (the latter uses Brotli compression). Backed by fonttools.</value>
+    <value>Convert desktop and web fonts between TTF, OTF, WOFF, and WOFF2.</value>
   </data>
   <data name="FontConverterPage_Item_007.Content" xml:space="preserve">
     <value>TTF (TrueType)</value>
@@ -2857,7 +2854,7 @@
     <value>Forget this entry</value>
   </data>
   <data name="HistoryPage_Item_005.Text" xml:space="preserve">
-    <value>CONVERSION HISTORY</value>
+    <value>History</value>
   </data>
   <data name="HistoryPage_Item_006.Text" xml:space="preserve">
     <value>Persistent SQLite log of every job. Search, re-run, or forget any entry.</value>
@@ -2911,10 +2908,10 @@
     <value>Browse Tools</value>
   </data>
   <data name="HomePage_Item_003.Text" xml:space="preserve">
-    <value>LOCAL MEDIA WORKSPACE</value>
+    <value>UniversalConverter X</value>
   </data>
   <data name="HomePage_Item_004.Text" xml:space="preserve">
-    <value>Convert, compress, download, record, and inspect media locally.</value>
+    <value>Convert, compress, download, record, and inspect media—locally.</value>
   </data>
   <data name="HomePage_Item_005.Text" xml:space="preserve">
     <value>Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow.</value>
@@ -2974,7 +2971,7 @@
     <value>Local logs and crash bundles</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.30.0</value>
+    <value>UniversalConverter X v2.31.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Local-first processing</value>
@@ -3061,7 +3058,7 @@
     <value>Open folder</value>
   </data>
   <data name="ImageConverterPage_Item_004.Text" xml:space="preserve">
-    <value>IMAGE CONVERTER</value>
+    <value>Image Converter</value>
   </data>
   <data name="ImageConverterPage_Item_005.Text" xml:space="preserve">
     <value>Convert between HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP. Preserves ICC + EXIF by default.</value>
@@ -3214,7 +3211,7 @@
     <value>Open folder</value>
   </data>
   <data name="ImageEnhancerPage_Item_004.Text" xml:space="preserve">
-    <value>IMAGE UPSCALER</value>
+    <value>Image Enhancer</value>
   </data>
   <data name="ImageEnhancerPage_Item_005.Text" xml:space="preserve">
     <value>Real-ESRGAN ncnn-vulkan super-resolution up to 4×. Photo, anime, and general models available.</value>
@@ -3427,7 +3424,7 @@
     <value>00:00.000</value>
   </data>
   <data name="LosslessCutPage_Item_001.Text" xml:space="preserve">
-    <value>LOSSLESS CUT</value>
+    <value>Lossless Cut</value>
   </data>
   <data name="LosslessCutPage_Item_002.Text" xml:space="preserve">
     <value>Cut a clip on keyframe boundaries with no re-encode — a stream copy that keeps the exact source quality.</value>
@@ -3508,10 +3505,7 @@
     <value>DVD Rip</value>
   </data>
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
-    <value>UCX</value>
-  </data>
-  <data name="MainWindow_Item_003.Text" xml:space="preserve">
-    <value>Local media tools</value>
+    <value>UniversalConverter X</value>
   </data>
   <data name="MainWindow_Item_005.Content" xml:space="preserve">
     <value>Home</value>
@@ -3550,13 +3544,10 @@
     <value>Presets</value>
   </data>
   <data name="MainWindow_Item_017.Text" xml:space="preserve">
-    <value>Local-first workspace</value>
-  </data>
-  <data name="MainWindow_Item_018.Text" xml:space="preserve">
-    <value>Files stay on this PC unless a workflow clearly uses a network-backed engine.</value>
+    <value>Local-first</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
-    <value>Search tasks and tools</value>
+    <value>Search tools</value>
   </data>
   <data name="NoiseRemoverPage_AudioFormatCombo.Header" xml:space="preserve">
     <value>Audio container</value>
@@ -3580,7 +3571,7 @@
     <value>Open folder</value>
   </data>
   <data name="NoiseRemoverPage_Item_004.Text" xml:space="preserve">
-    <value>NOISE REMOVER</value>
+    <value>Noise Remover</value>
   </data>
   <data name="NoiseRemoverPage_Item_005.Text" xml:space="preserve">
     <value>RNNoise broadband speech denoiser via FFmpeg arnndn. Cleans hum, hiss, fan and HVAC noise from voice tracks.</value>
@@ -3667,10 +3658,10 @@
     <value>Remove from queue</value>
   </data>
   <data name="OcrPage_Item_002.Text" xml:space="preserve">
-    <value>OCR (TEXT RECOGNITION)</value>
+    <value>OCR</value>
   </data>
   <data name="OcrPage_Item_003.Text" xml:space="preserve">
-    <value>Extract text from images and scans via Tesseract. Output as plain TXT, hOCR (HTML with bounding boxes), searchable PDF, TSV (per-word coords), or ALTO XML.</value>
+    <value>Extract searchable text and structured OCR output from images or scans.</value>
   </data>
   <data name="OcrPage_Item_008.Content" xml:space="preserve">
     <value>TXT (plain text)</value>
@@ -3733,7 +3724,7 @@
     <value>PDF Tools</value>
   </data>
   <data name="PdfToolsPage_Item_002.Text" xml:space="preserve">
-    <value>Merge, split, extract pages, rotate, encrypt, decrypt, and shrink PDFs. Backed by pikepdf (qpdf under the hood) -- no external binary required.</value>
+    <value>Merge, split, rotate, secure, and optimize PDFs locally.</value>
   </data>
   <data name="PdfToolsPage_Item_004.Content" xml:space="preserve">
     <value>Merge -- combine multiple PDFs into one</value>
@@ -4082,7 +4073,7 @@ libx264
     <value>Presets</value>
   </data>
   <data name="PresetsPage_Item_005.Text" xml:space="preserve">
-    <value>Browse shipped and user-defined presets, filter by engine, and run the same workflows used by the CLI and Explorer menu.</value>
+    <value>Browse, filter, and run shipped or custom conversion presets.</value>
   </data>
   <data name="PresetsPage_Item_010.Content" xml:space="preserve">
     <value>All engines</value>
@@ -4343,7 +4334,7 @@ libx264
     <value>Scene Detection</value>
   </data>
   <data name="SceneDetectPage_Item_002.Text" xml:space="preserve">
-    <value>Find scene cuts in a video via PySceneDetect. Export to CSV (spreadsheets) or EDL CMX 3600 (DaVinci Resolve / Premiere Pro), or copy the timecode list straight into ClipForge for batch trim.</value>
+    <value>Find scene cuts and export timecodes for editing workflows.</value>
   </data>
   <data name="SceneDetectPage_Item_006.Content" xml:space="preserve">
     <value>Content (HSV + edge)</value>
@@ -4784,7 +4775,7 @@ libx264
     <value>Update status</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.30.0</value>
+    <value>Version 2.31.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
@@ -4811,7 +4802,7 @@ libx264
     <value>Progress</value>
   </data>
   <data name="SlideshowPage_Item_003.Text" xml:space="preserve">
-    <value>SLIDESHOW MAKER</value>
+    <value>Slideshow Maker</value>
   </data>
   <data name="SlideshowPage_Item_004.Text" xml:space="preserve">
     <value>Turn image sets into polished videos with motion, transitions, text, and music.</value>
@@ -4957,6 +4948,9 @@ libx264
   <data name="SpeechToTextPage_DownloadParakeetModelButton.Content" xml:space="preserve">
     <value>Review &amp; download model</value>
   </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg whisper filter (lightweight · bundled)</value>
+  </data>
   <data name="SpeechToTextPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Remove from queue</value>
   </data>
@@ -4976,7 +4970,7 @@ libx264
     <value>Open folder</value>
   </data>
   <data name="SpeechToTextPage_Item_005.Text" xml:space="preserve">
-    <value>SPEECH TO TEXT</value>
+    <value>Speech to Text</value>
   </data>
   <data name="SpeechToTextPage_Item_006.Text" xml:space="preserve">
     <value>Transcribe audio and video into editable transcript files using local ASR inference.</value>
@@ -5001,9 +4995,6 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>whisper.cpp (Vulkan / CUDA · single binary)</value>
-  </data>
-  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg whisper filter (lightweight · bundled)</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Parakeet TDT v3 (CUDA · 25 languages)</value>
@@ -5186,10 +5177,10 @@ libx264
     <value>Remove from queue</value>
   </data>
   <data name="SubtitleConverterPage_Item_002.Text" xml:space="preserve">
-    <value>SUBTITLE CONVERTER</value>
+    <value>Subtitle Converter</value>
   </data>
   <data name="SubtitleConverterPage_Item_003.Text" xml:space="preserve">
-    <value>Convert SRT, WebVTT, ASS, SSA, MicroDVD, and TMP, decode broadcast Scenarist SCC, and extract embedded captions from video files. Optional millisecond shift and framerate retiming. Backed by pysubs2 and FFmpeg.</value>
+    <value>Convert, retime, and extract subtitles across common caption formats.</value>
   </data>
   <data name="SubtitleConverterPage_Item_007.Content" xml:space="preserve">
     <value>SRT (SubRip)</value>
@@ -5282,7 +5273,7 @@ libx264
     <value>Generate Audio</value>
   </data>
   <data name="TextToSpeechPage_Item_001.Text" xml:space="preserve">
-    <value>TEXT TO SPEECH</value>
+    <value>Text to Speech</value>
   </data>
   <data name="TextToSpeechPage_Item_002.Text" xml:space="preserve">
     <value>Generate voiceover audio from script text using Microsoft Edge Neural TTS — 322 voices, 50+ languages.</value>
@@ -5405,7 +5396,7 @@ libx264
     <value>Timeline Preview</value>
   </data>
   <data name="TimelinePreviewPage_Item_002.Text" xml:space="preserve">
-    <value>Generate a thumbnail strip + audio waveform image for any video. Useful for visually scrubbing long clips before sending them through ClipForge or VideoCrush. Output drops to a per-clip folder under %TEMP% by default; use Export to move it next to the source.</value>
+    <value>Generate a thumbnail strip and waveform for fast visual review.</value>
   </data>
   <data name="TimelinePreviewPage_Item_008.Text" xml:space="preserve">
     <value>No timeline yet</value>
@@ -5432,7 +5423,7 @@ libx264
     <value>AI</value>
   </data>
   <data name="ToolboxPage_Item_002.Text" xml:space="preserve">
-    <value>TOOLBOX</value>
+    <value>Toolbox</value>
   </data>
   <data name="ToolboxPage_Item_003.Text" xml:space="preserve">
     <value>Specialized tools for finishing, repairing, extracting, and preparing media.</value>
@@ -5488,6 +5479,9 @@ libx264
   <data name="TrackManagerPage_ApplyButton.Content" xml:space="preserve">
     <value>Apply changes...</value>
   </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Delay (ms)</value>
+  </data>
   <data name="TrackManagerPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Export subtitle stream</value>
   </data>
@@ -5501,10 +5495,7 @@ libx264
     <value>Track Manager</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Add or remove tracks and independently advance or delay audio streams without re-encoding. Set delay in milliseconds, tick streams to drop, then Apply -- or attach external audio / subtitles.</value>
-  </data>
-  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
-    <value>Delay (ms)</value>
+    <value>Add, remove, or retime media tracks without re-encoding.</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>No tracks loaded</value>
@@ -5639,7 +5630,7 @@ libx264
     <value>Open folder</value>
   </data>
   <data name="VideoEnhancerPage_Item_004.Text" xml:space="preserve">
-    <value>VIDEO ENHANCER</value>
+    <value>Video Enhancer</value>
   </data>
   <data name="VideoEnhancerPage_Item_005.Text" xml:space="preserve">
     <value>Restore and upscale video with Real-ESRGAN, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine.</value>
@@ -5768,7 +5759,7 @@ libx264
     <value>Video Summarizer</value>
   </data>
   <data name="VideoSummarizerPage_Item_002.Text" xml:space="preserve">
-    <value>Turn long recordings into a written summary, timestamped chapters, and an optional condensed highlight cut. Runs offline with Whisper transcription and an extractive summarizer — no cloud, no account.</value>
+    <value>Create offline summaries, chapters, and highlight cuts from long recordings.</value>
   </data>
   <data name="VideoSummarizerPage_Item_005.Text" xml:space="preserve">
     <value>Summary</value>
@@ -5861,7 +5852,7 @@ libx264
     <value>VMAF Quality Analysis</value>
   </data>
   <data name="VmafAnalysisPage_Item_002.Text" xml:space="preserve">
-    <value>Score a distorted (compressed / re-encoded) clip against its high-quality reference. VMAF runs frame-by-frame; results show pooled mean, Netflix-style harmonic mean (more sensitive to worst frames), and the percentage of frames below 70 (visible degradation).</value>
+    <value>Compare an encoded clip with its reference using frame-level VMAF metrics.</value>
   </data>
   <data name="VmafAnalysisPage_Item_003.Text" xml:space="preserve">
     <value>Reference</value>
@@ -6077,7 +6068,7 @@ libx264
     <value>Progress</value>
   </data>
   <data name="VoiceChangerPage_Item_003.Text" xml:space="preserve">
-    <value>VOICE CHANGER</value>
+    <value>Voice Changer</value>
   </data>
   <data name="VoiceChangerPage_Item_004.Text" xml:space="preserve">
     <value>Transform narration tone, pitch, and timbre while preserving speech timing.</value>
@@ -6194,7 +6185,7 @@ libx264
     <value>Remove profile</value>
   </data>
   <data name="WatchFoldersPage_Item_005.Text" xml:space="preserve">
-    <value>WATCH FOLDERS</value>
+    <value>Watch Folders</value>
   </data>
   <data name="WatchFoldersPage_Item_006.Text" xml:space="preserve">
     <value>Drop a file into any watched folder to auto-convert or auto-compress it. Profiles persist across launches.</value>
@@ -6372,8 +6363,5 @@ libx264
   </data>
   <data name="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02.Header" xml:space="preserve">
     <value>Finished</value>
-  </data>
-  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
-    <value>Deinterlace with D3D12 (guarded)</value>
   </data>
 </root>

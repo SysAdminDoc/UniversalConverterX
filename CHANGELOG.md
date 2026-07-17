@@ -4,6 +4,14 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.0] - 2026-07-17
+
+### Changed
+
+- Rebuilt the WinUI visual system across all 53 pages around a compact 28 px page-title scale, readable 15 px body copy, shorter descriptions, tighter section rhythm, and restrained blue/emerald accents. Removed explicit card outlines, tiny 9–11 px labels, decorative status pills, hero gradients, and glass-backed AI tiles in favor of tonal grouping and sparse structural separators.
+- Reworked the application shell, Home, Converter, AI Lab, Toolbox, Settings, and progress surfaces to keep primary controls higher in the viewport. Converter now exposes its main action beside file intake, the shell uses the shipped UniversalConverter X mark, and high-traffic discovery tiles are denser with bounded descriptions.
+- Synchronized the complete WinUI localization catalog after the page-wide copy and hierarchy pass; localized catalogs retain matching keys and placeholder contracts.
+
 ## [2.30.0] - 2026-07-17
 
 ### Added

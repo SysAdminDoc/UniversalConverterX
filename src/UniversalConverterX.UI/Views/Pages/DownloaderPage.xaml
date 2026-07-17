@@ -12,8 +12,8 @@
         <DataTemplate x:Key="DownloadQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -30,7 +30,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.RowSpan="3" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE896;" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -87,8 +87,8 @@
         <DataTemplate x:Key="DownloadFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -97,7 +97,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}" FontSize="19"
                                   Foreground="{Binding AccentBrush}"/>
@@ -124,7 +124,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -135,9 +135,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="6">
-            <TextBlock x:Uid="DownloaderPage_Item_004" Text="Downloader" Style="{StaticResource TitleTextStyle}"/>
+            <TextBlock x:Uid="DownloaderPage_Item_004" Text="Downloader" Style="{StaticResource PageTitleTextStyle}"/>
             <TextBlock x:Uid="DownloaderPage_Item_005" Text="Queue video and audio downloads from supported URLs, then review completed results."
-                       Style="{StaticResource SubtitleTextStyle}" TextWrapping="Wrap"/>
+                       Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource CardStyle}">
@@ -147,7 +147,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                         Background="{StaticResource SurfaceLightBrush}">
                     <FontIcon Glyph="&#xE9D9;" FontSize="19"
                               Foreground="{StaticResource AccentBlueBrush}"/>

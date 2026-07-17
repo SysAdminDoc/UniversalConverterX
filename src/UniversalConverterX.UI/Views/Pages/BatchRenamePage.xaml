@@ -9,7 +9,7 @@
     Background="{StaticResource BackgroundBrush}"
     AutomationProperties.Name="Batch Rename">
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,17 +21,17 @@
         <!-- Header -->
         <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock x:Uid="BatchRenamePage_Item_002" Text="Batch Rename"
-                       Style="{StaticResource TitleTextStyle}"/>
+                       Style="{StaticResource PageTitleTextStyle}"/>
             <TextBlock x:Uid="BatchRenamePage_Item_003" TextWrapping="Wrap"
-                       Foreground="{StaticResource TextMutedBrush}"
-                       Text="Pattern-based file rename with live preview. Regex supported. Tokens: {n}, {n:padding}, {stem}, {ext}, {parent}, {date}, {date:format}. Nothing renames until you click Apply."/>
+                       Style="{StaticResource PageDescriptionTextStyle}"
+                       Text="Preview token- or regex-based renames before applying them."/>
         </StackPanel>
 
         <!-- File source -->
         <Border Grid.Row="1"
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1" CornerRadius="14" Padding="16">
+                BorderThickness="0" CornerRadius="10" Padding="16">
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -62,7 +62,7 @@
         <Border Grid.Row="2"
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1" CornerRadius="14" Padding="16">
+                BorderThickness="0" CornerRadius="10" Padding="16">
             <StackPanel Spacing="12">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -139,7 +139,7 @@
         <Border Grid.Row="3"
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1" CornerRadius="14" Padding="16">
+                BorderThickness="0" CornerRadius="10" Padding="16">
             <Grid RowSpacing="8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

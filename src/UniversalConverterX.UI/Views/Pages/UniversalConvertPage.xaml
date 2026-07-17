@@ -12,7 +12,7 @@
         <DataTemplate x:Key="MatchCardTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="14" Padding="16"
+                    BorderThickness="0" CornerRadius="10" Padding="16"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -35,14 +35,14 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Subtitle}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    TextWrapping="Wrap"
                                    MaxLines="2"/>
-                        <Border Style="{StaticResource StatusPillStyle}"
+                        <Border Background="Transparent"
                                 HorizontalAlignment="Left"
-                                Padding="8,3">
+                                Padding="0">
                             <TextBlock Text="{Binding MatchSummary}"
-                                       FontSize="11"
+                                       FontSize="12"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource AccentGreenBrush}"
                                        TextTrimming="CharacterEllipsis"/>
@@ -55,7 +55,7 @@
                                 Tag="{Binding Name}"/>
                         <TextBlock Text="{Binding StatusText, Mode=OneWay}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    TextAlignment="Right"/>
                     </StackPanel>
                 </Grid>
@@ -63,7 +63,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -74,23 +74,23 @@
 
         <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock x:Uid="UniversalConvertPage_Item_002" Text="Universal Convert"
-                       Style="{StaticResource TitleTextStyle}"/>
+                       Style="{StaticResource PageTitleTextStyle}"/>
             <TextBlock x:Uid="UniversalConvertPage_Item_003" Text="Drop files once and see every compatible preset before running a sidecar."
-                       Style="{StaticResource SubtitleTextStyle}"
+                       Style="{StaticResource PageDescriptionTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="32"
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="20"
                 AllowDrop="True"
                 Drop="DropZone_Drop"
                 DragOver="DropZone_DragOver">
-            <Grid ColumnSpacing="26">
+            <Grid ColumnSpacing="18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="280"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" Spacing="12" MaxWidth="520">
-                    <Border Width="88" Height="88" CornerRadius="24"
+                    <Border Width="88" Height="88" CornerRadius="12"
                             Background="{StaticResource SurfaceLightBrush}"
                             HorizontalAlignment="Center">
                         <FontIcon Glyph="&#xE7C5;" FontSize="38"
@@ -112,7 +112,7 @@
                         AutomationProperties.AutomationId="UniversalConvertPageButton01"/>
                     <TextBlock x:Name="SelectedFilesText"
                                Style="{StaticResource MutedTextStyle}"
-                               FontSize="12"
+                               FontSize="13"
                                TextAlignment="Center"
                                TextWrapping="Wrap"/>
                 </StackPanel>
@@ -164,7 +164,7 @@
                         VerticalAlignment="Center"
                         Spacing="12"
                         MaxWidth="520">
-                <Border Width="86" Height="86" CornerRadius="22"
+                <Border Width="86" Height="86" CornerRadius="12"
                         Background="{StaticResource SurfaceLightBrush}">
                     <FontIcon Glyph="&#xE946;" FontSize="38"
                               Foreground="{StaticResource AccentOrangeBrush}"/>

@@ -99,6 +99,9 @@
   <data name="AiSubtitlePage_ExportButton.Content" xml:space="preserve">
     <value>导出预览</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
+  </data>
   <data name="AiSubtitlePage_FormatCombo.Header" xml:space="preserve">
     <value>字幕格式</value>
   </data>
@@ -131,9 +134,6 @@
   </data>
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>cpp (Vulkan / CUDA - 二进制)</value>
-  </data>
-  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
   </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>模式+语言</value>
@@ -1108,7 +1108,7 @@
     <value>批次重命名</value>
   </data>
   <data name="BatchRenamePage_Item_003.Text" xml:space="preserve">
-    <value>Pattern-based file rename with live preview. Regex supported. Tokens: {n}, {n:padding}, {stem}, {ext}, {parent}, {date}, {date:format}. Nothing renames until you click Apply.</value>
+    <value>在应用前预览基于令牌或正则表达式的重命名。</value>
   </data>
   <data name="BatchRenamePage_Item_012.Content" xml:space="preserve">
     <value>无改动</value>
@@ -1280,6 +1280,9 @@
   </data>
   <data name="CompressorPage_CompressorPagePivotItem02.Header" xml:space="preserve">
     <value>已完成</value>
+  </data>
+  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
+    <value>使用 D3D12 去隔行（受保护）</value>
   </data>
   <data name="CompressorPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>从队列中删除</value>
@@ -1643,12 +1646,6 @@
   </data>
   <data name="ConverterPage_Item_053.Text" xml:space="preserve">
     <value>文件位置</value>
-  </data>
-  <data name="ConverterPage_Item_057.Text" xml:space="preserve">
-    <value>转换按钮在文件后启用, 并选中输出配置文件。 完成的结果在队列清除后仍然可见 。</value>
-  </data>
-  <data name="ConverterPage_Item_058.Text" xml:space="preserve">
-    <value>批次摘要</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>保存到</value>
@@ -2974,7 +2971,7 @@
     <value>本地日志和崩溃捆包</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.30.0</value>
+    <value>UniversalConverter X v2.31.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>当地一级处理</value>
@@ -3510,9 +3507,6 @@
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
     <value>UCX</value>
   </data>
-  <data name="MainWindow_Item_003.Text" xml:space="preserve">
-    <value>地方地方媒体工具</value>
-  </data>
   <data name="MainWindow_Item_005.Content" xml:space="preserve">
     <value>Home</value>
   </data>
@@ -3551,9 +3545,6 @@
   </data>
   <data name="MainWindow_Item_017.Text" xml:space="preserve">
     <value>本地第一工作空间</value>
-  </data>
-  <data name="MainWindow_Item_018.Text" xml:space="preserve">
-    <value>文件留在此 PC 上, 除非工作流程明显使用网络支持引擎 。</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
     <value>搜索任务和工具</value>
@@ -4778,7 +4769,7 @@ libx264
     <value>最新更新现状</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.30.0</value>
+    <value>Version 2.31.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>取消</value>
@@ -4951,6 +4942,9 @@ libx264
   <data name="SpeechToTextPage_DownloadParakeetModelButton.Content" xml:space="preserve">
     <value>审查及下载模式</value>
   </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
+  </data>
   <data name="SpeechToTextPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>从队列中删除</value>
   </data>
@@ -4995,9 +4989,6 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>cpp (Vulkan / CUDA · 单二进制)</value>
-  </data>
-  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
-    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Parakeet TDT v3 (CUDA = 25 种语言)</value>
@@ -5482,6 +5473,9 @@ libx264
   <data name="TrackManagerPage_ApplyButton.Content" xml:space="preserve">
     <value>应用更改...</value>
   </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>延迟（毫秒）</value>
+  </data>
   <data name="TrackManagerPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>导出字幕流</value>
   </data>
@@ -5496,9 +5490,6 @@ libx264
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
     <value>无需重新编码即可添加或删除轨道，并分别提前或延迟音频轨道。以毫秒设置延迟，勾选要删除的轨道，然后选择“应用”。</value>
-  </data>
-  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
-    <value>延迟（毫秒）</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>未装入音轨</value>
@@ -6366,8 +6357,5 @@ libx264
   </data>
   <data name="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02.Header" xml:space="preserve">
     <value>已完成</value>
-  </data>
-  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
-    <value>使用 D3D12 去隔行（受保护）</value>
   </data>
 </root>

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using FluentAssertions;
@@ -88,9 +89,15 @@ public sealed class FfmpegProxyTests
         var root = FindRepositoryRoot();
         var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
         var bin = Path.Combine(root, "src", "UniversalConverterX.FfmpegProxy", "bin");
+        var runtimeIdentifier = OperatingSystem.IsWindows()
+            ? RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "win-arm64" : "win-x64"
+            : string.Empty;
         return Directory
             .EnumerateFiles(bin, executable, SearchOption.AllDirectories)
-            .OrderByDescending(path => path.Contains(
+            .OrderByDescending(path => string.IsNullOrEmpty(runtimeIdentifier) || path.Contains(
+                $"{Path.DirectorySeparatorChar}{runtimeIdentifier}{Path.DirectorySeparatorChar}",
+                StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(path => path.Contains(
                 $"{Path.DirectorySeparatorChar}Release{Path.DirectorySeparatorChar}",
                 StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(File.GetLastWriteTimeUtc)

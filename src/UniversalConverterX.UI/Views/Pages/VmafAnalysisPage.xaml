@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -19,9 +19,9 @@
 
         <StackPanel Grid.Row="0" Spacing="6">
             <TextBlock x:Uid="VmafAnalysisPage_Item_001" Text="VMAF Quality Analysis"
-                       Style="{StaticResource TitleTextStyle}"/>
-            <TextBlock x:Uid="VmafAnalysisPage_Item_002" Text="Score a distorted (compressed / re-encoded) clip against its high-quality reference. VMAF runs frame-by-frame; results show pooled mean, Netflix-style harmonic mean (more sensitive to worst frames), and the percentage of frames below 70 (visible degradation)."
-                       Style="{StaticResource SubtitleTextStyle}"
+                       Style="{StaticResource PageTitleTextStyle}"/>
+            <TextBlock x:Uid="VmafAnalysisPage_Item_002" Text="Compare an encoded clip with its reference using frame-level VMAF metrics."
+                       Style="{StaticResource PageDescriptionTextStyle}"
                        TextWrapping="Wrap"/>
         </StackPanel>
 
@@ -100,7 +100,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid ColumnSpacing="20">
+                <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>

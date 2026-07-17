@@ -12,7 +12,7 @@
         <DataTemplate x:Key="ImgQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
+                    BorderThickness="0"
                     CornerRadius="12"
                     Padding="16"
                     Margin="0,0,0,10">
@@ -41,7 +41,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding SourceSummary}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    LineHeight="18"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
@@ -51,7 +51,7 @@
                         <TextBlock Text="{Binding PlanSummary}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontWeight="SemiBold"
-                                   FontSize="11"
+                                   FontSize="12"
                                    TextAlignment="Center"
                                    TextTrimming="CharacterEllipsis"/>
                     </Border>
@@ -76,7 +76,7 @@
                         <TextBlock Grid.Column="1"
                                    Text="{Binding StatusText}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    MinWidth="120"
                                    TextAlignment="Right"/>
                     </Grid>
@@ -87,7 +87,7 @@
         <DataTemplate x:Key="ImgFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
+                    BorderThickness="0"
                     CornerRadius="12"
                     Padding="16"
                     Margin="0,0,0,10">
@@ -110,12 +110,12 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Details}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    LineHeight="16"
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="10"
+                                   FontSize="12"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <Button x:Uid="ImageConverterPage_Item_003" Grid.Column="2"
@@ -130,7 +130,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -143,11 +143,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock x:Uid="ImageConverterPage_Item_004" Text="IMAGE CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="ImageConverterPage_Item_004" Text="Image Converter" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="ImageConverterPage_Item_005" Text="Convert between HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP. Preserves ICC + EXIF by default."
-                           Style="{StaticResource TitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="ImageConverterPage_ImageConverterPageButton01" Content="Browse Files"
@@ -163,7 +163,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
@@ -283,7 +283,7 @@
                                    AutomationProperties.AutomationId="TargetSizeBox"/>
                         <TextBlock x:Uid="ImageConverterPage_Item_027" Text="When set, quality is searched automatically. A warning is reported when the target cannot be reached within 5%."
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
@@ -381,7 +381,7 @@
                             </Grid>
                             <TextBlock x:Uid="ImageConverterPage_Item_051" Text="Adjustments apply to every frame. Alpha is preserved for compatible outputs."
                                        Style="{StaticResource MutedTextStyle}"
-                                       FontSize="11" TextWrapping="Wrap"/>
+                                       FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Expander>
                 </Border>

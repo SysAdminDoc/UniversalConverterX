@@ -10,11 +10,11 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ActionCardTemplate">
-            <Border Width="222" Height="172" Padding="18" Margin="0,0,14,14"
+            <Border Width="212" Height="148" Padding="14" Margin="0,0,10,10"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="18"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
                 <Grid RowSpacing="14">
@@ -29,36 +29,37 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                                 Background="{Binding AccentSurfaceBrush}">
                             <FontIcon Glyph="{Binding Glyph}" FontSize="20"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Padding="8,4" CornerRadius="10"
-                                Background="{StaticResource SurfaceLightBrush}"
+                        <Border Grid.Column="2" Padding="0" CornerRadius="0"
+                                Background="Transparent"
                                 Visibility="{Binding BadgeVisibility}">
-                            <TextBlock Text="{Binding Badge}" FontSize="10" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding Badge}" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{Binding AccentBrush}"/>
                         </Border>
                     </Grid>
                     <StackPanel Grid.Row="1" Spacing="5">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="{Binding Description}" FontSize="12"
+                        <TextBlock Text="{Binding Description}" FontSize="13"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="3" LineHeight="17"/>
+                                   TextWrapping="Wrap" MaxLines="2" LineHeight="17"
+                                   TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Text="{Binding ActionText}" FontSize="12" FontWeight="SemiBold"
+                    <TextBlock Grid.Row="2" Text="{Binding ActionText}" FontSize="13" FontWeight="SemiBold"
                                Foreground="{Binding AccentBrush}"/>
                 </Grid>
             </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="AiFeatureTemplate">
-            <Border Width="232" Height="116" Padding="14" Margin="0,0,12,12"
-                    Background="{StaticResource AiGradientBrush}"
+            <Border Width="220" Height="108" Padding="12" Margin="0,0,10,10"
+                    Background="{StaticResource SurfaceMutedBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
                 <Grid ColumnSpacing="12">
@@ -75,10 +76,10 @@
                         <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding Description}" FontSize="11"
+                        <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" MaxLines="2"/>
-                        <TextBlock Text="{Binding StatusText}" FontSize="10" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{Binding AccentBrush}"/>
                     </StackPanel>
                 </Grid>
@@ -86,11 +87,11 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ClusterTemplate">
-            <Border Width="304" MinHeight="164" Padding="18" Margin="0,0,14,14"
+            <Border Width="288" MinHeight="138" Padding="14" Margin="0,0,10,10"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="18"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
                 <StackPanel Spacing="10">
@@ -102,12 +103,12 @@
                         </Border>
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
-                            <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                            <TextBlock Text="{Binding Subtitle}" FontSize="12"
                                        Foreground="{StaticResource TextMutedBrush}"/>
                         </StackPanel>
                     </StackPanel>
                     <TextBlock Text="{Binding Description}" Style="{StaticResource MutedTextStyle}"
-                               TextWrapping="Wrap" MaxLines="4"/>
+                               TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </Border>
         </DataTemplate>
@@ -140,7 +141,7 @@
         </InfoBar>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
-        <Grid Padding="32" RowSpacing="26">
+        <Grid Style="{StaticResource PageLayoutStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -151,34 +152,32 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="24" Padding="32">
-                <Grid ColumnSpacing="32">
+            <Border Grid.Row="0" Background="Transparent"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                    CornerRadius="0" Padding="0">
+                <Grid ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="328"/>
+                        <ColumnDefinition Width="0"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Spacing="16" VerticalAlignment="Center">
-                        <Border Background="{StaticResource SurfaceBrush}"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                                CornerRadius="999"
-                                Padding="12,6" HorizontalAlignment="Left">
+                    <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Center">
+                        <Border Background="Transparent"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                                CornerRadius="0"
+                                Padding="0" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
-                                         VerticalAlignment="Center"/>
-                                <TextBlock x:Uid="HomePage_Item_003" Text="LOCAL MEDIA WORKSPACE"
-                                           Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentPrimaryBrush}"/>
+                                <TextBlock x:Uid="HomePage_Item_003" Text="UniversalConverter X"
+                                           Style="{StaticResource PageTitleTextStyle}"/>
                             </StackPanel>
                         </Border>
-                        <TextBlock x:Uid="HomePage_Item_004" Text="Convert, compress, download, record, and inspect media locally."
-                                   Style="{StaticResource HeroTextStyle}"
+                        <TextBlock x:Uid="HomePage_Item_004" Text="Convert, compress, download, record, and inspect media—locally."
+                                   Style="{StaticResource PageDescriptionTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="720"/>
                         <TextBlock x:Uid="HomePage_Item_005" Text="Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow."
                                    Style="{StaticResource SubtitleTextStyle}"
+                                   Visibility="Collapsed"
                                    TextWrapping="Wrap" MaxWidth="720"/>
-                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,10,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
                             <Button x:Uid="HomePage_HomePageButton01" Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenConverter_Click"
                                 AutomationProperties.AutomationId="HomePageButton01"/>
@@ -192,8 +191,8 @@
                     </StackPanel>
 
                     <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
-                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                            CornerRadius="20" Padding="22" VerticalAlignment="Stretch">
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                            CornerRadius="12" Padding="16" VerticalAlignment="Stretch" Visibility="Collapsed">
                         <StackPanel Spacing="18">
                             <StackPanel Spacing="4">
                                 <TextBlock x:Uid="HomePage_Item_009" Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
@@ -207,7 +206,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Border Grid.Row="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="14" Padding="14,12">
+                                        CornerRadius="10" Padding="14,12">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <FontIcon Glyph="&#xE73E;" FontSize="15"
                                                   Foreground="{StaticResource AccentGreenBrush}"/>
@@ -218,7 +217,7 @@
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Background="{StaticResource SurfaceMutedBrush}"
-                                        CornerRadius="14" Padding="14,12">
+                                        CornerRadius="10" Padding="14,12">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <FontIcon Glyph="&#xE8FD;" FontSize="15"
                                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -229,7 +228,7 @@
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="2" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="14" Padding="14,12">
+                                        CornerRadius="10" Padding="14,12">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <FontIcon Glyph="&#xE946;" FontSize="15"
                                                   Foreground="{StaticResource AccentOrangeBrush}"/>
@@ -240,7 +239,7 @@
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="3" Background="{StaticResource SurfaceMutedBrush}"
-                                        CornerRadius="14" Padding="14,12">
+                                        CornerRadius="10" Padding="14,12">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <FontIcon Glyph="&#xE72E;" FontSize="15"
                                                   Foreground="{StaticResource AccentGreenBrush}"/>
@@ -269,7 +268,7 @@
                         <DataTemplate>
                             <StackPanel Padding="4">
                                 <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                                <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                                <TextBlock Text="{Binding Subtitle}" FontSize="12"
                                            Foreground="{StaticResource TextMutedBrush}"/>
                             </StackPanel>
                         </DataTemplate>
@@ -281,7 +280,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock x:Uid="HomePage_Item_020" Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
                     <TextBlock x:Uid="HomePage_Item_021" Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
+                               VerticalAlignment="Bottom" FontSize="13" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
@@ -293,7 +292,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock x:Uid="HomePage_Item_022" Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
                     <TextBlock x:Uid="HomePage_Item_023" Text="Availability shown" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom" FontSize="12" FontWeight="Normal"/>
+                               VerticalAlignment="Bottom" FontSize="13" FontWeight="Normal"/>
                 </StackPanel>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
@@ -315,10 +314,10 @@
 
             <!-- ROADMAP Item 51: Diagnostics card — local-only crash bundle export and log folder access. -->
             <Border Grid.Row="5" Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
                     CornerRadius="20" Padding="22"
                     AutomationProperties.AutomationId="HomePage_DiagnosticsCard">
-                <Grid ColumnSpacing="20">
+                <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -349,7 +348,7 @@
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>
-                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.30.0"
+                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.31.0"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"

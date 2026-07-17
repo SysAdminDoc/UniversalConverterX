@@ -12,7 +12,7 @@
         <DataTemplate x:Key="VeQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="16" Padding="14"
+                    BorderThickness="0" CornerRadius="12" Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
                     <Grid.ColumnDefinitions>
@@ -25,7 +25,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.RowSpan="2" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.RowSpan="2" Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xE799;" FontSize="20"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
@@ -63,7 +63,7 @@
         <DataTemplate x:Key="VeFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="16" Padding="14"
+                    BorderThickness="0" CornerRadius="12" Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -71,7 +71,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Width="44" Height="44" CornerRadius="14"
+                    <Border Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}" FontSize="19"
                                   Foreground="{Binding AccentBrush}"/>
@@ -90,7 +90,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -103,12 +103,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="VideoEnhancerPage_Item_004" Text="VIDEO ENHANCER"
-                           Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="VideoEnhancerPage_Item_004" Text="Video Enhancer"
+                           Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore and upscale video with Real-ESRGAN, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine."
-                           Style="{StaticResource TitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="VideoEnhancerPage_VideoEnhancerPageButton01" Content="Browse Files"
@@ -124,13 +124,13 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource CardStyle}" CornerRadius="22" Padding="18"
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" CornerRadius="12" Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"

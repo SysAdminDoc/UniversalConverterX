@@ -10,19 +10,16 @@
 
     <Page.Resources>
         <DataTemplate x:Key="AiToolTemplate">
-            <Grid Width="264" Height="170" Margin="0,0,14,14"
+            <Grid Width="248" Height="148" Margin="0,0,10,10"
                   AutomationProperties.Name="{Binding Title}"
                   ToolTipService.ToolTip="{Binding Description}">
                 <!-- The solid layer is the deterministic fallback for unsupported materials. -->
-                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"/>
-                <SystemBackdropElement CornerRadius="18"
-                                       IsHitTestVisible="False"
-                                       Loaded="AiCardBackdrop_Loaded"/>
+                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="12"/>
                 <Border BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="18"
-                        Padding="18">
-                    <Grid RowSpacing="12">
+                        BorderThickness="0"
+                        CornerRadius="12"
+                        Padding="14">
+                    <Grid RowSpacing="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -34,23 +31,25 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="14"
+                        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
                                 Background="{StaticResource SurfaceLightBrush}">
                             <FontIcon Glyph="{Binding Glyph}" FontSize="20"
                                       Foreground="{Binding AccentBrush}"/>
                         </Border>
-                        <Border Grid.Column="2" Style="{StaticResource StatusPillStyle}" Padding="10,5">
-                            <TextBlock Text="{Binding Phase}" FontSize="10" FontWeight="SemiBold"
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <Ellipse Width="6" Height="6" Fill="{Binding PhaseBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Phase}" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{Binding PhaseBrush}"/>
-                        </Border>
+                        </StackPanel>
                     </Grid>
                     <StackPanel Grid.Row="1" Spacing="6">
                         <TextBlock Text="{Binding Title}" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock Text="{Binding Description}" FontSize="12"
+                        <TextBlock Text="{Binding Description}" FontSize="13"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="3" LineHeight="17"/>
+                                   TextWrapping="Wrap" MaxLines="2" LineHeight="17"
+                                   TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Text="{Binding WorkflowHint}" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Grid.Row="2" Text="{Binding WorkflowHint}" FontSize="12" FontWeight="SemiBold"
                                Foreground="{Binding AccentBrush}"/>
                     </Grid>
                 </Border>
@@ -59,36 +58,36 @@
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
-        <Grid Padding="32" RowSpacing="26">
+        <Grid Style="{StaticResource PageLayoutStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource HeroGradientBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="24" Padding="32">
-                <Grid ColumnSpacing="30">
+            <Border Grid.Row="0" Background="Transparent"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                    CornerRadius="0" Padding="0">
+                <Grid ColumnSpacing="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="0"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Spacing="14">
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"
-                                Padding="12,5" HorizontalAlignment="Left">
-                            <TextBlock x:Uid="AiLabPage_Item_001" Text="AI LAB"
-                                       Style="{StaticResource EyebrowTextStyle}"
-                                       Foreground="{StaticResource AccentBlueBrush}"/>
+                    <StackPanel Grid.Column="0" Spacing="8">
+                        <Border Background="Transparent" CornerRadius="0"
+                                Padding="0" HorizontalAlignment="Left">
+                            <TextBlock x:Uid="AiLabPage_Item_001" Text="AI Lab"
+                                       Style="{StaticResource PageTitleTextStyle}"/>
                         </Border>
                         <TextBlock x:Uid="AiLabPage_Item_002" Text="AI tools show readiness before you start."
-                                   Style="{StaticResource HeroTextStyle}"
+                                   Style="{StaticResource PageDescriptionTextStyle}"
                                    TextWrapping="Wrap" MaxWidth="760"/>
                         <TextBlock x:Uid="AiLabPage_Item_003" Text="Ready tools open directly. Planned tools stay clear about missing engine, preview, export, and recovery work."
                                    Style="{StaticResource SubtitleTextStyle}"
+                                   Visibility="Collapsed"
                                    TextWrapping="Wrap" MaxWidth="760"/>
-                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
                             <Button x:Uid="AiLabPage_AiLabPageButton01" Content="Open Toolbox" Style="{StaticResource PrimaryButtonStyle}"
                                     Click="OpenToolbox_Click"
                                 AutomationProperties.AutomationId="AiLabPageButton01"/>
@@ -99,8 +98,8 @@
                     </StackPanel>
 
                     <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
-                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                            CornerRadius="20" Padding="22">
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                            CornerRadius="12" Padding="16" Visibility="Collapsed">
                         <StackPanel Spacing="14">
                             <TextBlock x:Uid="AiLabPage_Item_006" Text="Availability" Style="{StaticResource PanelTitleTextStyle}"/>
                             <StackPanel Spacing="10">
@@ -117,7 +116,7 @@
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock x:Uid="AiLabPage_Item_008" Text="Ready" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_008" Text="Ready" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentGreenBrush}"/>
                                     </Border>
                                 </Grid>
@@ -134,7 +133,7 @@
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock x:Uid="AiLabPage_Item_010" Text="Planned" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_010" Text="Planned" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{StaticResource AccentOrangeBrush}"/>
                                     </Border>
                                 </Grid>
@@ -151,7 +150,7 @@
                                                Style="{StaticResource MutedTextStyle}"/>
                                     <Border Grid.Column="2" Padding="6,2" CornerRadius="6"
                                             Background="{StaticResource SurfaceLightBrush}">
-                                        <TextBlock x:Uid="AiLabPage_Item_012" Text="Roadmap" FontSize="10" FontWeight="SemiBold"
+                                        <TextBlock x:Uid="AiLabPage_Item_012" Text="Roadmap" FontSize="12" FontWeight="SemiBold"
                                                    Foreground="{StaticResource TextMutedBrush}"/>
                                     </Border>
                                 </Grid>
@@ -176,9 +175,9 @@
             </StackPanel>
 
             <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                    CornerRadius="20" Padding="22">
-                <Grid ColumnSpacing="20">
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                    CornerRadius="12" Padding="16" Visibility="Collapsed">
+                <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>

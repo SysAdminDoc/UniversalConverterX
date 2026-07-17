@@ -8,9 +8,13 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.30.0-blue)
+![Version](https://img.shields.io/badge/version-2.31.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+## Interface
+
+UniversalConverter X uses a compact, queue-first desktop workspace: readable typography, restrained tonal surfaces, short page headers, and primary actions kept high in the viewport. Every module follows the same spacing and control hierarchy, while status is shown as quiet inline metadata instead of decorative badges.
 
 ## Modules
 
@@ -80,7 +84,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Conversion History — use bounded multi-term local search across engines, actions, source/output paths, presets, and failure details; export filtered jobs or restore exact Converter settings for a re-run.
 - Queue Automation — notify, sleep, safely schedule shutdown, or run a hidden PowerShell hook with a JSON summary.
 - Watch Folders — process stable new or renamed files automatically with duplicate and self-output loop protection.
-- Modern UI — WinUI 3 with dark theme and Mica effects.
+- Modern UI — compact WinUI 3 shell with readable typography, tonal grouping, consistent page hierarchy, and dark/light themes.
 - CLI Support — full command-line interface for automation (`ucx`).
 
 ## Supported Converters

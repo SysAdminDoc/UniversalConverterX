@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Background="{StaticResource BackgroundBrush}">
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -18,9 +18,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="DiscBurnPage_Item_001" Text="DISC BURNER" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="DiscBurnPage_Item_001" Text="Disc Burner" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="DiscBurnPage_Item_002" Text="Create or burn data CD/DVD, DVD-Video, and single-title Blu-ray media."
-                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap" MaxWidth="820"/>
+                           Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap" MaxWidth="820"/>
             </StackPanel>
             <Button x:Uid="DiscBurnPage_RefreshDrivesButton" Grid.Column="1" Content="Refresh drives"
                     Style="{StaticResource SecondaryButtonStyle}" VerticalAlignment="Center"
@@ -28,14 +28,14 @@
                     Click="RefreshDrives_Click"/>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="360"/>
             </Grid.ColumnDefinitions>
 
             <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop">
                 <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
@@ -78,13 +78,13 @@
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="1" CornerRadius="14" Padding="14" Margin="0,0,0,8">
+                                        BorderThickness="0" CornerRadius="10" Padding="14" Margin="0,0,0,8">
                                     <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="44"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="44" Height="44" CornerRadius="14"
+                                        <Border Width="44" Height="44" CornerRadius="10"
                                                 Background="{StaticResource SurfaceLightBrush}">
                                             <FontIcon Glyph="&#xE8B7;" FontSize="18"
                                                       Foreground="{StaticResource AccentGreenBrush}"/>

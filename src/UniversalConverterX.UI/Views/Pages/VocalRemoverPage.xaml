@@ -12,8 +12,8 @@
         <DataTemplate x:Key="VrQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14" RowSpacing="8">
@@ -29,7 +29,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.RowSpan="2" Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xEC4F;" FontSize="20"
                                   Foreground="{StaticResource AccentRedBrush}"/>
@@ -85,8 +85,8 @@
         <DataTemplate x:Key="VrFinishedTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="14">
@@ -96,7 +96,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0"
-                            Width="44" Height="44" CornerRadius="14"
+                            Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceSoftBrush}">
                         <FontIcon Glyph="{Binding Glyph}"
                                   FontSize="19"
@@ -125,7 +125,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -138,9 +138,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Spacing="6">
-                <TextBlock x:Uid="VocalRemoverPage_Item_004" Text="Vocal Remover" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock x:Uid="VocalRemoverPage_Item_004" Text="Vocal Remover" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="VocalRemoverPage_Item_005" Text="Split music with BS-RoFormer, Mel-RoFormer, or Demucs."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -155,7 +155,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="320"/>
@@ -164,7 +164,7 @@
             <Border x:Name="DropZone"
                     Grid.Column="0"
                     Style="{StaticResource CardStyle}"
-                    CornerRadius="22"
+                    CornerRadius="12"
                     Padding="18"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
@@ -294,7 +294,7 @@
                         <TextBlock x:Uid="VocalRemoverPage_Item_034" Text="Runs separation twice with shifted windows and averages the result. Doubles processing time."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
-                                   FontSize="11"/>
+                                   FontSize="12"/>
                     </StackPanel>
                 </Border>
 

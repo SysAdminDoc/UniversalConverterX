@@ -12,7 +12,7 @@
         <DataTemplate x:Key="PresetCardTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="14" Padding="16"
+                    BorderThickness="0" CornerRadius="10" Padding="16"
                     Margin="0,0,0,12">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -39,12 +39,12 @@
                                     Padding="7,2">
                                 <TextBlock Text="{Binding OriginLabel}"
                                            Style="{StaticResource SubtleTextStyle}"
-                                           FontSize="10"/>
+                                           FontSize="12"/>
                             </Border>
                         </StackPanel>
                         <TextBlock Text="{Binding Subtitle}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    TextWrapping="Wrap"
                                    MaxLines="2"
                                    LineHeight="17"/>
@@ -74,7 +74,7 @@
                         </StackPanel>
                         <TextBlock Text="{Binding StatusText, Mode=OneWay}"
                                    Style="{StaticResource SubtleTextStyle}"
-                                   TextAlignment="Center" FontSize="10"
+                                   TextAlignment="Center" FontSize="12"
                                    TextWrapping="Wrap"
                                    MaxWidth="132"
                                    ToolTipService.ToolTip="{Binding HealthDetail}"/>
@@ -84,7 +84,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -100,9 +100,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="PresetsPage_Item_004" Text="Presets"
-                           Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="PresetsPage_Item_005" Text="Browse shipped and user-defined presets, filter by engine, and run the same workflows used by the CLI and Explorer menu."
-                           Style="{StaticResource SubtitleTextStyle}" FontSize="13"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="PresetsPage_Item_005" Text="Browse, filter, and run shipped or custom conversion presets."
+                           Style="{StaticResource PageDescriptionTextStyle}" FontSize="13"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1"
@@ -188,7 +188,7 @@
                         VerticalAlignment="Center"
                         Spacing="12"
                         MaxWidth="520">
-                <Border Width="86" Height="86" CornerRadius="22"
+                <Border Width="86" Height="86" CornerRadius="12"
                         Background="{StaticResource SurfaceLightBrush}">
                     <FontIcon Glyph="&#xE71D;" FontSize="38"
                               Foreground="{StaticResource AccentOrangeBrush}"/>

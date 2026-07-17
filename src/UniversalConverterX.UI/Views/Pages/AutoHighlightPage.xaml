@@ -13,7 +13,7 @@
         <DataTemplate x:Key="HighlightRowTemplate" x:DataType="vm:AutoHighlightCandidateViewModel">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
+                    BorderThickness="0"
                     CornerRadius="10"
                     Padding="12,10"
                     Margin="0,0,0,6">
@@ -52,7 +52,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -68,9 +68,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="AutoHighlightPage_Item_002" Text="Auto Highlight"
-                           Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="AutoHighlightPage_Item_003" Text="Find high-energy moments locally from scene-change peaks and visible motion. Review the ranked windows, then export a highlight reel, CMX 3600 EDL, or OpenTimelineIO timeline."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="AutoHighlightPage_Item_003" Text="Find high-energy moments locally and export a reel or editing timeline."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="780"/>
             </StackPanel>

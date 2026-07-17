@@ -12,8 +12,8 @@
         <DataTemplate x:Key="AudioConversionQueueTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
+                    BorderThickness="0"
+                    CornerRadius="12"
                     Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="12" RowSpacing="8">
@@ -26,7 +26,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.RowSpan="2" Width="44" Height="44" CornerRadius="14"
+                    <Border Grid.RowSpan="2" Width="44" Height="44" CornerRadius="10"
                             Background="{StaticResource SurfaceLightBrush}">
                         <FontIcon Glyph="&#xEC4F;" FontSize="20"
                                   Foreground="{StaticResource AccentGreenBrush}"/>
@@ -60,7 +60,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="20">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -73,10 +73,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="AudioConverterPage_Item_003" Text="AUDIO CONVERTER" Style="{StaticResource EyebrowTextStyle}"/>
+                <TextBlock x:Uid="AudioConverterPage_Item_003" Text="Audio Converter" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="AudioConverterPage_Item_004" Text="Convert audio locally with codec-aware VBR quality and advanced encoder controls."
-                           Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap"
-                           MaxWidth="760" LineHeight="30"/>
+                           Style="{StaticResource PageDescriptionTextStyle}" TextWrapping="Wrap"
+                           MaxWidth="760"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="AudioConverterPage_AudioConverterAddFilesButton" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
@@ -88,14 +88,14 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnSpacing="20">
+        <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="380"/>
             </Grid.ColumnDefinitions>
 
             <Border x:Name="DropZone" Grid.Column="0" Style="{StaticResource CardStyle}"
-                    CornerRadius="22" Padding="18" AllowDrop="True"
+                    CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
                 <Grid MinHeight="480">

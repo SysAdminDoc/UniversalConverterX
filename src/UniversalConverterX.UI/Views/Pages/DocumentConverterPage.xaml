@@ -12,7 +12,7 @@
         <DataTemplate x:Key="DocFileTemplate">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="14"
+                    BorderThickness="0" CornerRadius="12" Padding="14"
                     Margin="0,0,0,10">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
@@ -32,14 +32,14 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Path}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="11"
+                                   FontSize="12"
                                    LineHeight="16"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <TextBlock Grid.Column="2"
                                Text="{Binding StatusText, Mode=OneWay}"
                                Style="{StaticResource MutedTextStyle}"
-                               FontSize="11"
+                               FontSize="12"
                                VerticalAlignment="Center"
                                TextAlignment="Right"/>
                     <Button x:Uid="DocumentConverterPage_Item_001" Grid.Column="3"
@@ -56,7 +56,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -72,12 +72,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
-                <TextBlock x:Uid="DocumentConverterPage_Item_002" Text="DOCUMENT CONVERTER"
-                           Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock x:Uid="DocumentConverterPage_Item_003" Text="Convert DOCX, PDF, ODT, RTF, XLSX, ODS, CSV, PPTX, ODP, EPUB, HTML, and more via LibreOffice headless. Drag in a folder of mixed documents and pick a target format."
-                           Style="{StaticResource TitleTextStyle}"
+                <TextBlock x:Uid="DocumentConverterPage_Item_002" Text="Document Converter"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="DocumentConverterPage_Item_003" Text="Convert office documents and mixed folders with local LibreOffice tooling."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
-                           MaxWidth="720" LineHeight="30"/>
+                           MaxWidth="720"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="DocumentConverterPage_DocumentConverterPageButton01" Content="Add files"
@@ -161,7 +161,7 @@
             <TextBlock x:Name="LogText"
                        Style="{StaticResource MutedTextStyle}"
                        FontFamily="Consolas, Cascadia Mono, monospace"
-                       FontSize="11"
+                       FontSize="12"
                        TextWrapping="Wrap"/>
         </ScrollViewer>
 

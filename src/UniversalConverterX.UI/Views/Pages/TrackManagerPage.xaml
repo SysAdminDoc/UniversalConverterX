@@ -13,7 +13,7 @@
         <DataTemplate x:Key="TrackRowTemplate" x:DataType="p:TrackRow">
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="12" Padding="12"
+                    BorderThickness="0" CornerRadius="12" Padding="12"
                     Margin="0,0,0,8">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -50,7 +50,7 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{x:Bind Detail}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <NumberBox x:Uid="TrackManagerPage_AudioDelayBox"
@@ -78,7 +78,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Padding="32" RowSpacing="16">
+    <Grid Style="{StaticResource PageLayoutStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -94,9 +94,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="TrackManagerPage_Item_003" Text="Track Manager"
-                           Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="TrackManagerPage_Item_004" Text="Add or remove tracks and independently advance or delay audio streams without re-encoding. Set delay in milliseconds, tick streams to drop, then Apply -- or attach external audio / subtitles."
-                           Style="{StaticResource SubtitleTextStyle}"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="TrackManagerPage_Item_004" Text="Add, remove, or retime media tracks without re-encoding."
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <Button x:Uid="TrackManagerPage_TrackManagerPageButton01" Grid.Column="1"
