@@ -304,6 +304,39 @@ public class ConversionOrchestrator : IConversionOrchestrator
         if (postResult.Success)
             return result;
 
+        // A failed Mark-of-the-Web propagation under the non-destructive Keep
+        // action (the default) must NOT fail an otherwise-successful conversion.
+        // The output artifact is fully produced; only the source's download
+        // security zone could not be copied onto it — a common, benign case when
+        // the output lives on a filesystem without alternate-data-stream support
+        // (FAT32/exFAT USB sticks, many SMB shares) or the zone data exceeds the
+        // safety cap. Surface it as a warning instead of a hard failure.
+        if (postResult.Action == PostConversionAction.Keep)
+        {
+            _logger?.LogWarning(
+                "Conversion succeeded but Mark-of-the-Web could not be preserved on '{Output}': {Message}",
+                result.OutputPath,
+                postResult.ErrorMessage);
+
+            return new ConversionResult
+            {
+                Success = true,
+                Job = result.Job,
+                OutputPath = result.OutputPath,
+                OutputSize = result.OutputSize,
+                Duration = result.Duration,
+                ExitCode = result.ExitCode,
+                StandardOutput = result.StandardOutput,
+                StandardError = result.StandardError,
+                ConverterUsed = result.ConverterUsed,
+                CommandLine = result.CommandLine,
+                Warnings = [.. result.Warnings, LocalizedText.Format(
+                    "Core_MarkOfWebWarning",
+                    "The converted file was created, but its download security zone could not be copied from the source: {0}",
+                    postResult.ErrorMessage ?? "unknown error")]
+            };
+        }
+
         result.Job.Status = ConversionStatus.Failed;
         result.Job.CompletedAt = DateTime.UtcNow;
 
