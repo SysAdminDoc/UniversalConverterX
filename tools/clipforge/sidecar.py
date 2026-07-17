@@ -171,6 +171,9 @@ from clipforge_ops.tracks import (
 )
 
 
+from clipforge_ops.video import op_deinterlace
+
+
 from clipforge_ops.analysis import (
     op_keyframes,
     op_proxy,
@@ -1005,6 +1008,18 @@ def build_parser() -> argparse.ArgumentParser:
                                help="Output path; extension drives the target format "
                                     "(.srt / .vtt / .ass / .ssa / .lrc / .sup)")
 
+    deinterlace = sub.add_parser(
+        "deinterlace",
+        help="Auto-detect interlaced video and produce progressive output")
+    deinterlace.add_argument("--input", required=True)
+    deinterlace.add_argument("--output", required=True)
+    deinterlace.add_argument("--filter", choices=["bwdif", "yadif"], default="bwdif")
+    deinterlace.add_argument("--rate", choices=["double", "single"], default="double",
+                             help="One frame per field (double) or per input frame (single)")
+    deinterlace.add_argument("--codec", default="libx264")
+    deinterlace.add_argument("--crf", type=int, choices=range(0, 52), default=18)
+    deinterlace.add_argument("--preset", default="medium")
+
     # ── concat ────────────────────────────────────────────────────────────────
     concat = sub.add_parser("concat", help="Concatenate clips (stream-copy when codecs match, re-encode otherwise)")
     concat.add_argument("--input", nargs="+", required=True)
@@ -1274,6 +1289,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_track_add(args)
         if args.op == "track-extract":
             return op_track_extract(args)
+        if args.op == "deinterlace":
+            return op_deinterlace(args)
         if args.op == "concat":
             return op_concat(args)
         if args.op == "speed":

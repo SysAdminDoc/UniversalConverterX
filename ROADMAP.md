@@ -39,7 +39,6 @@ programmability (CLI + REST + PS module), and AI depth.
 | **Spatial audio conversion** (Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) | FFmpeg partial support; assess demand. |
 | **Community preset repository** | Needs governance + security review of contributed XML. |
 | **NPU acceleration** | Measure throughput gain vs. CUDA GPU before committing. |
-| **Deinterlace framerate auto-doubling** | Needs UX decision about auto-enable. |
 | **C2PA Content Credentials** | Rust compile dependency justified for the audience? |
 | **IAMF immersive audio** | Identify 3+ concrete user workflows first. |
 | **Commercial / ad detection (Comskip)** | UCX use case or dedicated DVR tool? |

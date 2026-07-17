@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Auto Deinterlace (Double Frame Rate)</Name>
+    <Folder>Video/Repair</Folder>
+    <InputTypes>
+        <Extension>mkv</Extension>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>avi</Extension>
+        <Extension>m2ts</Extension>
+        <Extension>ts</Extension>
+        <Extension>mpg</Extension>
+        <Extension>mpeg</Extension>
+        <Extension>vob</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_progressive</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>clipforge</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>deinterlace</Arg>
+        <Arg>--filter</Arg>
+        <Arg>bwdif</Arg>
+        <Arg>--rate</Arg>
+        <Arg>double</Arg>
+        <Arg>--crf</Arg>
+        <Arg>18</Arg>
+    </Args>
+</Preset>
