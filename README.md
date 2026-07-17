@@ -37,7 +37,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | **AI** | Reviewed ComfyUI Workflows · Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · IAMF Immersive Audio · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
-| **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · Commercial Detection · DVD Copy (planned) |
+| **Disc** | Data CD/DVD/Blu-ray imaging and burn · DVD-Video authoring · single-title BDMV authoring · DVD Rip · Commercial Detection · DVD Copy (planned) |
 | **Other** | Format Inspector · Content Credentials · Pkl Preset Compiler · Chapter Marks · Watch Folders · History · VMAF Quality |
 
 ## Architecture
@@ -59,6 +59,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
 - Commercial Detection — analyze local recordings through an explicitly provisioned Comskip runtime, emit EDL and chapter metadata without changing the source, and optionally export an atomic commercial-free copy through managed FFmpeg.
+- Blu-ray Authoring — transcode one local title to H.264/AC-3, author and validate a persistent BDMV folder, then create a UDF 2.50 ISO or burn it through Windows IMAPI2. The optional tsMuxeR 2.7.0 runtime is installed only by the explicit `tools/discburn/build-runtime.ps1 -AcceptApacheLicense` command from a size- and SHA-256-pinned Apache-2.0 release archive.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
 - Reviewed Community Presets — inspect the bundled SysAdminDoc-operated catalog offline, preview the exact engine/arguments/license/SHA-256, and install only after explicit digest acceptance; installed entries never auto-update.
 - Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.

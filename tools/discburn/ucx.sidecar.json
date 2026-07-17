@@ -6,7 +6,7 @@
       "executable": "ffmpeg",
       "display": "FFmpeg",
       "managed": true,
-      "whenArgContainsAny": ["image-dvd", "burn-dvd"]
+      "whenArgContainsAny": ["image-dvd", "burn-dvd", "author-bluray", "image-bluray", "burn-bluray"]
     },
     {
       "id": "dvdauthor",
@@ -14,6 +14,13 @@
       "display": "dvdauthor",
       "managed": false,
       "whenArgContainsAny": ["image-dvd", "burn-dvd"]
+    },
+    {
+      "id": "tsmuxer",
+      "executable": "tsMuxeR",
+      "display": "tsMuxeR 2.7.0",
+      "managed": false,
+      "whenArgContainsAny": ["author-bluray", "image-bluray", "burn-bluray"]
     }
   ]
 }

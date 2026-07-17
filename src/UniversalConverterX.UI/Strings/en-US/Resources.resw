@@ -1756,10 +1756,10 @@
     <value>DISC BURNER</value>
   </data>
   <data name="DiscBurnPage_Item_002.Text" xml:space="preserve">
-    <value>Create or burn data CD/DVD and standards-compliant DVD-Video media.</value>
+    <value>Create or burn data CD/DVD, DVD-Video, and single-title Blu-ray media.</value>
   </data>
   <data name="DiscBurnPage_Item_003.Text" xml:space="preserve">
-    <value>Data images use Windows IMAPI2 only. DVD-Video also requires FFmpeg and dvdauthor. Blu-ray authoring is not offered because its former muxer dependency is unmaintained.</value>
+    <value>Data images use Windows IMAPI2 only. DVD-Video also requires FFmpeg and dvdauthor. Blu-ray uses managed FFmpeg and the pinned Apache-2.0 tsMuxeR 2.7.0 runtime; its BDMV folder remains inspectable.</value>
   </data>
   <data name="DiscBurnPage_Item_006.Text" xml:space="preserve">
     <value>Disc setup</value>
@@ -1769,6 +1769,9 @@
   </data>
   <data name="DiscBurnPage_Item_009.Content" xml:space="preserve">
     <value>DVD-Video titles</value>
+  </data>
+  <data name="DiscBurnPage_Item_010.Content" xml:space="preserve">
+    <value>Blu-ray single title</value>
   </data>
   <data name="DiscBurnPage_Item_011.Content" xml:space="preserve">
     <value>Create ISO image</value>

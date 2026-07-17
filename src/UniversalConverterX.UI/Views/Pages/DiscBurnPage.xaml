@@ -19,7 +19,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="DiscBurnPage_Item_001" Text="DISC BURNER" Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock x:Uid="DiscBurnPage_Item_002" Text="Create or burn data CD/DVD and standards-compliant DVD-Video media."
+                <TextBlock x:Uid="DiscBurnPage_Item_002" Text="Create or burn data CD/DVD, DVD-Video, and single-title Blu-ray media."
                            Style="{StaticResource TitleTextStyle}" TextWrapping="Wrap" MaxWidth="820"/>
             </StackPanel>
             <Button x:Uid="DiscBurnPage_RefreshDrivesButton" Grid.Column="1" Content="Refresh drives"
@@ -48,7 +48,7 @@
                             <FontIcon Glyph="&#xE72E;" FontSize="16"
                                       Foreground="{StaticResource AccentGreenBrush}" VerticalAlignment="Top"/>
                             <TextBlock x:Uid="DiscBurnPage_Item_003"
-                                       Text="Data images use Windows IMAPI2 only. DVD-Video also requires FFmpeg and dvdauthor. Blu-ray authoring is not offered because its former muxer dependency is unmaintained."
+                                       Text="Data images use Windows IMAPI2 only. DVD-Video also requires FFmpeg and dvdauthor. Blu-ray uses managed FFmpeg and the pinned Apache-2.0 tsMuxeR 2.7.0 runtime; its BDMV folder remains inspectable."
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -113,6 +113,7 @@
                                       SelectionChanged="Mode_Changed">
                                 <ComboBoxItem x:Uid="DiscBurnPage_Item_008" Content="Data files and folders" Tag="data"/>
                                 <ComboBoxItem x:Uid="DiscBurnPage_Item_009" Content="DVD-Video titles" Tag="dvd"/>
+                                <ComboBoxItem x:Uid="DiscBurnPage_Item_010" Content="Blu-ray single title" Tag="bluray"/>
                             </ComboBox>
                             <ComboBox x:Uid="DiscBurnPage_ActionCombo" x:Name="ActionCombo" Header="Action"
                                       SelectedIndex="0" HorizontalAlignment="Stretch"

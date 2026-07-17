@@ -31,14 +31,4 @@ programmability (CLI + REST + PS module), and AI depth.
 
 ## Tier 3 — Later _(v2.27+)_
 
-### 44. Blu-ray Authoring (Disc Tools residual)
-
-Complete single-title BDMV authoring through a pinned, license-compatible
-Windows backend with a reproducible build or verified immutable distribution
-path. Reuse the existing Disc Tools ISO/write boundary, preserve an inspectable
-BDMV folder, and prove the workflow headlessly with a synthetic input and
-filesystem/playlist inspection before exposing it as ready.
-
-Impact: 2 · Effort: 4 · Type: parity
-
 ## Under Consideration

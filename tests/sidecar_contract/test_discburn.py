@@ -1,4 +1,4 @@
-"""Headless coverage for IMAPI2 data images and DVD-Video authoring."""
+"""Headless coverage for IMAPI2 data, DVD-Video, and Blu-ray authoring."""
 
 from __future__ import annotations
 
@@ -111,6 +111,78 @@ class DiscBurnTests(unittest.TestCase):
         )
         self.assertEqual(["one.mp4", "two.mp4"], args.input)
         self.assertEqual("pal", args.standard)
+
+    def test_bluray_parser_is_single_title_and_preserves_bdmv_destination(self) -> None:
+        args = SIDECAR.build_parser().parse_args(
+            [
+                "burn-bluray", "--input", "title.mkv",
+                "--bdmv-output", "movie_BDMV", "--recorder", "drive-id",
+            ]
+        )
+        self.assertEqual("title.mkv", args.input)
+        self.assertEqual("movie_BDMV", args.bdmv_output)
+        self.assertEqual("drive-id", args.recorder)
+
+    def test_bluray_authoring_atomically_promotes_an_inspectable_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "title.mp4"
+            source.write_bytes(b"video")
+            destination = root / "movie_BDMV"
+
+            def fake_run(command: list[str], _stage: str) -> str | None:
+                if command[0] == "ffmpeg.exe":
+                    Path(command[-1]).write_bytes(b"prepared")
+                    return None
+                authored = Path(command[-1])
+                for relative, signature in SIDECAR._BDMV_REQUIRED:
+                    output = authored / relative
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    if relative.endswith(".m2ts"):
+                        output.write_bytes(b"\x00\x00\x00\x00\x47transport")
+                    else:
+                        output.write_bytes((signature or b"DATA") + b"fixture")
+                return None
+
+            media = {
+                "streams": [
+                    {"codec_type": "video"},
+                    {"codec_type": "audio"},
+                ]
+            }
+            with (
+                mock.patch.object(SIDECAR, "find_ffmpeg", return_value="ffmpeg.exe"),
+                mock.patch.object(SIDECAR, "find_ffprobe", return_value="ffprobe.exe"),
+                mock.patch.object(SIDECAR, "find_tsmuxer", return_value="tsMuxeR.exe"),
+                mock.patch.object(SIDECAR, "probe_media", return_value=media),
+                mock.patch.object(SIDECAR, "_run_tool", side_effect=fake_run),
+            ):
+                inspection, error = SIDECAR._author_bluray(
+                    str(source), destination, "tsMuxeR.exe"
+                )
+
+            self.assertIsNone(error)
+            self.assertEqual(str(destination), inspection["output"])
+            self.assertEqual(len(SIDECAR._BDMV_REQUIRED), len(inspection["files"]))
+            self.assertEqual(b"MPLS", (destination / "BDMV/PLAYLIST/00000.mpls").read_bytes()[:4])
+            self.assertFalse(any(root.glob(".movie_BDMV.partial-*")))
+
+    def test_bluray_imapi_layout_is_udf_250(self) -> None:
+        helper = (SIDECAR_PATH.parent / "imapi.ps1").read_text(encoding="utf-8-sig")
+        self.assertIn("[ValidateSet('data', 'dvd-video', 'bdmv')]", helper)
+        self.assertIn("$image.UDFRevision = 592", helper)
+        self.assertIn("elseif ($MediaKind -eq 'bluray') { 13 }", helper)
+
+    def test_tsmuxer_runtime_is_immutable_and_license_pinned(self) -> None:
+        manifest = json.loads(
+            (SIDECAR_PATH.parent / "tsmuxer-runtime.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual("f06ac394c55ccee1cb76ae54f4636532a2d10253", manifest["sourceCommit"])
+        self.assertEqual("Apache-2.0", manifest["license"])
+        for entry in (manifest["archive"], manifest["licenseFile"]):
+            self.assertGreater(entry["size"], 0)
+            self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")
+            self.assertTrue(entry["url"].startswith("https://"))
 
 
 if __name__ == "__main__":

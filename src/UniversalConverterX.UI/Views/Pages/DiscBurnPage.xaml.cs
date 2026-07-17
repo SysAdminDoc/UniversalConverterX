@@ -31,15 +31,24 @@ public sealed partial class DiscBurnPage : Page
         (combo.SelectedItem as ComboBoxItem)?.Tag as string ?? fallback;
 
     private bool IsDvdVideo => SelectedTag(ModeCombo, "data") == "dvd";
+    private bool IsBluRay => SelectedTag(ModeCombo, "data") == "bluray";
+    private bool IsVideoDisc => IsDvdVideo || IsBluRay;
     private bool IsBurn => SelectedTag(ActionCombo, "image") == "burn";
 
     private async void ChooseSource_Click(object sender, RoutedEventArgs e)
     {
-        if (IsDvdVideo)
+        if (IsVideoDisc)
         {
             var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.VideosLibrary };
             picker.FileTypeFilter.Add("*");
             InitializePicker(picker);
+            if (IsBluRay)
+            {
+                var file = await picker.PickSingleFileAsync();
+                if (file is not null)
+                    SetSources([new DiscSource(file.Name, file.Path)]);
+                return;
+            }
             var files = await picker.PickMultipleFilesAsync();
             SetSources(files.Select(file => new DiscSource(file.Name, file.Path)));
             return;
@@ -70,6 +79,8 @@ public sealed partial class DiscBurnPage : Page
             ? "No source selected."
             : IsDvdVideo
                 ? $"Ready to author {_sources.Count} DVD-Video title(s)."
+                : IsBluRay
+                    ? $"Ready to author {_sources[0].Name} as a Blu-ray title."
                 : $"Ready to image {_sources[0].Path}.";
         UpdateEnabled();
     }
@@ -77,7 +88,9 @@ public sealed partial class DiscBurnPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = IsDvdVideo ? "Add DVD-Video titles" : "Use as data-disc source";
+        e.DragUIOverride.Caption = IsDvdVideo
+            ? "Add DVD-Video titles"
+            : IsBluRay ? "Use as the Blu-ray title" : "Use as data-disc source";
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -86,9 +99,10 @@ public sealed partial class DiscBurnPage : Page
         if (!e.DataView.Contains(StandardDataFormats.StorageItems))
             return;
         var items = await e.DataView.GetStorageItemsAsync();
-        if (IsDvdVideo)
+        if (IsVideoDisc)
         {
-            SetSources(items.OfType<StorageFile>().Select(file => new DiscSource(file.Name, file.Path)));
+            var files = items.OfType<StorageFile>().Select(file => new DiscSource(file.Name, file.Path));
+            SetSources(IsBluRay ? files.Take(1) : files);
             return;
         }
         var folder = items.OfType<StorageFolder>().FirstOrDefault();
@@ -100,12 +114,18 @@ public sealed partial class DiscBurnPage : Page
     {
         if (MediaCombo is null)
             return;
-        MediaCombo.Visibility = IsDvdVideo ? Visibility.Collapsed : Visibility.Visible;
+        MediaCombo.Visibility = IsVideoDisc ? Visibility.Collapsed : Visibility.Visible;
         StandardCombo.Visibility = IsDvdVideo ? Visibility.Visible : Visibility.Collapsed;
-        EmptyTitle.Text = IsDvdVideo ? "Choose one or more video titles" : "Choose a folder for the disc";
+        EmptyTitle.Text = IsDvdVideo
+            ? "Choose one or more video titles"
+            : IsBluRay ? "Choose one video title" : "Choose a folder for the disc";
         EmptyHint.Text = IsDvdVideo
             ? "Videos are transcoded to DVD MPEG-2 and authored into a VIDEO_TS structure."
-            : "Its files and subfolders will become the data-disc contents.";
+            : IsBluRay
+                ? "The title is transcoded to H.264 and AC-3, then authored into a persistent, inspectable BDMV folder."
+                : "Its files and subfolders will become the data-disc contents.";
+        _outputPath = null;
+        OutputBox.Text = "";
         SetSources([]);
         UpdateEnabled();
     }
@@ -114,18 +134,35 @@ public sealed partial class DiscBurnPage : Page
     {
         if (OutputBox is null)
             return;
-        OutputBox.Visibility = IsBurn ? Visibility.Collapsed : Visibility.Visible;
-        ChooseOutputButton.Visibility = IsBurn ? Visibility.Collapsed : Visibility.Visible;
+        var needsOutput = !IsBurn || IsBluRay;
+        OutputBox.Visibility = needsOutput ? Visibility.Visible : Visibility.Collapsed;
+        ChooseOutputButton.Visibility = needsOutput ? Visibility.Visible : Visibility.Collapsed;
         DriveCombo.Visibility = IsBurn ? Visibility.Visible : Visibility.Collapsed;
+        OutputBox.Header = IsBluRay && IsBurn ? "Persistent BDMV folder" : "ISO image";
         StartButton.Content = IsBurn ? "Burn disc" : "Create ISO";
         UpdateEnabled();
     }
 
     private async void ChooseOutput_Click(object sender, RoutedEventArgs e)
     {
+        if (IsBluRay && IsBurn)
+        {
+            var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+            folderPicker.FileTypeFilter.Add("*");
+            InitializePicker(folderPicker);
+            var folder = await folderPicker.PickSingleFolderAsync();
+            if (folder is null)
+                return;
+            _outputPath = Path.Combine(folder.Path, "UniversalX_BDMV");
+            OutputBox.Text = _outputPath;
+            UpdateEnabled();
+            return;
+        }
         var picker = new FileSavePicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         picker.FileTypeChoices.Add("ISO disc image", [".iso"]);
-        picker.SuggestedFileName = IsDvdVideo ? "UniversalX_DVD-Video" : "UniversalX_DataDisc";
+        picker.SuggestedFileName = IsDvdVideo
+            ? "UniversalX_DVD-Video"
+            : IsBluRay ? "UniversalX_Blu-ray" : "UniversalX_DataDisc";
         InitializePicker(picker);
         var file = await picker.PickSaveFileAsync();
         if (file is null)
@@ -174,7 +211,9 @@ public sealed partial class DiscBurnPage : Page
             return;
         StartButton.IsEnabled = _cts is null
             && _sources.Count > 0
-            && (IsBurn ? DriveCombo.SelectedItem is DiscRecorder : !string.IsNullOrWhiteSpace(_outputPath));
+            && (IsBurn
+                ? DriveCombo.SelectedItem is DiscRecorder && (!IsBluRay || !string.IsNullOrWhiteSpace(_outputPath))
+                : !string.IsNullOrWhiteSpace(_outputPath));
     }
 
     private async void Start_Click(object sender, RoutedEventArgs e)
@@ -183,6 +222,8 @@ public sealed partial class DiscBurnPage : Page
             return;
         var operation = IsDvdVideo
             ? (IsBurn ? "burn-dvd" : "image-dvd")
+            : IsBluRay
+                ? (IsBurn ? "burn-bluray" : "image-bluray")
             : (IsBurn ? "burn-data" : "image-data");
         var args = new List<string> { operation };
         if (IsDvdVideo)
@@ -191,13 +232,21 @@ public sealed partial class DiscBurnPage : Page
                 args.AddRange(["--input", source.Path]);
             args.AddRange(["--standard", SelectedTag(StandardCombo, "ntsc")]);
         }
+        else if (IsBluRay)
+        {
+            args.AddRange(["--input", _sources[0].Path]);
+        }
         else
         {
             args.AddRange(["--input", _sources[0].Path, "--media", SelectedTag(MediaCombo, "dvd")]);
         }
         args.AddRange(["--label", LabelBox.Text]);
         if (IsBurn && DriveCombo.SelectedItem is DiscRecorder recorder)
+        {
             args.AddRange(["--recorder", recorder.Id]);
+            if (IsBluRay && _outputPath is not null)
+                args.AddRange(["--bdmv-output", _outputPath]);
+        }
         else if (_outputPath is not null)
             args.AddRange(["--output", _outputPath]);
 
@@ -229,7 +278,11 @@ public sealed partial class DiscBurnPage : Page
             UpdateEnabled();
         }
         StatusText.Text = result.Success
-            ? IsBurn ? "Disc burn completed." : $"ISO image saved to {_outputPath}."
+            ? IsBurn
+                ? IsBluRay ? $"Blu-ray burn completed; BDMV retained at {_outputPath}." : "Disc burn completed."
+                : IsBluRay
+                    ? $"Blu-ray ISO saved to {_outputPath}; its BDMV folder is retained beside the image."
+                    : $"ISO image saved to {_outputPath}."
             : result.ErrorCode == "cancelled" ? "Disc operation cancelled." : $"Disc operation failed: {result.ErrorMessage}";
     }
 

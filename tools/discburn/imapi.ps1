@@ -9,10 +9,10 @@ param(
     [string]$OutputPath,
     [string]$VolumeLabel = 'UNIVERSAL_X',
 
-    [ValidateSet('cd', 'dvd')]
+    [ValidateSet('cd', 'dvd', 'bluray')]
     [string]$Media = 'dvd',
 
-    [ValidateSet('data', 'dvd-video')]
+    [ValidateSet('data', 'dvd-video', 'bdmv')]
     [string]$Layout = 'data',
 
     [string]$RecorderId
@@ -56,9 +56,9 @@ function New-ImageResult {
     $source = Assert-SafeSourceTree -Path $Path
     $image = New-Object -ComObject IMAPI2FS.MsftFileSystemImage
 
-    # IMAPI_MEDIA_TYPE: CD-R = 2, DVD-R = 9. Choosing media defaults before
+    # IMAPI_MEDIA_TYPE: CD-R = 2, DVD-R = 9, BD-R = 13. Choosing media defaults before
     # adding the tree gives the image the correct capacity constraints.
-    $mediaType = if ($MediaKind -eq 'cd') { 2 } else { 9 }
+    $mediaType = if ($MediaKind -eq 'cd') { 2 } elseif ($MediaKind -eq 'bluray') { 13 } else { 9 }
     $image.ChooseImageDefaultsForMediaType($mediaType)
 
     if ($LayoutKind -eq 'dvd-video') {
@@ -66,6 +66,11 @@ function New-ImageResult {
         # VIDEO_TS directory produced by dvdauthor.
         $image.FileSystemsToCreate = 4
         $image.UDFRevision = 258
+    } elseif ($LayoutKind -eq 'bdmv') {
+        # Blu-ray BDMV uses a UDF 2.50 filesystem. The source root contains
+        # the inspectable BDMV tree produced and validated by tsMuxeR.
+        $image.FileSystemsToCreate = 4
+        $image.UDFRevision = 592
     } elseif ($MediaKind -eq 'cd') {
         $image.FileSystemsToCreate = 3 # ISO9660 + Joliet
     } else {
