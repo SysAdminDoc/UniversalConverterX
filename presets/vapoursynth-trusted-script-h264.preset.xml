@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Trusted VapourSynth Script - H.264 MKV</Name>
+    <Folder>Video/Scripting</Folder>
+    <Description>Executes reviewed local .vpy executable Python code. Never use this preset with an untrusted script.</Description>
+    <InputTypes>
+        <Extension>vpy</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_rendered</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>vapoursynth</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>render</Arg>
+        <Arg>--acknowledge-script-code</Arg>
+        <Arg>--codec</Arg>
+        <Arg>h264</Arg>
+    </Args>
+</Preset>

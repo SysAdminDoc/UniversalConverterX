@@ -1,0 +1,7 @@
+{
+  "engine": "vapoursynth",
+  "tools": [
+    { "id": "vspipe", "executable": "vspipe", "display": "VapourSynth R76+", "managed": false },
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+  ]
+}
