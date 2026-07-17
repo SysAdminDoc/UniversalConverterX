@@ -1,0 +1,11 @@
+{
+  "engine": "spatialaudio",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg spatial filters",
+      "managed": true
+    }
+  ]
+}

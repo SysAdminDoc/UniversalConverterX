@@ -369,6 +369,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("presets:sdkit", "Stable Diffusion", "txt2img / img2img / inpaint / x4 upscale (diffusers)", "\uE790", blue, "Ready", green, true, "diffusers + SD 1.5/2/XL"));
         AiTools.Add(new ToolboxTile("presets:speechenhance", "Speech Enhancer", "DeepFilterNet 3 SOTA denoise + dereverb for voice", "\uE767", green, "Ready", green, true, "DeepFilterNet"));
         AudioTools.Add(new ToolboxTile("presets:stemkit", "Stem Separator", "Vocals / drums / bass / other (Roformer / Demucs / MDX)", "\uEC4F", red, "Ready", green, true, "audio-separator"));
+        AudioTools.Add(new ToolboxTile("presets:spatialaudio", "Spatial Audio", "Ambisonics / binaural / 5.1 / 7.1 conversion with optional local SOFA HRTF", "\uE767", blue, "Ready", green, false, "FFmpeg spatial filters"));
         DocumentTools.Add(new ToolboxTile("presets:pdfmarkdown", "PDF -> Markdown", "Layout-aware Markdown extraction (pymupdf4llm / marker)", "\uE8A5", green, "Ready", green, false, "pymupdf4llm"));
         ImageTools.Add(new ToolboxTile("presets:vectorkit", "Vector Converter", "AI / EPS / PS / EMF / WMF / SVG / CDR / VSD via Inkscape", "\uE8B7", green, "Ready", green, false, "Inkscape headless"));
         OtherTools.Add(new ToolboxTile("presets:lutgen", "3D LUT Generator", "Build .cube / .3dl from before/after grading reference frames", "\uE790", orange, "Ready", green, false, "UCX (numpy)"));

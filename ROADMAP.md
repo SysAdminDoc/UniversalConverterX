@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 199 sidecar engines · 290+ presets · 45+ UI pages
+**Status:** v2.28.0 · 200 sidecar engines · 290+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -36,7 +36,6 @@ programmability (CLI + REST + PS module), and AI depth.
 | Item | Question blocking placement |
 |------|-----------------------------|
 | **OCR full pipeline** | Already have `pdfocr`; would a dedicated `ocrkit` add value? |
-| **Spatial audio conversion** (Ambisonics ↔ binaural ↔ 5.1 ↔ 7.1) | FFmpeg partial support; assess demand. |
 | **Community preset repository** | Needs governance + security review of contributed XML. |
 | **NPU acceleration** | Measure throughput gain vs. CUDA GPU before committing. |
 | **C2PA Content Credentials** | Rust compile dependency justified for the audience? |
