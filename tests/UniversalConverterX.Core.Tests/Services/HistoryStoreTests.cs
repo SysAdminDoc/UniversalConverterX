@@ -57,6 +57,22 @@ public sealed class HistoryStoreTests : IDisposable
         var search = await store.QueryAsync("résumé");
         search.Should().ContainSingle().Which.Id.Should().Be(firstId);
 
+        var crossFieldSearch = await store.QueryAsync("videocrush résumé");
+        crossFieldSearch.Should().ContainSingle().Which.Id.Should().Be(firstId);
+
+        var failureSearch = await store.QueryAsync("heicshift Invalid image");
+        failureSearch.Should().ContainSingle().Which.Id.Should().Be(secondId);
+
+        (await store.QueryAsync("%")).Should().BeEmpty("wildcards are literal search text");
+
+        (await store.SummarizeAsync("café mp4")).Should().Be(new ConversionHistorySummary(
+            TotalJobs: 1,
+            Succeeded: 1,
+            Failed: 0,
+            TotalSourceBytes: 1_000,
+            TotalOutputBytes: 600,
+            SpaceSavedBytes: 400));
+
         var summary = await store.SummarizeAsync();
         summary.Should().Be(new ConversionHistorySummary(
             TotalJobs: 2,

@@ -192,10 +192,7 @@ public sealed class HistoryStore : IDisposable
         var entries = new List<ConversionHistoryEntry>();
         using var connection = Open();
         using var command = connection.CreateCommand();
-        var where = string.IsNullOrWhiteSpace(search) ? "" : """
-            WHERE engine LIKE @q OR action LIKE @q
-               OR source_path LIKE @q OR output_path LIKE @q OR profile LIKE @q
-            """;
+        var where = BuildSearchWhere(command, search);
         command.CommandText = $"""
             SELECT id, timestamp_utc, engine, action, source_path, output_path,
                    source_bytes, output_bytes, duration_sec, success,
@@ -205,8 +202,6 @@ public sealed class HistoryStore : IDisposable
             ORDER BY id DESC
             LIMIT @lim;
             """;
-        if (!string.IsNullOrWhiteSpace(search))
-            command.Parameters.AddWithValue("@q", $"%{search}%");
         command.Parameters.AddWithValue("@lim", rowLimit);
 
         using var reader = command.ExecuteReader();
@@ -267,10 +262,7 @@ public sealed class HistoryStore : IDisposable
     {
         using var connection = Open();
         using var command = connection.CreateCommand();
-        var where = string.IsNullOrWhiteSpace(search) ? "" : """
-            WHERE engine LIKE @q OR action LIKE @q
-               OR source_path LIKE @q OR output_path LIKE @q OR profile LIKE @q
-            """;
+        var where = BuildSearchWhere(command, search);
         command.CommandText = $"""
             SELECT
                 COUNT(*),
@@ -287,9 +279,6 @@ public sealed class HistoryStore : IDisposable
             FROM history
             {where};
             """;
-        if (!string.IsNullOrWhiteSpace(search))
-            command.Parameters.AddWithValue("@q", $"%{search}%");
-
         using var reader = command.ExecuteReader();
         if (!reader.Read())
             return new ConversionHistorySummary(0, 0, 0, 0, 0, 0);
@@ -302,6 +291,44 @@ public sealed class HistoryStore : IDisposable
             TotalOutputBytes: reader.GetInt64(4),
             SpaceSavedBytes: reader.GetInt64(5));
     }
+
+    private static string BuildSearchWhere(SqliteCommand command, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+            return "";
+
+        var terms = search.Split(
+                (char[]?)null,
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(16)
+            .Select(term => term.Length > 256 ? term[..256] : term)
+            .ToArray();
+        if (terms.Length == 0)
+            return "";
+
+        var groups = new List<string>(terms.Length);
+        for (var index = 0; index < terms.Length; index++)
+        {
+            var parameter = $"@q{index}";
+            command.Parameters.AddWithValue(parameter, $"%{EscapeLike(terms[index])}%");
+            groups.Add($"""
+                (engine LIKE {parameter} ESCAPE '\'
+                 OR action LIKE {parameter} ESCAPE '\'
+                 OR source_path LIKE {parameter} ESCAPE '\'
+                 OR output_path LIKE {parameter} ESCAPE '\'
+                 OR profile LIKE {parameter} ESCAPE '\'
+                 OR error_code LIKE {parameter} ESCAPE '\'
+                 OR error_message LIKE {parameter} ESCAPE '\')
+                """);
+        }
+
+        return $"WHERE {string.Join(" AND ", groups)}";
+    }
+
+    private static string EscapeLike(string value) =>
+        value.Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("%", "\\%", StringComparison.Ordinal)
+            .Replace("_", "\\_", StringComparison.Ordinal);
 
     private void EnsureSchema()
     {

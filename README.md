@@ -65,7 +65,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Offline AI Video Tags — sample up to a bounded number of local frames, detect people/animals/vehicles and other COCO objects, and produce searchable JSON metadata without changing the source media.
 - Auto Highlight — rank scene-change and visible-motion peaks locally, review clip windows, and export an audio-preserving reel, CMX 3600 EDL, or OpenTimelineIO timeline.
 - Exact Chapter Editor — import, edit, delete, and export MKV/MP4/MOV markers while retaining untouched PTS values; verified stream-copy muxing uses MKVToolNix 97+ for MKV and FFmpeg for MP4/MOV.
-- Conversion History — search/export past jobs and restore exact Converter settings for a re-run.
+- Conversion History — use bounded multi-term local search across engines, actions, source/output paths, presets, and failure details; export filtered jobs or restore exact Converter settings for a re-run.
 - Queue Automation — notify, sleep, safely schedule shutdown, or run a hidden PowerShell hook with a JSON summary.
 - Watch Folders — process stable new or renamed files automatically with duplicate and self-output loop protection.
 - Modern UI — WinUI 3 with dark theme and Mica effects.

@@ -38,5 +38,4 @@ programmability (CLI + REST + PS module), and AI depth.
 | **ComfyUI AI Workflow Integration** | Effort 5. Needs community signal. |
 | **Dia-1.6B / Dia2 TTS** | 6 GB VRAM requirement. Assess after Kokoro/F5-TTS stabilizes. |
 | **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |
-| **Searchable Output Library (Meilisearch)** (Item 79) | Heavyweight dependency. |
 | **Vector Semantic Search (Qdrant)** (Item 80) | ML inference for preset search — feasibility unclear. |
