@@ -19,6 +19,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.2 and libavif 1.4.2 runtimes.
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
+- **Offline AI video tags** — sample images or video frames locally, identify 80 COCO object classes, and write bounded per-frame detections plus aggregate tags as atomic JSON.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
@@ -30,7 +31,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | Category | Tools |
 |---|---|
 | **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
-| **Video** | Auto Highlight · Av1an Per-Scene Parallel Encode · Trusted VapourSynth Scripts · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
+| **Video** | Offline AI Tags · Auto Highlight · Av1an Per-Scene Parallel Encode · Trusted VapourSynth Scripts · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
 | **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · IAMF Immersive Audio · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
@@ -61,6 +62,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
 - Batch Image Editing — apply named looks, colour/tone controls, blur, grain, vignette, tint, and borders while retaining compatible alpha and multi-frame output.
 - Face Blur Privacy Filter — detect and irreversibly obscure frontal faces in every video frame with an offline, fail-closed OpenCV pipeline.
+- Offline AI Video Tags — sample up to a bounded number of local frames, detect people/animals/vehicles and other COCO objects, and produce searchable JSON metadata without changing the source media.
 - Auto Highlight — rank scene-change and visible-motion peaks locally, review clip windows, and export an audio-preserving reel, CMX 3600 EDL, or OpenTimelineIO timeline.
 - Exact Chapter Editor — import, edit, delete, and export MKV/MP4/MOV markers while retaining untouched PTS values; verified stream-copy muxing uses MKVToolNix 97+ for MKV and FFmpeg for MP4/MOV.
 - Conversion History — search/export past jobs and restore exact Converter settings for a re-run.
@@ -136,6 +138,9 @@ ucx engines --json
 
 # Invoke any installed sidecar without a preset-specific CLI wrapper
 ucx invoke-engine scenedetect --args-json '["presets"]'
+
+# Run the preset-backed offline video tagger after its explicit model install
+ucx convert-preset --preset "AI Video Tags - Offline JSON" video.mp4
 
 # Start the loopback-only REST surface; GET /engines discovers the catalogue
 # and POST /convert accepts {"engine":"...","args":["..."]}
@@ -299,6 +304,13 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools and updates. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
 AI inference never downloads models, packages, repositories, or executables. Supported optional packs expose a separate download action that shows the third-party licence, requires explicit consent, pins an immutable HTTPS source, and verifies both exact size and SHA-256 before atomic installation. Other engines require a pre-provisioned local model and fail closed when it is absent. User-requested online services such as cloud lip reading and local Ollama endpoints remain clearly separate from asset acquisition.
+
+The `videotag` engine uses Google's versioned MediaPipe EfficientDet-Lite0 int8
+model through standalone LiteRT, not MediaPipe Tasks. Install the 4,602,795-byte
+Apache-2.0 model only with `videotag download-model --accept-license`; the exact
+SHA-256 is checked before atomic promotion. Tagging then enables the shared
+process network guard, samples locally, emits an atomic JSON report, and sends
+no usage or performance metrics.
 
 Converter exposes generated FFmpeg argument templates in its Advanced panel. Command editing is off by default; enable it under **Settings > Advanced** to edit a batch-safe `{input}`/`{output}` template or review exact commands generated inside sidecars before they run. UCX never sends edited text through a command shell and blocks shell metacharacters introduced by an edit.
 

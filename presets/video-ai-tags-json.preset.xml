@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>AI Video Tags - Offline JSON</Name>
+    <Folder>Video/Analysis</Folder>
+    <Description>Sample local frames and write COCO object detections and aggregate tags without modifying the source or sending telemetry.</Description>
+    <InputTypes>
+        <Extension>mp4</Extension><Extension>mkv</Extension><Extension>mov</Extension>
+        <Extension>m4v</Extension><Extension>avi</Extension><Extension>webm</Extension>
+        <Extension>ts</Extension><Extension>mts</Extension><Extension>m2ts</Extension>
+        <Extension>jpg</Extension><Extension>jpeg</Extension><Extension>png</Extension>
+        <Extension>webp</Extension><Extension>bmp</Extension><Extension>tif</Extension><Extension>tiff</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ai_tags</OutputFileNameTemplate>
+    <OutputExtension>json</OutputExtension>
+    <Engine>videotag</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>tag</Arg><Arg>--interval-seconds</Arg><Arg>2</Arg>
+        <Arg>--threshold</Arg><Arg>0.6</Arg>
+    </Args>
+</Preset>

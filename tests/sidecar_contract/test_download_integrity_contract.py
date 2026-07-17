@@ -30,6 +30,7 @@ class DownloadIntegrityContractTests(unittest.TestCase):
             "colorize/sidecar.py": "verified_asset",
             "gainmap/sidecar.py": "verified_asset",
             "seedvr2/sidecar.py": "verified_asset",
+            "videotag/sidecar.py": "verified_asset",
             "lipsight/sidecar.py": "user_requested_api",
             "videosummary/sidecar.py": "user_requested_api",
             "alphacut/AlphaCut.py": "update_metadata",
@@ -67,6 +68,7 @@ class DownloadIntegrityContractTests(unittest.TestCase):
             "stemkit/sidecar.py",
             "superres/sidecar.py",
             "translatekit/sidecar.py",
+            "videotag/sidecar.py",
             "whisper-stt/sidecar.py",
         )
         missing = [
