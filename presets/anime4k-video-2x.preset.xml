@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Anime4K GLSL 2× video (Mode A)</Name>
+    <Folder>AI/Video</Folder>
+    <InputTypes>
+        <Extension>mp4</Extension>
+        <Extension>mkv</Extension>
+        <Extension>mov</Extension>
+        <Extension>m4v</Extension>
+        <Extension>avi</Extension>
+        <Extension>webm</Extension>
+        <Extension>ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_anime4k_a_x2</OutputFileNameTemplate>
+    <OutputExtension>mp4</OutputExtension>
+    <Engine>anime-upscale</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>video</Arg>
+        <Arg>--backend</Arg>
+        <Arg>anime4k</Arg>
+        <Arg>--profile</Arg>
+        <Arg>a</Arg>
+        <Arg>--scale</Arg>
+        <Arg>2</Arg>
+        <Arg>--crf</Arg>
+        <Arg>18</Arg>
+    </Args>
+</Preset>

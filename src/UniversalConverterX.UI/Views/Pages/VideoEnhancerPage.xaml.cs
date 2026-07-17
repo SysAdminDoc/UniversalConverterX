@@ -30,7 +30,9 @@ public sealed partial class VideoEnhancerPage : Page
     private readonly List<VeModel> _models = [];
     private CancellationTokenSource? _cts;
     private bool _seedVr2ModelReady;
-    private bool _modelActionRunning;
+    private bool _seedVr2ActionRunning;
+    private bool _anime4KReady;
+    private bool _anime4KActionRunning;
 
     public VideoEnhancerPage()
     {
@@ -43,6 +45,7 @@ public sealed partial class VideoEnhancerPage : Page
         UpdateUi();
         _ = LoadModelsAsync();
         _ = RefreshSeedVr2ModelStatusAsync();
+        _ = RefreshAnime4KStatusAsync();
     }
 
     private void ShowWindowsVideoScalerStatus()
@@ -50,7 +53,7 @@ public sealed partial class VideoEnhancerPage : Page
         var capability = _healthService.EvaluateWindowsVideoScaler();
         WindowsVsrStatusText.Text = capability.Status == "Ready"
             ? "Available for qualified frame pipelines"
-            : "Unavailable on this system — choose Real-ESRGAN or SeedVR2";
+            : "Unavailable on this system — choose Real-ESRGAN, Anime4K, or SeedVR2";
         WindowsVsrDetailText.Text = $"{capability.Detail} {capability.Remediation}".Trim();
     }
 
@@ -113,15 +116,19 @@ public sealed partial class VideoEnhancerPage : Page
 
     private void Engine_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RealEsrganModelPanel is null || SeedVr2ModelPanel is null ||
-            RealEsrganQualityPanel is null || SeedVr2QualityPanel is null || RunButton is null)
+        if (RealEsrganModelPanel is null || SeedVr2ModelPanel is null || Anime4KModelPanel is null ||
+            RealEsrganQualityPanel is null || SeedVr2QualityPanel is null ||
+            Anime4KQualityPanel is null || RunButton is null)
             return;
         var seedVr2 = IsSeedVr2Selected();
-        RealEsrganModelPanel.Visibility = seedVr2 ? Visibility.Collapsed : Visibility.Visible;
+        var anime4K = IsAnime4KSelected();
+        RealEsrganModelPanel.Visibility = seedVr2 || anime4K ? Visibility.Collapsed : Visibility.Visible;
         SeedVr2ModelPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
-        RealEsrganQualityPanel.Visibility = seedVr2 ? Visibility.Collapsed : Visibility.Visible;
+        Anime4KModelPanel.Visibility = anime4K ? Visibility.Visible : Visibility.Collapsed;
+        RealEsrganQualityPanel.Visibility = seedVr2 || anime4K ? Visibility.Collapsed : Visibility.Visible;
         SeedVr2QualityPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
-        RunButton.Content = seedVr2 ? "Restore with SeedVR2" : "Upscale Video";
+        Anime4KQualityPanel.Visibility = anime4K ? Visibility.Visible : Visibility.Collapsed;
+        RunButton.Content = seedVr2 ? "Restore with SeedVR2" : anime4K ? "Upscale with Anime4K" : "Upscale Video";
         var summary = BuildPlanSummary();
         foreach (var file in _files) file.PlanSummary = summary;
         UpdateUi();
@@ -129,7 +136,7 @@ public sealed partial class VideoEnhancerPage : Page
 
     private async Task RefreshSeedVr2ModelStatusAsync()
     {
-        if (_modelActionRunning) return;
+        if (_seedVr2ActionRunning) return;
         if (_runner.Locate("seedvr2") is null)
         {
             _seedVr2ModelReady = false;
@@ -139,7 +146,7 @@ public sealed partial class VideoEnhancerPage : Page
             return;
         }
 
-        _modelActionRunning = true;
+        _seedVr2ActionRunning = true;
         _seedVr2ModelReady = false;
         DownloadSeedVr2ModelButton.IsEnabled = false;
         SeedVr2ModelStatus.Text = "Checking local model pack...";
@@ -160,7 +167,7 @@ public sealed partial class VideoEnhancerPage : Page
         }
         finally
         {
-            _modelActionRunning = false;
+            _seedVr2ActionRunning = false;
             DownloadSeedVr2ModelButton.IsEnabled = _runner.Locate("seedvr2") is not null;
             UpdateUi();
         }
@@ -168,7 +175,7 @@ public sealed partial class VideoEnhancerPage : Page
 
     private async void DownloadSeedVr2Model_Click(object sender, RoutedEventArgs e)
     {
-        if (_modelActionRunning || _runner.Locate("seedvr2") is null) return;
+        if (_seedVr2ActionRunning || _runner.Locate("seedvr2") is null) return;
 
         var dialog = new ContentDialog
         {
@@ -183,7 +190,7 @@ public sealed partial class VideoEnhancerPage : Page
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
 
-        _modelActionRunning = true;
+        _seedVr2ActionRunning = true;
         _seedVr2ModelReady = false;
         DownloadSeedVr2ModelButton.IsEnabled = false;
         SeedVr2ModelStatus.Text = "Downloading pinned SeedVR2 pack...";
@@ -208,10 +215,94 @@ public sealed partial class VideoEnhancerPage : Page
         }
         finally
         {
-            _modelActionRunning = false;
+            _seedVr2ActionRunning = false;
             DownloadSeedVr2ModelButton.IsEnabled = true;
             UpdateUi();
         }
+    }
+
+    private async Task RefreshAnime4KStatusAsync()
+    {
+        if (_anime4KActionRunning) return;
+        if (_runner.Locate("anime-upscale") is null)
+        {
+            _anime4KReady = false;
+            DownloadAnime4KShadersButton.IsEnabled = false;
+            Anime4KStatus.Text = "Anime4K sidecar is not installed in this build.";
+            UpdateUi();
+            return;
+        }
+
+        _anime4KActionRunning = true;
+        _anime4KReady = false;
+        DownloadAnime4KShadersButton.IsEnabled = false;
+        Anime4KStatus.Text = "Checking mpv and local shader pack...";
+        UpdateUi();
+        try
+        {
+            var result = await _runner.RunAsync(
+                "anime-upscale",
+                ["shader-status"],
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromMinutes(2));
+            _anime4KReady = result.Success;
+            Anime4KStatus.Text = result.Success
+                ? "Ready — mpv and the pinned Anime4K v4.0.1 shaders are available."
+                : result.ErrorMessage ?? "Anime4K is not ready.";
+        }
+        finally
+        {
+            _anime4KActionRunning = false;
+            DownloadAnime4KShadersButton.IsEnabled = _runner.Locate("anime-upscale") is not null;
+            UpdateUi();
+        }
+    }
+
+    private async void DownloadAnime4KShaders_Click(object sender, RoutedEventArgs e)
+    {
+        if (_anime4KActionRunning || _runner.Locate("anime-upscale") is null) return;
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Download the Anime4K shader pack?",
+            Content = "This downloads the pinned, SHA-256 verified Anime4K v4.0.1 GLSL shader pack " +
+                      "(MIT license, approximately 0.8 MB). Export remains local and also requires mpv " +
+                      "on PATH, beside the sidecar, or in tools/_bin.",
+            PrimaryButtonText = "Accept & download",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        _anime4KActionRunning = true;
+        _anime4KReady = false;
+        DownloadAnime4KShadersButton.IsEnabled = false;
+        Anime4KStatus.Text = "Downloading pinned Anime4K shaders...";
+        UpdateUi();
+        try
+        {
+            var progress = new Progress<SidecarProgress>(value =>
+                DispatcherQueue.TryEnqueue(() =>
+                    Anime4KStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
+                        ? $"Downloading... {value.Percent:F0}%"
+                        : $"{value.Stage} ({value.Percent:F0}%)"));
+            var result = await _runner.RunAsync(
+                "anime-upscale",
+                ["download-shaders", "--accept-license"],
+                progress,
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromMinutes(5));
+            Anime4KStatus.Text = result.Success
+                ? "Shader pack installed; checking mpv..."
+                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+        }
+        finally
+        {
+            _anime4KActionRunning = false;
+            DownloadAnime4KShadersButton.IsEnabled = true;
+        }
+        await RefreshAnime4KStatusAsync();
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -349,12 +440,30 @@ public sealed partial class VideoEnhancerPage : Page
         foreach (var f in _files) f.PlanSummary = summary;
     }
 
+    private void Anime4KCrf_Changed(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (Anime4KCrfLabel is null) return;
+        var crf = (int)e.NewValue;
+        var hint = crf switch
+        {
+            <= 17 => "visually lossless",
+            <= 22 => "high quality",
+            <= 26 => "balanced",
+            <= 30 => "compressed",
+            _ => "very compressed",
+        };
+        Anime4KCrfLabel.Text = $"CRF {crf} ({hint})";
+        var summary = BuildPlanSummary();
+        foreach (var f in _files) f.PlanSummary = summary;
+    }
+
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
         if (_files.Count == 0 || _cts is not null) return;
         var seedVr2 = IsSeedVr2Selected();
+        var anime4K = IsAnime4KSelected();
         VeModel? model = (ModelCombo.SelectedItem as ComboBoxItem)?.Tag as VeModel;
-        if (!seedVr2 && model is null)
+        if (!seedVr2 && !anime4K && model is null)
         {
             StatusText.Text = "Pick a model first.";
             return;
@@ -364,9 +473,15 @@ public sealed partial class VideoEnhancerPage : Page
             StatusText.Text = "Download the SeedVR2 model pack before restoration.";
             return;
         }
+        if (anime4K && !_anime4KReady)
+        {
+            StatusText.Text = "Install mpv and download the Anime4K shader pack before upscaling.";
+            return;
+        }
         var scale = SelectedInt(ScaleCombo, 2);
         var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
-        var crf = (int)CrfSlider.Value;
+        var crf = anime4K ? (int)Anime4KCrfSlider.Value : (int)CrfSlider.Value;
+        var anime4KProfile = SelectedTag(Anime4KProfileCombo, "a");
 
         var jobs = _files.ToList();
         var completed = 0; var failed = 0;
@@ -381,7 +496,7 @@ public sealed partial class VideoEnhancerPage : Page
             foreach (var item in jobs)
             {
                 if (_cts.IsCancellationRequested) break;
-                var outputPath = BuildOutputPath(item.Path, seedVr2, scale, resolution);
+                var outputPath = BuildOutputPath(item.Path, seedVr2, anime4K, scale, resolution, anime4KProfile);
                 var args = seedVr2
                     ? new List<string>
                     {
@@ -389,6 +504,17 @@ public sealed partial class VideoEnhancerPage : Page
                         "--input", item.Path,
                         "--output", outputPath,
                         "--resolution", resolution.ToString(CultureInfo.InvariantCulture),
+                    }
+                    : anime4K
+                    ? new List<string>
+                    {
+                        "video",
+                        "--backend", "anime4k",
+                        "--profile", anime4KProfile,
+                        "--input", item.Path,
+                        "--output", outputPath,
+                        "--scale", "2",
+                        "--crf", crf.ToString(CultureInfo.InvariantCulture),
                     }
                     : new List<string>
                     {
@@ -401,9 +527,11 @@ public sealed partial class VideoEnhancerPage : Page
                     };
 
                 item.Progress = 0;
-                item.StatusText = seedVr2 ? "Restoring" : "Upscaling";
+                item.StatusText = seedVr2 ? "Restoring" : anime4K ? "Anime4K" : "Upscaling";
                 StatusText.Text = seedVr2
                     ? $"Restoring {item.FileName} with SeedVR2 at {resolution}p... ({completed + failed + 1}/{jobs.Count})"
+                    : anime4K
+                    ? $"Upscaling {item.FileName} with Anime4K Mode {anime4KProfile.ToUpperInvariant()}... ({completed + failed + 1}/{jobs.Count})"
                     : $"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})";
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
@@ -419,7 +547,8 @@ public sealed partial class VideoEnhancerPage : Page
                 try
                 {
                     // Video upscale is slow per minute — generous watchdog timeout.
-                    result = await _runner.RunAsync(seedVr2 ? "seedvr2" : "realesrgan", args, progress, log, _cts.Token,
+                    var sidecar = seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : "realesrgan";
+                    result = await _runner.RunAsync(sidecar, args, progress, log, _cts.Token,
                         silenceTimeout: seedVr2 ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(60));
                 }
                 catch (OperationCanceledException)
@@ -498,8 +627,11 @@ public sealed partial class VideoEnhancerPage : Page
         var hasFiles = _files.Count > 0;
         var hasFinished = _finished.Count > 0;
         var seedVr2 = IsSeedVr2Selected();
+        var anime4K = IsAnime4KSelected();
         var hasModel = seedVr2
             ? _seedVr2ModelReady && _runner.Locate("seedvr2") is not null
+            : anime4K
+            ? _anime4KReady && _runner.Locate("anime-upscale") is not null
             : ModelCombo?.SelectedItem is not null;
         EmptyState.Visibility = hasFiles ? Visibility.Collapsed : Visibility.Visible;
         FileList.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
@@ -528,18 +660,27 @@ public sealed partial class VideoEnhancerPage : Page
             var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
             return $"SeedVR2 3B FP8 · {resolution}p · CUDA offline";
         }
+        if (IsAnime4KSelected())
+        {
+            var profile = SelectedTag(Anime4KProfileCombo, "a").ToUpperInvariant();
+            var animeCrf = Anime4KCrfSlider is null ? 18 : (int)Anime4KCrfSlider.Value;
+            return $"Anime4K Mode {profile} · 2× · mpv GLSL · CRF {animeCrf}";
+        }
         var model = (ModelCombo?.SelectedItem as ComboBoxItem)?.Tag is VeModel m ? m.Name : "no model";
         var scale = SelectedInt(ScaleCombo, 2);
         var crf = CrfSlider is null ? 20 : (int)CrfSlider.Value;
         return $"\u00d7{scale} · {model} · CRF {crf}";
     }
 
-    private static string BuildOutputPath(string inputPath, bool seedVr2, int scale, int resolution)
+    private static string BuildOutputPath(
+        string inputPath, bool seedVr2, bool anime4K, int scale, int resolution, string anime4KProfile)
     {
         var dir = Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory;
         var name = Path.GetFileNameWithoutExtension(inputPath);
         if (seedVr2)
             return EnsureUniquePath(Path.Combine(dir, $"{name}_seedvr2_{resolution}p.mp4"));
+        if (anime4K)
+            return EnsureUniquePath(Path.Combine(dir, $"{name}_anime4k_{anime4KProfile}_x2.mp4"));
         var ext = Path.GetExtension(inputPath);
         if (string.IsNullOrEmpty(ext)) ext = ".mp4";
         return EnsureUniquePath(Path.Combine(dir, $"{name}_x{scale}{ext}"));
@@ -567,8 +708,14 @@ public sealed partial class VideoEnhancerPage : Page
         return fallback;
     }
 
+    private static string SelectedTag(ComboBox combo, string fallback) =>
+        combo.SelectedItem is ComboBoxItem item && item.Tag is string tag ? tag : fallback;
+
     private bool IsSeedVr2Selected() =>
         EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } && tag == "seedvr2";
+
+    private bool IsAnime4KSelected() =>
+        EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } && tag == "anime4k";
 
     private static void OpenContainingFolder(string? path)
     {

@@ -105,7 +105,7 @@
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="VideoEnhancerPage_Item_004" Text="VIDEO ENHANCER"
                            Style="{StaticResource EyebrowTextStyle}"/>
-                <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore and upscale video with portable Real-ESRGAN or the optional CUDA-only SeedVR2 diffusion engine."
+                <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore and upscale video with Real-ESRGAN, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine."
                            Style="{StaticResource TitleTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720" LineHeight="30"/>
@@ -148,7 +148,7 @@
                                 <TextBlock x:Uid="VideoEnhancerPage_Item_009" Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock x:Uid="VideoEnhancerPage_Item_010" Text="Choose an engine, then queue clips for local restoration. SeedVR2 is substantially slower and requires its optional model pack."
+                                <TextBlock x:Uid="VideoEnhancerPage_Item_010" Text="Choose an engine, then queue clips for local restoration. Anime4K needs optional mpv and shaders; SeedVR2 requires its CUDA model pack."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
@@ -193,6 +193,7 @@
                                   AutomationProperties.AutomationId="EngineCombo">
                             <ComboBoxItem x:Uid="VideoEnhancerPage_Item_016" Content="Real-ESRGAN (portable)" Tag="realesrgan"/>
                             <ComboBoxItem x:Uid="VideoEnhancerPage_Item_017" Content="SeedVR2 3B FP8 (CUDA, optional)" Tag="seedvr2"/>
+                            <ComboBoxItem x:Uid="VideoEnhancerPage_Anime4KEngine" Content="Anime4K GLSL (mpv, optional)" Tag="anime4k"/>
                         </ComboBox>
                         <StackPanel x:Name="RealEsrganModelPanel" Spacing="8">
                             <ComboBox x:Uid="VideoEnhancerPage_ModelCombo" x:Name="ModelCombo" Header="Model"
@@ -219,6 +220,33 @@
                                     AutomationProperties.AutomationId="DownloadSeedVr2ModelButton"/>
                             <TextBlock x:Uid="VideoEnhancerPage_SeedVr2ModelStatus" x:Name="SeedVr2ModelStatus"
                                        Text="Checking local model pack..."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                        <StackPanel x:Name="Anime4KModelPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock x:Uid="VideoEnhancerPage_Anime4KPackTitle" Text="Anime4K v4.0.1 GLSL shader pack"
+                                       Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock x:Uid="VideoEnhancerPage_Anime4KPackDescription" Text="Pinned MIT-licensed shaders · approximately 0.8 MB. Export runs locally through an optional mpv installation; no model weights are required."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <ComboBox x:Uid="VideoEnhancerPage_Anime4KProfileCombo" x:Name="Anime4KProfileCombo"
+                                      Header="Shader profile" SelectedIndex="0"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="Settings_Changed"
+                                      AutomationProperties.AutomationId="Anime4KProfileCombo">
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Anime4KProfileA" Content="Mode A · line restoration" Tag="a"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Anime4KProfileB" Content="Mode B · soft restoration" Tag="b"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_Anime4KProfileC" Content="Mode C · denoise" Tag="c"/>
+                            </ComboBox>
+                            <Button x:Uid="VideoEnhancerPage_DownloadAnime4KShadersButton" x:Name="DownloadAnime4KShadersButton"
+                                    Content="Review &amp; download shaders"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Click="DownloadAnime4KShaders_Click"
+                                    AutomationProperties.AutomationId="DownloadAnime4KShadersButton"/>
+                            <TextBlock x:Uid="VideoEnhancerPage_Anime4KStatus" x:Name="Anime4KStatus"
+                                       Text="Checking mpv and local shader pack..."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
                                        AutomationProperties.LiveSetting="Polite"/>
@@ -273,6 +301,21 @@
                             <TextBlock x:Uid="VideoEnhancerPage_Item_036" Text="Uses streaming, CPU offload, BlockSwap, and tiled VAE processing. The source and result stay local."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <StackPanel x:Name="Anime4KQualityPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock x:Uid="VideoEnhancerPage_Anime4KScaleNote" Text="Fixed 2× output through the selected Anime4K shader chain. Audio is preserved as AAC."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <Slider x:Uid="VideoEnhancerPage_Anime4KCrfSlider" x:Name="Anime4KCrfSlider"
+                                    Header="x264 CRF"
+                                    Minimum="14" Maximum="32" Value="18"
+                                    StepFrequency="1"
+                                    ValueChanged="Anime4KCrf_Changed"
+                                    AutomationProperties.AutomationId="Anime4KCrfSlider"/>
+                            <TextBlock x:Uid="VideoEnhancerPage_Anime4KCrfLabel" x:Name="Anime4KCrfLabel"
+                                       Text="CRF 18 (high quality)"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       HorizontalAlignment="Right"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

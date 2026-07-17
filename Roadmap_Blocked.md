@@ -44,16 +44,6 @@ Impact: 3 · Effort: 2 · Type: format coverage
 
 ---
 
-### 95. Anime Upscale — remaining: Anime4K GLSL backend
-
-Real-ESRGAN ncnn-vulkan backend shipped. **Remaining:** Anime4K GLSL shader-chain backend.
-
-Impact: 3 · Effort: 3 · Type: AI
-
-**Blocker:** Needs a realtime GLSL rendering path plus an mpv-script bridge, and is deferred pending community signal that the GLSL backend is wanted over the shipped Real-ESRGAN engine. Product-signal gate, not a coding gap.
-
----
-
 ### 117. UltraHDR / ISO 21496-1 Gain-Map Preservation
 
 Preserve ISO 21496-1 gain maps when converting UltraHDR JPEG photos to JPEG or AVIF through libvips 8.18 / libultrahdr.

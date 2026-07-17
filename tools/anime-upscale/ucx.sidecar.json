@@ -7,6 +7,20 @@
       "display": "FFmpeg",
       "managed": true,
       "whenArgContains": "video"
+    },
+    {
+      "id": "ffprobe",
+      "executable": "ffprobe",
+      "display": "FFprobe",
+      "managed": true,
+      "whenArgContains": "video"
+    },
+    {
+      "id": "mpv",
+      "executable": "mpv",
+      "display": "mpv (Anime4K GLSL export)",
+      "managed": false,
+      "whenArgContainsAny": ["anime4k", "shader-status"]
     }
   ],
   "models": true,

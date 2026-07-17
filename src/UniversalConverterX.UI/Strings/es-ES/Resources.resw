@@ -5544,6 +5544,39 @@
   <data name="UniversalConvertPage_UniversalConvertPageButton02.Content" xml:space="preserve">
     <value>Limpiar</value>
   </data>
+  <data name="VideoEnhancerPage_Anime4KCrfLabel.Text" xml:space="preserve">
+    <value>CRF 18 (high quality)</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KCrfSlider.Header" xml:space="preserve">
+    <value>x264 CRF</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KEngine.Content" xml:space="preserve">
+    <value>Anime4K GLSL (mpv, optional)</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KPackDescription.Text" xml:space="preserve">
+    <value>Pinned MIT-licensed shaders · approximately 0.8 MB. Export runs locally through an optional mpv installation; no model weights are required.</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KPackTitle.Text" xml:space="preserve">
+    <value>Anime4K v4.0.1 GLSL shader pack</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KProfileA.Content" xml:space="preserve">
+    <value>Mode A · line restoration</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KProfileB.Content" xml:space="preserve">
+    <value>Mode B · soft restoration</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KProfileC.Content" xml:space="preserve">
+    <value>Mode C · denoise</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KProfileCombo.Header" xml:space="preserve">
+    <value>Shader profile</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KScaleNote.Text" xml:space="preserve">
+    <value>Fixed 2× output through the selected Anime4K shader chain. Audio is preserved as AAC.</value>
+  </data>
+  <data name="VideoEnhancerPage_Anime4KStatus.Text" xml:space="preserve">
+    <value>Checking mpv and local shader pack...</value>
+  </data>
   <data name="VideoEnhancerPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>
   </data>
@@ -5555,6 +5588,9 @@
   </data>
   <data name="VideoEnhancerPage_CrfSlider.Header" xml:space="preserve">
     <value>x264 CRF</value>
+  </data>
+  <data name="VideoEnhancerPage_DownloadAnime4KShadersButton.Content" xml:space="preserve">
+    <value>Review &amp; download shaders</value>
   </data>
   <data name="VideoEnhancerPage_DownloadSeedVr2ModelButton.Content" xml:space="preserve">
     <value>Modelo de revisión y descarga</value>
