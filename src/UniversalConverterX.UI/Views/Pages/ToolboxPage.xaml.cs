@@ -218,6 +218,7 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:timefmt", "Timestamp Format", "ISO 8601 / Epoch / Excel / FILETIME / Cocoa / Mainframe Julian", "\uE787", blue, "Ready", green, false, "stdlib + dateutil"));
         VideoTools.Add(new ToolboxTile("presets:vertigo", "Auto-Reframe 9:16 Vertical", "Smart 16:9 -> 9:16 vertical reframing for TikTok / Reels / Shorts", "\uE714", red, "Ready", green, false, "Vertigo + OpenCV"));
         VideoTools.Add(new ToolboxTile("presets:videocrush", "Video Compressor", "SVT-AV1 v2 fast / quality / streaming + size targeting", "\uE714", green, "Ready", green, false, "FFmpeg + SVT-AV1"));
+        VideoTools.Add(new ToolboxTile("presets:comskip", "Commercial Detection", "Local DVR analysis to JSON, EDL, and chapter markers with optional atomic clean export", "\uE7C3", blue, "Ready", green, false, "Comskip + FFmpeg"));
         VideoTools.Add(new ToolboxTile("presets:videosubtitleremover", "Burned-In Subtitle Remove", "STTN inpainting to erase burned-in subtitles from video", "\uED1E", red, "Ready", green, false, "STTN"));
         AudioTools.Add(new ToolboxTile("presets:whisper-cpp", "Speech -> Text (whisper.cpp)", "Local CPU Whisper transcription via whisper.cpp (no GPU needed)", "\uE767", blue, "Ready", green, false, "whisper.cpp"));
         AudioTools.Add(new ToolboxTile("presets:whisper-stt", "Speech -> Text (Whisper Large v3 Turbo)", "GPU-accelerated Whisper Large v3 Turbo + Silero VAD + diarization", "\uE767", red, "Ready", green, false, "Whisper + pyannote"));

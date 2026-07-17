@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.29.0 · 211 sidecar engines · 299+ presets · 45+ UI pages
+**Status:** v2.29.0 · 212 sidecar engines · 300+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -28,17 +28,6 @@ programmability (CLI + REST + PS module), and AI depth.
 ## Tier 1 — Now _(v2.21–v2.22)_
 
 ## Tier 2 — Next _(v2.23–v2.27)_
-
-### 148. Commercial / Ad Detection (Comskip)
-
-Add a local, non-destructive commercial-detection workflow that accepts a
-user-provisioned Comskip executable or a UCX-built binary from a pinned,
-license-reviewed source recipe. Emit EDL and chapter metadata, optionally
-export detected keep ranges atomically through FFmpeg, and never fetch an
-unverified Windows binary. Acceptance requires source and frozen sidecar
-contract tests plus a reproducible synthetic fixture.
-
-Impact: 2 · Effort: 2 · Type: optional external engine
 
 ## Tier 3 — Later _(v2.27+)_
 

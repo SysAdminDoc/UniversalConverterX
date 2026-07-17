@@ -72,3 +72,4 @@ This matches UCX's existing `IConversionOrchestrator` progress contract and mini
 - **v2.2** — `alphacut/sidecar.py` + `videosubtitleremover/sidecar.py` + `lipsight/sidecar.py`; shared ONNX model cache at `tools/_models/` (gitignored).
 - **v2.3** — `vertigo/sidecar.py` + `framesnap/sidecar.py` + `heicshift/` defaults absorbed into UCX FFmpeg/libvips strategies; `gifstudio/index.html` hosted via WebView2 (no shim needed).
 - **v2.21+** - first-party FFmpeg shims such as `audio-compressor/sidecar.py`, `voice-changer/sidecar.py`, `slideshow/sidecar.py`, and `video-face-enhance/sidecar.py` use the same NDJSON runner for local media processing workflows.
+- **v2.30+** - `comskip/sidecar.py` adds non-destructive commercial detection. Runtime jobs accept only a user-provisioned Comskip executable; `comskip/build-runtime.ps1` separately verifies pinned source, FFmpeg, and argtable2 inputs before preparing or building the GPL-2.0 backend.

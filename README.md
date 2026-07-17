@@ -37,14 +37,14 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | **AI** | Reviewed ComfyUI Workflows · Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · IAMF Immersive Audio · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
-| **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · DVD Copy (planned) |
+| **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · Commercial Detection · DVD Copy (planned) |
 | **Other** | Format Inspector · Content Credentials · Pkl Preset Compiler · Chapter Marks · Watch Folders · History · VMAF Quality |
 
 ## Architecture
 
 UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
 
-Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Audio Compressor, Voice Changer, Slideshow Maker, and Video Face Enhance.
+Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Comskip, Audio Compressor, Voice Changer, Slideshow Maker, and Video Face Enhance.
 
 Local automation definitions can also be compiled from Pkl 0.32+ into UCX preset
 XML through the `pkl-preset` engine. The compiler uses `pkl eval` only, confines
@@ -58,6 +58,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Local Processing — all conversions happen on your machine. No telemetry.
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
+- Commercial Detection — analyze local recordings through an explicitly provisioned Comskip runtime, emit EDL and chapter metadata without changing the source, and optionally export an atomic commercial-free copy through managed FFmpeg.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
 - Reviewed Community Presets — inspect the bundled SysAdminDoc-operated catalog offline, preview the exact engine/arguments/license/SHA-256, and install only after explicit digest acceptance; installed entries never auto-update.
 - Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "runtime": "Comskip V0.83",
+  "sourceCommit": "55b0bcd018ddb9dacfad79addc48df55c1411073",
+  "license": "GPL-2.0-only",
+  "buildInputs": [
+    {
+      "name": "Comskip source",
+      "url": "https://github.com/erikkaashoek/Comskip/archive/55b0bcd018ddb9dacfad79addc48df55c1411073.tar.gz",
+      "size": 269452,
+      "sha256": "70f10802d1404f87e96c0d0e0777570c1b0494beacf09ebf87999886acac32c1",
+      "license": "GPL-2.0-only"
+    },
+    {
+      "name": "FFmpeg 5.0.1 shared build",
+      "url": "https://github.com/GyanD/codexffmpeg/releases/download/5.0.1/ffmpeg-5.0.1-full_build-shared.7z",
+      "size": 37539420,
+      "sha256": "ded28435b6f04b74f5ef5a6a13761233bce9e8e9f8ecb0eabe936fd36a778b0c",
+      "license": "GPL-3.0-or-later"
+    },
+    {
+      "name": "argtable2 2.13",
+      "url": "https://downloads.sourceforge.net/project/argtable/argtable/argtable-2.13/argtable2-13.tar.gz",
+      "size": 3326444,
+      "sha256": "8f77e8a7ced5301af6e22f47302fdbc3b1ff41f2b83c43c77ae5ca041771ddbf",
+      "license": "LGPL-2.0-or-later"
+    }
+  ],
+  "redistribution": "Any redistributed runtime bundle must include the corresponding GPL/LGPL source and license notices. UCX does not download this runtime during application use."
+}

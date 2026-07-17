@@ -1,0 +1,18 @@
+{
+  "engine": "comskip",
+  "tools": [
+    {
+      "id": "comskip",
+      "executable": "comskip",
+      "display": "Comskip",
+      "managed": false
+    },
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContainsAny": ["--export-clean"]
+    }
+  ]
+}
