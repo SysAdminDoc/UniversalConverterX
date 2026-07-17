@@ -72,6 +72,12 @@ public class Program
                 .WithExample("convert-preset", "--preset", "To MP4 (H.264 1080p)", "video.mov")
                 .WithExample("convert-preset", "--preset", "To PNG", "--input-files", "files.txt");
 
+            config.AddCommand<CommunityPresetsCommand>("community-presets")
+                .WithDescription("List, preview, and explicitly install reviewed local community presets")
+                .WithExample("community-presets", "list")
+                .WithExample("community-presets", "preview", "community-h264-720p-compact")
+                .WithExample("community-presets", "install", "community-h264-720p-compact", "--accept-sha256", "<digest>");
+
             config.AddCommand<EnginesCommand>("engines")
                 .WithDescription("List the shared UI, CLI, REST, and PowerShell engine catalogue")
                 .WithExample("engines", "--json")

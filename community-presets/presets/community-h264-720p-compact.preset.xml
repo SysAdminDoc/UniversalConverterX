@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+  <Name>Community — H.264 720p Compact</Name>
+  <Folder>Community/Video</Folder>
+  <InputTypes>
+    <Extension>mp4</Extension>
+    <Extension>mov</Extension>
+    <Extension>mkv</Extension>
+    <Extension>avi</Extension>
+    <Extension>webm</Extension>
+    <Extension>m4v</Extension>
+  </InputTypes>
+  <OutputFileNameTemplate>{dir}/{stem}_community_720p</OutputFileNameTemplate>
+  <OutputExtension>mp4</OutputExtension>
+  <Engine>videocrush</Engine>
+  <InvocationMode>per-file</InvocationMode>
+  <Args>
+    <Arg>--crf</Arg>
+    <Arg>24</Arg>
+    <Arg>--codec</Arg>
+    <Arg>libx264</Arg>
+    <Arg>--ffmpeg-preset</Arg>
+    <Arg>medium</Arg>
+    <Arg>--resolution</Arg>
+    <Arg>720p</Arg>
+    <Arg>--audio-codec</Arg>
+    <Arg>aac</Arg>
+    <Arg>--audio-bitrate</Arg>
+    <Arg>128</Arg>
+    <Arg>--hwaccel</Arg>
+    <Arg>none</Arg>
+  </Args>
+</Preset>

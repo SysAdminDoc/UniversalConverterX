@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "operator": {
+    "name": "SysAdminDoc",
+    "repository": "https://github.com/SysAdminDoc/UniversalConverterX",
+    "issues": "https://github.com/SysAdminDoc/UniversalConverterX/issues"
+  },
+  "contributions": {
+    "reviewRequired": true,
+    "requiredEvidence": [
+      "author-or-source",
+      "spdx-license",
+      "preset-schema-validation",
+      "engine-and-argument-review",
+      "sha256"
+    ],
+    "prohibited": [
+      "credentials",
+      "remote-code-download",
+      "shell-invocation",
+      "implicit-network-access",
+      "path-traversal"
+    ]
+  },
+  "publication": {
+    "channel": "versioned UniversalConverterX release assets",
+    "mutableBranchFeedsAllowed": false,
+    "immutableVersionRequired": true,
+    "sha256Required": true,
+    "installedPresetAutoUpdateAllowed": false
+  },
+  "incidentResponse": {
+    "owner": "SysAdminDoc",
+    "reportingChannel": "GitHub security advisory or repository issue without sensitive data",
+    "actions": [
+      "review",
+      "revoke-digest",
+      "publish-new-catalog-version",
+      "document-takedown-reason"
+    ]
+  },
+  "clientBoundary": {
+    "networkAccess": "none",
+    "installMustBeUserInitiated": true,
+    "exactEngineAndArgumentsMustBePreviewed": true,
+    "sha256AcceptanceRequired": true,
+    "localPresetValidationRequired": true,
+    "atomicInstallRequired": true
+  }
+}

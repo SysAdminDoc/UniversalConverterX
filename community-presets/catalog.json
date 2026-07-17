@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "sysadmindoc.ucx.community-presets",
+  "catalogVersion": "1.0.0",
+  "operator": "SysAdminDoc",
+  "policyVersion": "1.0.0",
+  "entries": [
+    {
+      "id": "community-h264-720p-compact",
+      "version": "1.0.0",
+      "path": "presets/community-h264-720p-compact.preset.xml",
+      "sha256": "942c66f5dcb4f2174283946d6f8ed1bb6f712ef9d9b059e831e571f8c8f50c32",
+      "author": "SysAdminDoc",
+      "license": "MIT",
+      "reviewedAt": "2026-07-17"
+    }
+  ],
+  "revocations": []
+}

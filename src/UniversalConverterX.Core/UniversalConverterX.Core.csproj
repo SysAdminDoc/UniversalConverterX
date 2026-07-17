@@ -37,6 +37,11 @@
     </Content>
     <EmbeddedResource Include="..\..\tools\ffmpeg\bundle.json"
                       LogicalName="UniversalConverterX.Core.Tools.ffmpeg.bundle.json" />
+    <Content Include="..\..\community-presets\**\*.*">
+      <Link>community-presets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- The SDK auto-includes all *.cs under the project. No explicit Compile entries required. -->

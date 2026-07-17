@@ -40,17 +40,6 @@ contract tests plus a reproducible synthetic fixture.
 
 Impact: 2 · Effort: 2 · Type: optional external engine
 
-### 149. Community Preset Repository
-
-Ship a SysAdminDoc-owned, versioned catalog in this repository with explicit
-review, license, takedown, revocation, checksum, and immutable-publication
-rules. Add a user-initiated client that previews the exact engine and
-arguments, validates the preset locally, verifies SHA-256, installs atomically,
-and never auto-updates installed presets. Acceptance requires offline catalog
-and tamper/revocation tests.
-
-Impact: 3 · Effort: 3 · Type: ecosystem
-
 ## Tier 3 — Later _(v2.27+)_
 
 ### 44. Blu-ray Authoring (Disc Tools residual)

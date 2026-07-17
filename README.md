@@ -59,6 +59,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
+- Reviewed Community Presets — inspect the bundled SysAdminDoc-operated catalog offline, preview the exact engine/arguments/license/SHA-256, and install only after explicit digest acceptance; installed entries never auto-update.
 - Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.
 - Offline Neural Speech — run Dia2 1B multi-speaker dialogue or Chatterbox Turbo voice cloning from the Presets UI and automation surfaces. Chatterbox requires selecting exactly one local reference-audio file together with one or more text files, and the preset explicitly acknowledges consent; generated audio retains the model's PerTh watermark.
 - Reviewed ComfyUI Workflows — run local Export (API) JSON through a separately managed loopback ComfyUI server, with explicit trust, bounded overrides/polling/exports, blocked redirects and known network nodes, and atomic output directories.
@@ -151,6 +152,11 @@ ucx convert-preset --preset "AI Video Tags - Offline JSON" video.mp4
 # Rank up to 50 presets by local semantic similarity
 ucx convert-preset --list --search "make movie smaller"
 
+# Inspect and explicitly install a reviewed local community preset
+ucx community-presets list
+ucx community-presets preview community-h264-720p-compact
+ucx community-presets install community-h264-720p-compact --accept-sha256 <digest>
+
 # Start the loopback-only REST surface; GET /engines discovers the catalogue
 # and POST /convert accepts {"engine":"...","args":["..."]}
 ucx serve --port 17654
@@ -171,6 +177,7 @@ curl http://127.0.0.1:17654/metrics
 | `engines` | Discover the shared UI/CLI/REST/PowerShell engine catalogue |
 | `invoke-engine` | Run an installed sidecar with a JSON argument array |
 | `convert-preset` | Run a named desktop-compatible preset |
+| `community-presets` | List, preview, and explicitly install the reviewed offline catalog |
 | `serve` | Host the loopback-only REST job API |
 
 `serve` also exposes loopback-only Prometheus metrics at `/metrics`. A local
