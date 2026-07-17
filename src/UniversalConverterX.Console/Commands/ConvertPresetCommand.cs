@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using UniversalConverterX.Console.Presets;
+using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Console.Commands;
 
@@ -25,6 +26,10 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
         [Description("List discoverable presets and exit (no conversion).")]
         public bool ListOnly { get; set; }
 
+        [CommandOption("--search <QUERY>")]
+        [Description("Rank --list results by local semantic similarity (no model or network).")]
+        public string? Search { get; set; }
+
         [CommandOption("--input-files <PATH>")]
         [Description("Path to a UTF-8 text file containing one input path per line. " +
                      "Used by the shell extension to bypass the 8 KB Windows command-line limit.")]
@@ -41,7 +46,9 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
 
         if (settings.ListOnly)
         {
-            DumpPresets(presets);
+            DumpPresets(
+                SearchPresets(presets, settings.Search),
+                preserveOrder: !string.IsNullOrWhiteSpace(settings.Search));
             return 0;
         }
 
@@ -117,7 +124,7 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
         return PresetRunner.Run(match, resolved);
     }
 
-    private static void DumpPresets(IReadOnlyList<ConversionPreset> presets)
+    private static void DumpPresets(IReadOnlyList<ConversionPreset> presets, bool preserveOrder = false)
     {
         if (presets.Count == 0)
         {
@@ -127,7 +134,10 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
             return;
         }
         var table = new Table().AddColumns("Name", "Folder", "Engine", "Inputs", "Output", "Source");
-        foreach (var p in presets.OrderBy(x => x.Folder ?? "").ThenBy(x => x.Name))
+        var displayed = preserveOrder
+            ? presets
+            : presets.OrderBy(x => x.Folder ?? "").ThenBy(x => x.Name).ToList();
+        foreach (var p in displayed)
         {
             table.AddRow(
                 p.Name,
@@ -138,5 +148,26 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
                 Path.GetFileName(p.SourcePath));
         }
         AnsiConsole.Write(table);
+    }
+
+    private static IReadOnlyList<ConversionPreset> SearchPresets(
+        IReadOnlyList<ConversionPreset> presets,
+        string? query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return presets;
+        var byId = presets.ToDictionary(preset => preset.SourcePath, StringComparer.OrdinalIgnoreCase);
+        return PresetSemanticSearch.Search(
+                query,
+                presets.Select(preset => new PresetSearchDocument(
+                    preset.SourcePath,
+                    preset.Name,
+                    preset.Folder,
+                    preset.Engine,
+                    preset.InputTypes,
+                    preset.OutputExtension)),
+                limit: Math.Min(presets.Count, 50))
+            .Select(match => byId[match.Id])
+            .ToList();
     }
 }

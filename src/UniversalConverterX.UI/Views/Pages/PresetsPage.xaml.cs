@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.Storage.Pickers;
@@ -187,12 +188,20 @@ public sealed partial class PresetsPage : Page
                 StringComparison.OrdinalIgnoreCase) == true);
         if (!string.IsNullOrWhiteSpace(_searchTerm))
         {
-            var s = _searchTerm.Trim();
-            q = q.Where(c =>
-                c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
-                || (c.Preset.Folder?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
-                || c.Preset.Engine.Contains(s, StringComparison.OrdinalIgnoreCase)
-                || c.Preset.InputTypes.Any(e => e.Contains(s, StringComparison.OrdinalIgnoreCase)));
+            var candidates = q.ToDictionary(
+                card => card.Preset.SourcePath,
+                StringComparer.OrdinalIgnoreCase);
+            q = PresetSemanticSearch.Search(
+                    _searchTerm,
+                    candidates.Values.Select(card => new PresetSearchDocument(
+                        card.Preset.SourcePath,
+                        card.Name,
+                        card.Preset.Folder,
+                        card.Preset.Engine,
+                        card.Preset.InputTypes,
+                        card.Preset.OutputExtension)),
+                    limit: Math.Min(candidates.Count, 100))
+                .Select(match => candidates[match.Id]);
         }
         _displayed.Clear();
         foreach (var c in q) _displayed.Add(c);

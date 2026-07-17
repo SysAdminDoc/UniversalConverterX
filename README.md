@@ -57,6 +57,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
+- Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.
 - Av1an Per-Scene Encoding — split long videos at detected scene boundaries, distribute chunks across local encoder processes, resume interrupted work, and optionally target a perceptual quality score through a user-installed Av1an/VapourSynth/encoder toolchain.
 - Trusted VapourSynth Scripts — inspect output metadata, export simple/full DOT filter graphs, or render a reviewed local `.vpy` script through VSPipe and managed FFmpeg. Scripts are executable Python and require explicit trust; UCX never downloads them.
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
@@ -141,6 +142,9 @@ ucx invoke-engine scenedetect --args-json '["presets"]'
 
 # Run the preset-backed offline video tagger after its explicit model install
 ucx convert-preset --preset "AI Video Tags - Offline JSON" video.mp4
+
+# Rank up to 50 presets by local semantic similarity
+ucx convert-preset --list --search "make movie smaller"
 
 # Start the loopback-only REST surface; GET /engines discovers the catalogue
 # and POST /convert accepts {"engine":"...","args":["..."]}
