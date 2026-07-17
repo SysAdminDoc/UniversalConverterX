@@ -26,7 +26,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_extract_path
 
 
 
@@ -210,7 +210,7 @@ def _extract_pck(src: Path, dest: Path) -> int:
         for e in entries:
             f.seek(e["offset"])
             rel = e["name"].lstrip("/").replace("res://", "")
-            target = dest / rel
+            target = safe_extract_path(dest, rel)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(f.read(e["size"]))
             n += 1

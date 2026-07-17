@@ -35,7 +35,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_tar_extractall
 from xml.etree import ElementTree as ET
 
 
@@ -224,7 +224,7 @@ def op_joplin_jex(args: argparse.Namespace) -> int:
         try:
             with tarfile.open(src, "r") as tar:
                 names = tar.getnames()
-                tar.extractall(target)
+                safe_tar_extractall(tar, target)
         except Exception as ex:
             return fail("extract_failed", f"{src.name}: {ex}")
         emit("note_doc",

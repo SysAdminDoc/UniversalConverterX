@@ -28,7 +28,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_tar_extractall
 
 
 
@@ -50,7 +50,7 @@ def _extract(src: Path, dest: Path) -> int:
                 zf.extractall(str(dest))
         elif ext == ".cbt":
             with tarfile.open(str(src)) as tf:
-                tf.extractall(str(dest))
+                safe_tar_extractall(tf, dest)
         elif ext == ".cbr":
             try:
                 import rarfile

@@ -164,3 +164,41 @@ def run_ffmpeg(
         for line in error_tail:
             event_emitter("log", level="error", message=line)
     return process.returncode
+
+
+def safe_extract_path(dest: str | Path, name: str) -> Path:
+    """Resolve ``name`` under ``dest``, raising ValueError if it escapes.
+
+    Guards custom archive-extraction loops (e.g. Godot .pck tables) against
+    path-traversal ("zip-slip") where a crafted entry name like ``../../x``
+    would otherwise write outside the destination directory.
+    """
+    dest_root = Path(dest).resolve()
+    target = (dest_root / name).resolve()
+    if target != dest_root and dest_root not in target.parents:
+        raise ValueError(f"unsafe archive entry rejected: {name!r}")
+    return target
+
+
+def safe_tar_extractall(tar, dest: str | Path) -> int:
+    """Extract a tar archive, rejecting traversal and unsafe link members.
+
+    ``tarfile.extractall`` performs no path validation, so a malicious archive
+    can traverse out of ``dest`` or plant absolute/relative symlinks (tar-slip).
+    Unlike ``zipfile`` — which strips ``..`` components — tar needs an explicit
+    guard. Returns the number of members extracted.
+    """
+    dest_path = Path(dest)
+    dest_path.mkdir(parents=True, exist_ok=True)
+    dest_root = dest_path.resolve()
+    members = tar.getmembers()
+    for member in members:
+        target = (dest_root / member.name).resolve()
+        if target != dest_root and dest_root not in target.parents:
+            raise ValueError(f"unsafe tar entry rejected: {member.name!r}")
+        if member.issym() or member.islnk():
+            link = (target.parent / member.linkname).resolve()
+            if link != dest_root and dest_root not in link.parents:
+                raise ValueError(f"unsafe tar link rejected: {member.name!r}")
+    tar.extractall(str(dest_path), members=members)
+    return len(members)
