@@ -43,7 +43,10 @@ public static class ReleaseCompatibilityPolicy
         {
             var manifest = JsonSerializer.Deserialize<ReleaseManifestDocument>(json, JsonOptions);
             return manifest is { SchemaVersion: > 0 }
-                && manifest.Product.Equals("UniversalConverterX", StringComparison.OrdinalIgnoreCase)
+                // Web defaults let an explicit "product": null in the (remote,
+                // untrusted) manifest override the record default with null, so
+                // compare null-safely rather than dereferencing manifest.Product.
+                && string.Equals(manifest.Product, "UniversalConverterX", StringComparison.OrdinalIgnoreCase)
                 && !string.IsNullOrWhiteSpace(manifest.Version)
                     ? manifest
                     : null;

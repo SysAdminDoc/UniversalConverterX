@@ -57,6 +57,36 @@ public sealed class ConversionReportWriterTests : IDisposable
     }
 
     [Fact]
+    public async Task WriteCsv_ShouldNeutralizeFormulaInjectionButKeepNegativeNumbers()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        var job = ConversionJob.Create(
+            Path.Combine(_tempDirectory, "clip.dat"),
+            Path.Combine(_tempDirectory, "out.dat"));
+        job.InputFileSize = 10;
+        var results = new[]
+        {
+            ConversionResult.Failed(
+                job,
+                "=cmd|'/c calc'!A1",
+                TimeSpan.FromSeconds(0.5),
+                exitCode: 1,
+                converter: "test-engine"),
+        };
+        var report = ConversionReportWriter.Create(results);
+        var path = Path.Combine(_tempDirectory, "inject.csv");
+
+        await ConversionReportWriter.WriteAsync(path, report);
+
+        var csv = await File.ReadAllTextAsync(path);
+        // Formula-triggering error text is prefixed with an apostrophe...
+        csv.Should().Contain("'=cmd|'/c calc'!A1");
+        csv.Should().NotContain(",=cmd");
+        // ...while genuine negative numbers (byte delta) are left intact.
+        csv.Should().NotContain("'-");
+    }
+
+    [Fact]
     public async Task CreateFromHistory_ShouldPreservePersistedStatusAndDurations()
     {
         var report = ConversionReportWriter.CreateFromHistory(

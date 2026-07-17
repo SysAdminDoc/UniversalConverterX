@@ -230,6 +230,17 @@ public static class ConversionReportWriter
     private static string EscapeCsv(string? value)
     {
         value ??= "";
+
+        // CSV-injection hardening: report fields (source paths, engine names,
+        // warnings, error messages) come from filenames and external tool output.
+        // A leading =, +, -, or @ is interpreted as a formula when the report is
+        // opened in Excel/LibreOffice. Neutralize it with a leading apostrophe —
+        // but leave genuine numeric fields (e.g. a negative byte delta) untouched.
+        if (value.Length > 0 && value[0] is '=' or '+' or '-' or '@'
+            && !double.TryParse(value, NumberStyles.Float | NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture, out _))
+            value = "'" + value;
+
         if (!value.ContainsAny([',', '"', '\r', '\n']))
             return value;
         return $"\"{value.Replace("\"", "\"\"")}\"";

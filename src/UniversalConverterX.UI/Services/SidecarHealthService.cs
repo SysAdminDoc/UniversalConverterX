@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
 using Microsoft.Windows.AI;
 using Microsoft.Windows.AI.Video;
@@ -39,7 +40,11 @@ public sealed class SidecarHealthService : ISidecarHealthService
     private readonly ISidecarRunner _runner;
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
-    private readonly Dictionary<string, SidecarManifest> _manifestCache = new(StringComparer.OrdinalIgnoreCase);
+    // Singleton service invoked concurrently from multiple pages (Home diagnostics,
+    // Presets, Downloader, Compressor). LoadManifest runs between real awaits whose
+    // continuations resume on thread-pool threads, so a plain Dictionary could be
+    // read and written simultaneously and corrupt its buckets. Use a concurrent map.
+    private readonly ConcurrentDictionary<string, SidecarManifest> _manifestCache = new(StringComparer.OrdinalIgnoreCase);
 
     public SidecarHealthService(
         ISidecarRunner runner,
