@@ -1,0 +1,6 @@
+{
+  "engine": "pkl-preset",
+  "tools": [
+    { "id": "pkl", "executable": "pkl", "display": "Pkl 0.32+", "managed": false }
+  ]
+}

@@ -1,0 +1,10 @@
+schemaVersion = 1
+name = "Pkl Sample - Fast H.264"
+folder = "Video/Pkl Samples"
+description = "Deterministic offline compiler smoke fixture."
+inputExtensions = List("mkv", "mp4")
+outputFileNameTemplate = "{dir}/{stem}_pkl"
+outputExtension = "mkv"
+engine = "clipforge"
+invocationMode = "per-file"
+args = List("proxy", "--height", "720")

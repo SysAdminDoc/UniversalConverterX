@@ -1,0 +1,9 @@
+schemaVersion = 1
+name = read("env:PATH")
+folder = "Video/Rejected"
+inputExtensions = List("mkv")
+outputFileNameTemplate = "{dir}/{stem}"
+outputExtension = "mkv"
+engine = "clipforge"
+invocationMode = "per-file"
+args = List("proxy")

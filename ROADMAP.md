@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 204 sidecar engines · 290+ presets · 45+ UI pages
+**Status:** v2.28.0 · 205 sidecar engines · 290+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -46,4 +46,3 @@ programmability (CLI + REST + PS module), and AI depth.
 | **AI Video Metadata Tagging (MediaPipe)** (Item 76) | Charter concern re: video understanding scope. |
 | **Searchable Output Library (Meilisearch)** (Item 79) | Heavyweight dependency. |
 | **Vector Semantic Search (Qdrant)** (Item 80) | ML inference for preset search — feasibility unclear. |
-| **Pkl Preset DSL** (Item 82) | Adds Pkl compiler dependency. |

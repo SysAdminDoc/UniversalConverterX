@@ -41,6 +41,12 @@ UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orch
 
 Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Audio Compressor, Voice Changer, Slideshow Maker, and Video Face Enhance.
 
+Local automation definitions can also be compiled from Pkl 0.32+ into UCX preset
+XML through the `pkl-preset` engine. The compiler uses `pkl eval` only, confines
+file-module access to the source directory, permits only Pkl's built-in output-format property while denying file/environment/network resources and projects,
+disables caches and user settings, and emits a preset only after strict schema
+validation. Pkl remains an optional external tool and is never downloaded by UCX.
+
 ## Features
 
 - Right-Click Context Menu — convert files directly from Windows Explorer.
