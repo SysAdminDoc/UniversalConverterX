@@ -21,7 +21,7 @@
     <Company>UniversalConverterX</Company>
     <Product>UniversalConverter X</Product>
     <Description>Universal converter: media (video / audio / image), documents (PDF / DOCX / EPUB / archives / fonts / subtitles / OCR), and 25+ AI-powered tools</Description>
-    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
+    <Copyright>Copyright © 2026 SysAdminDoc</Copyright>
 
     <!-- Enable unpackaged deployment -->
     <WindowsPackageType>None</WindowsPackageType>

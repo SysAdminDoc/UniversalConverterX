@@ -87,7 +87,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 
 ### Quick Start
 
-1. Install the portable release with `winget install MavenImaging.UniversalConverterX`, or download and extract the unsigned portable ZIP from the latest release.
+1. Install the portable release with `winget install SysAdminDoc.UniversalConverterX`, or download and extract the unsigned portable ZIP from the latest release.
 2. Launch `UniversalConverterX.exe` for the desktop workspace or `ucx.exe` for automation.
 3. Install any additional converter tools you need (or use `ucx tools download`).
 4. Start converting!

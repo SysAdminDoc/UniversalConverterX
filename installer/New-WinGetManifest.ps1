@@ -7,7 +7,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$packageIdentifier = 'MavenImaging.UniversalConverterX'
+$packageIdentifier = 'SysAdminDoc.UniversalConverterX'
 $manifestVersion = '1.12.0'
 
 if (-not (Test-Path -LiteralPath $PortableArchivePath -PathType Leaf)) {
@@ -56,7 +56,7 @@ $localeManifest = @"
 PackageIdentifier: $packageIdentifier
 PackageVersion: $Version
 PackageLocale: en-US
-Publisher: Maven Imaging
+Publisher: SysAdminDoc
 PublisherUrl: https://github.com/SysAdminDoc
 PublisherSupportUrl: https://github.com/SysAdminDoc/UniversalConverterX/issues
 PackageName: UniversalConverter X

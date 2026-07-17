@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Company>Maven Imaging</Company>
+    <Company>SysAdminDoc</Company>
     <Product>UniversalConverter X</Product>
-    <Copyright>Copyright © 2026 Maven Imaging</Copyright>
+    <Copyright>Copyright © 2026 SysAdminDoc</Copyright>
     <Version>2.28.0</Version>
     <AssemblyVersion>2.28.0.0</AssemblyVersion>
     <FileVersion>2.28.0.0</FileVersion>
