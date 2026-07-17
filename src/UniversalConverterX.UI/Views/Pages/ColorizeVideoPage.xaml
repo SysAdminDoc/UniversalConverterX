@@ -48,9 +48,9 @@
                 <Grid>
                     <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"
                                 VerticalAlignment="Center" Spacing="12">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xE790;" FontSize="48"
+                            <FontIcon Glyph="&#xE790;" FontSize="30"
                                       Foreground="{StaticResource AccentGreenBrush}"/>
                         </Border>
                         <TextBlock x:Uid="ColorizeVideoPage_Item_004" Text="Drop a B&amp;W photo or video"

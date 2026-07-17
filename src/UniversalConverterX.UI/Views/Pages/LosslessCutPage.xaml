@@ -48,9 +48,9 @@
                 <Grid>
                     <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"
                                 VerticalAlignment="Center" Spacing="12">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xE8C6;" FontSize="48"
+                            <FontIcon Glyph="&#xE8C6;" FontSize="30"
                                       Foreground="{StaticResource AccentGreenBrush}"/>
                         </Border>
                         <TextBlock x:Uid="LosslessCutPage_Item_004" Text="Drop a video to cut"

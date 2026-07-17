@@ -98,12 +98,12 @@
                     CornerRadius="12" Padding="18" AllowDrop="True"
                     DragOver="DropZone_DragOver" Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
-                <Grid MinHeight="480">
+                <Grid MinHeight="360">
                     <StackPanel x:Name="EmptyState" HorizontalAlignment="Center"
                                 VerticalAlignment="Center" Spacing="12">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xEC4F;" FontSize="48"
+                            <FontIcon Glyph="&#xEC4F;" FontSize="30"
                                       Foreground="{StaticResource AccentGreenBrush}"/>
                         </Border>
                         <TextBlock x:Uid="AudioConverterPage_Item_007" Text="Drop audio files to convert"

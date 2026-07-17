@@ -102,7 +102,7 @@
                 <TextBlock x:Uid="PresetsPage_Item_004" Text="Presets"
                            Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="PresetsPage_Item_005" Text="Browse, filter, and run shipped or custom conversion presets."
-                           Style="{StaticResource PageDescriptionTextStyle}" FontSize="13"
+                           Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>
             <StackPanel Grid.Column="1"

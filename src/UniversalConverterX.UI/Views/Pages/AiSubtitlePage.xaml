@@ -53,14 +53,14 @@
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
-                <Grid MinHeight="430">
+                <Grid MinHeight="320">
                     <StackPanel x:Name="DropZonePanel"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Spacing="14">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xED1E;" FontSize="48"
+                            <FontIcon Glyph="&#xED1E;" FontSize="30"
                                       Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                         <TextBlock x:Uid="AiSubtitlePage_DropZoneLabel" x:Name="DropZoneLabel"

@@ -161,14 +161,14 @@
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem x:Uid="CompressorPage_CompressorPagePivotItem01" Header="Compressing"
                         AutomationProperties.AutomationId="CompressorPagePivotItem01">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE91F;" FontSize="48"
+                                    <FontIcon Glyph="&#xE91F;" FontSize="30"
                                               Foreground="{StaticResource AccentCyanBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="CompressorPage_Item_009" Text="Drop video files to compress"
@@ -194,14 +194,14 @@
 
                     <PivotItem x:Uid="CompressorPage_CompressorPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="CompressorPagePivotItem02">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="CompressorPage_Item_013" Text="No finished compressions yet"
@@ -419,7 +419,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="3">
-                                <TextBlock x:Uid="CompressorPage_Item_061" Text="SOURCE" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Uid="CompressorPage_Item_061" Text="Source" Style="{StaticResource MetricLabelTextStyle}"/>
                                 <TextBlock x:Uid="CompressorPage_SourceSizeText" x:Name="SourceSizeText" Text="0 B"
                                            Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentBlueBrush}"/>
@@ -428,7 +428,7 @@
                                       Foreground="{StaticResource TextMutedBrush}"
                                       VerticalAlignment="Bottom" Margin="0,0,0,4"/>
                             <StackPanel Grid.Column="2" Spacing="3">
-                                <TextBlock x:Uid="CompressorPage_Item_063" Text="RESULT" Style="{StaticResource MetricLabelTextStyle}"/>
+                                <TextBlock x:Uid="CompressorPage_Item_063" Text="Result" Style="{StaticResource MetricLabelTextStyle}"/>
                                 <TextBlock x:Uid="CompressorPage_ResultSizeText" x:Name="ResultSizeText" Text="0 B"
                                            Style="{StaticResource MetricNumberTextStyle}"
                                            Foreground="{StaticResource AccentGreenBrush}"/>

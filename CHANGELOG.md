@@ -4,6 +4,12 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.1] - 2026-07-17
+
+### Changed
+
+- Completed a second density pass across the WinUI workspace: 38 queue and drop surfaces no longer reserve oversized empty-state height, 46 large placeholder illustrations are compact, Converter leads with Format and Save controls, and Home, Toolbox, and Settings shed hidden dashboard scaffolding and redundant header copy. Visual contracts now enforce readable shared descriptions, compact empty states, and control-first ordering; concise copy remains localized across all six catalogs.
+
 ## [2.31.0] - 2026-07-17
 
 ### Changed

@@ -119,7 +119,7 @@
                 <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
                     <Border Style="{StaticResource QuietSurfaceStyle}">
                         <StackPanel Spacing="4">
-                            <TextBlock x:Uid="UniversalConvertPage_Item_007" Text="SAFE MATCHING" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock x:Uid="UniversalConvertPage_Item_007" Text="Safe matching" Style="{StaticResource MetricLabelTextStyle}"/>
                             <TextBlock x:Uid="UniversalConvertPage_Item_008" Text="No conversion starts until you choose a preset."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>
@@ -127,7 +127,7 @@
                     </Border>
                     <Border Style="{StaticResource QuietSurfaceStyle}">
                         <StackPanel Spacing="4">
-                            <TextBlock x:Uid="UniversalConvertPage_Item_009" Text="BATCH AWARE" Style="{StaticResource MetricLabelTextStyle}"/>
+                            <TextBlock x:Uid="UniversalConvertPage_Item_009" Text="Batch aware" Style="{StaticResource MetricLabelTextStyle}"/>
                             <TextBlock x:Uid="UniversalConvertPage_Item_010" Text="Mixed selections show partial and full-coverage matches."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"/>

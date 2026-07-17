@@ -169,7 +169,7 @@
             <StackPanel Grid.Column="0" Spacing="8">
                 <TextBlock x:Uid="ConverterPage_Item_007" Text="Converter" Style="{StaticResource PageTitleTextStyle}"/>
                 <TextBlock x:Uid="ConverterPage_Item_008" Text="Queue files, choose one output profile, and review finished results."
-                           Style="{StaticResource PageDescriptionTextStyle}" FontSize="13"/>
+                           Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button x:Uid="ConverterPage_ConverterPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
@@ -202,14 +202,14 @@
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem x:Uid="ConverterPage_ConverterPagePivotItem01" Header="Converting"
                         AutomationProperties.AutomationId="ConverterPagePivotItem01">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE896;" FontSize="48"
+                                    <FontIcon Glyph="&#xE896;" FontSize="30"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="ConverterPage_Item_012" Text="Add media, images, documents, or archives"
@@ -291,14 +291,14 @@
 
                     <PivotItem x:Uid="ConverterPage_ConverterPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="ConverterPagePivotItem02">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="ConverterPage_Item_022" Text="No finished conversions yet"
@@ -318,7 +318,61 @@
                 </Pivot>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="14">
+            <StackPanel Grid.Column="1" Spacing="12">
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Uid="ConverterPage_Item_035" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <ComboBox x:Uid="ConverterPage_FormatSelector" x:Name="FormatSelector"
+                                  Header="Format"
+                                  PlaceholderText="Select format"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="FormatSelector_SelectionChanged"
+                            AutomationProperties.AutomationId="FormatSelector">
+                            <ComboBoxItem x:Uid="ConverterPage_Item_037" Content="MP4 - Video" Tag="mp4"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_038" Content="MKV - Video" Tag="mkv"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_039" Content="MOV - Video" Tag="mov"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_040" Content="WEBM - Video" Tag="webm"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_041" Content="MP3 - Audio" Tag="mp3"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_042" Content="WAV - Audio" Tag="wav"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_043" Content="FLAC - Audio" Tag="flac"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_044" Content="AAC - Audio" Tag="aac"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_045" Content="PNG - Image" Tag="png"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_046" Content="JPG - Image" Tag="jpg"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_047" Content="WEBP - Image" Tag="webp"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_048" Content="AVIF - Image" Tag="avif"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_049" Content="GIF - Image" Tag="gif"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_050" Content="PDF - Document" Tag="pdf"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_051" Content="DOCX - Document" Tag="docx"/>
+                        </ComboBox>
+                        <TextBox x:Uid="ConverterPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
+                                 Header="Save to"
+                                 PlaceholderText="Same as source file"
+                                 IsReadOnly="True"
+                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Uid="ConverterPage_ConverterPageButton07" Grid.Column="0" Content="Browse"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton07"/>
+                            <Button x:Uid="ConverterPage_ConverterPageButton08" Grid.Column="1" Content="Same as source"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="SameAsSource_Click"
+                                AutomationProperties.AutomationId="ConverterPageButton08"/>
+                        </Grid>
+                        <ToggleSwitch x:Uid="ConverterPage_HighSpeedToggle" x:Name="HighSpeedToggle"
+                                      Header="High speed conversion"
+                                      OffContent="Software routing"
+                                      OnContent="Use fastest available backend"
+                                      IsOn="True"
+                                      IsEnabled="False"
+                            AutomationProperties.AutomationId="HighSpeedToggle"/>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}" Background="Transparent" Padding="0">
                     <StackPanel Spacing="12">
                         <TextBlock x:Uid="ConverterPage_Item_024" Text="Format Shortcuts" Style="{StaticResource PanelTitleTextStyle}"/>
@@ -399,66 +453,6 @@
                                  AutomationProperties.AutomationId="FfmpegCommandInfoBar"/>
                     </StackPanel>
                 </Expander>
-
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock x:Uid="ConverterPage_Item_035" Text="Output Profile" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <ComboBox x:Uid="ConverterPage_FormatSelector" x:Name="FormatSelector"
-                                  Header="Convert all files to"
-                                  PlaceholderText="Select format"
-                                  HorizontalAlignment="Stretch"
-                                  SelectionChanged="FormatSelector_SelectionChanged"
-                            AutomationProperties.AutomationId="FormatSelector">
-                            <ComboBoxItem x:Uid="ConverterPage_Item_037" Content="MP4 - Video" Tag="mp4"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_038" Content="MKV - Video" Tag="mkv"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_039" Content="MOV - Video" Tag="mov"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_040" Content="WEBM - Video" Tag="webm"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_041" Content="MP3 - Audio" Tag="mp3"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_042" Content="WAV - Audio" Tag="wav"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_043" Content="FLAC - Audio" Tag="flac"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_044" Content="AAC - Audio" Tag="aac"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_045" Content="PNG - Image" Tag="png"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_046" Content="JPG - Image" Tag="jpg"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_047" Content="WEBP - Image" Tag="webp"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_048" Content="AVIF - Image" Tag="avif"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_049" Content="GIF - Image" Tag="gif"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_050" Content="PDF - Document" Tag="pdf"/>
-                            <ComboBoxItem x:Uid="ConverterPage_Item_051" Content="DOCX - Document" Tag="docx"/>
-                        </ComboBox>
-                        <ToggleSwitch x:Uid="ConverterPage_HighSpeedToggle" x:Name="HighSpeedToggle"
-                                      Header="High speed conversion"
-                                      OffContent="Software routing"
-                                      OnContent="Use fastest available backend"
-                                      IsOn="True"
-                                      IsEnabled="False"
-                            AutomationProperties.AutomationId="HighSpeedToggle"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource CardStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock x:Uid="ConverterPage_Item_053" Text="File Location" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBox x:Uid="ConverterPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
-                                 Header="Save to"
-                                 PlaceholderText="Same as source file"
-                                 IsReadOnly="True"
-                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
-                        <Grid ColumnSpacing="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button x:Uid="ConverterPage_ConverterPageButton07" Grid.Column="0" Content="Browse"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"
-                                AutomationProperties.AutomationId="ConverterPageButton07"/>
-                            <Button x:Uid="ConverterPage_ConverterPageButton08" Grid.Column="1" Content="Same as source"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"
-                                AutomationProperties.AutomationId="ConverterPageButton08"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
 
                 <StackPanel Spacing="2" Margin="4,2,4,0">
                     <TextBlock x:Uid="ConverterPage_QueueSummaryText" x:Name="QueueSummaryText" Text="0 queued"

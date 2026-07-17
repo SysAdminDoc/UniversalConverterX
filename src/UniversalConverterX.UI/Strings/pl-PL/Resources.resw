@@ -1408,10 +1408,10 @@
     <value>Porównanie rozmiaru</value>
   </data>
   <data name="CompressorPage_Item_061.Text" xml:space="preserve">
-    <value>SOURCE</value>
+    <value>Źródło</value>
   </data>
   <data name="CompressorPage_Item_063.Text" xml:space="preserve">
-    <value>RESULT</value>
+    <value>Wynik</value>
   </data>
   <data name="CompressorPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Zapisz do</value>
@@ -1534,7 +1534,7 @@
     <value>Podgląd polecenia</value>
   </data>
   <data name="ConverterPage_FormatSelector.Header" xml:space="preserve">
-    <value>Konwertuj wszystkie pliki na</value>
+    <value>Format</value>
   </data>
   <data name="ConverterPage_FormatSelector.PlaceholderText" xml:space="preserve">
     <value>Wybierz format</value>
@@ -1597,7 +1597,7 @@
     <value>Podgląd jest szablonem bezpieczeństwa serii. Każda oferta zastępuje {input} i {output} własnymi ścieżkami.</value>
   </data>
   <data name="ConverterPage_Item_035.Text" xml:space="preserve">
-    <value>Profil wyjścia</value>
+    <value>Wyjście</value>
   </data>
   <data name="ConverterPage_Item_037.Content" xml:space="preserve">
     <value>MP4 - Filmiki</value>
@@ -1643,9 +1643,6 @@
   </data>
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - dokument</value>
-  </data>
-  <data name="ConverterPage_Item_053.Text" xml:space="preserve">
-    <value>Umiejscowienie pliku</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Zapisz do</value>
@@ -2913,65 +2910,23 @@
   <data name="HomePage_Item_004.Text" xml:space="preserve">
     <value>Konwersja, kompresja, pobieranie, nagrywanie i sprawdzanie mediów lokalnie.</value>
   </data>
-  <data name="HomePage_Item_005.Text" xml:space="preserve">
-    <value>Zacznij od zadania, dodaj pliki, wybierz wynik i sprawdź wyniki. Narzędzia pokaż dostępność przed wprowadzeniem przepływu pracy.</value>
-  </data>
-  <data name="HomePage_Item_009.Text" xml:space="preserve">
-    <value>AT A GLANCE</value>
-  </data>
-  <data name="HomePage_Item_010.Text" xml:space="preserve">
-    <value>Zachowanie miejsca pracy</value>
-  </data>
-  <data name="HomePage_Item_011.Text" xml:space="preserve">
-    <value>Domyślnie lokalny</value>
-  </data>
-  <data name="HomePage_Item_012.Text" xml:space="preserve">
-    <value>Pliki zostają na dysku, chyba że przepływ pracy mówi inaczej.</value>
-  </data>
-  <data name="HomePage_Item_013.Text" xml:space="preserve">
-    <value>Względna kolejka</value>
-  </data>
-  <data name="HomePage_Item_014.Text" xml:space="preserve">
-    <value>Postępy, anulowanie i wyniki pozostają widoczne.</value>
-  </data>
-  <data name="HomePage_Item_015.Text" xml:space="preserve">
-    <value>Wyświetlona czystość</value>
-  </data>
-  <data name="HomePage_Item_016.Text" xml:space="preserve">
-    <value>Niedostępne narzędzia wyjaśniają, czego brakuje.</value>
-  </data>
-  <data name="HomePage_Item_017.Text" xml:space="preserve">
-    <value>Brak telemetrii</value>
-  </data>
-  <data name="HomePage_Item_018.Text" xml:space="preserve">
-    <value>Nie wysłano żadnego śledzenia użycia z aplikacji.</value>
-  </data>
   <data name="HomePage_Item_020.Text" xml:space="preserve">
     <value>Przepływy pracy</value>
-  </data>
-  <data name="HomePage_Item_021.Text" xml:space="preserve">
-    <value>Zadania wykonalne</value>
   </data>
   <data name="HomePage_Item_022.Text" xml:space="preserve">
     <value>Laboratorium AI</value>
   </data>
-  <data name="HomePage_Item_023.Text" xml:space="preserve">
-    <value>Pokazano dostępność</value>
-  </data>
   <data name="HomePage_Item_024.Text" xml:space="preserve">
     <value>Skrzynka narzędziowa</value>
   </data>
-  <data name="HomePage_Item_025.Text" xml:space="preserve">
-    <value>Urządzenia specjalistyczne</value>
-  </data>
   <data name="HomePage_Item_026.Text" xml:space="preserve">
-    <value>DIAGNOSTICS</value>
+    <value>Diagnostyka</value>
   </data>
   <data name="HomePage_Item_027.Text" xml:space="preserve">
     <value>Krajowe dzienniki i pakiety wypadkowe</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.0</value>
+    <value>UniversalConverter X v2.31.1</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Pierwsze przetworzenie lokalne</value>
@@ -4420,16 +4375,10 @@
     <value>Ustawienia</value>
   </data>
   <data name="SettingsWindow_Item_003.Text" xml:space="preserve">
-    <value>Ustaw domyślne ścieżki narzędzi lokalnych, integrację Explorera i wygląd.</value>
-  </data>
-  <data name="SettingsWindow_Item_004.Text" xml:space="preserve">
-    <value>Domyślne lokalne</value>
+    <value>Ustawienia domyślne, narzędzia lokalne, integracje i wygląd.</value>
   </data>
   <data name="SettingsWindow_Item_005.Text" xml:space="preserve">
     <value>Ogólne</value>
-  </data>
-  <data name="SettingsWindow_Item_006.Text" xml:space="preserve">
-    <value>Miejsce wyjścia, zachowanie nadpisu, powiadomienia</value>
   </data>
   <data name="SettingsWindow_Item_010.Content" xml:space="preserve">
     <value>Zapytaj za każdym razem.</value>
@@ -4453,7 +4402,7 @@
     <value>Stałe usuwanie oryginałów</value>
   </data>
   <data name="SettingsWindow_Item_020.Text" xml:space="preserve">
-    <value>Usuń na stałe usuwa oryginały po uzyskaniu zweryfikowanego wyniku. Ruch jest opcją bezpieczniejszego czyszczenia.</value>
+    <value>Usuwanie następuje dopiero po sprawdzeniu wyniku. Przenoszenie oryginałów jest bezpieczniejsze.</value>
   </data>
   <data name="SettingsWindow_Item_024.Content" xml:space="preserve">
     <value>Nic nie rób.</value>
@@ -4471,13 +4420,10 @@
     <value>Uruchom skrypt PowerShell</value>
   </data>
   <data name="SettingsWindow_Item_031.Text" xml:space="preserve">
-    <value>Uruchomienie snu i wyłączenie przebiega tylko wtedy, gdy każda pozycja kolejki się powiedzie. Wyłączenie jest zaplanowane na 60-sekundowym oknie Windows anulowania. Skrypty otrzymują ścieżkę skróconą JSON jako pierwszy argument.</value>
+    <value>Uśpienie i wyłączenie wymagają powodzenia wszystkich zadań. Wyłączenie ma 60 sekund na anulowanie; skrypty otrzymują ścieżkę podsumowania JSON.</value>
   </data>
   <data name="SettingsWindow_Item_032.Text" xml:space="preserve">
     <value>Jakość i wydajność</value>
-  </data>
-  <data name="SettingsWindow_Item_033.Text" xml:space="preserve">
-    <value>Domyślna jakość, przyspieszenie sprzętu, równoległe przetwarzanie</value>
   </data>
   <data name="SettingsWindow_Item_035.Content" xml:space="preserve">
     <value>Najniższy - najmniejszy rozmiar pliku</value>
@@ -4518,23 +4464,14 @@
   <data name="SettingsWindow_Item_049.Text" xml:space="preserve">
     <value>Narzędzia konwerterowe</value>
   </data>
-  <data name="SettingsWindow_Item_050.Text" xml:space="preserve">
-    <value>Zarządzanie narzędziami FFmpeg, ImageMagick i CLI</value>
-  </data>
   <data name="SettingsWindow_Item_054.Text" xml:space="preserve">
     <value>Zaufane wtyczki</value>
   </data>
-  <data name="SettingsWindow_Item_055.Text" xml:space="preserve">
-    <value>Przegląd miejscowych sidecars przed ich uruchomieniem</value>
-  </data>
   <data name="SettingsWindow_Item_056.Text" xml:space="preserve">
-    <value>Utracone wtyczki są domyślnie kwarantanna. Zaufanie obejmuje SHA-256 każdego pliku; każda zmiana wykonywanych wymuszeń do czasu dokonania przeglądu i zaufania nowego hash. Linki i punkty zwrotne są odrzucane.</value>
+    <value>Nowe wtyczki pozostają w kwarantannie do zatwierdzenia ich skrótów. Zmiany ponownie je wyłączają; łącza i punkty ponownej analizy są odrzucane.</value>
   </data>
   <data name="SettingsWindow_Item_059.Text" xml:space="preserve">
     <value>Integracja Shell</value>
-  </data>
-  <data name="SettingsWindow_Item_060.Text" xml:space="preserve">
-    <value>Opcje menu kontekstowego Windows Explorer</value>
   </data>
   <data name="SettingsWindow_Item_063.Content" xml:space="preserve">
     <value>Menu Cascading (Konwersja do →)</value>
@@ -4551,17 +4488,11 @@
   <data name="SettingsWindow_Item_075.Text" xml:space="preserve">
     <value>Zaawansowane</value>
   </data>
-  <data name="SettingsWindow_Item_076.Text" xml:space="preserve">
-    <value>Przegląd i edycja polecenia użytkownika zasilającego</value>
-  </data>
   <data name="SettingsWindow_Item_078.Text" xml:space="preserve">
-    <value>Edycja poleceń jest przeszukiwana jako wektor argumentu bez powłoki. Wejściowe/wyjściowe wytyczne są obowiązkowe, a metacharaktery powłoki są odrzucane.</value>
+    <value>Polecenia działają bez powłoki. Symbole wejścia i wyjścia są wymagane; metaznaki powłoki są odrzucane.</value>
   </data>
   <data name="SettingsWindow_Item_079.Text" xml:space="preserve">
     <value>Wygląd</value>
-  </data>
-  <data name="SettingsWindow_Item_080.Text" xml:space="preserve">
-    <value>Motyw, kolor akcentu, zachowanie okna</value>
   </data>
   <data name="SettingsWindow_Item_082.Content" xml:space="preserve">
     <value>Światło</value>
@@ -4578,14 +4509,11 @@
   <data name="SettingsWindow_Item_093.Text" xml:space="preserve">
     <value>O grze</value>
   </data>
-  <data name="SettingsWindow_Item_094.Text" xml:space="preserve">
-    <value>Informacje o wersji, aktualizacje, pozwolenia</value>
-  </data>
   <data name="SettingsWindow_Item_095.Text" xml:space="preserve">
     <value>UniversalConverter X</value>
   </data>
   <data name="SettingsWindow_Item_097.Text" xml:space="preserve">
-    <value>Miejscowy obszar konwersji plików z opcjonalną integracją Windows Explorer.</value>
+    <value>Konwersja lokalna z opcjonalną integracją Eksploratora.</value>
   </data>
   <data name="SettingsWindow_Item_104.Text" xml:space="preserve">
     <value>Silniki lokalne:</value>
@@ -4765,7 +4693,7 @@
     <value>Uaktualnij status</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.0</value>
+    <value>Version 2.31.1</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Anuluj</value>
@@ -5418,27 +5346,6 @@
   <data name="ToolboxPage_Item_003.Text" xml:space="preserve">
     <value>Narzędzia specjalistyczne do wykończenia, naprawy, ekstrakcji i przygotowania mediów.</value>
   </data>
-  <data name="ToolboxPage_Item_004.Text" xml:space="preserve">
-    <value>Gotowe narzędzia otwierają się bezpośrednio. Planowane narzędzia pozostają niepełnosprawne i wyjaśniają, czego brakuje.</value>
-  </data>
-  <data name="ToolboxPage_Item_005.Text" xml:space="preserve">
-    <value>Klucz stanu</value>
-  </data>
-  <data name="ToolboxPage_Item_006.Text" xml:space="preserve">
-    <value>Gotowy otwiera przepływ pracy</value>
-  </data>
-  <data name="ToolboxPage_Item_007.Text" xml:space="preserve">
-    <value>Planowana ścieżka realizacji</value>
-  </data>
-  <data name="ToolboxPage_Item_008.Text" xml:space="preserve">
-    <value>Przyszłość nadal wymaga decyzji w sprawie zakresu</value>
-  </data>
-  <data name="ToolboxPage_Item_009.Text" xml:space="preserve">
-    <value>AI</value>
-  </data>
-  <data name="ToolboxPage_Item_010.Text" xml:space="preserve">
-    <value>Narzędzia modelowane</value>
-  </data>
   <data name="ToolboxPage_Item_011.Text" xml:space="preserve">
     <value>Obrazek</value>
   </data>
@@ -5524,13 +5431,13 @@
     <value>UCX sprawdza predefiniowane wejścia lokalnie, filtruje niekompatybilne narzędzia i utrzymuje oryginalne pliki nietknięte.</value>
   </data>
   <data name="UniversalConvertPage_Item_007.Text" xml:space="preserve">
-    <value>SAFE MATCHING</value>
+    <value>Bezpieczne dopasowanie</value>
   </data>
   <data name="UniversalConvertPage_Item_008.Text" xml:space="preserve">
     <value>Żadne nawrócenie się nie rozpocznie, dopóki nie wybierzesz ustawień.</value>
   </data>
   <data name="UniversalConvertPage_Item_009.Text" xml:space="preserve">
-    <value>BATCH AWARE</value>
+    <value>Obsługa wsadowa</value>
   </data>
   <data name="UniversalConvertPage_Item_010.Text" xml:space="preserve">
     <value>Wybór mieszany pokazuje mecze częściowe i pełne pokrycia.</value>

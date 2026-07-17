@@ -31,6 +31,11 @@ public class VisualSystemContractTests
             xaml.Should().NotContain("BorderThickness=\"1\"");
             xaml.Should().NotContain("HeroGradientBrush");
             xaml.Should().NotContain("AiGradientBrush");
+            xaml.Should().NotContain("MinHeight=\"430\"");
+            xaml.Should().NotContain("Width=\"116\" Height=\"116\"");
+            xaml.Should().NotContain("FontSize=\"48\"");
+            Regex.IsMatch(xaml, "PageDescriptionTextStyle[^\\r\\n]*FontSize=").Should().BeFalse(
+                $"{Path.GetFileName(page)} must not shrink the shared page description style");
         }
     }
 
@@ -48,11 +53,28 @@ public class VisualSystemContractTests
         appXaml.Should().Contain("x:Key=\"PageDescriptionTextStyle\"");
         appXaml.Should().Contain("x:Key=\"PageLayoutStyle\"");
         appXaml.Should().Contain("<Setter Property=\"FontSize\" Value=\"15\"/>");
+        appXaml.Should().NotContain("<Setter Property=\"FontSize\" Value=\"11\"/>");
 
         var cardStart = appXaml.IndexOf("x:Key=\"CardStyle\"", StringComparison.Ordinal);
         cardStart.Should().BeGreaterThanOrEqualTo(0);
         var cardStyle = appXaml.Substring(cardStart, Math.Min(700, appXaml.Length - cardStart));
         cardStyle.Should().Contain("<Setter Property=\"BorderThickness\" Value=\"0\"/>");
+    }
+
+    [Fact]
+    public void PrimaryWorkflowAndSettings_ShouldLeadWithControlsNotLegacyChrome()
+    {
+        var repoRoot = FindRepoRoot();
+        var viewsRoot = Path.Combine(repoRoot, "src", "UniversalConverterX.UI", "Views");
+        var converterXaml = File.ReadAllText(Path.Combine(viewsRoot, "Pages", "ConverterPage.xaml"));
+        var settingsXaml = File.ReadAllText(Path.Combine(viewsRoot, "SettingsWindow.xaml"));
+
+        converterXaml.IndexOf("Text=\"Output\"", StringComparison.Ordinal)
+            .Should().BeLessThan(converterXaml.IndexOf("Text=\"Format Shortcuts\"", StringComparison.Ordinal));
+        converterXaml.IndexOf("Text=\"Output\"", StringComparison.Ordinal)
+            .Should().BeLessThan(converterXaml.IndexOf("Header=\"Advanced FFmpeg command\"", StringComparison.Ordinal));
+        settingsXaml.Should().NotContain("BorderThickness=\"1\"");
+        settingsXaml.Should().NotContain("Text=\"Local defaults\"");
     }
 
     private static string FindRepoRoot()

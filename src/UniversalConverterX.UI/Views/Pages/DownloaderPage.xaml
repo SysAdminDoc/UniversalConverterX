@@ -342,9 +342,9 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE896;" FontSize="48"
+                                    <FontIcon Glyph="&#xE896;" FontSize="30"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="DownloaderPage_Item_041" Text="Paste a URL above and add it to the queue"
@@ -370,9 +370,9 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="DownloaderPage_Item_044" Text="No finished downloads yet"

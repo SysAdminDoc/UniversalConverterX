@@ -158,9 +158,9 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Spacing="10">
-                    <Border Width="64" Height="64" CornerRadius="18"
+                    <Border Width="52" Height="52" CornerRadius="14"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE823;" FontSize="28"
+                        <FontIcon Glyph="&#xE823;" FontSize="24"
                                   Foreground="{StaticResource TextMutedBrush}"/>
                     </Border>
                     <TextBlock x:Uid="WatchFoldersPage_Item_011" Text="No activity yet"

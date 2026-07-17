@@ -125,7 +125,7 @@
              UpdateCheckService cache reports updates. -->
         <InfoBar x:Uid="HomePage_UpdateBanner" x:Name="UpdateBanner"
                  Grid.Row="0"
-                 Margin="32,16,32,0"
+                 Margin="28,12,28,0"
                  IsOpen="False"
                  Severity="Informational"
                  IsClosable="True"
@@ -152,111 +152,27 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="Transparent"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
-                    CornerRadius="0" Padding="0">
-                <Grid ColumnSpacing="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="0"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Center">
-                        <Border Background="Transparent"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
-                                CornerRadius="0"
-                                Padding="0" HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock x:Uid="HomePage_Item_003" Text="UniversalConverter X"
-                                           Style="{StaticResource PageTitleTextStyle}"/>
-                            </StackPanel>
-                        </Border>
-                        <TextBlock x:Uid="HomePage_Item_004" Text="Convert, compress, download, record, and inspect media—locally."
-                                   Style="{StaticResource PageDescriptionTextStyle}"
-                                   TextWrapping="Wrap" MaxWidth="720"/>
-                        <TextBlock x:Uid="HomePage_Item_005" Text="Start with a task, add files, choose output, and review results. Tools show availability before you enter a workflow."
-                                   Style="{StaticResource SubtitleTextStyle}"
-                                   Visibility="Collapsed"
-                                   TextWrapping="Wrap" MaxWidth="720"/>
-                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
-                            <Button x:Uid="HomePage_HomePageButton01" Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
-                                    Click="OpenConverter_Click"
-                                AutomationProperties.AutomationId="HomePageButton01"/>
-                            <Button x:Uid="HomePage_HomePageButton02" Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="OpenAiLab_Click"
-                                AutomationProperties.AutomationId="HomePageButton02"/>
-                            <Button x:Uid="HomePage_HomePageButton03" Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
-                                    Click="OpenToolbox_Click"
-                                AutomationProperties.AutomationId="HomePageButton03"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}"
-                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
-                            CornerRadius="12" Padding="16" VerticalAlignment="Stretch" Visibility="Collapsed">
-                        <StackPanel Spacing="18">
-                            <StackPanel Spacing="4">
-                                <TextBlock x:Uid="HomePage_Item_009" Text="AT A GLANCE" Style="{StaticResource MetricLabelTextStyle}"/>
-                                <TextBlock x:Uid="HomePage_Item_010" Text="Workspace behavior" Style="{StaticResource PanelTitleTextStyle}"/>
-                            </StackPanel>
-                            <Grid RowSpacing="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Border Grid.Row="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="10" Padding="14,12">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <FontIcon Glyph="&#xE73E;" FontSize="15"
-                                                  Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <StackPanel Spacing="2">
-                                            <TextBlock x:Uid="HomePage_Item_011" Text="Local by default" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock x:Uid="HomePage_Item_012" Text="Files stay on disk unless a workflow says otherwise." Style="{StaticResource MutedTextStyle}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="1" Background="{StaticResource SurfaceMutedBrush}"
-                                        CornerRadius="10" Padding="14,12">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <FontIcon Glyph="&#xE8FD;" FontSize="15"
-                                                  Foreground="{StaticResource AccentBlueBrush}"/>
-                                        <StackPanel Spacing="2">
-                                            <TextBlock x:Uid="HomePage_Item_013" Text="Queue based" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock x:Uid="HomePage_Item_014" Text="Progress, cancellation, and results stay visible." Style="{StaticResource MutedTextStyle}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="2" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="10" Padding="14,12">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <FontIcon Glyph="&#xE946;" FontSize="15"
-                                                  Foreground="{StaticResource AccentOrangeBrush}"/>
-                                        <StackPanel Spacing="2">
-                                            <TextBlock x:Uid="HomePage_Item_015" Text="Readiness shown" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock x:Uid="HomePage_Item_016" Text="Unavailable tools explain what is missing." Style="{StaticResource MutedTextStyle}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Row="3" Background="{StaticResource SurfaceMutedBrush}"
-                                        CornerRadius="10" Padding="14,12">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <FontIcon Glyph="&#xE72E;" FontSize="15"
-                                                  Foreground="{StaticResource AccentGreenBrush}"/>
-                                        <StackPanel Spacing="2">
-                                            <TextBlock x:Uid="HomePage_Item_017" Text="No telemetry" Style="{StaticResource LabelTextStyle}"/>
-                                            <TextBlock x:Uid="HomePage_Item_018" Text="No usage tracking is sent from the app." Style="{StaticResource MutedTextStyle}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Border>
+            <StackPanel Grid.Row="0" Spacing="8">
+                <TextBlock x:Uid="HomePage_Item_003" Text="UniversalConverter X"
+                           Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="HomePage_Item_004" Text="Convert, compress, download, record, and inspect media—locally."
+                           Style="{StaticResource PageDescriptionTextStyle}"
+                           MaxWidth="720" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                    <Button x:Uid="HomePage_HomePageButton01" Content="Convert Files" Style="{StaticResource PrimaryButtonStyle}"
+                            Click="OpenConverter_Click"
+                        AutomationProperties.AutomationId="HomePageButton01"/>
+                    <Button x:Uid="HomePage_HomePageButton02" Content="Open AI Lab" Style="{StaticResource SecondaryButtonStyle}"
+                            Click="OpenAiLab_Click"
+                        AutomationProperties.AutomationId="HomePageButton02"/>
+                    <Button x:Uid="HomePage_HomePageButton03" Content="Browse Tools" Style="{StaticResource GhostButtonStyle}"
+                            Click="OpenToolbox_Click"
+                        AutomationProperties.AutomationId="HomePageButton03"/>
+                </StackPanel>
+            </StackPanel>
 
             <Border Grid.Row="1" Style="{StaticResource CardStyle}"
-                    CornerRadius="20" Padding="14,8">
+                    Background="Transparent" CornerRadius="0" Padding="0">
                 <AutoSuggestBox x:Uid="HomePage_TaskSearchBox" x:Name="TaskSearchBox"
                                 PlaceholderText="Search tasks: convert, compress, record, inspect, frames"
                                 QueryIcon="Find"
@@ -277,11 +193,7 @@
             </Border>
 
             <StackPanel Grid.Row="2" Spacing="16">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock x:Uid="HomePage_Item_020" Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock x:Uid="HomePage_Item_021" Text="Runnable tasks" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom" FontSize="13" FontWeight="Normal"/>
-                </StackPanel>
+                <TextBlock x:Uid="HomePage_Item_020" Text="Workflows" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="ActionsGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="ActionTile_Click"
@@ -289,11 +201,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="3" Spacing="16">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock x:Uid="HomePage_Item_022" Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock x:Uid="HomePage_Item_023" Text="Availability shown" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom" FontSize="13" FontWeight="Normal"/>
-                </StackPanel>
+                <TextBlock x:Uid="HomePage_Item_022" Text="AI Lab" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="AiTile_Click"
@@ -301,11 +209,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="4" Spacing="12">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock x:Uid="HomePage_Item_024" Text="Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
-                    <TextBlock x:Uid="HomePage_Item_025" Text="Specialized utilities" Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Bottom"/>
-                </StackPanel>
+                <TextBlock x:Uid="HomePage_Item_024" Text="Toolbox" Style="{StaticResource SectionHeaderTextStyle}"/>
                 <GridView x:Name="ClustersGrid" SelectionMode="None" IsItemClickEnabled="True"
                           UseSystemFocusVisuals="True"
                           ItemClick="ClusterTile_Click"
@@ -315,7 +219,7 @@
             <!-- ROADMAP Item 51: Diagnostics card — local-only crash bundle export and log folder access. -->
             <Border Grid.Row="5" Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
-                    CornerRadius="20" Padding="22"
+                    CornerRadius="12" Padding="16"
                     AutomationProperties.AutomationId="HomePage_DiagnosticsCard">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -323,7 +227,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Spacing="6">
-                        <TextBlock x:Uid="HomePage_Item_026" Text="DIAGNOSTICS" Style="{StaticResource MetricLabelTextStyle}"/>
+                        <TextBlock x:Uid="HomePage_Item_026" Text="Diagnostics" Style="{StaticResource MetricLabelTextStyle}"/>
                         <TextBlock x:Uid="HomePage_Item_027" Text="Local logs and crash bundles" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Uid="HomePage_DiagnosticsStatusText" x:Name="DiagnosticsStatusText"
                                    Text="No issues recorded this session."
@@ -348,7 +252,7 @@
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>
-                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.31.0"
+                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.31.1"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"

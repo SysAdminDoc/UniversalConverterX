@@ -124,9 +124,9 @@
                 <StackPanel x:Name="EmptyState"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="10">
-                    <Border Width="80" Height="80" CornerRadius="20"
+                    <Border Width="60" Height="60" CornerRadius="16"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE93F;" FontSize="36"
+                        <FontIcon Glyph="&#xE93F;" FontSize="28"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Uid="TrackManagerPage_Item_007" Text="No tracks loaded"

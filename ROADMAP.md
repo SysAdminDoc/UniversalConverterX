@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.31.0 · 212 sidecar engines · 300+ presets · 53 UI pages
+**Status:** v2.31.1 · 212 sidecar engines · 300+ presets · 53 UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).

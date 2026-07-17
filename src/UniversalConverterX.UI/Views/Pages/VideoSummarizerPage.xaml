@@ -25,7 +25,7 @@
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <Border Width="64" Height="64" CornerRadius="18"
+                    <Border Width="52" Height="52" CornerRadius="14"
                             Background="{StaticResource SurfaceLightBrush}"
                             HorizontalAlignment="Center">
                         <FontIcon Glyph="&#xE8D2;" FontSize="30"

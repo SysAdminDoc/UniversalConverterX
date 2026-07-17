@@ -1408,10 +1408,10 @@
     <value>Comparaison des tailles</value>
   </data>
   <data name="CompressorPage_Item_061.Text" xml:space="preserve">
-    <value>SOURCE</value>
+    <value>Source</value>
   </data>
   <data name="CompressorPage_Item_063.Text" xml:space="preserve">
-    <value>RESULT</value>
+    <value>Résultat</value>
   </data>
   <data name="CompressorPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Enregistrer dans</value>
@@ -1534,7 +1534,7 @@
     <value>Aperçu des commandes</value>
   </data>
   <data name="ConverterPage_FormatSelector.Header" xml:space="preserve">
-    <value>Convertir tous les fichiers en</value>
+    <value>Format</value>
   </data>
   <data name="ConverterPage_FormatSelector.PlaceholderText" xml:space="preserve">
     <value>Sélectionner le format</value>
@@ -1597,7 +1597,7 @@
     <value>Chaque tâche remplace {input} et {output} par ses propres chemins.</value>
   </data>
   <data name="ConverterPage_Item_035.Text" xml:space="preserve">
-    <value>Profil de sortie</value>
+    <value>Sortie</value>
   </data>
   <data name="ConverterPage_Item_037.Content" xml:space="preserve">
     <value>MP4 - Vidéo</value>
@@ -1643,9 +1643,6 @@
   </data>
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - Document</value>
-  </data>
-  <data name="ConverterPage_Item_053.Text" xml:space="preserve">
-    <value>Emplacement du fichier</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Enregistrer dans</value>
@@ -2913,65 +2910,23 @@
   <data name="HomePage_Item_004.Text" xml:space="preserve">
     <value>Convertir, compresser, télécharger, enregistrer et inspecter les médias localement.</value>
   </data>
-  <data name="HomePage_Item_005.Text" xml:space="preserve">
-    <value>Commencez par une tâche, ajoutez des fichiers, choisissez la sortie et examinez les résultats. Les outils montrent la disponibilité avant d'entrer dans un workflow.</value>
-  </data>
-  <data name="HomePage_Item_009.Text" xml:space="preserve">
-    <value>AT A GLANCE</value>
-  </data>
-  <data name="HomePage_Item_010.Text" xml:space="preserve">
-    <value>Comportement dans l'espace de travail</value>
-  </data>
-  <data name="HomePage_Item_011.Text" xml:space="preserve">
-    <value>Local par défaut</value>
-  </data>
-  <data name="HomePage_Item_012.Text" xml:space="preserve">
-    <value>Les fichiers restent sur le disque à moins qu'un workflow n'indique le contraire.</value>
-  </data>
-  <data name="HomePage_Item_013.Text" xml:space="preserve">
-    <value>Dossier basé sur</value>
-  </data>
-  <data name="HomePage_Item_014.Text" xml:space="preserve">
-    <value>Les progrès, l'annulation et les résultats restent visibles.</value>
-  </data>
-  <data name="HomePage_Item_015.Text" xml:space="preserve">
-    <value>État de préparation affiché</value>
-  </data>
-  <data name="HomePage_Item_016.Text" xml:space="preserve">
-    <value>Les outils non disponibles expliquent ce qui manque.</value>
-  </data>
-  <data name="HomePage_Item_017.Text" xml:space="preserve">
-    <value>Pas de télémétrie</value>
-  </data>
-  <data name="HomePage_Item_018.Text" xml:space="preserve">
-    <value>Aucun suivi d'utilisation n'est envoyé depuis l'application.</value>
-  </data>
   <data name="HomePage_Item_020.Text" xml:space="preserve">
     <value>Flux de travail</value>
-  </data>
-  <data name="HomePage_Item_021.Text" xml:space="preserve">
-    <value>Tâches exécutées</value>
   </data>
   <data name="HomePage_Item_022.Text" xml:space="preserve">
     <value>Laboratoire AI</value>
   </data>
-  <data name="HomePage_Item_023.Text" xml:space="preserve">
-    <value>Disponibilité indiquée</value>
-  </data>
   <data name="HomePage_Item_024.Text" xml:space="preserve">
     <value>Boîte à outils</value>
   </data>
-  <data name="HomePage_Item_025.Text" xml:space="preserve">
-    <value>Utilitaires spécialisés</value>
-  </data>
   <data name="HomePage_Item_026.Text" xml:space="preserve">
-    <value>DIAGNOSTICS</value>
+    <value>Diagnostics</value>
   </data>
   <data name="HomePage_Item_027.Text" xml:space="preserve">
     <value>Registres locaux et paquets de crash</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.0</value>
+    <value>UniversalConverter X v2.31.1</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Traitement local en premier lieu</value>
@@ -4420,16 +4375,10 @@
     <value>Paramètres</value>
   </data>
   <data name="SettingsWindow_Item_003.Text" xml:space="preserve">
-    <value>Définir les paramètres par défaut, les chemins d'outils locaux, l'intégration Explorer et l'apparence.</value>
-  </data>
-  <data name="SettingsWindow_Item_004.Text" xml:space="preserve">
-    <value>Par défaut local</value>
+    <value>Valeurs par défaut, outils locaux, intégrations et apparence.</value>
   </data>
   <data name="SettingsWindow_Item_005.Text" xml:space="preserve">
     <value>Général</value>
-  </data>
-  <data name="SettingsWindow_Item_006.Text" xml:space="preserve">
-    <value>Emplacement de sortie, comportement d'écrasement, notifications</value>
   </data>
   <data name="SettingsWindow_Item_010.Content" xml:space="preserve">
     <value>Demandez à chaque fois</value>
@@ -4453,7 +4402,7 @@
     <value>Supprimer définitivement les originaux</value>
   </data>
   <data name="SettingsWindow_Item_020.Text" xml:space="preserve">
-    <value>Supprimer définitivement les originaux après qu'une sortie vérifiée existe. Déplacer est l'option de nettoyage plus sûre.</value>
+    <value>La suppression intervient après une sortie vérifiée. Le déplacement est plus sûr.</value>
   </data>
   <data name="SettingsWindow_Item_024.Content" xml:space="preserve">
     <value>Ne rien faire</value>
@@ -4471,13 +4420,10 @@
     <value>Exécuter le script PowerShell</value>
   </data>
   <data name="SettingsWindow_Item_031.Text" xml:space="preserve">
-    <value>L'arrêt est programmé avec une fenêtre d'annulation de 60 secondes Windows. Les scripts reçoivent un chemin résumé de JSON comme premier argument.</value>
+    <value>La mise en veille et l’arrêt exigent la réussite de toutes les tâches. L’arrêt inclut 60 secondes d’annulation ; les scripts reçoivent le chemin du résumé JSON.</value>
   </data>
   <data name="SettingsWindow_Item_032.Text" xml:space="preserve">
     <value>Qualité et performance</value>
-  </data>
-  <data name="SettingsWindow_Item_033.Text" xml:space="preserve">
-    <value>Qualité par défaut, accélération matérielle, traitement parallèle</value>
   </data>
   <data name="SettingsWindow_Item_035.Content" xml:space="preserve">
     <value>Plus bas - Taille de fichier la plus petite</value>
@@ -4518,23 +4464,14 @@
   <data name="SettingsWindow_Item_049.Text" xml:space="preserve">
     <value>Outils de conversion</value>
   </data>
-  <data name="SettingsWindow_Item_050.Text" xml:space="preserve">
-    <value>Gérer FFmpeg, ImageMagick et d'autres outils CLI</value>
-  </data>
   <data name="SettingsWindow_Item_054.Text" xml:space="preserve">
     <value>Plugins de confiance</value>
   </data>
-  <data name="SettingsWindow_Item_055.Text" xml:space="preserve">
-    <value>Examiner les sidecars locaux avant qu'ils puissent courir</value>
-  </data>
   <data name="SettingsWindow_Item_056.Text" xml:space="preserve">
-    <value>Les plugins droppés sont mis en quarantaine par défaut. Trust couvre le SHA-256 de chaque fichier; tout changement désactive l'exécution jusqu'à ce que vous revoyiez et faites confiance au nouveau hash. Les liens et les points de réparation sont rejetés.</value>
+    <value>Les nouveaux modules restent en quarantaine jusqu’à validation de leurs empreintes. Toute modification les désactive ; les liens et points d’analyse sont refusés.</value>
   </data>
   <data name="SettingsWindow_Item_059.Text" xml:space="preserve">
     <value>Intégration Shell</value>
-  </data>
-  <data name="SettingsWindow_Item_060.Text" xml:space="preserve">
-    <value>Options du menu contextuel de l'explorateur Windows</value>
   </data>
   <data name="SettingsWindow_Item_063.Content" xml:space="preserve">
     <value>Menu Cascading (Convertissez à →)</value>
@@ -4551,17 +4488,11 @@
   <data name="SettingsWindow_Item_075.Text" xml:space="preserve">
     <value>Avancé</value>
   </data>
-  <data name="SettingsWindow_Item_076.Text" xml:space="preserve">
-    <value>Révision et édition de la commande Power-user</value>
-  </data>
   <data name="SettingsWindow_Item_078.Text" xml:space="preserve">
-    <value>Les commandes éditées sont analysées comme un vecteur d'argument sans shell. Les détenteurs de place d'entrée/sortie sont obligatoires, et les métacaractères shell sont rejetés.</value>
+    <value>Les commandes s’exécutent sans shell. Les espaces réservés d’entrée et de sortie sont requis ; les métacaractères shell sont refusés.</value>
   </data>
   <data name="SettingsWindow_Item_079.Text" xml:space="preserve">
     <value>Apparence</value>
-  </data>
-  <data name="SettingsWindow_Item_080.Text" xml:space="preserve">
-    <value>Thème, couleur d'accent, comportement de la fenêtre</value>
   </data>
   <data name="SettingsWindow_Item_082.Content" xml:space="preserve">
     <value>Lumière</value>
@@ -4578,14 +4509,11 @@
   <data name="SettingsWindow_Item_093.Text" xml:space="preserve">
     <value>À propos</value>
   </data>
-  <data name="SettingsWindow_Item_094.Text" xml:space="preserve">
-    <value>Informations de version, mises à jour, licences</value>
-  </data>
   <data name="SettingsWindow_Item_095.Text" xml:space="preserve">
     <value>UniversalConverter X</value>
   </data>
   <data name="SettingsWindow_Item_097.Text" xml:space="preserve">
-    <value>Un espace de travail de conversion de fichiers local avec intégration optionnelle Windows Explorer.</value>
+    <value>Conversion locale avec intégration facultative à l’Explorateur.</value>
   </data>
   <data name="SettingsWindow_Item_104.Text" xml:space="preserve">
     <value>Moteurs locaux:</value>
@@ -4765,7 +4693,7 @@
     <value>État de la mise à jour</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.0</value>
+    <value>Version 2.31.1</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Annuler</value>
@@ -5418,27 +5346,6 @@
   <data name="ToolboxPage_Item_003.Text" xml:space="preserve">
     <value>Outils spécialisés pour la finition, la réparation, l'extraction et la préparation des supports.</value>
   </data>
-  <data name="ToolboxPage_Item_004.Text" xml:space="preserve">
-    <value>Les outils prévus restent désactivés et expliquent ce qui manque.</value>
-  </data>
-  <data name="ToolboxPage_Item_005.Text" xml:space="preserve">
-    <value>Clé d'état</value>
-  </data>
-  <data name="ToolboxPage_Item_006.Text" xml:space="preserve">
-    <value>Ready ouvre un workflow exécutable</value>
-  </data>
-  <data name="ToolboxPage_Item_007.Text" xml:space="preserve">
-    <value>Planifié a une trajectoire de mise en œuvre définie</value>
-  </data>
-  <data name="ToolboxPage_Item_008.Text" xml:space="preserve">
-    <value>L'avenir a encore besoin de décisions de portée</value>
-  </data>
-  <data name="ToolboxPage_Item_009.Text" xml:space="preserve">
-    <value>AI</value>
-  </data>
-  <data name="ToolboxPage_Item_010.Text" xml:space="preserve">
-    <value>Outil soutenu par un modèle</value>
-  </data>
   <data name="ToolboxPage_Item_011.Text" xml:space="preserve">
     <value>Image</value>
   </data>
@@ -5524,13 +5431,13 @@
     <value>UCX vérifie localement les entrées prédéfinies, filtre les outils incompatibles et garde vos fichiers originaux intacts.</value>
   </data>
   <data name="UniversalConvertPage_Item_007.Text" xml:space="preserve">
-    <value>SAFE MATCHING</value>
+    <value>Correspondance sûre</value>
   </data>
   <data name="UniversalConvertPage_Item_008.Text" xml:space="preserve">
     <value>Aucune conversion ne commence jusqu'à ce que vous choisissiez un preset.</value>
   </data>
   <data name="UniversalConvertPage_Item_009.Text" xml:space="preserve">
-    <value>BATCH AWARE</value>
+    <value>Traitement par lots</value>
   </data>
   <data name="UniversalConvertPage_Item_010.Text" xml:space="preserve">
     <value>Les sélections mixtes montrent des correspondances partielles et complètes.</value>

@@ -10,73 +10,41 @@
 
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="72"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="{StaticResource SurfaceMutedBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="28,14">
-            <Grid ColumnSpacing="18">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" Spacing="5">
-                    <TextBlock x:Uid="SettingsWindow_Item_002" Text="Settings" Style="{StaticResource PageTitleTextStyle}"/>
-                    <TextBlock x:Uid="SettingsWindow_Item_003" Text="Set defaults, local tool paths, Explorer integration, and appearance."
-                               Style="{StaticResource PageDescriptionTextStyle}"
-                               TextWrapping="Wrap"/>
-                </StackPanel>
-                <Border Grid.Column="1"
-                        Background="{StaticResource SurfaceBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="10,6"
-                        VerticalAlignment="Center"
-                        Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE83D;" FontSize="15"
-                                  Foreground="{StaticResource AccentGreenBrush}"/>
-                        <TextBlock x:Uid="SettingsWindow_Item_004" Text="Local defaults"
-                                   Style="{StaticResource MutedTextStyle}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                 Background="{StaticResource SurfaceMutedBrush}"
+                 BorderBrush="{StaticResource BorderBrush}"
+                 BorderThickness="0,0,0,1"
+                 Padding="24,10">
+            <StackPanel Spacing="3">
+                <TextBlock x:Uid="SettingsWindow_Item_002" Text="Settings" Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="SettingsWindow_Item_003" Text="Defaults, local tools, integrations, and appearance."
+                           Style="{StaticResource PageDescriptionTextStyle}"/>
+            </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="1" Padding="28,18">
-            <Grid MaxWidth="960">
+        <ScrollViewer Grid.Row="1" Padding="24,12">
+            <Grid MaxWidth="920">
                 <!-- Keep a solid panel under Mica for unsupported/RDP configurations. -->
                 <Border Background="{StaticResource SurfaceBrush}" CornerRadius="12"/>
                 <SystemBackdropElement x:Name="SettingsBackdropHost"
                                        CornerRadius="12"
                                        IsHitTestVisible="False"/>
-                <StackPanel Spacing="14" Padding="16">
+                <StackPanel Spacing="10" Padding="14">
                 
                 <!-- General Settings -->
                 <Expander IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE713;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_005" Text="General" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_006" Text="Output location, overwrite behavior, notifications" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE713;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_005" Text="General" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <!-- Default Output Directory -->
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -147,7 +115,7 @@
                                 AutomationProperties.AutomationId="BrowsePostConversionArchiveButton"/>
                         </Grid>
 
-                        <TextBlock x:Uid="SettingsWindow_Item_020" Text="Delete permanently removes originals after a verified output exists. Move is the safer cleanup option."
+                        <TextBlock x:Uid="SettingsWindow_Item_020" Text="Delete runs only after verified output. Moving originals is safer."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -204,7 +172,7 @@
                                     AutomationProperties.AutomationId="BrowseQueueCompletionScriptButton"/>
                         </Grid>
 
-                        <TextBlock x:Uid="SettingsWindow_Item_031" Text="Sleep and shutdown run only when every queue item succeeds. Shutdown is scheduled with a 60-second Windows cancellation window. Scripts receive a JSON summary path as their first argument."
+                        <TextBlock x:Uid="SettingsWindow_Item_031" Text="Sleep and shutdown require every job to succeed. Shutdown includes a 60-second cancellation window; scripts receive the JSON summary path."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -214,21 +182,12 @@
                 <!-- Quality & Performance -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE9D9;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_032" Text="Quality &amp; Performance" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_033" Text="Default quality, hardware acceleration, parallel processing" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE9D9;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_032" Text="Quality &amp; Performance" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <!-- Default Quality -->
                         <ComboBox x:Uid="SettingsWindow_DefaultQualityComboBox" x:Name="DefaultQualityComboBox"
                                   Header="Default quality preset"
@@ -300,21 +259,12 @@
                 <!-- Tools Management -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE90F;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_049" Text="Converter Tools" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_050" Text="Manage FFmpeg, ImageMagick, and other CLI tools" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE90F;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_049" Text="Converter Tools" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <!-- Tools Path -->
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -397,23 +347,13 @@
                 <!-- Third-party plugins -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE74C;" FontSize="20" Margin="0,0,16,0"
-                                      Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_054" Text="Trusted Plugins" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_055" Text="Review local sidecars before they can run"
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE74C;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_054" Text="Trusted Plugins" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="14" Padding="0,16,0,0">
-                        <TextBlock x:Uid="SettingsWindow_Item_056" Text="Dropped plugins are quarantined by default. Trust covers the SHA-256 of every file; any change disables execution until you review and trust the new hash. Links and reparse points are rejected."
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <TextBlock x:Uid="SettingsWindow_Item_056" Text="New plugins stay quarantined until you trust their file hashes. Changes disable them again; links and reparse points are rejected."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"/>
                         <ListView x:Name="PluginsListView"
@@ -467,21 +407,12 @@
                 <!-- Shell Integration -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE8B7;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_059" Text="Shell Integration" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_060" Text="Windows Explorer context menu options" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_059" Text="Shell Integration" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <!-- Enable Context Menu -->
                         <ToggleSwitch x:Uid="SettingsWindow_ContextMenuToggle" x:Name="ContextMenuToggle"
                                       Header="Show in Explorer context menu"
@@ -541,21 +472,12 @@
                 <!-- Advanced -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE943;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_075" Text="Advanced" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_076" Text="Power-user command review and editing"
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE943;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_075" Text="Advanced" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="12" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <ToggleSwitch x:Uid="SettingsWindow_FfmpegCommandEditingToggle" x:Name="FfmpegCommandEditingToggle"
                                       Header="Allow FFmpeg command editing before run"
                                       OffContent="Read-only command previews"
@@ -563,7 +485,7 @@
                                       IsOn="False"
                                       Toggled="SettingsToggle_Changed"
                                       AutomationProperties.AutomationId="FfmpegCommandEditingToggle"/>
-                        <TextBlock x:Uid="SettingsWindow_Item_078" Text="Edited commands are parsed as an argument vector without a shell. Input/output placeholders are mandatory, and shell metacharacters are rejected."
+                        <TextBlock x:Uid="SettingsWindow_Item_078" Text="Commands run without a shell. Input/output placeholders are required; shell metacharacters are rejected."
                                    TextWrapping="Wrap"
                                    Style="{StaticResource MutedTextStyle}"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
@@ -573,21 +495,12 @@
                 <!-- Appearance -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE790;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_079" Text="Appearance" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_080" Text="Theme, accent color, window behavior" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE790;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_079" Text="Appearance" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <!-- Theme -->
                         <ComboBox x:Uid="SettingsWindow_ThemeComboBox" x:Name="ThemeComboBox"
                                   Header="App theme"
@@ -629,35 +542,35 @@
                                         Width="40" Height="40" 
                                         Background="#22c55e"
                                         AutomationProperties.Name="Green accent"
-                                        CornerRadius="20"
+                                        CornerRadius="10"
                                         Click="AccentColor_Click" Tag="#22c55e"
                                     AutomationProperties.AutomationId="AccentGreenButton"/>
                                 <Button x:Uid="SettingsWindow_AccentBlueButton" x:Name="AccentBlueButton" 
                                         Width="40" Height="40" 
                                         Background="#60a5fa"
                                         AutomationProperties.Name="Blue accent"
-                                        CornerRadius="20"
+                                        CornerRadius="10"
                                         Click="AccentColor_Click" Tag="#60a5fa"
                                     AutomationProperties.AutomationId="AccentBlueButton"/>
                                 <Button x:Uid="SettingsWindow_AccentPurpleButton" x:Name="AccentPurpleButton" 
                                         Width="40" Height="40" 
                                         Background="#a78bfa"
                                         AutomationProperties.Name="Purple accent"
-                                        CornerRadius="20"
+                                        CornerRadius="10"
                                         Click="AccentColor_Click" Tag="#a78bfa"
                                     AutomationProperties.AutomationId="AccentPurpleButton"/>
                                 <Button x:Uid="SettingsWindow_AccentOrangeButton" x:Name="AccentOrangeButton" 
                                         Width="40" Height="40" 
                                         Background="#fb923c"
                                         AutomationProperties.Name="Orange accent"
-                                        CornerRadius="20"
+                                        CornerRadius="10"
                                         Click="AccentColor_Click" Tag="#fb923c"
                                     AutomationProperties.AutomationId="AccentOrangeButton"/>
                                 <Button x:Uid="SettingsWindow_AccentRedButton" x:Name="AccentRedButton" 
                                         Width="40" Height="40" 
                                         Background="#f87171"
                                         AutomationProperties.Name="Red accent"
-                                        CornerRadius="20"
+                                        CornerRadius="10"
                                         Click="AccentColor_Click" Tag="#f87171"
                                     AutomationProperties.AutomationId="AccentRedButton"/>
                             </StackPanel>
@@ -684,29 +597,20 @@
                 <!-- About -->
                 <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <FontIcon Glyph="&#xE946;" FontSize="20" Margin="0,0,16,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="SettingsWindow_Item_093" Text="About" Style="{StaticResource LabelTextStyle}"/>
-                                <TextBlock x:Uid="SettingsWindow_Item_094" Text="Version info, updates, licenses" 
-                                           Style="{StaticResource MutedTextStyle}"
-                                           Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE946;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Uid="SettingsWindow_Item_093" Text="About" Style="{StaticResource LabelTextStyle}"/>
+                        </StackPanel>
                     </Expander.Header>
-                    <StackPanel Spacing="16" Padding="0,16,0,0">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
                         <StackPanel Spacing="4">
                             <TextBlock x:Uid="SettingsWindow_Item_095" Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
                             <TextBlock x:Uid="SettingsWindow_VersionText" x:Name="VersionText" 
-                                       Text="Version 2.31.0"
+                                       Text="Version 2.31.1"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 
-                        <TextBlock x:Uid="SettingsWindow_Item_097" Text="A local file conversion workspace with optional Windows Explorer integration."
+                        <TextBlock x:Uid="SettingsWindow_Item_097" Text="Local conversion with optional Explorer integration."
                                    TextWrapping="Wrap"
                                    Foreground="{StaticResource TextSecondaryBrush}"/>
 
@@ -757,7 +661,7 @@
                 Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,1,0,0"
-                Padding="28,12">
+                Padding="24,10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

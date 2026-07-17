@@ -124,14 +124,14 @@
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
-                <Grid MinHeight="470">
+                <Grid MinHeight="360">
                     <StackPanel x:Name="EmptyState"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Spacing="12">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xE946;" FontSize="48"
+                            <FontIcon Glyph="&#xE946;" FontSize="30"
                                       Foreground="{StaticResource AccentBlueBrush}"/>
                         </Border>
                         <TextBlock x:Uid="FormatInspectorPage_Item_006" Text="Drop files to inspect"
@@ -170,14 +170,14 @@
                 </Border>
 
                 <Border Style="{StaticResource CardStyle}">
-                    <Grid MinHeight="354">
+                    <Grid MinHeight="320">
                         <StackPanel x:Name="ReportEmpty"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Spacing="10">
-                            <Border Width="116" Height="116" CornerRadius="28"
+                            <Border Width="72" Height="72" CornerRadius="18"
                                     Background="{StaticResource SurfaceLightBrush}">
-                                <FontIcon Glyph="&#xE9D9;" FontSize="48"
+                                <FontIcon Glyph="&#xE9D9;" FontSize="30"
                                           Foreground="{StaticResource TextMutedBrush}"/>
                             </Border>
                             <TextBlock x:Uid="FormatInspectorPage_Item_010" Text="Select a file to view the report"

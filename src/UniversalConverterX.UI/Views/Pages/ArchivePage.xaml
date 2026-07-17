@@ -176,9 +176,9 @@
                 <StackPanel x:Name="EmptyState"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="10">
-                    <Border Width="80" Height="80" CornerRadius="20"
+                    <Border Width="60" Height="60" CornerRadius="16"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE7B8;" FontSize="36"
+                        <FontIcon Glyph="&#xE7B8;" FontSize="28"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Uid="ArchivePage_Item_021" Text="Drop files / folders here"

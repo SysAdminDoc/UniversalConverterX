@@ -138,11 +138,11 @@
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem x:Uid="VideoEnhancerPage_VideoEnhancerPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="VideoEnhancerPagePivotItem01">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE799;" FontSize="48"
+                                    <FontIcon Glyph="&#xE799;" FontSize="30"
                                               Foreground="{StaticResource AccentBlueBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="VideoEnhancerPage_Item_009" Text="Drop video files here"
@@ -163,12 +163,12 @@
                     </PivotItem>
                     <PivotItem x:Uid="VideoEnhancerPage_VideoEnhancerPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="VideoEnhancerPagePivotItem02">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="VideoEnhancerPage_Item_013" Text="No upscaled videos yet"

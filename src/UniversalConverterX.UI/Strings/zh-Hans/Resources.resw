@@ -1408,10 +1408,10 @@
     <value>大小比较比较</value>
   </data>
   <data name="CompressorPage_Item_061.Text" xml:space="preserve">
-    <value>SOURCE</value>
+    <value>源</value>
   </data>
   <data name="CompressorPage_Item_063.Text" xml:space="preserve">
-    <value>RESULT</value>
+    <value>结果</value>
   </data>
   <data name="CompressorPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>保存到</value>
@@ -1534,7 +1534,7 @@
     <value>命令预览</value>
   </data>
   <data name="ConverterPage_FormatSelector.Header" xml:space="preserve">
-    <value>将全部文件转换为</value>
+    <value>格式</value>
   </data>
   <data name="ConverterPage_FormatSelector.PlaceholderText" xml:space="preserve">
     <value>选择格式</value>
@@ -1597,7 +1597,7 @@
     <value>预览是一个批量安全模板。 每个工作用自己的路径替换 {input} 和 {output} 。</value>
   </data>
   <data name="ConverterPage_Item_035.Text" xml:space="preserve">
-    <value>产出概况</value>
+    <value>输出</value>
   </data>
   <data name="ConverterPage_Item_037.Content" xml:space="preserve">
     <value>MP4 - 视频</value>
@@ -1643,9 +1643,6 @@
   </data>
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - 文件</value>
-  </data>
-  <data name="ConverterPage_Item_053.Text" xml:space="preserve">
-    <value>文件位置</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>保存到</value>
@@ -2913,65 +2910,23 @@
   <data name="HomePage_Item_004.Text" xml:space="preserve">
     <value>转换、压缩、下载、记录和检查当地媒体。</value>
   </data>
-  <data name="HomePage_Item_005.Text" xml:space="preserve">
-    <value>以任务开始, 添加文件, 选择输出, 并审查结果。 工具在输入工作流程前显示可用性 。</value>
-  </data>
-  <data name="HomePage_Item_009.Text" xml:space="preserve">
-    <value>AT A GLANCE</value>
-  </data>
-  <data name="HomePage_Item_010.Text" xml:space="preserve">
-    <value>工作空间行为</value>
-  </data>
-  <data name="HomePage_Item_011.Text" xml:space="preserve">
-    <value>默认本地( 默认)</value>
-  </data>
-  <data name="HomePage_Item_012.Text" xml:space="preserve">
-    <value>文件保留在磁盘上,除非工作流程另有规定。</value>
-  </data>
-  <data name="HomePage_Item_013.Text" xml:space="preserve">
-    <value>基于队列的队列</value>
-  </data>
-  <data name="HomePage_Item_014.Text" xml:space="preserve">
-    <value>进展、取消和成果保持可见。</value>
-  </data>
-  <data name="HomePage_Item_015.Text" xml:space="preserve">
-    <value>显示就绪状态</value>
-  </data>
-  <data name="HomePage_Item_016.Text" xml:space="preserve">
-    <value>没有可用的工具来解释缺少什么 。</value>
-  </data>
-  <data name="HomePage_Item_017.Text" xml:space="preserve">
-    <value>无遥测</value>
-  </data>
-  <data name="HomePage_Item_018.Text" xml:space="preserve">
-    <value>没有从应用程序发送使用跟踪信息 。</value>
-  </data>
   <data name="HomePage_Item_020.Text" xml:space="preserve">
     <value>流动流量</value>
-  </data>
-  <data name="HomePage_Item_021.Text" xml:space="preserve">
-    <value>可执行的任务</value>
   </data>
   <data name="HomePage_Item_022.Text" xml:space="preserve">
     <value>AI实验室</value>
   </data>
-  <data name="HomePage_Item_023.Text" xml:space="preserve">
-    <value>显示可用性</value>
-  </data>
   <data name="HomePage_Item_024.Text" xml:space="preserve">
     <value>工具箱</value>
   </data>
-  <data name="HomePage_Item_025.Text" xml:space="preserve">
-    <value>专门公用事业</value>
-  </data>
   <data name="HomePage_Item_026.Text" xml:space="preserve">
-    <value>DIAGNOSTICS</value>
+    <value>诊断</value>
   </data>
   <data name="HomePage_Item_027.Text" xml:space="preserve">
     <value>本地日志和崩溃捆包</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.0</value>
+    <value>UniversalConverter X v2.31.1</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>当地一级处理</value>
@@ -4424,16 +4379,10 @@ libx264
     <value>设置</value>
   </data>
   <data name="SettingsWindow_Item_003.Text" xml:space="preserve">
-    <value>设置默认值、 本地工具路径、 探索者整合和外观 。</value>
-  </data>
-  <data name="SettingsWindow_Item_004.Text" xml:space="preserve">
-    <value>本地违约</value>
+    <value>默认设置、本地工具、集成和外观。</value>
   </data>
   <data name="SettingsWindow_Item_005.Text" xml:space="preserve">
     <value>常规</value>
-  </data>
-  <data name="SettingsWindow_Item_006.Text" xml:space="preserve">
-    <value>输出位置、覆盖行为、通知</value>
   </data>
   <data name="SettingsWindow_Item_010.Content" xml:space="preserve">
     <value>每次询问</value>
@@ -4457,7 +4406,7 @@ libx264
     <value>永久删除原件</value>
   </data>
   <data name="SettingsWindow_Item_020.Text" xml:space="preserve">
-    <value>删除已校验输出后永久删除原件。 移动是更安全的清理选项 。</value>
+    <value>仅在输出验证后删除。移动原文件更安全。</value>
   </data>
   <data name="SettingsWindow_Item_024.Content" xml:space="preserve">
     <value>无所不做</value>
@@ -4475,13 +4424,10 @@ libx264
     <value>运行 PowerShell 脚本</value>
   </data>
   <data name="SettingsWindow_Item_031.Text" xml:space="preserve">
-    <value>只有当每个队列项目成功时, 才会有睡眠和关闭运行。 关闭计划将使用60秒的 Windows 取消窗口。 脚本将获得 JSON 概要路径作为第一个参数 。</value>
+    <value>休眠和关机要求所有任务成功。关机提供 60 秒取消时间；脚本会收到 JSON 摘要路径。</value>
   </data>
   <data name="SettingsWindow_Item_032.Text" xml:space="preserve">
     <value>质量和绩效</value>
-  </data>
-  <data name="SettingsWindow_Item_033.Text" xml:space="preserve">
-    <value>默认质量、硬件加速、平行处理</value>
   </data>
   <data name="SettingsWindow_Item_035.Content" xml:space="preserve">
     <value>最低 - 最小文件大小</value>
@@ -4522,23 +4468,14 @@ libx264
   <data name="SettingsWindow_Item_049.Text" xml:space="preserve">
     <value>转换器工具</value>
   </data>
-  <data name="SettingsWindow_Item_050.Text" xml:space="preserve">
-    <value>管理 FFmpeg、 ImageMagick 和其他 CLI 工具</value>
-  </data>
   <data name="SettingsWindow_Item_054.Text" xml:space="preserve">
     <value>信任的插件</value>
   </data>
-  <data name="SettingsWindow_Item_055.Text" xml:space="preserve">
-    <value>在本地随行车行驶前审查当地随行车</value>
-  </data>
   <data name="SettingsWindow_Item_056.Text" xml:space="preserve">
-    <value>被丢弃的插件会默认隔离。 信任覆盖每个文件的 SHA-256; 任何更改都会禁用执行, 直到您审查和信任新的散列。 链接和折射点会被拒绝 。</value>
+    <value>新插件会保持隔离，直到其文件哈希获得信任。文件变更会再次禁用插件；链接和重解析点会被拒绝。</value>
   </data>
   <data name="SettingsWindow_Item_059.Text" xml:space="preserve">
     <value>Shell 集成</value>
-  </data>
-  <data name="SettingsWindow_Item_060.Text" xml:space="preserve">
-    <value>Windows 探索上下文菜单选项</value>
   </data>
   <data name="SettingsWindow_Item_063.Content" xml:space="preserve">
     <value>递归菜单( 转至 __ )</value>
@@ -4555,17 +4492,11 @@ libx264
   <data name="SettingsWindow_Item_075.Text" xml:space="preserve">
     <value>高级</value>
   </data>
-  <data name="SettingsWindow_Item_076.Text" xml:space="preserve">
-    <value>电力用户指令审查和编辑</value>
-  </data>
   <data name="SettingsWindow_Item_078.Text" xml:space="preserve">
-    <value>经过编辑的命令被解析为没有 shell 的参数矢量。 输入/ 输出占位符是强制性的, 而 shell 元字符则被拒绝 。</value>
+    <value>命令不通过 shell 运行。必须包含输入和输出占位符；shell 元字符会被拒绝。</value>
   </data>
   <data name="SettingsWindow_Item_079.Text" xml:space="preserve">
     <value>外观</value>
-  </data>
-  <data name="SettingsWindow_Item_080.Text" xml:space="preserve">
-    <value>主题、口音颜色、窗口行为</value>
   </data>
   <data name="SettingsWindow_Item_082.Content" xml:space="preserve">
     <value>照明灯</value>
@@ -4582,14 +4513,11 @@ libx264
   <data name="SettingsWindow_Item_093.Text" xml:space="preserve">
     <value>关于</value>
   </data>
-  <data name="SettingsWindow_Item_094.Text" xml:space="preserve">
-    <value>版本信息、更新、许可证</value>
-  </data>
   <data name="SettingsWindow_Item_095.Text" xml:space="preserve">
     <value>UniversalConverter X</value>
   </data>
   <data name="SettingsWindow_Item_097.Text" xml:space="preserve">
-    <value>一个带有可选 Windows 探索器整合的本地文件转换工作空间 。</value>
+    <value>本地转换，可选资源管理器集成。</value>
   </data>
   <data name="SettingsWindow_Item_104.Text" xml:space="preserve">
     <value>本地引擎 :</value>
@@ -4769,7 +4697,7 @@ libx264
     <value>最新更新现状</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.0</value>
+    <value>Version 2.31.1</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>取消</value>
@@ -5422,27 +5350,6 @@ libx264
   <data name="ToolboxPage_Item_003.Text" xml:space="preserve">
     <value>制作、修理、提取和准备媒体的专门工具。</value>
   </data>
-  <data name="ToolboxPage_Item_004.Text" xml:space="preserve">
-    <value>即时工具可直接打开。 计划工具仍被禁用, 并解释缺少的工具 。</value>
-  </data>
-  <data name="ToolboxPage_Item_005.Text" xml:space="preserve">
-    <value>状态键</value>
-  </data>
-  <data name="ToolboxPage_Item_006.Text" xml:space="preserve">
-    <value>准备打开可运行的工作流程</value>
-  </data>
-  <data name="ToolboxPage_Item_007.Text" xml:space="preserve">
-    <value>计划有明确的执行路径</value>
-  </data>
-  <data name="ToolboxPage_Item_008.Text" xml:space="preserve">
-    <value>未来仍需要的范围范围决定</value>
-  </data>
-  <data name="ToolboxPage_Item_009.Text" xml:space="preserve">
-    <value>AI</value>
-  </data>
-  <data name="ToolboxPage_Item_010.Text" xml:space="preserve">
-    <value>模型支持工具</value>
-  </data>
   <data name="ToolboxPage_Item_011.Text" xml:space="preserve">
     <value>Image</value>
   </data>
@@ -5528,13 +5435,13 @@ libx264
     <value>UCX 检查本地预设输入, 过滤不兼容的工具, 并保持原文件不动 。</value>
   </data>
   <data name="UniversalConvertPage_Item_007.Text" xml:space="preserve">
-    <value>SAFE MATCHING</value>
+    <value>安全匹配</value>
   </data>
   <data name="UniversalConvertPage_Item_008.Text" xml:space="preserve">
     <value>在您选择预设之前不得开始转换 。</value>
   </data>
   <data name="UniversalConvertPage_Item_009.Text" xml:space="preserve">
-    <value>BATCH AWARE</value>
+    <value>支持批处理</value>
   </data>
   <data name="UniversalConvertPage_Item_010.Text" xml:space="preserve">
     <value>混合选择显示部分和全部覆盖匹配。</value>

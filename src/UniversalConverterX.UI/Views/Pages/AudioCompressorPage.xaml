@@ -127,14 +127,14 @@
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"
                     PointerPressed="DropZone_PointerPressed">
-                <Grid MinHeight="430" Padding="0,8,0,0">
+                <Grid MinHeight="320" Padding="0,8,0,0">
                     <StackPanel x:Name="EmptyState"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Spacing="12">
-                        <Border Width="116" Height="116" CornerRadius="28"
+                        <Border Width="72" Height="72" CornerRadius="18"
                                 Background="{StaticResource SurfaceLightBrush}">
-                            <FontIcon Glyph="&#xE91F;" FontSize="48"
+                            <FontIcon Glyph="&#xE91F;" FontSize="30"
                                       Foreground="{StaticResource AccentCyanBrush}"/>
                         </Border>
                         <TextBlock x:Uid="AudioCompressorPage_Item_007" Text="Drop audio files to compress"

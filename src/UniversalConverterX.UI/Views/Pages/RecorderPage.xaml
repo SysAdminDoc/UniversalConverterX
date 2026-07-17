@@ -175,14 +175,14 @@
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem x:Uid="RecorderPage_RecorderPagePivotItem01" Header="Recording"
                         AutomationProperties.AutomationId="RecorderPagePivotItem01">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="QueueEmpty"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE7C8;" FontSize="48"
+                                    <FontIcon Glyph="&#xE7C8;" FontSize="30"
                                               Foreground="{StaticResource AccentRedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="RecorderPage_Item_009" Text="Build a recording queue"
@@ -211,14 +211,14 @@
 
                     <PivotItem x:Uid="RecorderPage_RecorderPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="RecorderPagePivotItem02">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="10">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="RecorderPage_Item_013" Text="No finished recordings yet"

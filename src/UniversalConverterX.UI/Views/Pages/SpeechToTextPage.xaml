@@ -186,14 +186,14 @@
                 <Pivot x:Name="QueuePivot" SelectionChanged="QueuePivot_SelectionChanged">
                     <PivotItem x:Uid="SpeechToTextPage_SpeechToTextPagePivotItem01" Header="Queue"
                         AutomationProperties.AutomationId="SpeechToTextPagePivotItem01">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="EmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE720;" FontSize="48"
+                                    <FontIcon Glyph="&#xE720;" FontSize="30"
                                               Foreground="{StaticResource AccentGreenBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="SpeechToTextPage_Item_010" Text="Drop audio or video files"
@@ -219,14 +219,14 @@
 
                     <PivotItem x:Uid="SpeechToTextPage_SpeechToTextPagePivotItem02" Header="Finished"
                         AutomationProperties.AutomationId="SpeechToTextPagePivotItem02">
-                        <Grid MinHeight="430" Padding="0,8,0,0">
+                        <Grid MinHeight="320" Padding="0,8,0,0">
                             <StackPanel x:Name="FinishedEmptyState"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="12">
-                                <Border Width="116" Height="116" CornerRadius="28"
+                                <Border Width="72" Height="72" CornerRadius="18"
                                         Background="{StaticResource SurfaceLightBrush}">
-                                    <FontIcon Glyph="&#xE73E;" FontSize="48"
+                                    <FontIcon Glyph="&#xE73E;" FontSize="30"
                                               Foreground="{StaticResource TextMutedBrush}"/>
                                 </Border>
                                 <TextBlock x:Uid="SpeechToTextPage_Item_014" Text="No finished transcriptions yet"

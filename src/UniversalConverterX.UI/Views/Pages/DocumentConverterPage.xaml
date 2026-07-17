@@ -128,9 +128,9 @@
                 <StackPanel x:Name="EmptyState"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             Spacing="10">
-                    <Border Width="80" Height="80" CornerRadius="20"
+                    <Border Width="60" Height="60" CornerRadius="16"
                             Background="{StaticResource SurfaceLightBrush}">
-                        <FontIcon Glyph="&#xE8A5;" FontSize="36"
+                        <FontIcon Glyph="&#xE8A5;" FontSize="28"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Uid="DocumentConverterPage_Item_009" Text="Drop documents here"
