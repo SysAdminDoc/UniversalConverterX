@@ -76,7 +76,7 @@ except Exception:
 import requests
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
-from PyQt6.QtGui import *, QIcon
+from PyQt6.QtGui import *
 
 APP_NAME = "LipSight"
 APP_VERSION = "1.1.0"

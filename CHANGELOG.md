@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+- Restored valid Python syntax in the FrameSnap, HEICShift, and LipSight legacy GUI sources after malformed icon-import injection, and added a repository-wide tracked-Python parser contract to prevent recurrence.
+
 ### Security
 
 - Dia2 and Chatterbox inference is process-offline and accepts only complete local model bundles from immutable Hugging Face revisions with exact byte counts and SHA-256 hashes. Model acquisition is explicit-consent only and stages every file before promotion. Dia2's vendored runtime disables remote tokenizer code and localizes Mimi loading; Chatterbox voice cloning requires an explicit consent flag and preserves the upstream PerTh watermark.

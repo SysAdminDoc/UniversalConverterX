@@ -118,7 +118,7 @@ except ImportError:
 from PyQt6.QtCore import (
     Qt, QThread, pyqtSignal, QTimer, QSettings, QSize, QUrl,
 )
-from PyQt6.QtGui import (, QIcon
+from PyQt6.QtGui import (
     QFont, QColor, QPalette, QIcon, QPixmap, QPainter, QAction,
     QDragEnterEvent, QDropEvent,
 )

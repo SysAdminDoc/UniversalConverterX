@@ -74,7 +74,7 @@ from PyQt6.QtCore import (
     Qt, QTimer, QThread, QMutex, QWaitCondition, pyqtSignal,
     QPoint, QSize, QRect,
 )
-from PyQt6.QtGui import (, QIcon
+from PyQt6.QtGui import (
     QPixmap, QImage, QIcon, QPainter, QColor, QFont, QAction,
     QDragEnterEvent, QDropEvent,
 )
