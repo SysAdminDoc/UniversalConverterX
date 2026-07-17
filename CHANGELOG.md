@@ -4,6 +4,24 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.4] - 2026-07-17
+
+### Security
+
+- Guard sidecar `tarfile.extractall` and the Godot `.pck` extractor against path traversal (tar-slip): a malicious `.cbt` comic archive, Joplin `.jex` export, or crafted `.pck` could write outside the extraction directory or plant symlinks. Added shared `safe_tar_extractall`/`safe_extract_path` helpers. (zip extraction was already safe — CPython strips `..`.)
+- Neutralize CSV formula injection in exported conversion reports: fields beginning with `= + - @` (from filenames or tool output) are prefixed with an apostrophe so they aren't executed as formulas in Excel/LibreOffice, while genuine negative numbers are left intact.
+- Escape user-controlled values in `ucx` CLI markup output so a `[` in a config key/value, path, format, tool name, or action no longer throws inside Spectre and returns exit code -1 instead of the intended 0/1.
+
+### Fixed
+
+- Format and parse all external-tool numbers with `InvariantCulture`. On comma-decimal locales (de/fr, which ship as resources) converters emitted args like `-r 29,97` that FFmpeg rejects, and `double.Parse` of period-decimal tool output threw, breaking FFmpeg/Calibre/JXL progress and resvg SVG sizing. Covers FFmpeg, potrace, cjxl, resvg, Calibre.
+- Do not fail an otherwise-successful conversion when Mark-of-the-Web can't be copied under the default Keep action (output on FAT32/exFAT/SMB or an over-cap zone). Surface it as a warning instead of a hard failure.
+- Relocate LibreOffice output to the requested filename: `--convert-to` writes `<sourceStem>.<ext>` and ignored collision-avoidance suffixes and filename templates, so a successful conversion was reported as failed and left a mis-named file.
+- Harden `SidecarHealthService` (a concurrently-used DI singleton) against manifest-cache corruption by switching to `ConcurrentDictionary`.
+- `ReleaseCompatibilityPolicy.ParseManifest` no longer throws `NullReferenceException` on a remote manifest with `"product": null`; bad input returns null as documented.
+- Harden `AutoHighlightWorkflowViewModel.ParseHighlight` against malformed sidecar JSON (wrong value kinds) so a bad event degrades to defaults instead of throwing in the event callback.
+- Stamp only the schema version actually reached on a settings-migration gap, preventing a false "fully migrated" stamp from becoming permanent.
+
 ## [2.31.3] - 2026-07-17
 
 ### Changed

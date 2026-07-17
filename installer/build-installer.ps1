@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.31.3.0',
+    [string]$Version = '2.31.4.0',
 
     [string]$FfmpegArchivePath
 )
