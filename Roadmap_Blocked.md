@@ -28,6 +28,16 @@ Impact: 2 · Effort: 4 · Type: parity
 
 Publish a native ARM64 build targeting Snapdragon X Elite / X Plus devices. Requires ARM64 .NET 10 publish, ARM64 WinUI 3 validation, and verifying Python sidecars under ARM64 Python or x64 emulation. ONNX Runtime 1.25.0 removed ArmNN EP — must target QNN EP only.
 
+The generic Intel NPU candidate was qualified on 2026-07-17 and does not
+justify a separate acceleration backend. On an Intel Core Ultra 9 285 with
+Intel AI Boost, OpenVINO 2026.2 reported the NPU ready, but Windows App SDK
+2.2 `VideoScaler` reported `NotSupportedOnCurrentSystem`. Five warmed trials
+of the same eight-layer 192x192 convolution workload produced median
+throughput of 815 frames/s on the NPU (four asynchronous requests) versus
+1,510 frames/s through ONNX Runtime 1.22 CUDA on an RTX 4070 SUPER (one
+request). CUDA was 1.85x faster, so UCX keeps its existing CUDA and portable
+fallback paths instead of adding an Intel-only runtime for lower throughput.
+
 Impact: 2 · Effort: 4 · Type: platform
 
 **Blocker:** Needs a Snapdragon X Elite device to verify QNN EP availability, ARM64 Python sidecar compatibility, and WinUI 3 ARM64 rendering. Cannot be validated without hardware.
