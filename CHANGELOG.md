@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.30.0] - 2026-07-17
+
 ### Added
 
 - Disc Burner now authors a single video title as Blu-ray BDMV, creates a UDF 2.50 ISO, or writes the same image through the existing Windows IMAPI2 boundary. Managed FFmpeg normalizes the title to a conservative H.264 High@4.1 and AC-3 profile; the optional Apache-2.0 tsMuxeR 2.7.0 runtime comes only from a versioned release archive whose exact size and SHA-256 are verified after explicit license acceptance. UCX validates the index, movie object, playlist, clip-info, backup, and M2TS signatures before atomically preserving the inspectable BDMV folder, even when a later image/write step fails.

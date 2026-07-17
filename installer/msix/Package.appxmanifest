@@ -9,7 +9,7 @@
   <Identity
     Name="UniversalConverterX"
     Publisher="CN=UniversalConverterX"
-    Version="2.29.0.0"
+    Version="2.30.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
