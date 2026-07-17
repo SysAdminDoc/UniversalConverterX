@@ -82,6 +82,24 @@ public class SettingsMigrationsTests
     }
 
     [Fact]
+    public void Migrate_OnMigrationGap_StampsOnlyTheVersionReached()
+    {
+        // A future target with no migration for the gap must not falsely stamp
+        // the tree as fully migrated — otherwise the loader persists the false
+        // stamp and permanently skips the (later-added) transform.
+        var root = new JsonObject { ["OverwriteBehavior"] = "Ask" };
+
+        // toVersion far beyond the known migrations (v1->v2, v2->v3).
+        var result = SettingsMigrations.Migrate(root, fromVersion: 1, toVersion: 99,
+                                                out var didMigrate);
+
+        didMigrate.Should().BeTrue();
+        // Only the migrations that actually ran advance the stamp — not toVersion.
+        ((int?)result["SchemaVersion"]).Should().BeLessThan(99);
+        ((int?)result["SchemaVersion"]).Should().BeGreaterThanOrEqualTo(3);
+    }
+
+    [Fact]
     public void Migrate_NoOpWhenAlreadyAtTarget()
     {
         var root = new JsonObject

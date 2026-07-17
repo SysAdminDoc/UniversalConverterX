@@ -81,21 +81,25 @@ internal static class SettingsMigrations
         if (fromVersion >= toVersion)
             return root;
 
+        var reached = fromVersion;
         for (var v = fromVersion; v < toVersion; v++)
         {
             var migrationIndex = v - 1;
             if (migrationIndex < 0 || migrationIndex >= Migrations.Count)
             {
-                // Gap in the migration table — fall back to "stamp the version"
-                // so we don't loop forever. Surfaces as a no-op upgrade.
+                // Gap in the migration table — stop so we don't loop forever.
                 break;
             }
             Migrations[migrationIndex](root);
             didMigrate = true;
+            reached = v + 1;
         }
 
-        // Stamp the post-migration version so the loaded options carries it.
-        root["SchemaVersion"] = toVersion;
+        // Stamp only the version actually reached. Stamping toVersion on a gap
+        // would mark the file fully-migrated while the missing transform never
+        // ran; because the loader persists the migrated document, that false
+        // stamp would become permanent and defeat any later fix.
+        root["SchemaVersion"] = reached;
         return root;
     }
 }
