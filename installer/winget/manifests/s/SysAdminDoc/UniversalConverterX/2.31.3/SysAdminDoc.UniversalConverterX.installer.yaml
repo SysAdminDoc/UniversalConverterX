@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: SysAdminDoc.UniversalConverterX
+PackageVersion: 2.31.3
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: UniversalConverterX.exe
+    PortableCommandAlias: universalconverterx
+  - RelativeFilePath: ucx.exe
+    PortableCommandAlias: ucx
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/SysAdminDoc/UniversalConverterX/releases/download/v2.31.3/UniversalConverterX_2.31.3_portable.zip
+    InstallerSha256: 67F5C1C9F025E099D63520DCA50B2817B09FF0EDC49C4F96411A001DE569878C
+ManifestType: installer
+ManifestVersion: 1.12.0
