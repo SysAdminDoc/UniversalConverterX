@@ -35,7 +35,6 @@ programmability (CLI + REST + PS module), and AI depth.
 
 | Item | Question blocking placement |
 |------|-----------------------------|
-| **Community preset repository** | Needs governance + security review of contributed XML. |
 | **ComfyUI AI Workflow Integration** | Effort 5. Needs community signal. |
 | **Dia-1.6B / Dia2 TTS** | 6 GB VRAM requirement. Assess after Kokoro/F5-TTS stabilizes. |
 | **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |

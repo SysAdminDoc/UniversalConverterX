@@ -62,3 +62,27 @@ silently acquiring or claiming verification for that mutable distribution.
 Unblock when upstream publishes a versioned Windows console archive through an
 immutable release with SHA-256 metadata, or when UCX has a reproducible,
 license-reviewed Windows build recipe and a redistributable acceptance fixture.
+
+---
+
+### 149. Community Preset Repository
+
+UCX already ships the local client-side safety boundary: custom preset XML is
+read with DTDs and external resolution disabled, validated against the preset
+schema, and saved atomically; executable third-party plugins remain quarantined
+until a user approves a whole-directory SHA-256 digest, and any changed file
+revokes that trust automatically. A hosted community catalog would still be an
+external service and governance commitment, not merely another importer.
+
+Impact: 3 · Effort: 3 · Type: ecosystem
+
+**Blocker (verified 2026-07-17):** No canonical repository operator,
+contribution/license policy, moderation and incident-response owner, revocation
+feed, or immutable publication channel has been designated. Hardcoding a
+mutable or third-party feed would bypass the product's default-deny trust model
+and turn contributed sidecar arguments into an unreviewed remote control
+surface. Unblock with a SysAdminDoc-owned catalog location and named operator
+policy that defines review, takedown, license provenance, immutable versioned
+assets, SHA-256 metadata, and revocation semantics. The future client must keep
+network access user-initiated, validate every preset locally, show the exact
+engine and arguments before install, and never auto-update installed presets.
