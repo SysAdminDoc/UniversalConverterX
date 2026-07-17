@@ -1470,23 +1470,23 @@
   <data name="CompressorPage_VmafTargetBox.Header" xml:space="preserve">
     <value>最小 VMAF 质量</value>
   </data>
+  <data name="ConverterPage_AddFilesLabel.Text" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="ConverterPage_AddFolderMenuItem.Text" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
   <data name="ConverterPage_AdvancedFfmpegExpander.Header" xml:space="preserve">
     <value>高级 FFmpeg 命令</value>
+  </data>
+  <data name="ConverterPage_AudioSelector.Header" xml:space="preserve">
+    <value>Audio</value>
   </data>
   <data name="ConverterPage_CancelButton.Content" xml:space="preserve">
     <value>取消</value>
   </data>
   <data name="ConverterPage_ConversionProgress.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>进度</value>
-  </data>
-  <data name="ConverterPage_ConvertButton.Content" xml:space="preserve">
-    <value>全部转换</value>
-  </data>
-  <data name="ConverterPage_ConverterPageButton01.Content" xml:space="preserve">
-    <value>添加文件</value>
-  </data>
-  <data name="ConverterPage_ConverterPageButton02.Content" xml:space="preserve">
-    <value>添加文件夹</value>
   </data>
   <data name="ConverterPage_ConverterPageButton03.Content" xml:space="preserve">
     <value>浏览文件</value>
@@ -1500,11 +1500,11 @@
   <data name="ConverterPage_ConverterPageButton06.Content" xml:space="preserve">
     <value>图像网络P</value>
   </data>
-  <data name="ConverterPage_ConverterPageButton07.Content" xml:space="preserve">
-    <value>浏览</value>
+  <data name="ConverterPage_ConverterPageButton07.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Choose output folder</value>
   </data>
-  <data name="ConverterPage_ConverterPageButton08.Content" xml:space="preserve">
-    <value>与源相同</value>
+  <data name="ConverterPage_ConverterPageButton07.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Choose output folder</value>
   </data>
   <data name="ConverterPage_ConverterPageButton09.Content" xml:space="preserve">
     <value>清除队列</value>
@@ -1539,6 +1539,9 @@
   <data name="ConverterPage_FormatSelector.PlaceholderText" xml:space="preserve">
     <value>选择格式</value>
   </data>
+  <data name="ConverterPage_FrameRateSelector.Header" xml:space="preserve">
+    <value>Frame rate</value>
+  </data>
   <data name="ConverterPage_HighSpeedToggle.Header" xml:space="preserve">
     <value>高速转换</value>
   </data>
@@ -1551,11 +1554,17 @@
   <data name="ConverterPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>文件预览缩略图</value>
   </data>
+  <data name="ConverterPage_Item_001_2.Text" xml:space="preserve">
+    <value>Convert</value>
+  </data>
   <data name="ConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>估计产出规模</value>
   </data>
   <data name="ConverterPage_Item_003.Text" xml:space="preserve">
     <value>准备就绪</value>
+  </data>
+  <data name="ConverterPage_Item_003_2.Content" xml:space="preserve">
+    <value>High quality (recommended)</value>
   </data>
   <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>从队列中删除</value>
@@ -1563,11 +1572,20 @@
   <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>从队列中删除</value>
   </data>
+  <data name="ConverterPage_Item_004_2.Content" xml:space="preserve">
+    <value>Highest quality</value>
+  </data>
   <data name="ConverterPage_Item_005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>进度</value>
   </data>
+  <data name="ConverterPage_Item_005_2.Content" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
   <data name="ConverterPage_Item_006.Content" xml:space="preserve">
     <value>打开文件夹</value>
+  </data>
+  <data name="ConverterPage_Item_006_2.Content" xml:space="preserve">
+    <value>Smaller file</value>
   </data>
   <data name="ConverterPage_Item_007.Text" xml:space="preserve">
     <value>转换器</value>
@@ -1575,23 +1593,62 @@
   <data name="ConverterPage_Item_008.Text" xml:space="preserve">
     <value>队列文件, 选择一个输出配置, 并审查已完成结果 。</value>
   </data>
+  <data name="ConverterPage_Item_008_2.Content" xml:space="preserve">
+    <value>Same as source</value>
+  </data>
+  <data name="ConverterPage_Item_009.Content" xml:space="preserve">
+    <value>4K (3840 x 2160)</value>
+  </data>
+  <data name="ConverterPage_Item_010.Content" xml:space="preserve">
+    <value>Full HD (1920 x 1080)</value>
+  </data>
+  <data name="ConverterPage_Item_011.Content" xml:space="preserve">
+    <value>HD (1280 x 720)</value>
+  </data>
   <data name="ConverterPage_Item_012.Text" xml:space="preserve">
     <value>添加媒体、图像、文件或档案</value>
   </data>
   <data name="ConverterPage_Item_013.Text" xml:space="preserve">
     <value>在此拖放文件, 添加文件夹, 或者从磁盘浏览 。</value>
   </data>
-  <data name="ConverterPage_Item_015.Text" xml:space="preserve">
-    <value>预览预览</value>
+  <data name="ConverterPage_Item_013_2.Content" xml:space="preserve">
+    <value>Same as source</value>
+  </data>
+  <data name="ConverterPage_Item_014.Content" xml:space="preserve">
+    <value>60 fps</value>
+  </data>
+  <data name="ConverterPage_Item_015_2.Content" xml:space="preserve">
+    <value>30 fps</value>
+  </data>
+  <data name="ConverterPage_Item_016.Content" xml:space="preserve">
+    <value>24 fps</value>
+  </data>
+  <data name="ConverterPage_Item_018.Content" xml:space="preserve">
+    <value>AAC, 320 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_019.Content" xml:space="preserve">
+    <value>AAC, 192 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_020.Content" xml:space="preserve">
+    <value>AAC, 128 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_021.Content" xml:space="preserve">
+    <value>Automatic</value>
   </data>
   <data name="ConverterPage_Item_022.Text" xml:space="preserve">
     <value>尚未完成转换</value>
+  </data>
+  <data name="ConverterPage_Item_022_2.Text" xml:space="preserve">
+    <value>Save to</value>
   </data>
   <data name="ConverterPage_Item_023.Text" xml:space="preserve">
     <value>完成、 失败、 取消文件并在此出现 。</value>
   </data>
   <data name="ConverterPage_Item_024.Text" xml:space="preserve">
     <value>格式化快捷键</value>
+  </data>
+  <data name="ConverterPage_Item_025.Header" xml:space="preserve">
+    <value>More output options</value>
   </data>
   <data name="ConverterPage_Item_031.Text" xml:space="preserve">
     <value>预览是一个批量安全模板。 每个工作用自己的路径替换 {input} 和 {output} 。</value>
@@ -1644,14 +1701,23 @@
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - 文件</value>
   </data>
-  <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
-    <value>保存到</value>
+  <data name="ConverterPage_OpenOutputAfterConversionCheckBox.Content" xml:space="preserve">
+    <value>Open output folder after conversion</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.PlaceholderText" xml:space="preserve">
     <value>与源文件相同</value>
   </data>
+  <data name="ConverterPage_OutputSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Open advanced output settings</value>
+  </data>
+  <data name="ConverterPage_OutputSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Advanced output settings</value>
+  </data>
   <data name="ConverterPage_ProgressTitle.Text" xml:space="preserve">
     <value>正在转换...</value>
+  </data>
+  <data name="ConverterPage_QualityPresetSelector.Header" xml:space="preserve">
+    <value>Preset</value>
   </data>
   <data name="ConverterPage_QueueSortEstimateButton.Content" xml:space="preserve">
     <value>Est产出</value>
@@ -1673,6 +1739,12 @@
   </data>
   <data name="ConverterPage_RecommendationText.Text" xml:space="preserve">
     <value>添加文件以接收本地输出建议 。</value>
+  </data>
+  <data name="ConverterPage_ResolutionSelector.Header" xml:space="preserve">
+    <value>Resolution</value>
+  </data>
+  <data name="ConverterPage_SameAsSourceFolderCheckBox.Content" xml:space="preserve">
+    <value>Same as source folder</value>
   </data>
   <data name="ConverterPage_SmartMatchButton.Content" xml:space="preserve">
     <value>智能匹配</value>
@@ -2926,7 +2998,7 @@
     <value>本地日志和崩溃捆包</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.1</value>
+    <value>UniversalConverter X v2.31.2</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>当地一级处理</value>
@@ -4697,7 +4769,7 @@ libx264
     <value>最新更新现状</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.1</value>
+    <value>Version 2.31.2</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>取消</value>

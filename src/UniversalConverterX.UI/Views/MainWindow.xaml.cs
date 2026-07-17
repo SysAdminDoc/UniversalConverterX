@@ -117,7 +117,7 @@ public sealed partial class MainWindow : Window
         // Default landing — JumpList passes `--route <key>` as activation arg
         // (see App.ConfigureJumpListAsync); honour it on first activate.
         var route = ParseJumpListRoute(Environment.GetCommandLineArgs());
-        RequestNavigation(route ?? "home");
+        RequestNavigation(route ?? "converter");
     }
 
     private static string? ParseJumpListRoute(string[] argv)

@@ -606,7 +606,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock x:Uid="SettingsWindow_Item_095" Text="UniversalConverter X" Style="{StaticResource SubtitleTextStyle}"/>
                             <TextBlock x:Uid="SettingsWindow_VersionText" x:Name="VersionText" 
-                                       Text="Version 2.31.1"
+                                       Text="Version 2.31.2"
                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 

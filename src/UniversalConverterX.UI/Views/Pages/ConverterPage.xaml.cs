@@ -68,6 +68,11 @@ public sealed partial class ConverterPage : Page
     private CancellationTokenSource? _cancellationTokenSource;
     private string? _selectedFormat;
     private string? _outputDirectory;
+    private QualityPreset _qualityPreset = QualityPreset.High;
+    private int? _outputWidth;
+    private int? _outputHeight;
+    private double? _outputFrameRate;
+    private string _audioProfile = "aac-320-2";
     private bool _restoringQueue;
     private bool _updatingFfmpegCommand;
     private QueueSortColumn _queueSortColumn = QueueSortColumn.File;
@@ -87,6 +92,11 @@ public sealed partial class ConverterPage : Page
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
+        // Establish the mockup's MP4 default without clearing an interrupted
+        // queue before RestorePersistedQueue has had a chance to read it.
+        _restoringQueue = true;
+        SelectFormat("mp4");
+        _restoringQueue = false;
         RestorePersistedQueue();
         UpdateUI();
     }
@@ -236,6 +246,8 @@ public sealed partial class ConverterPage : Page
 
     private void BrowseButton_Click(object sender, RoutedEventArgs e) => BrowseFiles();
 
+    private void AddFilesSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs args) => BrowseFiles();
+
     private async void BrowseFiles()
     {
         var picker = new FileOpenPicker
@@ -289,16 +301,64 @@ public sealed partial class ConverterPage : Page
 
         _outputDirectory = folder.Path;
         OutputDirectoryBox.Text = _outputDirectory;
+        SameAsSourceFolderCheckBox.IsChecked = false;
         PersistQueue();
         UpdateFooterStatus();
     }
 
-    private void SameAsSource_Click(object sender, RoutedEventArgs e)
+    private void SameAsSourceFolder_Changed(object sender, RoutedEventArgs e)
     {
+        if (SameAsSourceFolderCheckBox.IsChecked != true)
+            return;
+
         _outputDirectory = null;
         OutputDirectoryBox.Text = "";
+        if (_queueStore is null)
+            return;
         PersistQueue();
         UpdateFooterStatus();
+    }
+
+    private void OpenAdvancedSettings_Click(object sender, RoutedEventArgs e)
+    {
+        AdvancedFfmpegExpander.IsExpanded = true;
+        AdvancedFfmpegExpander.Focus(FocusState.Programmatic);
+    }
+
+    private void OutputPreference_Changed(object sender, RoutedEventArgs e) => PersistQueue();
+
+    private void OutputProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (QualityPresetSelector?.SelectedItem is ComboBoxItem qualityItem
+            && Enum.TryParse(qualityItem.Tag?.ToString(), true, out QualityPreset quality))
+        {
+            _qualityPreset = quality;
+        }
+
+        (_outputWidth, _outputHeight) = ParseResolution(
+            (ResolutionSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString());
+
+        var frameRateTag = (FrameRateSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        _outputFrameRate = double.TryParse(frameRateTag, out var frameRate) ? frameRate : null;
+
+        _audioProfile = (AudioSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "source";
+        if (_queueStore is null)
+            return;
+        PersistQueue();
+        UpdateFfmpegCommandPreview();
+    }
+
+    private static (int? Width, int? Height) ParseResolution(string? tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag) || tag.Equals("source", StringComparison.OrdinalIgnoreCase))
+            return (null, null);
+
+        var dimensions = tag.Split('x', 2, StringSplitOptions.TrimEntries);
+        return dimensions.Length == 2
+            && int.TryParse(dimensions[0], out var width)
+            && int.TryParse(dimensions[1], out var height)
+                ? (width, height)
+                : (null, null);
     }
 
     private void AddFolder(string path)
@@ -662,7 +722,10 @@ public sealed partial class ConverterPage : Page
             {
                 _outputDirectory = outputDirectory;
                 OutputDirectoryBox.Text = outputDirectory;
+                SameAsSourceFolderCheckBox.IsChecked = false;
             }
+
+            RestoreOutputProfile(queue.Settings);
 
             var restored = 0;
             foreach (var job in queue.Jobs)
@@ -739,6 +802,13 @@ public sealed partial class ConverterPage : Page
             {
                 ["targetFormat"] = _selectedFormat,
                 ["outputDirectory"] = _outputDirectory,
+                ["qualityPreset"] = _qualityPreset.ToString(),
+                ["resolution"] = _outputWidth.HasValue && _outputHeight.HasValue
+                    ? $"{_outputWidth}x{_outputHeight}"
+                    : "source",
+                ["frameRate"] = _outputFrameRate?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "source",
+                ["audioProfile"] = _audioProfile,
+                ["openOutputAfterConversion"] = OpenOutputAfterConversionCheckBox.IsChecked == true ? "true" : "false",
             },
             Jobs = activeJobs,
         });
@@ -1117,6 +1187,12 @@ public sealed partial class ConverterPage : Page
                 ConversionProgress.IsIndeterminate = false;
                 CancelButton.Content = "Close";
                 QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
+                if (completed > 0 && OpenOutputAfterConversionCheckBox.IsChecked == true)
+                {
+                    var output = _outputDirectory
+                        ?? _finishedFiles.LastOrDefault(f => f.Success && !string.IsNullOrWhiteSpace(f.OutputPath))?.OutputPath;
+                    OpenContainingFolder(output);
+                }
             });
 
             if (!completionItems.IsEmpty)
@@ -1295,6 +1371,8 @@ public sealed partial class ConverterPage : Page
             };
         }
 
+        ApplyVisibleOutputProfile(conversionOptions);
+
         ffmpegCommandTemplate ??= EditFfmpegCommandToggle.IsOn
             ? FfmpegCommandBox.Text
             : null;
@@ -1314,6 +1392,55 @@ public sealed partial class ConverterPage : Page
         }
 
         return ConversionJob.Create(inputPath, outputPath, conversionOptions);
+    }
+
+    private void ApplyVisibleOutputProfile(ConversionOptions options)
+    {
+        options.Quality = _qualityPreset;
+        options.UseHardwareAcceleration = HighSpeedToggle.IsOn;
+        options.OutputDirectory = _outputDirectory;
+        options.Video.Width = _outputWidth;
+        options.Video.Height = _outputHeight;
+        options.Video.Fps = _outputFrameRate;
+
+        if (_audioProfile.Equals("source", StringComparison.OrdinalIgnoreCase))
+        {
+            options.Audio.Codec = null;
+            options.Audio.Bitrate = null;
+            options.Audio.Channels = null;
+            return;
+        }
+
+        var parts = _audioProfile.Split('-', StringSplitOptions.RemoveEmptyEntries);
+        options.Audio.Codec = parts.ElementAtOrDefault(0);
+        options.Audio.Bitrate = int.TryParse(parts.ElementAtOrDefault(1), out var bitrate) ? bitrate : null;
+        options.Audio.Channels = int.TryParse(parts.ElementAtOrDefault(2), out var channels) ? channels : null;
+    }
+
+    private void RestoreOutputProfile(IReadOnlyDictionary<string, string?> settings)
+    {
+        if (settings.TryGetValue("qualityPreset", out var quality))
+            SelectTaggedItem(QualityPresetSelector, quality);
+        if (settings.TryGetValue("resolution", out var resolution))
+            SelectTaggedItem(ResolutionSelector, resolution);
+        if (settings.TryGetValue("frameRate", out var frameRate))
+            SelectTaggedItem(FrameRateSelector, frameRate);
+        if (settings.TryGetValue("audioProfile", out var audio))
+            SelectTaggedItem(AudioSelector, audio);
+        if (settings.TryGetValue("openOutputAfterConversion", out var openOutput))
+            OpenOutputAfterConversionCheckBox.IsChecked = bool.TryParse(openOutput, out var open) && open;
+    }
+
+    private static void SelectTaggedItem(ComboBox selector, string? tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag))
+            return;
+
+        var match = selector.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        if (match is not null)
+            selector.SelectedItem = match;
     }
 
     private static ConversionOptions CloneOptions(ConversionOptions options)

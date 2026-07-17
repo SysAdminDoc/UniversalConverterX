@@ -68,20 +68,14 @@
             </NavigationView.AutoSuggestBox>
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Uid="MainWindow_Item_005" Tag="home" Content="Home">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE80F;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-
                 <NavigationViewItem x:Uid="MainWindow_Item_006" Tag="converter" Content="Converter">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_007" Tag="ai-lab" Content="AI Lab">
+                <NavigationViewItem x:Uid="MainWindow_Item_010" Tag="downloader" Content="Downloader">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE950;"/>
+                        <FontIcon Glyph="&#xE896;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_008" Tag="compressor" Content="Compressor">
@@ -94,6 +88,11 @@
                         <FontIcon Glyph="&#xE70F;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Uid="MainWindow_Item_007" Tag="ai-lab" Content="AI Lab">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE950;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_001_2" Tag="lossless-cut" Content="Lossless Cut">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8C6;"/>
@@ -104,9 +103,9 @@
                         <FontIcon Glyph="&#xE958;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_010" Tag="downloader" Content="Downloader">
+                <NavigationViewItem x:Uid="MainWindow_Item_005" Tag="home" Content="Home">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE896;"/>
+                        <FontIcon Glyph="&#xE80F;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_011" Tag="recorder" Content="Recorder">
@@ -148,17 +147,14 @@
             </NavigationView.FooterMenuItems>
 
             <NavigationView.PaneFooter>
-                <Border Margin="12,8,12,12"
-                        Style="{StaticResource QuietSurfaceStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Ellipse Width="7" Height="7"
-                                 Fill="{StaticResource AccentGreenBrush}"
-                                 VerticalAlignment="Center"/>
-                        <TextBlock x:Uid="MainWindow_Item_017" Text="Local-first"
-                                   Style="{StaticResource MutedTextStyle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                    </StackPanel>
-                </Border>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="18,8,12,12">
+                    <Ellipse Width="7" Height="7"
+                             Fill="{StaticResource AccentGreenBrush}"
+                             VerticalAlignment="Center"/>
+                    <TextBlock x:Uid="MainWindow_Item_017" Text="Ready"
+                               Style="{StaticResource MutedTextStyle}"
+                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                </StackPanel>
             </NavigationView.PaneFooter>
 
             <Frame x:Name="ContentFrame" Background="{StaticResource BackgroundBrush}"/>

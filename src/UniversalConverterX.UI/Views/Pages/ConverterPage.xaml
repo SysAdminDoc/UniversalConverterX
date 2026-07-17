@@ -10,12 +10,12 @@
 
     <Page.Resources>
         <DataTemplate x:Key="QueuedFileTemplate">
-            <Border Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="0"
-                    CornerRadius="12"
-                    Padding="12"
-                    Margin="0,0,0,8"
+            <Border Background="Transparent"
+                    BorderBrush="{StaticResource DividerBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="0"
+                    Padding="12,10"
+                    Margin="0"
                     MinWidth="720">
                 <Grid ColumnSpacing="12" RowSpacing="10">
                     <Grid.ColumnDefinitions>
@@ -52,24 +52,24 @@
                                    TextTrimming="CharacterEllipsis"
                                    ToolTipService.ToolTip="{Binding Path}"/>
                         <TextBlock Text="{Binding StatusText}"
-                                   Style="{StaticResource MutedTextStyle}" FontSize="12"/>
+                                   Style="{StaticResource MutedTextStyle}"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="2" Grid.Row="0"
-                               Text="{Binding FormatSummary}"
+                               Text="{Binding Extension}"
                                Style="{StaticResource MutedTextStyle}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"
-                               TextTrimming="CharacterEllipsis" FontSize="12"/>
+                               TextTrimming="CharacterEllipsis"/>
 
                     <TextBlock Grid.Column="3" Grid.Row="0"
                                Text="{Binding FileSize}"
                                Style="{StaticResource MutedTextStyle}"
-                               VerticalAlignment="Center" FontSize="12"/>
+                               VerticalAlignment="Center"/>
 
                     <TextBlock x:Uid="ConverterPage_Item_002" Grid.Column="4" Grid.Row="0"
                                Text="{Binding EstimatedSizeLabel}"
-                               Style="{StaticResource MutedTextStyle}" FontSize="12"
+                               Style="{StaticResource MutedTextStyle}"
                                Foreground="{StaticResource AccentBlueBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding HasEstimatedSize}"
@@ -85,13 +85,12 @@
                             <TextBlock Text="{Binding WarningBadgeText}"
                                        Style="{StaticResource MutedTextStyle}"
                                        Foreground="{StaticResource AccentOrangeBrush}"
-                                       TextTrimming="CharacterEllipsis" FontSize="12"/>
+                                       TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                         <TextBlock x:Uid="ConverterPage_Item_003" Text="Ready"
                                    Visibility="{Binding ReadyVisibility}"
                                    Style="{StaticResource MutedTextStyle}"
-                                   Foreground="{StaticResource AccentGreenBrush}"
-                                   FontSize="12"/>
+                                   Foreground="{StaticResource AccentGreenBrush}"/>
                     </StackPanel>
 
                     <Button x:Uid="ConverterPage_Item_004" Grid.Column="6" Grid.Row="0"
@@ -105,7 +104,7 @@
                     <Grid Grid.Column="1" Grid.ColumnSpan="6" Grid.Row="1">
                         <ProgressBar x:Uid="ConverterPage_Item_005" AutomationProperties.Name="Progress" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
-                                     Height="7" CornerRadius="3"
+                                     Height="4" CornerRadius="2"
                                      VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
@@ -161,40 +160,65 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Spacing="8">
+        <Grid Grid.Row="0" RowSpacing="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Spacing="6">
                 <TextBlock x:Uid="ConverterPage_Item_007" Text="Converter" Style="{StaticResource PageTitleTextStyle}"/>
-                <TextBlock x:Uid="ConverterPage_Item_008" Text="Queue files, choose one output profile, and review finished results."
+                <TextBlock x:Uid="ConverterPage_Item_008" Text="Convert your files to the format you need."
                            Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button x:Uid="ConverterPage_ConverterPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseButton_Click"
-                    AutomationProperties.AutomationId="ConverterPageButton01"/>
-                <Button x:Uid="ConverterPage_ConverterPageButton02" Content="Add Folder" Style="{StaticResource SecondaryButtonStyle}"
-                        Click="BrowseFolder_Click"
-                    AutomationProperties.AutomationId="ConverterPageButton02"/>
-                <Button x:Uid="ConverterPage_ConvertButton" x:Name="ConvertButton" Content="Convert All"
+            <Grid Grid.Row="1">
+                <SplitButton x:Name="AddFilesSplitButton"
+                             Click="AddFilesSplitButton_Click"
+                             Background="{StaticResource AccentPrimaryBrush}"
+                             Foreground="{StaticResource TextInverseBrush}"
+                             BorderThickness="0"
+                             CornerRadius="8"
+                             MinHeight="40"
+                             Padding="16,8"
+                             FontSize="14"
+                             FontWeight="SemiBold"
+                             AutomationProperties.AutomationId="ConverterAddFilesSplitButton">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                        <TextBlock x:Uid="ConverterPage_AddFilesLabel" Text="Add files"/>
+                    </StackPanel>
+                    <SplitButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Uid="ConverterPage_AddFolderMenuItem"
+                                            Text="Add folder"
+                                            Click="BrowseFolder_Click"
+                                            AutomationProperties.AutomationId="ConverterAddFolderMenuItem"/>
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+                </SplitButton>
+                <Button x:Uid="ConverterPage_ConvertAction" x:Name="ConvertButton"
+                        HorizontalAlignment="Right"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Click="ConvertButton_Click" IsEnabled="False"
-                        AutomationProperties.AutomationId="ConvertButton"/>
-            </StackPanel>
+                        AutomationProperties.AutomationId="ConvertButton">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock x:Uid="ConverterPage_Item_001_2" Text="Convert"/>
+                        <FontIcon Glyph="&#xE72A;" FontSize="16"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="1" ColumnSpacing="14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="372"/>
             </Grid.ColumnDefinitions>
 
             <Border x:Name="DropZone" Grid.Column="0"
-                    Style="{StaticResource CardStyle}"
-                    CornerRadius="12"
-                    Padding="18"
+                    Background="{StaticResource SurfaceMutedBrush}"
+                    BorderThickness="0"
+                    CornerRadius="10"
+                    Padding="0"
                     AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop"
@@ -231,7 +255,7 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <Border Grid.Row="0" Background="{StaticResource SurfaceLightBrush}"
-                                        CornerRadius="10" Padding="12,7" MinWidth="720">
+                                        CornerRadius="0" Padding="12,8" MinWidth="720">
                                     <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48"/>
@@ -242,8 +266,8 @@
                                             <ColumnDefinition Width="145"/>
                                             <ColumnDefinition Width="36"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock x:Uid="ConverterPage_Item_015" Grid.Column="0" Text="Preview"
-                                                   Style="{StaticResource MutedTextStyle}" FontSize="12"
+                                        <TextBlock x:Uid="ConverterPage_Item_015" Grid.Column="0" Text=""
+                                                   Style="{StaticResource MutedTextStyle}"
                                                    VerticalAlignment="Center"/>
                                         <Button x:Uid="ConverterPage_QueueSortFileButton" x:Name="QueueSortFileButton" Grid.Column="1" Content="File ↑"
                                                 Tag="file" Click="QueueSort_Click"
@@ -318,10 +342,15 @@
                 </Pivot>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="12">
-                <Border Style="{StaticResource CardStyle}">
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                <Border x:Name="OutputInspector"
+                        Background="{StaticResource SurfaceMutedBrush}"
+                        BorderThickness="0"
+                        CornerRadius="10"
+                        Padding="18">
                     <StackPanel Spacing="12">
-                        <TextBlock x:Uid="ConverterPage_Item_035" Text="Output" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="ConverterPage_Item_035" Text="Output format" Style="{StaticResource PanelTitleTextStyle}"/>
                         <ComboBox x:Uid="ConverterPage_FormatSelector" x:Name="FormatSelector"
                                   Header="Format"
                                   PlaceholderText="Select format"
@@ -344,25 +373,92 @@
                             <ComboBoxItem x:Uid="ConverterPage_Item_050" Content="PDF - Document" Tag="pdf"/>
                             <ComboBoxItem x:Uid="ConverterPage_Item_051" Content="DOCX - Document" Tag="docx"/>
                         </ComboBox>
-                        <TextBox x:Uid="ConverterPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
-                                 Header="Save to"
-                                 PlaceholderText="Same as source file"
-                                 IsReadOnly="True"
-                            AutomationProperties.AutomationId="OutputDirectoryBox"/>
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button x:Uid="ConverterPage_ConverterPageButton07" Grid.Column="0" Content="Browse"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="BrowseOutputFolder_Click"
-                                AutomationProperties.AutomationId="ConverterPageButton07"/>
-                            <Button x:Uid="ConverterPage_ConverterPageButton08" Grid.Column="1" Content="Same as source"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Click="SameAsSource_Click"
-                                AutomationProperties.AutomationId="ConverterPageButton08"/>
+                            <ComboBox x:Uid="ConverterPage_QualityPresetSelector" x:Name="QualityPresetSelector" Grid.Column="0"
+                                      Header="Preset"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="OutputProfile_SelectionChanged"
+                                      AutomationProperties.AutomationId="QualityPresetSelector">
+                                <ComboBoxItem x:Uid="ConverterPage_Item_003_2" Content="High quality (recommended)" Tag="High" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="ConverterPage_Item_004_2" Content="Highest quality" Tag="Highest"/>
+                                <ComboBoxItem x:Uid="ConverterPage_Item_005_2" Content="Balanced" Tag="Medium"/>
+                                <ComboBoxItem x:Uid="ConverterPage_Item_006_2" Content="Smaller file" Tag="Low"/>
+                            </ComboBox>
+                            <Button x:Uid="ConverterPage_OutputSettingsButton" Grid.Column="1"
+                                    VerticalAlignment="Bottom"
+                                    Style="{StaticResource IconButtonStyle}"
+                                    Click="OpenAdvancedSettings_Click"
+                                    AutomationProperties.AutomationId="ConverterOutputSettingsButton"
+                                    AutomationProperties.Name="Open advanced output settings"
+                                    ToolTipService.ToolTip="Advanced output settings">
+                                <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                            </Button>
                         </Grid>
+                        <ComboBox x:Uid="ConverterPage_ResolutionSelector" x:Name="ResolutionSelector"
+                                  Header="Resolution"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="OutputProfile_SelectionChanged"
+                                  AutomationProperties.AutomationId="ResolutionSelector">
+                            <ComboBoxItem x:Uid="ConverterPage_Item_008_2" Content="Same as source" Tag="source" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_009" Content="4K (3840 x 2160)" Tag="3840x2160"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_010" Content="Full HD (1920 x 1080)" Tag="1920x1080"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_011" Content="HD (1280 x 720)" Tag="1280x720"/>
+                        </ComboBox>
+                        <ComboBox x:Uid="ConverterPage_FrameRateSelector" x:Name="FrameRateSelector"
+                                  Header="Frame rate"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="OutputProfile_SelectionChanged"
+                                  AutomationProperties.AutomationId="FrameRateSelector">
+                            <ComboBoxItem x:Uid="ConverterPage_Item_013_2" Content="Same as source" Tag="source" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_014" Content="60 fps" Tag="60"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_015_2" Content="30 fps" Tag="30"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_016" Content="24 fps" Tag="24"/>
+                        </ComboBox>
+                        <ComboBox x:Uid="ConverterPage_AudioSelector" x:Name="AudioSelector"
+                                  Header="Audio"
+                                  HorizontalAlignment="Stretch"
+                                  SelectionChanged="OutputProfile_SelectionChanged"
+                                  AutomationProperties.AutomationId="AudioSelector">
+                            <ComboBoxItem x:Uid="ConverterPage_Item_018" Content="AAC, 320 kbps, stereo" Tag="aac-320-2" IsSelected="True"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_019" Content="AAC, 192 kbps, stereo" Tag="aac-192-2"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_020" Content="AAC, 128 kbps, stereo" Tag="aac-128-2"/>
+                            <ComboBoxItem x:Uid="ConverterPage_Item_021" Content="Automatic" Tag="source"/>
+                        </ComboBox>
+                        <Border Style="{StaticResource SectionDividerStyle}" Margin="0,4"/>
+                        <TextBlock x:Uid="ConverterPage_Item_022_2" Text="Save to" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Uid="ConverterPage_OutputDirectoryBox" x:Name="OutputDirectoryBox"
+                                     Grid.Column="0"
+                                     PlaceholderText="Same as source folder"
+                                     IsReadOnly="True"
+                                     AutomationProperties.AutomationId="OutputDirectoryBox"/>
+                            <Button x:Uid="ConverterPage_ConverterPageButton07" Grid.Column="1"
+                                    Style="{StaticResource IconButtonStyle}"
+                                    Click="BrowseOutputFolder_Click"
+                                    AutomationProperties.AutomationId="ConverterOutputFolderButton"
+                                    AutomationProperties.Name="Choose output folder"
+                                    ToolTipService.ToolTip="Choose output folder">
+                                <FontIcon Glyph="&#xE8B7;" FontSize="16"/>
+                            </Button>
+                        </Grid>
+                        <CheckBox x:Uid="ConverterPage_SameAsSourceFolderCheckBox" x:Name="SameAsSourceFolderCheckBox"
+                                  Content="Same as source folder"
+                                  IsChecked="True"
+                                  Checked="SameAsSourceFolder_Changed"
+                                  Unchecked="SameAsSourceFolder_Changed"
+                                  AutomationProperties.AutomationId="SameAsSourceFolderCheckBox"/>
+                        <CheckBox x:Uid="ConverterPage_OpenOutputAfterConversionCheckBox" x:Name="OpenOutputAfterConversionCheckBox"
+                                  Content="Open output folder after conversion"
+                                  Click="OutputPreference_Changed"
+                                  AutomationProperties.AutomationId="OpenOutputAfterConversionCheckBox"/>
                         <ToggleSwitch x:Uid="ConverterPage_HighSpeedToggle" x:Name="HighSpeedToggle"
                                       Header="High speed conversion"
                                       OffContent="Software routing"
@@ -373,8 +469,10 @@
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource CardStyle}" Background="Transparent" Padding="0">
-                    <StackPanel Spacing="12">
+                <Expander x:Uid="ConverterPage_Item_025" Header="More output options"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12" Padding="0,10,0,0">
                         <TextBlock x:Uid="ConverterPage_Item_024" Text="Format Shortcuts" Style="{StaticResource PanelTitleTextStyle}"/>
                         <TextBlock x:Uid="ConverterPage_RecommendationText" x:Name="RecommendationText"
                                    Text="Add files to receive a local output recommendation."
@@ -416,7 +514,7 @@
                                 AutomationProperties.AutomationId="ConverterPageButton06"/>
                         </Grid>
                     </StackPanel>
-                </Border>
+                </Expander>
 
                 <Expander x:Uid="ConverterPage_AdvancedFfmpegExpander" x:Name="AdvancedFfmpegExpander"
                           Header="Advanced FFmpeg command"
@@ -463,7 +561,8 @@
                                Style="{StaticResource MutedTextStyle}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
-            </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="2">

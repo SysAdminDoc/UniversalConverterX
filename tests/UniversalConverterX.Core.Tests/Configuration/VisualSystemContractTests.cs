@@ -69,12 +69,44 @@ public class VisualSystemContractTests
         var converterXaml = File.ReadAllText(Path.Combine(viewsRoot, "Pages", "ConverterPage.xaml"));
         var settingsXaml = File.ReadAllText(Path.Combine(viewsRoot, "SettingsWindow.xaml"));
 
-        converterXaml.IndexOf("Text=\"Output\"", StringComparison.Ordinal)
+        converterXaml.IndexOf("Text=\"Output format\"", StringComparison.Ordinal)
             .Should().BeLessThan(converterXaml.IndexOf("Text=\"Format Shortcuts\"", StringComparison.Ordinal));
-        converterXaml.IndexOf("Text=\"Output\"", StringComparison.Ordinal)
+        converterXaml.IndexOf("Text=\"Output format\"", StringComparison.Ordinal)
             .Should().BeLessThan(converterXaml.IndexOf("Header=\"Advanced FFmpeg command\"", StringComparison.Ordinal));
         settingsXaml.Should().NotContain("BorderThickness=\"1\"");
         settingsXaml.Should().NotContain("Text=\"Local defaults\"");
+    }
+
+    [Fact]
+    public void Converter_ShouldMatchTheFlatQueueAndUnifiedOutputInspectorContract()
+    {
+        var repoRoot = FindRepoRoot();
+        var converterPath = Path.Combine(
+            repoRoot,
+            "src",
+            "UniversalConverterX.UI",
+            "Views",
+            "Pages",
+            "ConverterPage.xaml");
+        var converterXaml = File.ReadAllText(converterPath);
+        var converterCode = File.ReadAllText(converterPath + ".cs");
+
+        converterXaml.Should().Contain("<SplitButton x:Name=\"AddFilesSplitButton\"");
+        converterXaml.Should().Contain("x:Name=\"OutputInspector\"");
+        converterXaml.Should().Contain("Text=\"Output format\"");
+        converterXaml.Should().Contain("x:Name=\"QualityPresetSelector\"");
+        converterXaml.Should().Contain("x:Name=\"ResolutionSelector\"");
+        converterXaml.Should().Contain("x:Name=\"FrameRateSelector\"");
+        converterXaml.Should().Contain("x:Name=\"AudioSelector\"");
+        converterXaml.Should().Contain("x:Name=\"SameAsSourceFolderCheckBox\"");
+        converterXaml.Should().Contain("x:Name=\"OpenOutputAfterConversionCheckBox\"");
+        converterXaml.Should().Contain("BorderThickness=\"0,0,0,1\"");
+        converterXaml.Should().NotContain("Text=\"Output\" Style=\"{StaticResource PanelTitleTextStyle}\"");
+
+        converterCode.Should().Contain("ApplyVisibleOutputProfile(conversionOptions)");
+        converterCode.Should().Contain("options.Video.Width = _outputWidth");
+        converterCode.Should().Contain("options.Video.Fps = _outputFrameRate");
+        converterCode.Should().Contain("options.Audio.Bitrate =");
     }
 
     private static string FindRepoRoot()

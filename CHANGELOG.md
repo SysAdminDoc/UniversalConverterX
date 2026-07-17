@@ -4,6 +4,14 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.2] - 2026-07-17
+
+### Changed
+
+- Brought the primary Converter workspace into closer parity with the approved desktop mockup: the shell now opens on Converter, core navigation is ordered around the main workflows, file intake uses one split action, and queued files sit in a flat, divider-led table instead of separate rounded cards.
+- Replaced the stacked output and shortcut cards with one scrollable output inspector. Format, quality preset, resolution, frame rate, audio, destination, same-source, and open-after-conversion controls are grouped in conversion order; quality, video, and audio selections now feed real `ConversionOptions` and persist with an interrupted queue.
+- Regenerated all six localization catalogs and added a source-level visual contract for the flatter queue, unified inspector, and functional output-profile wiring.
+
 ## [2.31.1] - 2026-07-17
 
 ### Changed

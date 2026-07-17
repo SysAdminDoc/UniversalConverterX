@@ -1470,23 +1470,23 @@
   <data name="CompressorPage_VmafTargetBox.Header" xml:space="preserve">
     <value>Minimalna jakość VMAF</value>
   </data>
+  <data name="ConverterPage_AddFilesLabel.Text" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="ConverterPage_AddFolderMenuItem.Text" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
   <data name="ConverterPage_AdvancedFfmpegExpander.Header" xml:space="preserve">
     <value>Zaawansowane polecenie FFmpeg</value>
+  </data>
+  <data name="ConverterPage_AudioSelector.Header" xml:space="preserve">
+    <value>Audio</value>
   </data>
   <data name="ConverterPage_CancelButton.Content" xml:space="preserve">
     <value>Anuluj</value>
   </data>
   <data name="ConverterPage_ConversionProgress.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Postęp</value>
-  </data>
-  <data name="ConverterPage_ConvertButton.Content" xml:space="preserve">
-    <value>Konwertuj wszystkie</value>
-  </data>
-  <data name="ConverterPage_ConverterPageButton01.Content" xml:space="preserve">
-    <value>Dodaj pliki</value>
-  </data>
-  <data name="ConverterPage_ConverterPageButton02.Content" xml:space="preserve">
-    <value>Dodaj folder</value>
   </data>
   <data name="ConverterPage_ConverterPageButton03.Content" xml:space="preserve">
     <value>Przeglądanie plików</value>
@@ -1500,11 +1500,11 @@
   <data name="ConverterPage_ConverterPageButton06.Content" xml:space="preserve">
     <value>Image WebP</value>
   </data>
-  <data name="ConverterPage_ConverterPageButton07.Content" xml:space="preserve">
-    <value>Przeglądaj</value>
+  <data name="ConverterPage_ConverterPageButton07.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Choose output folder</value>
   </data>
-  <data name="ConverterPage_ConverterPageButton08.Content" xml:space="preserve">
-    <value>Tak samo jak źródło</value>
+  <data name="ConverterPage_ConverterPageButton07.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Choose output folder</value>
   </data>
   <data name="ConverterPage_ConverterPageButton09.Content" xml:space="preserve">
     <value>Wyczyść kolejkę</value>
@@ -1539,6 +1539,9 @@
   <data name="ConverterPage_FormatSelector.PlaceholderText" xml:space="preserve">
     <value>Wybierz format</value>
   </data>
+  <data name="ConverterPage_FrameRateSelector.Header" xml:space="preserve">
+    <value>Frame rate</value>
+  </data>
   <data name="ConverterPage_HighSpeedToggle.Header" xml:space="preserve">
     <value>Konwersja o wysokiej prędkości</value>
   </data>
@@ -1551,11 +1554,17 @@
   <data name="ConverterPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Miniaturka podglądu pliku</value>
   </data>
+  <data name="ConverterPage_Item_001_2.Text" xml:space="preserve">
+    <value>Convert</value>
+  </data>
   <data name="ConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Szacunkowy rozmiar wyjścia</value>
   </data>
   <data name="ConverterPage_Item_003.Text" xml:space="preserve">
     <value>Gotowy</value>
+  </data>
+  <data name="ConverterPage_Item_003_2.Content" xml:space="preserve">
+    <value>High quality (recommended)</value>
   </data>
   <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Usuń z kolejki</value>
@@ -1563,11 +1572,20 @@
   <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Usuń z kolejki</value>
   </data>
+  <data name="ConverterPage_Item_004_2.Content" xml:space="preserve">
+    <value>Highest quality</value>
+  </data>
   <data name="ConverterPage_Item_005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Postęp</value>
   </data>
+  <data name="ConverterPage_Item_005_2.Content" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
   <data name="ConverterPage_Item_006.Content" xml:space="preserve">
     <value>Otwórz folder</value>
+  </data>
+  <data name="ConverterPage_Item_006_2.Content" xml:space="preserve">
+    <value>Smaller file</value>
   </data>
   <data name="ConverterPage_Item_007.Text" xml:space="preserve">
     <value>Konwerter</value>
@@ -1575,23 +1593,62 @@
   <data name="ConverterPage_Item_008.Text" xml:space="preserve">
     <value>Pliki kolejkowe, wybierz jeden profil wyjściowy i przejrzyj gotowe wyniki.</value>
   </data>
+  <data name="ConverterPage_Item_008_2.Content" xml:space="preserve">
+    <value>Same as source</value>
+  </data>
+  <data name="ConverterPage_Item_009.Content" xml:space="preserve">
+    <value>4K (3840 x 2160)</value>
+  </data>
+  <data name="ConverterPage_Item_010.Content" xml:space="preserve">
+    <value>Full HD (1920 x 1080)</value>
+  </data>
+  <data name="ConverterPage_Item_011.Content" xml:space="preserve">
+    <value>HD (1280 x 720)</value>
+  </data>
   <data name="ConverterPage_Item_012.Text" xml:space="preserve">
     <value>Dodaj media, obrazki, dokumenty lub archiwa</value>
   </data>
   <data name="ConverterPage_Item_013.Text" xml:space="preserve">
     <value>Upuść pliki tutaj, dodaj folder lub przeglądaj z dysku.</value>
   </data>
-  <data name="ConverterPage_Item_015.Text" xml:space="preserve">
-    <value>Podgląd</value>
+  <data name="ConverterPage_Item_013_2.Content" xml:space="preserve">
+    <value>Same as source</value>
+  </data>
+  <data name="ConverterPage_Item_014.Content" xml:space="preserve">
+    <value>60 fps</value>
+  </data>
+  <data name="ConverterPage_Item_015_2.Content" xml:space="preserve">
+    <value>30 fps</value>
+  </data>
+  <data name="ConverterPage_Item_016.Content" xml:space="preserve">
+    <value>24 fps</value>
+  </data>
+  <data name="ConverterPage_Item_018.Content" xml:space="preserve">
+    <value>AAC, 320 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_019.Content" xml:space="preserve">
+    <value>AAC, 192 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_020.Content" xml:space="preserve">
+    <value>AAC, 128 kbps, stereo</value>
+  </data>
+  <data name="ConverterPage_Item_021.Content" xml:space="preserve">
+    <value>Automatic</value>
   </data>
   <data name="ConverterPage_Item_022.Text" xml:space="preserve">
     <value>Brak jeszcze gotowych konwersji</value>
+  </data>
+  <data name="ConverterPage_Item_022_2.Text" xml:space="preserve">
+    <value>Save to</value>
   </data>
   <data name="ConverterPage_Item_023.Text" xml:space="preserve">
     <value>Zakończone, nieudane i anulowane pliki pojawiają się tutaj.</value>
   </data>
   <data name="ConverterPage_Item_024.Text" xml:space="preserve">
     <value>Formatowanie skrótów</value>
+  </data>
+  <data name="ConverterPage_Item_025.Header" xml:space="preserve">
+    <value>More output options</value>
   </data>
   <data name="ConverterPage_Item_031.Text" xml:space="preserve">
     <value>Podgląd jest szablonem bezpieczeństwa serii. Każda oferta zastępuje {input} i {output} własnymi ścieżkami.</value>
@@ -1644,14 +1701,23 @@
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - dokument</value>
   </data>
-  <data name="ConverterPage_OutputDirectoryBox.Header" xml:space="preserve">
-    <value>Zapisz do</value>
+  <data name="ConverterPage_OpenOutputAfterConversionCheckBox.Content" xml:space="preserve">
+    <value>Open output folder after conversion</value>
   </data>
   <data name="ConverterPage_OutputDirectoryBox.PlaceholderText" xml:space="preserve">
     <value>To samo co plik źródłowy</value>
   </data>
+  <data name="ConverterPage_OutputSettingsButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Open advanced output settings</value>
+  </data>
+  <data name="ConverterPage_OutputSettingsButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Advanced output settings</value>
+  </data>
   <data name="ConverterPage_ProgressTitle.Text" xml:space="preserve">
     <value>Konwertowanie...</value>
+  </data>
+  <data name="ConverterPage_QualityPresetSelector.Header" xml:space="preserve">
+    <value>Preset</value>
   </data>
   <data name="ConverterPage_QueueSortEstimateButton.Content" xml:space="preserve">
     <value>Est. wyjście</value>
@@ -1673,6 +1739,12 @@
   </data>
   <data name="ConverterPage_RecommendationText.Text" xml:space="preserve">
     <value>Dodaj pliki do otrzymania lokalnego zalecenia wyjścia.</value>
+  </data>
+  <data name="ConverterPage_ResolutionSelector.Header" xml:space="preserve">
+    <value>Resolution</value>
+  </data>
+  <data name="ConverterPage_SameAsSourceFolderCheckBox.Content" xml:space="preserve">
+    <value>Same as source folder</value>
   </data>
   <data name="ConverterPage_SmartMatchButton.Content" xml:space="preserve">
     <value>Inteligentne dopasowanie</value>
@@ -2926,7 +2998,7 @@
     <value>Krajowe dzienniki i pakiety wypadkowe</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.1</value>
+    <value>UniversalConverter X v2.31.2</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Pierwsze przetworzenie lokalne</value>
@@ -4693,7 +4765,7 @@
     <value>Uaktualnij status</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.1</value>
+    <value>Version 2.31.2</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Anuluj</value>
