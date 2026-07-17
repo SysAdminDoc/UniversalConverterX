@@ -28,6 +28,7 @@ public sealed partial class MainWindow : Window
         new("GIF Maker", "Convert video clips to high-quality animated GIFs", "gif-maker"),
         new("Slideshow Maker", "Turn image folders into videos with motion, transitions, text, and music", "slideshow-maker"),
         new("Image Converter", "Convert HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP", "image-converter"),
+        new("UltraHDR Gain Maps", "Preserve ISO 21496-1 JPEG gain maps or write gain-map AVIF", "presets:gainmap"),
         new("Auto Reframe", "Convert horizontal video to 9:16 / 1:1 / 4:5 with optional face tracking", "auto-reframe"),
         new("Image Upscaler", "Real-ESRGAN super-resolution up to 4× for photos / illustrations", "ai-image-enhancer"),
         new("Video Upscaler", "Real-ESRGAN, Anime4K GLSL, or SeedVR2 video restoration", "ai-video-enhancer"),

@@ -96,6 +96,7 @@ public sealed partial class ToolboxPage : Page
         ImageTools.Add(new ToolboxTile("ai-portrait", "AI Portrait", "CodeFormer + GFPGAN portrait upscale & restoration with fidelity slider", "\uE77B", blue, "Ready", green, true, "CodeFormer / GFPGAN"));
         ImageTools.Add(new ToolboxTile("slideshow-maker", "Slideshow Maker", "Image folders to MP4/MOV/WebM with Ken Burns motion, transitions, captions, and music", "\uE786", blue, "Ready", green, false, "FFmpeg slideshow"));
         ImageTools.Add(new ToolboxTile("presets:exiftool-meta", "Metadata Editor", "View, edit, and clear EXIF / XMP / IPTC metadata", "\uE8B7", blue, "Ready", green, false, "ExifTool"));
+        ImageTools.Add(new ToolboxTile("presets:gainmap", "UltraHDR Gain Maps", "Preserve ISO 21496-1 JPEG gain maps and write gain-map AVIF", "\uEB9F", orange, "Ready", green, false, "libvips + libavif"));
 
         // Video
         VideoTools.Add(new ToolboxTile("smart-trimmer", "Smart Trimmer", "Detect highlight ranges and trim", "\uE71D", green, "Planned", orange, true, "ClipForge"));

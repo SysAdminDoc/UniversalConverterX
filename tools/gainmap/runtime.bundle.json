@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runtimeVersion": "1.4.2+vips8.18.2",
+  "artifacts": [
+    {
+      "id": "libvips",
+      "version": "8.18.2",
+      "license": "LGPL-2.1-or-later",
+      "url": "https://github.com/libvips/build-win64-mxe/releases/download/v8.18.2/vips-dev-x64-all-8.18.2.zip",
+      "bytes": 21145549,
+      "sha256": "aec9b8d5e79c06aade9fd51224570c87687675896d4da335955047c211d40e01",
+      "archivePrefix": "vips-dev-8.18/"
+    },
+    {
+      "id": "avifgainmaputil",
+      "version": "1.4.2",
+      "license": "BSD-2-Clause",
+      "sourceCommit": "c5240fc79fe5c2407e10afd35f5505ef6333ea49",
+      "url": "https://github.com/SysAdminDoc/UniversalConverterX/releases/download/v2.28.0/UniversalConverterX-gainmap-runtime-v1.4.2-win-x64.zip",
+      "bytes": 4254192,
+      "sha256": "64fe22b44de6bb8ffd24e00fcfb0984689cc9634c250694099a5b7e6fa09e01c"
+    }
+  ]
+}

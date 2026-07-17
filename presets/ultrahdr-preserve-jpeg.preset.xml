@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>UltraHDR JPEG — preserve ISO 21496-1 gain map</Name>
+    <Folder>Image/HDR</Folder>
+    <InputTypes>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ultrahdr</OutputFileNameTemplate>
+    <OutputExtension>jpg</OutputExtension>
+    <Engine>gainmap</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>preserve-jpeg</Arg>
+        <Arg>--quality</Arg>
+        <Arg>90</Arg>
+    </Args>
+</Preset>

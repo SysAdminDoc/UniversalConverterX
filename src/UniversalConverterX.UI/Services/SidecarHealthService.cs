@@ -644,11 +644,21 @@ public sealed class SidecarHealthService : ISidecarHealthService
             ? executable + ".exe"
             : executable;
         var toolsDir = Path.GetDirectoryName(engineDir);
+        var localTools = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "UniversalConverterX",
+            "tools");
+        var localEngine = Path.Combine(localTools, engine);
+        var localRuntime = Path.Combine(localTools, engine + "-runtime");
         var directories = new[]
         {
             sidecarDir,
             engineDir,
             toolsDir is null ? null : Path.Combine(toolsDir, "_bin"),
+            localEngine,
+            localRuntime,
+            Path.Combine(localRuntime, "vips", "bin"),
+            Path.Combine(localRuntime, "avif"),
         };
         foreach (var directory in directories.Where(d => !string.IsNullOrWhiteSpace(d)).Distinct(StringComparer.OrdinalIgnoreCase))
         {

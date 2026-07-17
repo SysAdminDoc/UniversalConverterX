@@ -16,6 +16,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Video Enhancer** — portable Real-ESRGAN export, optional Anime4K v4 GLSL chains through mpv, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
+- **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.2 and libavif 1.4.2 runtimes.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
@@ -82,6 +83,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - .NET 10 Runtime
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
 - DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
+- Gain-map presets require the opt-in pinned runtime (`gainmap download-runtime --accept-licenses`); the manifest records third-party licenses, immutable URLs, sizes, and SHA-256 hashes
 
 ### Quick Start
 

@@ -31,23 +31,3 @@ Publish a native ARM64 build targeting Snapdragon X Elite / X Plus devices. Requ
 Impact: 2 · Effort: 4 · Type: platform
 
 **Blocker:** Needs a Snapdragon X Elite device to verify QNN EP availability, ARM64 Python sidecar compatibility, and WinUI 3 ARM64 rendering. Cannot be validated without hardware.
-
----
-
-### 89. AVIF Gain Map HDR — remaining: gain-map writing
-
-AVIF tuning controls shipped (speed/subsampling/lossless). **Remaining:** full Apple-style JPEG gain-map writing.
-
-Impact: 3 · Effort: 2 · Type: format coverage
-
-**Blocker:** Requires `pillow-avif-plugin` (or an equivalent bundled encoder) to expose the libavif 1.4.x gain-map writing API. No redistributable Windows build exposes it yet, so the round-trip write cannot be implemented or tested. Overlaps the libvips/libultrahdr path tracked under Item 117.
-
----
-
-### 117. UltraHDR / ISO 21496-1 Gain-Map Preservation
-
-Preserve ISO 21496-1 gain maps when converting UltraHDR JPEG photos to JPEG or AVIF through libvips 8.18 / libultrahdr.
-
-Impact: 3 · Effort: 3 · Type: format coverage
-
-**Blocker:** Requires a redistributable Windows libvips 8.18 build with `uhdrload` / `uhdrsave` enabled plus a legally redistributable ISO 21496-1 gain-map fixture. Neither is present in the repository or managed tool inventory, so the required round-trip preservation check cannot be run or added to CI without selecting those external artifacts.
