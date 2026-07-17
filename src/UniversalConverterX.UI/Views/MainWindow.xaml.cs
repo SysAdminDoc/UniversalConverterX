@@ -9,6 +9,7 @@ namespace UniversalConverterX.UI.Views;
 public sealed partial class MainWindow : Window
 {
     private bool _isSelectingNavigationItem;
+    private string _currentNavigationTag = "converter";
 
     private readonly List<NavSearchSuggestion> _searchSuggestions =
     [
@@ -132,8 +133,9 @@ public sealed partial class MainWindow : Window
 
     public void RequestNavigation(string routeKey, object? parameter = null)
     {
+        _currentNavigationTag = GetNavigationSelectionTag(routeKey);
         NavigateTo(routeKey, parameter);
-        SelectMenuItem(GetNavigationSelectionTag(routeKey));
+        SelectMenuItem(_currentNavigationTag);
     }
 
     public void NavigateTo(string routeKey, object? parameter = null)
@@ -248,7 +250,7 @@ public sealed partial class MainWindow : Window
         return false;
     }
 
-    private void MainNav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void MainNav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (_isSelectingNavigationItem)
             return;
@@ -261,8 +263,48 @@ public sealed partial class MainWindow : Window
 
         if (args.SelectedItem is NavigationViewItem item && item.Tag is string tag)
         {
+            if (tag == "about")
+            {
+                await ShowAboutDialogAsync();
+                SelectMenuItem(_currentNavigationTag);
+                return;
+            }
+
+            _currentNavigationTag = tag;
             NavigateTo(tag);
         }
+    }
+
+    private async Task ShowAboutDialogAsync()
+    {
+        var version = typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "Unknown";
+        var dialog = new ContentDialog
+        {
+            XamlRoot = ContentFrame.XamlRoot,
+            Title = "UniversalConverter X",
+            Content = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = $"Version {version}",
+                        Style = (Style)Application.Current.Resources["LabelTextStyle"],
+                    },
+                    new TextBlock
+                    {
+                        Text = "Local-first conversion, compression, editing, downloading, automation, and media tools for Windows.",
+                        TextWrapping = TextWrapping.Wrap,
+                        Style = (Style)Application.Current.Resources["MutedTextStyle"],
+                    },
+                },
+            },
+            CloseButtonText = "Close",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        await dialog.ShowAsync();
     }
 
     private void NavSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)

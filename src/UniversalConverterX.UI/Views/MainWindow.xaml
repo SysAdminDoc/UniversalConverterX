@@ -48,6 +48,7 @@
 
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Uid="MainWindow_NavSearchBox" x:Name="NavSearchBox"
+                                Visibility="Collapsed"
                                 PlaceholderText="Search tools"
                                 QueryIcon="Find"
                                 TextChanged="NavSearchBox_TextChanged"
@@ -88,14 +89,9 @@
                         <FontIcon Glyph="&#xE70F;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_007" Tag="ai-lab" Content="AI Lab">
+                <NavigationViewItem x:Uid="MainWindow_Item_013" Tag="universal-convert" Content="Universal Convert">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE950;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_001_2" Tag="lossless-cut" Content="Lossless Cut">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8C6;"/>
+                        <FontIcon Glyph="&#xED0C;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_001_3" Tag="dvd-rip" Content="DVD Rip">
@@ -103,19 +99,6 @@
                         <FontIcon Glyph="&#xE958;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_005" Tag="home" Content="Home">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE80F;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_011" Tag="recorder" Content="Recorder">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7C8;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-
-                <NavigationViewItemSeparator/>
-
                 <NavigationViewItem x:Uid="MainWindow_Item_012" Tag="toolbox" Content="Toolbox">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE713;"/>
@@ -124,24 +107,9 @@
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem x:Uid="MainWindow_Item_013" Tag="universal-convert" Content="Universal Convert">
+                <NavigationViewItem x:Uid="MainWindow_AboutItem" Tag="about" Content="About">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xED0C;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_014" Tag="watch-folders" Content="Watch Folders">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xED25;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_015" Tag="history" Content="History">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE81C;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem x:Uid="MainWindow_Item_016" Tag="presets" Content="Presets">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE71D;"/>
+                        <FontIcon Glyph="&#xE946;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>

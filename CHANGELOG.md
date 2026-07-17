@@ -4,6 +4,15 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.3] - 2026-07-17
+
+### Changed
+
+- Continued approved-mockup parity in the Converter workspace with real row and select-all checkboxes, persistent manual ordering, move-up/down actions, remove-selected confirmation, a compact bottom queue toolbar, and flat finished-result rows.
+- Consolidated shortcuts and FFmpeg controls inside the existing output inspector, moved conversion feedback into a quiet bottom status line, and removed duplicate high-emphasis queue actions from the page footer.
+- Reduced the permanent shell navigation to Converter, Downloader, Compressor, Editor, Universal Convert, DVD Rip, and Toolbox; specialized workflows remain discoverable through Toolbox and direct routes, while Settings and a functional About dialog anchor the footer.
+- Extended the visual contract to lock the simplified shell, selectable queue, unified inspector, and functional batch-action wiring; all six localization catalogs remain synchronized.
+
 ## [2.31.2] - 2026-07-17
 
 ### Changed

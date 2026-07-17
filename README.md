@@ -8,13 +8,13 @@ The all-in-one media tool for Windows — convert, compress, edit, download, rec
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
 
-![Version](https://img.shields.io/badge/version-2.31.2-blue)
+![Version](https://img.shields.io/badge/version-2.31.3-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Interface
 
-UniversalConverter X uses a compact, queue-first desktop workspace: readable typography, restrained tonal surfaces, short page headers, and primary actions kept high in the viewport. Converter opens by default with a flat file table, split Add files action, and one unified output inspector for format, quality, resolution, frame rate, audio, and destination controls. Status remains quiet inline metadata instead of decorative badges.
+UniversalConverter X uses a compact, queue-first desktop workspace: readable typography, restrained tonal surfaces, short page headers, and primary actions kept high in the viewport. Converter opens by default with a flat selectable file table, split Add files action, functional reorder/remove toolbar, and one unified output inspector for format, quality, resolution, frame rate, audio, and destination controls. Status remains quiet inline metadata instead of decorative badges.
 
 ## Modules
 

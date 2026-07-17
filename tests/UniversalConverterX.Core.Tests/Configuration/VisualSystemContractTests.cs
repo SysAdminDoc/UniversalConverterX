@@ -100,6 +100,10 @@ public class VisualSystemContractTests
         converterXaml.Should().Contain("x:Name=\"AudioSelector\"");
         converterXaml.Should().Contain("x:Name=\"SameAsSourceFolderCheckBox\"");
         converterXaml.Should().Contain("x:Name=\"OpenOutputAfterConversionCheckBox\"");
+        converterXaml.Should().Contain("x:Name=\"SelectAllQueueCheckBox\"");
+        converterXaml.Should().Contain("x:Name=\"MoveSelectedUpButton\"");
+        converterXaml.Should().Contain("x:Name=\"MoveSelectedDownButton\"");
+        converterXaml.Should().Contain("x:Name=\"RemoveSelectedButton\"");
         converterXaml.Should().Contain("BorderThickness=\"0,0,0,1\"");
         converterXaml.Should().NotContain("Text=\"Output\" Style=\"{StaticResource PanelTitleTextStyle}\"");
 
@@ -107,6 +111,33 @@ public class VisualSystemContractTests
         converterCode.Should().Contain("options.Video.Width = _outputWidth");
         converterCode.Should().Contain("options.Video.Fps = _outputFrameRate");
         converterCode.Should().Contain("options.Audio.Bitrate =");
+        converterCode.Should().Contain("private void MoveSelectedUp_Click");
+        converterCode.Should().Contain("private void MoveSelectedDown_Click");
+        converterCode.Should().Contain("private async void RemoveSelected_Click");
+    }
+
+    [Fact]
+    public void MainShell_ShouldKeepThePrimaryNavigationAsQuietAsTheApprovedMockup()
+    {
+        var repoRoot = FindRepoRoot();
+        var shellXaml = File.ReadAllText(Path.Combine(
+            repoRoot,
+            "src",
+            "UniversalConverterX.UI",
+            "Views",
+            "MainWindow.xaml"));
+
+        shellXaml.Should().Contain("x:Name=\"NavSearchBox\"");
+        shellXaml.Should().Contain("Visibility=\"Collapsed\"");
+        shellXaml.Should().Contain("Tag=\"converter\" Content=\"Converter\"");
+        shellXaml.Should().Contain("Tag=\"downloader\" Content=\"Downloader\"");
+        shellXaml.Should().Contain("Tag=\"compressor\" Content=\"Compressor\"");
+        shellXaml.Should().Contain("Tag=\"editor\" Content=\"Editor\"");
+        shellXaml.Should().Contain("Tag=\"dvd-rip\" Content=\"DVD Rip\"");
+        shellXaml.Should().Contain("Tag=\"toolbox\" Content=\"Toolbox\"");
+        shellXaml.Should().Contain("Tag=\"about\" Content=\"About\"");
+        shellXaml.Should().NotContain("Tag=\"home\" Content=\"Home\"");
+        shellXaml.Should().NotContain("Tag=\"ai-lab\" Content=\"AI Lab\"");
     }
 
     private static string FindRepoRoot()

@@ -75,7 +75,8 @@ public sealed partial class ConverterPage : Page
     private string _audioProfile = "aac-320-2";
     private bool _restoringQueue;
     private bool _updatingFfmpegCommand;
-    private QueueSortColumn _queueSortColumn = QueueSortColumn.File;
+    private bool _updatingQueueSelection;
+    private QueueSortColumn _queueSortColumn = QueueSortColumn.Manual;
     private bool _queueSortDescending;
 
     public ConverterPage()
@@ -615,6 +616,9 @@ public sealed partial class ConverterPage : Page
 
     private void ApplyQueueSort()
     {
+        if (_queueSortColumn == QueueSortColumn.Manual)
+            return;
+
         IEnumerable<FileItem> ordered = _queueSortColumn switch
         {
             QueueSortColumn.Format => _files
@@ -649,7 +653,7 @@ public sealed partial class ConverterPage : Page
         QueueSortFormatButton.Content = SortHeader("Format", QueueSortColumn.Format);
         QueueSortSizeButton.Content = SortHeader("Size", QueueSortColumn.Size);
         QueueSortEstimateButton.Content = SortHeader("Est. output", QueueSortColumn.Estimate);
-        QueueSortWarningsButton.Content = SortHeader("Warnings", QueueSortColumn.Warnings);
+        QueueSortWarningsButton.Content = SortHeader("Status", QueueSortColumn.Warnings);
     }
 
     private string SortHeader(string label, QueueSortColumn column) =>
@@ -665,6 +669,110 @@ public sealed partial class ConverterPage : Page
             PersistQueue();
             UpdateUI();
         }
+    }
+
+    private void QueueItemSelection_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_updatingQueueSelection)
+            UpdateQueueSelectionActions();
+    }
+
+    private void SelectAllQueue_Click(object sender, RoutedEventArgs e)
+    {
+        if (_updatingQueueSelection)
+            return;
+
+        var selectAll = SelectAllQueueCheckBox.IsChecked == true;
+        _updatingQueueSelection = true;
+        try
+        {
+            foreach (var file in _files)
+                file.IsSelected = selectAll;
+        }
+        finally
+        {
+            _updatingQueueSelection = false;
+        }
+
+        UpdateQueueSelectionActions();
+    }
+
+    private void MoveSelectedUp_Click(object sender, RoutedEventArgs e)
+    {
+        _queueSortColumn = QueueSortColumn.Manual;
+        for (var index = 1; index < _files.Count; index++)
+        {
+            if (_files[index].IsSelected && !_files[index - 1].IsSelected)
+                _files.Move(index, index - 1);
+        }
+
+        PersistQueue();
+        UpdateUI();
+    }
+
+    private void MoveSelectedDown_Click(object sender, RoutedEventArgs e)
+    {
+        _queueSortColumn = QueueSortColumn.Manual;
+        for (var index = _files.Count - 2; index >= 0; index--)
+        {
+            if (_files[index].IsSelected && !_files[index + 1].IsSelected)
+                _files.Move(index, index + 1);
+        }
+
+        PersistQueue();
+        UpdateUI();
+    }
+
+    private async void RemoveSelected_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = _files.Where(file => file.IsSelected).ToList();
+        if (selected.Count == 0)
+            return;
+
+        if (!await PageDialogService.ConfirmClearAsync(
+                this,
+                "Remove selected files?",
+                $"Remove {selected.Count} selected file(s) from the conversion queue?"))
+        {
+            return;
+        }
+
+        foreach (var file in selected)
+            _files.Remove(file);
+
+        PersistQueue();
+        UpdateUI();
+    }
+
+    private void UpdateQueueSelectionActions()
+    {
+        var selectedCount = _files.Count(file => file.IsSelected);
+        _updatingQueueSelection = true;
+        try
+        {
+            SelectAllQueueCheckBox.IsChecked = selectedCount switch
+            {
+                0 => false,
+                _ when selectedCount == _files.Count => true,
+                _ => null,
+            };
+        }
+        finally
+        {
+            _updatingQueueSelection = false;
+        }
+
+        RemoveSelectedButton.IsEnabled = selectedCount > 0;
+        MoveSelectedUpButton.IsEnabled = _files
+            .Select((file, index) => (file, index))
+            .Any(entry => entry.file.IsSelected
+                && entry.index > 0
+                && !_files[entry.index - 1].IsSelected);
+        MoveSelectedDownButton.IsEnabled = _files
+            .Select((file, index) => (file, index))
+            .Any(entry => entry.file.IsSelected
+                && entry.index < _files.Count - 1
+                && !_files[entry.index + 1].IsSelected);
     }
 
     private async void ClearAll_Click(object sender, RoutedEventArgs e)
@@ -867,8 +975,9 @@ public sealed partial class ConverterPage : Page
             && _cancellationTokenSource is null;
         SmartMatchButton.IsEnabled = hasFiles && RecommendFormatTag() is not null;
         QueueSummaryText.Text = warningFiles > 0
-            ? $"{_files.Count} queued / {warningFiles} need review"
-            : $"{_files.Count} queued / {_finishedFiles.Count} finished";
+            ? $"{_files.Count} files / {warningFiles} need review"
+            : $"{_files.Count} files";
+        UpdateQueueSelectionActions();
         RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
         if (EditFfmpegCommandToggle?.IsOn != true)
@@ -1711,6 +1820,7 @@ public sealed partial class ConverterPage : Page
 
     private enum QueueSortColumn
     {
+        Manual,
         File,
         Format,
         Size,
@@ -1728,6 +1838,7 @@ public sealed partial class ConverterPage : Page
 
 public class FileItem : INotifyPropertyChanged
 {
+    private bool _isSelected;
     private double _progress;
     private string _statusText = "";
     private string _formatSummary = "";
@@ -1744,6 +1855,11 @@ public class FileItem : INotifyPropertyChanged
     public string Extension { get; set; } = "";
     public string FileSize { get; set; } = "";
     public long Size { get; set; }
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string? OutputPath { get; set; }
     public string? ErrorMessage { get; set; }

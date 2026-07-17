@@ -1506,12 +1506,6 @@
   <data name="ConverterPage_ConverterPageButton07.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Choose output folder</value>
   </data>
-  <data name="ConverterPage_ConverterPageButton09.Content" xml:space="preserve">
-    <value>Effacer la file</value>
-  </data>
-  <data name="ConverterPage_ConverterPageButton10.Content" xml:space="preserve">
-    <value>Sortie ouverte</value>
-  </data>
   <data name="ConverterPage_ConverterPagePivotItem01.Header" xml:space="preserve">
     <value>Conversion</value>
   </data>
@@ -1557,6 +1551,9 @@
   <data name="ConverterPage_Item_001_2.Text" xml:space="preserve">
     <value>Convert</value>
   </data>
+  <data name="ConverterPage_Item_001_3.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Select file</value>
+  </data>
   <data name="ConverterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Taille estimée de la production</value>
   </data>
@@ -1565,12 +1562,6 @@
   </data>
   <data name="ConverterPage_Item_003_2.Content" xml:space="preserve">
     <value>High quality (recommended)</value>
-  </data>
-  <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Supprimer de la file d'attente</value>
-  </data>
-  <data name="ConverterPage_Item_004.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Supprimer de la file d'attente</value>
   </data>
   <data name="ConverterPage_Item_004_2.Content" xml:space="preserve">
     <value>Highest quality</value>
@@ -1701,6 +1692,18 @@
   <data name="ConverterPage_Item_051.Content" xml:space="preserve">
     <value>DOCX - Document</value>
   </data>
+  <data name="ConverterPage_MoveSelectedDownButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Move selected files down</value>
+  </data>
+  <data name="ConverterPage_MoveSelectedDownButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Move selected files down</value>
+  </data>
+  <data name="ConverterPage_MoveSelectedUpButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Move selected files up</value>
+  </data>
+  <data name="ConverterPage_MoveSelectedUpButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Move selected files up</value>
+  </data>
   <data name="ConverterPage_OpenOutputAfterConversionCheckBox.Content" xml:space="preserve">
     <value>Open output folder after conversion</value>
   </data>
@@ -1740,11 +1743,20 @@
   <data name="ConverterPage_RecommendationText.Text" xml:space="preserve">
     <value>Ajouter des fichiers pour recevoir une recommandation de sortie locale.</value>
   </data>
+  <data name="ConverterPage_RemoveSelectedButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove selected files</value>
+  </data>
+  <data name="ConverterPage_RemoveSelectedButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Remove selected files</value>
+  </data>
   <data name="ConverterPage_ResolutionSelector.Header" xml:space="preserve">
     <value>Resolution</value>
   </data>
   <data name="ConverterPage_SameAsSourceFolderCheckBox.Content" xml:space="preserve">
     <value>Same as source folder</value>
+  </data>
+  <data name="ConverterPage_SelectAllQueueCheckBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Select all queued files</value>
   </data>
   <data name="ConverterPage_SmartMatchButton.Content" xml:space="preserve">
     <value>Match intelligent</value>
@@ -2998,7 +3010,7 @@
     <value>Registres locaux et paquets de crash</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.2</value>
+    <value>UniversalConverter X v2.31.3</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Traitement local en premier lieu</value>
@@ -3522,11 +3534,11 @@
   <data name="LosslessCutPage_StatusText.Text" xml:space="preserve">
     <value>Open a video to begin.</value>
   </data>
+  <data name="MainWindow_AboutItem.Content" xml:space="preserve">
+    <value>About</value>
+  </data>
   <data name="MainWindow_Item_001.Title" xml:space="preserve">
     <value>UniversalConverter X</value>
-  </data>
-  <data name="MainWindow_Item_001_2.Content" xml:space="preserve">
-    <value>Lossless Cut</value>
   </data>
   <data name="MainWindow_Item_001_3.Content" xml:space="preserve">
     <value>DVD Rip</value>
@@ -3534,14 +3546,8 @@
   <data name="MainWindow_Item_002.Text" xml:space="preserve">
     <value>UCX</value>
   </data>
-  <data name="MainWindow_Item_005.Content" xml:space="preserve">
-    <value>Sommaire</value>
-  </data>
   <data name="MainWindow_Item_006.Content" xml:space="preserve">
     <value>Convertisseur</value>
-  </data>
-  <data name="MainWindow_Item_007.Content" xml:space="preserve">
-    <value>Laboratoire AI</value>
   </data>
   <data name="MainWindow_Item_008.Content" xml:space="preserve">
     <value>Compresseur</value>
@@ -3552,23 +3558,11 @@
   <data name="MainWindow_Item_010.Content" xml:space="preserve">
     <value>Télécharger</value>
   </data>
-  <data name="MainWindow_Item_011.Content" xml:space="preserve">
-    <value>Enregistrementur</value>
-  </data>
   <data name="MainWindow_Item_012.Content" xml:space="preserve">
     <value>Boîte à outils</value>
   </data>
   <data name="MainWindow_Item_013.Content" xml:space="preserve">
     <value>Convertir universelle</value>
-  </data>
-  <data name="MainWindow_Item_014.Content" xml:space="preserve">
-    <value>Dossiers de montres</value>
-  </data>
-  <data name="MainWindow_Item_015.Content" xml:space="preserve">
-    <value>Historique</value>
-  </data>
-  <data name="MainWindow_Item_016.Content" xml:space="preserve">
-    <value>Préréglages</value>
   </data>
   <data name="MainWindow_Item_017.Text" xml:space="preserve">
     <value>Espace de travail d ' abord local</value>
@@ -4765,7 +4759,7 @@
     <value>État de la mise à jour</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.31.2</value>
+    <value>Version 2.31.3</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Annuler</value>
