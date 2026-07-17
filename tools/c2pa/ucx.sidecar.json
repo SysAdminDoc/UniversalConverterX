@@ -1,0 +1,6 @@
+{
+  "engine": "c2pa",
+  "tools": [
+    { "id": "c2patool", "executable": "c2patool", "display": "c2patool 0.27+", "managed": false }
+  ]
+}

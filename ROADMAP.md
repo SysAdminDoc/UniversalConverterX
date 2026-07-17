@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 205 sidecar engines · 290+ presets · 45+ UI pages
+**Status:** v2.28.0 · 206 sidecar engines · 290+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -37,7 +37,6 @@ programmability (CLI + REST + PS module), and AI depth.
 |------|-----------------------------|
 | **Community preset repository** | Needs governance + security review of contributed XML. |
 | **NPU acceleration** | Measure throughput gain vs. CUDA GPU before committing. |
-| **C2PA Content Credentials** | Rust compile dependency justified for the audience? |
 | **IAMF immersive audio** | Identify 3+ concrete user workflows first. |
 | **Commercial / ad detection (Comskip)** | UCX use case or dedicated DVR tool? |
 | **ComfyUI AI Workflow Integration** | Effort 5. Needs community signal. |

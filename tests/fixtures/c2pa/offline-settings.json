@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "core": {
+    "allowed_network_hosts": [],
+    "max_decompressed_manifest_size_in_mb": 32
+  },
+  "verify": {
+    "remote_manifest_fetch": false,
+    "ocsp_fetch": false
+  }
+}

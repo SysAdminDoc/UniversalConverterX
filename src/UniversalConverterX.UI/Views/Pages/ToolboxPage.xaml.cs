@@ -159,6 +159,7 @@ public sealed partial class ToolboxPage : Page
         // Other
         OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));
         OtherTools.Add(new ToolboxTile("presets:pkl-preset", "Pkl Preset Compiler", "Compile confined local Pkl descriptions into validated UCX preset XML", "\uE943", blue, "Ready", green, false, "Pkl 0.32+"));
+        OtherTools.Add(new ToolboxTile("presets:c2pa", "Content Credentials", "Inspect and validate embedded C2PA provenance offline", "\uE72E", blue, "Ready", green, false, "c2patool 0.27+"));
         OtherTools.Add(new ToolboxTile("chapter-marks", "Chapter Marks", "Exact-PTS MKV / MP4 chapter import, editing, export, and stream-copy muxing", "\uE8B7", blue, "Ready", green, false, "FFmpeg + MKVToolNix 97+"));
         OtherTools.Add(new ToolboxTile("watch-folders", "Watch Folders", "Auto-process files dropped into a watched folder", "\uED25", green, "Ready", green, false, "UCX"));
         OtherTools.Add(new ToolboxTile("history", "History", "Search the persistent log of every job + re-run", "\uE81C", blue, "Ready", green, false, "UCX + SQLite"));

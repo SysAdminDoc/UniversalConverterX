@@ -1,0 +1,22 @@
+{
+  "claim_generator_info": [
+    {
+      "name": "UniversalConverterX test",
+      "version": "2.28.0"
+    }
+  ],
+  "title": "Offline external manifest fixture",
+  "assertions": [
+    {
+      "label": "c2pa.actions",
+      "data": {
+        "actions": [
+          {
+            "action": "c2pa.created",
+            "digitalSourceType": "http://cv.iptc.org/newscodes/digitalsourcetype/digitalCapture"
+          }
+        ]
+      }
+    }
+  ]
+}

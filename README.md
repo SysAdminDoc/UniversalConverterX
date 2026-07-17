@@ -17,6 +17,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Video Enhancer** — portable Real-ESRGAN export, optional Anime4K v4 GLSL chains through mpv, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
 - **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.2 and libavif 1.4.2 runtimes.
+- **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
@@ -33,7 +34,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | **Audio** | Audio Converter · Audio Compressor · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
 | **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · DVD Copy (planned) |
-| **Other** | Format Inspector · Chapter Marks · Watch Folders · History · VMAF Quality |
+| **Other** | Format Inspector · Content Credentials · Pkl Preset Compiler · Chapter Marks · Watch Folders · History · VMAF Quality |
 
 ## Architecture
 
