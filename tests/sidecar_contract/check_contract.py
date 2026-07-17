@@ -14,7 +14,7 @@ Scans every tools/*/sidecar.py and enforces the rules that bit us in v2.3:
      failure as "unknown" in the UI. (Found in lipsight during the same audit.)
 
   3. Known event names — `event` strings must be one of the documented set:
-     progress, log, complete, error, segment, stem, device. New events should
+     progress, log, complete, error, segment, stem, device, capability. New events should
      be added to KNOWN_EVENTS here when intentional, surfacing accidental typos.
 
   4. Health manifest: every sidecar must carry a valid ucx.sidecar.json whose
@@ -57,6 +57,7 @@ KNOWN_EVENTS = {
     "model",    # rnnoise — discoverable .rnnn model files
     "aspect",   # vertigo — target aspect-ratio presets
     "backend",  # whisper-cpp — compiled-in feature probe
+    "capability", # optional runtime/model capability discovery
     "rule_result", # rules — safe metadata-to-preset planning result
     "chapter",  # chaptermark — discovered chapter markers
     "vmaf",          # clipforge.vmaf — per-frame VMAF scores
