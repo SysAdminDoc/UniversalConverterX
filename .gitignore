@@ -36,6 +36,7 @@ artifacts/build-reports/
 
 # Installer-generated WiX fragments
 installer/wix/PresetFiles.generated.wxs
+installer/output/
 
 # Python bytecode cache
 __pycache__/

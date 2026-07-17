@@ -84,10 +84,12 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 
 ### Quick Start
 
-1. Download the latest release
-2. Run the installer
-3. Install any additional converter tools you need (or use `ucx tools download`)
+1. Install the portable release with `winget install MavenImaging.UniversalConverterX`, or download and extract the unsigned portable ZIP from the latest release.
+2. Launch `UniversalConverterX.exe` for the desktop workspace or `ucx.exe` for automation.
+3. Install any additional converter tools you need (or use `ucx tools download`).
 4. Start converting!
+
+The release also includes an intentionally unsigned MSIX for managed sideload environments that choose to apply their own disposable local sideload key. The portable ZIP needs no certificate and is the artifact used by WinGet.
 
 ## CLI Usage
 

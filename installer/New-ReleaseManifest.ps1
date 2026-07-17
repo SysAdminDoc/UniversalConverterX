@@ -4,7 +4,7 @@
     Writes the machine-readable metadata published with a UCX release.
 
 .DESCRIPTION
-    Hashes the exact installer artifacts after signing and inventories bundled
+    Hashes the exact installer artifacts after packaging and inventories bundled
     executables/scripts without launching them. The manifest is written
     atomically so release automation cannot publish a partial JSON document.
 #>

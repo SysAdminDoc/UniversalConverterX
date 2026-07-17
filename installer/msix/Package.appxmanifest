@@ -2,14 +2,9 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
-  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
-  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
-  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
-  IgnorableNamespaces="uap uap3 uap5 rescap desktop desktop4 desktop5 com">
+  IgnorableNamespaces="uap rescap desktop">
 
   <Identity
     Name="UniversalConverterX"
@@ -35,7 +30,7 @@
   <Applications>
     <!-- Main UI Application -->
     <Application Id="App"
-      Executable="UniversalConverterX.UI.exe"
+      Executable="UniversalConverterX.exe"
       EntryPoint="Windows.FullTrustApplication">
       
       <uap:VisualElements
@@ -133,34 +128,6 @@
             <uap:Logo>Assets\DocumentIcon.png</uap:Logo>
           </uap:FileTypeAssociation>
         </uap:Extension>
-
-        <!-- Windows 11 Context Menu (IExplorerCommand) -->
-        <desktop4:Extension Category="windows.fileExplorerContextMenus">
-          <desktop4:FileExplorerContextMenus>
-            <desktop5:ItemType Type="*">
-              <desktop5:Verb Id="UCXConvert" Clsid="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" />
-            </desktop5:ItemType>
-            <desktop5:ItemType Type="Directory">
-              <desktop5:Verb Id="UCXConvert" Clsid="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" />
-            </desktop5:ItemType>
-          </desktop4:FileExplorerContextMenus>
-        </desktop4:Extension>
-
-        <!-- COM Server Registration -->
-        <com:Extension Category="windows.comServer">
-          <com:ComServer>
-            <com:ExeServer Executable="UniversalConverterX.ShellExtension.exe" Arguments="-Embedding" DisplayName="UniversalConverterX Shell Extension">
-              <com:Class Id="7E8B9A1C-2D3E-4F5A-B6C7-D8E9F0A1B2C3" DisplayName="UniversalConverterX Explorer Command" />
-            </com:ExeServer>
-          </com:ComServer>
-        </com:Extension>
-
-        <!-- App Execution Alias (CLI) -->
-        <uap5:Extension Category="windows.appExecutionAlias">
-          <uap5:AppExecutionAlias>
-            <uap5:ExecutionAlias Alias="ucx.exe" />
-          </uap5:AppExecutionAlias>
-        </uap5:Extension>
 
         <!-- Protocol Handler -->
         <uap:Extension Category="windows.protocol">

@@ -1,20 +1,14 @@
 # UniversalConverter X - Installer Build Script
-# Builds MSIX and MSI installers
+# Builds unsigned MSIX, MSI, and portable ZIP artifacts
 
 param(
-    [ValidateSet('msix', 'msi', 'all')]
+    [ValidateSet('msix', 'msi', 'portable', 'all')]
     [string]$Type = 'all',
     
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
     [string]$Version = '2.28.0.0',
-    
-    [switch]$Sign,
-    
-    [string]$CertificatePath,
-    
-    [string]$CertificatePassword,
 
     [string]$FfmpegArchivePath
 )
@@ -25,6 +19,10 @@ $rootDir = Split-Path -Parent $scriptDir
 $publishDir = Join-Path $rootDir "publish"
 $outputDir = Join-Path $rootDir "installer\output"
 $minimumDotnetRuntime = [Version]'10.0.9'
+$parsedVersion = [Version]$Version
+$semanticVersion = $parsedVersion.ToString(3)
+$msixVersion = $parsedVersion.ToString(4)
+$releaseTag = "v$semanticVersion"
 
 $installedDotnetRuntimes = @(dotnet --list-runtimes 2>$null |
     Where-Object { $_ -match '^Microsoft\.NETCore\.App\s+(\d+\.\d+\.\d+)' } |
@@ -99,12 +97,15 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 }
 
-$msixOutput = Join-Path $outputDir "UniversalConverterX_$Version.msix"
-$msiOutput = Join-Path $outputDir "UniversalConverterX_$Version.msi"
-$releaseManifest = Join-Path $outputDir "UniversalConverterX_$Version.release.json"
+$msixOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion.msix"
+$msiOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion.msi"
+$portableOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion`_portable.zip"
+$releaseManifest = Join-Path $outputDir "UniversalConverterX_$semanticVersion.release.json"
+$wingetOutput = Join-Path $outputDir 'winget\manifests\m\MavenImaging\UniversalConverterX'
 $staleOutputs = @($releaseManifest)
 if ($Type -eq 'msix' -or $Type -eq 'all') { $staleOutputs += $msixOutput }
 if ($Type -eq 'msi' -or $Type -eq 'all') { $staleOutputs += $msiOutput }
+if ($Type -eq 'portable' -or $Type -eq 'all') { $staleOutputs += $portableOutput }
 foreach ($staleOutput in $staleOutputs) {
     if (Test-Path -LiteralPath $staleOutput) {
         Remove-Item -LiteralPath $staleOutput -Force
@@ -120,7 +121,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.UI\UniversalConverterX.UI.cspro
     -r win-x64 `
     --self-contained true `
     -p:PublishSingleFile=false `
-    -p:Version=$Version `
+    -p:Version=$semanticVersion `
     -o "$publishDir\win-x64"
 
 if ($LASTEXITCODE -ne 0) {
@@ -134,7 +135,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.Console\UniversalConverterX.Con
     -r win-x64 `
     --self-contained true `
     -p:PublishSingleFile=false `
-    -p:Version=$Version `
+    -p:Version=$semanticVersion `
     -o "$publishDir\win-x64"
 
 if ($LASTEXITCODE -ne 0) {
@@ -146,7 +147,7 @@ Write-Step "Publishing Shell Extension..."
 dotnet publish "$rootDir\src\UniversalConverterX.ShellExtension\UniversalConverterX.ShellExtension.csproj" `
     -c $Configuration `
     -r win-x64 `
-    -p:Version=$Version `
+    -p:Version=$semanticVersion `
     -o "$publishDir\win-x64"
 
 if ($LASTEXITCODE -ne 0) {
@@ -160,7 +161,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.FfmpegProxy\UniversalConverterX
     -r win-x64 `
     --self-contained false `
     -p:PublishSingleFile=false `
-    -p:Version=$Version `
+    -p:Version=$semanticVersion `
     -o "$publishDir\win-x64\tools\ffmpeg-proxy"
 
 if ($LASTEXITCODE -ne 0) {
@@ -200,6 +201,27 @@ if (-not [string]::IsNullOrWhiteSpace($FfmpegArchivePath)) {
 & (Join-Path $scriptDir 'Stage-PinnedFfmpeg.ps1') @ffmpegStageArguments | Out-Null
 Write-Success "Staged FFmpeg 8.1.2 -> $($ffmpegStageArguments.DestinationPath)"
 
+# Build a directly runnable, unsigned portable archive. This is the WinGet
+# installer source and remains usable even when Windows refuses an unsigned
+# MSIX sideload.
+if ($Type -eq 'portable' -or $Type -eq 'all') {
+    Write-Header "Building Portable ZIP"
+    Compress-Archive -Path "$publishDir\win-x64\*" -DestinationPath $portableOutput -CompressionLevel Optimal -Force
+    if (-not (Test-Path -LiteralPath $portableOutput -PathType Leaf) -or
+        (Get-Item -LiteralPath $portableOutput).Length -eq 0) {
+        throw "Portable ZIP was not produced: $portableOutput"
+    }
+
+    Write-Success "Portable ZIP created: $portableOutput"
+    Write-Step "Generating WinGet manifest content..."
+    & (Join-Path $scriptDir 'New-WinGetManifest.ps1') `
+        -Version $semanticVersion `
+        -PortableArchivePath $portableOutput `
+        -ReleaseTag $releaseTag `
+        -OutputDirectory $wingetOutput | Out-Null
+    Write-Success "WinGet manifests created under: $wingetOutput\$semanticVersion"
+}
+
 # Build MSIX
 if ($Type -eq 'msix' -or $Type -eq 'all') {
     Write-Header "Building MSIX Package"
@@ -217,14 +239,20 @@ if ($Type -eq 'msix' -or $Type -eq 'all') {
     # Copy published files
     Copy-Item -Path "$publishDir\win-x64\*" -Destination $msixBuildDir -Recurse
     
-    # Copy manifest
-    Copy-Item -Path "$msixDir\Package.appxmanifest" -Destination $msixBuildDir
+    # Copy and stamp the manifest. The source manifest intentionally carries
+    # the current release version for consistency tests; staging always uses
+    # the requested build version.
+    $stagedManifestPath = Join-Path $msixBuildDir 'AppxManifest.xml'
+    Copy-Item -Path "$msixDir\Package.appxmanifest" -Destination $stagedManifestPath
+    [xml]$stagedManifest = Get-Content -LiteralPath $stagedManifestPath
+    $stagedManifest.Package.Identity.Version = $msixVersion
+    $stagedManifest.Save($stagedManifestPath)
     
-    # Create Assets folder with placeholder icons if not present
+    # Generate correctly sized package assets from the repository logo.
     $assetsDir = Join-Path $msixBuildDir "Assets"
-    if (-not (Test-Path $assetsDir)) {
-        New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
-    }
+    & (Join-Path $scriptDir 'New-MsixAssets.ps1') `
+        -SourceImage (Join-Path $rootDir 'icon.png') `
+        -OutputDirectory $assetsDir
     
     # Use MakeAppx to create the package
     $makeAppx = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.22621.0\x64\makeappx.exe"
@@ -238,36 +266,7 @@ if ($Type -eq 'msix' -or $Type -eq 'all') {
         & $makeAppx pack /d $msixBuildDir /p $msixOutput /o
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Success "MSIX package created: $msixOutput"
-            
-            # Sign if requested
-            if ($Sign -and $CertificatePath) {
-                Write-Step "Signing MSIX package..."
-                $signTool = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe"
-                if (-not (Test-Path $signTool)) {
-                    $signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -ErrorAction SilentlyContinue | 
-                                Sort-Object FullName -Descending | 
-                                Select-Object -First 1 -ExpandProperty FullName
-                }
-                
-                if ($signTool -and (Test-Path $signTool)) {
-                    $signArgs = @('sign', '/fd', 'SHA256', '/f', $CertificatePath)
-                    if ($CertificatePassword) {
-                        $signArgs += @('/p', $CertificatePassword)
-                    }
-                    $signArgs += $msixOutput
-
-                    & $signTool $signArgs
-                    
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-Success "MSIX package signed"
-                    } else {
-                        Write-Error "Failed to sign MSIX package"
-                    }
-                } else {
-                    Write-Error "SignTool not found"
-                }
-            }
+            Write-Success "Unsigned MSIX package created: $msixOutput"
         } else {
             Write-Error "Failed to create MSIX package"
         }
@@ -309,7 +308,7 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         try {
             & dotnet tool run wix build Product.wxs $presetFragmentPath `
                 -d "PublishDir=$publishDir\win-x64\" `
-                -d "Version=$Version" `
+                -d "Version=$semanticVersion" `
                 -o $msiOutput
             
             if ($LASTEXITCODE -eq 0) {
@@ -334,7 +333,7 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         # Compile
         & $candlePath "$wixDir\Product.wxs" `
             -d "PublishDir=$publishDir\win-x64\" `
-            -d "Version=$Version" `
+            -d "Version=$semanticVersion" `
             -out "$wixObjDir\Product.wixobj"
         if ($LASTEXITCODE -eq 0) {
             & $candlePath $presetFragmentPath `
@@ -361,33 +360,10 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         Write-Error "WiX Toolset not found. Install WiX v4 (dotnet tool install wix) or WiX v3."
     }
     
-    # Sign MSI if requested
-    if ($Sign -and $CertificatePath -and (Test-Path $msiOutput)) {
-        Write-Step "Signing MSI installer..."
-        $signTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -ErrorAction SilentlyContinue | 
-                    Sort-Object FullName -Descending | 
-                    Select-Object -First 1 -ExpandProperty FullName
-        
-        if ($signTool) {
-            $signArgs = @("sign", "/fd", "SHA256", "/f", $CertificatePath)
-            if ($CertificatePassword) {
-                $signArgs += @("/p", $CertificatePassword)
-            }
-            $signArgs += @("/tr", "http://timestamp.digicert.com", "/td", "SHA256", $msiOutput)
-            
-            & $signTool $signArgs
-            
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "MSI installer signed"
-            } else {
-                Write-Error "Failed to sign MSI"
-            }
-        }
-    }
 }
 
-# Generate release metadata only after packaging and signing so every digest
-# describes the exact bytes that will be uploaded. Missing requested artifacts
+# Generate release metadata only after packaging so every digest describes the
+# exact bytes that will be uploaded. Missing requested artifacts
 # are fatal; stale files from a previous build must never satisfy this check.
 $releaseArtifacts = New-Object System.Collections.Generic.List[string]
 if ($Type -eq 'msix' -or $Type -eq 'all') {
@@ -404,11 +380,18 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
     }
     $releaseArtifacts.Add($msiOutput) | Out-Null
 }
+if ($Type -eq 'portable' -or $Type -eq 'all') {
+    if (-not (Test-Path -LiteralPath $portableOutput -PathType Leaf) -or
+        (Get-Item -LiteralPath $portableOutput).Length -eq 0) {
+        throw "Requested portable artifact was not produced: $portableOutput"
+    }
+    $releaseArtifacts.Add($portableOutput) | Out-Null
+}
 
 $manifestScript = Join-Path $scriptDir 'New-ReleaseManifest.ps1'
 Write-Step "Generating release manifest..."
 & $manifestScript `
-    -Version $Version `
+    -Version $semanticVersion `
     -ArtifactPath $releaseArtifacts.ToArray() `
     -BundleRoot (Join-Path $publishDir 'win-x64') `
     -PresetRoot $presetsDst `
