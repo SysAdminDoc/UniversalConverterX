@@ -18,9 +18,9 @@
     <Company>Maven Imaging</Company>
     <Product>UniversalConverter X</Product>
     <Copyright>Copyright © 2026 Maven Imaging</Copyright>
-    <Version>2.26.0</Version>
-    <AssemblyVersion>2.26.0.0</AssemblyVersion>
-    <FileVersion>2.26.0.0</FileVersion>
+    <Version>2.27.0</Version>
+    <AssemblyVersion>2.27.0.0</AssemblyVersion>
+    <FileVersion>2.27.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

@@ -1,7 +1,7 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.26.0 · 190 sidecar engines · 290+ presets · 45+ UI pages
-**Last updated:** 2026-07-16
+**Status:** v2.27.0 · 191 sidecar engines · 290+ presets · 45+ UI pages
+**Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
 Shipped work is recorded in [`CHANGELOG.md`](CHANGELOG.md).
@@ -30,14 +30,6 @@ programmability (CLI + REST + PS module), and AI depth.
 ## Tier 2 — Next _(v2.23–v2.27)_
 
 ## Tier 3 — Later _(v2.27+)_
-
-### 55. Video Summarizer (AI Condensed Highlight)
-
-3-sidecar orchestration: Whisper → local LLM (llama.cpp or Phi Silica) → FFmpeg concat. Ships the "Planned" Video Summarizer tile in AiLabPage.
-
-Impact: 3 · Effort: 4 · Type: leapfrog
-
----
 
 ### 98. PyAV v17 Hardware-Memory Zero-Copy Path
 

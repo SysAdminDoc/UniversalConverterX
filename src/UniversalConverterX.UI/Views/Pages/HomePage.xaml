@@ -349,7 +349,7 @@
                         HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Ellipse Width="6" Height="6" Fill="{StaticResource AccentGreenBrush}"
                          VerticalAlignment="Center"/>
-                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.26.0"
+                <TextBlock x:Uid="HomePage_Item_031" Text="UniversalConverter X v2.27.0"
                            Style="{StaticResource MutedTextStyle}"
                            VerticalAlignment="Center"/>
                 <Border Background="{StaticResource DividerBrush}" Width="1" Height="12"

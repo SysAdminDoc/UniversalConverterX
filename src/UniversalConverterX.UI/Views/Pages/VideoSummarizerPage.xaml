@@ -14,72 +14,37 @@
             <!-- Header -->
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="VideoSummarizerPage_Item_001" Text="Video Summarizer" Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="VideoSummarizerPage_Item_002" Text="Extract chapters, highlights, and written summaries from long recordings using Whisper transcription and a local LLM."
+                <TextBlock x:Uid="VideoSummarizerPage_Item_002" Text="Turn long recordings into a written summary, timestamped chapters, and an optional condensed highlight cut. Runs offline with Whisper transcription and an extractive summarizer — no cloud, no account."
                            Style="{StaticResource SubtitleTextStyle}"/>
             </StackPanel>
 
-            <!-- Dev status banner -->
-            <Border Style="{StaticResource CardStyle}">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14"
-                            Background="{StaticResource SurfaceLightBrush}"
-                            VerticalAlignment="Top">
-                        <FontIcon Glyph="&#xE8D2;" FontSize="22"
-                                  Foreground="{StaticResource AccentBlueBrush}"/>
-                    </Border>
-                    <StackPanel Grid.Column="1" Spacing="6">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Background="{StaticResource AccentOrangeBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock x:Uid="VideoSummarizerPage_Item_003" Text="PLANNED" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource TextInverseBrush}"/>
-                            </Border>
-                            <Border Background="{StaticResource SurfaceLightBrush}" CornerRadius="6" Padding="8,3">
-                                <TextBlock x:Uid="VideoSummarizerPage_Item_004" Text="Engine: Whisper + local LLM" Style="{StaticResource EyebrowTextStyle}"
-                                           Foreground="{StaticResource AccentBlueBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock x:Uid="VideoSummarizerPage_Item_005" Text="Video Summarizer is not available yet."
-                                   Style="{StaticResource LabelTextStyle}"/>
-                        <TextBlock x:Uid="VideoSummarizerPage_Item_006" Text="Required before enabling: transcript pipeline, summary model, preview, export path, cancellation, and failure recovery."
-                                   Style="{StaticResource MutedTextStyle}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
             <!-- Input area -->
             <Border Style="{StaticResource CardStyle}"
-                    MinHeight="160"
-                    AllowDrop="False"
-                    Opacity="0.72"
+                    MinHeight="150"
+                    AllowDrop="True"
                     DragOver="DropZone_DragOver"
                     Drop="DropZone_Drop">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                    <Border Width="72" Height="72" CornerRadius="18"
+                    <Border Width="64" Height="64" CornerRadius="18"
                             Background="{StaticResource SurfaceLightBrush}"
                             HorizontalAlignment="Center">
-                        <FontIcon Glyph="&#xE8D2;" FontSize="32"
+                        <FontIcon Glyph="&#xE8D2;" FontSize="30"
                                   Foreground="{StaticResource AccentBlueBrush}"/>
                     </Border>
                     <TextBlock x:Uid="VideoSummarizerPage_DropZoneLabel" x:Name="DropZoneLabel"
-                               Text="Input is disabled until this workflow is ready."
+                               Text="Drop a video, audio file, or transcript — or browse."
                                Style="{StaticResource BodyTextStyle}"
+                               TextWrapping="Wrap"
                                HorizontalAlignment="Center"/>
-                    <Button x:Uid="VideoSummarizerPage_VideoSummarizerPageButton01" Content="Browse Files"
+                    <Button x:Uid="VideoSummarizerPage_BrowseButton" x:Name="BrowseButton" AutomationProperties.AutomationId="BrowseButton" Content="Browse Files"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            IsEnabled="False"
                             HorizontalAlignment="Center"
-                            Click="Browse_Click"
-                        AutomationProperties.AutomationId="VideoSummarizerPageButton01"/>
+                            Click="Browse_Click"/>
                 </StackPanel>
             </Border>
 
             <!-- Settings panel -->
-            <Grid ColumnSpacing="16" IsHitTestVisible="False" Opacity="0.72">
+            <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -87,87 +52,109 @@
 
                 <Border Grid.Column="0" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock x:Uid="VideoSummarizerPage_Item_009" Text="Summary" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VideoSummarizerPage_Item_005" Text="Summary" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
-                            <TextBlock x:Uid="VideoSummarizerPage_Item_010" Text="Summary Length" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox01">
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_011" Content="Brief (3-5 bullets)" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_012" Content="Standard (1 paragraph)"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_013" Content="Detailed (multi-section)"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_014" Content="Executive brief"/>
+                            <TextBlock x:Uid="VideoSummarizerPage_Item_006" Text="Summary Length" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="LengthBox" AutomationProperties.AutomationId="LengthBox" HorizontalAlignment="Stretch">
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_007" Content="Brief (3-5 bullets)" Tag="brief"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_008" Content="Standard (1 paragraph)" Tag="standard" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_009" Content="Detailed (multi-section)" Tag="detailed"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_010" Content="Executive brief" Tag="executive"/>
                             </ComboBox>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock x:Uid="VideoSummarizerPage_Item_015" Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox02">
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_016" Content="Plain text" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_017" Content="Markdown"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_018" Content="Chapters with timestamps"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_019" Content="YouTube description format"/>
+                            <TextBlock x:Uid="VideoSummarizerPage_Item_011" Text="Output Format" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="FormatBox" AutomationProperties.AutomationId="FormatBox" HorizontalAlignment="Stretch">
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_012" Content="Plain text" Tag="text" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_013" Content="Markdown" Tag="markdown"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_014" Content="Chapters with timestamps" Tag="chapters"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_015" Content="YouTube description format" Tag="youtube"/>
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel Spacing="6">
-                            <TextBlock x:Uid="VideoSummarizerPage_Item_020" Text="Output Language" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox03">
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_021" Content="Auto (match source)" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_022" Content="English"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_023" Content="Spanish"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_024" Content="French"/>
-                            </ComboBox>
-                        </StackPanel>
+                        <ToggleSwitch x:Uid="VideoSummarizerPage_ChaptersToggle" x:Name="ChaptersToggle" AutomationProperties.AutomationId="ChaptersToggle" Header="Include chapter timestamps"
+                                      IsOn="True" OffContent="Off" OnContent="On"/>
+                        <ToggleSwitch x:Uid="VideoSummarizerPage_TranscriptToggle" x:Name="TranscriptToggle" AutomationProperties.AutomationId="TranscriptToggle" Header="Export transcript alongside summary"
+                                      IsOn="False" OffContent="Off" OnContent="On"/>
+                        <ToggleSwitch x:Uid="VideoSummarizerPage_HighlightToggle" x:Name="HighlightToggle" AutomationProperties.AutomationId="HighlightToggle" Header="Render condensed highlight reel (video only)"
+                                      IsOn="False" OffContent="Off" OnContent="On"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="1" Style="{StaticResource CardStyle}">
                     <StackPanel Spacing="14">
-                        <TextBlock x:Uid="VideoSummarizerPage_Item_025" Text="Transcript &amp; Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                        <TextBlock x:Uid="VideoSummarizerPage_Item_019" Text="Transcript &amp; Engine" Style="{StaticResource PanelTitleTextStyle}"/>
                         <StackPanel Spacing="6">
-                            <TextBlock x:Uid="VideoSummarizerPage_Item_026" Text="Whisper Model" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox04">
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_027" Content="medium (balanced)" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_028" Content="large-v3 (accurate)"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_029" Content="small (fast)"/>
+                            <TextBlock x:Uid="VideoSummarizerPage_Item_020" Text="Whisper Model (for audio/video input)" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="ModelBox" AutomationProperties.AutomationId="ModelBox" HorizontalAlignment="Stretch">
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_021" Content="large-v3-turbo (recommended)" Tag="large-v3-turbo" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_022" Content="medium (balanced)" Tag="medium"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_023" Content="small (fast)" Tag="small"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_024" Content="large-v3 (accurate)" Tag="large-v3"/>
                             </ComboBox>
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock x:Uid="VideoSummarizerPage_Item_030" Text="LLM Backend" Style="{StaticResource MutedTextStyle}"/>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                AutomationProperties.AutomationId="VideoSummarizerPageComboBox05">
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_031" Content="Llama.cpp (local)" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_032" Content="Ollama (local server)"/>
+                            <TextBlock x:Uid="VideoSummarizerPage_Item_025" Text="Summarizer Engine" Style="{StaticResource MutedTextStyle}"/>
+                            <ComboBox x:Name="EngineBox" AutomationProperties.AutomationId="EngineBox" HorizontalAlignment="Stretch">
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_026" Content="Extractive (offline, no model)" Tag="extractive" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="VideoSummarizerPage_Item_027" Content="Local LLM via Ollama (if running)" Tag="auto"/>
                             </ComboBox>
                         </StackPanel>
-                        <ToggleSwitch x:Uid="VideoSummarizerPage_VideoSummarizerPageToggleSwitch01" Header="Export transcript alongside summary"
-                                      IsOn="True"
-                                      OffContent="Off" OnContent="On"
-                            AutomationProperties.AutomationId="VideoSummarizerPageToggleSwitch01"/>
-                        <ToggleSwitch x:Uid="VideoSummarizerPage_VideoSummarizerPageToggleSwitch02" Header="Include chapter timestamps"
-                                      IsOn="True"
-                                      OffContent="Off" OnContent="On"
-                            AutomationProperties.AutomationId="VideoSummarizerPageToggleSwitch02"/>
+                        <TextBlock x:Uid="VideoSummarizerPage_Item_028" Text="Extractive summarization needs no model download and runs entirely on the CPU. The Ollama option is used only when a local server is reachable, otherwise it falls back to extractive."
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Action bar -->
             <Border Style="{StaticResource CardStyle}" Padding="16">
-                <Grid>
+                <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Uid="VideoSummarizerPage_Item_035" Grid.Column="0" Text="Preview only. Controls are disabled until the workflow is wired."
+                    <TextBlock x:Uid="VideoSummarizerPage_StatusText" x:Name="StatusText" Grid.Column="0"
+                               Text="Load a file to begin."
                                Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
                                VerticalAlignment="Center"/>
-                    <Button x:Uid="VideoSummarizerPage_VideoSummarizerPageButton02" Grid.Column="1" Content="Summarize Video"
+                    <Button x:Uid="VideoSummarizerPage_CancelButton" x:Name="CancelButton" AutomationProperties.AutomationId="CancelButton" Grid.Column="1" Content="Cancel"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            IsEnabled="False"
+                            Click="Cancel_Click"/>
+                    <Button x:Uid="VideoSummarizerPage_SummarizeButton" x:Name="SummarizeButton" AutomationProperties.AutomationId="SummarizeButton" Grid.Column="2" Content="Summarize"
                             Style="{StaticResource PrimaryButtonStyle}"
                             IsEnabled="False"
-                        AutomationProperties.AutomationId="VideoSummarizerPageButton02"/>
+                            Click="Summarize_Click"/>
                 </Grid>
+            </Border>
+
+            <ProgressBar x:Name="SummaryProgress" Minimum="0" Maximum="100"
+                         Visibility="Collapsed"/>
+
+            <!-- Result -->
+            <Border x:Name="ResultCard" Style="{StaticResource CardStyle}" Visibility="Collapsed">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Uid="VideoSummarizerPage_Item_032" Grid.Column="0" Text="Summary" Style="{StaticResource PanelTitleTextStyle}"
+                                   VerticalAlignment="Center"/>
+                        <Button x:Uid="VideoSummarizerPage_CopyButton" Grid.Column="1" x:Name="CopyButton" AutomationProperties.AutomationId="CopyButton" Content="Copy"
+                                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0"
+                                Click="Copy_Click"/>
+                        <Button x:Uid="VideoSummarizerPage_SaveButton" Grid.Column="2" x:Name="SaveButton" AutomationProperties.AutomationId="SaveButton" Content="Save As…"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Save_Click"/>
+                    </Grid>
+                    <TextBox x:Name="ResultBox" AutomationProperties.AutomationId="ResultBox" IsReadOnly="True" AcceptsReturn="True"
+                             TextWrapping="Wrap" MinHeight="180" MaxHeight="420"
+                             FontFamily="Consolas"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
             </Border>
 
         </StackPanel>

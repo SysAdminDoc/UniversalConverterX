@@ -2869,7 +2869,7 @@
     <value>Registros locales y paquetes de accidentes</value>
   </data>
   <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.26.0</value>
+    <value>UniversalConverter X v2.27.0</value>
   </data>
   <data name="HomePage_Item_032.Text" xml:space="preserve">
     <value>Procesamiento local en primer lugar</value>
@@ -4669,7 +4669,7 @@
     <value>Actualizar estado</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.26.0</value>
+    <value>Version 2.27.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>
@@ -5577,8 +5577,35 @@
   <data name="VideoEnhancerPage_VideoEnhancerPagePivotItem02.Header" xml:space="preserve">
     <value>Finalizado</value>
   </data>
+  <data name="VideoSummarizerPage_BrowseButton.Content" xml:space="preserve">
+    <value>Browse Files</value>
+  </data>
+  <data name="VideoSummarizerPage_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="VideoSummarizerPage_ChaptersToggle.Header" xml:space="preserve">
+    <value>Include chapter timestamps</value>
+  </data>
+  <data name="VideoSummarizerPage_ChaptersToggle.OffContent" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="VideoSummarizerPage_ChaptersToggle.OnContent" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="VideoSummarizerPage_CopyButton.Content" xml:space="preserve">
+    <value>Copy</value>
+  </data>
   <data name="VideoSummarizerPage_DropZoneLabel.Text" xml:space="preserve">
     <value>La entrada está desactivada hasta que este flujo de trabajo esté listo.</value>
+  </data>
+  <data name="VideoSummarizerPage_HighlightToggle.Header" xml:space="preserve">
+    <value>Render condensed highlight reel (video only)</value>
+  </data>
+  <data name="VideoSummarizerPage_HighlightToggle.OffContent" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="VideoSummarizerPage_HighlightToggle.OnContent" xml:space="preserve">
+    <value>On</value>
   </data>
   <data name="VideoSummarizerPage_Item_001.Text" xml:space="preserve">
     <value>Resumen de vídeo</value>
@@ -5586,26 +5613,26 @@
   <data name="VideoSummarizerPage_Item_002.Text" xml:space="preserve">
     <value>Extraiga capítulos, aspectos destacados y resúmenes escritos de grabaciones largas usando la transcripción Whisper y un LLM local.</value>
   </data>
-  <data name="VideoSummarizerPage_Item_003.Text" xml:space="preserve">
-    <value>PLANNED</value>
-  </data>
-  <data name="VideoSummarizerPage_Item_004.Text" xml:space="preserve">
-    <value>Motor: Whisper + LLM local</value>
-  </data>
   <data name="VideoSummarizerPage_Item_005.Text" xml:space="preserve">
     <value>Video Summarizer aún no está disponible.</value>
   </data>
   <data name="VideoSummarizerPage_Item_006.Text" xml:space="preserve">
     <value>Requerido antes de habilitar: tubería de transcripción, modelo de resumen, vista previa, ruta de exportación, cancelación y recuperación de fallos.</value>
   </data>
-  <data name="VideoSummarizerPage_Item_009.Text" xml:space="preserve">
-    <value>Resumen</value>
+  <data name="VideoSummarizerPage_Item_007.Content" xml:space="preserve">
+    <value>Brief (3-5 bullets)</value>
   </data>
-  <data name="VideoSummarizerPage_Item_010.Text" xml:space="preserve">
-    <value>Resumen Longitud</value>
+  <data name="VideoSummarizerPage_Item_008.Content" xml:space="preserve">
+    <value>Standard (1 paragraph)</value>
   </data>
-  <data name="VideoSummarizerPage_Item_011.Content" xml:space="preserve">
-    <value>Breve (3 a 5 balas)</value>
+  <data name="VideoSummarizerPage_Item_009.Content" xml:space="preserve">
+    <value>Detailed (multi-section)</value>
+  </data>
+  <data name="VideoSummarizerPage_Item_010.Content" xml:space="preserve">
+    <value>Executive brief</value>
+  </data>
+  <data name="VideoSummarizerPage_Item_011.Text" xml:space="preserve">
+    <value>Output Format</value>
   </data>
   <data name="VideoSummarizerPage_Item_012.Content" xml:space="preserve">
     <value>Norma (1 párrafo)</value>
@@ -5616,20 +5643,11 @@
   <data name="VideoSummarizerPage_Item_014.Content" xml:space="preserve">
     <value>Informe ejecutivo</value>
   </data>
-  <data name="VideoSummarizerPage_Item_015.Text" xml:space="preserve">
-    <value>Formato de salida</value>
+  <data name="VideoSummarizerPage_Item_015.Content" xml:space="preserve">
+    <value>YouTube description format</value>
   </data>
-  <data name="VideoSummarizerPage_Item_016.Content" xml:space="preserve">
-    <value>Texto plano</value>
-  </data>
-  <data name="VideoSummarizerPage_Item_017.Content" xml:space="preserve">
-    <value>Marcado</value>
-  </data>
-  <data name="VideoSummarizerPage_Item_018.Content" xml:space="preserve">
-    <value>Capítulos con marcas de tiempo</value>
-  </data>
-  <data name="VideoSummarizerPage_Item_019.Content" xml:space="preserve">
-    <value>Formato de descripción YouTube</value>
+  <data name="VideoSummarizerPage_Item_019.Text" xml:space="preserve">
+    <value>Transcript &amp; Engine</value>
   </data>
   <data name="VideoSummarizerPage_Item_020.Text" xml:space="preserve">
     <value>Idioma de salida</value>
@@ -5649,53 +5667,35 @@
   <data name="VideoSummarizerPage_Item_025.Text" xml:space="preserve">
     <value>&amp; Modelo de transcripción</value>
   </data>
-  <data name="VideoSummarizerPage_Item_026.Text" xml:space="preserve">
-    <value>Modelo Whisper</value>
+  <data name="VideoSummarizerPage_Item_026.Content" xml:space="preserve">
+    <value>Extractive (offline, no model)</value>
   </data>
   <data name="VideoSummarizerPage_Item_027.Content" xml:space="preserve">
     <value>medio (balanced)</value>
   </data>
-  <data name="VideoSummarizerPage_Item_028.Content" xml:space="preserve">
-    <value>large-v3 (exacto)</value>
+  <data name="VideoSummarizerPage_Item_028.Text" xml:space="preserve">
+    <value>Extractive summarization needs no model download and runs entirely on the CPU. The Ollama option is used only when a local server is reachable, otherwise it falls back to extractive.</value>
   </data>
-  <data name="VideoSummarizerPage_Item_029.Content" xml:space="preserve">
-    <value>pequeño (rápido)</value>
+  <data name="VideoSummarizerPage_Item_032.Text" xml:space="preserve">
+    <value>Summary</value>
   </data>
-  <data name="VideoSummarizerPage_Item_030.Text" xml:space="preserve">
-    <value>Motor LLM</value>
+  <data name="VideoSummarizerPage_SaveButton.Content" xml:space="preserve">
+    <value>Save As…</value>
   </data>
-  <data name="VideoSummarizerPage_Item_031.Content" xml:space="preserve">
-    <value>Llama.cpp (local)</value>
+  <data name="VideoSummarizerPage_StatusText.Text" xml:space="preserve">
+    <value>Load a file to begin.</value>
   </data>
-  <data name="VideoSummarizerPage_Item_032.Content" xml:space="preserve">
-    <value>Ollama (servidor local)</value>
+  <data name="VideoSummarizerPage_SummarizeButton.Content" xml:space="preserve">
+    <value>Summarize</value>
   </data>
-  <data name="VideoSummarizerPage_Item_035.Text" xml:space="preserve">
-    <value>Solo Vista previa. Los controles se deshabilitan hasta que el flujo de trabajo esté conectado.</value>
+  <data name="VideoSummarizerPage_TranscriptToggle.Header" xml:space="preserve">
+    <value>Export transcript alongside summary</value>
   </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageButton01.Content" xml:space="preserve">
-    <value>Examinar archivos</value>
+  <data name="VideoSummarizerPage_TranscriptToggle.OffContent" xml:space="preserve">
+    <value>Off</value>
   </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageButton02.Content" xml:space="preserve">
-    <value>Resuma el vídeo</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch01.Header" xml:space="preserve">
-    <value>Exportar transcripción junto con resumen</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch01.OffContent" xml:space="preserve">
-    <value>Desactivado</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch01.OnContent" xml:space="preserve">
-    <value>Activar</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch02.Header" xml:space="preserve">
-    <value>Incluir marcas de tiempo del capítulo</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch02.OffContent" xml:space="preserve">
-    <value>Desactivado</value>
-  </data>
-  <data name="VideoSummarizerPage_VideoSummarizerPageToggleSwitch02.OnContent" xml:space="preserve">
-    <value>Activar</value>
+  <data name="VideoSummarizerPage_TranscriptToggle.OnContent" xml:space="preserve">
+    <value>On</value>
   </data>
   <data name="VmafAnalysisPage_DistortedLabel.Text" xml:space="preserve">
     <value>(Seleccione el clip comprimido para evaluar)</value>

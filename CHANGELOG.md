@@ -4,6 +4,12 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.27.0] - 2026-07-17
+
+### Added
+
+- Shipped the **Video Summarizer** (previously a "Planned" placeholder): turn a long recording into a written summary, timestamped chapters, and an optional condensed highlight cut — all offline. A new `videosummary` sidecar transcribes audio/video with the existing Whisper engine, then runs a pure-standard-library **extractive TextRank** summarizer that needs no model download, no GPU, and no network. It picks the most central sentences (Brief / Standard / Detailed / Executive lengths), detects chapters and titles them from their top keywords, and can render a speech-driven highlight reel by concatenating the highest-ranked segments with FFmpeg. Output as plain text, Markdown, YouTube-style chapter descriptions (first chapter pinned to 00:00 with auto hashtags), or a bare chapters list; transcripts (SRT / VTT / JSON / TXT) can be summarized directly, and you can bring your own transcript alongside a video to cut a reel without re-transcribing. An optional local-LLM path via Ollama is used only when a server is reachable, otherwise it transparently falls back to the offline extractive engine.
+
 ## [2.26.0] - 2026-07-16
 
 ### Fixed

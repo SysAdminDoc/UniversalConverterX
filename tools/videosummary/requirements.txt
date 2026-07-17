@@ -1,0 +1,4 @@
+# The videosummary engine is pure Python standard library — the extractive
+# TextRank summarizer, transcript parsing, and chapter detection need no
+# third-party packages. Whisper transcription is delegated to the whisper-stt
+# sidecar; FFmpeg is a managed external tool. No runtime dependencies.
