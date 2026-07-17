@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 201 sidecar engines · 290+ presets · 45+ UI pages
+**Status:** v2.28.0 · 202 sidecar engines · 290+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -50,4 +50,3 @@ programmability (CLI + REST + PS module), and AI depth.
 | **Pkl Preset DSL** (Item 82) | Adds Pkl compiler dependency. |
 | **Prometheus Dashboard** (Item 86) | Optional for advanced batch ops. UC pending demand. |
 | **VapourSynth Scripting Bridge** (Item 96) | Survey demand from mpv/encoder forums. |
-| **Conditional Rules Engine (Tdarr-style)** (Item 97) | Deep design space. Start simple, promote on signal. |

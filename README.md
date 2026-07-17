@@ -20,6 +20,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
+- **Automation** — shared CLI/REST/PowerShell engine catalog plus safe metadata-based conditional preset planning.
 - **Toolbox** — 40+ specialized tools across Image, Video, AI, Audio, Documents, Disc, and Other categories.
 
 ## Toolbox highlights

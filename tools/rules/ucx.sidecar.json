@@ -1,0 +1,11 @@
+{
+  "engine": "rules",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffprobe",
+      "display": "FFprobe media inspection",
+      "managed": true
+    }
+  ]
+}

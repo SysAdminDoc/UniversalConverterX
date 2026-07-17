@@ -57,6 +57,7 @@ KNOWN_EVENTS = {
     "model",    # rnnoise — discoverable .rnnn model files
     "aspect",   # vertigo — target aspect-ratio presets
     "backend",  # whisper-cpp — compiled-in feature probe
+    "rule_result", # rules — safe metadata-to-preset planning result
     "chapter",  # chaptermark — discovered chapter markers
     "vmaf",          # clipforge.vmaf — per-frame VMAF scores
     "vmaf_summary",  # clipforge.vmaf — pooled mean / harmonic / min / pct<70
