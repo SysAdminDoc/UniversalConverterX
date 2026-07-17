@@ -36,6 +36,14 @@ def _run(func, args) -> tuple[int, list[dict]]:
 
 
 class ColorizeTests(unittest.TestCase):
+    def test_video_hardware_decode_is_opt_in(self) -> None:
+        default = SIDECAR.build_parser().parse_args(
+            ["video", "--input", "in.mp4", "--output", "out.mp4"])
+        enabled = SIDECAR.build_parser().parse_args(
+            ["video", "--input", "in.mp4", "--output", "out.mp4", "--hw-decode"])
+        self.assertFalse(default.hw_decode)
+        self.assertTrue(enabled.hw_decode)
+
     def test_download_requires_license_acceptance(self) -> None:
         code, events = _run(SIDECAR.op_download_model, ["download-model"])
         self.assertEqual(1, code)

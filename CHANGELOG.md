@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Changed
 
+- NVDEC frame decoding now extends beyond Auto Highlight to LipSight speech segmentation and Vertigo smart tracking, with automatic OpenCV fallback and no duplicate frames if hardware decoding fails mid-stream. Pixel-producing ClipForge face blur and Colorize video workflows expose hardware decode only through an explicit `--hw-decode` opt-in. All four frozen engines pin and bundle PyAV 17, while a fully GPU-resident path remains deferred until a CuPy/Torch-class frame consumer exists.
 - ClipForge's 2,322-line sidecar entrypoint is now split into focused metadata/filter, track, analysis/proxy, and face-privacy operation modules. The entrypoint retains its complete CLI and import surface while focusing on parser wiring and orchestration, PyInstaller includes and exercises the package, and the static NDJSON contract audit now follows extracted `*_ops` modules.
 - Video Summarizer, Auto Highlight, Colorize, Background Remover, and Compressor now delegate their non-visual workflow state, sidecar argument construction, output planning, and error mapping to tested CommunityToolkit.Mvvm ViewModels in Core. The WinUI code-behind is limited to picker, dispatcher, and view-service work, with focused xUnit coverage for transcript/video branching, selected highlight serialization, model readiness, AlphaCut options, target-size headroom, and VMAF encoder presets.
 

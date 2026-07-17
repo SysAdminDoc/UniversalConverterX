@@ -1177,6 +1177,10 @@ def build_parser() -> argparse.ArgumentParser:
                            help="Cascade consensus threshold 1..20 (default 5).")
     face_blur.add_argument("--min-face", dest="min_face", type=int, default=24,
                            help="Smallest detected face in pixels (default 24).")
+    face_blur.add_argument(
+        "--hw-decode",
+        action="store_true",
+        help="Opt in to NVDEC frame decoding when CUDA/PyAV are available.")
     face_blur.add_argument("--codec", choices=("libx264", "libx265"), default="libx264")
     face_blur.add_argument("--crf", type=int, choices=range(0, 52), default=18)
     face_blur.add_argument("--preset", default="medium")

@@ -17,6 +17,10 @@ import shutil
 import subprocess
 import math
 import multiprocessing
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+import hw_decode
 
 # PyInstaller multiprocessing guard must run before any heavy imports — when
 # frozen, child workers re-execute this module and would otherwise re-run main.
@@ -191,21 +195,17 @@ def segment_video(video_path: str, threshold: float = 0.06) -> list[tuple[float,
         return [(0.0, total / fps)]
 
     emit_log(f"Analyzing {total} frames for speech segments ({analyzer._backend})...")
-    cap = cv2.VideoCapture(video_path)
+    emit_log(f"Frame decode backend: {hw_decode.frames_backend()}")
     ratios: list[tuple[int, float]] = []
     step = max(1, int(fps / 10))
-    idx = 0
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        if idx % step == 0:
-            ratios.append((idx, analyzer.open_ratio(frame)))
-        if idx % 200 == 0 and total > 0:
-            emit_progress(idx / total * 15, f"Analyzing frame {idx}/{total}")
-        idx += 1
-    cap.release()
-    analyzer.close()
+    try:
+        for idx, frame in hw_decode.frames_or_opencv(video_path, cv2):
+            if idx % step == 0:
+                ratios.append((idx, analyzer.open_ratio(frame)))
+            if idx % 200 == 0 and total > 0:
+                emit_progress(idx / total * 15, f"Analyzing frame {idx}/{total}")
+    finally:
+        analyzer.close()
 
     if not ratios:
         return [(0.0, total / fps)]

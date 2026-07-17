@@ -87,15 +87,25 @@ def iter_frames(
 
     use_hw = bool(allow_hw) and cuda_decode_available()
 
+    emitted = 0
     if use_hw:
         try:
-            yield from _decode(av, path, pix_fmt,
-                               HWAccel(device_type="cuda", allow_software_fallback=True))
+            for index, frame in _decode(
+                av,
+                path,
+                pix_fmt,
+                HWAccel(device_type="cuda", allow_software_fallback=True),
+            ):
+                emitted = index + 1
+                yield index, frame
             return
         except av.error.FFmpegError:
-            # NVDEC refused this stream (unsupported codec/profile) — fall back.
+            # NVDEC refused this stream (unsupported codec/profile) or failed
+            # mid-stream. Restart in software, skipping frames already emitted.
             pass
-    yield from _decode(av, path, pix_fmt, None)
+    for index, frame in _decode(av, path, pix_fmt, None):
+        if index >= emitted:
+            yield index, frame
 
 
 def _decode(av, path, pix_fmt, hwaccel):
@@ -109,7 +119,13 @@ def _decode(av, path, pix_fmt, hwaccel):
         container.close()
 
 
-def frames_or_opencv(path: str | Path, cv2, *, pix_fmt: str = "bgr24"):
+def frames_or_opencv(
+    path: str | Path,
+    cv2,
+    *,
+    pix_fmt: str = "bgr24",
+    allow_hw: bool = True,
+):
     """Yield ``(frame_index, ndarray)`` using NVDEC when available, else OpenCV.
 
     A drop-in replacement for a ``cv2.VideoCapture`` read loop in analysis
@@ -117,9 +133,12 @@ def frames_or_opencv(path: str | Path, cv2, *, pix_fmt: str = "bgr24"):
     on any failure (no PyAV, no CUDA, unsupported stream) it transparently falls
     back to OpenCV's software ``VideoCapture`` so behaviour never regresses.
     """
-    if cuda_decode_available():
+    emitted = 0
+    if allow_hw and cuda_decode_available():
         try:
-            yield from iter_frames(path, pix_fmt=pix_fmt)
+            for index, frame in iter_frames(path, pix_fmt=pix_fmt):
+                emitted = index + 1
+                yield index, frame
             return
         except Exception:
             pass  # fall through to OpenCV
@@ -133,7 +152,8 @@ def frames_or_opencv(path: str | Path, cv2, *, pix_fmt: str = "bgr24"):
             ok, frame = capture.read()
             if not ok:
                 break
-            yield index, frame
+            if index >= emitted:
+                yield index, frame
             index += 1
     finally:
         capture.release()
@@ -144,3 +164,8 @@ def decode_backend(allow_hw: bool = True) -> str:
     if not pyav_available():
         return "opencv"
     return "nvdec" if (allow_hw and cuda_decode_available()) else "pyav-software"
+
+
+def frames_backend(allow_hw: bool = True) -> str:
+    """Return the backend selected by :func:`frames_or_opencv`."""
+    return "nvdec" if (allow_hw and cuda_decode_available()) else "opencv"

@@ -34,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit, find_ffmpeg as shared_find_ffmpeg, run_ffmpeg
+import hw_decode
 
 
 # ── NDJSON helpers ───────────────────────────────────────────────────────────
@@ -125,37 +126,40 @@ def _smart_track_centers(in_path: Path, sample_hz: float = 1.0) -> list[tuple[fl
     if total_frames <= 0:
         cap.release()
         return None
+    cap.release()
 
     step = max(1, int(round(fps / sample_hz)))
     detector = mp.solutions.face_detection.FaceDetection(  # type: ignore
         model_selection=1, min_detection_confidence=0.4)
 
     points: list[tuple[float, float]] = []
-    fnum = 0
-    while True:
-        ok, frame = cap.read()
-        if not ok:
-            break
-        if fnum % step == 0:
-            h, w = frame.shape[:2]
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            res = detector.process(rgb)
-            if res.detections:
-                # take the largest face by bounding-box area
-                best = max(res.detections,
-                           key=lambda d: (d.location_data.relative_bounding_box.width *
-                                          d.location_data.relative_bounding_box.height))
-                bb = best.location_data.relative_bounding_box
-                x_norm = max(0.0, min(1.0, bb.xmin + bb.width / 2.0))
-                t = fnum / fps
-                points.append((t, x_norm))
-        fnum += 1
-        if fnum % (step * 30) == 0 and total_frames:
-            progress(5.0 + 15.0 * fnum / total_frames,
-                     f"sampling face track ({len(points)} hits, {fnum}/{total_frames})")
-
-    detector.close()
-    cap.release()
+    log("info", f"Frame decode backend: {hw_decode.frames_backend()}")
+    try:
+        for fnum, frame in hw_decode.frames_or_opencv(in_path, cv2):
+            if fnum % step == 0:
+                h, w = frame.shape[:2]
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                res = detector.process(rgb)
+                if res.detections:
+                    # take the largest face by bounding-box area
+                    best = max(
+                        res.detections,
+                        key=lambda d: (
+                            d.location_data.relative_bounding_box.width
+                            * d.location_data.relative_bounding_box.height
+                        ),
+                    )
+                    bb = best.location_data.relative_bounding_box
+                    x_norm = max(0.0, min(1.0, bb.xmin + bb.width / 2.0))
+                    t = fnum / fps
+                    points.append((t, x_norm))
+            if fnum % (step * 30) == 0 and total_frames:
+                progress(
+                    5.0 + 15.0 * fnum / total_frames,
+                    f"sampling face track ({len(points)} hits, {fnum}/{total_frames})",
+                )
+    finally:
+        detector.close()
     return points
 
 

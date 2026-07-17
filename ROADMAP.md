@@ -65,14 +65,3 @@ programmability (CLI + REST + PS module), and AI depth.
 ## Research-Driven Additions
 
 ### 2026-07-16 additions (continue Item numbering from 98)
-
-### 126. Broaden NVDEC decode adoption + GPU-resident dlpack path
-
-P3. `tools/_lib/hw_decode.py` (NVDEC via PyAV v17) now backs scenedetect's
-motion-energy loop. Adopt it in the other per-frame CPU-decode sidecars
-(clipforge, colorize, lipsight, vertigo) behind the same graceful OpenCV
-fallback. Separately, a true zero-copy dlpack path (keep frames GPU-resident
-from NVDEC through processing) needs a GPU-native frame consumer — none exists
-yet; revisit if/when a sidecar's per-frame work moves to CuPy/Torch.
-
-Impact: 2 · Effort: 2 · Type: performance

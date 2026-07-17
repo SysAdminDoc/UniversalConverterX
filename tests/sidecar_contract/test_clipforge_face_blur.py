@@ -44,6 +44,14 @@ class ClipForgeFaceBlurTests(unittest.TestCase):
             SIDECAR._expand_face_box((5, 5, 20, 20), 100, 80, 50),
         )
 
+    def test_hardware_decode_is_opt_in(self) -> None:
+        base = [
+            "face-blur", "--input", "in.mp4", "--output", "out.mp4",
+        ]
+        self.assertFalse(SIDECAR.build_parser().parse_args(base).hw_decode)
+        self.assertTrue(
+            SIDECAR.build_parser().parse_args([*base, "--hw-decode"]).hw_decode)
+
     def test_blur_reduces_detected_region_detail(self) -> None:
         import numpy as np  # type: ignore
 

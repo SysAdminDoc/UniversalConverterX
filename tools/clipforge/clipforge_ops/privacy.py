@@ -7,6 +7,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+import hw_decode
+
 from .runtime import emit, fail, find_ffmpeg, find_ffprobe, probe, run_ffmpeg
 
 
@@ -129,6 +131,7 @@ def op_face_blur(args: argparse.Namespace, detector_override=None) -> int:
         if fps <= 0 or width <= 0 or height <= 0:
             capture.release()
             return fail("decode_failed", "Video dimensions or frame rate are unavailable.")
+        capture.release()
 
         writer = cv2.VideoWriter(
             str(temporary_video),
@@ -137,18 +140,25 @@ def op_face_blur(args: argparse.Namespace, detector_override=None) -> int:
             (width, height),
         )
         if not writer.isOpened():
-            capture.release()
             return fail("temporary_encoder_failed", "Could not open the private frame encoder.")
 
+        allow_hw = bool(getattr(args, "hw_decode", False))
+        emit(
+            "log",
+            level="info",
+            message=(
+                f"Frame decode backend: {hw_decode.frames_backend(allow_hw)}"
+                + ("" if allow_hw else " (hardware decode not requested)")
+            ),
+        )
         frame_index = 0
         faces_detected = 0
         frames_with_faces = 0
         emit("progress", percent=0, stage="detecting faces", eta_seconds=None)
         try:
-            while True:
-                ok, frame = capture.read()
-                if not ok:
-                    break
+            for _decoded_index, frame in hw_decode.frames_or_opencv(
+                source, cv2, allow_hw=allow_hw
+            ):
                 grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 grayscale = cv2.equalizeHist(grayscale)
                 boxes = detector.detectMultiScale(
@@ -171,7 +181,6 @@ def op_face_blur(args: argparse.Namespace, detector_override=None) -> int:
                         eta_seconds=None,
                     )
         finally:
-            capture.release()
             writer.release()
 
         if frame_index == 0:

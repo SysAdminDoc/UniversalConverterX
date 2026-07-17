@@ -43,7 +43,7 @@ $pyiArgs = @(
 
 if (-not $NoSmart) {
     Write-Host '[vertigo] Installing smart-mode runtime deps (opencv-python + mediapipe)...'
-    & $Python -m pip install --quiet 'opencv-python>=4.8.0' 'mediapipe>=0.10.0'
+    & $Python -m pip install --quiet 'opencv-python>=4.8.0' 'mediapipe>=0.10.0' 'av>=17.0.0,<18'
     if ($LASTEXITCODE -ne 0) {
         Write-Warning '[vertigo] cv2/mediapipe install failed — building static-only sidecar.'
     } else {
@@ -60,5 +60,6 @@ if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 $exe = Join-Path $DistDir 'vertigo.exe'
 if (-not (Test-Path $exe)) { throw "Expected output not found: $exe" }
+Copy-Item $exe (Join-Path $ToolDir 'vertigo.exe') -Force
 
-Write-Host "[vertigo] Built: $exe" -ForegroundColor Green
+Write-Host "[vertigo] Built: $(Join-Path $ToolDir 'vertigo.exe')" -ForegroundColor Green

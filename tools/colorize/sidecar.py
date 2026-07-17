@@ -30,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit, find_ffmpeg, find_ffprobe, probe_media
+import hw_decode
 
 
 PACK_SLUG = "colorize"
@@ -286,6 +287,7 @@ def op_video(args: argparse.Namespace) -> int:
     if width <= 0 or height <= 0:
         capture.release()
         return fail("decode_failed", "Could not determine the video frame size.")
+    capture.release()
 
     # Pipe colourised BGR frames straight into a single h264 encode (with the
     # original audio remuxed) so there is no lossy intermediate re-encode.
@@ -301,12 +303,20 @@ def op_video(args: argparse.Namespace) -> int:
     process = subprocess.Popen(cmd, stdin=subprocess.PIPE,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     assert process.stdin is not None
+    allow_hw = bool(getattr(args, "hw_decode", False))
+    emit(
+        "log",
+        level="info",
+        message=(
+            f"Frame decode backend: {hw_decode.frames_backend(allow_hw)}"
+            + ("" if allow_hw else " (hardware decode not requested)")
+        ),
+    )
     index = 0
     try:
-        while True:
-            ok, frame = capture.read()
-            if not ok:
-                break
+        for _decoded_index, frame in hw_decode.frames_or_opencv(
+            src, cv2, allow_hw=allow_hw
+        ):
             process.stdin.write(_colorize_bgr(net, frame).tobytes())
             index += 1
             if total_frames:
@@ -317,7 +327,6 @@ def op_video(args: argparse.Namespace) -> int:
     except BrokenPipeError:
         pass
     finally:
-        capture.release()
         with contextlib.suppress(Exception):
             process.stdin.close()
         process.wait()
@@ -355,6 +364,10 @@ def build_parser() -> argparse.ArgumentParser:
     vid = sub.add_parser("video", help="Colourise a video frame-by-frame")
     vid.add_argument("--input", required=True)
     vid.add_argument("--output", required=True)
+    vid.add_argument(
+        "--hw-decode",
+        action="store_true",
+        help="Opt in to NVDEC frame decoding when CUDA/PyAV are available.")
 
     return p
 
