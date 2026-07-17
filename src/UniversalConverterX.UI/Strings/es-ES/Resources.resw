@@ -5488,7 +5488,10 @@
     <value>Gestor de pistas</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Agregar o eliminar pistas de audio, subtítulo y datos de un contenedor de vídeo sin volver a codificar. Tick streams to drop, entonces Aplique -- o elija un archivo de audio / subtítulo externo para adjuntarlo como una nueva pista.</value>
+    <value>Añada o elimine pistas y adelante o retrase cada pista de audio sin recodificar. Defina el retraso en milisegundos, marque las pistas que desea quitar y pulse Aplicar.</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Retraso (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>No hay pistas cargadas</value>

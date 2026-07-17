@@ -5492,7 +5492,10 @@ libx264
     <value>音轨管理器</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>从视频容器中添加或删除音频、字幕和数据轨迹, 不重编码 。 选中流可下降, 然后应用 - 或者选择外部音频/ 字幕文件作为新音轨附加 。</value>
+    <value>无需重新编码即可添加或删除轨道，并分别提前或延迟音频轨道。以毫秒设置延迟，勾选要删除的轨道，然后选择“应用”。</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>延迟（毫秒）</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>未装入音轨</value>

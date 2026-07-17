@@ -29,9 +29,15 @@ public sealed class TrackRow : INotifyPropertyChanged
     public bool IsSubtitle =>
         string.Equals(CodecType, "subtitle", StringComparison.OrdinalIgnoreCase);
 
+    public bool IsAudio =>
+        string.Equals(CodecType, "audio", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>UI-bound — show the Export button only on subtitle rows.</summary>
     public Visibility ExportButtonVisibility =>
         IsSubtitle ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility DelayControlVisibility =>
+        IsAudio ? Visibility.Visible : Visibility.Collapsed;
 
     public string Title
     {
@@ -58,6 +64,8 @@ public sealed class TrackRow : INotifyPropertyChanged
             if (CodecType == "video" && Width is int w && Height is int h)
                 bits.Add($"{w}x{h}");
             if (CodecType == "audio" && Channels is int c) bits.Add($"{c}ch");
+            if (IsAudio && Math.Abs(DelayMilliseconds) >= 1)
+                bits.Add($"delay={DelayMilliseconds:+0;-0;0}ms");
             return string.Join(" | ", bits);
         }
     }
@@ -71,6 +79,20 @@ public sealed class TrackRow : INotifyPropertyChanged
             if (_markedForRemoval == value) return;
             _markedForRemoval = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MarkedForRemoval)));
+        }
+    }
+
+    private double _delayMilliseconds;
+    public double DelayMilliseconds
+    {
+        get => _delayMilliseconds;
+        set
+        {
+            var bounded = Math.Clamp(Math.Round(value), -600_000, 600_000);
+            if (Math.Abs(_delayMilliseconds - bounded) < 0.5) return;
+            _delayMilliseconds = bounded;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DelayMilliseconds)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Detail)));
         }
     }
 }
@@ -145,7 +167,7 @@ public sealed partial class TrackManagerPage : Page
         }
         else if (result.Success)
         {
-            StatusText.Text = $"Loaded {_tracks.Count} stream(s). Tick to remove, then Apply.";
+            StatusText.Text = $"Loaded {_tracks.Count} stream(s). Remove streams or set audio delays, then Apply.";
         }
         else
         {
@@ -170,9 +192,12 @@ public sealed partial class TrackManagerPage : Page
     {
         if (_currentPath is null) return;
         var drop = _tracks.Where(t => t.MarkedForRemoval).Select(t => t.StreamIndex).ToList();
-        if (drop.Count == 0)
+        var delays = _tracks
+            .Where(t => t.IsAudio && !t.MarkedForRemoval && Math.Abs(t.DelayMilliseconds) >= 1)
+            .ToDictionary(t => t.StreamIndex, t => (int)Math.Round(t.DelayMilliseconds));
+        if (drop.Count == 0 && delays.Count == 0)
         {
-            StatusText.Text = "No streams marked for removal. Tick the rows to drop, then Apply.";
+            StatusText.Text = "No changes selected. Remove a stream or set an audio delay, then Apply.";
             return;
         }
         if (drop.Count >= _tracks.Count)
@@ -194,17 +219,20 @@ public sealed partial class TrackManagerPage : Page
         var output = await picker.PickSaveFileAsync();
         if (output is null) return;
 
-        StatusText.Text = $"Removing {drop.Count} stream(s) -- copy mux, no re-encode.";
+        StatusText.Text = $"Applying {drop.Count} removal(s) and {delays.Count} audio delay(s) -- copy mux, no re-encode.";
         WorkProgress.Value = 0;
         ApplyButton.IsEnabled = false;
 
         var args = new List<string>
         {
-            "track-remove",
+            "track-edit",
             "--input",  _currentPath,
             "--output", output.Path,
-            "--remove", string.Join(",", drop),
         };
+        if (drop.Count > 0)
+            args.AddRange(["--remove", string.Join(",", drop)]);
+        if (delays.Count > 0)
+            args.AddRange(["--delays", string.Join(",", delays.Select(pair => $"{pair.Key}={pair.Value}"))]);
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;

@@ -5498,7 +5498,10 @@ libx264
     <value>Track Manager</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Add or remove audio, subtitle, and data tracks from a video container without re-encoding. Tick streams to drop, then Apply -- or pick an external audio / subtitle file to attach as a new track.</value>
+    <value>Add or remove tracks and independently advance or delay audio streams without re-encoding. Set delay in milliseconds, tick streams to drop, then Apply -- or attach external audio / subtitles.</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Delay (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>No tracks loaded</value>

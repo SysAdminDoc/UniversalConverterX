@@ -115,6 +115,130 @@ def op_track_remove(args: argparse.Namespace) -> int:
     return 0
 
 
+def parse_track_delays(value: str) -> dict[int, int]:
+    """Parse ``stream=milliseconds`` pairs with a bounded ten-minute range."""
+    delays: dict[int, int] = {}
+    for raw in value.split(","):
+        item = raw.strip()
+        if not item:
+            continue
+        if "=" not in item:
+            raise ValueError("--delays must use stream=milliseconds pairs, e.g. '1=250,2=-80'.")
+        stream_text, delay_text = item.split("=", 1)
+        try:
+            stream_index = int(stream_text.strip())
+            milliseconds = int(delay_text.strip())
+        except ValueError as ex:
+            raise ValueError("Track delay stream indices and milliseconds must be integers.") from ex
+        if stream_index < 0:
+            raise ValueError("Track delay stream indices must be zero or greater.")
+        if not -600_000 <= milliseconds <= 600_000:
+            raise ValueError("Track delays must be between -600000 and 600000 milliseconds.")
+        if milliseconds:
+            delays[stream_index] = milliseconds
+    return delays
+
+
+def build_track_edit_command(
+    ffmpeg: str,
+    source: Path,
+    output: Path,
+    streams: list[dict],
+    drop: set[int],
+    delays: dict[int, int],
+) -> list[str]:
+    """Build a stream-copy remux with independent input timestamp offsets."""
+    command = [ffmpeg, "-y", "-i", str(source)]
+    delay_inputs: dict[int, int] = {}
+    for stream_index, milliseconds in sorted(delays.items()):
+        delay_inputs[stream_index] = len(delay_inputs) + 1
+        seconds = milliseconds / 1000.0
+        command += ["-itsoffset", f"{seconds:.3f}", "-i", str(source)]
+
+    for stream in streams:
+        stream_index = int(stream.get("index", -1))
+        if stream_index in drop:
+            continue
+        input_index = delay_inputs.get(stream_index, 0)
+        command += ["-map", f"{input_index}:{stream_index}"]
+
+    command += [
+        "-c", "copy",
+        "-map_metadata", "0",
+        "-map_chapters", "0",
+        "-avoid_negative_ts", "disabled",
+    ]
+    if output.suffix.lower() in (".mp4", ".m4v", ".mov"):
+        command += ["-movflags", "+faststart"]
+    command.append(str(output))
+    return command
+
+
+def op_track_edit(args: argparse.Namespace) -> int:
+    """Remove streams and apply per-audio-stream timestamp offsets in one remux."""
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    if not ffmpeg or not ffprobe:
+        return fail("missing_ffmpeg", "FFmpeg/FFprobe not found.")
+
+    source = Path(args.input)
+    if not source.is_file():
+        return fail("missing_input", f"Input not found: {args.input}")
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    info = probe(ffprobe, str(source))
+    if not info:
+        return fail("probe_failed", "ffprobe could not read input.")
+    streams = info.get("streams", [])
+    known = {int(stream.get("index", -1)): stream for stream in streams}
+    duration = float(info.get("format", {}).get("duration", 0)) or 0.0
+
+    try:
+        drop = {int(value.strip()) for value in (args.remove or "").split(",") if value.strip()}
+        delays = parse_track_delays(args.delays or "")
+    except ValueError as ex:
+        return fail("bad_track_edit_arg", str(ex))
+    if not drop and not delays:
+        return fail("nothing_to_change", "Specify at least one --remove stream or --delays pair.")
+    unknown = (drop | set(delays)) - set(known)
+    if unknown:
+        return fail("missing_stream", f"Stream indices are not present: {sorted(unknown)}")
+    if drop >= set(known):
+        return fail("nothing_to_keep", "The requested edit would remove every stream.")
+    delayed_non_audio = [
+        index for index in delays
+        if str(known[index].get("codec_type") or "").lower() != "audio"
+    ]
+    if delayed_non_audio:
+        return fail("not_audio", f"Only audio streams can be delayed: {delayed_non_audio}")
+
+    # Removed streams do not need duplicate delayed inputs.
+    effective_delays = {index: value for index, value in delays.items() if index not in drop}
+    command = build_track_edit_command(
+        ffmpeg, source, output, streams, drop, effective_delays
+    )
+    emit(
+        "log",
+        level="info",
+        message=f"Track remux: remove={sorted(drop)} delays_ms={effective_delays}",
+    )
+    emit("progress", percent=0, stage="track-edit", eta_seconds=None)
+    rc = run_ffmpeg(command, duration, "track-edit")
+    if rc != 0:
+        return fail("ffmpeg_failed", f"FFmpeg exited with code {rc}")
+    if not output.is_file():
+        return fail("output_missing", f"Output not produced: {output}")
+    emit(
+        "complete",
+        output=str(output),
+        size_bytes=output.stat().st_size,
+        removed=sorted(drop),
+        delays_ms={str(index): value for index, value in effective_delays.items()},
+    )
+    return 0
+
+
 def op_track_add(args: argparse.Namespace) -> int:
     """Add an external audio (or subtitle) file as a new track without re-encoding.
 

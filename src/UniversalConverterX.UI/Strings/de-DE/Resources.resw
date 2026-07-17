@@ -5488,7 +5488,10 @@
     <value>Titelverwaltung</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Hinzufügen oder Entfernen von Audio-, Untertitel- und Datenspuren aus einem Video-Container ohne erneute Kodierung. Tick Streams fallen lassen, dann Anwenden -- oder wählen Sie eine externe Audio / Untertitel-Datei, um als neue Spur zu befestigen.</value>
+    <value>Spuren hinzufügen oder entfernen und Audiospuren ohne Neukodierung einzeln vorziehen oder verzögern. Verzögerung in Millisekunden einstellen, zu entfernende Spuren markieren und dann Anwenden wählen.</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Verzögerung (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>Keine Tracks geladen</value>

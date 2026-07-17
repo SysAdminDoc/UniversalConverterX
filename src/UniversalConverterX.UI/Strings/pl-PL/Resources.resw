@@ -5488,7 +5488,10 @@
     <value>Menedżer utworu</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Dodaj lub usuń audio, napisy i utwory z wideo kontenera bez ponownego wycofywania. Zaznacz streams to low, a następnie Zastosuj -- lub wybierz zewnętrzny plik audio / napisów, aby załączyć jako nowy utwór.</value>
+    <value>Dodawaj lub usuwaj ścieżki oraz niezależnie przyspieszaj lub opóźniaj ścieżki audio bez ponownego kodowania. Ustaw opóźnienie w milisekundach, zaznacz ścieżki do usunięcia i wybierz Zastosuj.</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Opóźnienie (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>Brak wczytanych utworów</value>

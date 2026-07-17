@@ -22,6 +22,7 @@
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox x:Uid="TrackManagerPage_MarkForRemoval" x:Name="MarkForRemoval"
                               IsChecked="{x:Bind MarkedForRemoval, Mode=TwoWay}"
@@ -52,7 +53,18 @@
                                    FontSize="12"
                                    TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button x:Uid="TrackManagerPage_Item_002" Grid.Column="4"
+                    <NumberBox x:Uid="TrackManagerPage_AudioDelayBox"
+                               Grid.Column="4"
+                               Header="Delay (ms)"
+                               Width="118"
+                               Minimum="-600000"
+                               Maximum="600000"
+                               SmallChange="10"
+                               SpinButtonPlacementMode="Compact"
+                               Value="{x:Bind DelayMilliseconds, Mode=TwoWay}"
+                               Visibility="{x:Bind DelayControlVisibility}"
+                               VerticalAlignment="Center"/>
+                    <Button x:Uid="TrackManagerPage_Item_002" Grid.Column="5"
                             Content="Export..."
                             Style="{StaticResource SecondaryButtonStyle}"
                             Visibility="{x:Bind ExportButtonVisibility}"
@@ -83,7 +95,7 @@
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="TrackManagerPage_Item_003" Text="Track Manager"
                            Style="{StaticResource TitleTextStyle}"/>
-                <TextBlock x:Uid="TrackManagerPage_Item_004" Text="Add or remove audio, subtitle, and data tracks from a video container without re-encoding. Tick streams to drop, then Apply -- or pick an external audio / subtitle file to attach as a new track."
+                <TextBlock x:Uid="TrackManagerPage_Item_004" Text="Add or remove tracks and independently advance or delay audio streams without re-encoding. Set delay in milliseconds, tick streams to drop, then Apply -- or attach external audio / subtitles."
                            Style="{StaticResource SubtitleTextStyle}"
                            TextWrapping="Wrap"/>
             </StackPanel>

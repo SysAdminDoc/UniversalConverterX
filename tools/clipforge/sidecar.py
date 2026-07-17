@@ -164,6 +164,7 @@ from clipforge_ops.metadata import (
 
 from clipforge_ops.tracks import (
     op_track_add,
+    op_track_edit,
     op_track_extract,
     op_track_list,
     op_track_remove,
@@ -973,6 +974,16 @@ def build_parser() -> argparse.ArgumentParser:
     track_remove.add_argument("--remove", required=True,
                               help="Comma-separated list of stream indices to drop, e.g. '1,3'")
 
+    track_edit = sub.add_parser(
+        "track-edit",
+        help="Remove streams and apply per-audio-stream timestamp offsets without re-encoding")
+    track_edit.add_argument("--input", required=True)
+    track_edit.add_argument("--output", required=True)
+    track_edit.add_argument("--remove", default="",
+                            help="Optional comma-separated stream indices to drop")
+    track_edit.add_argument("--delays", default="",
+                            help="Optional stream=milliseconds pairs, e.g. '1=250,2=-80'")
+
     track_add = sub.add_parser("track-add",
                                help="Add an external audio/subtitle file as a new track")
     track_add.add_argument("--input", required=True)
@@ -1257,6 +1268,8 @@ def main(argv: list[str] | None = None) -> int:
             return op_track_list(args)
         if args.op == "track-remove":
             return op_track_remove(args)
+        if args.op == "track-edit":
+            return op_track_edit(args)
         if args.op == "track-add":
             return op_track_add(args)
         if args.op == "track-extract":

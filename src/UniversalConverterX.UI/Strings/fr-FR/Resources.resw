@@ -5488,7 +5488,10 @@
     <value>Gestionnaire de piste</value>
   </data>
   <data name="TrackManagerPage_Item_004.Text" xml:space="preserve">
-    <value>Ajouter ou supprimer des pistes audio, sous-titres et données d'un conteneur vidéo sans réencodage. Cochez les flux à déposer, puis Apply -- ou choisissez un fichier audio / sous-titre externe à joindre comme nouvelle piste.</value>
+    <value>Ajoutez ou supprimez des pistes et avancez ou retardez chaque piste audio sans réencodage. Réglez le délai en millisecondes, cochez les pistes à supprimer, puis choisissez Appliquer.</value>
+  </data>
+  <data name="TrackManagerPage_AudioDelayBox.Header" xml:space="preserve">
+    <value>Délai (ms)</value>
   </data>
   <data name="TrackManagerPage_Item_007.Text" xml:space="preserve">
     <value>Aucune piste chargée</value>
