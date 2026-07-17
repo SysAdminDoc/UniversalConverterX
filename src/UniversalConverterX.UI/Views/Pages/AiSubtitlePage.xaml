@@ -142,6 +142,7 @@
                             AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem x:Uid="AiSubtitlePage_Item_015" Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt"/>
                             <ComboBoxItem x:Uid="AiSubtitlePage_Item_016" Content="whisper.cpp (Vulkan / CUDA · binary)" Tag="whisper-cpp"/>
+                            <ComboBoxItem x:Uid="AiSubtitlePage_FfmpegWhisperBackend" Content="FFmpeg whisper filter (lightweight · bundled)" Tag="ffmpeg-whisper"/>
                         </ComboBox>
                     </StackPanel>
                 </Border>

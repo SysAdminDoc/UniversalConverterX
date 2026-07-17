@@ -132,6 +132,9 @@
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>szept.cpp (Vulkan / CUDA · binarny)</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>Filtr Whisper FFmpeg (lekki · w zestawie)</value>
+  </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>Wzór + język</value>
   </data>
@@ -4985,6 +4988,9 @@
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>szept.cpp (Vulkan / CUDA · pojedyncze binarne)</value>
+  </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>Filtr Whisper FFmpeg (lekki · w zestawie)</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Parakeet TDT v3 (CUDA · 25 języków)</value>

@@ -132,6 +132,9 @@
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>whisper.cpp (Vulkan / CUDA · binary)</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg whisper filter (lightweight · bundled)</value>
+  </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>Model + Language</value>
   </data>
@@ -4995,6 +4998,9 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>whisper.cpp (Vulkan / CUDA · single binary)</value>
+  </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg whisper filter (lightweight · bundled)</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Parakeet TDT v3 (CUDA · 25 languages)</value>

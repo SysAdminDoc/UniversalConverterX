@@ -408,9 +408,9 @@ public sealed partial class SpeechToTextPage : Page
                     ];
                     if (wordTs) args.Add("--word-timestamps");
                 }
-                else if (backend == "whisper-cpp")
+                else if (backend is "whisper-cpp" or "ffmpeg-whisper")
                 {
-                    // whisper-cpp wants the format encoded in the output extension.
+                    // Native whisper backends use the output extension as their format contract.
                     // Replace whatever we built with the format-driven extension.
                     var ext = format switch
                     {

@@ -271,6 +271,7 @@
                             AutomationProperties.AutomationId="BackendCombo">
                             <ComboBoxItem x:Uid="SpeechToTextPage_Item_017" Content="faster-whisper (Python · CUDA / CPU)" Tag="whisper-stt" IsSelected="True"/>
                             <ComboBoxItem x:Uid="SpeechToTextPage_Item_018" Content="whisper.cpp (Vulkan / CUDA · single binary)" Tag="whisper-cpp"/>
+                            <ComboBoxItem x:Uid="SpeechToTextPage_FfmpegWhisperBackend" Content="FFmpeg whisper filter (lightweight · bundled)" Tag="ffmpeg-whisper"/>
                             <ComboBoxItem x:Uid="SpeechToTextPage_Item_019" Content="Parakeet TDT v3 (CUDA · 25 languages)" Tag="parakeet-stt"/>
                         </ComboBox>
                         <CheckBox x:Uid="SpeechToTextPage_VadCheck" x:Name="VadCheck"

@@ -1,0 +1,12 @@
+{
+  "engine": "ffmpeg-whisper",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg 8.1+ with whisper filter",
+      "managed": true
+    }
+  ],
+  "models": true
+}

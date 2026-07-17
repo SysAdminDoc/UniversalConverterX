@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 191 sidecar engines · 290+ presets · 45+ UI pages
+**Status:** v2.28.0 · 199 sidecar engines · 290+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -47,7 +47,6 @@ programmability (CLI + REST + PS module), and AI depth.
 | **ComfyUI AI Workflow Integration** | Effort 5. Needs community signal. |
 | **Dia-1.6B / Dia2 TTS** | 6 GB VRAM requirement. Assess after Kokoro/F5-TTS stabilizes. |
 | **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |
-| **FFmpeg native `whisper` filter** | Lightweight fallback for subtitle pipeline. |
 | **Av1an per-scene parallel encoding** (Item 71) | VapourSynth dependency is heavy. Effort 5. Assess demand. |
 | **AI Video Metadata Tagging (MediaPipe)** (Item 76) | Charter concern re: video understanding scope. |
 | **Searchable Output Library (Meilisearch)** (Item 79) | Heavyweight dependency. |

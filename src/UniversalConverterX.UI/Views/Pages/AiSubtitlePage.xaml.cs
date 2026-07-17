@@ -376,7 +376,7 @@ public sealed partial class AiSubtitlePage : Page
         int batchSize)
     {
         List<string> arguments;
-        if (backend == "whisper-cpp")
+        if (backend is "whisper-cpp" or "ffmpeg-whisper")
         {
             arguments =
             [

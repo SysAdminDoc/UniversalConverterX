@@ -132,6 +132,9 @@
   <data name="AiSubtitlePage_Item_016.Content" xml:space="preserve">
     <value>cpp (Vulkan / CUDA - 二进制)</value>
   </data>
+  <data name="AiSubtitlePage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
+  </data>
   <data name="AiSubtitlePage_Item_017.Text" xml:space="preserve">
     <value>模式+语言</value>
   </data>
@@ -4989,6 +4992,9 @@ libx264
   </data>
   <data name="SpeechToTextPage_Item_018.Content" xml:space="preserve">
     <value>cpp (Vulkan / CUDA · 单二进制)</value>
+  </data>
+  <data name="SpeechToTextPage_FfmpegWhisperBackend.Content" xml:space="preserve">
+    <value>FFmpeg Whisper 筛选器（轻量 · 内置）</value>
   </data>
   <data name="SpeechToTextPage_Item_019.Content" xml:space="preserve">
     <value>Parakeet TDT v3 (CUDA = 25 种语言)</value>
