@@ -41,17 +41,9 @@ public static class PresetDocument
 {
     public const int CurrentSchemaVersion = 1;
     public const string NamespaceUri = "https://universalconverterx.io/preset/v1";
-    public const string DefaultInvocationMode = "per-file";
+    public const string DefaultInvocationMode = PresetInvocationModes.PerFile;
 
-    public static readonly IReadOnlySet<string> InvocationModes =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            DefaultInvocationMode,
-            "batch-input-list",
-            "batch-output-dir",
-            "batch-single-output",
-            "extract-each",
-        };
+    public static readonly IReadOnlySet<string> InvocationModes = PresetInvocationModes.SupportedNames;
 
     private static readonly XmlReaderSettings SafeReaderSettings = new()
     {

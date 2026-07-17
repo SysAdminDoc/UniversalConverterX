@@ -14,7 +14,7 @@
     <OutputFileNameTemplate>{dir}/{stem}_voice32</OutputFileNameTemplate>
     <OutputExtension>opus</OutputExtension>
     <Engine>audiopro</Engine>
-    <InvocationMode>batch-input-list</InvocationMode>
+    <InvocationMode>batch-output-dir</InvocationMode>
     <Args>
         <Arg>convert</Arg>
         <Arg>--format</Arg>

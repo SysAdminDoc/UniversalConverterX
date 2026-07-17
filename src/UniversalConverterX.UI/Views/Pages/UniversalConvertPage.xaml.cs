@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -255,7 +256,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
 
             // Output dir prompt for batch modes; per-file infers from template.
             string? outDir = null;
-            if (preset.Mode != PresetInvocationMode.PerFile)
+            if (PresetInvocationModes.RequiresOutputDirectory(preset.Mode))
             {
                 var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
                 folderPicker.FileTypeFilter.Add("*");
@@ -279,10 +280,12 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
             if (inputs.Count > 0)
             {
                 var firstInput = inputs[0];
-                string? firstOut = !result.Success ? null : (preset.Mode == PresetInvocationMode.PerFile
-                    ? UiPresetLoader.ResolveOutputPath(preset, firstInput)
-                    : (outDir is null ? null : Path.Combine(outDir,
-                        Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension)));
+                string? firstOut = !result.Success || !PresetInvocationModes.ProducesOutputPath(preset.Mode)
+                    ? null
+                    : preset.Mode == PresetInvocationMode.PerFile
+                        ? UiPresetLoader.ResolveOutputPath(preset, firstInput)
+                        : outDir is null ? null : Path.Combine(outDir,
+                            Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension);
                 _ = _history.LogAsync(new HistoryRecord
                 {
                     Timestamp = startedAt,

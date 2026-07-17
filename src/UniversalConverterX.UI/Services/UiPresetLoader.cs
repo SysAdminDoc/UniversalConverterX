@@ -55,8 +55,6 @@ public sealed class UiPresetCache : IUiPresetCache
     }
 }
 
-public enum PresetInvocationMode { PerFile, BatchOutputDir, BatchSingleOutput, ExtractEach }
-
 public sealed record UiPreset(
     string Name,
     string? Folder,
@@ -168,13 +166,7 @@ public static class UiPresetLoader
             return null;
 
         var preset = loaded.Preset;
-        var mode = preset.InvocationMode switch
-        {
-            "batch-output-dir" => PresetInvocationMode.BatchOutputDir,
-            "batch-single-output" => PresetInvocationMode.BatchSingleOutput,
-            "extract-each" => PresetInvocationMode.ExtractEach,
-            _ => PresetInvocationMode.PerFile,
-        };
+        var mode = PresetInvocationModes.Parse(preset.InvocationMode);
 
         return new UiPreset(
             preset.Name,

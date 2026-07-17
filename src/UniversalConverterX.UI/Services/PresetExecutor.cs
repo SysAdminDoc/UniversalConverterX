@@ -1,3 +1,5 @@
+using UniversalConverterX.Core.Utilities;
+
 namespace UniversalConverterX.UI.Services;
 
 /// <summary>
@@ -50,6 +52,9 @@ public sealed class PresetExecutor : IPresetExecutor
             {
                 case PresetInvocationMode.PerFile:
                     return await RunPerFileAsync(preset, inputs, progress, log, cancellationToken).ConfigureAwait(false);
+
+                case PresetInvocationMode.BatchInputList:
+                    return await RunBatchInputListAsync(preset, inputs, progress, log, cancellationToken).ConfigureAwait(false);
 
                 case PresetInvocationMode.BatchOutputDir:
                     if (string.IsNullOrWhiteSpace(outputDir))
@@ -117,6 +122,20 @@ public sealed class PresetExecutor : IPresetExecutor
         args.AddRange(inputs);
         var r = await _runner.RunAsync(preset.Engine, args, progress, log, ct).ConfigureAwait(false);
         return new PresetExecutionResult(r.Success, r.ErrorCode, r.ErrorMessage, r.ExitCode, r.Success ? inputs.Count : 0);
+    }
+
+    private async Task<PresetExecutionResult> RunBatchInputListAsync(
+        UiPreset preset, IReadOnlyList<string> inputs,
+        IProgress<SidecarProgress>? progress, IProgress<SidecarLog>? log, CancellationToken ct)
+    {
+        var args = PresetInvocationModes.BuildBatchInputArguments(preset.Args, inputs);
+        var result = await _runner.RunAsync(preset.Engine, args, progress, log, ct).ConfigureAwait(false);
+        return new PresetExecutionResult(
+            result.Success,
+            result.ErrorCode,
+            result.ErrorMessage,
+            result.ExitCode,
+            result.Success ? inputs.Count : 0);
     }
 
     private async Task<PresetExecutionResult> RunBatchSingleOutputAsync(

@@ -102,6 +102,29 @@ public class PresetXmlSmokeTests
     }
 
     [Fact]
+    public void SpecializedPresetModes_ShouldMatchTheirSidecarArgumentContracts()
+    {
+        var expected = new Dictionary<string, string>
+        {
+            ["ab-av1-crf-search-only.preset.xml"] = PresetInvocationModes.PerFile,
+            ["audiotag-auto-populate.preset.xml"] = PresetInvocationModes.BatchInputList,
+            ["exif-clear-all.preset.xml"] = PresetInvocationModes.BatchInputList,
+            ["exif-strip-gps.preset.xml"] = PresetInvocationModes.BatchInputList,
+            ["exif-read.preset.xml"] = PresetInvocationModes.BatchInputList,
+            ["to-opus-voice-32k.preset.xml"] = PresetInvocationModes.BatchOutputDir,
+            ["to-opus-rtc-lowdelay.preset.xml"] = PresetInvocationModes.BatchOutputDir,
+            ["to-opus-music-128k.preset.xml"] = PresetInvocationModes.BatchOutputDir,
+        };
+
+        foreach (var (fileName, mode) in expected)
+        {
+            var loaded = PresetDocument.Load(Path.Combine(PresetsDir, fileName));
+            loaded.Succeeded.Should().BeTrue(fileName);
+            loaded.Preset!.InvocationMode.Should().Be(mode, fileName);
+        }
+    }
+
+    [Fact]
     public void PreservationAndProductionFamilies_ShouldExposeCuratedPresets()
     {
         var expected = new Dictionary<string, (string Folder, string Output, string SidecarPreset)>

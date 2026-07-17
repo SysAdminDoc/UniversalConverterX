@@ -4,30 +4,6 @@ using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Presets;
 
-/// <summary>
-/// How a preset translates a list of input files into one-or-more sidecar
-/// invocations.
-/// </summary>
-public enum InvocationMode
-{
-    /// <summary>One sidecar invocation per input. Runner appends
-    /// <c>--input &lt;f&gt; --output &lt;built&gt;</c>. Default.</summary>
-    PerFile,
-
-    /// <summary>One invocation for the whole batch. Runner appends
-    /// <c>--input f1 f2 ... --output-dir &lt;dir&gt;</c>.</summary>
-    BatchOutputDir,
-
-    /// <summary>One invocation; all inputs become the source for a single
-    /// archive. Runner appends <c>--input f1 f2 ... --output &lt;archive&gt;</c>.</summary>
-    BatchSingleOutput,
-
-    /// <summary>One invocation per input that produces a sibling folder
-    /// named after the input stem. Runner appends
-    /// <c>--input &lt;f&gt; --output-dir &lt;built&gt;</c>.</summary>
-    ExtractEach,
-}
-
 public sealed record ConversionPreset(
     string Name,
     string? Folder,
@@ -35,7 +11,7 @@ public sealed record ConversionPreset(
     string OutputFileNameTemplate,
     string OutputExtension,
     string Engine,
-    InvocationMode Mode,
+    PresetInvocationMode Mode,
     IReadOnlyList<string> Args,
     string SourcePath)
 {
@@ -153,14 +129,7 @@ public static class PresetLoader
                 .ToList()
                 ?? [];
 
-            var modeStr = Get("InvocationMode");
-            var mode = modeStr.ToLowerInvariant() switch
-            {
-                "batch-output-dir"    => InvocationMode.BatchOutputDir,
-                "batch-single-output" => InvocationMode.BatchSingleOutput,
-                "extract-each"        => InvocationMode.ExtractEach,
-                _                     => InvocationMode.PerFile,
-            };
+            var mode = PresetInvocationModes.Parse(Get("InvocationMode"));
 
             var argsElem =
                 root.Element(XName.Get("Args", Ns))

@@ -13,7 +13,7 @@
     <OutputFileNameTemplate>{dir}/{stem}_opus_rtc</OutputFileNameTemplate>
     <OutputExtension>opus</OutputExtension>
     <Engine>audiopro</Engine>
-    <InvocationMode>batch-input-list</InvocationMode>
+    <InvocationMode>batch-output-dir</InvocationMode>
     <Args>
         <Arg>convert</Arg>
         <Arg>--format</Arg>

@@ -14,7 +14,7 @@
     <OutputFileNameTemplate>{dir}/{stem}_crf-recommendation</OutputFileNameTemplate>
     <OutputExtension>txt</OutputExtension>
     <Engine>ab-av1</Engine>
-    <InvocationMode>batch-input-list</InvocationMode>
+    <InvocationMode>per-file</InvocationMode>
     <Args>
         <Arg>crf-search</Arg>
         <Arg>--encoder</Arg>

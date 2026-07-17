@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.Storage.Pickers;
 
@@ -337,7 +338,7 @@ public sealed partial class PresetsPage : Page
             // 2) Output dir for batch / extract-each modes; per-file mode resolves
             // each output via the preset's template, so we just need the parent dir.
             string? outDir = null;
-            if (preset.Mode != PresetInvocationMode.PerFile)
+            if (PresetInvocationModes.RequiresOutputDirectory(preset.Mode))
             {
                 var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
                 folderPicker.FileTypeFilter.Add("*");
@@ -361,10 +362,12 @@ public sealed partial class PresetsPage : Page
             // the History dashboard is exactly what the user needs to debug a
             // recurring sidecar problem.
             var firstInput = inputs[0];
-            string? firstOut = !result.Success ? null : (preset.Mode == PresetInvocationMode.PerFile
-                ? UiPresetLoader.ResolveOutputPath(preset, firstInput)
-                : (outDir is null ? null : Path.Combine(outDir,
-                    Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension)));
+            string? firstOut = !result.Success || !PresetInvocationModes.ProducesOutputPath(preset.Mode)
+                ? null
+                : preset.Mode == PresetInvocationMode.PerFile
+                    ? UiPresetLoader.ResolveOutputPath(preset, firstInput)
+                    : outDir is null ? null : Path.Combine(outDir,
+                        Path.GetFileNameWithoutExtension(firstInput) + "." + preset.OutputExtension);
             _ = _history.LogAsync(new HistoryRecord
             {
                 Timestamp = startedAt,

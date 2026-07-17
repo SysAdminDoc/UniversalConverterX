@@ -46,6 +46,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Local Processing — all conversions happen on your machine. No telemetry.
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
+- Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
 - Batch Image Editing — apply named looks, colour/tone controls, blur, grain, vignette, tint, and borders while retaining compatible alpha and multi-frame output.
 - Face Blur Privacy Filter — detect and irreversibly obscure frontal faces in every video frame with an offline, fail-closed OpenCV pipeline.

@@ -44,10 +44,11 @@ public static class PresetRunner
 
         return preset.Mode switch
         {
-            InvocationMode.PerFile => RunPerFile(exe, preset, inputs),
-            InvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs),
-            InvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs),
-            InvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs),
+            PresetInvocationMode.PerFile => RunPerFile(exe, preset, inputs),
+            PresetInvocationMode.BatchInputList => RunBatchInputList(exe, preset, inputs),
+            PresetInvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs),
+            PresetInvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs),
+            PresetInvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs),
             _ => 4,
         };
     }
@@ -85,6 +86,12 @@ public static class PresetRunner
         };
         args.AddRange(inputs);
         return Spawn(exe, args, $"batch -> {outDir}");
+    }
+
+    private static int RunBatchInputList(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    {
+        var args = PresetInvocationModes.BuildBatchInputArguments(preset.Args, inputs);
+        return Spawn(exe, args, $"batch inputs ({inputs.Count})");
     }
 
     private static int RunBatchSingleOutput(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)

@@ -289,14 +289,35 @@ def op_crf_search(args: argparse.Namespace) -> int:
         if m:
             final = (float(m.group("crf")), float(m.group("vmaf")))
             break
+    output_path = ""
+    output_size = 0
+    if args.output:
+        target = Path(args.output)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        report = [
+            f"input={src}",
+            f"encoder={encoder}",
+            f"target_vmaf={target_vmaf}",
+            f"recommended_crf={final[0] if final else 'unavailable'}",
+            f"predicted_vmaf={final[1] if final else 'unavailable'}",
+        ]
+        temporary = target.with_name(target.name + ".part")
+        try:
+            temporary.write_text("\n".join(report) + "\n", encoding="utf-8")
+            os.replace(temporary, target)
+        finally:
+            temporary.unlink(missing_ok=True)
+        output_path = str(target)
+        output_size = target.stat().st_size
+
     if final is None:
         log("warn", "Could not parse recommended CRF from ab-av1 transcript.")
-        emit("complete", output="", size_bytes=0,
+        emit("complete", output=output_path, size_bytes=output_size,
              encoder=encoder, target_vmaf=target_vmaf,
              final_crf=None, final_vmaf=None)
         return 0
     log("info", f"Recommended CRF {final[0]} (predicted VMAF {final[1]}).")
-    emit("complete", output="", size_bytes=0,
+    emit("complete", output=output_path, size_bytes=output_size,
          encoder=encoder, target_vmaf=target_vmaf,
          final_crf=final[0], final_vmaf=final[1])
     return 0
@@ -384,6 +405,7 @@ def build_parser() -> argparse.ArgumentParser:
     cs = sub.add_parser("crf-search",
                         help="Search-only mode: emit the recommended CRF without encoding.")
     cs.add_argument("--input", required=True)
+    cs.add_argument("--output", help="Optional UTF-8 recommendation report path.")
     cs.add_argument("--encoder", default="libsvtav1")
     cs.add_argument("--target-vmaf", type=float, default=93.0, dest="target_vmaf")
     cs.add_argument("--samples", type=int, default=None)
