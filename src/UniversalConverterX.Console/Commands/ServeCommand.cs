@@ -19,6 +19,7 @@ namespace UniversalConverterX.Console.Commands;
 ///   GET  /healthz                    -> { "ok": true, "version": "..." }
 ///   GET  /tools                      -> [ { "name": ..., "available": true|false, "path": ... } ]
 ///   GET  /engines                    -> native converter + shared sidecar catalogue
+///   GET  /metrics                    -> Prometheus text exposition (loopback only)
 ///   POST /convert                    -> { "job_id": "..." }                  (body: { "engine": str, "args": [str] })
 ///   GET  /jobs/{id}                  -> { "id":..., "running":..., "exit":..., "events_total":... }
 ///   GET  /jobs/{id}/events?since=N   -> NDJSON stream of accumulated events from cursor N
@@ -114,6 +115,15 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             else if (path == "/engines" && req.HttpMethod == "GET")
             {
                 await WriteJson(resp, 200, ListEngines(includeNativeConverter: true));
+            }
+            else if (path == "/metrics" && req.HttpMethod == "GET")
+            {
+                var metrics = PrometheusTextExporter.Render(
+                    Program.GetAssemblyVersion(),
+                    jobs.StartedUtc,
+                    DateTime.UtcNow,
+                    jobs.MetricsSnapshot());
+                await WriteText(resp, 200, PrometheusTextExporter.ContentType, metrics);
             }
             else if (path == "/convert" && req.HttpMethod == "POST")
             {
@@ -246,6 +256,15 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         await resp.OutputStream.WriteAsync(bytes);
     }
 
+    private static async Task WriteText(HttpListenerResponse resp, int status, string contentType, string body)
+    {
+        resp.StatusCode = status;
+        resp.ContentType = contentType;
+        var bytes = Encoding.UTF8.GetBytes(body);
+        resp.ContentLength64 = bytes.Length;
+        await resp.OutputStream.WriteAsync(bytes);
+    }
+
     private static async Task<string> ReadBody(HttpListenerRequest req)
     {
         if (req.ContentLength64 > MaxRequestBodyBytes)
@@ -333,6 +352,9 @@ internal sealed class JobManager
     private static readonly TimeSpan FinishedTtl = TimeSpan.FromHours(1);
 
     private readonly ConcurrentDictionary<string, JobRecord> _jobs = new();
+    private readonly ConcurrentDictionary<string, EngineJobCounters> _metrics = new(StringComparer.Ordinal);
+
+    public DateTime StartedUtc { get; } = DateTime.UtcNow;
 
     public string Start(string engine, string exe, IList<string> args)
     {
@@ -354,13 +376,34 @@ internal sealed class JobManager
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
         var proc = new Process { StartInfo = psi };
-        var rec = new JobRecord(id, engine, proc);
+        var metricEngine = engine.Trim().ToLowerInvariant();
+        var counters = _metrics.GetOrAdd(metricEngine, static _ => new EngineJobCounters());
+        var rec = new JobRecord(id, engine, proc, exitCode => counters.MarkCompleted(exitCode));
         rec.Start();
+        counters.MarkStarted();
         _jobs[id] = rec;
         return id;
     }
 
     public bool TryGet(string id, out JobRecord rec) => _jobs.TryGetValue(id, out rec!);
+
+    public IReadOnlyList<UcxEngineMetricSnapshot> MetricsSnapshot()
+    {
+        var live = _jobs.Values
+            .GroupBy(job => job.Engine, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => (Running: group.Count(job => job.IsRunning), Retained: group.Count()),
+                StringComparer.Ordinal);
+        return _metrics
+            .Select(pair =>
+            {
+                live.TryGetValue(pair.Key, out var counts);
+                return pair.Value.Snapshot(pair.Key, counts.Running, counts.Retained);
+            })
+            .OrderBy(item => item.Engine, StringComparer.Ordinal)
+            .ToList();
+    }
 
     public void KillAll()
     {
@@ -384,6 +427,31 @@ internal sealed class JobManager
             }
         }
     }
+
+    private sealed class EngineJobCounters
+    {
+        private long _started;
+        private long _succeeded;
+        private long _failed;
+
+        public void MarkStarted() => Interlocked.Increment(ref _started);
+
+        public void MarkCompleted(int? exitCode)
+        {
+            if (exitCode == 0)
+                Interlocked.Increment(ref _succeeded);
+            else
+                Interlocked.Increment(ref _failed);
+        }
+
+        public UcxEngineMetricSnapshot Snapshot(string engine, int running, int retained) => new(
+            engine,
+            Interlocked.Read(ref _started),
+            Interlocked.Read(ref _succeeded),
+            Interlocked.Read(ref _failed),
+            running,
+            retained);
+    }
 }
 
 internal sealed class JobRecord : IDisposable
@@ -403,6 +471,7 @@ internal sealed class JobRecord : IDisposable
     private int _totalEvents;
     private readonly object _lock = new();
     private volatile bool _hasExited;
+    private readonly Action<int?>? _onExited;
 
     public string Id { get; }
     public string Engine { get; }
@@ -417,9 +486,9 @@ internal sealed class JobRecord : IDisposable
     /// </summary>
     public bool IsRunning => !_hasExited;
 
-    public JobRecord(string id, string engine, Process proc)
+    public JobRecord(string id, string engine, Process proc, Action<int?>? onExited = null)
     {
-        Id = id; Engine = engine; _proc = proc;
+        Id = id; Engine = engine; _proc = proc; _onExited = onExited;
     }
 
     public int EventCount { get { lock (_lock) return _totalEvents; } }
@@ -446,6 +515,7 @@ internal sealed class JobRecord : IDisposable
             catch { ExitCode = -1; }
             FinishedUtc = DateTime.UtcNow;
             _hasExited = true;
+            _onExited?.Invoke(ExitCode);
         };
         _proc.EnableRaisingEvents = true;
         _proc.Start();

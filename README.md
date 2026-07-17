@@ -132,6 +132,9 @@ ucx invoke-engine scenedetect --args-json '["presets"]'
 # Start the loopback-only REST surface; GET /engines discovers the catalogue
 # and POST /convert accepts {"engine":"...","args":["..."]}
 ucx serve --port 17654
+
+# Scrape dependency-free local job counters and gauges in Prometheus 0.0.4 format
+curl http://127.0.0.1:17654/metrics
 ```
 
 ### Commands
@@ -147,6 +150,11 @@ ucx serve --port 17654
 | `invoke-engine` | Run an installed sidecar with a JSON argument array |
 | `convert-preset` | Run a named desktop-compatible preset |
 | `serve` | Host the loopback-only REST job API |
+
+`serve` also exposes loopback-only Prometheus metrics at `/metrics`. A local
+scrape configuration and importable Grafana dashboard live under
+[`integrations/prometheus/`](integrations/prometheus/README.md); UCX itself does
+not install or contact either service.
 
 ### Convert Options
 

@@ -60,6 +60,8 @@ public sealed class AutomationSurfaceParityTests
         program.Should().Contain("AddCommand<EnginesCommand>(\"engines\")");
         program.Should().Contain("AddCommand<InvokeEngineCommand>(\"invoke-engine\")");
         server.Should().Contain("path == \"/engines\"");
+        server.Should().Contain("path == \"/metrics\"");
+        server.Should().Contain("PrometheusTextExporter.Render(");
         server.Should().Contain("SidecarCatalog.Resolve(engine)");
         server.Should().Contain("ResolveNativeConverter(args)");
         server.Should().Contain("jobs.Start(engine, exe, launchArgs)");
