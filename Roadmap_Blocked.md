@@ -28,7 +28,7 @@ capture positive-path evidence; no product code or fallback work remains.
 The repository now cross-publishes ARM64-native apphosts for the CLI, WinUI
 app, Explorer shell extension COM host, and FFmpeg proxy. A PE-header gate
 verified all four as ARM64 and emitted an explicit sidecar architecture report;
-the 31 currently installed frozen sidecars are x64 and therefore require
+the 32 currently installed frozen sidecars are x64 and therefore require
 Windows x64 emulation or an ARM64 rebuild. `ucx tools qnn --json` probes a local
 ARM64 Python/ONNX Runtime environment and fails closed unless it exposes
 `QNNExecutionProvider`.
