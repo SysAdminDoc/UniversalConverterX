@@ -199,6 +199,12 @@ UniversalConverterX/
 # SDK-native builds can also use dotnet directly
 dotnet build src/UniversalConverterX.sln -c Release -p:Platform=x64
 dotnet build src/UniversalConverterX.Console/UniversalConverterX.Console.csproj -c Release
+
+# Verify representative sidecar manifests, imports, and help/operation surfaces
+.\tools\verify-sidecars.ps1 -Mode Fast
+
+# Verify every sidecar; add -Freeze to run each PyInstaller build and frozen --help
+.\tools\verify-sidecars.ps1 -Mode All
 ```
 
 ### Publish
