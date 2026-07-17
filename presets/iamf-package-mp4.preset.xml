@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+  <Name>IAMF - Package in MP4</Name><Folder>Audio/Immersive IAMF</Folder>
+  <Description>Stream-copy an IAMF master and both stream groups into an audio-only MP4.</Description>
+  <InputTypes><Extension>iamf</Extension></InputTypes>
+  <OutputFileNameTemplate>{dir}/{stem}_iamf</OutputFileNameTemplate><OutputExtension>mp4</OutputExtension>
+  <Engine>iamf</Engine><InvocationMode>per-file</InvocationMode><Args><Arg>package</Arg></Args>
+</Preset>

@@ -131,6 +131,7 @@ public sealed partial class ToolboxPage : Page
         // Audio
         AudioTools.Add(new ToolboxTile("audio-converter", "Audio Converter", "MP3, WAV, FLAC, AAC, OGG, Opus · VBR + advanced encoder controls", "\uEC4F", green, "Ready", green, false, "FFmpeg / AudioPro"));
         AudioTools.Add(new ToolboxTile("audio-compressor", "Audio Compressor", "Dynamic-range compression (FFmpeg acompressor) — light/medium/heavy/podcast/broadcast presets", "\uE91F", blue, "Ready", green, false, "FFmpeg acompressor"));
+        AudioTools.Add(new ToolboxTile("presets:iamf", "IAMF Immersive Audio", "Create scalable stereo/5.1 masters, package MP4, and render WAV/FLAC", "\uEC4F", blue, "Ready", green, false, "FFmpeg 8.1 IAMF"));
         AudioTools.Add(new ToolboxTile("ai-noise", "Noise Remover", "RNNoise broadband speech denoise (FFmpeg arnndn)", "\uE767", blue, "Ready", green, true, "RNNoise"));
 
         // Documents

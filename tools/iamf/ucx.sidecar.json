@@ -1,0 +1,7 @@
+{
+  "engine": "iamf",
+  "tools": [
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg 8.1+ with IAMF", "managed": true },
+    { "id": "ffprobe", "executable": "ffprobe", "display": "FFprobe", "managed": true }
+  ]
+}

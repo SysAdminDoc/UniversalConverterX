@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+  <Name>IAMF - Create Scalable Stereo + 5.1 Master</Name><Folder>Audio/Immersive IAMF</Folder>
+  <Description>Split a six-channel source into a scalable 48 kHz Opus IAMF master with stereo and 5.1 presentations.</Description>
+  <InputTypes><Extension>wav</Extension><Extension>flac</Extension><Extension>mkv</Extension><Extension>mp4</Extension><Extension>mov</Extension></InputTypes>
+  <OutputFileNameTemplate>{dir}/{stem}_scalable_5_1</OutputFileNameTemplate><OutputExtension>iamf</OutputExtension>
+  <Engine>iamf</Engine><InvocationMode>per-file</InvocationMode>
+  <Args><Arg>encode</Arg><Arg>--profile</Arg><Arg>scalable-5.1</Arg></Args>
+</Preset>

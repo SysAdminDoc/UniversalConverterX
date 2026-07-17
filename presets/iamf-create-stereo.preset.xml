@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+  <Name>IAMF - Create Stereo Master</Name><Folder>Audio/Immersive IAMF</Folder>
+  <Description>Create a 48 kHz Opus IAMF stereo audio element and mix presentation.</Description>
+  <InputTypes><Extension>wav</Extension><Extension>flac</Extension><Extension>m4a</Extension><Extension>mp3</Extension><Extension>mkv</Extension><Extension>mp4</Extension><Extension>mov</Extension></InputTypes>
+  <OutputFileNameTemplate>{dir}/{stem}_stereo</OutputFileNameTemplate><OutputExtension>iamf</OutputExtension>
+  <Engine>iamf</Engine><InvocationMode>per-file</InvocationMode>
+  <Args><Arg>encode</Arg><Arg>--profile</Arg><Arg>stereo</Arg></Args>
+</Preset>
