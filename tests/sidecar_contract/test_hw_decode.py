@@ -80,6 +80,30 @@ class HwDecodeTests(unittest.TestCase):
         self.assertEqual(idx, 0)
         self.assertEqual(arr.shape, (240, 320, 3))
 
+    def test_frames_or_opencv_matches(self) -> None:
+        import cv2  # noqa: PLC0415
+        ffmpeg = _ffmpeg()
+        if not ffmpeg:
+            self.skipTest("FFmpeg not available")
+        clip = self.dir / "clip.mp4"
+        if not _make_clip(clip, ffmpeg, seconds=2):
+            self.skipTest("could not synthesise clip")
+
+        # The convenience wrapper must yield the same frame count as a bare
+        # OpenCV read loop, whichever decode backend it selects.
+        wrapped = list(self.hw.frames_or_opencv(clip, cv2))
+        cap = cv2.VideoCapture(str(clip))
+        cv_count = 0
+        while True:
+            ok, _ = cap.read()
+            if not ok:
+                break
+            cv_count += 1
+        cap.release()
+        self.assertEqual(len(wrapped), cv_count)
+        self.assertEqual(wrapped[0][0], 0)
+        self.assertEqual(wrapped[0][1].shape, (240, 320, 3))
+
     def test_hw_and_sw_agree_on_count(self) -> None:
         if not self.hw.pyav_available():
             self.skipTest("PyAV not installed")

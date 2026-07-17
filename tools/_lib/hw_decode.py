@@ -109,6 +109,36 @@ def _decode(av, path, pix_fmt, hwaccel):
         container.close()
 
 
+def frames_or_opencv(path: str | Path, cv2, *, pix_fmt: str = "bgr24"):
+    """Yield ``(frame_index, ndarray)`` using NVDEC when available, else OpenCV.
+
+    A drop-in replacement for a ``cv2.VideoCapture`` read loop in analysis
+    sidecars: NVDEC offloads decode to the GPU when a CUDA device is present, and
+    on any failure (no PyAV, no CUDA, unsupported stream) it transparently falls
+    back to OpenCV's software ``VideoCapture`` so behaviour never regresses.
+    """
+    if cuda_decode_available():
+        try:
+            yield from iter_frames(path, pix_fmt=pix_fmt)
+            return
+        except Exception:
+            pass  # fall through to OpenCV
+
+    capture = cv2.VideoCapture(str(path))
+    if not capture.isOpened():
+        return
+    index = 0
+    try:
+        while True:
+            ok, frame = capture.read()
+            if not ok:
+                break
+            yield index, frame
+            index += 1
+    finally:
+        capture.release()
+
+
 def decode_backend(allow_hw: bool = True) -> str:
     """Return a human-readable label for the decode backend that would be used."""
     if not pyav_available():
