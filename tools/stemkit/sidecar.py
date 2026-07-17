@@ -5,7 +5,9 @@
   * MDX23 / RoFormer (BS-RoFormer SW, MelBand-RoFormer, Viperx)
   * Demucs v4        (htdemucs, htdemucs_ft, hdemucs_mmi)
   * VR Arch          (lower quality fallback, CPU-friendly)
-  * Spleeter (legacy 2/4/5-stem)
+Legacy Spleeter is intentionally not bundled: the curated RoFormer, Demucs,
+MDX-Net, and VR Arch paths cover its stem layouts without a second TensorFlow
+runtime and with materially newer separation models.
 
 The user picks a model name; we route it through the unified
 `audio_separator.separator.Separator` API. Inference is offline and requires
@@ -210,11 +212,17 @@ def op_separate(args: argparse.Namespace) -> int:
 def op_models(args: argparse.Namespace) -> int:
     if not _imports(): return 1
     sep = _offline_separator()
+    flat: list[dict[str, str]] = []
     try:
         models = sep.list_supported_model_files()
+    except FileNotFoundError as ex:
+        # audio-separator keeps its full remote catalogue in download_checks.json.
+        # UCX never fetches that file implicitly; the curated local aliases below
+        # remain useful and deterministic when the optional catalogue is absent.
+        emit("log", level="warn", message=str(ex))
+        models = {}
     except Exception as ex:
         return fail("list_failed", str(ex))
-    flat: list[dict[str, str]] = []
     if isinstance(models, dict):
         for arch, items in models.items():
             if isinstance(items, dict):

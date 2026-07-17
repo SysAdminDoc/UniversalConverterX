@@ -49,7 +49,6 @@ programmability (CLI + REST + PS module), and AI depth.
 | **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |
 | **FFmpeg native `whisper` filter** | Lightweight fallback for subtitle pipeline. |
 | **Av1an per-scene parallel encoding** (Item 71) | VapourSynth dependency is heavy. Effort 5. Assess demand. |
-| **Music Source Separation (Spleeter)** (Item 75) | ~100 MB model. UC pending demand. |
 | **AI Video Metadata Tagging (MediaPipe)** (Item 76) | Charter concern re: video understanding scope. |
 | **Searchable Output Library (Meilisearch)** (Item 79) | Heavyweight dependency. |
 | **Vector Semantic Search (Qdrant)** (Item 80) | ML inference for preset search — feasibility unclear. |

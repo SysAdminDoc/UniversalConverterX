@@ -131,6 +131,25 @@ class StemkitModelTests(unittest.TestCase):
         self.assertEqual("BS-RoFormer", alias["family"])
         self.assertIn("guitar", alias["stems"])
 
+    def test_model_listing_keeps_curated_aliases_when_remote_catalog_is_absent(self):
+        stdout = io.StringIO()
+
+        class OfflineSeparator(FakeSeparator):
+            def list_supported_model_files(self):
+                raise FileNotFoundError("download_checks.json is not installed")
+
+        modules = fake_audio_separator_modules()
+        modules["audio_separator.separator"].Separator = OfflineSeparator
+        with patch.dict(sys.modules, modules), contextlib.redirect_stdout(stdout):
+            result = STEMKIT.op_models(argparse.Namespace())
+
+        self.assertEqual(0, result)
+        events = [json.loads(line) for line in stdout.getvalue().splitlines()]
+        listing = next(event for event in events if event["event"] == "stem_models")
+        self.assertEqual([], listing["models"])
+        self.assertTrue(any(alias["alias"] == "vocals-roformer" for alias in listing["aliases"]))
+        self.assertEqual("complete", events[-1]["event"])
+
 
 if __name__ == "__main__":
     unittest.main()
