@@ -120,6 +120,27 @@ public sealed class WorkflowViewModelTests
     }
 
     [Fact]
+    public void AutoHighlight_ParseHighlight_ToleratesMalformedSidecarValues()
+    {
+        // The sidecar is a separate process; a malformed event must degrade to
+        // defaults rather than throw InvalidOperationException inside the
+        // NDJSON event callback and tear down the workflow.
+        using var document = JsonDocument.Parse(
+            """{"rank":"top","start_seconds":null,"end_seconds":"soon","score":{},"reason":42}""");
+        var model = new AutoHighlightWorkflowViewModel();
+
+        var act = () => model.ParseHighlight(document.RootElement);
+
+        act.Should().NotThrow();
+        var row = act();
+        row.Rank.Should().Be(0);
+        row.StartSeconds.Should().Be(0);
+        row.EndSeconds.Should().Be(0);
+        row.Score.Should().Be(0);
+        row.Reason.Should().Be("Selected highlight");
+    }
+
+    [Fact]
     public void BackgroundRemoval_BuildsAllSelectedOptionsAndIgnoresMissingImage()
     {
         var model = new BackgroundRemovalWorkflowViewModel

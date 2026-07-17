@@ -102,7 +102,7 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
                 case "toolspath":
                     if (!Directory.Exists(value))
                     {
-                        AnsiConsole.MarkupLine($"[yellow]Warning:[/] Directory does not exist: {value}");
+                        AnsiConsole.MarkupLine($"[yellow]Warning:[/] Directory does not exist: {Markup.Escape(value)}");
                     }
                     config.ToolsBasePath = value;
                     break;
@@ -150,18 +150,18 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
                     break;
 
                 default:
-                    AnsiConsole.MarkupLine($"[red]Error:[/] Unknown configuration key: {key}");
+                    AnsiConsole.MarkupLine($"[red]Error:[/] Unknown configuration key: {Markup.Escape(key)}");
                     ShowAvailableKeys();
                     return 1;
             }
 
             SaveConfig(config);
-            AnsiConsole.MarkupLine($"[green]✓[/] Set [cyan]{key}[/] = [yellow]{value}[/]");
+            AnsiConsole.MarkupLine($"[green]✓[/] Set [cyan]{Markup.Escape(key)}[/] = [yellow]{Markup.Escape(value)}[/]");
             return 0;
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] Invalid value: {ex.Message}");
+            AnsiConsole.MarkupLine($"[red]Error:[/] Invalid value: {Markup.Escape(ex.Message)}");
             return 1;
         }
     }

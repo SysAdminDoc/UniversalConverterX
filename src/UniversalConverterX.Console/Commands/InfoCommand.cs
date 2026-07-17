@@ -24,7 +24,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
     {
         if (!File.Exists(settings.FilePath))
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] File not found: {settings.FilePath}");
+            AnsiConsole.MarkupLine($"[red]Error:[/] File not found: {Markup.Escape(settings.FilePath)}");
             return 1;
         }
 

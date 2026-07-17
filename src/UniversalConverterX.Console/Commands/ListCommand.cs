@@ -56,11 +56,11 @@ public class ListCommand : Command<ListCommand.Settings>
 
             if (outputs.Count == 0)
             {
-                AnsiConsole.MarkupLine($"[yellow]No output formats available for[/] [cyan]{ext}[/]");
+                AnsiConsole.MarkupLine($"[yellow]No output formats available for[/] [cyan]{Markup.Escape(ext)}[/]");
                 return 1;
             }
 
-            AnsiConsole.MarkupLine($"[green]Output formats for[/] [cyan]{ext}[/]:");
+            AnsiConsole.MarkupLine($"[green]Output formats for[/] [cyan]{Markup.Escape(ext)}[/]:");
             AnsiConsole.WriteLine();
 
             var table = new Table();
@@ -186,7 +186,7 @@ public class ListCommand : Command<ListCommand.Settings>
 
     private static int InvalidType(string type)
     {
-        AnsiConsole.MarkupLine($"[red]Unknown list type:[/] {type}");
+        AnsiConsole.MarkupLine($"[red]Unknown list type:[/] {Markup.Escape(type)}");
         AnsiConsole.MarkupLine("[dim]Valid types: formats, converters, categories[/]");
         return 1;
     }

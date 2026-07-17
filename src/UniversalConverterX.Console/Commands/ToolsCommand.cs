@@ -140,7 +140,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         AnsiConsole.Write(table);
 
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine($"[dim]Tools path: {toolsPath}[/]");
+        AnsiConsole.MarkupLine($"[dim]Tools path: {Markup.Escape(toolsPath)}[/]");
 
         return 0;
     }
@@ -157,7 +157,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         var toolId = settings.ToolName.ToLowerInvariant();
         if (!KnownTools.TryGetValue(toolId, out var tool))
         {
-            AnsiConsole.MarkupLine($"[red]Error:[/] Unknown tool: {settings.ToolName}");
+            AnsiConsole.MarkupLine($"[red]Error:[/] Unknown tool: {Markup.Escape(settings.ToolName)}");
             AnsiConsole.MarkupLine("[dim]Available tools: " + string.Join(", ", KnownTools.Keys) + "[/]");
             return 1;
         }
@@ -220,7 +220,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     {
         var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
 
-        AnsiConsole.MarkupLine($"[green]Tools path:[/] {toolsPath}");
+        AnsiConsole.MarkupLine($"[green]Tools path:[/] {Markup.Escape(toolsPath)}");
 
         if (Directory.Exists(toolsPath))
         {
@@ -246,7 +246,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
 
     private static int InvalidAction(string action)
     {
-        AnsiConsole.MarkupLine($"[red]Unknown action:[/] {action}");
+        AnsiConsole.MarkupLine($"[red]Unknown action:[/] {Markup.Escape(action)}");
         AnsiConsole.MarkupLine("[dim]Valid actions: list, check, download, path, qnn[/]");
         return 1;
     }

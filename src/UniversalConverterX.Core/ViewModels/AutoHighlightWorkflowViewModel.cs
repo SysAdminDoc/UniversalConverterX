@@ -75,18 +75,38 @@ public sealed class AutoHighlightWorkflowViewModel : ObservableObject
                 "--min-gap", minimumGap.ToString("0.##", CultureInfo.InvariantCulture),
             ];
 
+    // The sidecar is a separate process; its JSON may carry unexpected value
+    // kinds (a string where a number is expected, null, etc.). Reading such a
+    // value with GetInt32()/GetDouble()/GetString() throws InvalidOperationException
+    // inside the event callback. Guard every field so malformed events degrade to
+    // defaults instead of tearing down the workflow.
     public AutoHighlightCandidateViewModel ParseHighlight(JsonElement root) => new()
     {
-        Rank = root.TryGetProperty("rank", out var rank) ? rank.GetInt32() : 0,
-        StartSeconds = root.TryGetProperty("start_seconds", out var start) ? start.GetDouble() : 0,
-        EndSeconds = root.TryGetProperty("end_seconds", out var end) ? end.GetDouble() : 0,
-        StartFrame = root.TryGetProperty("start_frame", out var startFrame) ? startFrame.GetInt32() : 0,
-        EndFrame = root.TryGetProperty("end_frame", out var endFrame) ? endFrame.GetInt32() : 0,
-        Score = root.TryGetProperty("score", out var score) ? score.GetDouble() : 0,
+        Rank = ReadInt(root, "rank"),
+        StartSeconds = ReadDouble(root, "start_seconds"),
+        EndSeconds = ReadDouble(root, "end_seconds"),
+        StartFrame = ReadInt(root, "start_frame"),
+        EndFrame = ReadInt(root, "end_frame"),
+        Score = ReadDouble(root, "score"),
         Reason = root.TryGetProperty("reason", out var reason)
+            && reason.ValueKind == JsonValueKind.String
             ? reason.GetString() ?? "Selected highlight"
             : "Selected highlight",
     };
+
+    private static int ReadInt(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var value)
+            && value.ValueKind == JsonValueKind.Number
+            && value.TryGetInt32(out var result)
+            ? result
+            : 0;
+
+    private static double ReadDouble(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var value)
+            && value.ValueKind == JsonValueKind.Number
+            && value.TryGetDouble(out var result)
+            ? result
+            : 0;
 
     public WorkflowInvocation BuildRenderInvocation(HighlightExportKind kind, string outputPath)
     {
