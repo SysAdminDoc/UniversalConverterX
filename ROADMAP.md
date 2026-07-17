@@ -48,7 +48,6 @@ programmability (CLI + REST + PS module), and AI depth.
 | **ComfyUI AI Workflow Integration** | Effort 5. Needs community signal. |
 | **Dia-1.6B / Dia2 TTS** | 6 GB VRAM requirement. Assess after Kokoro/F5-TTS stabilizes. |
 | **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |
-| **whisper.cpp native sidecar** | Footprint vs. capability regression trade-off. |
 | **FFmpeg native `whisper` filter** | Lightweight fallback for subtitle pipeline. |
 | **Av1an per-scene parallel encoding** (Item 71) | VapourSynth dependency is heavy. Effort 5. Assess demand. |
 | **Music Source Separation (Spleeter)** (Item 75) | ~100 MB model. UC pending demand. |
