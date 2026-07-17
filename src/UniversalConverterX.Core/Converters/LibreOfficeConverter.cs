@@ -197,6 +197,56 @@ public class LibreOfficeConverter : BaseConverterStrategy
         };
     }
 
+    protected override ConversionResult? ValidateSuccessfulOutput(
+        ConversionJob job,
+        TimeSpan duration,
+        int exitCode = 0,
+        string? standardOutput = null,
+        string? standardError = null,
+        string? converter = null,
+        string? commandLine = null,
+        IReadOnlyList<string>? warnings = null)
+    {
+        // LibreOffice ignores the requested output filename: --convert-to writes
+        // <outdir>/<sourceStem>.<ext>, keyed off the SOURCE file stem. When the
+        // target filename differs — collision-avoidance suffixes from
+        // UniqueOutputPath, or a filename template — the produced file lands
+        // beside the intended path and the base validation (which checks
+        // job.OutputPath) wrongly reports a successful conversion as failed.
+        // Relocate the produced file to the requested path first. Guarded so it
+        // is a no-op for the common same-stem case and cannot disturb it.
+        try
+        {
+            if (!File.Exists(job.OutputPath))
+            {
+                var outputDir = Path.GetDirectoryName(job.OutputPath);
+                var producedName = Path.GetFileNameWithoutExtension(job.InputPath)
+                    + Path.GetExtension(job.OutputPath);
+                var producedPath = string.IsNullOrEmpty(outputDir)
+                    ? producedName
+                    : Path.Combine(outputDir, producedName);
+
+                if (File.Exists(producedPath)
+                    && !string.Equals(
+                        Path.GetFullPath(producedPath),
+                        Path.GetFullPath(job.OutputPath),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Move(producedPath, job.OutputPath, overwrite: true);
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Logger?.LogWarning(ex,
+                "Could not relocate LibreOffice output to '{Output}'", job.OutputPath);
+        }
+
+        return base.ValidateSuccessfulOutput(
+            job, duration, exitCode, standardOutput, standardError,
+            converter, commandLine, warnings);
+    }
+
     public override ConversionProgress? ParseProgress(string line, ConversionJob job)
     {
         // LibreOffice doesn't output progress, conversion is typically quick
