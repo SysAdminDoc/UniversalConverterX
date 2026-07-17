@@ -1719,6 +1719,99 @@
   <data name="Core_UnknownError" xml:space="preserve">
     <value>Error desconocido</value>
   </data>
+  <data name="DiscBurnPage_ActionCombo.Header" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="DiscBurnPage_CancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DiscBurnPage_ChooseOutputButton.Content" xml:space="preserve">
+    <value>Choose output…</value>
+  </data>
+  <data name="DiscBurnPage_ChooseSourceButton.Content" xml:space="preserve">
+    <value>Choose source…</value>
+  </data>
+  <data name="DiscBurnPage_DriveCombo.Header" xml:space="preserve">
+    <value>Optical recorder</value>
+  </data>
+  <data name="DiscBurnPage_DriveCombo.PlaceholderText" xml:space="preserve">
+    <value>No compatible recorder found</value>
+  </data>
+  <data name="DiscBurnPage_EmptyHint.Text" xml:space="preserve">
+    <value>Its files and subfolders will become the data-disc contents.</value>
+  </data>
+  <data name="DiscBurnPage_EmptyTitle.Text" xml:space="preserve">
+    <value>Choose a folder for the disc</value>
+  </data>
+  <data name="DiscBurnPage_Item_001.Text" xml:space="preserve">
+    <value>DISC BURNER</value>
+  </data>
+  <data name="DiscBurnPage_Item_002.Text" xml:space="preserve">
+    <value>Create or burn data CD/DVD and standards-compliant DVD-Video media.</value>
+  </data>
+  <data name="DiscBurnPage_Item_003.Text" xml:space="preserve">
+    <value>Data images use Windows IMAPI2 only. DVD-Video also requires FFmpeg and dvdauthor. Blu-ray authoring is not offered because its former muxer dependency is unmaintained.</value>
+  </data>
+  <data name="DiscBurnPage_Item_006.Text" xml:space="preserve">
+    <value>Disc setup</value>
+  </data>
+  <data name="DiscBurnPage_Item_008.Content" xml:space="preserve">
+    <value>Data files and folders</value>
+  </data>
+  <data name="DiscBurnPage_Item_009.Content" xml:space="preserve">
+    <value>DVD-Video titles</value>
+  </data>
+  <data name="DiscBurnPage_Item_011.Content" xml:space="preserve">
+    <value>Create ISO image</value>
+  </data>
+  <data name="DiscBurnPage_Item_012.Content" xml:space="preserve">
+    <value>Burn physical disc</value>
+  </data>
+  <data name="DiscBurnPage_Item_014.Content" xml:space="preserve">
+    <value>CD</value>
+  </data>
+  <data name="DiscBurnPage_Item_015.Content" xml:space="preserve">
+    <value>DVD</value>
+  </data>
+  <data name="DiscBurnPage_Item_017.Content" xml:space="preserve">
+    <value>NTSC (720×480, 29.97 fps)</value>
+  </data>
+  <data name="DiscBurnPage_Item_018.Content" xml:space="preserve">
+    <value>PAL (720×576, 25 fps)</value>
+  </data>
+  <data name="DiscBurnPage_Item_020.Text" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="DiscBurnPage_LabelBox.Header" xml:space="preserve">
+    <value>Volume label</value>
+  </data>
+  <data name="DiscBurnPage_LabelBox.Text" xml:space="preserve">
+    <value>UNIVERSAL_X</value>
+  </data>
+  <data name="DiscBurnPage_MediaCombo.Header" xml:space="preserve">
+    <value>Data media</value>
+  </data>
+  <data name="DiscBurnPage_ModeCombo.Header" xml:space="preserve">
+    <value>Content type</value>
+  </data>
+  <data name="DiscBurnPage_OutputBox.Header" xml:space="preserve">
+    <value>ISO image</value>
+  </data>
+  <data name="DiscBurnPage_OutputBox.PlaceholderText" xml:space="preserve">
+    <value>Choose an output ISO…</value>
+  </data>
+  <data name="DiscBurnPage_RefreshDrivesButton.Content" xml:space="preserve">
+    <value>Refresh drives</value>
+  </data>
+  <data name="DiscBurnPage_StandardCombo.Header" xml:space="preserve">
+    <value>DVD-Video standard</value>
+  </data>
+  <data name="DiscBurnPage_StartButton.Content" xml:space="preserve">
+    <value>Create ISO</value>
+  </data>
+  <data name="DiscBurnPage_StatusText.Text" xml:space="preserve">
+    <value>Choose a source folder and an ISO destination.</value>
+  </data>
   <data name="DocumentConverterPage_ConvertButton.Content" xml:space="preserve">
     <value>Convertir</value>
   </data>

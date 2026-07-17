@@ -30,7 +30,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · OCR (Tesseract) |
-| **Disc** | DVD Burn · DVD Copy · CD Burner |
+| **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · DVD Copy (planned) |
 | **Other** | Format Inspector · Chapter Marks · Watch Folders · History · VMAF Quality |
 
 ## Architecture
@@ -81,6 +81,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Windows 10 21H2+ or Windows 11
 - .NET 10 Runtime
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
+- DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
 
 ### Quick Start
 

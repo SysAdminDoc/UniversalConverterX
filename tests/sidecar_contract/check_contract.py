@@ -42,6 +42,7 @@ KNOWN_EVENTS = {
     "segment",  # whisper-stt, lipsight — transcript segments
     "stem",     # demucs — separated audio stems
     "device",   # recordcast — DirectShow device enumeration
+    "drive",    # discburn — IMAPI2 optical recorder enumeration
     "preset",   # gifstudio — known render presets
     "format",   # heicshift — supported input/output format inventory
     "voice",    # edge-tts — voice catalog enumeration

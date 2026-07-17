@@ -131,8 +131,10 @@ def write_resw(path: Path, values: dict[str, str]) -> None:
         ET.SubElement(data, "value").text = values[name]
     ET.indent(root, space="  ")
     path.parent.mkdir(parents=True, exist_ok=True)
-    ET.ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)
-    with path.open("ab") as stream:
+    # Write through a binary stream so Windows does not translate ElementTree's
+    # LF separators into CRLF and turn every resource line into a noisy diff.
+    with path.open("wb") as stream:
+        ET.ElementTree(root).write(stream, encoding="utf-8", xml_declaration=True)
         stream.write(b"\n")
 
 

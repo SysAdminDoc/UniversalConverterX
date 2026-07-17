@@ -150,9 +150,8 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets", "Presets Browser", "Browse + run all shipped presets and any custom *.preset.xml", "\uE71D", blue, "Ready", green, false, "UCX"));
 
         // Disc
-        DiscTools.Add(new ToolboxTile("dvd-burn", "DVD Burn", "Burn videos to DVD", "\uE958", red, "Future", yellow, false, null));
+        DiscTools.Add(new ToolboxTile("disc-burn", "Disc Burner", "Create ISO images or burn data CD/DVD and DVD-Video media", "\uE958", red, "Ready", green, false, "Windows IMAPI2 + dvdauthor"));
         DiscTools.Add(new ToolboxTile("dvd-copy", "DVD Copy", "Copy or backup DVDs", "\uE958", red, "Future", yellow, false, null));
-        DiscTools.Add(new ToolboxTile("cd-burner", "CD Burner", "Burn audio CDs", "\uE958", red, "Future", yellow, false, null));
 
         // Other
         OtherTools.Add(new ToolboxTile("format-inspector", "Format Inspector", "Probe codecs, streams, and metadata", "\uE946", blue, "Ready", green, false, "UCX + FFprobe"));

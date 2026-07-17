@@ -1,0 +1,19 @@
+{
+  "engine": "discburn",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContainsAny": ["image-dvd", "burn-dvd"]
+    },
+    {
+      "id": "dvdauthor",
+      "executable": "dvdauthor",
+      "display": "dvdauthor",
+      "managed": false,
+      "whenArgContainsAny": ["image-dvd", "burn-dvd"]
+    }
+  ]
+}

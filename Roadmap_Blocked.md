@@ -14,13 +14,13 @@ Impact: 3 · Effort: 2 · Type: platform + leapfrog
 
 ---
 
-### 44. DVD Burn / CD Burner (Disc Tools)
+### 44. Blu-ray Authoring (Disc Tools residual)
 
-Write video files to DVD-Video structure or data files to a CD/DVD using `growisofs` / `cdrecord` / Windows `IDiscRecorder2` COM API.
+Data CD/DVD imaging and burning now ship through Windows IMAPI2, and DVD-Video authoring now ships through FFmpeg + `dvdauthor` into an IMAPI UDF 1.02 image/write path. The headless acceptance proof produced and inspected both a data ISO and a DVD-Video ISO containing a complete `VIDEO_TS` structure without requiring a physical recorder.
 
 Impact: 2 · Effort: 4 · Type: parity
 
-**Blocker:** tsMuxeR (the standard Blu-ray TS muxer) was archived by its maintainer in April 2025. Blu-ray authoring must pivot to `eac3to` or be scoped to data-DVD only. Requires design decision before implementation.
+**Blocker:** Blu-ray authoring still needs a maintained, redistributable Windows mux/author backend. tsMuxeR was archived by its maintainer in April 2025. Evaluate an `eac3to`-based pipeline (including licensing, playlist/clip authoring coverage, and a reproducible test image) before exposing Blu-ray in the product.
 
 ---
 
