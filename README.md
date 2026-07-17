@@ -30,7 +30,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | **Video** | Auto Highlight · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
 | **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
-| **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · OCR (Tesseract) |
+| **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
 | **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · DVD Copy (planned) |
 | **Other** | Format Inspector · Chapter Marks · Watch Folders · History · VMAF Quality |
 

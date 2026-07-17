@@ -66,6 +66,24 @@ def _ensure_tools_on_path():
         os.environ["PATH"] = os.pathsep.join(extras + [os.environ.get("PATH", "")])
 
 
+def op_probe(_: argparse.Namespace) -> int:
+    try:
+        import ocrmypdf  # noqa: F401
+        package = True
+    except ImportError:
+        package = False
+    _ensure_tools_on_path()
+    tesseract = shutil.which("tesseract") or shutil.which("tesseract.exe")
+    ghostscript = shutil.which("gswin64c") or shutil.which("gs")
+    available = package and tesseract is not None and ghostscript is not None
+    emit(
+        "backend", available=available, ocrmypdf=package,
+        tesseract=tesseract, ghostscript=ghostscript,
+    )
+    emit("complete", output="", size_bytes=0, available=available)
+    return 0 if available else 1
+
+
 def op_recognize(args: argparse.Namespace) -> int:
     if not _imports_ok():
         return 1
@@ -166,6 +184,8 @@ def build_parser() -> argparse.ArgumentParser:
     rec.add_argument("--output-type", default="pdf", dest="output_type",
                      help="pdf | pdfa | pdfa-1 | pdfa-2 | pdfa-3 (archival).")
 
+    sub.add_parser("probe", help="Check OCRmyPDF, Tesseract, and Ghostscript availability.")
+
     return p
 
 
@@ -174,6 +194,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "recognize":
             return op_recognize(args)
+        if args.op == "probe":
+            return op_probe(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         return fail("cancelled", "Cancelled by user.")

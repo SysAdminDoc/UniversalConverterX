@@ -1,5 +1,5 @@
 {
-  "engine": "pdfocr",
+  "engine": "ocrkit",
   "tools": [
     {
       "id": "tesseract",

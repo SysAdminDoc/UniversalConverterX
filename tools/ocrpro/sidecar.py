@@ -1,16 +1,12 @@
-"""Pro OCR sidecar -- Surya 0.6+ layout + text + tables + math.
+"""Pro OCR sidecar -- Surya 0.6+ layout and text recognition.
 
-Surya (datalab.to, Apache-2.0) is the SOTA OSS OCR pipeline: it handles
-layout analysis, paragraph reflow, table extraction, and math equation
-recognition across 90+ languages. Outperforms Tesseract on photographs of
-documents and on multi-column / non-Latin scripts.
+Surya (datalab.to, Apache-2.0) handles layout analysis and text recognition
+across 90+ languages. It is intended for photographs of documents and for
+multi-column or non-Latin scripts.
 
 Operations:
   text       Recognize text (plain JSON or markdown)
   layout     Detect paragraphs / titles / tables / figures (JSON)
-  tables     Extract structured tables to JSON / CSV
-  ordering   Reading-order detection
-  full       Layout + text + tables in one pass (markdown output)
 """
 from __future__ import annotations
 
@@ -156,7 +152,7 @@ def op_layout(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="ocrpro-sidecar",
-                                description="Surya OCR (text, layout, tables, math).")
+                                description="Surya OCR (text and layout).")
     sub = p.add_subparsers(dest="op", required=True)
 
     t = sub.add_parser("text", help="Recognize text on each page.")

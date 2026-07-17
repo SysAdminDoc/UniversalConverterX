@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Unified OCR (Images + Searchable PDF/A)</Name>
+    <Folder>Documents/OCR</Folder>
+    <InputTypes>
+        <Extension>pdf</Extension>
+        <Extension>png</Extension>
+        <Extension>jpg</Extension>
+        <Extension>jpeg</Extension>
+        <Extension>tif</Extension>
+        <Extension>tiff</Extension>
+        <Extension>webp</Extension>
+        <Extension>bmp</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_ocr</OutputFileNameTemplate>
+    <OutputExtension>txt</OutputExtension>
+    <Engine>ocrkit</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>recognize</Arg>
+        <Arg>--image-format</Arg>
+        <Arg>txt</Arg>
+        <Arg>--pdf-output-type</Arg>
+        <Arg>pdfa-2</Arg>
+        <Arg>--deskew</Arg>
+        <Arg>--rotate-pages</Arg>
+        <Arg>--skip-text</Arg>
+    </Args>
+</Preset>

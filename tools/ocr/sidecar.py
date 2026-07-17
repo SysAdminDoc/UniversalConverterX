@@ -101,6 +101,14 @@ def op_languages(args: argparse.Namespace) -> int:
     return 0
 
 
+def op_probe(_: argparse.Namespace) -> int:
+    tess = find_tesseract()
+    available = tess is not None
+    emit("backend", available=available, tesseract=tess)
+    emit("complete", output="", size_bytes=0, available=available)
+    return 0 if available else 1
+
+
 def op_recognize(args: argparse.Namespace) -> int:
     tess = find_tesseract()
     if not tess:
@@ -205,6 +213,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("languages",
                    help="List installed Tesseract language packs.")
+    sub.add_parser("probe", help="Check local Tesseract availability.")
 
     return p
 
@@ -214,6 +223,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "recognize":  return op_recognize(args)
         if args.op == "languages":  return op_languages(args)
+        if args.op == "probe":      return op_probe(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         return fail("cancelled", "Cancelled by user.")

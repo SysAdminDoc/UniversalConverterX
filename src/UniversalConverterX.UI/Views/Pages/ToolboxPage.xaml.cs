@@ -202,6 +202,7 @@ public sealed partial class ToolboxPage : Page
         AudioTools.Add(new ToolboxTile("presets:mailbox", "Email Mailbox Convert", "mbox / EML / Maildir / RFC822 mutual conversion", "\uE715", blue, "Ready", green, false, "stdlib mailbox"));
         DocumentTools.Add(new ToolboxTile("presets:ocr", "Image OCR (Tesseract)", "Image / multi-page TIFF -> TXT / hOCR / PDF / TSV / ALTO", "\uE8E6", blue, "Ready", green, false, "Tesseract"));
         DocumentTools.Add(new ToolboxTile("presets:pdfocr", "Scanned PDF -> Searchable PDF", "OCRmyPDF + Poppler scanned-PDF OCR pass", "\uE8E6", blue, "Ready", green, false, "OCRmyPDF"));
+        DocumentTools.Add(new ToolboxTile("presets:ocrkit", "Unified OCR Batch", "Mix images and PDFs -> text plus deskewed searchable PDF/A in one offline batch", "\uE8E6", blue, "Ready", green, false, "Tesseract + OCRmyPDF"));
         DocumentTools.Add(new ToolboxTile("presets:pdftools", "PDF Tools", "Merge / split / compress / encrypt / extract / rotate via pikepdf", "\uEA90", orange, "Ready", green, false, "pikepdf"));
         ImageTools.Add(new ToolboxTile("presets:realesrgan", "Image / Video Upscale", "Real-ESRGAN x4 super-resolution for image + video", "\uE714", red, "Ready", green, false, "Real-ESRGAN"));
         AudioTools.Add(new ToolboxTile("recorder", "Screen / Audio Recorder", "Live screen + system-audio + mic capture (DirectShow / FFmpeg)", "\uE714", blue, "Ready", green, false, "FFmpeg + DirectShow"));
@@ -354,7 +355,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("presets:translatekit", "Translator (200 lang)", "Local NLLB-200 / MADLAD-400 -- text, files, SRT subtitles", "\uE774", blue, "Ready", green, true, "NLLB-200"));
         AiTools.Add(new ToolboxTile("presets:inpaint", "Object Removal (LaMa)", "LaMa + YOLO auto-detect: 'remove every car / person / bird'", "\uE91B", orange, "Ready", green, true, "LaMa + YOLOv11"));
         AudioTools.Add(new ToolboxTile("presets:audiomastering", "Audio Mastering", "Matchering reference-based mastering + EBU R128 loudnorm", "\uEC4F", red, "Ready", green, true, "Matchering"));
-        DocumentTools.Add(new ToolboxTile("presets:ocrpro", "OCR Pro (Surya)", "Layout + text + tables + math, 90+ languages", "\uE8A1", blue, "Ready", green, true, "Surya"));
+        DocumentTools.Add(new ToolboxTile("presets:ocrpro", "OCR Pro (Surya)", "Layout + text recognition for complex documents, 90+ languages", "\uE8A1", blue, "Ready", green, true, "Surya"));
 
         // v2.9 wave (Coverage)
         OtherTools.Add(new ToolboxTile("presets:gametools", "Game ROM Tools", "IPS/BPS/UPS patches + N64 byteswap + CHD <-> CUE/BIN", "\uE7FC", green, "Ready", green, false, "UCX + chdman"));
