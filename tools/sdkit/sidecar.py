@@ -11,8 +11,8 @@ families via Hugging Face `diffusers`:
 Default model = "black-forest-labs/FLUX.1-schnell" for the speed/quality
 sweet spot. Override with --model.
 
-Models are NOT bundled (FLUX is ~24 GB). The sidecar pulls + caches them
-into the user's HF cache on first run.
+Models are NOT bundled (FLUX is ~24 GB). Inference is offline and resolves
+only models already present in the user's Hugging Face cache or a local path.
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -108,6 +109,7 @@ def _torch_dtype(dtype: str):
 
 def _load_pipe(model: str, kind: str, dtype: str, device: str):
     """kind in {'txt2img','img2img','inpaint','upscale'}."""
+    enforce_offline()
     family = _family_of(model)
     td = _torch_dtype(dtype)
 
@@ -117,7 +119,7 @@ def _load_pipe(model: str, kind: str, dtype: str, device: str):
         cls = {"txt2img": FluxPipeline, "img2img": FluxImg2ImgPipeline,
                "inpaint": FluxInpaintPipeline}.get(kind)
         if cls is None: raise ValueError(f"FLUX has no '{kind}' pipeline.")
-        pipe = cls.from_pretrained(model, torch_dtype=td)
+        pipe = cls.from_pretrained(model, torch_dtype=td, local_files_only=True)
     elif family == "sd3":
         from diffusers import (StableDiffusion3Pipeline,
                                 StableDiffusion3Img2ImgPipeline,
@@ -126,7 +128,7 @@ def _load_pipe(model: str, kind: str, dtype: str, device: str):
                "img2img": StableDiffusion3Img2ImgPipeline,
                "inpaint": StableDiffusion3InpaintPipeline}.get(kind)
         if cls is None: raise ValueError(f"SD3 has no '{kind}' pipeline.")
-        pipe = cls.from_pretrained(model, torch_dtype=td)
+        pipe = cls.from_pretrained(model, torch_dtype=td, local_files_only=True)
     elif family == "sdxl":
         from diffusers import (StableDiffusionXLPipeline,
                                 StableDiffusionXLImg2ImgPipeline,
@@ -136,7 +138,7 @@ def _load_pipe(model: str, kind: str, dtype: str, device: str):
                "inpaint": StableDiffusionXLInpaintPipeline}.get(kind)
         if cls is None: raise ValueError(f"SDXL has no '{kind}' pipeline.")
         pipe = cls.from_pretrained(model, torch_dtype=td, variant="fp16",
-                                    use_safetensors=True)
+                                    use_safetensors=True, local_files_only=True)
     else:  # sd1x
         from diffusers import (StableDiffusionPipeline,
                                 StableDiffusionImg2ImgPipeline,
@@ -146,7 +148,8 @@ def _load_pipe(model: str, kind: str, dtype: str, device: str):
                "img2img": StableDiffusionImg2ImgPipeline,
                "inpaint": StableDiffusionInpaintPipeline,
                "upscale": StableDiffusionUpscalePipeline}[kind]
-        pipe = cls.from_pretrained(model, torch_dtype=td, safety_checker=None)
+        pipe = cls.from_pretrained(
+            model, torch_dtype=td, safety_checker=None, local_files_only=True)
 
     pipe = pipe.to(device)
     if hasattr(pipe, "set_progress_bar_config"):

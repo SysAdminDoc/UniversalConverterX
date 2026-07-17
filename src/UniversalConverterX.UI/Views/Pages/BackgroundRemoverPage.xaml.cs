@@ -38,6 +38,8 @@ public sealed partial class BackgroundRemoverPage : Page
     private readonly ObservableCollection<BgRemoveFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
     private string? _outputDirectory;
+    private bool _modelReady;
+    private bool _modelBusy;
 
     public BackgroundRemoverPage()
     {
@@ -48,6 +50,78 @@ public sealed partial class BackgroundRemoverPage : Page
         QualitySlider.ValueChanged += (_, e) =>
             QualityValueText.Text = ((int)e.NewValue).ToString();
         UpdateUi();
+        _ = RefreshModelStatusAsync();
+    }
+
+    private async Task RefreshModelStatusAsync()
+    {
+        if (_runner.Locate("alphacut") is null)
+        {
+            _modelReady = false;
+            ModelStatus.Text = "Background-removal engine is not built.";
+            DownloadModelButton.IsEnabled = false;
+            UpdateUi();
+            return;
+        }
+
+        var ready = false;
+        await _runner.RunAsync(
+            "alphacut", ["--check-model"],
+            onRawEvent: (name, payload) =>
+            {
+                if (name == "model_status" && payload.TryGetProperty("ready", out var value))
+                    ready = value.ValueKind == System.Text.Json.JsonValueKind.True;
+            });
+        _modelReady = ready;
+        ModelStatus.Text = ready
+            ? "Pinned U2Net Human Seg model verified. Inference is offline."
+            : "Model not installed. Review the Apache-2.0 terms before downloading the pinned 168 MB asset.";
+        DownloadModelButton.Content = ready ? "Re-verify model" : "Download verified model (168 MB)";
+        DownloadModelButton.IsEnabled = !_modelBusy;
+        UpdateUi();
+    }
+
+    private async void DownloadModel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_modelBusy || _runner.Locate("alphacut") is null)
+            return;
+
+        if (!_modelReady)
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = "Download the background-removal model?",
+                Content = "This downloads the pinned U2Net Human Seg ONNX model (Apache-2.0, 168 MB). "
+                          + "UCX verifies its exact size and SHA-256 before installing it. "
+                          + "Background removal remains offline after installation.",
+                PrimaryButtonText = "Accept & download",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+                return;
+        }
+
+        _modelBusy = true;
+        DownloadModelButton.IsEnabled = false;
+        ModelStatus.Text = "Downloading and verifying model…";
+        UpdateUi();
+        try
+        {
+            var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
+                ModelStatus.Text = $"Downloading model… {p.Percent:F0}% ({p.Stage})"));
+            var result = await _runner.RunAsync(
+                "alphacut", ["--download-model", "u2net_human_seg", "--accept-license"],
+                progress, ct: CancellationToken.None, silenceTimeout: TimeSpan.FromHours(1));
+            if (!result.Success)
+                ModelStatus.Text = $"Download failed: {result.ErrorMessage ?? result.ErrorCode}.";
+        }
+        finally
+        {
+            _modelBusy = false;
+            await RefreshModelStatusAsync();
+        }
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -447,7 +521,7 @@ public sealed partial class BackgroundRemoverPage : Page
         FileList.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
-        RunButton.IsEnabled = hasFiles && _cts is null;
+        RunButton.IsEnabled = hasFiles && _cts is null && _modelReady && !_modelBusy;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         UpdateStatusText();
     }

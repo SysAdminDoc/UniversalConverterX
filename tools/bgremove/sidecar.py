@@ -18,12 +18,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -53,7 +55,8 @@ def _segment_birefnet(images, model_id: str, device: str):
 
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
     model = AutoModelForImageSegmentation.from_pretrained(
-        model_id, trust_remote_code=True, torch_dtype=dtype)
+        model_id, trust_remote_code=True, torch_dtype=dtype,
+        local_files_only=True)
     model.to(device).eval()
 
     tfm = transforms.Compose([
@@ -83,6 +86,21 @@ def _segment_rmbg(images, model_id: str, device: str):
 
 def _segment_rembg(images, model_name: str):
     """Legacy U2Net path via the `rembg` package."""
+    filenames = {
+        "u2net": ("u2net.onnx",),
+        "u2netp": ("u2netp.onnx",),
+        "u2net_human_seg": ("u2net_human_seg.onnx",),
+        "isnet-general-use": ("isnet-general-use.onnx",),
+        "isnet-anime": ("isnet-anime.onnx",),
+        "silueta": ("silueta.onnx",),
+        "sam": ("sam_vit_b_01ec64.encoder.onnx", "sam_vit_b_01ec64.decoder.onnx"),
+    }
+    cache = Path(os.environ.get("U2NET_HOME") or Path.home() / ".u2net")
+    missing = [name for name in filenames[model_name] if not (cache / name).is_file()]
+    if missing:
+        raise FileNotFoundError(
+            f"Local rembg model files are required in {cache}; automatic downloads are disabled: {missing}")
+    os.environ["U2NET_HOME"] = str(cache)
     from rembg import new_session, remove
     from PIL import Image
     sess = new_session(model_name)
@@ -98,6 +116,7 @@ def _segment_rembg(images, model_name: str):
 
 
 def op_remove(args: argparse.Namespace) -> int:
+    enforce_offline()
     inputs = [Path(p) for p in args.input]
     miss = [str(p) for p in inputs if not p.is_file()]
     if miss: return fail("missing_input", f"Image(s) not found: {miss}")

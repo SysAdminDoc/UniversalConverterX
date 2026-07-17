@@ -16,6 +16,7 @@ The frozen sidecar locates the ncnn-vulkan exe via:
 param(
     [switch] $Clean,
     [switch] $SkipDownload,
+    [switch] $AcceptLicense,
     [string] $Python = 'python'
 )
 
@@ -26,6 +27,7 @@ $DistDir   = Join-Path $ToolDir 'dist'
 $BuildDir  = Join-Path $ToolDir 'build'
 $SpecDir   = Join-Path $ToolDir 'spec'
 $BinDir    = Join-Path $ToolDir 'bin'
+$LibDir    = Join-Path $ToolDir '../_lib'
 
 if ($Clean) {
     foreach ($d in @($DistDir, $BuildDir, $SpecDir)) {
@@ -38,36 +40,38 @@ if ($Clean) {
 if (-not $SkipDownload) {
     $exe = Join-Path $BinDir 'realesrgan-ncnn-vulkan.exe'
     if (-not (Test-Path $exe)) {
-        # Vetted upstream Windows release. Asset URL pinned to release tag, not 'latest',
-        # so we don't drift unexpectedly. Update both URL + SHA-256 together.
+        # Pinned BSD-3-Clause upstream release. Update URL, size, and SHA together.
         $assetUrl = 'https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip'
-        $assetSha = 'EFC4E78E36D4F26F9486B8FB5B6BC0E3D7F5024F3F6E3E827DE8D03D6BA8DC1B'
+        $assetSize = 45474481
+        $assetSha = 'ABC02804E17982A3BE33675E4D471E91EA374E65B70167ABC09E31ACB412802D'
 
-        New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
-        $zipPath = Join-Path $BinDir 'realesrgan-ncnn-vulkan.zip'
-        Write-Host "[realesrgan] Downloading $assetUrl..."
-        Invoke-WebRequest -Uri $assetUrl -OutFile $zipPath -UseBasicParsing
-
-        $hash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToUpperInvariant()
-        if ($hash -ne $assetSha.ToUpperInvariant()) {
-            Remove-Item -Force $zipPath
-            Write-Warning "[realesrgan] SHA-256 mismatch for $assetUrl"
-            Write-Warning "             expected $assetSha"
-            Write-Warning "             actual   $hash"
-            Write-Warning "             — bin/ left empty. The sidecar will refuse to run until a verified copy is dropped in."
+        if (-not $AcceptLicense) {
+            Write-Warning '[realesrgan] Not downloading the BSD-3-Clause runtime without -AcceptLicense.'
         } else {
-            Write-Host '[realesrgan] SHA-256 verified.'
-            Expand-Archive -Path $zipPath -DestinationPath $BinDir -Force
-            Remove-Item -Force $zipPath
+            New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
+            $stagingPath = Join-Path $BinDir '.realesrgan-ncnn-vulkan.zip.part'
+            try {
+                Write-Host "[realesrgan] Downloading pinned BSD-3-Clause asset $assetUrl..."
+                Invoke-WebRequest -Uri $assetUrl -OutFile $stagingPath -UseBasicParsing -ErrorAction Stop
+                $actualSize = (Get-Item -LiteralPath $stagingPath).Length
+                $actualSha = (Get-FileHash -LiteralPath $stagingPath -Algorithm SHA256).Hash.ToUpperInvariant()
+                if ($actualSize -ne $assetSize -or $actualSha -ne $assetSha) {
+                    throw "Integrity mismatch (expected $assetSize bytes / $assetSha, got $actualSize bytes / $actualSha)."
+                }
+                Write-Host '[realesrgan] Size and SHA-256 verified.'
+                Expand-Archive -LiteralPath $stagingPath -DestinationPath $BinDir -Force
 
-            # The upstream zip extracts as realesrgan-ncnn-vulkan-<date>-windows/.
-            # Flatten it into bin/ so the sidecar's REALESRGAN_EXE search hits it.
-            $extracted = Get-ChildItem -Directory -Path $BinDir | Where-Object { $_.Name -like 'realesrgan-ncnn-vulkan-*-windows' } | Select-Object -First 1
-            if ($extracted) {
-                Get-ChildItem -Path $extracted.FullName | Move-Item -Destination $BinDir -Force
-                Remove-Item -Recurse -Force $extracted.FullName
+                # The upstream zip extracts as realesrgan-ncnn-vulkan-<date>-windows/.
+                # Flatten it into bin/ so the sidecar's REALESRGAN_EXE search hits it.
+                $extracted = Get-ChildItem -Directory -Path $BinDir | Where-Object { $_.Name -like 'realesrgan-ncnn-vulkan-*-windows' } | Select-Object -First 1
+                if ($extracted) {
+                    Get-ChildItem -Path $extracted.FullName | Move-Item -Destination $BinDir -Force
+                    Remove-Item -Recurse -Force $extracted.FullName
+                }
+                Write-Host "[realesrgan] Installed at: $exe"
+            } finally {
+                Remove-Item -LiteralPath $stagingPath -Force -ErrorAction SilentlyContinue
             }
-            Write-Host "[realesrgan] Installed at: $exe"
         }
     } else {
         Write-Host "[realesrgan] ncnn-vulkan exe already present at $exe — skipping download. Pass -Clean -SkipDownload:`$false to refetch."
@@ -92,12 +96,13 @@ Write-Host '[realesrgan] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
-    --paths ../_lib `
+    --paths $LibDir `
     $Sidecar
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 $frozen = Join-Path $DistDir 'realesrgan.exe'
 if (-not (Test-Path $frozen)) { throw "Expected output not found: $frozen" }
+Copy-Item -LiteralPath $frozen -Destination (Join-Path $ToolDir 'realesrgan.exe') -Force
 
 Write-Host "[realesrgan] Built: $frozen" -ForegroundColor Green

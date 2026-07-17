@@ -27,6 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -70,6 +71,7 @@ def _autodetect_mask(img_path: Path, target_classes: list[str]):
 
 
 def op_remove(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         from PIL import Image
         import numpy as np

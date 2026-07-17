@@ -97,6 +97,8 @@ def diarize(
 
     from pyannote.audio import Pipeline  # lazy
 
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
     pipeline = Pipeline.from_pretrained(
         "pyannote/speaker-diarization-3.1",
         use_auth_token=token,
@@ -155,5 +157,4 @@ def align_to_faces(
         if hits:
             lookup.setdefault(seg.speaker, []).extend(hits)
     return lookup
-
 

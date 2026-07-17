@@ -63,24 +63,8 @@ def _find_auto_editor() -> str | None:
 # ── Bootstrap ────────────────────────────────────────────────────────────────
 
 def _ensure_auto_editor() -> str | None:
-    """Best-effort `pip install auto-editor` when missing. Frozen-PyInstaller
-    short-circuits — pip-from-frozen-exe forks indefinitely."""
-    if (binary := _find_auto_editor()):
-        return binary
-
-    if getattr(sys, "frozen", False):
-        return None
-
-    log("info", "auto-editor not found — installing...")
-    for extra in [[], ["--user"], ["--break-system-packages"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--quiet",
-             "auto-editor>=27.0.0", *extra],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            return _find_auto_editor()
-    return None
+    """Resolve an already installed or bundled executable without networking."""
+    return _find_auto_editor()
 
 
 # ── Run wrapper ──────────────────────────────────────────────────────────────

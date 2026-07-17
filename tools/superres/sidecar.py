@@ -14,11 +14,12 @@ forward function. Supports:
   * SCUNet                                       (joint denoise + SR)
   * APISR                                        (anime production)
 
-Default model = HAT-L x4 because it has the cleanest results on photographic
-content. Anime / illustration users should pass --model real-cugan-pro or apisr.
+Default model = Real-ESRGAN x4plus. Transformer checkpoints remain usable as
+local files; curated network downloads are restricted to pinned assets whose
+size and SHA-256 are verified before they enter the model cache.
 
-Models are NOT bundled. Pass --model <repo-id-or-local-path>; we cache to
-`<UCX_MODEL_DIR>/superres/`.
+Models are NOT bundled. Install a curated model through `download-model
+--accept-license` or pass an existing local checkpoint to `--model`.
 """
 from __future__ import annotations
 
@@ -27,11 +28,18 @@ import json
 import os
 import sys
 import time
-import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import (
+    AssetError,
+    LicenseNotAccepted,
+    VerifiedAsset,
+    cached_asset,
+    download_verified,
+    enforce_offline,
+)
 
 
 
@@ -41,38 +49,39 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
-# Curated download URLs for OSS checkpoints. All MIT/Apache/BSD licensed.
-DOWNLOADS: dict[str, str] = {
-    # Real-ESRGAN family
-    "real-esrgan-x4plus":
+# Curated immutable release assets. Update URL, byte count, digest, and license
+# together; inference never performs network access.
+DOWNLOADS: dict[str, VerifiedAsset] = {
+    "real-esrgan-x4plus": VerifiedAsset(
+        "real-esrgan-x4plus", "RealESRGAN_x4plus.pth",
         "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
-    "real-esrgan-anime":
+        67040989, "4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1",
+        "BSD-3-Clause"),
+    "real-esrgan-anime": VerifiedAsset(
+        "real-esrgan-anime", "RealESRGAN_x4plus_anime_6B.pth",
         "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth",
-    "real-esrnet-x4":
+        17938799, "f872d837d3c90ed2e05227bed711af5671a6fd1c9f7d7e91c911a61f155e99da",
+        "BSD-3-Clause"),
+    "real-esrnet-x4": VerifiedAsset(
+        "real-esrnet-x4", "RealESRNet_x4plus.pth",
         "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.1/RealESRNet_x4plus.pth",
-    # HAT family (Hybrid Attention Transformer)
-    "hat-l-x4":
-        "https://github.com/XPixelGroup/HAT/releases/download/v0.1.0/HAT-L_SRx4_ImageNet-pretrain.pth",
-    "hat-x4":
-        "https://github.com/XPixelGroup/HAT/releases/download/v0.1.0/HAT_SRx4_ImageNet-pretrain.pth",
-    # DAT family
-    "dat-x4":
-        "https://github.com/zhengchen1999/DAT/releases/download/v1/DAT_x4.pth",
-    "dat-light-x4":
-        "https://github.com/zhengchen1999/DAT/releases/download/v1/DAT_light_x4.pth",
-    # SwinIR
-    "swinir-x4":
+        67040989, "a820b9bde89a874d7599d545567308ce6c128fc8754a53208eda016d40aa81df",
+        "BSD-3-Clause"),
+    "swinir-x4": VerifiedAsset(
+        "swinir-x4", "001_classicalSR_DF2K_s64w8_SwinIR-M_x4.pth",
         "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/001_classicalSR_DF2K_s64w8_SwinIR-M_x4.pth",
-    "swinir-large-x4":
+        67869037, "4e78e33f22c1aa8a773db0cf4a7381bae97c2362c717f155439ebc690cbd9215",
+        "Apache-2.0"),
+    "swinir-large-x4": VerifiedAsset(
+        "swinir-large-x4", "003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth",
         "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth",
-    # APISR (anime production SR, CVPR 2024)
-    "apisr-x4":
-        "https://github.com/Kiteretsu77/APISR/releases/download/v1.0.1/4x_APISR_GRL_GAN_generator.pth",
-    "apisr-x2":
-        "https://github.com/Kiteretsu77/APISR/releases/download/v1.0.1/2x_APISR_RRDB_GAN_generator.pth",
-    # SCUNet (joint denoise + SR)
-    "scunet":
+        142473939, "99adfa91350a84c99e946c1eb3d8fce34bc28f57d807b09dc8fe40a316328c0a",
+        "Apache-2.0"),
+    "scunet": VerifiedAsset(
+        "scunet", "scunet_color_real_psnr.pth",
         "https://github.com/cszn/KAIR/releases/download/v1.0/scunet_color_real_psnr.pth",
+        71982841, "fa78899ba2caec9d235a900e91d96c689da71c42029230c2028b00f09f809c2e",
+        "MIT"),
 }
 
 
@@ -85,26 +94,55 @@ def _model_dir() -> Path:
 
 
 def _resolve_checkpoint(model_arg: str) -> Path:
-    """Resolve `model_arg` (alias, URL, or path) to a local .pth file."""
+    """Resolve a verified cached alias or an explicitly supplied local file."""
     p = Path(model_arg)
-    if p.is_file(): return p
+    if p.is_file():
+        return p
     if model_arg in DOWNLOADS:
-        url = DOWNLOADS[model_arg]
-        target = _model_dir() / Path(url).name
-        if not target.is_file():
-            emit("log", level="info",
-                 message=f"Downloading {model_arg} from {url}...")
-            urllib.request.urlretrieve(url, str(target))
+        target = cached_asset(_model_dir(), DOWNLOADS[model_arg])
+        if target is None:
+            raise FileNotFoundError(
+                f"Verified model {model_arg!r} is not installed. Run "
+                f"`download-model --model {model_arg} --accept-license`.")
         return target
     if model_arg.startswith(("http://", "https://")):
-        target = _model_dir() / Path(model_arg).name
-        if not target.is_file():
-            urllib.request.urlretrieve(model_arg, str(target))
-        return target
+        raise ValueError("Remote checkpoint URLs are not accepted; use a curated alias or local file.")
     raise FileNotFoundError(f"Unknown model alias / file not found: {model_arg}")
 
 
+def op_download_model(args: argparse.Namespace) -> int:
+    asset = DOWNLOADS.get(args.model)
+    if asset is None:
+        return fail("unknown_model", f"Unknown curated model: {args.model}")
+    try:
+        target = download_verified(
+            _model_dir(),
+            asset,
+            accept_license=args.accept_license,
+            progress=lambda done, total: emit(
+                "progress",
+                percent=round(done / max(1, total) * 100, 1),
+                stage=f"downloading {asset.asset_id}",
+                eta_seconds=None,
+            ),
+        )
+    except LicenseNotAccepted as exc:
+        return fail("license_not_accepted", str(exc))
+    except AssetError as exc:
+        return fail("model_integrity_failed", str(exc))
+    emit(
+        "complete",
+        output=str(target),
+        size_bytes=target.stat().st_size,
+        model=asset.asset_id,
+        sha256=asset.sha256,
+        license=asset.license,
+    )
+    return 0
+
+
 def op_upscale(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         import torch
         from PIL import Image
@@ -175,9 +213,18 @@ def op_upscale(args: argparse.Namespace) -> int:
 
 
 def op_models(_args: argparse.Namespace) -> int:
-    for name, url in DOWNLOADS.items():
-        emit("upscale_model", name=name, url=url,
-             local=str((_model_dir() / Path(url).name)))
+    for name, asset in DOWNLOADS.items():
+        local = cached_asset(_model_dir(), asset)
+        emit(
+            "upscale_model",
+            name=name,
+            url=asset.url,
+            local=str(_model_dir() / asset.filename),
+            ready=local is not None,
+            size_bytes=asset.size_bytes,
+            sha256=asset.sha256,
+            license=asset.license,
+        )
     emit("complete", output="", size_bytes=0, count=len(DOWNLOADS))
     return 0
 
@@ -189,11 +236,14 @@ def build_parser() -> argparse.ArgumentParser:
     u = sub.add_parser("upscale", help="Upscale image(s).")
     u.add_argument("--input", nargs="+", required=True)
     u.add_argument("--output-dir", required=True, dest="output_dir")
-    u.add_argument("--model", default="hat-l-x4",
-                   help=f"Alias from {sorted(DOWNLOADS.keys())}, URL, or path to .pth")
+    u.add_argument("--model", default="real-esrgan-x4plus",
+                   help=f"Verified alias from {sorted(DOWNLOADS.keys())} or local .pth path")
     u.add_argument("--device", default="cuda", choices=["cuda", "cpu"])
     u.add_argument("--dtype", default="fp16", choices=["fp16", "fp32"])
-    sub.add_parser("models", help="List built-in model aliases + download URLs.")
+    download = sub.add_parser("download-model", help="Install a pinned model asset.")
+    download.add_argument("--model", required=True, choices=sorted(DOWNLOADS))
+    download.add_argument("--accept-license", action="store_true", dest="accept_license")
+    sub.add_parser("models", help="List pinned model aliases and readiness.")
     return p
 
 
@@ -201,6 +251,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.op == "upscale": return op_upscale(args)
+        if args.op == "download-model": return op_download_model(args)
         if args.op == "models":  return op_models(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:

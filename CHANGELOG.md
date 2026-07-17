@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+
+- Sidecar model and runtime acquisition now follows one repository-wide contract: network access requires explicit licence consent, immutable HTTPS metadata, exact byte-count and SHA-256 verification in private staging, and atomic promotion. Super-resolution, GFPGAN, and AlphaCut provide pinned download commands; Whisper.cpp and Real-ESRGAN packagers use the same consent and integrity gates. ML inference is process-offline, runtime pip installs and mutable Git clones are prohibited, Hugging Face loaders are local-only, and a contract test classifies every remaining direct network path so new implicit downloads fail CI.
+
 ### Changed
 
 - NVDEC frame decoding now extends beyond Auto Highlight to LipSight speech segmentation and Vertigo smart tracking, with automatic OpenCV fallback and no duplicate frames if hardware decoding fails mid-stream. Pixel-producing ClipForge face blur and Colorize video workflows expose hardware decode only through an explicit `--hw-decode` opt-in. All four frozen engines pin and bundle PyAV 17, while a fully GPU-resident path remains deferred until a CuPy/Torch-class frame consumer exists.

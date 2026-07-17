@@ -942,6 +942,9 @@
   <data name="BackgroundRemoverPage_ClearButton.Content" xml:space="preserve">
     <value>Wyczyść kolejkę</value>
   </data>
+  <data name="BackgroundRemoverPage_DownloadModelButton.Content" xml:space="preserve">
+    <value>Download verified model (168 MB)</value>
+  </data>
   <data name="BackgroundRemoverPage_InvertMaskToggle.Header" xml:space="preserve">
     <value>Odwróć maskę (zachowaj tło)</value>
   </data>
@@ -1040,6 +1043,9 @@
   </data>
   <data name="BackgroundRemoverPage_KeepAudioToggle.OnContent" xml:space="preserve">
     <value>Włączone</value>
+  </data>
+  <data name="BackgroundRemoverPage_ModelStatus.Text" xml:space="preserve">
+    <value>Checking model integrity…</value>
   </data>
   <data name="BackgroundRemoverPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>Zapisz do</value>

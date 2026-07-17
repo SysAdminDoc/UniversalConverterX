@@ -258,6 +258,8 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 
 The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools and updates. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
+AI inference never downloads models, packages, repositories, or executables. Supported optional packs expose a separate download action that shows the third-party licence, requires explicit consent, pins an immutable HTTPS source, and verifies both exact size and SHA-256 before atomic installation. Other engines require a pre-provisioned local model and fail closed when it is absent. User-requested online services such as cloud lip reading and local Ollama endpoints remain clearly separate from asset acquisition.
+
 Converter exposes generated FFmpeg argument templates in its Advanced panel. Command editing is off by default; enable it under **Settings > Advanced** to edit a batch-safe `{input}`/`{output}` template or review exact commands generated inside sidecars before they run. UCX never sends edited text through a command shell and blocks shell metacharacters introduced by an edit.
 
 ### Third-party sidecar plugins

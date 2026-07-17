@@ -59,9 +59,3 @@ programmability (CLI + REST + PS module), and AI depth.
 | **Prometheus Dashboard** (Item 86) | Optional for advanced batch ops. UC pending demand. |
 | **VapourSynth Scripting Bridge** (Item 96) | Survey demand from mpv/encoder forums. |
 | **Conditional Rules Engine (Tdarr-style)** (Item 97) | Deep design space. Start simple, promote on signal. |
-
----
-
-## Research-Driven Additions
-
-### 2026-07-16 additions (continue Item numbering from 98)

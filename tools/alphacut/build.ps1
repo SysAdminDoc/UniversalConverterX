@@ -34,6 +34,8 @@ if (-not (Test-Path .venv)) {
 
 $python = Join-Path $here '.venv/Scripts/python.exe'
 & $python -m pip install --quiet --upgrade pip pyinstaller
+& $python -m pip install --quiet -r (Join-Path $here 'requirements.txt')
+if ($LASTEXITCODE -ne 0) { throw "Dependency install failed (exit $LASTEXITCODE)" }
 
 Write-Host "[freeze] Building alphacut.exe" -ForegroundColor Cyan
 & $python -m PyInstaller `
@@ -44,7 +46,7 @@ Write-Host "[freeze] Building alphacut.exe" -ForegroundColor Cyan
   --clean `
   --log-level WARN `
   --paths . --paths ../_lib `
-  --paths . --paths ../_lib. `
+  --hidden-import AlphaCut `
   sidecar.py
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }

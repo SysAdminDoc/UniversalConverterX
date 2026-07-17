@@ -32,6 +32,9 @@ import tempfile
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_assets import enforce_offline
+
 
 def emit(event: dict) -> None:
     print(json.dumps(event), flush=True)
@@ -168,14 +171,16 @@ def transcribe_faster(
     total_duration: float,
     batch_size: int = 1,
 ) -> list[dict]:
+    enforce_offline()
     from faster_whisper import WhisperModel  # type: ignore
 
     progress(5.0, f"Loading {model_name} model...")
     log(f"Using faster-whisper model: {model_name}")
 
     download_root = str(model_dir) if model_dir else None
-    model = WhisperModel(model_name, download_root=download_root,
-                         device="auto", compute_type="auto")
+    model = WhisperModel(
+        model_name, download_root=download_root, local_files_only=True,
+        device="auto", compute_type="auto")
 
     progress(10.0, "Transcribing...")
     start = time.time()
@@ -242,13 +247,18 @@ def transcribe_openai(
     word_timestamps: bool,
     model_dir: Path | None,
 ) -> list[dict]:
+    enforce_offline()
     import whisper  # type: ignore
 
     progress(5.0, f"Loading {model_name} model...")
     log(f"Using openai-whisper model: {model_name}")
 
-    download_root = str(model_dir) if model_dir else None
-    model = whisper.load_model(model_name, download_root=download_root)
+    root = model_dir or Path.home() / ".cache" / "whisper"
+    model_path = root / f"{model_name}.pt"
+    if not model_path.is_file():
+        raise FileNotFoundError(
+            f"Local OpenAI Whisper model is not installed: {model_path}. Automatic downloads are disabled.")
+    model = whisper.load_model(str(model_path), download_root=str(root))
 
     progress(10.0, "Transcribing...")
     transcribe_kwargs: dict = {"verbose": False, "word_timestamps": word_timestamps}
@@ -377,6 +387,8 @@ def main() -> None:
                     log("Diarization skipped: set HF_TOKEN to use pyannote/speaker-diarization-3.1.", "warn")
                 else:
                     progress(95.0, "Running speaker diarization...")
+                    os.environ["HF_HUB_OFFLINE"] = "1"
+                    os.environ["TRANSFORMERS_OFFLINE"] = "1"
                     pipe = PyaPipeline.from_pretrained(
                         "pyannote/speaker-diarization-3.1", use_auth_token=token)
                     diar = pipe(str(input_path))

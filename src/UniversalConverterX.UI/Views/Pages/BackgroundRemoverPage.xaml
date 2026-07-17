@@ -240,6 +240,13 @@
                             <ComboBoxItem x:Uid="BackgroundRemoverPage_Item_019" Content="Anime / Illustration (isnet-anime)" Tag="isnet-anime"/>
                             <ComboBoxItem x:Uid="BackgroundRemoverPage_Item_020" Content="High Accuracy (u2net_cloth_seg)" Tag="u2net_cloth_seg"/>
                         </ComboBox>
+                        <TextBlock x:Uid="BackgroundRemoverPage_ModelStatus" x:Name="ModelStatus" Text="Checking model integrity…"
+                                   Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"
+                                   AutomationProperties.AutomationId="BackgroundRemoverModelStatus"/>
+                        <Button x:Uid="BackgroundRemoverPage_DownloadModelButton" x:Name="DownloadModelButton" Content="Download verified model (168 MB)"
+                                HorizontalAlignment="Stretch" Style="{StaticResource SecondaryButtonStyle}"
+                                Click="DownloadModel_Click"
+                                AutomationProperties.AutomationId="BackgroundRemoverDownloadModelButton"/>
                     </StackPanel>
                 </Border>
 

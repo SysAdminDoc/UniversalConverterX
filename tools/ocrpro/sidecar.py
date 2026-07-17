@@ -22,6 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -32,6 +33,7 @@ def fail(code: str, message: str) -> int:
 
 
 def _check():
+    enforce_offline()
     try:
         import surya  # noqa: F401
         return True

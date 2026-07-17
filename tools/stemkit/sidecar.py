@@ -8,19 +8,21 @@
   * Spleeter (legacy 2/4/5-stem)
 
 The user picks a model name; we route it through the unified
-`audio_separator.separator.Separator` API. Models are downloaded on first
-use and cached under `~/.audio-separator/`.
+`audio_separator.separator.Separator` API. Inference is offline and requires
+the model plus audio-separator metadata to already exist in the UCX cache.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -119,6 +121,30 @@ def _imports():
         return False
 
 
+def _offline_separator(output_dir: Path | None = None, **kwargs):
+    from audio_separator.separator import Separator
+    enforce_offline()
+
+    base = Path(os.environ.get("UCX_MODEL_DIR") or Path.home() / ".cache" / "ucx" / "models")
+    model_dir = base / "stemkit"
+    model_dir.mkdir(parents=True, exist_ok=True)
+    separator = Separator(
+        model_file_dir=str(model_dir),
+        **({"output_dir": str(output_dir)} if output_dir is not None else {}),
+        **kwargs,
+    )
+
+    def local_only(_url: str, output_path: str):
+        if not Path(output_path).is_file():
+            raise FileNotFoundError(
+                f"Required audio-separator asset is not installed: {output_path}. "
+                "Automatic model downloads are disabled.")
+        return output_path
+
+    separator.download_file_if_not_exists = local_only
+    return separator
+
+
 def op_separate(args: argparse.Namespace) -> int:
     if not _imports(): return 1
     from audio_separator.separator import Separator
@@ -136,8 +162,8 @@ def op_separate(args: argparse.Namespace) -> int:
         "vocals": "Vocals",
         "accompaniment": "Instrumental",
     }.get(args.stems)
-    sep = Separator(
-        output_dir=str(out_dir),
+    sep = _offline_separator(
+        output_dir=out_dir,
         output_format=args.format.upper(),
         output_single_stem=output_single_stem,
         demucs_params={
@@ -183,8 +209,7 @@ def op_separate(args: argparse.Namespace) -> int:
 
 def op_models(args: argparse.Namespace) -> int:
     if not _imports(): return 1
-    from audio_separator.separator import Separator
-    sep = Separator()
+    sep = _offline_separator()
     try:
         models = sep.list_supported_model_files()
     except Exception as ex:

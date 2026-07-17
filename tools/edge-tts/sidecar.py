@@ -49,39 +49,12 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
 # ── Bootstrap ────────────────────────────────────────────────────────────────
 
 def _ensure_deps() -> None:
-    """Install edge-tts if missing.
-
-    PyInstaller fork-bomb guard: when frozen, sys.executable is the sidecar
-    exe — a pip-install spawn would re-execute the exe and fork-bomb the host.
-    Bundle the dep at build time instead.
-    """
-    if getattr(sys, "frozen", False):
-        try:
-            import edge_tts  # noqa: F401
-            return
-        except ImportError:
-            fail("missing_dep",
-                 "edge-tts is not bundled into this frozen sidecar. "
-                 "Rebuild after `pip install edge-tts`.")
-            sys.exit(1)
-
+    """Require the build-bundled dependency without runtime installs."""
     try:
         import edge_tts  # noqa: F401
         return
     except ImportError:
-        pass
-
-    log("info", "edge-tts not found — installing...")
-    for extra in [[], ["--user"], ["--break-system-packages"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--quiet",
-             "edge-tts>=7.2.0", *extra],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            log("info", "edge-tts installed.")
-            return
-    fail("install_failed", "Could not install edge-tts.")
+        fail("missing_dep", "edge-tts is not bundled into this sidecar; runtime package installation is disabled.")
     sys.exit(1)
 
 

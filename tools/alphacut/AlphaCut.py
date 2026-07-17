@@ -3,7 +3,7 @@
 AlphaCut v1.2.0 — AI Video Background Removal
 Direct ONNX inference. No rembg dependency. Fully turnkey.
 
-Dependencies: PyQt6, numpy, Pillow, onnxruntime, scipy (auto-installed)
+Dependencies: PyQt6, numpy, Pillow, onnxruntime, scipy (bundled at build time)
 External: FFmpeg (must be on PATH)
 
 MIT License — Copyright (c) 2025-2026 SysAdminDoc
@@ -46,61 +46,21 @@ sys.excepthook = _exception_handler
 # ═══════════════════════════════════════════════════════════════════════════════
 # BOOTSTRAP
 # ═══════════════════════════════════════════════════════════════════════════════
-def _pip_install(package, verbose=False):
-    for flags in [[], ['--user'], ['--break-system-packages']]:
-        try:
-            cmd = [sys.executable, '-m', 'pip', 'install', package] + flags
-            if not verbose:
-                cmd.append('-q')
-            subprocess.check_call(cmd,
-                stdout=None if verbose else subprocess.DEVNULL,
-                stderr=None if verbose else subprocess.PIPE)
-            return True
-        except subprocess.CalledProcessError:
-            continue
-    return False
-
-
 def _bootstrap():
     if sys.version_info < (3, 9):
         print("Python 3.9+ required"); sys.exit(1)
-    try:
-        import pip
-    except ImportError:
-        subprocess.check_call([sys.executable, '-m', 'ensurepip', '--default-pip'])
     deps = [('PyQt6', 'PyQt6'), ('PIL', 'Pillow'), ('numpy', 'numpy'),
             ('scipy', 'scipy'), ('onnxruntime', 'onnxruntime')]
-    import importlib
-    try:
-        __import__('onnxruntime')
-    except (ImportError, ModuleNotFoundError):
-        for c in ['onnxruntime-gpu', 'onnxruntime-directml']:
-            subprocess.run([sys.executable, '-m', 'pip', 'uninstall', '-y', c],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    missing = []
     for mod, pkg in deps:
         try:
             __import__(mod)
         except (ImportError, ModuleNotFoundError):
-            print(f"Installing {pkg}...")
-            if not _pip_install(pkg, verbose=True):
-                print(f"Failed to install {pkg}."); sys.exit(1)
-            importlib.invalidate_caches()
-            import site; site.main()
-            for key in list(sys.modules.keys()):
-                if key == mod or key.startswith(mod + '.'):
-                    del sys.modules[key]
-            try:
-                __import__(mod)
-            except (ImportError, ModuleNotFoundError) as e:
-                verify = subprocess.run(
-                    [sys.executable, '-c', f'import {mod}; print("ok")'],
-                    capture_output=True, text=True, timeout=30)
-                if verify.returncode == 0 and 'ok' in verify.stdout:
-                    print(f"{pkg} installed. Restart IDE and re-run.")
-                    try: os.execv(sys.executable, [sys.executable] + sys.argv)
-                    except Exception: pass
-                    sys.exit(0)
-                print(f"{pkg} cannot import: {e}"); sys.exit(1)
+            missing.append(pkg)
+    if missing:
+        print("Missing bundled dependencies: " + ", ".join(missing) +
+              ". Runtime package installation is disabled.")
+        sys.exit(1)
     import onnxruntime as ort
     ort.set_default_logger_severity(3)
     providers = ort.get_available_providers()
@@ -156,6 +116,9 @@ MODEL_BASE = "https://github.com/danielgatis/rembg/releases/download/v0.0.0"
 MODELS = {
     "u2net_human_seg (People — Recommended)": {
         "file": "u2net_human_seg.onnx", "url": f"{MODEL_BASE}/u2net_human_seg.onnx",
+        "size_bytes": 175997641,
+        "sha256": "01eb6a29a5c4d8edb30b56adad9bb3a2a0535338e480724a213e0acfd2d1c73c",
+        "license": "Apache-2.0",
         "size": (320, 320), "mean": (0.485, 0.456, 0.406), "std": (0.229, 0.224, 0.225), "sigmoid": False,
     },
     "u2net (General Purpose)": {
@@ -565,44 +528,23 @@ class AlphaCutEngine:
         sidecar = path + '.sha256'
 
         if os.path.isfile(path) and os.path.getsize(path) > 1_000_000:
-            # Verify stored hash if sidecar exists; recompute and save if not.
-            if os.path.isfile(sidecar):
-                stored = open(sidecar).read().strip()
-                actual = _compute_sha256(path)
-                if actual != stored:
-                    self.log(f"SHA-256 mismatch for {self.config['file']} — re-downloading...")
-                    os.remove(path); os.remove(sidecar)
-                else:
-                    self.log(f"Model verified: {self.config['file']} (sha256: {actual[:12]}…)"); return path
-            else:
-                digest = _compute_sha256(path)
-                open(sidecar, 'w').write(digest)
-                self.log(f"Model cached: {self.config['file']} (sha256: {digest[:12]}…)"); return path
+            actual = _compute_sha256(path)
+            expected = self.config.get('sha256')
+            if expected and (actual != expected or os.path.getsize(path) != self.config['size_bytes']):
+                raise RuntimeError(
+                    f"Integrity verification failed for {self.config['file']}; "
+                    "delete the file and reinstall the pinned model.")
+            if not expected:
+                if not os.path.isfile(sidecar) or open(sidecar).read().strip().lower() != actual:
+                    raise RuntimeError(
+                        f"Local model {self.config['file']} has no matching SHA-256 sidecar; "
+                        "automatic downloads and trust-on-first-use are disabled.")
+            self.log(f"Model verified: {self.config['file']} (sha256: {actual[:12]}…)")
+            return path
 
-        url = self.config['url']
-        self.log(f"Downloading: {self.config['file']}...")
-        try:
-            req = urllib.request.Request(url, headers={'User-Agent': f'AlphaCut/{__version__}'})
-            with urllib.request.urlopen(req, timeout=300) as resp:
-                total = int(resp.headers.get('Content-Length', 0))
-                downloaded = 0; tmp_path = path + '.tmp'; last_pct = -10
-                with open(tmp_path, 'wb') as f:
-                    while True:
-                        chunk = resp.read(256 * 1024)
-                        if not chunk: break
-                        f.write(chunk); downloaded += len(chunk)
-                        if total > 0:
-                            pct = downloaded * 100 // total
-                            if pct >= last_pct + 10:
-                                last_pct = pct
-                                self.log(f"   {downloaded/(1024*1024):.1f}/{total/(1024*1024):.1f} MB ({pct}%)")
-            os.replace(tmp_path, path)
-            digest = _compute_sha256(path)
-            open(sidecar, 'w').write(digest)
-            self.log(f"Model ready: {os.path.getsize(path)/(1024*1024):.1f} MB (sha256: {digest[:12]}…)"); return path
-        except Exception as e:
-            if os.path.exists(path + '.tmp'): os.remove(path + '.tmp')
-            raise RuntimeError(f"Download failed: {e}")
+        raise RuntimeError(
+            f"Model {self.config['file']} is not installed. Automatic downloads are disabled; "
+            "use the UCX consent-gated model download action or supply a vetted local model.")
 
 
 _engine_cache = {'key': None, 'engine': None}

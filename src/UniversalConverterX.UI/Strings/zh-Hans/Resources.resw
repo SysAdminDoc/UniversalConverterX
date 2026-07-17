@@ -942,6 +942,9 @@
   <data name="BackgroundRemoverPage_ClearButton.Content" xml:space="preserve">
     <value>清除队列</value>
   </data>
+  <data name="BackgroundRemoverPage_DownloadModelButton.Content" xml:space="preserve">
+    <value>Download verified model (168 MB)</value>
+  </data>
   <data name="BackgroundRemoverPage_InvertMaskToggle.Header" xml:space="preserve">
     <value>反向遮罩( 隐藏背景)</value>
   </data>
@@ -1040,6 +1043,9 @@
   </data>
   <data name="BackgroundRemoverPage_KeepAudioToggle.OnContent" xml:space="preserve">
     <value>日期 于</value>
+  </data>
+  <data name="BackgroundRemoverPage_ModelStatus.Text" xml:space="preserve">
+    <value>Checking model integrity…</value>
   </data>
   <data name="BackgroundRemoverPage_OutputDirectoryBox.Header" xml:space="preserve">
     <value>保存到</value>

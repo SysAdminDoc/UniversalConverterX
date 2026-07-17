@@ -25,6 +25,22 @@ _here = Path(__file__).resolve().parent
 _parent = _here.parent
 sys.path.insert(0, str(_parent))
 sys.path.insert(0, str(_here))
+sys.path.insert(0, str(_parent / "_lib"))
+from ucx_assets import AssetError, LicenseNotAccepted, VerifiedAsset, cached_asset, download_verified, enforce_offline
+
+
+DEFAULT_MODEL = VerifiedAsset(
+    "u2net_human_seg", "u2net_human_seg.onnx",
+    "https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx",
+    175997641, "01eb6a29a5c4d8edb30b56adad9bb3a2a0535338e480724a213e0acfd2d1c73c",
+    "Apache-2.0")
+
+
+def _model_root(args: argparse.Namespace) -> Path:
+    return Path(
+        args.model_dir
+        or os.environ.get("UCX_MODEL_DIR")
+        or Path.home() / ".alphacut" / "models")
 
 
 # ─── NDJSON emitter ──────────────────────────────────────────────────────────
@@ -98,6 +114,7 @@ def _on_error(msg: str) -> None:
 # ─── Job ─────────────────────────────────────────────────────────────────────
 
 def run_bgremove(args: argparse.Namespace) -> int:
+    enforce_offline()
     global _had_error, _error_message
     _had_error = False
     _error_message = ""
@@ -123,10 +140,17 @@ def run_bgremove(args: argparse.Namespace) -> int:
     available_models = getattr(AlphaCut, "MODELS", {})
     model_key = args.model
     if model_key not in available_models and available_models:
-        # Fall back to first available model
-        model_key = next(iter(available_models))
-        emit("log", level="warn",
-             message=f"Model '{args.model}' not found; using '{model_key}'")
+        matching = next(
+            (key for key, config in available_models.items()
+             if args.model.lower() in key.lower()
+             or Path(config.get("file", "")).stem.lower() == args.model.lower()),
+            None)
+        if matching is None:
+            model_key = next(iter(available_models))
+            emit("log", level="warn",
+                 message=f"Model '{args.model}' not found; using '{model_key}'")
+        else:
+            model_key = matching
 
     # Resolve output format. AlphaCut's ProcessingWorker expects the short
     # format CODE (the values of OUTPUT_FORMATS: mp4, webm, png_seq, prores,
@@ -166,6 +190,7 @@ def run_bgremove(args: argparse.Namespace) -> int:
     model_dir = args.model_dir or os.environ.get("UCX_MODEL_DIR") or None
     if model_dir:
         Path(model_dir).mkdir(parents=True, exist_ok=True)
+        AlphaCut.MODELS_DIR = str(Path(model_dir))
         emit("log", level="info", message=f"Model cache: {model_dir}")
 
     try:
@@ -267,9 +292,9 @@ def build_parser() -> argparse.ArgumentParser:
         prog="alphacut-sidecar",
         description="UCX AlphaCut sidecar — background removal with NDJSON progress.",
     )
-    p.add_argument("--input", required=True,
+    p.add_argument("--input",
                    help="Input video or image path")
-    p.add_argument("--output", required=True,
+    p.add_argument("--output",
                    help="Output file path")
     p.add_argument("--model", default="u2net_human_seg",
                    help="AlphaCut model key (default: u2net_human_seg)")
@@ -304,6 +329,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Strip audio from output (video inputs only)")
     p.add_argument("--model-dir",
                    help="Shared model cache directory (overrides UCX_MODEL_DIR env var)")
+    p.add_argument("--download-model", choices=["u2net_human_seg"],
+                   help="Install a pinned model instead of processing input.")
+    p.add_argument("--check-model", action="store_true",
+                   help="Report whether the pinned default model is installed and valid.")
+    p.add_argument("--accept-license", action="store_true",
+                   help="Accept the model license before network access.")
     return p
 
 
@@ -312,6 +343,29 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.check_model:
+            target = cached_asset(_model_root(args), DEFAULT_MODEL)
+            emit("model_status", ready=target is not None,
+                 path=str(_model_root(args) / DEFAULT_MODEL.filename),
+                 size_bytes=DEFAULT_MODEL.size_bytes, sha256=DEFAULT_MODEL.sha256,
+                 license=DEFAULT_MODEL.license)
+            emit("complete", output=str(target or ""),
+                 size_bytes=target.stat().st_size if target else 0)
+            return 0
+        if args.download_model:
+            root = _model_root(args)
+            try:
+                target = download_verified(root, DEFAULT_MODEL, accept_license=args.accept_license)
+            except LicenseNotAccepted as exc:
+                return fail("license_not_accepted", str(exc))
+            except AssetError as exc:
+                return fail("model_integrity_failed", str(exc))
+            (target.with_suffix(target.suffix + ".sha256")).write_text(DEFAULT_MODEL.sha256, encoding="ascii")
+            emit("complete", output=str(target), size_bytes=target.stat().st_size,
+                 sha256=DEFAULT_MODEL.sha256, license=DEFAULT_MODEL.license)
+            return 0
+        if not args.input or not args.output:
+            return fail("missing_argument", "--input and --output are required for background removal.")
         return run_bgremove(args)
     except KeyboardInterrupt:
         emit("error", code="cancelled", message="Cancelled by user")

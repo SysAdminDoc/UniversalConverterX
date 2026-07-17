@@ -10,18 +10,66 @@ preservation, 1.0 = max quality. Use 0.5-0.7 for old photos, 0.7-0.9 for
 deepfake-grade enhancement.
 
 Wraps the upstream `codeformer-pip` package which bundles the inference
-runtime; downloads weights from the maintainer's mirror on first use.
+runtime. Inference is deliberately offline: install the pinned GFPGAN asset
+with ``download-model --accept-license`` or provide local CodeFormer weights.
 """
 from __future__ import annotations
 
 import argparse
-import json
+import os
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import AssetError, LicenseNotAccepted, VerifiedAsset, cached_asset, download_verified, enforce_offline
+
+
+GFPGAN_V14 = VerifiedAsset(
+    "gfpgan-v1.4",
+    "GFPGANv1.4.pth",
+    "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth",
+    348632874,
+    "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+    "Apache-2.0",
+)
+
+
+def _model_dir() -> Path:
+    root = Path(os.environ.get("UCX_MODEL_DIR") or Path.home() / ".cache" / "ucx" / "models")
+    result = root / "facerestore"
+    result.mkdir(parents=True, exist_ok=True)
+    return result
+
+
+def op_download_model(args: argparse.Namespace) -> int:
+    try:
+        target = download_verified(
+            _model_dir(), GFPGAN_V14, accept_license=args.accept_license,
+            progress=lambda done, total: emit(
+                "progress", percent=round(done / max(1, total) * 100, 1),
+                stage="downloading gfpgan-v1.4", eta_seconds=None),
+        )
+    except LicenseNotAccepted as exc:
+        return fail("license_not_accepted", str(exc))
+    except AssetError as exc:
+        return fail("model_integrity_failed", str(exc))
+    emit("complete", output=str(target), size_bytes=target.stat().st_size,
+         model=GFPGAN_V14.asset_id, sha256=GFPGAN_V14.sha256,
+         license=GFPGAN_V14.license)
+    return 0
+
+
+def _local_codeformer_weights(model_dir: str | None) -> Path:
+    root = Path(model_dir) if model_dir else _model_dir() / "codeformer"
+    if not root.is_dir() or not any(root.rglob("*.pth")):
+        raise FileNotFoundError(
+            "Local CodeFormer weights are required; automatic model downloads are disabled. "
+            "Provide --model-dir containing the vetted weights.")
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    return root
 
 
 
@@ -32,6 +80,11 @@ def fail(code: str, message: str) -> int:
 
 
 def op_restore_codeformer(args: argparse.Namespace) -> int:
+    enforce_offline()
+    try:
+        _local_codeformer_weights(args.model_dir)
+    except FileNotFoundError as exc:
+        return fail("missing_model", str(exc))
     try:
         from codeformer import CodeFormer
     except ImportError:
@@ -83,6 +136,7 @@ def op_restore_codeformer(args: argparse.Namespace) -> int:
 
 
 def op_restore_gfpgan(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         from gfpgan import GFPGANer
         import cv2
@@ -97,8 +151,19 @@ def op_restore_gfpgan(args: argparse.Namespace) -> int:
     out_dir = Path(args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    model_path = Path(args.model)
+    if model_path.is_file():
+        resolved_model = model_path
+    elif args.model == GFPGAN_V14.asset_id:
+        resolved_model = cached_asset(_model_dir(), GFPGAN_V14)
+        if resolved_model is None:
+            return fail("missing_model", "Verified GFPGAN v1.4 is not installed. Run "
+                        "`download-model --model gfpgan-v1.4 --accept-license`.")
+    else:
+        return fail("missing_model", "Use the gfpgan-v1.4 alias or an existing local model file; remote URLs are disabled.")
+
     restorer = GFPGANer(
-        model_path=args.model,  # auto-downloads if not cached
+        model_path=str(resolved_model),
         upscale=int(args.upscale),
         arch="clean", channel_multiplier=2,
         bg_upsampler=None,
@@ -139,13 +204,17 @@ def build_parser() -> argparse.ArgumentParser:
                     help="Apply face-only upsampling pass.")
     cf.add_argument("--bg-enhance", action="store_true",
                     help="Run Real-ESRGAN background pass.")
+    cf.add_argument("--model-dir", help="Directory containing vetted local CodeFormer .pth weights.")
 
     gp = sub.add_parser("gfpgan", help="Restore via GFPGAN v1.4.")
     gp.add_argument("--input", nargs="+", required=True)
     gp.add_argument("--output-dir", required=True, dest="output_dir")
-    gp.add_argument("--model", default="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth")
+    gp.add_argument("--model", default="gfpgan-v1.4")
     gp.add_argument("--w", type=float, default=0.5)
     gp.add_argument("--upscale", type=int, default=2)
+    download = sub.add_parser("download-model", help="Install the pinned GFPGAN model.")
+    download.add_argument("--model", default="gfpgan-v1.4", choices=["gfpgan-v1.4"])
+    download.add_argument("--accept-license", action="store_true", dest="accept_license")
     return p
 
 
@@ -154,6 +223,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.op == "codeformer": return op_restore_codeformer(args)
         if args.op == "gfpgan":     return op_restore_gfpgan(args)
+        if args.op == "download-model": return op_download_model(args)
         return fail("unknown_op", f"Unknown op: {args.op}")
     except KeyboardInterrupt:
         return fail("cancelled", "Cancelled by user.")

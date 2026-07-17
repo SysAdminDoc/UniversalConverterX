@@ -17,6 +17,7 @@ The .gitkeep file lists trusted sources.
 param(
     [switch] $Clean,
     [switch] $SkipDownload,
+    [switch] $AcceptLicense,
     [string] $Python = 'python'
 )
 
@@ -27,6 +28,7 @@ $DistDir   = Join-Path $ToolDir 'dist'
 $BuildDir  = Join-Path $ToolDir 'build'
 $SpecDir   = Join-Path $ToolDir 'spec'
 $BinDir    = Join-Path $ToolDir 'bin'
+$LibDir    = Join-Path $ToolDir '../_lib'
 
 if ($Clean) {
     foreach ($d in @($DistDir, $BuildDir, $SpecDir)) {
@@ -39,41 +41,29 @@ if ($Clean) {
 if (-not $SkipDownload) {
     $exe = Join-Path $BinDir 'whisper-cli.exe'
     if (-not (Test-Path $exe)) {
-        # Pinned upstream release — bump tag + SHA together. Vulkan-enabled win-x64 build.
+        # Pinned MIT-licensed upstream release. Update URL, size, and SHA together.
         $assetUrl = 'https://github.com/ggml-org/whisper.cpp/releases/download/v1.8.4/whisper-bin-x64.zip'
-        $assetSha = '0000000000000000000000000000000000000000000000000000000000000000'
+        $assetSize = 4078768
+        $assetSha = '74F973345CB52EF5BA3EC9E7E7AF8E48CC8C71722D1528603B80588A11F82E3E'
 
-        New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
-        $zipPath = Join-Path $BinDir 'whisper-bin-x64.zip'
-        Write-Host "[whisper-cpp] Downloading $assetUrl..."
-        try {
-            Invoke-WebRequest -Uri $assetUrl -OutFile $zipPath -UseBasicParsing -ErrorAction Stop
-        } catch {
-            Write-Warning "[whisper-cpp] Download failed: $($_.Exception.Message)"
-            Write-Warning "             Update the release tag in build.ps1 if v1.8.4 has been superseded,"
-            Write-Warning "             or drop whisper-cli.exe + DLLs into $BinDir manually."
-            $zipPath = $null
-        }
-
-        if ($zipPath -and (Test-Path $zipPath)) {
-            $hash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToUpperInvariant()
-            $expected = $assetSha.ToUpperInvariant()
-
-            if ($expected -eq ('0' * 64)) {
-                Write-Warning '[whisper-cpp] Placeholder SHA-256 in build.ps1 — release verification SKIPPED.'
-                Write-Warning '             Pin the real SHA after the first vetted download.'
-                Write-Warning "             Actual hash for the file you downloaded: $hash"
-                Expand-Archive -Path $zipPath -DestinationPath $BinDir -Force
-            } elseif ($hash -ne $expected) {
-                Remove-Item -Force $zipPath
-                Write-Warning "[whisper-cpp] SHA-256 mismatch — bin/ left empty."
-                Write-Warning "             expected $expected"
-                Write-Warning "             actual   $hash"
-            } else {
-                Write-Host '[whisper-cpp] SHA-256 verified.'
-                Expand-Archive -Path $zipPath -DestinationPath $BinDir -Force
+        if (-not $AcceptLicense) {
+            Write-Warning '[whisper-cpp] Not downloading the MIT-licensed whisper.cpp runtime without -AcceptLicense.'
+        } else {
+            New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
+            $stagingPath = Join-Path $BinDir '.whisper-bin-x64.zip.part'
+            try {
+                Write-Host "[whisper-cpp] Downloading pinned MIT asset $assetUrl..."
+                Invoke-WebRequest -Uri $assetUrl -OutFile $stagingPath -UseBasicParsing -ErrorAction Stop
+                $actualSize = (Get-Item -LiteralPath $stagingPath).Length
+                $actualSha = (Get-FileHash -LiteralPath $stagingPath -Algorithm SHA256).Hash.ToUpperInvariant()
+                if ($actualSize -ne $assetSize -or $actualSha -ne $assetSha) {
+                    throw "Integrity mismatch (expected $assetSize bytes / $assetSha, got $actualSize bytes / $actualSha)."
+                }
+                Write-Host '[whisper-cpp] Size and SHA-256 verified.'
+                Expand-Archive -LiteralPath $stagingPath -DestinationPath $BinDir -Force
+            } finally {
+                Remove-Item -LiteralPath $stagingPath -Force -ErrorAction SilentlyContinue
             }
-            if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
         }
     } else {
         Write-Host "[whisper-cpp] whisper-cli.exe already present at $exe — skipping download."
@@ -96,13 +86,14 @@ Write-Host '[whisper-cpp] Freezing sidecar.py...'
     --distpath $DistDir `
     --workpath $BuildDir `
     --specpath $SpecDir `
-    --paths ../_lib `
+    --paths $LibDir `
     $Sidecar
 
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 $frozen = Join-Path $DistDir 'whisper-cpp.exe'
 if (-not (Test-Path $frozen)) { throw "Expected output not found: $frozen" }
+Copy-Item -LiteralPath $frozen -Destination (Join-Path $ToolDir 'whisper-cpp.exe') -Force
 
 Write-Host "[whisper-cpp] Built: $frozen" -ForegroundColor Green
 Write-Host '[whisper-cpp] Drop ggml-*.bin GGUF models into tools/whisper-cpp/models/' -ForegroundColor Yellow

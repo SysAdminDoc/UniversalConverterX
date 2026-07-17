@@ -21,6 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 # ── NDJSON helpers ───────────────────────────────────────────────────────────
@@ -46,42 +47,13 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
 # ── Bootstrap ────────────────────────────────────────────────────────────────
 
 def _ensure_deps() -> None:
-    """Install gfpgan + torch on first run.
-
-    PyInstaller fork-bomb guard: when frozen, sys.executable is this sidecar
-    exe — pip install would re-spawn the exe. Bundle deps at build time.
-    """
-    if getattr(sys, "frozen", False):
-        try:
-            import gfpgan  # noqa: F401
-            import torch   # noqa: F401
-            return
-        except ImportError:
-            fail("missing_dep",
-                 "gfpgan / torch not bundled into this frozen sidecar. "
-                 "Rebuild after `pip install gfpgan torch torchvision`.")
-            sys.exit(1)
-
+    """Require build-bundled dependencies without runtime installs."""
     try:
         import gfpgan  # noqa: F401
         import torch   # noqa: F401
         return
     except ImportError:
-        pass
-
-    log("info", "gfpgan / torch not found — installing (this can take a few minutes)...")
-    progress(0.5, "installing dependencies")
-    for extra in [[], ["--user"], ["--break-system-packages"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--quiet",
-             "gfpgan>=1.3.8", "basicsr>=1.4.2", "facexlib>=0.3.0",
-             "torch>=2.0.0", "torchvision>=0.15.0", *extra],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            log("info", "dependencies installed.")
-            return
-    fail("install_failed", "Could not install gfpgan / torch.")
+        fail("missing_dep", "gfpgan / torch are not bundled into this sidecar; runtime package installation is disabled.")
     sys.exit(1)
 
 
@@ -135,6 +107,7 @@ def op_list_models(_: argparse.Namespace) -> int:
 # ── restore ──────────────────────────────────────────────────────────────────
 
 def op_restore(args: argparse.Namespace) -> int:
+    enforce_offline()
     in_path = Path(args.input)
     if not in_path.is_file():
         return fail("missing_input", f"Input not found: {in_path}")
@@ -147,9 +120,8 @@ def op_restore(args: argparse.Namespace) -> int:
         return fail(
             "missing_model",
             "No GFPGAN .pth model found. Pass --model <path>, or drop "
-            "GFPGANv1.4.pth into tools/gfpgan/models/. The first run can also "
-            "auto-download via the gfpgan package — set UCX_MODEL_DIR to point "
-            "the cache somewhere persistent.",
+            "GFPGANv1.4.pth into tools/gfpgan/models/. Automatic model "
+            "downloads are disabled.",
         )
     log("info", f"Model: {model_path.name}")
 

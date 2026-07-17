@@ -29,6 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -73,8 +74,10 @@ def _resolve_nllb(code: str) -> str:
 
 def _load_nllb(model_id: str, src: str, tgt: str, device: str):
     from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_id, src_lang=src)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_id).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, src_lang=src, local_files_only=True)
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        model_id, local_files_only=True).to(device)
 
     def translate(text: str) -> str:
         inputs = tokenizer(text, return_tensors="pt", truncation=True,
@@ -88,8 +91,9 @@ def _load_nllb(model_id: str, src: str, tgt: str, device: str):
 
 def _load_madlad(model_id: str, tgt: str, device: str):
     from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_id).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, local_files_only=True)
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        model_id, local_files_only=True).to(device)
 
     def translate(text: str) -> str:
         # MADLAD takes a "<2xx> sentence" prefix.
@@ -140,14 +144,16 @@ def _load_helsinki_onnx(model_id: str, device: str):
     cache_root = Path(os.environ.get("UCX_MODEL_DIR") or Path.home() / ".cache" / "ucx-models")
     cache_dir = cache_root / "translatekit" / model_id.replace("/", "--")
     cached = (cache_dir / "config.json").is_file() and any(cache_dir.glob("*.onnx"))
-    tokenizer = AutoTokenizer.from_pretrained(cache_dir if cached else model_id)
+    tokenizer = AutoTokenizer.from_pretrained(
+        cache_dir if cached else model_id, local_files_only=True)
     if cached:
-        model = ORTModelForSeq2SeqLM.from_pretrained(cache_dir, provider=provider)
+        model = ORTModelForSeq2SeqLM.from_pretrained(
+            cache_dir, provider=provider, local_files_only=True)
     else:
         emit("log", level="info",
              message=f"Exporting {model_id} to ONNX (one-time model cache setup).")
         model = ORTModelForSeq2SeqLM.from_pretrained(
-            model_id, export=True, provider=provider)
+            model_id, export=True, provider=provider, local_files_only=True)
         cache_dir.mkdir(parents=True, exist_ok=True)
         model.save_pretrained(cache_dir)
         tokenizer.save_pretrained(cache_dir)
@@ -161,6 +167,7 @@ def _load_helsinki_onnx(model_id: str, device: str):
 
 
 def _build_translator(args):
+    enforce_offline()
     model_id = args.model
     if model_id.lower() in {"helsinki", "opus-mt", "helsinki-opus-mt"}:
         model_id = helsinki_model_id(args.source, args.target)

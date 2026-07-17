@@ -49,52 +49,12 @@ def error_exit(code: str, message: str) -> None:
 # ---------------------------------------------------------------------------
 
 def bootstrap() -> None:
-    """Auto-install demucs and torch if not present."""
-    # When frozen with PyInstaller, sys.executable is this sidecar exe — a pip
-    # install would re-spawn this exe and fork-bomb the host. Bundle deps at
-    # build time instead of relying on runtime install.
-    if getattr(sys, "frozen", False):
-        try:
-            import demucs  # noqa: F401
-            return
-        except ImportError:
-            error_exit("missing_dep",
-                       "demucs is not bundled into this frozen sidecar. Rebuild "
-                       "with PyInstaller after `pip install demucs torch`.")
-
+    """Require build-bundled Demucs; never mutate the runtime environment."""
     try:
         import demucs  # noqa: F401
         return
     except ImportError:
-        pass
-
-    log("demucs not found — installing (this may take a few minutes)...")
-    progress(0.0, "Installing demucs...")
-
-    # Try plain install first; fall back to --user
-    for extra_args in [[], ["--user"]]:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "demucs>=4.0.1", "--quiet",
-             *extra_args],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode == 0:
-            log("demucs installed successfully.")
-            return
-        log(f"pip install attempt failed: {result.stderr.strip()}", "warn")
-
-    # Last resort: --break-system-packages
-    result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "demucs>=4.0.1", "--quiet",
-         "--break-system-packages"],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        error_exit("install_failed", f"Could not install demucs: {result.stderr.strip()}")
-
-    log("demucs installed.")
+        error_exit("missing_dep", "demucs is not bundled into this sidecar; runtime package installation is disabled.")
 
 
 # ---------------------------------------------------------------------------
@@ -146,9 +106,15 @@ def separate(
     # demucs writes to <output_dir>/<model>/<track_name>/<stem>.wav by default
     stem_dir = output_dir / model / input_path.stem
 
+    if model_dir is None or not model_dir.is_dir() or not any(model_dir.iterdir()):
+        error_exit(
+            "missing_model",
+            "A populated local Demucs model repository is required; automatic model downloads are disabled.")
+
     cmd = [
         sys.executable, "-m", "demucs",
         "--name", model,
+        "--repo", str(model_dir),
         "--out", str(output_dir),
         "--shifts", str(shifts),
     ]
@@ -158,11 +124,7 @@ def separate(
     elif fmt == "flac":
         cmd += ["--flac"]
 
-    if model_dir:
-        # demucs reads TORCH_HOME for cached model weights
-        env_extra = {"TORCH_HOME": str(model_dir)}
-    else:
-        env_extra = {}
+    env_extra = {"TORCH_HOME": str(model_dir)}
 
     # For 2-stem (vocals vs. accompaniment)
     if stem_selection in {"vocals", "2stem", "accompaniment"}:

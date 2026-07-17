@@ -28,41 +28,20 @@ multiprocessing.freeze_support()
 
 # ── Bootstrap ────────────────────────────────────────────────────────────────
 def _bootstrap():
-    # When frozen with PyInstaller, sys.executable is this sidecar exe. Running
-    # `[sys.executable, '-m', 'pip', 'install', ...]` would re-spawn this exe
-    # and fork-bomb the host. Bundle deps at build time instead.
-    if getattr(sys, 'frozen', False):
-        return
     if sys.version_info < (3, 8):
         print("Python 3.8+ required"); sys.exit(1)
-    required = ['opencv-python', 'requests', 'numpy']
-    for pkg in required:
-        mod = pkg.replace('-', '_').lower()
-        if mod == 'opencv_python':
-            mod = 'cv2'
+    required = {'opencv-python': 'cv2', 'requests': 'requests', 'numpy': 'numpy'}
+    missing = []
+    for package, module in required.items():
         try:
-            __import__(mod)
+            __import__(module)
         except ImportError:
-            for flags in [[], ['--user'], ['--break-system-packages']]:
-                try:
-                    subprocess.check_call(
-                        [sys.executable, '-m', 'pip', 'install', pkg, '-q'] + flags,
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    break
-                except subprocess.CalledProcessError:
-                    continue
-    for pkg in ['mediapipe']:
-        try:
-            __import__(pkg)
-        except ImportError:
-            for flags in [[], ['--user'], ['--break-system-packages']]:
-                try:
-                    subprocess.check_call(
-                        [sys.executable, '-m', 'pip', 'install', pkg, '-q'] + flags,
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    break
-                except subprocess.CalledProcessError:
-                    continue
+            missing.append(package)
+    if missing:
+        print(json.dumps({"event": "error", "code": "missing_dep",
+                          "message": "Bundled dependencies are missing: " + ", ".join(missing) +
+                          ". Runtime package installation is disabled."}))
+        sys.exit(1)
 
 _bootstrap()
 
@@ -317,47 +296,27 @@ class LocalAutoAVSRBackend:
     def _ensure(self):
         if self._ready:
             return
-        emit_log("Setting up local Auto-AVSR (first run may take several minutes)...")
-        os.makedirs(self.model_dir, exist_ok=True)
-
-        try:
-            import torch
-            emit_log(f"PyTorch {torch.__version__} (CUDA: {torch.cuda.is_available()})")
-        except ImportError:
-            emit_log("Installing PyTorch...")
-            for cmd in [
-                [sys.executable, '-m', 'pip', 'install', 'torch', 'torchvision', 'torchaudio',
-                 '--index-url', 'https://download.pytorch.org/whl/cu121', '-q'],
-                [sys.executable, '-m', 'pip', 'install', 'torch', 'torchvision', 'torchaudio', '-q'],
-            ]:
-                try:
-                    subprocess.check_call(cmd, timeout=900)
-                    break
-                except Exception:
-                    continue
-
-        for pkg in ['sentencepiece', 'pytorch-lightning', 'hydra-core', 'omegaconf']:
-            try:
-                __import__(pkg.replace('-', '_').replace('.', '_').lower())
-            except ImportError:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', pkg, '-q'], timeout=300)
-
         repo = os.path.join(self.model_dir, 'repo')
         if not os.path.isdir(repo):
-            emit_log("Cloning Auto-AVSR repository...")
-            subprocess.check_call(
-                ['git', 'clone', '--depth', '1',
-                 'https://github.com/mpc001/auto_avsr.git', repo],
-                timeout=120)
-
+            raise RuntimeError(
+                f"A vetted local Auto-AVSR runtime is required at {repo}. "
+                "Runtime package installs and mutable git clones are disabled.")
         try:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', repo, '-q'], timeout=300)
-        except Exception:
-            if repo not in sys.path:
-                sys.path.insert(0, repo)
+            import torch
+            import sentencepiece  # noqa: F401
+            import pytorch_lightning  # noqa: F401
+            import hydra  # noqa: F401
+            import omegaconf  # noqa: F401
+        except ImportError as exc:
+            raise RuntimeError(
+                f"The bundled Auto-AVSR dependency set is incomplete: {exc}. "
+                "Runtime package installation is disabled.") from exc
+        emit_log(f"PyTorch {torch.__version__} (CUDA: {torch.cuda.is_available()})")
+        if repo not in sys.path:
+            sys.path.insert(0, repo)
 
         self._ready = True
-        emit_log("Local Auto-AVSR setup complete")
+        emit_log("Local Auto-AVSR runtime verified")
 
     def transcribe(self, video_path: str) -> str:
         self._ensure()

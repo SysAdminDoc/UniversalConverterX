@@ -31,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit
+from ucx_assets import enforce_offline
 
 
 
@@ -51,6 +52,7 @@ KOKORO_VOICES = [
 
 
 def op_speak_kokoro(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         from kokoro import KPipeline
     except ImportError as ex:
@@ -92,6 +94,7 @@ def op_speak_kokoro(args: argparse.Namespace) -> int:
 
 
 def op_speak_f5(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         from f5_tts.api import F5TTS
     except ImportError as ex:
@@ -139,6 +142,7 @@ def op_speak_f5(args: argparse.Namespace) -> int:
 
 
 def op_speak_xtts(args: argparse.Namespace) -> int:
+    enforce_offline()
     try:
         from TTS.api import TTS  # coqui-ai/TTS
     except ImportError as ex:
