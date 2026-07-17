@@ -14,6 +14,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- Fix clipped, unreadable Toolbox tiles. The "tighten workspace density" pass shrank tile height to 116px, but each tile renders a 40px icon block, title, two-line description, and a status row — needing ~170px. Title and description were squeezed to an unreadable sliver. Restored the tile to 216×172 (padding 14) so all tile content is fully visible.
 - Fix a fatal launch crash: `MainWindow`, `SettingsWindow`, and `ProgressWindow` each carried an `x:Uid` on the `Window` root. A WinUI 3 `Window` is not a `FrameworkElement`, so `x:Uid`-driven resource application throws `XamlParseException` ("Failed to assign to property Window.Title") during `InitializeComponent`. `MainWindow` crashed the app on startup; the other two would crash when Settings or a progress window opened. Removed the `x:Uid`/literal `Title` from all three roots and set the (localized) title in code-behind, matching the existing pattern.
 - Format and parse all external-tool numbers with `InvariantCulture`. On comma-decimal locales (de/fr, which ship as resources) converters emitted args like `-r 29,97` that FFmpeg rejects, and `double.Parse` of period-decimal tool output threw, breaking FFmpeg/Calibre/JXL progress and resvg SVG sizing. Covers FFmpeg, potrace, cjxl, resvg, Calibre.
 - Do not fail an otherwise-successful conversion when Mark-of-the-Web can't be copied under the default Keep action (output on FAT32/exFAT/SMB or an over-cap zone). Surface it as a warning instead of a hard failure.
