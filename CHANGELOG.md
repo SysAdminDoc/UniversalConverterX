@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Video Summarizer, Auto Highlight, Colorize, Background Remover, and Compressor now delegate their non-visual workflow state, sidecar argument construction, output planning, and error mapping to tested CommunityToolkit.Mvvm ViewModels in Core. The WinUI code-behind is limited to picker, dispatcher, and view-service work, with focused xUnit coverage for transcript/video branching, selected highlight serialization, model readiness, AlphaCut options, target-size headroom, and VMAF encoder presets.
+
 ### Added
 
 - Added pinned, opt-in ISO 21496-1 gain-map tooling. UltraHDR JPEGs can be round-tripped through libvips 8.18.2 without dropping gain-map metadata or converted to AVIF through a reproducible static libavif 1.4.2 build; SDR/HDR image pairs can also synthesize new AVIF gain maps. Downloads require explicit license acceptance and exact size/SHA-256 verification, outputs are re-inspected before atomic promotion, and a generated-fixture headless smoke covers the writer.

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using UniversalConverterX.Core.ViewModels;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -21,10 +22,7 @@ public sealed partial class VideoSummarizerPage : Page
     private static readonly string[] TranscriptExts = [".srt", ".vtt", ".json", ".txt"];
 
     private readonly ISidecarRunner _runner;
-    private string? _sourcePath;
-    private bool _isTranscript;
-    private bool _isVideo;
-    private bool _busy;
+    private readonly VideoSummaryWorkflowViewModel _viewModel = new();
     private CancellationTokenSource? _cts;
 
     public VideoSummarizerPage()
@@ -76,26 +74,20 @@ public sealed partial class VideoSummarizerPage : Page
 
     private void LoadSource(string path)
     {
-        _sourcePath = path;
-        var ext = Path.GetExtension(path).ToLowerInvariant();
-        _isTranscript = TranscriptExts.Contains(ext);
-        _isVideo = ext is ".mp4" or ".mkv" or ".mov" or ".m4v" or ".avi" or ".webm" or ".ts";
+        if (!_viewModel.TryLoadSource(path))
+            return;
 
         DropZoneLabel.Text = Path.GetFileName(path);
-        StatusText.Text = _isTranscript
-            ? "Transcript loaded — summarizes instantly, no transcription needed."
-            : _isVideo
-                ? "Video loaded — Whisper transcribes the audio first, then summarizes."
-                : "Audio loaded — Whisper transcribes it first, then summarizes.";
-        HighlightToggle.IsEnabled = _isVideo;
-        if (!_isVideo)
+        StatusText.Text = _viewModel.SourceStatus;
+        HighlightToggle.IsEnabled = _viewModel.IsVideo;
+        if (!_viewModel.IsVideo)
             HighlightToggle.IsOn = false;
         ResultCard.Visibility = Visibility.Collapsed;
         UpdateEnabled();
     }
 
     private void UpdateEnabled() =>
-        SummarizeButton.IsEnabled = !_busy && _sourcePath is not null;
+        SummarizeButton.IsEnabled = _viewModel.CanSummarize;
 
     private static string SelectedTag(ComboBox box) =>
         (box.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
@@ -104,54 +96,24 @@ public sealed partial class VideoSummarizerPage : Page
 
     private async void Summarize_Click(object sender, RoutedEventArgs e)
     {
-        if (_busy || _sourcePath is null)
+        if (!_viewModel.CanSummarize)
             return;
 
         var output = Path.Combine(
             Path.GetTempPath(),
-            $"ucx_summary_{Guid.NewGuid():N}.{FormatExtension(SelectedTag(FormatBox))}");
+            $"ucx_summary_{Guid.NewGuid():N}.{VideoSummaryWorkflowViewModel.FormatExtension(SelectedTag(FormatBox))}");
+        var request = _viewModel.BuildInvocation(
+            output, SelectedTag(LengthBox), SelectedTag(FormatBox), SelectedTag(EngineBox),
+            SelectedTag(ModelBox), ChaptersToggle.IsOn, TranscriptToggle.IsOn, HighlightToggle.IsOn);
 
-        var args = new List<string> { "summarize", "--output", output };
-        args.Add(_isTranscript ? "--transcript" : "--input");
-        args.Add(_sourcePath);
-        args.Add("--summary-length");
-        args.Add(SelectedTag(LengthBox));
-        args.Add("--summary-format");
-        args.Add(SelectedTag(FormatBox));
-        args.Add("--engine");
-        args.Add(SelectedTag(EngineBox));
-        if (!_isTranscript)
-        {
-            args.Add("--whisper-model");
-            args.Add(SelectedTag(ModelBox));
-        }
-        if (!ChaptersToggle.IsOn)
-            args.Add("--no-chapters");
-
-        string? transcriptOut = null;
-        if (TranscriptToggle.IsOn)
-        {
-            transcriptOut = Path.ChangeExtension(output, ".transcript.txt");
-            args.Add("--export-transcript");
-            args.Add(transcriptOut);
-        }
-
-        string? reelOut = null;
-        if (_isVideo && HighlightToggle.IsOn)
-        {
-            reelOut = Path.ChangeExtension(output, ".highlights.mp4");
-            args.Add("--highlight-reel");
-            args.Add(reelOut);
-        }
-
-        _busy = true;
+        _viewModel.IsBusy = true;
         _cts = new CancellationTokenSource();
         SummarizeButton.IsEnabled = false;
         BrowseButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
         SummaryProgress.Visibility = Visibility.Visible;
         SummaryProgress.Value = 0;
-        StatusText.Text = _isTranscript ? "Summarizing transcript…" : "Transcribing and summarizing…";
+        StatusText.Text = _viewModel.IsTranscript ? "Summarizing transcript…" : "Transcribing and summarizing…";
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
@@ -164,7 +126,7 @@ public sealed partial class VideoSummarizerPage : Page
         try
         {
             result = await _runner.RunAsync(
-                "videosummary", args, progress, null, _cts.Token,
+                request.Invocation.Engine, request.Invocation.Arguments, progress, null, _cts.Token,
                 silenceTimeout: TimeSpan.FromHours(6));
         }
         catch (OperationCanceledException)
@@ -173,7 +135,7 @@ public sealed partial class VideoSummarizerPage : Page
         }
         finally
         {
-            _busy = false;
+            _viewModel.IsBusy = false;
             _cts = null;
             CancelButton.IsEnabled = false;
             BrowseButton.IsEnabled = true;
@@ -186,25 +148,17 @@ public sealed partial class VideoSummarizerPage : Page
             ResultBox.Text = await File.ReadAllTextAsync(output);
             ResultCard.Visibility = Visibility.Visible;
             var extras = new List<string>();
-            if (transcriptOut is not null && File.Exists(transcriptOut))
+            if (request.TranscriptOutput is not null && File.Exists(request.TranscriptOutput))
                 extras.Add("transcript saved next to the summary");
-            if (reelOut is not null && File.Exists(reelOut))
-                extras.Add($"highlight reel: {Path.GetFileName(reelOut)}");
+            if (request.HighlightReelOutput is not null && File.Exists(request.HighlightReelOutput))
+                extras.Add($"highlight reel: {Path.GetFileName(request.HighlightReelOutput)}");
             StatusText.Text = extras.Count > 0
                 ? "Summary ready — " + string.Join("; ", extras) + "."
                 : "Summary ready.";
         }
         else
         {
-            StatusText.Text = result.ErrorCode switch
-            {
-                "cancelled" => "Summarization cancelled.",
-                "sidecar_not_found" =>
-                    "Video Summarizer engine is not built. Run tools/videosummary/build.ps1.",
-                "transcription_failed" =>
-                    "Could not transcribe the media. Build the whisper-stt sidecar, or drop an existing transcript (.srt/.vtt).",
-                _ => $"Summarization failed: {result.ErrorMessage ?? result.ErrorCode}",
-            };
+            StatusText.Text = VideoSummaryWorkflowViewModel.MapError(result.ErrorCode, result.ErrorMessage);
         }
     }
 
@@ -213,12 +167,6 @@ public sealed partial class VideoSummarizerPage : Page
         StatusText.Text = "Cancelling…";
         _cts?.Cancel();
     }
-
-    private static string FormatExtension(string format) => format switch
-    {
-        "markdown" => "md",
-        _ => "txt",
-    };
 
     // ── Result actions ───────────────────────────────────────────────────────
 
@@ -242,7 +190,7 @@ public sealed partial class VideoSummarizerPage : Page
             picker.FileTypeChoices.Add("Markdown", [".md"]);
         picker.FileTypeChoices.Add("Text", [".txt"]);
         picker.SuggestedFileName =
-            (_sourcePath is null ? "summary" : Path.GetFileNameWithoutExtension(_sourcePath) + "_summary");
+            (_viewModel.SourcePath is null ? "summary" : Path.GetFileNameWithoutExtension(_viewModel.SourcePath) + "_summary");
 
         InitializeWithWindow(picker);
         var file = await picker.PickSaveFileAsync();

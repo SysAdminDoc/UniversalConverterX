@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.ViewModels;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -287,6 +288,17 @@ public sealed partial class BackgroundRemoverPage : Page
         var keepAudio = KeepAudioToggle.IsOn;
         var bgColor = BgSolid.IsChecked == true ? BgColorBox.Text.Trim() : null;
         var bgImagePath = BgImage.IsChecked == true ? BgImagePathBox.Text.Trim() : null;
+        var workflow = new BackgroundRemovalWorkflowViewModel
+        {
+            Model = modelTag,
+            Format = formatTag,
+            Quality = quality,
+            Edge = edge,
+            InvertMask = invertMask,
+            KeepAudio = keepAudio,
+            BackgroundColor = bgColor,
+            BackgroundImagePath = bgImagePath,
+        };
 
         var jobs = _files.ToList();
         var completed = 0;
@@ -305,38 +317,7 @@ public sealed partial class BackgroundRemoverPage : Page
                     break;
 
                 var outputPath = BuildOutputPath(item.Path, formatTag);
-                var args = new List<string>
-                {
-                    "--input", item.Path,
-                    "--output", outputPath,
-                    "--model", modelTag,
-                    "--format", formatTag,
-                    "--quality", quality.ToString(),
-                };
-
-                if (edge > 0)
-                {
-                    args.Add("--edge");
-                    args.Add(edge.ToString());
-                }
-
-                if (invertMask)
-                    args.Add("--invert");
-
-                if (!keepAudio)
-                    args.Add("--no-audio");
-
-                if (!string.IsNullOrWhiteSpace(bgColor))
-                {
-                    args.Add("--bg-color");
-                    args.Add(bgColor);
-                }
-
-                if (!string.IsNullOrWhiteSpace(bgImagePath) && File.Exists(bgImagePath))
-                {
-                    args.Add("--bg-image");
-                    args.Add(bgImagePath);
-                }
+                var request = workflow.BuildInvocation(item.Path, outputPath);
 
                 item.StatusText = "Processing";
                 item.Progress = 0;
@@ -365,7 +346,8 @@ public sealed partial class BackgroundRemoverPage : Page
                     ProgressLog.Text = combined;
                 }));
 
-                var result = await _runner.RunAsync("alphacut", args, progress, log, _cts.Token);
+                var result = await _runner.RunAsync(
+                    request.Engine, request.Arguments, progress, log, _cts.Token);
                 if (result.Success)
                 {
                     completed++;

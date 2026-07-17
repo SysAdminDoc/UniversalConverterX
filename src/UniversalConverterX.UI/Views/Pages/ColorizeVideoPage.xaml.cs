@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using UniversalConverterX.Core.ViewModels;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -21,11 +22,7 @@ public sealed partial class ColorizeVideoPage : Page
     private static readonly string[] VideoExts = [".mp4", ".mkv", ".mov", ".m4v", ".avi", ".webm", ".ts"];
 
     private readonly ISidecarRunner _runner;
-    private string? _sourcePath;
-    private string? _outputPath;
-    private bool _isVideo;
-    private bool _modelReady;
-    private bool _busy;
+    private readonly ColorizeWorkflowViewModel _viewModel = new();
     private CancellationTokenSource? _cts;
 
     public ColorizeVideoPage()
@@ -43,7 +40,7 @@ public sealed partial class ColorizeVideoPage : Page
         {
             ModelStatus.Text = "colorize engine not built (tools/colorize/build.ps1).";
             DownloadModelButton.IsEnabled = false;
-            _modelReady = false;
+            _viewModel.ModelReady = false;
             UpdateColorizeEnabled();
             return;
         }
@@ -56,20 +53,20 @@ public sealed partial class ColorizeVideoPage : Page
                 if (name == "model_status" && payload.TryGetProperty("ready", out var r))
                     ready = r.ValueKind == JsonValueKind.True;
             });
-        _modelReady = ready;
+        _viewModel.ModelReady = ready;
         ModelStatus.Text = ready
             ? "Model ready — colourisation runs offline on the CPU."
             : "Model not downloaded. The colourisation weights (BSD-2-Clause) are ~123 MB.";
-        DownloadModelButton.IsEnabled = !_busy;
+        DownloadModelButton.IsEnabled = !_viewModel.IsBusy;
         DownloadModelButton.Content = ready ? "Re-verify model" : "Download model (123 MB)";
         UpdateColorizeEnabled();
     }
 
     private async void DownloadModel_Click(object sender, RoutedEventArgs e)
     {
-        if (_busy || _runner.Locate("colorize") is null) return;
+        if (_viewModel.IsBusy || _runner.Locate("colorize") is null) return;
 
-        if (!_modelReady)
+        if (!_viewModel.ModelReady)
         {
             var dialog = new ContentDialog
             {
@@ -85,7 +82,7 @@ public sealed partial class ColorizeVideoPage : Page
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
         }
 
-        _busy = true;
+        _viewModel.IsBusy = true;
         DownloadModelButton.IsEnabled = false;
         ColorizeButton.IsEnabled = false;
         ModelStatus.Text = "Downloading model…";
@@ -103,7 +100,7 @@ public sealed partial class ColorizeVideoPage : Page
         }
         finally
         {
-            _busy = false;
+            _viewModel.IsBusy = false;
             await RefreshModelStatusAsync();
         }
     }
@@ -141,67 +138,57 @@ public sealed partial class ColorizeVideoPage : Page
 
     private void LoadSource(string path)
     {
-        _sourcePath = path;
-        _outputPath = null;
+        if (!_viewModel.TryLoadSource(path))
+            return;
         OutputBox.Text = "";
-        var ext = Path.GetExtension(path).ToLowerInvariant();
-        _isVideo = VideoExts.Contains(ext);
 
         EmptyState.Visibility = Visibility.Collapsed;
         PreviewPanel.Visibility = Visibility.Visible;
-        if (!_isVideo)
+        if (!_viewModel.IsVideo)
             PreviewImage.Source = new BitmapImage(new Uri(path));
         else
             PreviewImage.Source = null;
 
-        StatusText.Text = _isVideo
-            ? $"{Path.GetFileName(path)} · video — colourises frame-by-frame on the CPU (slow for long clips)."
-            : $"{Path.GetFileName(path)} · image.";
+        StatusText.Text = _viewModel.SourceStatus;
         UpdateColorizeEnabled();
     }
 
     private async void ChooseOutput_Click(object sender, RoutedEventArgs e)
     {
-        if (_sourcePath is null) return;
+        if (_viewModel.SourcePath is null) return;
         var picker = new FileSavePicker { SuggestedStartLocation = PickerLocationId.PicturesLibrary };
-        var ext = _isVideo ? ".mp4" : ".png";
-        picker.FileTypeChoices.Add(_isVideo ? "Video" : "Image", [ext]);
-        picker.SuggestedFileName = Path.GetFileNameWithoutExtension(_sourcePath) + "_color";
+        var ext = _viewModel.IsVideo ? ".mp4" : ".png";
+        picker.FileTypeChoices.Add(_viewModel.IsVideo ? "Video" : "Image", [ext]);
+        picker.SuggestedFileName = Path.GetFileNameWithoutExtension(_viewModel.SourcePath) + "_color";
         var handle = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
         WinRT.Interop.InitializeWithWindow.Initialize(picker, handle);
         var file = await picker.PickSaveFileAsync();
         if (file is not null)
         {
-            _outputPath = file.Path;
+            _viewModel.OutputPath = file.Path;
             OutputBox.Text = file.Path;
         }
     }
 
     private void UpdateColorizeEnabled() =>
-        ColorizeButton.IsEnabled = !_busy && _modelReady && _sourcePath is not null;
-
-    private string DefaultOutputPath()
-    {
-        var dir = Path.GetDirectoryName(_sourcePath!) ?? Path.GetTempPath();
-        var stem = Path.GetFileNameWithoutExtension(_sourcePath!);
-        return Path.Combine(dir, $"{stem}_color{(_isVideo ? ".mp4" : ".png")}");
-    }
+        ColorizeButton.IsEnabled = _viewModel.CanColorize;
 
     // ── Colorize ─────────────────────────────────────────────────────────────
 
     private async void Colorize_Click(object sender, RoutedEventArgs e)
     {
-        if (_busy || _sourcePath is null || !_modelReady) return;
+        if (!_viewModel.CanColorize) return;
 
-        var output = _outputPath ?? DefaultOutputPath();
-        _busy = true;
+        var request = _viewModel.BuildInvocation();
+        var output = request.OutputPath;
+        _viewModel.IsBusy = true;
         _cts = new CancellationTokenSource();
         ColorizeButton.IsEnabled = false;
         DownloadModelButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
         ColorizeProgress.Visibility = Visibility.Visible;
         ColorizeProgress.Value = 0;
-        StatusText.Text = _isVideo ? "Colourising video…" : "Colourising image…";
+        StatusText.Text = _viewModel.IsVideo ? "Colourising video…" : "Colourising image…";
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
@@ -213,8 +200,7 @@ public sealed partial class ColorizeVideoPage : Page
         try
         {
             result = await _runner.RunAsync(
-                "colorize",
-                [_isVideo ? "video" : "image", "--input", _sourcePath, "--output", output],
+                request.Engine, request.Arguments,
                 progress, null, _cts.Token,
                 silenceTimeout: TimeSpan.FromHours(6));
         }
@@ -224,7 +210,7 @@ public sealed partial class ColorizeVideoPage : Page
         }
         finally
         {
-            _busy = false;
+            _viewModel.IsBusy = false;
             _cts = null;
             CancelButton.IsEnabled = false;
             DownloadModelButton.IsEnabled = true;
@@ -234,15 +220,13 @@ public sealed partial class ColorizeVideoPage : Page
 
         if (result.Success)
         {
-            StatusText.Text = $"Saved colourised {(_isVideo ? "video" : "image")} to {output}.";
-            if (!_isVideo && File.Exists(output))
+            StatusText.Text = $"Saved colourised {(_viewModel.IsVideo ? "video" : "image")} to {output}.";
+            if (!_viewModel.IsVideo && File.Exists(output))
                 PreviewImage.Source = new BitmapImage(new Uri(output));
         }
         else
         {
-            StatusText.Text = result.ErrorCode == "cancelled"
-                ? "Colourisation cancelled."
-                : $"Colourisation failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = ColorizeWorkflowViewModel.MapError(result.ErrorCode, result.ErrorMessage);
         }
     }
 

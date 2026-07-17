@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.ViewModels;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -31,7 +32,6 @@ public sealed partial class CompressorPage : Page
     private const int ProgressLogMaxChars = 64_000;
     private const int FinishedCap = 200;
     private const int FolderAddCap = 500;
-    private const double TargetSizeHeadroom = 0.95;
 
     private static readonly IReadOnlyDictionary<string, double> TargetSizeLimitsMb =
         new Dictionary<string, double>(StringComparer.Ordinal)
@@ -407,7 +407,21 @@ public sealed partial class CompressorPage : Page
         }
 
         var preset = SelectedPresetTag();
-        var engine = smartQualityMode ? "ab-av1" : "videocrush";
+        var workflow = new CompressorWorkflowViewModel
+        {
+            Mode = smartQualityMode
+                ? CompressionWorkflowMode.Vmaf
+                : IsTargetSizeMode
+                    ? CompressionWorkflowMode.TargetSize
+                    : CompressionWorkflowMode.Standard,
+            Preset = preset,
+            HardwareAcceleration = SelectedHwAccel(),
+            TargetPreset = SelectedTargetPresetTag(),
+            TargetMegabytes = SelectedTargetLimitMb(),
+            VmafEncoder = SelectedVmafEncoder(),
+            VmafTarget = SelectedVmafTarget(),
+        };
+        var engine = workflow.Engine;
         var jobs = _files.ToList();
         var completed = 0;
         var failed = 0;
@@ -428,49 +442,7 @@ public sealed partial class CompressorPage : Page
                     break;
 
                 var outputPath = BuildOutputPath(item.Path, smartQualityMode);
-                List<string> args;
-                if (smartQualityMode)
-                {
-                    args =
-                    [
-                        "auto-encode",
-                        "--input", item.Path,
-                        "--output", outputPath,
-                        "--encoder", SelectedVmafEncoder(),
-                        "--target-vmaf", SelectedVmafTarget().ToString("0.##", CultureInfo.InvariantCulture),
-                        "--preset", SelectedVmafEncoderPreset(),
-                        "--verify-vmaf",
-                    ];
-                }
-                else
-                {
-                    args = ["--input", item.Path, "--output", outputPath];
-                    if (IsTargetSizeMode)
-                    {
-                        var targetPreset = SelectedTargetPresetTag();
-                        if (targetPreset == "custom")
-                        {
-                            args.AddRange(
-                            [
-                                "--target-mb", (SelectedTargetLimitMb() * TargetSizeHeadroom).ToString("0.###", CultureInfo.InvariantCulture),
-                                "--codec", "libx264",
-                                "--ffmpeg-preset", "slow",
-                                "--resolution", "720p",
-                                "--audio-codec", "aac",
-                                "--audio-bitrate", "96",
-                            ]);
-                        }
-                        else
-                        {
-                            args.AddRange(["--preset", targetPreset]);
-                        }
-                        args.AddRange(["--hwaccel", "none"]);
-                    }
-                    else
-                    {
-                        args.AddRange(["--preset", preset, "--hwaccel", SelectedHwAccel()]);
-                    }
-                }
+                var request = workflow.BuildInvocation(item.Path, outputPath);
 
                 item.StatusText = "Compressing";
                 item.Progress = 0;
@@ -529,7 +501,8 @@ public sealed partial class CompressorPage : Page
                     };
                 }
 
-                var result = await _runner.RunAsync(engine, args, progress, log, _cts.Token, rawEvent);
+                var result = await _runner.RunAsync(
+                    request.Engine, request.Arguments, progress, log, _cts.Token, rawEvent);
                 if (result.Success)
                 {
                     completed++;
@@ -817,13 +790,6 @@ public sealed partial class CompressorPage : Page
             return item.Content?.ToString() ?? "SVT-AV1";
         return "SVT-AV1";
     }
-
-    private string SelectedVmafEncoderPreset() => SelectedVmafEncoder() switch
-    {
-        "libx265" => "medium",
-        "libx264" => "slow",
-        _ => "6",
-    };
 
     private string BuildOutputPath(string inputPath, bool smartQualityMode = false)
     {
