@@ -1,5 +1,9 @@
 # UniversalConverter X
 
+<p align="center">
+  <img src="icon.png" width="180" height="180" alt="UniversalConverter X interlocking conversion-ribbon logo">
+</p>
+
 The all-in-one media tool for Windows — convert, compress, edit, download, record, and 25+ AI-powered tools, all running locally.
 
 A free, open-source alternative to Wondershare UniConverter and similar paid suites. No subscriptions, no cloud processing, no telemetry.
