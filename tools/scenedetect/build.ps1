@@ -18,6 +18,11 @@ $python = Join-Path $here '.venv/Scripts/python.exe'
 
 & $python -m pip install --quiet --upgrade pip pyinstaller
 & $python -m pip install --quiet 'scenedetect[opencv]==0.6.7.1' opencv-python-headless
+# PyAV powers the NVDEC hardware-decode path in tools/_lib/hw_decode.py (Item 98).
+# Optional at runtime — motion measurement degrades to OpenCV software decode when
+# PyAV or a CUDA device is absent — but bundling it lets a rebuilt sidecar offload
+# decode to the GPU on long-form HD/4K.
+& $python -m pip install --quiet 'av>=17.0.0'
 
 & $python -m PyInstaller `
     --name scenedetect `

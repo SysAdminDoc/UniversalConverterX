@@ -244,38 +244,67 @@ def rank_highlight_candidates(
     return selected
 
 
+def _motion_from_frames(frames, cv2, *, sample_step: int, total_frames: int) -> dict[int, float]:
+    """Reduce a (frame_number, bgr_ndarray) stream to sampled motion deltas."""
+    motion: dict[int, float] = {}
+    previous_gray = None
+    last_percent = -1.0
+    for frame_number, frame in frames:
+        if frame_number % sample_step == 0:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            small = cv2.resize(gray, (96, 54), interpolation=cv2.INTER_AREA)
+            motion[frame_number] = 0.0 if previous_gray is None \
+                else float(cv2.absdiff(previous_gray, small).mean() / 255.0)
+            previous_gray = small
+        percent = 42.0 + min(40.0, frame_number / max(1, total_frames) * 40.0)
+        if percent - last_percent >= 1.0:
+            last_percent = percent
+            emit(
+                "progress", percent=round(percent, 1), stage="measuring motion energy",
+                eta_seconds=None,
+            )
+    return motion
+
+
 def measure_motion_energy(source: Path, cv2, *, fps: float, total_frames: int) -> dict[int, float]:
-    """Sample visible frame deltas at up to 10 fps on a tiny grayscale raster."""
+    """Sample visible frame deltas at up to 10 fps on a tiny grayscale raster.
+
+    Decode runs on the GPU's NVDEC engine (PyAV v17, Item 98) when a CUDA device
+    is present — a large saving on long-form HD/4K — and degrades to the OpenCV
+    software path otherwise. The per-frame reduction is identical either way.
+    """
+    sample_step = max(1, int(round(fps / 10.0)))
+
+    try:
+        import hw_decode
+        if hw_decode.cuda_decode_available():
+            emit("log", level="info",
+                 message=f"Motion decode backend: {hw_decode.decode_backend()}")
+            frames = hw_decode.iter_frames(source, pix_fmt="bgr24")
+            return _motion_from_frames(frames, cv2, sample_step=sample_step,
+                                       total_frames=total_frames)
+    except Exception as exc:  # pragma: no cover - hardware/decoder edge cases
+        emit("log", level="warn",
+             message=f"NVDEC decode unavailable ({exc}); using OpenCV software decode.")
+
     capture = cv2.VideoCapture(str(source))
     if not capture.isOpened():
         return {}
-    sample_step = max(1, int(round(fps / 10.0)))
-    motion: dict[int, float] = {}
-    previous_gray = None
-    frame_number = 0
-    last_percent = -1.0
-    try:
-        while True:
-            available, frame = capture.read()
-            if not available:
-                break
-            if frame_number % sample_step == 0:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                small = cv2.resize(gray, (96, 54), interpolation=cv2.INTER_AREA)
-                motion[frame_number] = 0.0 if previous_gray is None \
-                    else float(cv2.absdiff(previous_gray, small).mean() / 255.0)
-                previous_gray = small
-            percent = 42.0 + min(40.0, frame_number / max(1, total_frames) * 40.0)
-            if percent - last_percent >= 1.0:
-                last_percent = percent
-                emit(
-                    "progress", percent=round(percent, 1), stage="measuring motion energy",
-                    eta_seconds=None,
-                )
-            frame_number += 1
-    finally:
-        capture.release()
-    return motion
+
+    def _cv_frames():
+        frame_number = 0
+        try:
+            while True:
+                available, frame = capture.read()
+                if not available:
+                    break
+                yield frame_number, frame
+                frame_number += 1
+        finally:
+            capture.release()
+
+    return _motion_from_frames(_cv_frames(), cv2, sample_step=sample_step,
+                               total_frames=total_frames)
 
 
 def _timecode_from_frame(frame: int, fps: float) -> str:

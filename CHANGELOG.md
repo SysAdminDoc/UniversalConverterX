@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Long-form video analysis now decodes on the GPU's NVDEC engine when a CUDA device is present. A new shared `tools/_lib/hw_decode.py` helper decodes frames with PyAV v17 (`*_cuvid`), offloading the expensive decode from the CPU on HD/4K footage, and the Auto Highlight motion-energy pass is the first consumer. It degrades transparently to OpenCV software decode when PyAV or a CUDA device is absent, produces identical motion results either way, and honours a `UCX_HWDECODE=0` kill switch.
+
 ## [2.27.0] - 2026-07-17
 
 ### Added
