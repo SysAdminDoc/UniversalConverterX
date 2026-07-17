@@ -13,6 +13,25 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "installer" / "New-ReleaseManifest.ps1"
+INSTALLER_SCRIPT = REPO / "installer" / "build-installer.ps1"
+WIX_PRODUCT = REPO / "installer" / "wix" / "Product.wxs"
+
+
+def test_installer_accepts_local_or_global_wix_tool() -> None:
+    source = INSTALLER_SCRIPT.read_text(encoding="utf-8-sig")
+    assert "dotnet tool run wix --version" in source
+    assert "wix --version" in source
+    assert "& wix @wixArguments" in source
+
+
+def test_wix_uses_current_ui_publish_names() -> None:
+    source = WIX_PRODUCT.read_text(encoding="utf-8-sig")
+    assert "UniversalConverterX.UI.exe" not in source
+    assert "UniversalConverterX.UI.deps.json" not in source
+    assert "UniversalConverterX.UI.runtimeconfig.json" not in source
+    assert "UniversalConverterX.exe" in source
+    assert "UniversalConverterX.deps.json" in source
+    assert "UniversalConverterX.runtimeconfig.json" in source
 
 
 class ReleaseManifestTests(unittest.TestCase):

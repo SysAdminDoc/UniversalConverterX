@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.28.0.0',
+    [string]$Version = '2.29.0.0',
 
     [string]$FfmpegArchivePath
 )
@@ -285,13 +285,24 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
     # Check for WiX v4 (dotnet tool) or WiX v3
     $wixExe = $null
     
-    # Try WiX v4 (dotnet tool)
+    # Try WiX v4+ from a repository tool manifest.
     try {
         $wixVersion = dotnet tool run wix --version 2>$null
         if ($LASTEXITCODE -eq 0) {
-            $wixExe = "dotnet tool run wix"
+            $wixExe = 'local-tool'
         }
     } catch {}
+
+    # Fall back to the normal global-tool command. `dotnet tool run` does not
+    # discover tools installed with `--global` even when `wix` is on PATH.
+    if (-not $wixExe) {
+        try {
+            $wixVersion = wix --version 2>$null
+            if ($LASTEXITCODE -eq 0) {
+                $wixExe = 'global-tool'
+            }
+        } catch {}
+    }
     
     # Try WiX v3 (candle/light)
     if (-not $wixExe) {
@@ -301,15 +312,22 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         }
     }
     
-    if ($wixExe -eq "dotnet tool run wix") {
+    if ($wixExe -eq 'local-tool' -or $wixExe -eq 'global-tool') {
         Write-Step "Building with WiX v4..."
         
         Push-Location $wixDir
         try {
-            & dotnet tool run wix build Product.wxs $presetFragmentPath `
-                -d "PublishDir=$publishDir\win-x64\" `
-                -d "Version=$semanticVersion" `
-                -o $msiOutput
+            $wixArguments = @(
+                'build', 'Product.wxs', $presetFragmentPath,
+                '-d', "PublishDir=$publishDir\win-x64\",
+                '-d', "Version=$semanticVersion",
+                '-o', $msiOutput
+            )
+            if ($wixExe -eq 'local-tool') {
+                & dotnet tool run wix @wixArguments
+            } else {
+                & wix @wixArguments
+            }
             
             if ($LASTEXITCODE -eq 0) {
                 Write-Success "MSI installer created: $msiOutput"

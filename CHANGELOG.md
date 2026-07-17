@@ -4,7 +4,12 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.29.0] - 2026-07-17
+
+### Fixed
+
 - Restored valid Python syntax in the FrameSnap, HEICShift, and LipSight legacy GUI sources after malformed icon-import injection, and added a repository-wide tracked-Python parser contract to prevent recurrence.
+- Unsigned installer packaging now discovers either repository-local or globally installed WiX 4+ tools and references the current `UniversalConverterX.exe` publish outputs instead of obsolete `UniversalConverterX.UI.*` filenames.
 
 ### Security
 

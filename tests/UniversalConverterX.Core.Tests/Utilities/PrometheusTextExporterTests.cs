@@ -11,7 +11,7 @@ public sealed class PrometheusTextExporterTests
     public void Render_UsesPrometheus004ContractAndLfTermination()
     {
         var text = PrometheusTextExporter.Render(
-            "2.28.0",
+            "2.29.0",
             Started,
             Started.AddSeconds(12.5),
             [new("converter", 3, 2, 0, 1, 3)]);
@@ -44,7 +44,7 @@ public sealed class PrometheusTextExporterTests
     public void Render_IsDeterministicAndClampsInvalidSnapshots()
     {
         var text = PrometheusTextExporter.Render(
-            "2.28.0",
+            "2.29.0",
             Started,
             Started.AddSeconds(-1),
             [
