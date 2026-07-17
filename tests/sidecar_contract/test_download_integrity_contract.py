@@ -31,6 +31,7 @@ class DownloadIntegrityContractTests(unittest.TestCase):
             "gainmap/sidecar.py": "verified_asset",
             "seedvr2/sidecar.py": "verified_asset",
             "videotag/sidecar.py": "verified_asset",
+            "comfyui/sidecar.py": "user_requested_local_api",
             "lipsight/sidecar.py": "user_requested_api",
             "videosummary/sidecar.py": "user_requested_api",
             "alphacut/AlphaCut.py": "update_metadata",

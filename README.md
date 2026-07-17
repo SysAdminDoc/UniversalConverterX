@@ -20,6 +20,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
 - **Offline AI video tags** — sample images or video frames locally, identify 80 COCO object classes, and write bounded per-frame detections plus aggregate tags as atomic JSON.
+- **Reviewed ComfyUI workflows** — submit an Export (API) graph to an already running loopback ComfyUI server, wait for its exact prompt ID, and atomically export local artifacts without installing nodes or models.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
 - **Recorder** — screen, webcam, system audio, microphone.
@@ -32,7 +33,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 |---|---|
 | **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
 | **Video** | Offline AI Tags · Auto Highlight · Av1an Per-Scene Parallel Encode · Trusted VapourSynth Scripts · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
-| **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
+| **AI** | Reviewed ComfyUI Workflows · Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · IAMF Immersive Audio · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
 | **Disc** | Data CD/DVD imaging and burn · DVD-Video authoring · DVD Rip · DVD Copy (planned) |
@@ -58,6 +59,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Batch Conversion — convert and process multiple files at once.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
 - Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.
+- Reviewed ComfyUI Workflows — run local Export (API) JSON through a separately managed loopback ComfyUI server, with explicit trust, bounded overrides/polling/exports, blocked redirects and known network nodes, and atomic output directories.
 - Av1an Per-Scene Encoding — split long videos at detected scene boundaries, distribute chunks across local encoder processes, resume interrupted work, and optionally target a perceptual quality score through a user-installed Av1an/VapourSynth/encoder toolchain.
 - Trusted VapourSynth Scripts — inspect output metadata, export simple/full DOT filter graphs, or render a reviewed local `.vpy` script through VSPipe and managed FFmpeg. Scripts are executable Python and require explicit trust; UCX never downloads them.
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
@@ -315,6 +317,15 @@ Apache-2.0 model only with `videotag download-model --accept-license`; the exact
 SHA-256 is checked before atomic promotion. Tagging then enables the shared
 process network guard, samples locally, emits an atomic JSON report, and sends
 no usage or performance metrics.
+
+The `comfyui` engine never installs or updates ComfyUI, models, or custom nodes.
+Export a graph with ComfyUI's **Export (API)** action, review every node, start
+the local server with `--disable-api-nodes`, and run the **ComfyUI - Run Reviewed
+Local Workflow** preset. UCX accepts only HTTP loopback endpoints, refuses
+redirects, embedded URLs/credentials, and known network/cloud node classes,
+requires an explicit workflow acknowledgment, and atomically exports the exact
+prompt's final artifacts. Custom nodes remain executable third-party Python and
+must be independently trusted.
 
 Converter exposes generated FFmpeg argument templates in its Advanced panel. Command editing is off by default; enable it under **Settings > Advanced** to edit a batch-safe `{input}`/`{output}` template or review exact commands generated inside sidecars before they run. UCX never sends edited text through a command shell and blocks shell metacharacters introduced by an edit.
 

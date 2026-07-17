@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>ComfyUI - Run Reviewed Local Workflow</Name>
+    <Folder>AI/Workflows</Folder>
+    <Description>Submit a reviewed Export (API) JSON workflow to loopback ComfyUI and atomically export its outputs.</Description>
+    <InputTypes><Extension>json</Extension></InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_comfyui</OutputFileNameTemplate>
+    <OutputExtension></OutputExtension>
+    <Engine>comfyui</Engine>
+    <InvocationMode>extract-each</InvocationMode>
+    <Args><Arg>run</Arg><Arg>--accept-workflow</Arg></Args>
+</Preset>
