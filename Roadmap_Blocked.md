@@ -14,16 +14,6 @@ Impact: 3 · Effort: 2 · Type: platform + leapfrog
 
 ---
 
-### 25. MSIX Packaging + WinGet Submission
-
-Build a `.msixbundle` using `makeappx.exe`. Submit a manifest to `microsoft/winget-pkgs` so users can install via `winget install MavenImaging.UniversalConverterX`.
-
-Impact: 4 · Effort: 3 · Type: distribution
-
-**Blocker:** Requires a code-signing certificate. Cannot produce a trusted MSIX without one.
-
----
-
 ### 44. DVD Burn / CD Burner (Disc Tools)
 
 Write video files to DVD-Video structure or data files to a CD/DVD using `growisofs` / `cdrecord` / Windows `IDiscRecorder2` COM API.
