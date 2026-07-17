@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
@@ -185,7 +186,7 @@ public class CalibreConverter : BaseConverterStrategy
                 }
                 
                 var percentStr = line[startIndex..percentIndex];
-                if (double.TryParse(percentStr, out var percent))
+                if (double.TryParse(percentStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var percent))
                 {
                     return ConversionProgress.FromPercent(percent);
                 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -176,6 +177,35 @@ public class FFmpegConverterTests
 
         argsString.Should().Contain("-r");
         argsString.Should().Contain("30");
+    }
+
+    [Fact]
+    public void BuildArguments_FractionalFrameRate_UsesInvariantDecimalUnderCommaLocale()
+    {
+        // FFmpeg only accepts '.' as the decimal separator. Under a comma-decimal
+        // OS locale (e.g. de-DE) culture-sensitive formatting would emit "29,97",
+        // which FFmpeg rejects. The builder must format invariantly regardless of
+        // the ambient thread culture.
+        var original = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var job = CreateTestJob("input.mp4", "output.mp4");
+            var options = new ConversionOptions
+            {
+                Video = new VideoOptions { Fps = 29.97 },
+                Audio = new AudioOptions { Volume = 1.5 },
+            };
+
+            var args = _converter.BuildArguments(job, options);
+
+            args.Should().Contain("29.97").And.NotContain("29,97");
+            string.Join(" ", args).Should().Contain("volume=1.50").And.NotContain("volume=1,50");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = original;
+        }
     }
 
     [Fact]

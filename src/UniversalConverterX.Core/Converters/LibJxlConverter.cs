@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
@@ -84,7 +85,7 @@ public partial class LibJxlConverter : BaseConverterStrategy
             // Quality/Distance setting
             // JPEG XL uses distance (0-15) where 0 is lossless, 1.0 is visually lossless
             var distance = GetDistanceValue(options.Quality);
-            args.AddRange(["-d", distance.ToString("F1")]);
+            args.AddRange(["-d", distance.ToString("F1", CultureInfo.InvariantCulture)]);
 
             // Effort level (1-9, higher = slower but better compression)
             var effort = GetEffortValue(options.Quality);
@@ -330,7 +331,7 @@ public partial class LibJxlConverter : BaseConverterStrategy
         var percentMatch = PercentRegex().Match(line);
         if (percentMatch.Success)
         {
-            var percent = double.Parse(percentMatch.Groups[1].Value);
+            var percent = double.Parse(percentMatch.Groups[1].Value, CultureInfo.InvariantCulture);
             return new ConversionProgress
             {
                 Percent = Math.Min(percent, 100),

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
@@ -181,7 +182,7 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Frame rate
         if (video.Fps.HasValue)
-            args.AddRange(["-r", video.Fps.Value.ToString("F2")]);
+            args.AddRange(["-r", video.Fps.Value.ToString("F2", CultureInfo.InvariantCulture)]);
 
         // Quality (CRF or bitrate)
         if (video.Crf.HasValue)
@@ -292,7 +293,7 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Volume
         if (audio.Volume.HasValue && Math.Abs(audio.Volume.Value - 1.0) > 0.001)
-            args.AddRange(["-af", $"volume={audio.Volume:F2}"]);
+            args.AddRange(["-af", FormattableString.Invariant($"volume={audio.Volume.Value:F2}")]);
 
         // Normalization
         if (audio.Normalize)
@@ -380,8 +381,8 @@ public partial class FFmpegConverter : BaseConverterStrategy
             percent = currentTime.Value.TotalSeconds / _totalDuration.Value.TotalSeconds * 100;
         }
 
-        double? speed = speedMatch.Success ? double.Parse(speedMatch.Groups[1].Value) : null;
-        double? fps = fpsMatch.Success ? double.Parse(fpsMatch.Groups[1].Value) : null;
+        double? speed = speedMatch.Success ? double.Parse(speedMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
+        double? fps = fpsMatch.Success ? double.Parse(fpsMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         long? frame = frameMatch.Success ? long.Parse(frameMatch.Groups[1].Value) : null;
         long? size = sizeMatch.Success ? long.Parse(sizeMatch.Groups[1].Value) * 1024 : null;
         string? bitrate = bitrateMatch.Success ? $"{bitrateMatch.Groups[1].Value} kbits/s" : null;

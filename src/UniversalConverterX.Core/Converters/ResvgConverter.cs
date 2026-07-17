@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
@@ -368,7 +369,7 @@ public partial class ResvgConverter : BaseConverterStrategy
                 StartInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = executablePath,
-                    Arguments = $"--query-all \"{svgPath}\"",
+                    ArgumentList = { "--query-all", svgPath },
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -391,8 +392,8 @@ public partial class ResvgConverter : BaseConverterStrategy
                 {
                     var parts = line.Split(',');
                     if (parts.Length >= 4 &&
-                        double.TryParse(parts[2].Trim(), out var width) &&
-                        double.TryParse(parts[3].Trim(), out var height))
+                        double.TryParse(parts[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var width) &&
+                        double.TryParse(parts[3].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var height))
                     {
                         return new SvgMetadata(width, height);
                     }
@@ -420,8 +421,8 @@ public partial class ResvgConverter : BaseConverterStrategy
 
             if (widthMatch.Success && heightMatch.Success)
             {
-                var width = double.Parse(widthMatch.Groups[1].Value);
-                var height = double.Parse(heightMatch.Groups[1].Value);
+                var width = double.Parse(widthMatch.Groups[1].Value, CultureInfo.InvariantCulture);
+                var height = double.Parse(heightMatch.Groups[1].Value, CultureInfo.InvariantCulture);
                 
                 // Convert to pixels if needed
                 var widthUnit = widthMatch.Groups[2].Value.ToLowerInvariant();
@@ -437,8 +438,8 @@ public partial class ResvgConverter : BaseConverterStrategy
             var viewBoxMatch = Regex.Match(content, @"viewBox\s*=\s*""[\d.\s]+\s+[\d.\s]+\s+([\d.]+)\s+([\d.]+)""");
             if (viewBoxMatch.Success)
             {
-                var width = double.Parse(viewBoxMatch.Groups[1].Value);
-                var height = double.Parse(viewBoxMatch.Groups[2].Value);
+                var width = double.Parse(viewBoxMatch.Groups[1].Value, CultureInfo.InvariantCulture);
+                var height = double.Parse(viewBoxMatch.Groups[2].Value, CultureInfo.InvariantCulture);
                 return new SvgMetadata(width, height);
             }
 

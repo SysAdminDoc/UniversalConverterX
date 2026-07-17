@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
@@ -176,7 +177,7 @@ public partial class PotraceConverter : BaseConverterStrategy
             QualityPreset.Lossless => 1.34,
             _ => 1.0
         };
-        args.AddRange(["-a", alphaMax.ToString("F2")]);
+        args.AddRange(["-a", alphaMax.ToString("F2", CultureInfo.InvariantCulture)]);
 
         // Optimize curves
         if (options.Quality >= QualityPreset.Medium)
@@ -191,7 +192,7 @@ public partial class PotraceConverter : BaseConverterStrategy
                 QualityPreset.Lossless => 0.02,
                 _ => 0.2
             };
-            args.AddRange(["-T", tolerance.ToString("F2")]);
+            args.AddRange(["-T", tolerance.ToString("F2", CultureInfo.InvariantCulture)]);
         }
         else
         {
