@@ -11,6 +11,7 @@ public sealed class CompressorWorkflowViewModel : ObservableObject
     public CompressionWorkflowMode Mode { get; set; }
     public string Preset { get; set; } = "web-1080p";
     public string HardwareAcceleration { get; set; } = "none";
+    public bool D3D12Deinterlace { get; set; }
     public string TargetPreset { get; set; } = "discord-10mb";
     public double TargetMegabytes { get; set; } = 10;
     public string VmafEncoder { get; set; } = "libsvtav1";
@@ -52,6 +53,8 @@ public sealed class CompressorWorkflowViewModel : ObservableObject
             else
             {
                 arguments.AddRange(["--preset", Preset, "--hwaccel", HardwareAcceleration]);
+                if (HardwareAcceleration == "d3d12" && D3D12Deinterlace)
+                    arguments.Add("--d3d12-deinterlace");
             }
         }
         return new WorkflowInvocation(Engine, arguments, outputPath);

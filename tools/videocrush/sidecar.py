@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -96,6 +97,76 @@ def resolve_encoder(codec: str, hwaccel: str | None) -> str:
         return codec
     mapping = _HW_ENCODER.get(hwaccel, {})
     return mapping.get(codec, codec)
+
+
+def d3d12_filter_chain(resolution: str | None, deinterlace: bool) -> list[str]:
+    """Build a hardware-frame-only D3D12 filter chain."""
+    filters: list[str] = []
+    if deinterlace:
+        filters.append("deinterlace_d3d12=method=default:mode=field:deint=interlaced")
+    if resolution and resolution != "Original":
+        height = int(resolution.replace("p", ""))
+        filters.append(f"scale_d3d12=w=-2:h={height}")
+    return filters
+
+
+def software_filter_chain(resolution: str | None, deinterlace: bool) -> list[str]:
+    """Build the behavior-preserving CPU fallback for the requested filters."""
+    filters: list[str] = []
+    if deinterlace:
+        filters.append("bwdif=mode=send_field:parity=auto:deint=interlaced")
+    if resolution and resolution != "Original":
+        height = int(resolution.replace("p", ""))
+        filters.append(f"scale=-2:{height}")
+    return filters
+
+
+def d3d12_quality_args(crf: int) -> list[str]:
+    """Translate the user CRF target to D3D12VA's QVBR quality control."""
+    return ["-rc_mode", "QVBR", "-global_quality", str(crf)]
+
+
+def probe_d3d12_pipeline(
+    ffmpeg: str,
+    input_path: Path,
+    encoder: str,
+    filters: list[str],
+    crf: int,
+) -> tuple[bool, str]:
+    """Exercise one decoded, filtered, encoded frame before the real job.
+
+    Listing filters/codecs is insufficient because FFmpeg exposes D3D12
+    components even when the installed driver cannot create the video
+    processor or encoder. The one-frame probe catches that runtime boundary.
+    """
+    null_out = "NUL" if sys.platform == "win32" else "/dev/null"
+    command = [
+        ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+        "-hwaccel", "d3d12va", "-hwaccel_output_format", "d3d12",
+        "-i", str(input_path), "-map", "0:v:0", "-frames:v", "1",
+    ]
+    if filters:
+        command += ["-vf", ",".join(filters)]
+    command += ["-an", "-c:v", encoder, *d3d12_quality_args(crf),
+                "-f", "null", null_out]
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if sys.platform == "win32" else 0
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=45,
+            creationflags=creationflags,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, f"probe could not run: {type(exc).__name__}: {exc}"
+    if result.returncode == 0:
+        return True, ""
+    diagnostic = (result.stderr or result.stdout or f"exit code {result.returncode}").strip()
+    lines = [line.strip() for line in diagnostic.splitlines() if line.strip()]
+    return False, (lines[-1] if lines else f"exit code {result.returncode}")[:500]
 
 
 # ─── Preset → encoding parameters ────────────────────────────────────────────
@@ -325,7 +396,7 @@ def compress(args: argparse.Namespace) -> int:
     preset_cfg = PRESETS.get(args.preset, {}) if args.preset else {}
     target_mb = args.target_mb if args.target_mb is not None else preset_cfg.get("target_mb")
     crf = args.crf if args.crf is not None else preset_cfg.get("crf")
-    codec = args.codec or preset_cfg.get("codec", "libx264")
+    software_codec = args.codec or preset_cfg.get("codec", "libx264")
     fpreset = args.ffmpeg_preset or preset_cfg.get("preset")
     resolution = args.resolution or preset_cfg.get("resolution", "Original")
     audio_codec = args.audio_codec or preset_cfg.get("audio_codec", "aac")
@@ -337,10 +408,13 @@ def compress(args: argparse.Namespace) -> int:
     )
     pixel_format = preset_cfg.get("pixel_format")
 
-    # Resolve HW encoder; falls back to software if accelerator is unavailable
+    # Resolve HW encoder. D3D12 is activated only after an actual one-frame
+    # decode/filter/encode probe succeeds; all other paths keep prior behavior.
     hwaccel = getattr(args, "hwaccel", None)
-    codec = resolve_encoder(codec, hwaccel)
-    if hwaccel and hwaccel != "none":
+    d3d12_requested = hwaccel == "d3d12"
+    d3d12_active = False
+    codec = software_codec if d3d12_requested else resolve_encoder(software_codec, hwaccel)
+    if hwaccel and hwaccel not in ("none", "d3d12"):
         emit("log", level="info", message=f"Hardware accelerator: {hwaccel} -> encoder: {codec}")
 
     if (target_mb is None and crf is None
@@ -366,11 +440,36 @@ def compress(args: argparse.Namespace) -> int:
     else:
         emit("log", level="info", message=f"Duration: {duration:.1f}s")
 
-    # Build vf filter
-    vf_filters: list[str] = []
-    if resolution and resolution != "Original":
-        height = int(resolution.replace("p", ""))
-        vf_filters.append(f"scale=-2:{height}")
+    deinterlace = bool(getattr(args, "d3d12_deinterlace", False))
+    vf_filters = software_filter_chain(resolution, deinterlace)
+    input_args: list[str] = []
+    if d3d12_requested:
+        d3d12_encoder = resolve_encoder(software_codec, "d3d12")
+        if target_mb is not None:
+            fallback_reason = "size-targeted two-pass mode is not supported by D3D12VA"
+        elif crf is None:
+            fallback_reason = "the selected workflow has no quality target for the D3D12VA probe"
+        elif d3d12_encoder == software_codec:
+            fallback_reason = f"codec {software_codec} has no D3D12VA encoder"
+        else:
+            hardware_filters = d3d12_filter_chain(resolution, deinterlace)
+            emit("log", level="info",
+                 message=f"Probing D3D12 zero-copy path with {d3d12_encoder}")
+            d3d12_active, fallback_reason = probe_d3d12_pipeline(
+                ffmpeg, in_path, d3d12_encoder, hardware_filters, int(crf)
+            )
+            if d3d12_active:
+                codec = d3d12_encoder
+                vf_filters = hardware_filters
+                input_args = ["-hwaccel", "d3d12va", "-hwaccel_output_format", "d3d12"]
+                emit("log", level="info",
+                     message=f"D3D12 zero-copy enabled: decode -> "
+                             f"{','.join(hardware_filters) if hardware_filters else 'direct'} -> {codec}")
+        if not d3d12_active:
+            codec = software_codec
+            emit("log", level="warn",
+                 message=f"D3D12 zero-copy unavailable ({fallback_reason}); "
+                         f"falling back to software {software_codec}.")
 
     is_av1 = codec == "libsvtav1"
     is_vp9 = codec == "libvpx-vp9"
@@ -380,7 +479,7 @@ def compress(args: argparse.Namespace) -> int:
     # ─── ProRes / DNxHR / FFV1 — profile-driven encode (no CRF, no 2-pass) ──
     if is_intermediate or is_lossless:
         emit("progress", percent=0, stage="encoding (intermediate)", eta_seconds=None)
-        cmd = [ffmpeg, "-y", "-i", str(in_path)]
+        cmd = [ffmpeg, "-y", *input_args, "-i", str(in_path)]
         if vf_filters:
             cmd += ["-vf", ",".join(vf_filters)]
 
@@ -425,13 +524,16 @@ def compress(args: argparse.Namespace) -> int:
     # ─── CRF mode (single-pass) ──────────────────────────────────────────────
     if crf is not None:
         emit("progress", percent=0, stage="encoding", eta_seconds=None)
-        cmd = [ffmpeg, "-y", "-i", str(in_path)]
+        cmd = [ffmpeg, "-y", *input_args, "-i", str(in_path)]
         if vf_filters:
             cmd += ["-vf", ",".join(vf_filters)]
-        cmd += ["-c:v", codec, "-crf", str(crf)]
-        if pixel_format:
+        if d3d12_active:
+            cmd += ["-c:v", codec, *d3d12_quality_args(int(crf))]
+        else:
+            cmd += ["-c:v", codec, "-crf", str(crf)]
+        if pixel_format and not d3d12_active:
             cmd += ["-pix_fmt", pixel_format]
-        if fpreset and not is_av1:
+        if fpreset and not is_av1 and not d3d12_active:
             cmd += ["-preset", fpreset]
 
         # ROADMAP Item 91 — Cross-encoder capped-CRF harmonization. The user
@@ -658,7 +760,12 @@ def build_parser() -> argparse.ArgumentParser:
                    choices=["none", "nvenc", "amf", "qsv", "d3d12"],
                    default="none",
                    help="Hardware video encoder to use (default: none / software). "
-                        "d3d12 enables h264_d3d12va / hevc_d3d12va / av1_d3d12va.")
+                        "d3d12 probes a zero-copy D3D12VA decode/filter/encode path "
+                        "and falls back to software when the driver rejects it.")
+    p.add_argument("--d3d12-deinterlace", action="store_true",
+                   help="When --hwaccel=d3d12, request deinterlace_d3d12 before "
+                        "scaling. The guarded fallback uses CPU bwdif with the "
+                        "same interlaced-frame-only behavior.")
     p.add_argument("--max-bitrate", type=int, default=None, dest="max_bitrate",
                    help="Capped-CRF mode: maximum video bitrate ceiling in kbps "
                         "(ROADMAP Item 91). Translated per-encoder: x264/x265/h264_*/"

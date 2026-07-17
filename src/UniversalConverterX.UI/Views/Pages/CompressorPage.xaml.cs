@@ -300,6 +300,7 @@ public sealed partial class CompressorPage : Page
                 : Visibility.Collapsed;
         if (HwAccelCombo is not null)
             HwAccelCombo.IsEnabled = !IsTargetSizeMode && !IsVmafTargetMode;
+        UpdateD3D12Options();
         UpdatePresetSummaries();
         UpdateStatusText();
     }
@@ -350,7 +351,17 @@ public sealed partial class CompressorPage : Page
     private void HwAccel_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (StatusText is null) return;
+        UpdateD3D12Options();
         UpdateStatusText();
+    }
+
+    private void UpdateD3D12Options()
+    {
+        if (D3D12DeinterlaceToggle is null) return;
+        D3D12DeinterlaceToggle.Visibility =
+            !IsTargetSizeMode && !IsVmafTargetMode && SelectedHwAccel() == "d3d12"
+                ? Visibility.Visible
+                : Visibility.Collapsed;
     }
 
     private string SelectedHwAccel()
@@ -416,6 +427,7 @@ public sealed partial class CompressorPage : Page
                     : CompressionWorkflowMode.Standard,
             Preset = preset,
             HardwareAcceleration = SelectedHwAccel(),
+            D3D12Deinterlace = D3D12DeinterlaceToggle?.IsChecked == true,
             TargetPreset = SelectedTargetPresetTag(),
             TargetMegabytes = SelectedTargetLimitMb(),
             VmafEncoder = SelectedVmafEncoder(),

@@ -6360,4 +6360,7 @@
   <data name="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02.Header" xml:space="preserve">
     <value>Abgeschlossen</value>
   </data>
+  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
+    <value>Mit D3D12 deinterlacen (abgesichert)</value>
+  </data>
 </root>

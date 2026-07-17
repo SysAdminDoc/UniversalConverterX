@@ -242,6 +242,11 @@
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"
                                    FontSize="11"/>
+                        <CheckBox x:Uid="CompressorPage_D3D12DeinterlaceToggle"
+                                  x:Name="D3D12DeinterlaceToggle"
+                                  Content="Deinterlace with D3D12 (guarded)"
+                                  Visibility="Collapsed"
+                                  AutomationProperties.AutomationId="CompressorD3D12DeinterlaceToggle"/>
                     </StackPanel>
                 </Border>
 

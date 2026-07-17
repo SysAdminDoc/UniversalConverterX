@@ -63,18 +63,6 @@ filesystem/playlist inspection before exposing it as ready.
 
 Impact: 2 · Effort: 4 · Type: parity
 
-### 66-a. Guarded FFmpeg 8.1 D3D12 Zero-Copy Pipeline
-
-Wire D3D12 decode, `scale_d3d12`, optional `deinterlace_d3d12`, and D3D12
-encode into VideoCrush behind an explicit opt-in. Probe the requested pipeline
-before the real job and automatically fall back to the existing portable path
-when any device/filter/encoder stage is unavailable. Acceptance requires
-argument-planning tests and a headless fallback smoke on the available GPU;
-successful zero-copy execution on supported hardware remains Item 66's device
-validation residual.
-
-Impact: 3 · Effort: 2 · Type: platform + leapfrog
-
 ### 47-a. ARM64 Publish and QNN Readiness
 
 Add a repeatable `win-arm64` publish path, audit bundled sidecars and native

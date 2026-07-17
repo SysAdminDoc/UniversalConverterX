@@ -170,6 +170,23 @@ public sealed class WorkflowViewModelTests
         request.Arguments.Should().ContainInOrder("--hwaccel", "none");
     }
 
+    [Fact]
+    public void Compressor_D3D12CanRequestGuardedDeinterlacing()
+    {
+        var model = new CompressorWorkflowViewModel
+        {
+            Mode = CompressionWorkflowMode.Standard,
+            Preset = "web-1080p",
+            HardwareAcceleration = "d3d12",
+            D3D12Deinterlace = true,
+        };
+
+        var request = model.BuildInvocation("input.mkv", "output.mp4");
+
+        request.Arguments.Should().ContainInOrder(
+            "--preset", "web-1080p", "--hwaccel", "d3d12", "--d3d12-deinterlace");
+    }
+
     [Theory]
     [InlineData("libx264", "slow")]
     [InlineData("libx265", "medium")]

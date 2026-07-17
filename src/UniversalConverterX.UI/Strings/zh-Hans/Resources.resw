@@ -6364,4 +6364,7 @@ libx264
   <data name="WatermarkRemoverPage_WatermarkRemoverPagePivotItem02.Header" xml:space="preserve">
     <value>已完成</value>
   </data>
+  <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
+    <value>使用 D3D12 去隔行（受保护）</value>
+  </data>
 </root>

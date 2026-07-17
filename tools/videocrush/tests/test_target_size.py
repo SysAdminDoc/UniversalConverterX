@@ -144,3 +144,91 @@ class TargetSizeTests(TestCase):
         self.assertEqual("2", commands[1][commands[1].index("-pass") + 1])
         expected_video_kbps = int(((9.5 * 8 * 1024 * 1024) - (96_000 * 60)) / 60 / 1000)
         self.assertIn(f"{expected_video_kbps}k", commands[0])
+
+    def test_d3d12_filter_plan_stays_on_hardware_frames(self):
+        filters = sidecar.d3d12_filter_chain("1080p", True)
+
+        self.assertEqual([
+            "deinterlace_d3d12=method=default:mode=field:deint=interlaced",
+            "scale_d3d12=w=-2:h=1080",
+        ], filters)
+        self.assertNotIn("hwdownload", ",".join(filters))
+
+    def test_d3d12_probe_failure_falls_back_and_preserves_filters(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            input_path = root / "input.mp4"
+            output_path = root / "output.mp4"
+            input_path.write_bytes(b"input")
+            commands = []
+
+            def fake_run(command, *_args):
+                commands.append(command)
+                output_path.write_bytes(b"output")
+                return 0
+
+            args = argparse.Namespace(
+                input=str(input_path), output=str(output_path), preset="web-1080p",
+                target_mb=None, crf=None, codec=None, ffmpeg_preset=None,
+                resolution=None, audio_codec=None, audio_bitrate=None,
+                audio_vbr_quality=None, hwaccel="d3d12", d3d12_deinterlace=True,
+                max_bitrate=None, prores_profile=None, dnxhd_profile=None,
+            )
+            media = {"format": {"duration": "2"}, "streams": []}
+            with (
+                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(sidecar, "probe", return_value=media),
+                mock.patch.object(sidecar, "probe_d3d12_pipeline",
+                                  return_value=(False, "driver rejected processor")),
+                mock.patch.object(sidecar, "run_ffmpeg", side_effect=fake_run),
+            ):
+                result = sidecar.compress(args)
+
+        self.assertEqual(0, result)
+        command = commands[0]
+        self.assertNotIn("d3d12va", command)
+        self.assertEqual("libx264", command[command.index("-c:v") + 1])
+        filters = command[command.index("-vf") + 1]
+        self.assertIn("bwdif=mode=send_field:parity=auto:deint=interlaced", filters)
+        self.assertIn("scale=-2:1080", filters)
+
+    def test_d3d12_probe_success_builds_zero_copy_command(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            input_path = root / "input.mp4"
+            output_path = root / "output.mp4"
+            input_path.write_bytes(b"input")
+            commands = []
+
+            def fake_run(command, *_args):
+                commands.append(command)
+                output_path.write_bytes(b"output")
+                return 0
+
+            args = argparse.Namespace(
+                input=str(input_path), output=str(output_path), preset="web-1080p",
+                target_mb=None, crf=None, codec=None, ffmpeg_preset=None,
+                resolution=None, audio_codec=None, audio_bitrate=None,
+                audio_vbr_quality=None, hwaccel="d3d12", d3d12_deinterlace=True,
+                max_bitrate=None, prores_profile=None, dnxhd_profile=None,
+            )
+            media = {"format": {"duration": "2"}, "streams": []}
+            with (
+                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(sidecar, "probe", return_value=media),
+                mock.patch.object(sidecar, "probe_d3d12_pipeline", return_value=(True, "")),
+                mock.patch.object(sidecar, "run_ffmpeg", side_effect=fake_run),
+            ):
+                result = sidecar.compress(args)
+
+        self.assertEqual(0, result)
+        command = commands[0]
+        self.assertIn("d3d12va", command)
+        self.assertEqual("h264_d3d12va", command[command.index("-c:v") + 1])
+        self.assertNotIn("-crf", command)
+        self.assertEqual("QVBR", command[command.index("-rc_mode") + 1])
+        filters = command[command.index("-vf") + 1]
+        self.assertIn("deinterlace_d3d12", filters)
+        self.assertIn("scale_d3d12", filters)

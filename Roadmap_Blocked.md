@@ -4,13 +4,22 @@ Items that cannot proceed without external input, credentials, hardware, or upst
 
 ---
 
-### 66. FFmpeg 8.1 D3D12 Filter Pipeline
+### 66. FFmpeg 8.1 D3D12 Hardware Validation
 
-D3D12 encoder presets shipped (h264/av1_d3d12va via videocrush) and the bundled FFmpeg is already pinned to 8.1.2. Remaining scope was wiring `scale_d3d12` + `deinterlace_d3d12` into a GPU zero-copy filter chain.
+The opt-in VideoCrush path now probes one real frame through D3D12 decode,
+optional `deinterlace_d3d12`, `scale_d3d12`, and D3D12 encode before running a
+job. Probe failure falls back automatically to software BWDIF/scaling and the
+original software encoder. Argument-planning tests and a headless smoke prove
+the fallback on the available machine.
 
 Impact: 3 · Effort: 2 · Type: platform + leapfrog
 
-**Blocker:** Requires a GPU whose Direct3D 12 video engine supports hardware encode/decode and the video-processor filters. On the available hardware, `scale_d3d12` runs in isolation but `h264_d3d12va`/`av1_d3d12va` encode, D3D12 hardware decode, and `deinterlace_d3d12` all fail (encode: "Encode failed"; deinterlace: HRESULT 0x887A0005 DXGI_ERROR_INVALID_CALL). The intended zero-copy pipeline (d3d12 decode → scale_d3d12/deinterlace_d3d12 → d3d12 encode) cannot be built or verified without a supporting GPU. Verify on a machine with a modern discrete GPU whose driver exposes working D3D12 video encode + video-processor deinterlace.
+**Blocker:** Successful zero-copy execution still requires a GPU/driver whose
+Direct3D 12 video engine supports the requested decoder, video-processor
+filters, and encoder together. The available RTX 4070 SUPER exposes the FFmpeg
+components but rejects the runtime processor/encode path, so only the guarded
+fallback can be verified here. Run the same smoke on a supporting device to
+capture positive-path evidence; no product code or fallback work remains.
 
 ---
 
