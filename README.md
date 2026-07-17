@@ -28,7 +28,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 | Category | Tools |
 |---|---|
 | **Image** | Image Converter · GIF Maker · Image Upscaler (AI) · AI Portrait · Slideshow Maker · Metadata Editor |
-| **Video** | Auto Highlight · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
+| **Video** | Auto Highlight · Av1an Per-Scene Parallel Encode · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
 | **AI** | Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
 | **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
@@ -48,6 +48,7 @@ Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, Vid
 - Progress Tracking — real-time progress with speed and ETA, NDJSON sidecar contract.
 - Batch Conversion — convert and process multiple files at once.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
+- Av1an Per-Scene Encoding — split long videos at detected scene boundaries, distribute chunks across local encoder processes, resume interrupted work, and optionally target a perceptual quality score through a user-installed Av1an/VapourSynth/encoder toolchain.
 - Image Quality Targeting — automatically find the best JPEG, WebP, AVIF, HEIC, or JXL quality for a size, PSNR, or local SSIMULACRA2 target.
 - Batch Image Editing — apply named looks, colour/tone controls, blur, grain, vignette, tint, and borders while retaining compatible alpha and multi-frame output.
 - Face Blur Privacy Filter — detect and irreversibly obscure frontal faces in every video frame with an offline, fail-closed OpenCV pipeline.

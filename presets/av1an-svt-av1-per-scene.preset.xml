@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>SVT-AV1 - Av1an Per-Scene Parallel</Name>
+    <Folder>Video/AV1</Folder>
+    <InputTypes>
+        <Extension>mkv</Extension>
+        <Extension>mp4</Extension>
+        <Extension>mov</Extension>
+        <Extension>webm</Extension>
+        <Extension>avi</Extension>
+        <Extension>m2ts</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_av1an</OutputFileNameTemplate>
+    <OutputExtension>mkv</OutputExtension>
+    <Engine>av1an</Engine>
+    <InvocationMode>per-file</InvocationMode>
+    <Args>
+        <Arg>encode</Arg>
+        <Arg>--encoder</Arg>
+        <Arg>svt-av1</Arg>
+        <Arg>--chunk-method</Arg>
+        <Arg>hybrid</Arg>
+        <Arg>--concat-method</Arg>
+        <Arg>ffmpeg</Arg>
+        <Arg>--workers</Arg>
+        <Arg>0</Arg>
+    </Args>
+</Preset>

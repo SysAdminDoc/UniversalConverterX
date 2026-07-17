@@ -8,6 +8,8 @@ public sealed class SidecarNamingTests
     [InlineData("videocrush", "videocrush.exe")]
     [InlineData("ab-av1", "ab-av1-sidecar.exe")]
     [InlineData("AB-AV1", "ab-av1-sidecar.exe")]
+    [InlineData("av1an", "av1an-sidecar.exe")]
+    [InlineData("AV1AN", "av1an-sidecar.exe")]
     public void ExecutableName_AvoidsUpstreamBinaryCollisions(string engine, string expected)
     {
         Assert.Equal(expected, SidecarNaming.ExecutableName(engine));

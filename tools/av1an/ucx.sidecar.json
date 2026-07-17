@@ -1,0 +1,14 @@
+{
+  "engine": "av1an",
+  "tools": [
+    { "id": "av1an", "executable": "av1an", "display": "Av1an 0.5.2+", "managed": false },
+    { "id": "vspipe", "executable": "vspipe", "display": "VapourSynth", "managed": false },
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true },
+    { "id": "svtav1encapp", "executable": "SvtAv1EncApp", "display": "SVT-AV1 encoder", "managed": false, "whenArgContains": "svt-av1" },
+    { "id": "aomenc", "executable": "aomenc", "display": "AOM encoder", "managed": false, "whenArgContains": "aom" },
+    { "id": "rav1e", "executable": "rav1e", "display": "rav1e encoder", "managed": false, "whenArgContains": "rav1e" },
+    { "id": "vpxenc", "executable": "vpxenc", "display": "VPX encoder", "managed": false, "whenArgContains": "vpx" },
+    { "id": "x264", "executable": "x264", "display": "x264 encoder", "managed": false, "whenArgContains": "x264" },
+    { "id": "x265", "executable": "x265", "display": "x265 encoder", "managed": false, "whenArgContains": "x265" }
+  ]
+}
