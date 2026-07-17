@@ -266,7 +266,27 @@ dotnet build src/UniversalConverterX.Console/UniversalConverterX.Console.csproj 
 ```bash
 # Publish CLI and WinUI output
 .\build.ps1 -Target Publish -Configuration Release
+
+# Cross-publish native ARM64 apphosts and generate the architecture audit
+.\build.ps1 -Target Publish -Configuration Release -Architecture arm64
 ```
+
+The ARM64 publish writes to `publish/win-arm64/` and verifies the PE machine
+type of the CLI, WinUI app, Explorer shell extension COM host, and FFmpeg
+command proxy. Its generated `compatibility/arm64-publish.json` inventories
+installed sidecar executables without inferring architecture from filenames;
+x64-only sidecars require Windows x64 emulation or a later ARM64 rebuild.
+
+On a Snapdragon device with an ARM64 Python environment, probe the locally
+installed ONNX Runtime package without downloading anything:
+
+```powershell
+ucx tools qnn --json
+```
+
+The command exits successfully only when the OS and Python runtime are ARM64
+and ONNX Runtime exposes `QNNExecutionProvider`. Provider discovery is a
+readiness check, not a substitute for the on-device inference acceptance test.
 
 ## Architecture
 

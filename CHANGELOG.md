@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added a repeatable `win-arm64` cross-publish for the CLI, WinUI app, Explorer shell extension COM host, and FFmpeg command proxy. The publish gate reads PE headers to require ARM64 primary apphosts and emits an architecture inventory for installed sidecar executables, explicitly routing x64-only engines to Windows emulation or a native rebuild rather than claiming compatibility from filenames. `ucx tools qnn --json` now performs a local-only, fail-closed ARM64 Python/ONNX Runtime provider probe and succeeds only when `QNNExecutionProvider` is actually exposed; no runtime or model is installed or downloaded.
 - Compressor can now run a guarded FFmpeg 8.1 D3D12VA zero-copy chain from hardware decode through optional `deinterlace_d3d12`, `scale_d3d12`, and H.264/H.265/AV1 hardware encode. A one-frame runtime probe verifies the exact input, filters, driver, and encoder before the real job; any failure automatically preserves the request through software BWDIF/scaling and the original software codec. The WinUI surface exposes D3D12 deinterlacing explicitly, and D3D12 quality targets use QVBR instead of unsupported CRF arguments.
 
 ## [2.29.0] - 2026-07-17

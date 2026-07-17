@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -13,7 +15,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     public class Settings : CommandSettings
     {
         [CommandArgument(0, "<ACTION>")]
-        [Description("Action: list, check, download, path")]
+        [Description("Action: list, check, download, path, qnn")]
         public string Action { get; set; } = "list";
 
         [CommandArgument(1, "[TOOL]")]
@@ -23,6 +25,14 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
         [CommandOption("--tools-path <PATH>")]
         [Description("Path to converter tools")]
         public string? ToolsPath { get; set; }
+
+        [CommandOption("--python <PATH>")]
+        [Description("Python executable used by the local QNN provider probe")]
+        public string? PythonPath { get; set; }
+
+        [CommandOption("--json")]
+        [Description("Emit machine-readable JSON (supported by qnn)")]
+        public bool Json { get; set; }
     }
 
     private static readonly Dictionary<string, ToolDefinition> KnownTools = new()
@@ -47,6 +57,7 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
             "check" => await CheckTools(settings, cancellationToken),
             "download" => await DownloadTool(settings, cancellationToken),
             "path" => ShowToolsPath(settings),
+            "qnn" => await ProbeQnn(settings, cancellationToken),
             _ => InvalidAction(settings.Action)
         };
     }
@@ -236,8 +247,30 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     private static int InvalidAction(string action)
     {
         AnsiConsole.MarkupLine($"[red]Unknown action:[/] {action}");
-        AnsiConsole.MarkupLine("[dim]Valid actions: list, check, download, path[/]");
+        AnsiConsole.MarkupLine("[dim]Valid actions: list, check, download, path, qnn[/]");
         return 1;
+    }
+
+    private static async Task<int> ProbeQnn(Settings settings, CancellationToken cancellationToken)
+    {
+        var report = await QnnCapabilityProbe.ProbeAsync(settings.PythonPath, cancellationToken);
+        if (settings.Json)
+        {
+            var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+            jsonOptions.Converters.Add(new JsonStringEnumConverter());
+            AnsiConsole.WriteLine(JsonSerializer.Serialize(report, jsonOptions));
+        }
+        else
+        {
+            var color = report.Ready ? "green" : "yellow";
+            AnsiConsole.MarkupLine($"[{color}]QNN status: {report.Status}[/]");
+            AnsiConsole.MarkupLine($"[dim]Process/OS: {report.ProcessArchitecture}/{report.OperatingSystemArchitecture}[/]");
+            AnsiConsole.MarkupLine($"[dim]Python: {Markup.Escape(report.PythonArchitecture ?? "unavailable")}[/]");
+            AnsiConsole.MarkupLine($"[dim]ONNX Runtime: {Markup.Escape(report.OnnxRuntimeVersion ?? "unavailable")}[/]");
+            AnsiConsole.MarkupLine($"[dim]Providers: {Markup.Escape(report.Providers.Count == 0 ? "none" : string.Join(", ", report.Providers))}[/]");
+            AnsiConsole.WriteLine(report.Detail);
+        }
+        return report.Ready ? 0 : 2;
     }
 
     private static async Task<(bool Found, string? Version, string? Path)> FindTool(

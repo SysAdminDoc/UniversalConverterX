@@ -58,7 +58,8 @@ public class Program
                 .WithDescription("Manage converter tools")
                 .WithExample("tools", "list")
                 .WithExample("tools", "check")
-                .WithExample("tools", "download", "ffmpeg");
+                .WithExample("tools", "download", "ffmpeg")
+                .WithExample("tools", "qnn", "--json");
 
             config.AddCommand<ServeCommand>("serve")
                 .WithDescription("Bind a localhost HTTP API for headless integration")

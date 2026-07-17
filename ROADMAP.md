@@ -63,15 +63,4 @@ filesystem/playlist inspection before exposing it as ready.
 
 Impact: 2 · Effort: 4 · Type: parity
 
-### 47-a. ARM64 Publish and QNN Readiness
-
-Add a repeatable `win-arm64` publish path, audit bundled sidecars and native
-dependencies for architecture compatibility, and expose a local QNN capability
-probe that fails closed when the provider/runtime is absent. Acceptance
-requires headless ARM64 publish artifact inspection and provider-probe tests;
-actual QNN inference and WinUI rendering remain Item 47's Snapdragon hardware
-validation residual.
-
-Impact: 2 · Effort: 4 · Type: platform
-
 ## Under Consideration

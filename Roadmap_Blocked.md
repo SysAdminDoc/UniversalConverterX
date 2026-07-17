@@ -23,9 +23,15 @@ capture positive-path evidence; no product code or fallback work remains.
 
 ---
 
-### 47. Qualcomm NPU / ARM64 Native Build
+### 47. Qualcomm QNN On-Device Validation
 
-Publish a native ARM64 build targeting Snapdragon X Elite / X Plus devices. Requires ARM64 .NET 10 publish, ARM64 WinUI 3 validation, and verifying Python sidecars under ARM64 Python or x64 emulation. ONNX Runtime 1.25.0 removed ArmNN EP — must target QNN EP only.
+The repository now cross-publishes ARM64-native apphosts for the CLI, WinUI
+app, Explorer shell extension COM host, and FFmpeg proxy. A PE-header gate
+verified all four as ARM64 and emitted an explicit sidecar architecture report;
+the 31 currently installed frozen sidecars are x64 and therefore require
+Windows x64 emulation or an ARM64 rebuild. `ucx tools qnn --json` probes a local
+ARM64 Python/ONNX Runtime environment and fails closed unless it exposes
+`QNNExecutionProvider`.
 
 The generic Intel NPU candidate was qualified on 2026-07-17 and does not
 justify a separate acceleration backend. On an Intel Core Ultra 9 285 with
@@ -39,7 +45,9 @@ fallback paths instead of adding an Intel-only runtime for lower throughput.
 
 Impact: 2 · Effort: 4 · Type: platform
 
-**Blocker:** The source/build and provider-probe work is active as Item 47-a.
-After that ships, a Snapdragon X Elite / X Plus device is still required to
-verify QNN EP inference, ARM64 Python/native sidecar compatibility, and WinUI 3
-ARM64 rendering on the target hardware.
+**Blocker:** A Snapdragon X Elite / X Plus device is required to run the final
+QNN inference smoke, launch the native WinUI build, and exercise representative
+x64-emulated and ARM64 Python sidecars. The available x64 host proved the
+cross-publish, PE architecture gate, and negative provider path but cannot
+produce genuine Snapdragon runtime evidence. No remaining source/build work is
+hidden behind this entry.
