@@ -20,6 +20,7 @@ A free, open-source alternative to Wondershare UniConverter and similar paid sui
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
 - **Offline AI video tags** — sample images or video frames locally, identify 80 COCO object classes, and write bounded per-frame detections plus aggregate tags as atomic JSON.
+- **Offline neural speech** — generate two-speaker English dialogue with Dia2 1B or a consented, PerTh-watermarked voice clone with Chatterbox Turbo. Both use pinned local assets with exact hashes and separate CUDA runtimes; inference cannot access the network.
 - **Reviewed ComfyUI workflows** — submit an Export (API) graph to an already running loopback ComfyUI server, wait for its exact prompt ID, and atomically export local artifacts without installing nodes or models.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
 - **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
@@ -59,6 +60,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Batch Conversion — convert and process multiple files at once.
 - Custom Presets — create, duplicate, and edit validated workflows in-app, including per-file, input-only batch, output-folder batch, single-output, and extraction modes.
 - Semantic Preset Search — rank natural media intents such as “make movie smaller” with local sparse TF-IDF vectors and domain aliases in both the Presets UI and CLI; no model, Qdrant service, network, or telemetry is involved.
+- Offline Neural Speech — run Dia2 1B multi-speaker dialogue or Chatterbox Turbo voice cloning from the Presets UI and automation surfaces. Chatterbox requires selecting exactly one local reference-audio file together with one or more text files, and the preset explicitly acknowledges consent; generated audio retains the model's PerTh watermark.
 - Reviewed ComfyUI Workflows — run local Export (API) JSON through a separately managed loopback ComfyUI server, with explicit trust, bounded overrides/polling/exports, blocked redirects and known network nodes, and atomic output directories.
 - Av1an Per-Scene Encoding — split long videos at detected scene boundaries, distribute chunks across local encoder processes, resume interrupted work, and optionally target a perceptual quality score through a user-installed Av1an/VapourSynth/encoder toolchain.
 - Trusted VapourSynth Scripts — inspect output metadata, export simple/full DOT filter graphs, or render a reviewed local `.vpy` script through VSPipe and managed FFmpeg. Scripts are executable Python and require explicit trust; UCX never downloads them.
@@ -101,6 +103,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
 - DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
 - Gain-map presets require the opt-in pinned runtime (`gainmap download-runtime --accept-licenses`); the manifest records third-party licenses, immutable URLs, sizes, and SHA-256 hashes
+- Dia2 and Chatterbox are opt-in GPU tools. Install their reviewed model bundles with `ucx invoke-engine dia2tts --args-json '["install-model","--accept-license"]'` and `ucx invoke-engine chatterboxtts --args-json '["install-model","--accept-license"]'`. Dia2 uses Apache-2.0 code/weights plus the CC-BY-4.0 Mimi codec weights; Chatterbox and its PerTh watermarker are MIT.
 
 ### Quick Start
 

@@ -356,7 +356,7 @@ public sealed partial class ToolboxPage : Page
         AiTools.Add(new ToolboxTile("presets:bgremove", "BG Remove (BiRefNet)", "SOTA cutouts via BiRefNet / RMBG-2.0 / IS-Net / U2Net / SAM 2", "\uE91B", green, "Ready", green, true, "BiRefNet + RMBG-2.0"));
         AiTools.Add(new ToolboxTile("presets:superres", "Image Upscaler Pro", "Modern transformer SR: HAT / DAT / SwinIR / APISR / DRCT (spandrel)", "\uE799", blue, "Ready", green, true, "spandrel"));
         AiTools.Add(new ToolboxTile("presets:facerestore", "Face Restoration Pro", "CodeFormer + GFPGAN with fidelity / quality slider", "\uE77B", green, "Ready", green, true, "CodeFormer"));
-        AiTools.Add(new ToolboxTile("presets:premiumtts", "Premium TTS", "Kokoro / F5-TTS zero-shot cloning / XTTS v2 multilingual", "\uEC4F", green, "Ready", green, true, "Kokoro + F5-TTS"));
+        AiTools.Add(new ToolboxTile("presets:premiumtts", "Premium TTS", "Kokoro, Dia2 dialogue, Chatterbox Turbo and consented zero-shot voice cloning", "\uEC4F", green, "Ready", green, true, "Kokoro + Dia2 + Chatterbox"));
         AiTools.Add(new ToolboxTile("presets:translatekit", "Translator (200 lang)", "Local NLLB-200 / MADLAD-400 -- text, files, SRT subtitles", "\uE774", blue, "Ready", green, true, "NLLB-200"));
         AiTools.Add(new ToolboxTile("presets:inpaint", "Object Removal (LaMa)", "LaMa + YOLO auto-detect: 'remove every car / person / bird'", "\uE91B", orange, "Ready", green, true, "LaMa + YOLOv11"));
         AudioTools.Add(new ToolboxTile("presets:audiomastering", "Audio Mastering", "Matchering reference-based mastering + EBU R128 loudnorm", "\uEC4F", red, "Ready", green, true, "Matchering"));

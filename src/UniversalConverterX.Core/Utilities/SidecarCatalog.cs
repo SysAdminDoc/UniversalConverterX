@@ -117,6 +117,10 @@ public static class SidecarCatalog
 
     private static IEnumerable<string> ExecutableCandidates(string engineRoot, string executableName)
     {
+        // Large ML runtimes use PyInstaller's onedir form to avoid extracting
+        // multi-gigabyte CUDA payloads on every launch.
+        yield return Path.Combine(
+            engineRoot, "dist", Path.GetFileNameWithoutExtension(executableName), executableName);
         yield return Path.Combine(engineRoot, "dist", executableName);
         yield return Path.Combine(engineRoot, executableName);
         yield return Path.Combine(engineRoot, "bin", executableName);

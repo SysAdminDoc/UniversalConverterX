@@ -1,0 +1,7 @@
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124 ; sys_platform == 'win32'
+torchaudio==2.6.0+cu124 ; sys_platform == 'win32'
+torch==2.6.0 ; sys_platform != 'win32'
+torchaudio==2.6.0 ; sys_platform != 'win32'
+resemble-perth @ git+https://github.com/resemble-ai/Perth.git@ce86c49d029f42272c1902eccb675556b9ed2330
+chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox.git@65b18437192794391a0308a8f705b1e33e633948

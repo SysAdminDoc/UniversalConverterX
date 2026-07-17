@@ -1,0 +1,5 @@
+{
+  "engine": "chatterboxtts",
+  "models": true,
+  "gpu": "cuda-optional"
+}

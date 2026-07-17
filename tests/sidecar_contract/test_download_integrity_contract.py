@@ -65,6 +65,8 @@ class DownloadIntegrityContractTests(unittest.TestCase):
             "inpaint/sidecar.py",
             "ocrpro/sidecar.py",
             "premiumtts/sidecar.py",
+            "dia2tts/sidecar.py",
+            "chatterboxtts/sidecar.py",
             "sdkit/sidecar.py",
             "stemkit/sidecar.py",
             "superres/sidecar.py",
@@ -156,6 +158,10 @@ class DownloadIntegrityContractTests(unittest.TestCase):
              "download-model", "--model", "gfpgan-v1.4"],
             [sys.executable, str(TOOLS / "alphacut" / "sidecar.py"),
              "--download-model", "u2net_human_seg"],
+            [sys.executable, str(TOOLS / "dia2tts" / "sidecar.py"),
+             "install-model"],
+            [sys.executable, str(TOOLS / "chatterboxtts" / "sidecar.py"),
+             "install-model"],
         )
         with tempfile.TemporaryDirectory() as model_dir:
             for command in commands:

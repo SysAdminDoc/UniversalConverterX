@@ -40,6 +40,19 @@ public sealed class SidecarCatalogTests : IDisposable
         SidecarCatalog.Resolve(name, _root, Path.Combine(_root, "local")).Should().BeNull();
     }
 
+    [Fact]
+    public void Resolve_FindsPyInstallerOnedirExecutable()
+    {
+        var engineRoot = Path.Combine(_root, "tools", "large-ml");
+        var executable = Path.Combine(engineRoot, "dist", "large-ml", "large-ml.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(executable)!);
+        File.WriteAllText(Path.Combine(engineRoot, "ucx.sidecar.json"), "{}");
+        File.WriteAllText(executable, "fixture");
+
+        SidecarCatalog.Resolve("large-ml", _root, Path.Combine(_root, "local"))
+            .Should().Be(executable);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root)) Directory.Delete(_root, recursive: true);

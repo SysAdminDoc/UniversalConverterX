@@ -1,0 +1,5 @@
+{
+  "engine": "dia2tts",
+  "models": true,
+  "gpu": "cuda-optional"
+}

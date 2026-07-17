@@ -1,6 +1,6 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.28.0 · 209 sidecar engines · 297+ presets · 45+ UI pages
+**Status:** v2.28.0 · 211 sidecar engines · 299+ presets · 45+ UI pages
 **Last updated:** 2026-07-17
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -32,8 +32,3 @@ programmability (CLI + REST + PS module), and AI depth.
 ## Tier 3 — Later _(v2.27+)_
 
 ## Under Consideration
-
-| Item | Question blocking placement |
-|------|-----------------------------|
-| **Dia-1.6B / Dia2 TTS** | 6 GB VRAM requirement. Assess after Kokoro/F5-TTS stabilizes. |
-| **Chatterbox voice cloning** | Overlaps Dia; assess after Dia evaluation. |

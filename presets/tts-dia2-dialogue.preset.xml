@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Dialogue Text -&gt; Speech (Dia2 1B, Offline)</Name>
+    <Folder>AI/Audio</Folder>
+    <InputTypes>
+        <Extension>txt</Extension>
+        <Extension>md</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}_dia2</OutputFileNameTemplate>
+    <OutputExtension>wav</OutputExtension>
+    <Engine>dia2tts</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>speak</Arg>
+    </Args>
+</Preset>

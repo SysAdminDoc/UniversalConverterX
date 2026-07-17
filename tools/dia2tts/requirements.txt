@@ -1,0 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0+cu128 ; sys_platform == 'win32'
+torch==2.8.0 ; sys_platform != 'win32'
+numpy==2.2.6
+transformers==4.55.4
+safetensors==0.5.3
+huggingface-hub==0.34.4
+sphn==0.2.0
+soundfile==0.13.1

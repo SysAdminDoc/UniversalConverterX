@@ -70,6 +70,8 @@ are appended automatically. Common engines:
 | `framesnap`     | Frame extraction                         |
 | `rnnoise`       | Audio denoise (RNNoise / arnndn)         |
 | `edge-tts`      | TTS                                      |
+| `dia2tts`       | Pinned offline Dia2 1B dialogue TTS      |
+| `chatterboxtts` | Consented offline Chatterbox Turbo clone |
 | `whisper-cpp`   | Speech-to-text                           |
 | `parakeet-stt`  | CUDA Parakeet TDT v3 speech-to-text      |
 | `docconvert`    | LibreOffice document conversion          |
