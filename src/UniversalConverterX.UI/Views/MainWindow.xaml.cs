@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.Views.Pages;
 
 namespace UniversalConverterX.UI.Views;
@@ -70,6 +71,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SystemBackdropMaterialService.TryApplyMica(NavigationBackdropHost);
         NavSearchBox.ItemsSource = _searchSuggestions;
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);

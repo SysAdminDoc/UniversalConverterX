@@ -50,7 +50,13 @@
         </Border>
 
         <ScrollViewer Grid.Row="1" Padding="30,26">
-            <StackPanel Spacing="18" MaxWidth="920">
+            <Grid MaxWidth="920">
+                <!-- Keep a solid panel under Mica for unsupported/RDP configurations. -->
+                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="20"/>
+                <SystemBackdropElement x:Name="SettingsBackdropHost"
+                                       CornerRadius="20"
+                                       IsHitTestVisible="False"/>
+                <StackPanel Spacing="18" Padding="20">
                 
                 <!-- General Settings -->
                 <Expander IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
@@ -742,7 +748,8 @@
                     </StackPanel>
                 </Expander>
 
-            </StackPanel>
+                </StackPanel>
+            </Grid>
         </ScrollViewer>
 
         <Border Grid.Row="2"

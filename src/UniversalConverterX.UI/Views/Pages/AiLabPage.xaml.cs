@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.UI.Services;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
@@ -61,6 +62,12 @@ public sealed partial class AiLabPage : Page
 
         if (_titleToRoute.TryGetValue(tile.Title, out var route))
             App.RequestNavigation(route);
+    }
+
+    private void AiCardBackdrop_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is SystemBackdropElement host)
+            SystemBackdropMaterialService.TryApplyAcrylic(host);
     }
 
     private void OpenToolbox_Click(object sender, RoutedEventArgs e) =>

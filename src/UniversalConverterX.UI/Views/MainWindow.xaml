@@ -10,6 +10,14 @@
     Title="UniversalConverter X">
 
     <Grid Background="{StaticResource BackgroundBrush}">
+        <!-- Solid theme fallback remains visible when compositor materials are unavailable. -->
+        <Border Width="232"
+                HorizontalAlignment="Left"
+                Background="{StaticResource SurfaceBrush}"/>
+        <controls:SystemBackdropElement x:Name="NavigationBackdropHost"
+                                        Width="232"
+                                        HorizontalAlignment="Left"
+                                        IsHitTestVisible="False"/>
         <NavigationView x:Name="MainNav"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
@@ -17,7 +25,12 @@
                         OpenPaneLength="232"
                         IsTitleBarAutoPaddingEnabled="False"
                         SelectionChanged="MainNav_SelectionChanged"
-                        Background="{StaticResource BackgroundBrush}">
+                        Background="Transparent">
+
+            <NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent"/>
+                <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent"/>
+            </NavigationView.Resources>
 
             <NavigationView.PaneHeader>
                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,14,0,14">

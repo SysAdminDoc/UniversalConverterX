@@ -44,6 +44,7 @@ public sealed partial class SettingsWindow : Window
         _presetCache = serviceProvider.GetRequiredService<IUiPresetCache>();
 
         InitializeComponent();
+        SystemBackdropMaterialService.TryApplyMica(SettingsBackdropHost);
 
         // Set window size
         var hwnd = WindowNative.GetWindowHandle(this);

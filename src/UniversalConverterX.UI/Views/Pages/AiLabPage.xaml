@@ -10,14 +10,19 @@
 
     <Page.Resources>
         <DataTemplate x:Key="AiToolTemplate">
-            <Border Width="264" Height="170" Padding="18" Margin="0,0,14,14"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="18"
-                    AutomationProperties.Name="{Binding Title}"
-                    ToolTipService.ToolTip="{Binding Description}">
-                <Grid RowSpacing="12">
+            <Grid Width="264" Height="170" Margin="0,0,14,14"
+                  AutomationProperties.Name="{Binding Title}"
+                  ToolTipService.ToolTip="{Binding Description}">
+                <!-- The solid layer is the deterministic fallback for unsupported materials. -->
+                <Border Background="{StaticResource SurfaceBrush}" CornerRadius="18"/>
+                <SystemBackdropElement CornerRadius="18"
+                                       IsHitTestVisible="False"
+                                       Loaded="AiCardBackdrop_Loaded"/>
+                <Border BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="18"
+                        Padding="18">
+                    <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -47,8 +52,9 @@
                     </StackPanel>
                     <TextBlock Grid.Row="2" Text="{Binding WorkflowHint}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{Binding AccentBrush}"/>
-                </Grid>
-            </Border>
+                    </Grid>
+                </Border>
+            </Grid>
         </DataTemplate>
     </Page.Resources>
 

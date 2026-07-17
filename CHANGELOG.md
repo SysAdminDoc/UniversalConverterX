@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Navigation, AI Lab cards, and the Settings panel now use element-scoped Mica or Acrylic through Windows App SDK `SystemBackdropElement`. Each material is guarded by runtime API/controller capability checks and layered over the existing solid theme surface, so unsupported GPUs, remote sessions, elevated launches, and disabled transparency keep the previous legible appearance.
+
 ## [2.28.0] - 2026-07-17
 
 ### Changed
