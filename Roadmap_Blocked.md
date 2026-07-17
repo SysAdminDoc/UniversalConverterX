@@ -14,16 +14,6 @@ Impact: 3 · Effort: 2 · Type: platform + leapfrog
 
 ---
 
-### 44. Blu-ray Authoring (Disc Tools residual)
-
-Data CD/DVD imaging and burning now ship through Windows IMAPI2, and DVD-Video authoring now ships through FFmpeg + `dvdauthor` into an IMAPI UDF 1.02 image/write path. The headless acceptance proof produced and inspected both a data ISO and a DVD-Video ISO containing a complete `VIDEO_TS` structure without requiring a physical recorder.
-
-Impact: 2 · Effort: 4 · Type: parity
-
-**Blocker:** Blu-ray authoring still needs a maintained, redistributable Windows mux/author backend. tsMuxeR was archived by its maintainer in April 2025. Evaluate an `eac3to`-based pipeline (including licensing, playlist/clip authoring coverage, and a reproducible test image) before exposing Blu-ray in the product.
-
----
-
 ### 47. Qualcomm NPU / ARM64 Native Build
 
 Publish a native ARM64 build targeting Snapdragon X Elite / X Plus devices. Requires ARM64 .NET 10 publish, ARM64 WinUI 3 validation, and verifying Python sidecars under ARM64 Python or x64 emulation. ONNX Runtime 1.25.0 removed ArmNN EP — must target QNN EP only.
@@ -40,49 +30,7 @@ fallback paths instead of adding an Intel-only runtime for lower throughput.
 
 Impact: 2 · Effort: 4 · Type: platform
 
-**Blocker:** Needs a Snapdragon X Elite device to verify QNN EP availability, ARM64 Python sidecar compatibility, and WinUI 3 ARM64 rendering. Cannot be validated without hardware.
-
----
-
-### 148. Commercial / Ad Detection (Comskip)
-
-The UCX use case is valid: analyze local DVR recordings into EDL/chapter
-markers, optionally use the detected keep ranges for an atomic FFmpeg export,
-and always retain a non-destructive report. This fits batch media automation
-without turning UCX into a recorder or PVR.
-
-Impact: 2 · Effort: 2 · Type: optional external engine
-
-**Blocker (verified 2026-07-17):** The maintained GPL-2.0 upstream repository's
-latest stable tag is V0.83 (2025-02-28), but its official GitHub release is
-source-only and publishes no Windows executable, asset digest, or SBOM. The
-separate project site offers Windows free/donator downloads without immutable
-release-integrity metadata. UCX's repository-wide runtime policy forbids
-silently acquiring or claiming verification for that mutable distribution.
-Unblock when upstream publishes a versioned Windows console archive through an
-immutable release with SHA-256 metadata, or when UCX has a reproducible,
-license-reviewed Windows build recipe and a redistributable acceptance fixture.
-
----
-
-### 149. Community Preset Repository
-
-UCX already ships the local client-side safety boundary: custom preset XML is
-read with DTDs and external resolution disabled, validated against the preset
-schema, and saved atomically; executable third-party plugins remain quarantined
-until a user approves a whole-directory SHA-256 digest, and any changed file
-revokes that trust automatically. A hosted community catalog would still be an
-external service and governance commitment, not merely another importer.
-
-Impact: 3 · Effort: 3 · Type: ecosystem
-
-**Blocker (verified 2026-07-17):** No canonical repository operator,
-contribution/license policy, moderation and incident-response owner, revocation
-feed, or immutable publication channel has been designated. Hardcoding a
-mutable or third-party feed would bypass the product's default-deny trust model
-and turn contributed sidecar arguments into an unreviewed remote control
-surface. Unblock with a SysAdminDoc-owned catalog location and named operator
-policy that defines review, takedown, license provenance, immutable versioned
-assets, SHA-256 metadata, and revocation semantics. The future client must keep
-network access user-initiated, validate every preset locally, show the exact
-engine and arguments before install, and never auto-update installed presets.
+**Blocker:** The source/build and provider-probe work is active as Item 47-a.
+After that ships, a Snapdragon X Elite / X Plus device is still required to
+verify QNN EP inference, ARM64 Python/native sidecar compatibility, and WinUI 3
+ARM64 rendering on the target hardware.
