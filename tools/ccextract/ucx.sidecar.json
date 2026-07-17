@@ -1,3 +1,7 @@
 {
-  "engine": "ccextract"
+  "engine": "ccextract",
+  "tools": [
+    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true },
+    { "id": "ffprobe", "executable": "ffprobe", "display": "FFprobe", "managed": true }
+  ]
 }

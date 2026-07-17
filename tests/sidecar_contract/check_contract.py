@@ -43,6 +43,14 @@ KNOWN_EVENTS = {
     "stem",     # demucs — separated audio stems
     "device",   # recordcast — DirectShow device enumeration
     "drive",    # discburn — IMAPI2 optical recorder enumeration
+    "stream",   # ccextract — embedded caption stream inventory
+    "caption",  # ccextract — converted or extracted caption output
+    "title",    # dvdrip — discovered DVD title set
+    "keyframes",# clipforge — lossless-cut keyframe inventory
+    "proxy",    # clipforge — generated review proxy
+    "model_status", # colorize — local model readiness
+    "colorized",    # colorize — colourised image or video output
+    "waveform_doc", # mediathumb — rendered waveform image
     "preset",   # gifstudio — known render presets
     "format",   # heicshift — supported input/output format inventory
     "voice",    # edge-tts — voice catalog enumeration

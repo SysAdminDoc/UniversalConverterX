@@ -1,3 +1,19 @@
 {
-  "engine": "colorize"
+  "engine": "colorize",
+  "tools": [
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true,
+      "whenArgContainsAny": ["video"]
+    },
+    {
+      "id": "ffprobe",
+      "executable": "ffprobe",
+      "display": "FFprobe",
+      "managed": true,
+      "whenArgContainsAny": ["video"]
+    }
+  ]
 }
