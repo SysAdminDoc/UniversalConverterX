@@ -757,6 +757,9 @@ def main(argv: list[str] | None = None) -> int:
     all_violations: list[Violation] = []
     for path in sidecars:
         all_violations.extend(check_one(path))
+        for operation_dir in sorted(path.parent.glob("*_ops")):
+            for module_path in sorted(operation_dir.glob("*.py")):
+                all_violations.extend(check_one(module_path))
         all_violations.extend(check_health_manifest(path))
         all_violations.extend(check_security_floors(path.parent))
         all_violations.extend(check_onnx_runtime_compatibility(path.parent))

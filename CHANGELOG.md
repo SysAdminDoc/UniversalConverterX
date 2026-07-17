@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Changed
 
+- ClipForge's 2,322-line sidecar entrypoint is now split into focused metadata/filter, track, analysis/proxy, and face-privacy operation modules. The entrypoint retains its complete CLI and import surface while focusing on parser wiring and orchestration, PyInstaller includes and exercises the package, and the static NDJSON contract audit now follows extracted `*_ops` modules.
 - Video Summarizer, Auto Highlight, Colorize, Background Remover, and Compressor now delegate their non-visual workflow state, sidecar argument construction, output planning, and error mapping to tested CommunityToolkit.Mvvm ViewModels in Core. The WinUI code-behind is limited to picker, dispatcher, and view-service work, with focused xUnit coverage for transcript/video branching, selected highlight serialization, model readiness, AlphaCut options, target-size headroom, and VMAF encoder presets.
 
 ### Added

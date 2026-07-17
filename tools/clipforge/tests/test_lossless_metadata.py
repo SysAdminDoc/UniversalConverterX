@@ -12,6 +12,8 @@ sidecar = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(sidecar)
 
+from clipforge_ops import metadata
+
 
 class LosslessMetadataTests(TestCase):
     def test_ffmpeg_runner_drains_stderr_while_reading_progress(self):
@@ -20,9 +22,10 @@ class LosslessMetadataTests(TestCase):
             "[print('diagnostic-' + ('x' * 200), file=sys.stderr) for _ in range(200)]; "
             "print('progress=end')"
         )
-        with mock.patch.object(sidecar, "emit") as emit:
-            result = sidecar.run_ffmpeg(
-                [sys.executable, "-c", script], 1.0, "pipe smoke")
+        emit = mock.Mock()
+        result = sidecar.run_ffmpeg(
+            [sys.executable, "-c", script], 1.0, "pipe smoke",
+            event_emitter=emit)
 
         self.assertEqual(0, result)
         emit.assert_any_call(
@@ -65,10 +68,10 @@ class LosslessMetadataTests(TestCase):
                 left=16, right=16, top=8, bottom=8,
             )
             with (
-                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
-                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
-                mock.patch.object(sidecar, "probe", side_effect=[source_probe, output_probe]),
-                mock.patch.object(sidecar, "run_ffmpeg", side_effect=fake_run),
+                mock.patch.object(metadata, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(metadata, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(metadata, "probe", side_effect=[source_probe, output_probe]),
+                mock.patch.object(metadata, "run_ffmpeg", side_effect=fake_run),
             ):
                 result = sidecar.op_crop_meta(args)
 
@@ -99,10 +102,10 @@ class LosslessMetadataTests(TestCase):
                 }],
             }
             with (
-                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
-                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
-                mock.patch.object(sidecar, "probe", return_value=source_probe),
-                mock.patch.object(sidecar, "run_ffmpeg") as run,
+                mock.patch.object(metadata, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(metadata, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(metadata, "probe", return_value=source_probe),
+                mock.patch.object(metadata, "run_ffmpeg") as run,
             ):
                 result = sidecar.op_crop_meta(args)
 
@@ -138,10 +141,10 @@ class LosslessMetadataTests(TestCase):
             args = argparse.Namespace(
                 input=str(input_path), output=str(output_path), aspect="16:9")
             with (
-                mock.patch.object(sidecar, "find_ffmpeg", return_value="ffmpeg"),
-                mock.patch.object(sidecar, "find_ffprobe", return_value="ffprobe"),
-                mock.patch.object(sidecar, "probe", side_effect=[source_probe, output_probe]),
-                mock.patch.object(sidecar, "run_ffmpeg", side_effect=fake_run),
+                mock.patch.object(metadata, "find_ffmpeg", return_value="ffmpeg"),
+                mock.patch.object(metadata, "find_ffprobe", return_value="ffprobe"),
+                mock.patch.object(metadata, "probe", side_effect=[source_probe, output_probe]),
+                mock.patch.object(metadata, "run_ffmpeg", side_effect=fake_run),
             ):
                 result = sidecar.op_aspect_override(args)
 
