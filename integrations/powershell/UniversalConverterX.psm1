@@ -60,13 +60,16 @@ function Get-UcxExe {
     $root = Get-UcxRoot
     if (-not $root) { throw "UCX install root not found. Set `$env:UCX_HOME or install UCX." }
 
-    foreach ($p in @(
-        (Join-Path $root 'ucx.exe'),
+    $installed = Join-Path $root 'ucx.exe'
+    if (Test-Path $installed) { return $installed }
+
+    $candidate = @(
         (Join-Path $root 'src\UniversalConverterX.Console\bin\x64\Release\net10.0\ucx.exe'),
-        (Join-Path $root 'src\UniversalConverterX.Console\bin\x64\Debug\net10.0\ucx.exe')
-    )) {
-        if (Test-Path $p) { return $p }
-    }
+        (Join-Path $root 'src\UniversalConverterX.Console\bin\x64\Debug\net10.0\ucx.exe'),
+        (Join-Path $root 'src\UniversalConverterX.Console\bin\Release\net10.0\ucx.exe'),
+        (Join-Path $root 'src\UniversalConverterX.Console\bin\Debug\net10.0\ucx.exe')
+    ) | Where-Object { Test-Path $_ } | Get-Item | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+    if ($candidate) { return $candidate.FullName }
     throw "ucx.exe not found under $root. Build the Console project or install a release bundle."
 }
 
@@ -221,6 +224,63 @@ function ConvertTo-UcxQualityPreset {
     if ($Quality -le 90) { return 'high' }
     if ($Quality -lt 100) { return 'highest' }
     return 'lossless'
+}
+
+
+# ── Shared engine catalogue ─────────────────────────────────────────────────
+
+function Get-UcxEngine {
+    <#
+    .SYNOPSIS
+        List the same native and sidecar engines exposed by the UI, CLI, and REST API.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter()] [string] $Name,
+        [Parameter()] [switch] $Available
+    )
+
+    $cli = Get-UcxExe
+    $json = & $cli engines --json
+    if ($LASTEXITCODE -ne 0) { throw "ucx engines failed with exit code $LASTEXITCODE." }
+    $engines = @($json | ConvertFrom-Json)
+    if ($Name) {
+        $engines = @($engines | Where-Object { $_.name -eq $Name })
+    }
+    if ($Available) {
+        $engines = @($engines | Where-Object { $_.available })
+    }
+    $engines
+}
+
+
+function Invoke-UcxEngine {
+    <#
+    .SYNOPSIS
+        Invoke any engine from Get-UcxEngine with a verbatim argument array.
+
+    .EXAMPLE
+        Invoke-UcxEngine -Name scenedetect -Arguments @('presets')
+
+    .EXAMPLE
+        Invoke-UcxEngine -Name converter -Arguments @('input.mov','-o','mp4')
+    #>
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param(
+        [Parameter(Mandatory)] [string] $Name,
+        [Parameter()] [string[]] $Arguments = @()
+    )
+
+    if (-not $PSCmdlet.ShouldProcess($Name, "Invoke UCX engine")) { return }
+    if ($Name -eq 'converter') {
+        $cli = Get-UcxExe
+        & $cli convert @Arguments
+        if ($LASTEXITCODE -ne 0) { throw "Native converter exited with code $LASTEXITCODE." }
+        return
+    }
+
+    $exe = Get-UcxSidecar -Name $Name
+    Invoke-UcxNdjson -Exe $exe -ArgsList $Arguments -Activity "UCX $Name"
 }
 
 
@@ -402,4 +462,5 @@ function Watch-MediaFolder {
 
 Export-ModuleMember -Function `
     Get-UcxRoot, Get-UcxExe, Get-UcxSidecar, Test-Ucx, `
+    Get-UcxEngine, Invoke-UcxEngine, `
     Convert-MediaFile, Compress-MediaFile, Get-MediaInfo, Watch-MediaFolder

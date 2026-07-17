@@ -72,39 +72,8 @@ public sealed class SidecarRunner : ISidecarRunner
 
     public string? Locate(string toolName)
     {
-        if (string.IsNullOrWhiteSpace(toolName)) return null;
-        // Reject any input that could escape the tools/ root via traversal.
-        if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
-            return null;
-
-        var exeName = SidecarNaming.ExecutableName(toolName);
-
-        // Walk up from BaseDirectory checking the three layouts a frozen sidecar
-        // can take: PyInstaller one-folder builds drop to dist/, classic builds
-        // place the exe alongside sidecar.py, and the old tools-bin convention
-        // groups everything under bin/. PresetRunner / ServeCommand mirror this
-        // search order so the UI and CLI agree on which binary to run.
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            foreach (var rel in new[]
-            {
-                Path.Combine("tools", toolName, "dist", exeName),
-                Path.Combine("tools", toolName, exeName),
-                Path.Combine("tools", toolName, "bin", exeName),
-            })
-            {
-                var candidate = Path.Combine(dir.FullName, rel);
-                if (File.Exists(candidate)) return candidate;
-            }
-            dir = dir.Parent;
-        }
-
-        // Fall back to %LocalAppData%/UniversalConverterX/tools/<name>/<name>.exe.
-        var localApp = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "tools", toolName, exeName);
-        if (File.Exists(localApp)) return localApp;
+        var builtIn = SidecarCatalog.Resolve(toolName);
+        if (builtIn is not null) return builtIn;
 
         // Third-party plugins are a separate, default-deny execution root.
         // TryGetTrustedPlugin recomputes the whole-directory SHA-256 before

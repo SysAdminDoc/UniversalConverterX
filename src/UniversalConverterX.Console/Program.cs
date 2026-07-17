@@ -70,6 +70,15 @@ public class Program
                 .WithExample("convert-preset", "--list")
                 .WithExample("convert-preset", "--preset", "To MP4 (H.264 1080p)", "video.mov")
                 .WithExample("convert-preset", "--preset", "To PNG", "--input-files", "files.txt");
+
+            config.AddCommand<EnginesCommand>("engines")
+                .WithDescription("List the shared UI, CLI, REST, and PowerShell engine catalogue")
+                .WithExample("engines", "--json")
+                .WithExample("engines", "--available");
+
+            config.AddCommand<InvokeEngineCommand>("invoke-engine")
+                .WithDescription("Invoke any installed sidecar with a JSON argument array")
+                .WithExample("invoke-engine", "scenedetect", "--args-json", "[\"presets\"]");
         });
 
         return app.Run(args);

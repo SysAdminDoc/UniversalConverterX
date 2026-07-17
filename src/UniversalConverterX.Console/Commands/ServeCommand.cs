@@ -18,6 +18,7 @@ namespace UniversalConverterX.Console.Commands;
 /// Endpoints:
 ///   GET  /healthz                    -> { "ok": true, "version": "..." }
 ///   GET  /tools                      -> [ { "name": ..., "available": true|false, "path": ... } ]
+///   GET  /engines                    -> native converter + shared sidecar catalogue
 ///   POST /convert                    -> { "job_id": "..." }                  (body: { "engine": str, "args": [str] })
 ///   GET  /jobs/{id}                  -> { "id":..., "running":..., "exit":..., "events_total":... }
 ///   GET  /jobs/{id}/events?since=N   -> NDJSON stream of accumulated events from cursor N
@@ -108,7 +109,11 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             }
             else if (path == "/tools" && req.HttpMethod == "GET")
             {
-                await WriteJson(resp, 200, ListTools());
+                await WriteJson(resp, 200, ListEngines(includeNativeConverter: false));
+            }
+            else if (path == "/engines" && req.HttpMethod == "GET")
+            {
+                await WriteJson(resp, 200, ListEngines(includeNativeConverter: true));
             }
             else if (path == "/convert" && req.HttpMethod == "POST")
             {
@@ -154,13 +159,22 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                     return;
                 }
 
-                var exe = ResolveSidecar(engine);
+                var launchArgs = args;
+                string? exe;
+                if (string.Equals(engine, "converter", StringComparison.OrdinalIgnoreCase))
+                {
+                    (exe, launchArgs) = ResolveNativeConverter(args);
+                }
+                else
+                {
+                    exe = SidecarCatalog.Resolve(engine);
+                }
                 if (exe is null)
                 {
                     await WriteJson(resp, 404, new { error = "sidecar_not_found", engine });
                     return;
                 }
-                var id = jobs.Start(engine, exe, args);
+                var id = jobs.Start(engine, exe, launchArgs);
                 await WriteJson(resp, 202, new { job_id = id });
             }
             else if (path.StartsWith("/jobs/") && req.HttpMethod == "GET")
@@ -265,71 +279,52 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             : ip.ToString();
     }
 
-    private static IReadOnlyList<object> ListTools()
+    private static IReadOnlyList<object> ListEngines(bool includeNativeConverter)
     {
-        // Build the list dynamically from whichever tools/<name>/ folders exist
-        // in the bundled or %LocalAppData% layout. Hard-coding 19 sidecar names
-        // (the prior behaviour) was misleading once the project shipped 170+.
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var list = new List<object>();
-
-        void Scan(string toolsDir)
+        if (includeNativeConverter)
         {
-            if (!Directory.Exists(toolsDir)) return;
-            foreach (var sub in Directory.EnumerateDirectories(toolsDir))
+            list.Add(new
             {
-                var name = Path.GetFileName(sub);
-                // Skip private subdirs like _models that hold shared state, not a sidecar.
-                if (string.IsNullOrEmpty(name) || name.StartsWith('_') || name.StartsWith('.')) continue;
-                if (!seen.Add(name)) continue;
-                var path = ResolveSidecar(name);
-                list.Add(new { name, available = path is not null, path });
-            }
+                name = "converter",
+                kind = "native",
+                available = true,
+                path = Environment.ProcessPath,
+                manifest = (string?)null,
+            });
         }
-
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
+        foreach (var entry in SidecarCatalog.Discover())
         {
-            Scan(Path.Combine(dir.FullName, "tools"));
-            dir = dir.Parent;
+            list.Add(new
+            {
+                name = entry.Name,
+                kind = "sidecar",
+                available = entry.Available,
+                path = entry.ExecutablePath,
+                manifest = entry.ManifestPath,
+            });
         }
-        Scan(Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "tools"));
-
-        list.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(
-            ((dynamic)a).name, ((dynamic)b).name));
         return list;
     }
 
-    private static string? ResolveSidecar(string name)
+    private static (string? Executable, List<string> Arguments) ResolveNativeConverter(
+        IReadOnlyList<string> arguments)
     {
-        if (string.IsNullOrWhiteSpace(name)) return null;
-        // Reject input that could escape the tools/ root via traversal — the
-        // /convert endpoint takes engine names from arbitrary HTTP clients.
-        if (name.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || name == "." || name == "..")
-            return null;
+        var executable = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(executable)) return (null, []);
 
-        var exe = SidecarNaming.ExecutableName(name);
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
+        var launchArguments = new List<string>();
+        if (string.Equals(Path.GetFileNameWithoutExtension(executable), "dotnet", StringComparison.OrdinalIgnoreCase))
         {
-            foreach (var rel in new[]
-            {
-                Path.Combine("tools", name, "dist", exe),
-                Path.Combine("tools", name, exe),
-                Path.Combine("tools", name, "bin", exe),
-            })
-            {
-                var c = Path.Combine(dir.FullName, rel);
-                if (File.Exists(c)) return c;
-            }
-            dir = dir.Parent;
+            var assemblyPath = Path.Combine(
+                AppContext.BaseDirectory,
+                (typeof(Program).Assembly.GetName().Name ?? "ucx") + ".dll");
+            if (!File.Exists(assemblyPath)) return (null, []);
+            launchArguments.Add(assemblyPath);
         }
-        var localApp = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "tools", name, exe);
-        return File.Exists(localApp) ? localApp : null;
+        launchArguments.Add("convert");
+        launchArguments.AddRange(arguments);
+        return (executable, launchArguments);
     }
 }
 

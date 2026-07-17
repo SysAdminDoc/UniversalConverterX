@@ -117,6 +117,17 @@ ucx tools check
 
 # Show file info
 ucx info document.pdf
+
+# Discover the same native and sidecar engines exposed by the desktop, REST,
+# and PowerShell surfaces; include readiness and manifest metadata as JSON
+ucx engines --json
+
+# Invoke any installed sidecar without a preset-specific CLI wrapper
+ucx invoke-engine scenedetect --args-json '["presets"]'
+
+# Start the loopback-only REST surface; GET /engines discovers the catalogue
+# and POST /convert accepts {"engine":"...","args":["..."]}
+ucx serve --port 17654
 ```
 
 ### Commands
@@ -128,6 +139,10 @@ ucx info document.pdf
 | `info` | Show information about a file |
 | `config` | View or modify configuration |
 | `tools` | Manage converter tools |
+| `engines` | Discover the shared UI/CLI/REST/PowerShell engine catalogue |
+| `invoke-engine` | Run an installed sidecar with a JSON argument array |
+| `convert-preset` | Run a named desktop-compatible preset |
+| `serve` | Host the loopback-only REST job API |
 
 ### Convert Options
 
@@ -145,6 +160,11 @@ ucx info document.pdf
 ```
 
 The History page can also export the current filtered history view as the same JSON or CSV report schema.
+
+The bundled PowerShell module exposes the same catalogue through `Get-UcxEngine`
+and the same raw invocation path through `Invoke-UcxEngine`. The native
+`converter` engine maps to `ucx convert`; every specialized engine maps to the
+same frozen executable selected by WinUI and REST.
 
 ## Project planning
 

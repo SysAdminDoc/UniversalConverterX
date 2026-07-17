@@ -10,6 +10,20 @@ namespace UniversalConverterX.Console.Presets;
 /// </summary>
 public static class PresetRunner
 {
+    public static int RunRaw(string engine, IReadOnlyList<string> args)
+    {
+        var executable = ResolveSidecar(engine);
+        if (executable is null)
+        {
+            System.Console.Error.WriteLine(
+                $"Sidecar '{engine}' not found. Build it with `pwsh tools/{engine}/build.ps1` " +
+                "or install a release bundle containing that engine.");
+            return 3;
+        }
+
+        return Spawn(executable, args, engine);
+    }
+
     public static int Run(ConversionPreset preset, IReadOnlyList<string> inputs)
     {
         if (inputs.Count == 0)
@@ -144,34 +158,5 @@ public static class PresetRunner
     }
 
     /// <summary>Mirror of SidecarRunner.Locate semantics.</summary>
-    public static string? ResolveSidecar(string toolName)
-    {
-        if (string.IsNullOrWhiteSpace(toolName)) return null;
-        if (toolName.IndexOfAny(['/', '\\', ':', '\0']) >= 0 || toolName == "." || toolName == "..")
-            return null;
-
-        var exeName = SidecarNaming.ExecutableName(toolName);
-
-        // Walk up from the CLI's BaseDirectory looking for tools/<name>/<name>.exe.
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            foreach (var rel in new[] { $"tools/{toolName}/dist/{exeName}",
-                                        $"tools/{toolName}/{exeName}",
-                                        $"tools/{toolName}/bin/{exeName}" })
-            {
-                var c = Path.Combine(dir.FullName, rel);
-                if (File.Exists(c)) return c;
-            }
-            dir = dir.Parent;
-        }
-
-        // Then %LocalAppData%/UniversalConverterX/tools/<name>/<name>.exe
-        var localApp = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "tools", toolName, exeName);
-        if (File.Exists(localApp)) return localApp;
-
-        return null;
-    }
+    public static string? ResolveSidecar(string toolName) => SidecarCatalog.Resolve(toolName);
 }
