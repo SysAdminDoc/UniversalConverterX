@@ -14,6 +14,11 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- Fix a cluster of clipped/overflowing layouts introduced by the density pass:
+  - **Converter queue** — the 7-column table forced a 720px min-width into a ~520px panel, clipping the Size/Status columns and crushing the filename. Rebuilt as a 6-column table (the estimated output is now stacked under Size), fitting the panel with readable headers and filenames.
+  - **Downloader** — the Quality/Container combos and three option checkboxes shared one non-wrapping row that ran off the right edge (hiding "Skip sponsor segments"). Split into two rows and widened the Quality combo so "Highest available (video + audio)" fits.
+  - **AI Lab tiles** — 148px tiles clipped the second description line with no ellipsis; raised to 168px so descriptions show in full.
+  - **Home** — workflow cards were too short (148px) to render their descriptions at all; raised to 176px, and the AI-feature tiles now ellipsize overflow instead of hard-cutting.
 - Fix clipped, unreadable Toolbox tiles. The "tighten workspace density" pass shrank tile height to 116px, but each tile renders a 40px icon block, title, two-line description, and a status row — needing ~170px. Title and description were squeezed to an unreadable sliver. Restored the tile to 216×172 (padding 14) so all tile content is fully visible.
 - Fix a fatal launch crash: `MainWindow`, `SettingsWindow`, and `ProgressWindow` each carried an `x:Uid` on the `Window` root. A WinUI 3 `Window` is not a `FrameworkElement`, so `x:Uid`-driven resource application throws `XamlParseException` ("Failed to assign to property Window.Title") during `InitializeComponent`. `MainWindow` crashed the app on startup; the other two would crash when Settings or a progress window opened. Removed the `x:Uid`/literal `Title` from all three roots and set the (localized) title in code-behind, matching the existing pattern.
 - Format and parse all external-tool numbers with `InvariantCulture`. On comma-decimal locales (de/fr, which ship as resources) converters emitted args like `-r 29,97` that FFmpeg rejects, and `double.Parse` of period-decimal tool output threw, breaking FFmpeg/Calibre/JXL progress and resvg SVG sizing. Covers FFmpeg, potrace, cjxl, resvg, Calibre.

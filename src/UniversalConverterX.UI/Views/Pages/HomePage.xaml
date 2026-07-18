@@ -10,14 +10,14 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ActionCardTemplate">
-            <Border Width="212" Height="148" Padding="14" Margin="0,0,10,10"
+            <Border Width="212" Height="176" Padding="14" Margin="0,0,10,10"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0"
                     CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding Description}">
-                <Grid RowSpacing="14">
+                <Grid RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -78,7 +78,8 @@
                                    TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding Description}" FontSize="12"
                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" MaxLines="2"/>
+                                   TextWrapping="Wrap" MaxLines="2"
+                                   TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{Binding AccentBrush}"/>
                     </StackPanel>

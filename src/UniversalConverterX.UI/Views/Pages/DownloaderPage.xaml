@@ -197,31 +197,35 @@
                         AutomationProperties.AutomationId="DownloaderAddUrlButton"
                         Style="{StaticResource PrimaryButtonStyle}" Click="AddUrl_Click" IsEnabled="False"/>
 
-                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16">
-                    <ComboBox x:Uid="DownloaderPage_QualityCombo" x:Name="QualityCombo" Header="Quality" Width="180" SelectedIndex="0"
-                              AutomationProperties.AutomationId="DownloaderQualityCombo">
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_013" Content="Highest available (video + audio)" Tag="best"/>
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_014" Content="1080p" Tag="1080"/>
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_015" Content="720p" Tag="720"/>
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_016" Content="480p" Tag="480"/>
-                    </ComboBox>
-                    <ComboBox x:Uid="DownloaderPage_OutputFormatCombo" x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0"
-                              AutomationProperties.AutomationId="DownloaderOutputFormatCombo">
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_018" Content="MP4" Tag="mp4"/>
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_019" Content="MKV" Tag="mkv"/>
-                        <ComboBoxItem x:Uid="DownloaderPage_Item_020" Content="WebM" Tag="webm"/>
-                    </ComboBox>
-                    <CheckBox x:Uid="DownloaderPage_AudioOnlyCheck" x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
-                              AutomationProperties.AutomationId="DownloaderAudioOnlyCheck"
-                              Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox x:Uid="DownloaderPage_SubtitlesCheck" x:Name="SubtitlesCheck" Content="Embed subtitles"
-                              AutomationProperties.AutomationId="DownloaderSubtitlesCheck"
-                              Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <CheckBox x:Uid="DownloaderPage_SponsorBlockCheck" x:Name="SponsorBlockCheck"
-                              Content="Skip sponsor segments (SponsorBlock)"
-                              AutomationProperties.AutomationId="DownloaderSponsorBlockCheck"
-                              ToolTipService.ToolTip="Removes sponsor / self-promo / interaction segments from the final download. Uses yt-dlp's SponsorBlock postprocessor — pulls segment data from api.sponsor.ajay.app on demand."
-                              Foreground="{StaticResource TextPrimaryBrush}"/>
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <ComboBox x:Uid="DownloaderPage_QualityCombo" x:Name="QualityCombo" Header="Quality" Width="262" SelectedIndex="0"
+                                  AutomationProperties.AutomationId="DownloaderQualityCombo">
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_013" Content="Highest available (video + audio)" Tag="best"/>
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_014" Content="1080p" Tag="1080"/>
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_015" Content="720p" Tag="720"/>
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_016" Content="480p" Tag="480"/>
+                        </ComboBox>
+                        <ComboBox x:Uid="DownloaderPage_OutputFormatCombo" x:Name="OutputFormatCombo" Header="Container" Width="140" SelectedIndex="0"
+                                  AutomationProperties.AutomationId="DownloaderOutputFormatCombo">
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_018" Content="MP4" Tag="mp4"/>
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_019" Content="MKV" Tag="mkv"/>
+                            <ComboBoxItem x:Uid="DownloaderPage_Item_020" Content="WebM" Tag="webm"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="20">
+                        <CheckBox x:Uid="DownloaderPage_AudioOnlyCheck" x:Name="AudioOnlyCheck" Content="Audio only (MP3)"
+                                  AutomationProperties.AutomationId="DownloaderAudioOnlyCheck"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <CheckBox x:Uid="DownloaderPage_SubtitlesCheck" x:Name="SubtitlesCheck" Content="Embed subtitles"
+                                  AutomationProperties.AutomationId="DownloaderSubtitlesCheck"
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <CheckBox x:Uid="DownloaderPage_SponsorBlockCheck" x:Name="SponsorBlockCheck"
+                                  Content="Skip sponsor segments (SponsorBlock)"
+                                  AutomationProperties.AutomationId="DownloaderSponsorBlockCheck"
+                                  ToolTipService.ToolTip="Removes sponsor / self-promo / interaction segments from the final download. Uses yt-dlp's SponsorBlock postprocessor — pulls segment data from api.sponsor.ajay.app on demand."
+                                  Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"

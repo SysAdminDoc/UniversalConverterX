@@ -652,7 +652,6 @@ public sealed partial class ConverterPage : Page
         QueueSortFileButton.Content = SortHeader("File", QueueSortColumn.File);
         QueueSortFormatButton.Content = SortHeader("Format", QueueSortColumn.Format);
         QueueSortSizeButton.Content = SortHeader("Size", QueueSortColumn.Size);
-        QueueSortEstimateButton.Content = SortHeader("Est. output", QueueSortColumn.Estimate);
         QueueSortWarningsButton.Content = SortHeader("Status", QueueSortColumn.Warnings);
     }
 
