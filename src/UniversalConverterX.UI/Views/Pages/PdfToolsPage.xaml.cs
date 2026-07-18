@@ -16,9 +16,12 @@ public sealed partial class PdfToolsPage : Page
     private string? _singleInput;
     private string? _output;
 
+    private bool _isReady;
+
     public PdfToolsPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _history = App.Services.GetRequiredService<IHistoryService>();
         ApplyOpVisibility();
@@ -28,6 +31,7 @@ public sealed partial class PdfToolsPage : Page
 
     private void OpCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (!_isReady) return;
         ApplyOpVisibility();
         UpdateRunEnabled();
     }

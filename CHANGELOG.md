@@ -14,6 +14,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- Fix a fatal crash when opening several tool pages from the Toolbox (and Home / AI Lab). Nine pages — Image Converter, Image Enhancer, Video Enhancer, Photo Restoration, Noise Remover, GIF Maker, PDF Tools, Batch Rename, and Auto Reframe — wired a `SelectionChanged`/`Changed` handler that fires while `InitializeComponent()` is still constructing the page, before the controls it reads exist. The existing `if (RunButton is null) return;` guard checked a control created too early, so the handler ran and threw `NullReferenceException`, fail-fasting the app. Added an `_isReady` flag set immediately after `InitializeComponent()` and guarded the affected handlers on it. Verified by navigating to all 40 tool routes with zero crashes.
 - Fix a cluster of clipped/overflowing layouts introduced by the density pass:
   - **Converter queue** — the 7-column table forced a 720px min-width into a ~520px panel, clipping the Size/Status columns and crushing the filename. Rebuilt as a 6-column table (the estimated output is now stacked under Size), fitting the panel with readable headers and filenames.
   - **Downloader** — the Quality/Container combos and three option checkboxes shared one non-wrapping row that ran off the right edge (hiding "Skip sponsor segments"). Split into two rows and widened the Quality combo so "Highest available (video + audio)" fits.

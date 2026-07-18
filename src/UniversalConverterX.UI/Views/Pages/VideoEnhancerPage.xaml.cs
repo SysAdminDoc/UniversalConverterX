@@ -34,9 +34,12 @@ public sealed partial class VideoEnhancerPage : Page
     private bool _anime4KReady;
     private bool _anime4KActionRunning;
 
+    private bool _isReady;
+
     public VideoEnhancerPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _healthService = App.Services.GetRequiredService<ISidecarHealthService>();
         FileList.ItemsSource = _files;
@@ -417,7 +420,7 @@ public sealed partial class VideoEnhancerPage : Page
 
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();

@@ -27,9 +27,12 @@ public sealed partial class GifMakerPage : Page
     private readonly ObservableCollection<GfFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
 
+    private bool _isReady;
+
     public GifMakerPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -167,7 +170,7 @@ public sealed partial class GifMakerPage : Page
 
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
@@ -175,7 +178,7 @@ public sealed partial class GifMakerPage : Page
 
     private void Settings_Text_Changed(object sender, TextChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();

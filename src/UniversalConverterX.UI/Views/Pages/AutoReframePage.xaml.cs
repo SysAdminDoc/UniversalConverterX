@@ -28,9 +28,12 @@ public sealed partial class AutoReframePage : Page
     private readonly ObservableCollection<ArFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
 
+    private bool _isReady;
+
     public AutoReframePage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -160,7 +163,7 @@ public sealed partial class AutoReframePage : Page
 
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
@@ -168,7 +171,7 @@ public sealed partial class AutoReframePage : Page
 
     private void Mode_Changed(object sender, RoutedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();

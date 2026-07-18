@@ -41,9 +41,12 @@ public sealed partial class ImageConverterPage : Page
     private readonly ObservableCollection<ImgFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
 
+    private bool _isReady;
+
     public ImageConverterPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -174,7 +177,7 @@ public sealed partial class ImageConverterPage : Page
 
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         UpdateQualityControls();
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
@@ -183,7 +186,7 @@ public sealed partial class ImageConverterPage : Page
 
     private void Settings_Bool_Changed(object sender, RoutedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
@@ -200,20 +203,20 @@ public sealed partial class ImageConverterPage : Page
 
     private void TargetSize_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         UpdateQualityControls();
         RefreshPlanSummary();
     }
 
     private void EditNumber_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         RefreshPlanSummary();
     }
 
     private void EditText_Changed(object sender, TextChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         RefreshPlanSummary();
     }
 

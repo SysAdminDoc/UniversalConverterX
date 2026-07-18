@@ -37,9 +37,12 @@ public sealed partial class BatchRenamePage : Page
 
     public ObservableCollection<RenameRow> Rows { get; } = [];
 
+    private bool _isReady;
+
     public BatchRenamePage()
     {
         InitializeComponent();
+        _isReady = true;
         PreviewList.ItemsSource = Rows;
         AllowDrop = true;
         DragOver += (_, e) => { e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy; };
@@ -119,6 +122,7 @@ public sealed partial class BatchRenamePage : Page
 
     private void RecomputePreview()
     {
+        if (!_isReady) return;
         if (Rows.Count == 0)
         {
             UpdateUi();

@@ -29,9 +29,12 @@ public sealed partial class PhotoRestorationPage : Page
     private readonly List<PrModel> _models = [];
     private CancellationTokenSource? _cts;
 
+    private bool _isReady;
+
     public PhotoRestorationPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -201,7 +204,7 @@ public sealed partial class PhotoRestorationPage : Page
 
     private void Settings_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
@@ -209,7 +212,7 @@ public sealed partial class PhotoRestorationPage : Page
 
     private void Settings_Bool_Changed(object sender, RoutedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();

@@ -32,9 +32,12 @@ public sealed partial class NoiseRemoverPage : Page
     private readonly List<ModelEntry> _models = [];
     private CancellationTokenSource? _cts;
 
+    private bool _isReady;
+
     public NoiseRemoverPage()
     {
         InitializeComponent();
+        _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
@@ -240,7 +243,7 @@ public sealed partial class NoiseRemoverPage : Page
 
     private void Settings_Combo_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (RunButton is null) return;
+        if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
         UpdateStatusText();
