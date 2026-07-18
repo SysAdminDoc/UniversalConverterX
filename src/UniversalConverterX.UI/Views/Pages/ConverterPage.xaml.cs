@@ -394,12 +394,13 @@ public sealed partial class ConverterPage : Page
                 added++;
         }
 
+        var addedWord = added == 1 ? "file" : "files";
         if (added == 0)
             StatusText.Text = "No new files were added from that folder.";
         else if (truncated)
-            StatusText.Text = $"Added {added} files from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).";
+            StatusText.Text = $"Added {added} {addedWord} from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).";
         else
-            StatusText.Text = $"Added {added} files from {path}.";
+            StatusText.Text = $"Added {added} {addedWord} from {path}.";
         PersistQueue();
         UpdateUI();
     }
@@ -973,9 +974,10 @@ public sealed partial class ConverterPage : Page
             && blockingFiles == 0
             && _cancellationTokenSource is null;
         SmartMatchButton.IsEnabled = hasFiles && RecommendFormatTag() is not null;
+        var fileWord = _files.Count == 1 ? "file" : "files";
         QueueSummaryText.Text = warningFiles > 0
-            ? $"{_files.Count} files / {warningFiles} need review"
-            : $"{_files.Count} files";
+            ? $"{_files.Count} {fileWord} / {warningFiles} {(warningFiles == 1 ? "needs" : "need")} review"
+            : $"{_files.Count} {fileWord}";
         UpdateQueueSelectionActions();
         RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
