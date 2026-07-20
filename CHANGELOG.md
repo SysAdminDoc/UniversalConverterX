@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.31.5] - 2026-07-19
+
 ### Changed
 
 - Every bounded (blocking, output-buffered) `subprocess.run` call across the 212 sidecars now enforces a wall-clock timeout (600s, matching the C# host's silence watchdog). Previously ~85 calls omitted `timeout=`, so a wedged external tool hung the job forever under CLI/test invocations that run without the host watchdog. Added a shared `ucx_sidecar.run()` helper (with `DEFAULT_SUBPROCESS_TIMEOUT` and a `SubprocessTimeout` error) plus unit tests, and documented the required pattern. Streaming encoders that report progress remain governed by that progress via `run_ffmpeg`.
