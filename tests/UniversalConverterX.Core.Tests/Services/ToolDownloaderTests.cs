@@ -37,6 +37,42 @@ public class ToolDownloaderTests : IDisposable
     }
 
     [Fact]
+    public async Task DownloadToolAsync_WhenContentLengthExceedsCap_ShouldRejectBeforeWriting()
+    {
+        var payload = new byte[4096];
+        var downloader = CreateDownloader(payload);
+        var info = downloader.GetToolDownloadInfo("ffmpeg");
+        info.Should().NotBeNull();
+        info!.ExpectedChecksum = Sha256(payload);
+        info.MaxDownloadBytes = 1024;
+        SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
+
+        var result = await downloader.DownloadToolAsync("ffmpeg");
+
+        result.Success.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("exceeds the");
+        File.Exists(ExpectedToolPath("ffmpeg")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DownloadToolAsync_WhenBodyStreamsPastCapWithoutContentLength_ShouldAbortCopy()
+    {
+        var payload = new byte[64 * 1024];
+        var downloader = CreateDownloader(new NoLengthPayloadHandler(payload));
+        var info = downloader.GetToolDownloadInfo("ffmpeg");
+        info.Should().NotBeNull();
+        info!.ExpectedChecksum = Sha256(payload);
+        info.MaxDownloadBytes = 1024;
+        SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
+
+        var result = await downloader.DownloadToolAsync("ffmpeg");
+
+        result.Success.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("exceeded the");
+        File.Exists(ExpectedToolPath("ffmpeg")).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task DownloadToolAsync_WithInstallerExecutable_ShouldFailClosed()
     {
         var payload = new byte[] { 1, 2, 3 };
@@ -289,6 +325,43 @@ public class ToolDownloaderTests : IDisposable
             response.Content.Headers.ContentLength = payload.Length;
             return Task.FromResult(response);
         }
+    }
+
+    private sealed class NoLengthPayloadHandler(byte[] payload) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            // StreamContent does not expose a Content-Length, forcing the
+            // downloader to rely on the streaming byte-count guard.
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StreamContent(new ForwardOnlyStream(payload))
+            };
+            return Task.FromResult(response);
+        }
+    }
+
+    // A non-seekable read stream so StreamContent cannot derive a
+    // Content-Length, forcing the downloader onto its streaming byte guard.
+    private sealed class ForwardOnlyStream(byte[] data) : Stream
+    {
+        private readonly MemoryStream _inner = new(data);
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+        public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 
     private sealed class ReleasePayloadHandler(string releaseJson, byte[] payload) : HttpMessageHandler

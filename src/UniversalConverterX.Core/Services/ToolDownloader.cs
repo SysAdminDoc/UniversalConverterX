@@ -19,6 +19,16 @@ namespace UniversalConverterX.Core.Services;
 public class ToolDownloader : IToolDownloader
 {
     private static readonly TimeSpan VersionProbeTimeout = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// Default per-download size ceiling (1 GiB). Every portable tool UCX
+    /// fetches is far smaller; a compromised/mis-pinned asset for a
+    /// non-checksum-required tool must not be able to fill the disk before the
+    /// post-download checksum runs. Overridable per tool via
+    /// <see cref="ToolDownloadInfo.MaxDownloadBytes"/>.
+    /// </summary>
+    public const long DefaultMaxDownloadBytes = 1L * 1024 * 1024 * 1024;
+
     private readonly ILogger<ToolDownloader>? _logger;
     private readonly ConverterXOptions _options;
     private readonly HttpClient _httpClient;
@@ -87,7 +97,8 @@ public class ToolDownloader : IToolDownloader
             {
                 // Download the file
                 var downloadPath = Path.Combine(tempDir, GetFilenameFromUrl(resolved.Url));
-                await DownloadFileAsync(resolved.Url, downloadPath, progress, cancellationToken);
+                var maxBytes = downloadInfo.MaxDownloadBytes ?? DefaultMaxDownloadBytes;
+                await DownloadFileAsync(resolved.Url, downloadPath, maxBytes, progress, cancellationToken);
 
                 var configuredChecksumValue = GetConfiguredChecksumValue(downloadInfo);
                 var configuredChecksum = NormalizeSha256(configuredChecksumValue);
@@ -270,16 +281,27 @@ public class ToolDownloader : IToolDownloader
     private async Task DownloadFileAsync(
         string url,
         string destinationPath,
+        long maxBytes,
         IProgress<DownloadProgress>? progress,
         CancellationToken cancellationToken)
     {
         if (!url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException($"Refusing to download over insecure HTTP: {url}");
 
+        if (maxBytes <= 0)
+            maxBytes = DefaultMaxDownloadBytes;
+
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var totalBytes = response.Content.Headers.ContentLength ?? -1;
+
+        // Reject up front when the server declares a body larger than the cap,
+        // before a single byte hits the disk.
+        if (totalBytes > maxBytes)
+            throw new InvalidDataException(
+                $"Refusing to download {totalBytes:N0} bytes from {url}: exceeds the {maxBytes:N0}-byte limit.");
+
         var bytesDownloaded = 0L;
         var lastReportTime = DateTime.UtcNow;
 
@@ -292,8 +314,21 @@ public class ToolDownloader : IToolDownloader
 
         while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
         {
-            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
             bytesDownloaded += bytesRead;
+
+            // A server can under-declare (or omit) Content-Length; abort the
+            // copy loop the moment the streamed body passes the cap so a
+            // chunked/lying response cannot fill the disk either.
+            if (bytesDownloaded > maxBytes)
+            {
+                await fileStream.FlushAsync(cancellationToken);
+                fileStream.Close();
+                TryDeletePartialDownload(destinationPath);
+                throw new InvalidDataException(
+                    $"Download from {url} exceeded the {maxBytes:N0}-byte limit and was aborted.");
+            }
+
+            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
 
             // Report progress at most every 100ms
             if ((DateTime.UtcNow - lastReportTime).TotalMilliseconds >= 100)
@@ -314,6 +349,19 @@ public class ToolDownloader : IToolDownloader
         var finalElapsed = DateTime.UtcNow - startTime;
         var finalSpeed = finalElapsed.TotalSeconds > 0 ? bytesDownloaded / finalElapsed.TotalSeconds : 0;
         progress?.Report(new DownloadProgress(bytesDownloaded, totalBytes, finalSpeed));
+    }
+
+    private void TryDeletePartialDownload(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger?.LogWarning(ex, "Could not remove partial download at {Path}", path);
+        }
     }
 
     private async Task ExtractAndInstallAsync(
@@ -1096,7 +1144,8 @@ public class ToolDownloader : IToolDownloader
                 PlatformUrls = new Dictionary<string, string>
                 {
                     ["windows-x64"] = "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-29-portable-Q16-x64.zip"
-                }
+                },
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["pandoc"] = new ToolDownloadInfo
             {
@@ -1114,7 +1163,8 @@ public class ToolDownloader : IToolDownloader
                 BaseDownloadUrl = "https://potrace.sourceforge.io/download/potrace-1.16.win64.zip",
                 VersionArg = "--version",
                 Description = "Bitmap to vector conversion",
-                AdditionalFiles = ["mkbitmap"]
+                AdditionalFiles = ["mkbitmap"],
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["resvg"] = new ToolDownloadInfo
             {
@@ -1122,7 +1172,8 @@ public class ToolDownloader : IToolDownloader
                 ExecutableName = "resvg",
                 GitHubRepo = "RazrFalcon/resvg",
                 VersionArg = "--version",
-                Description = "High-quality SVG renderer"
+                Description = "High-quality SVG renderer",
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["vips"] = new ToolDownloadInfo
             {
@@ -1130,7 +1181,8 @@ public class ToolDownloader : IToolDownloader
                 ExecutableName = "vips",
                 GitHubRepo = "libvips/libvips",
                 VersionArg = "--version",
-                Description = "Fast image processing library"
+                Description = "Fast image processing library",
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["libjxl"] = new ToolDownloadInfo
             {
@@ -1139,7 +1191,8 @@ public class ToolDownloader : IToolDownloader
                 GitHubRepo = "libjxl/libjxl",
                 VersionArg = "--version",
                 Description = "JPEG XL encoder/decoder",
-                AdditionalFiles = ["djxl"]
+                AdditionalFiles = ["djxl"],
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["libheif"] = new ToolDownloadInfo
             {
@@ -1148,7 +1201,8 @@ public class ToolDownloader : IToolDownloader
                 GitHubRepo = "nicochristiaens/libheif-windows",
                 VersionArg = "--version",
                 Description = "HEIC/HEIF image converter",
-                AdditionalFiles = ["heif-enc", "heif-info"]
+                AdditionalFiles = ["heif-enc", "heif-info"],
+                MaxDownloadBytes = 256L * 1024 * 1024
             },
             ["yt-dlp"] = new ToolDownloadInfo
             {
@@ -1314,6 +1368,13 @@ public class ToolDownloadInfo
     public string[]? AdditionalFiles { get; set; }
     public Dictionary<string, string>? AssetNames { get; set; }
     public bool RequireReleaseVersionMatch { get; set; }
+
+    /// <summary>
+    /// Maximum allowed download size in bytes for this tool. A response whose
+    /// declared Content-Length exceeds this — or whose body streams past it —
+    /// is rejected before it can fill the disk. Null uses the global default.
+    /// </summary>
+    public long? MaxDownloadBytes { get; set; }
 }
 
 /// <summary>
