@@ -37,7 +37,7 @@ def _extract_via_7zip(src: Path, dest: Path) -> int:
         return fail("missing_7zip",
                     "7z not found on PATH. Install p7zip / 7-Zip.")
     cmd = [sz, "x", "-y", f"-o{dest}", str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("7zip_failed",
                     f"{src.name}: rc={proc.returncode}: "

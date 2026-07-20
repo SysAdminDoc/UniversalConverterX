@@ -115,7 +115,7 @@ def op_convert(args: argparse.Namespace) -> int:
                "--outdir", str(out_dir),
                str(src.resolve())]
         emit("log", level="debug", message=" ".join(cmd))
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-5:]
             for ln in tail:

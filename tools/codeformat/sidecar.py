@@ -104,7 +104,7 @@ def op_format(args: argparse.Namespace) -> int:
             shutil.copy2(str(src), str(target_path))
 
         cmd = [binary] + [a.replace("{file}", str(target_path)) for a in arg_template]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

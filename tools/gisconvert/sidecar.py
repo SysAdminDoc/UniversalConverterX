@@ -145,7 +145,7 @@ def op_vector(args: argparse.Namespace) -> int:
         if args.overwrite:
             cmd.append("-overwrite")
 
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-5:]
             for ln in tail:
@@ -209,7 +209,7 @@ def op_raster(args: argparse.Namespace) -> int:
         if args.compress:
             cmd += ["-co", f"COMPRESS={args.compress}"]
 
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-5:]
             for ln in tail:

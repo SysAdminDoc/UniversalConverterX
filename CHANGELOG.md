@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Every bounded (blocking, output-buffered) `subprocess.run` call across the 212 sidecars now enforces a wall-clock timeout (600s, matching the C# host's silence watchdog). Previously ~85 calls omitted `timeout=`, so a wedged external tool hung the job forever under CLI/test invocations that run without the host watchdog. Added a shared `ucx_sidecar.run()` helper (with `DEFAULT_SUBPROCESS_TIMEOUT` and a `SubprocessTimeout` error) plus unit tests, and documented the required pattern. Streaming encoders that report progress remain governed by that progress via `run_ffmpeg`.
+
 ### Fixed
 
 - LibreOffice output relocation now reconciles the filter's native extension. `--convert-to` writes the filter's own extension (requesting `.jpeg` yields `.jpg`, `.text` yields `.txt`), so the exact-extension relocation added earlier could still miss the produced file and report a successful conversion as failed. The validator now also relocates a known-alias output (`jpeg`↔`jpg`, `tif`↔`tiff`, `htm`↔`html`, `text`→`txt`), guarded to only pick a file freshly written during the conversion — never the input or a stale same-stem file.

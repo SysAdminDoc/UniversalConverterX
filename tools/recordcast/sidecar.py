@@ -58,7 +58,7 @@ def op_list_devices(args: argparse.Namespace) -> int:
         [ffmpeg, "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
         capture_output=True,
         text=True,
-    )
+    timeout=600)
 
     # FFmpeg prints device list on stderr
     output = proc.stderr + proc.stdout

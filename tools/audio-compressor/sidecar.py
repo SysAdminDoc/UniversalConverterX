@@ -178,7 +178,7 @@ def _run_one(src: Path, out_path: Path, filter_str: str, encode: str | None,
     # output extension matches input.
     cmd.append(str(out_path))
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode == 0:
         return 0, None
     tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]

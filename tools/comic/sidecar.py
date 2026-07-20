@@ -64,7 +64,7 @@ def _extract(src: Path, dest: Path) -> int:
             sz = shutil.which("7z") or shutil.which("7za")
             if not sz: return fail("missing_7zip", "7z not found on PATH.")
             proc = subprocess.run([sz, "x", "-y", f"-o{dest}", str(src)],
-                                   capture_output=True, text=True)
+                                   capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 return fail("7zip_failed", f"{src.name}: rc={proc.returncode}")
         else:
@@ -119,7 +119,7 @@ def op_convert(args: argparse.Namespace) -> int:
                     if not sz: return fail("missing_7zip", "7z not found.")
                     cmd = [sz, "a", "-tzip", str(out_path)] + [str(p) for p in images]
                     cmd[2] = "-t7z"
-                    proc = subprocess.run(cmd, capture_output=True, text=True)
+                    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                     if proc.returncode != 0:
                         return fail("7zip_failed", f"{src.name}: rc={proc.returncode}")
             except Exception as ex:

@@ -74,7 +74,7 @@ def _extract_with_unar(src: Path, dest: Path) -> int:
                     "(`brew install unar`, `apt install unar`, "
                     "or http://theunarchiver.com/command-line).")
     proc = subprocess.run([unar, "-o", str(dest), "-D", str(src)],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("unar_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -87,7 +87,7 @@ def _extract_with_7z(src: Path, dest: Path) -> int:
     if not sz:
         return fail("missing_7zip", "`7z` not found on PATH.")
     proc = subprocess.run([sz, "x", "-y", f"-o{dest}", str(src)],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("7zip_failed", f"{src.name}: rc={proc.returncode}")
     return 0

@@ -103,7 +103,7 @@ def op_loudnorm(args: argparse.Namespace) -> int:
         f1 = [ffmpeg, "-i", str(src),
               "-af", f"loudnorm=I={target_lufs}:TP={target_tp}:LRA={target_lra}:print_format=json",
               "-f", "null", "-"]
-        proc = subprocess.run(f1, capture_output=True, text=True)
+        proc = subprocess.run(f1, capture_output=True, text=True, timeout=600)
         stderr = proc.stderr or ""
         # Find the JSON block printed by loudnorm.
         s = stderr.rfind("{"); e = stderr.rfind("}")
@@ -123,7 +123,7 @@ def op_loudnorm(args: argparse.Namespace) -> int:
             f":linear=true:print_format=summary"
         )
         f2 = [ffmpeg, "-y", "-i", str(src), "-af", af, str(out_path)]
-        proc = subprocess.run(f2, capture_output=True, text=True)
+        proc = subprocess.run(f2, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

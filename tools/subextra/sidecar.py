@@ -62,7 +62,7 @@ def op_cea_to_srt(args: argparse.Namespace) -> int:
         out_path = out_dir / (src.stem + ".srt")
         cmd = [cce, str(src), "-o", str(out_path), "-out=srt"]
         if args.line == "708": cmd.append("-svc=1")
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

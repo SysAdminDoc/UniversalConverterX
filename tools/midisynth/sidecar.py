@@ -88,7 +88,7 @@ def op_render(args: argparse.Namespace) -> int:
                "-r", str(args.sample_rate),
                "-g", str(args.gain),
                sf, str(src)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).splitlines()[-5:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -99,7 +99,7 @@ def op_render(args: argparse.Namespace) -> int:
         if target != "wav":
             out_path = out_dir / (src.stem + "." + target)
             cmd_ff = [ffmpeg, "-y", "-i", str(wav_path), str(out_path)]
-            proc2 = subprocess.run(cmd_ff, capture_output=True, text=True)
+            proc2 = subprocess.run(cmd_ff, capture_output=True, text=True, timeout=600)
             try: wav_path.unlink()
             except OSError: pass
             if proc2.returncode != 0:

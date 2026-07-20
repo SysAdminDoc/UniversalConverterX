@@ -75,7 +75,7 @@ def op_convert(args: argparse.Namespace) -> int:
                 blk = args.astc_block or "6x6"
                 quality = args.astc_quality or "medium"
                 cmd = [astc, "-cl", str(src), str(out_path), blk, "-" + quality]
-                proc = subprocess.run(cmd, capture_output=True, text=True)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                 if proc.returncode != 0:
                     return fail("astcenc_failed",
                                 (proc.stderr or proc.stdout)[-400:])

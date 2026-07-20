@@ -236,7 +236,7 @@ def convert_to_pcm(source: Path, destination: Path) -> tuple[bool, str]:
         text=True,
         encoding="utf-8",
         errors="replace",
-    )
+    timeout=600)
     return result.returncode == 0, result.stderr.strip()
 
 

@@ -396,7 +396,7 @@ def op_image(args: argparse.Namespace) -> int:
         if args.gpu_id is not None:
             cmd += ["-g", str(args.gpu_id)]
 
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             for ln in (proc.stderr or proc.stdout or "").splitlines()[-15:]:
                 log("error", ln)
@@ -573,7 +573,7 @@ def op_video(args: argparse.Namespace) -> int:
             [ffmpeg, "-y", "-i", str(src),
              "-qscale:v", "1", "-qmin", "1", "-qmax", "1",
              str(frames_in / "%08d.png")],
-            capture_output=True, text=True).returncode
+            capture_output=True, text=True, timeout=600).returncode
         if rc != 0:
             return fail("extract_failed", f"FFmpeg extract exited {rc}")
 
@@ -586,7 +586,7 @@ def op_video(args: argparse.Namespace) -> int:
             cmd += ["-t", str(args.tile_size)]
         if args.gpu_id is not None:
             cmd += ["-g", str(args.gpu_id)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             for ln in (proc.stderr or proc.stdout or "").splitlines()[-15:]:
                 log("error", ln)
@@ -595,7 +595,7 @@ def op_video(args: argparse.Namespace) -> int:
         # Probe input fps via ffmpeg.
         probe = subprocess.run(
             [ffmpeg, "-i", str(src)],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         fps_match = re.search(r"(\d+(?:\.\d+)?)\s*fps", probe.stderr or "")
         fps = float(fps_match.group(1)) if fps_match else 30.0
 
@@ -610,7 +610,7 @@ def op_video(args: argparse.Namespace) -> int:
              "-c:v", target_codec, "-crf", str(crf), "-preset", "medium",
              "-c:a", "copy", "-pix_fmt", "yuv420p",
              str(out_path)],
-            capture_output=True, text=True).returncode
+            capture_output=True, text=True, timeout=600).returncode
         if rc != 0:
             return fail("encode_failed", f"FFmpeg encode exited {rc}")
 

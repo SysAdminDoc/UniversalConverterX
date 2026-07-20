@@ -46,7 +46,7 @@ def _via_imagemagick(src: Path, out_path: Path) -> int:
                     "ImageMagick not found. `apt install imagemagick` / "
                     "`choco install imagemagick`.")
     cmd = [magick, str(src), str(out_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("imagemagick_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -60,7 +60,7 @@ def _via_jbig2dec(src: Path, out_path: Path) -> int:
         return fail("missing_jbig2dec",
                     "jbig2dec not found. `apt install jbig2dec`.")
     cmd = [jbig2dec, "-o", str(out_path), str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("jbig2dec_failed", f"{src.name}: rc={proc.returncode}")
     return 0

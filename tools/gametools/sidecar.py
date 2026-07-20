@@ -339,7 +339,7 @@ def op_chd_pack(args: argparse.Namespace) -> int:
         cmd_kind = "createdvd" if args.dvd else "createcd"
         cmd = [chdman, cmd_kind, "-i", str(src), "-o", str(out_path), "-f"]
         if args.dvd: cmd = [chdman, "createdvd", "-i", str(src), "-o", str(out_path), "-f"]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -372,7 +372,7 @@ def op_chd_unpack(args: argparse.Namespace) -> int:
     for i, src in enumerate(inputs):
         out_cue = out_dir / (src.stem + ".cue")
         cmd = [chdman, "extractcd", "-i", str(src), "-o", str(out_cue), "-f"]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

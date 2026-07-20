@@ -473,7 +473,7 @@ def render_highlight_reel(media: Path, out_path: Path, sentences: list[dict],
                           start_percent=90.0, end_percent=99.0,
                           completion_stage="highlight reel ready")
     else:
-        code = subprocess.run(cmd, capture_output=True).returncode
+        code = subprocess.run(cmd, capture_output=True, timeout=600).returncode
     if code != 0 or not out_path.is_file() or out_path.stat().st_size == 0:
         out_path.unlink(missing_ok=True)
         log("Highlight reel rendering failed.", "warn")

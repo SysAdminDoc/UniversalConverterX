@@ -424,7 +424,7 @@ def remux_source_audio(ffmpeg: str, source: Path, restored_video: Path, output: 
     diagnostic = ""
     for command in attempts:
         result = subprocess.run(
-            command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            command, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
         if result.returncode == 0 and output.is_file() and output.stat().st_size > 0:
             return True, ""
         diagnostic = (result.stderr or result.stdout or f"FFmpeg exited {result.returncode}").strip()

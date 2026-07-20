@@ -183,7 +183,7 @@ def _run_tool(command: list[str], stage: str) -> str | None:
         encoding="utf-8",
         errors="replace",
         creationflags=CREATE_NO_WINDOW,
-    )
+    timeout=600)
     if result.returncode == 0:
         return None
     detail = (result.stderr or result.stdout or f"{stage} failed").strip()

@@ -66,6 +66,19 @@ Each sidecar shim must emit one JSON object per line on stdout:
 
 This matches UCX's existing `IConversionOrchestrator` progress contract and minimizes glue code per tool.
 
+## Subprocess timeouts
+
+Every bounded (blocking, output-buffered) child process a sidecar spawns must
+have a wall-clock timeout. `subprocess.run` defaults to waiting forever, so a
+wedged external tool hangs the job indefinitely under CLI/test invocations that
+run without the C# host's ~10-minute silence watchdog.
+
+Use `_lib/ucx_sidecar.run(cmd)` — it always applies `DEFAULT_SUBPROCESS_TIMEOUT`
+(600s, host-watchdog parity) and raises `SubprocessTimeout` on expiry so the
+shim can emit a clean `{"event":"error","code":"timeout",...}`. When calling
+`subprocess.run` directly, always pass `timeout=`. Streaming encoders that report
+progress use `run_ffmpeg`, which is governed by that progress instead.
+
 ## What lands per phase
 
 - **v2.1** — `videocrush/sidecar.py` + `clipforge/sidecar.py` + `streamkeep/sidecar.py` + `recordcast/sidecar.py` + freeze scripts; UI tabs (Compressor / Editor / Downloader / Recorder) wired to invoke them.

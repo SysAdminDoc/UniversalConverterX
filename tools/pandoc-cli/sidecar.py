@@ -107,7 +107,7 @@ def op_convert(args: argparse.Namespace) -> int:
                 if "=" in kv:
                     cmd += ["-M", kv]
 
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-5:]
             for ln in tail:
@@ -146,7 +146,7 @@ def op_formats(args: argparse.Namespace) -> int:
         return fail("missing_pandoc", "Pandoc not found.")
     for which in ("input-formats", "output-formats"):
         proc = subprocess.run([pandoc, "--list-" + which],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             continue
         for line in proc.stdout.splitlines():

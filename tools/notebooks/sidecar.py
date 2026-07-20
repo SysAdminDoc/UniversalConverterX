@@ -38,7 +38,7 @@ def _have(name: str) -> bool:
 def _via_nbconvert(src: Path, out_dir: Path, target: str) -> int:
     cmd = [sys.executable, "-m", "nbconvert", "--to", target,
            "--output-dir", str(out_dir), str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("nbconvert_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -51,7 +51,7 @@ def _via_jupytext(src: Path, out_dir: Path, target: str) -> int:
     out_path = out_dir / (src.stem + "." + target)
     cmd = [sys.executable, "-m", "jupytext", "--to", target,
            "--output", str(out_path), str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("jupytext_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -66,7 +66,7 @@ def _via_quarto(src: Path, out_dir: Path, target: str) -> int:
                     "Quarto CLI not found. Install from https://quarto.org/.")
     cmd = [quarto, "render", str(src), "--to", target,
            "--output-dir", str(out_dir)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("quarto_failed",
                     f"{src.name}: rc={proc.returncode}")
@@ -140,7 +140,7 @@ def op_execute(args: argparse.Namespace) -> int:
         out_path = out_dir / (src.stem + "_executed.ipynb")
         cmd = [sys.executable, "-m", "nbconvert", "--to", "notebook",
                "--execute", "--output", str(out_path), str(src)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             return fail("execute_failed",
                         f"{src.name}: rc={proc.returncode}: "

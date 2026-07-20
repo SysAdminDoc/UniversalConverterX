@@ -100,7 +100,7 @@ def op_encode(args: argparse.Namespace) -> int:
            "-i", pattern,
            "-c:v", vcodec, "-pix_fmt", pix_fmt,
            *extra, str(out_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout).strip().splitlines()[-5:]
         for ln in tail: emit("log", level="error", message=ln)
@@ -135,7 +135,7 @@ def op_decode(args: argparse.Namespace) -> int:
         if args.fps:
             cmd += ["-vf", f"fps={args.fps}"]
         cmd += [str(pattern)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

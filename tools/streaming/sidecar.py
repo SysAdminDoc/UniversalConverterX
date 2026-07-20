@@ -67,7 +67,7 @@ def op_hls_from_mp4(args: argparse.Namespace) -> int:
             "-hls_segment_filename", str(sub / "seg_%03d.ts"),
             "-f", "hls", str(m3u8),
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -123,7 +123,7 @@ def op_dash_from_mp4(args: argparse.Namespace) -> int:
                 "-media_seg_name", "chunk_$RepresentationID$_$Number%05d$.m4s",
                 "-f", "dash", str(mpd),
             ]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -156,7 +156,7 @@ def op_to_mp4(args: argparse.Namespace) -> int:
         cmd = [ffmpeg, "-y", "-i", str(src),
                "-c", "copy", "-bsf:a", "aac_adtstoasc",
                str(out_path)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

@@ -287,7 +287,7 @@ def op_list(args: argparse.Namespace) -> int:
         stdin=subprocess.DEVNULL,
         capture_output=True,
         text=True,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or proc.stdout).splitlines()[-5:]:
             emit("log", level="error", message=ln)

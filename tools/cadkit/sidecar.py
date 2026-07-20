@@ -143,7 +143,7 @@ def op_dwg_to_dxf(args: argparse.Namespace) -> int:
             shutil.copy2(str(src), Path(tmp_in) / src.name)
             cmd = [oda, tmp_in, str(out_dir),
                    "ACAD2018", "0", "0", "1"]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 tail = (proc.stderr or proc.stdout).splitlines()[-5:]
                 for ln in tail: emit("log", level="error", message=ln)

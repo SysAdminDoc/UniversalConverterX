@@ -293,7 +293,7 @@ def op_convert(args: argparse.Namespace) -> int:
                  message=f"vorbis-managed ignored — codec is {codec}, not libvorbis.")
 
         cmd += [str(out_path)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -319,7 +319,7 @@ def op_codecs(_args: argparse.Namespace) -> int:
     ffmpeg = _find_ffmpeg()
     if not ffmpeg: return fail("missing_ffmpeg", "FFmpeg not found.")
     proc = subprocess.run([ffmpeg, "-hide_banner", "-codecs"],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, timeout=600)
     haystack = proc.stdout.lower()
     for fmt, (codec, ext, _args) in TARGETS.items():
         present = bool(codec) and codec.lower() in haystack

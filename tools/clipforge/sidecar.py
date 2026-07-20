@@ -743,7 +743,7 @@ def _detect_crop(ffmpeg: str, src: Path, sample_seconds: float, threshold: int) 
            "-i", str(src),
            "-vf", f"cropdetect={threshold}:16:0",
            "-f", "null", "-"]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     counts: dict[str, int] = {}
     for ln in (proc.stderr or "").splitlines():
         m = _CROPDETECT_RE.search(ln)

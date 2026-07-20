@@ -58,7 +58,7 @@ def _render_mermaid(src: Path, out_path: Path) -> int:
         return fail("missing_mermaid",
                     "mermaid-cli not found. `npm install -g @mermaid-js/mermaid-cli`.")
     cmd = [mmdc, "-i", str(src), "-o", str(out_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("mermaid_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -80,7 +80,7 @@ def _render_plantuml(src: Path, out_path: Path, target: str) -> int:
     else:
         cmd = [plantuml, "-charset", "UTF-8", f"-t{target}",
                "-o", str(out_path.parent), str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("plantuml_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -94,7 +94,7 @@ def _render_graphviz(src: Path, out_path: Path, target: str) -> int:
         return fail("missing_graphviz",
                     "Graphviz `dot` not found. `apt install graphviz` / `choco install graphviz`.")
     cmd = [dot, f"-T{target}", str(src), "-o", str(out_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("graphviz_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -131,7 +131,7 @@ def _render_drawio(src: Path, out_path: Path, target: str) -> int:
                     "(https://github.com/jgraph/drawio-desktop/releases).")
     cmd = [drawio, "--export", "--format", target,
            "--output", str(out_path), str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("drawio_failed",
                     f"{src.name}: rc={proc.returncode}: "
@@ -146,7 +146,7 @@ def _render_excalidraw(src: Path, out_path: Path, target: str) -> int:
                     "excalidraw CLI not found. `npm install -g @excalidraw/excalidraw-cli`.")
     cmd = [cli, "--input", str(src), "--output", str(out_path),
            "--format", target]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("excalidraw_failed", f"{src.name}: rc={proc.returncode}")
     return 0

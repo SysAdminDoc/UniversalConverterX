@@ -140,7 +140,7 @@ def op_key_info(args: argparse.Namespace) -> int:
                     "gpg CLI not found. Install GnuPG (https://gnupg.org).")
 
     cmd = [gpg, "--with-colons", "--show-keys", str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("gpg_failed",
                     f"{src.name}: rc={proc.returncode}: "

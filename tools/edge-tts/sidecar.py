@@ -184,7 +184,7 @@ def _transcode_with_ffmpeg(src: Path, dst: Path) -> bool:
         codec_args = ["-c:a", "copy"]
 
     cmd = [ffmpeg, "-y", "-i", str(src), *codec_args, str(dst)]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         log("error", f"ffmpeg transcode failed: {result.stderr.strip()[-400:]}")
         return False

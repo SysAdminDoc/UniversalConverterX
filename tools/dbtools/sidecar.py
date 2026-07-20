@@ -61,11 +61,11 @@ def _read_mdb(path: Path) -> dict[str, list[dict]]:
             "mdbtools (mdb-tables, mdb-export) not found on PATH. "
             "Install via Chocolatey (`choco install mdbtools`), Homebrew, or apt.")
     listing = subprocess.run([mdb_tables, "-1", str(path)],
-                              capture_output=True, text=True).stdout.strip()
+                              capture_output=True, text=True, timeout=600).stdout.strip()
     out: dict[str, list[dict]] = {}
     for tbl in (t for t in listing.splitlines() if t.strip()):
         proc = subprocess.run([mdb_export, str(path), tbl],
-                               capture_output=True, text=True, encoding="utf-8")
+                               capture_output=True, text=True, encoding="utf-8", timeout=600)
         rows = list(csv.DictReader(proc.stdout.splitlines()))
         out[tbl] = rows
     return out

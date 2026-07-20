@@ -50,7 +50,7 @@ def _convert_assimp(src: Path, out_path: Path) -> int:
                     "`brew install assimp` / `apt install assimp-utils` / "
                     "https://github.com/assimp/assimp/releases.")
     proc = subprocess.run([assimp, "export", str(src), str(out_path)],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
         for ln in tail: emit("log", level="error", message=ln)

@@ -121,7 +121,7 @@ def op_to_pem(args: argparse.Namespace) -> int:
                 out_path = out_dir / (src.stem + ".pem")
                 cmd = [pkg, str(src), "-O", "private-openssh-new", "-o", str(out_path)]
                 import subprocess
-                proc = subprocess.run(cmd, capture_output=True, text=True)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                 if proc.returncode != 0:
                     return fail("puttygen_failed",
                                 f"{src.name}: rc={proc.returncode}: "
@@ -172,7 +172,7 @@ def op_to_openssh(args: argparse.Namespace) -> int:
                     return fail("missing_puttygen", "puttygen not found.")
                 out_path = out_dir / src.stem
                 cmd = [pkg, str(src), "-O", "private-openssh-new", "-o", str(out_path)]
-                proc = subprocess.run(cmd, capture_output=True, text=True)
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                 if proc.returncode != 0:
                     return fail("puttygen_failed",
                                 f"{src.name}: rc={proc.returncode}")
@@ -214,7 +214,7 @@ def op_to_ppk(args: argparse.Namespace) -> int:
         out_path = out_dir / (src.stem + ".ppk")
         cmd = [pkg, str(src), "-O", "private", "-o", str(out_path),
                "--ppk-version", str(args.ppk_version)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             return fail("puttygen_failed",
                         f"{src.name}: rc={proc.returncode}: "

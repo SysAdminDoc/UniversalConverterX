@@ -125,7 +125,7 @@ def op_convert(args: argparse.Namespace) -> int:
                     elif target == "apng":
                         cmd += ["-plays", "0"]   # loop forever
                     cmd.append(str(out_path))
-                    proc = subprocess.run(cmd, capture_output=True, text=True)
+                    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                     if proc.returncode != 0:
                         tail = (proc.stderr or proc.stdout).splitlines()[-5:]
                         for ln in tail: emit("log", level="error", message=ln)

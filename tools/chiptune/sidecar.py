@@ -83,7 +83,7 @@ def _gme_render(src: Path, out_dir: Path, target: str,
                 final = wav_path.with_suffix("." + target)
                 proc = subprocess.run(
                     [ffmpeg, "-y", "-i", str(wav_path), str(final)],
-                    capture_output=True, text=True)
+                    capture_output=True, text=True, timeout=600)
                 if proc.returncode == 0:
                     wav_path.unlink(missing_ok=True)
                     outputs.append(final)
@@ -104,7 +104,7 @@ def _sid_render(src: Path, out_dir: Path, target: str,
     out_path = out_dir / (src.stem + ".wav")
     cmd = [sidplayfp, "-w" + str(out_path), "-t" + str(length_seconds),
            str(src)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         emit("log", level="error",
              message=(proc.stderr or proc.stdout).strip()[:240])
@@ -114,7 +114,7 @@ def _sid_render(src: Path, out_dir: Path, target: str,
         if ffmpeg:
             final = out_path.with_suffix("." + target)
             subprocess.run([ffmpeg, "-y", "-i", str(out_path), str(final)],
-                            capture_output=True, text=True)
+                            capture_output=True, text=True, timeout=600)
             if final.is_file():
                 out_path.unlink(missing_ok=True); return final
     return out_path

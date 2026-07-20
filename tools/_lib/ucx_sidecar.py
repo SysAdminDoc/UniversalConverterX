@@ -24,6 +24,58 @@ except ImportError:
 
 
 EventEmitter = Callable[..., None]
+
+# Default wall-clock ceiling for a single bounded (capture-style) subprocess
+# call. Chosen to match the C# host's ~10-minute silence watchdog: no one-shot
+# probe/metadata/conversion CLI call should out-live the host's own patience,
+# and CLI/test invocations that run without the watchdog still fail cleanly
+# instead of hanging forever on a wedged child. Streaming encoders that report
+# progress (see ``run_ffmpeg``) are governed by that progress, not this ceiling.
+DEFAULT_SUBPROCESS_TIMEOUT = 600
+
+
+class SubprocessTimeout(RuntimeError):
+    """A bounded subprocess call exceeded its wall-clock timeout."""
+
+
+def run(
+    command: list[str],
+    *,
+    timeout: float | None = DEFAULT_SUBPROCESS_TIMEOUT,
+    capture_output: bool = True,
+    text: bool = True,
+    encoding: str | None = "utf-8",
+    check: bool = False,
+    **kwargs: object,
+) -> subprocess.CompletedProcess:
+    """Run a bounded child process with a mandatory wall-clock timeout.
+
+    A drop-in wrapper around ``subprocess.run`` that guarantees a ``timeout`` is
+    always applied (the stdlib default is ``None`` = wait forever). On timeout
+    the child is killed and a :class:`SubprocessTimeout` is raised with the
+    command name, so callers can surface a clean ``timeout`` error event instead
+    of the host force-killing a silent, stuck process minutes later.
+
+    Use for one-shot probe/metadata/version/conversion CLI calls. For streaming
+    encoders that emit progress, prefer :func:`run_ffmpeg`.
+    """
+    try:
+        return subprocess.run(
+            command,
+            timeout=timeout,
+            capture_output=capture_output,
+            text=text,
+            encoding=encoding,
+            check=check,
+            **kwargs,
+        )
+    except subprocess.TimeoutExpired as exc:
+        name = command[0] if command else "subprocess"
+        raise SubprocessTimeout(
+            f"{name} exceeded its {timeout:g}s timeout and was terminated"
+        ) from exc
+
+
 _TIME_RE = re.compile(r"out_time_(?:us|ms)=(\d+)")
 _PROGRESS_KEYS = (
     "frame=", "fps=", "stream_", "bitrate=", "total_size=", "out_time_",

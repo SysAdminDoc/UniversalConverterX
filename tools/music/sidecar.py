@@ -102,7 +102,7 @@ def _via_musescore(src: Path, out_path: Path) -> int:
         return fail("missing_musescore",
                     "MuseScore CLI not found. Install MuseScore 3/4 or set $env:MUSESCORE_PATH.")
     proc = subprocess.run([mscore, "-o", str(out_path), str(src)],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("mscore_failed",
                     f"{src.name}: rc={proc.returncode}: "

@@ -70,7 +70,7 @@ def _convert(ffmpeg: str, src: Path, out_dir: Path,
         cmd += ["-c:v", vcodec]
         if acodec: cmd += ["-c:a", acodec]
     cmd += ["-f", muxer, str(out_path)]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
         for ln in tail: emit("log", level="error", message=ln)
@@ -141,7 +141,7 @@ def op_extract_bitstream(args: argparse.Namespace) -> int:
         if codec in ("av1", "vp9"):
             cmd = [ffmpeg, "-y", "-i", str(src),
                    "-an", "-c:v", "copy", "-f", "ivf", str(out_path)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)

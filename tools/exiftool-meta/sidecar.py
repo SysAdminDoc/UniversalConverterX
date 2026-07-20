@@ -85,7 +85,7 @@ def op_read(args: argparse.Namespace) -> int:
     if args.tag_group:
         cmd += [f"-{args.tag_group}:all"]
     cmd += [str(p) for p in inputs]
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or "").splitlines()[-15:]:
             log("error", ln)
@@ -134,7 +134,7 @@ def op_write(args: argparse.Namespace) -> int:
     cmd += set_args
     cmd += [str(p) for p in inputs]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or "").splitlines()[-15:]:
             log("error", ln)
@@ -170,7 +170,7 @@ def op_clear(args: argparse.Namespace) -> int:
         cmd += ["-all="]
     cmd += [str(p) for p in inputs]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or "").splitlines()[-15:]:
             log("error", ln)
@@ -218,7 +218,7 @@ def op_template(args: argparse.Namespace) -> int:
         cmd.append(f"-{tag}={value}")
     cmd += [str(p) for p in inputs]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or "").splitlines()[-15:]:
             log("error", ln)
@@ -258,7 +258,7 @@ def op_rotate_orient(args: argparse.Namespace) -> int:
     cmd += [f"-Orientation={args.orientation}", "-n"]
     cmd += [str(p) for p in inputs]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=600)
     if proc.returncode != 0:
         for ln in (proc.stderr or "").splitlines()[-15:]:
             log("error", ln)

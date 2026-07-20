@@ -51,7 +51,7 @@ def _ts_srt(seconds: float) -> str:
 def _ocr_image(tess: str, img_path: Path, lang: str) -> str:
     proc = subprocess.run(
         [tess, str(img_path), "stdout", "-l", lang, "--psm", "6"],
-        capture_output=True, text=True, encoding="utf-8", errors="replace")
+        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
     return (proc.stdout or "").strip()
 
 
@@ -87,7 +87,7 @@ def op_pgs_to_srt(args: argparse.Namespace) -> int:
                 "-map", "[v]", "-vsync", "passthrough",
                 "-frame_pts", "true", png_pattern,
             ]
-            proc = subprocess.run(extract, capture_output=True, text=True)
+            proc = subprocess.run(extract, capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 tail = (proc.stderr or "").strip().splitlines()[-3:]
                 for ln in tail: emit("log", level="error", message=ln)
@@ -153,13 +153,13 @@ def op_vobsub_to_srt(args: argparse.Namespace) -> int:
                 "-c:s", "dvbsub", "-map", "0:s:0",
                 str(tmp_dir / "out_%04d.png"),
             ]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 # FFmpeg sometimes wants an explicit format flag for vobsub demux.
                 proc = subprocess.run(
                     [ffmpeg, "-y", "-f", "vobsub", "-i", str(idx),
                      "-map", "0:s:0", str(tmp_dir / "out_%04d.png")],
-                    capture_output=True, text=True)
+                    capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 tail = (proc.stderr or "").strip().splitlines()[-3:]
                 for ln in tail: emit("log", level="error", message=ln)

@@ -115,7 +115,7 @@ def op_render(args: argparse.Namespace) -> int:
         if ffmpeg is not None and not out_path.is_file():
             cmd = [ffmpeg, "-y", "-i", str(src),
                    "-ar", str(args.sample_rate), "-ac", "2", str(out_path)]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             if proc.returncode != 0:
                 tail = (proc.stderr or proc.stdout).splitlines()[-5:]
                 for ln in tail: emit("log", level="error", message=ln)

@@ -88,7 +88,7 @@ def op_languages(args: argparse.Namespace) -> int:
                     "Tesseract not found. Install from "
                     "https://github.com/UB-Mannheim/tesseract/wiki or set $env:TESSERACT_PATH.")
     proc = subprocess.run([tess, "--list-langs"],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("tesseract_failed",
                     f"tesseract --list-langs exited {proc.returncode}: "
@@ -159,7 +159,7 @@ def op_recognize(args: argparse.Namespace) -> int:
         if config_token:
             cmd.append(config_token)
 
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).splitlines()[-5:]
             for ln in tail:

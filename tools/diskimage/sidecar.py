@@ -89,7 +89,7 @@ def op_convert(args: argparse.Namespace) -> int:
         out_path = out_dir / (src.stem + "." + fmt_alias)
         cmd = [qemu, "convert", "-p", "-O", qemu_fmt, str(src), str(out_path)]
         if args.compress and qemu_fmt == "qcow2": cmd.insert(2, "-c")
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         if proc.returncode != 0:
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
             for ln in tail: emit("log", level="error", message=ln)
@@ -116,7 +116,7 @@ def op_info(args: argparse.Namespace) -> int:
     src = Path(args.input)
     if not src.is_file(): return fail("missing_input", f"Disk image not found: {src}")
     proc = subprocess.run([qemu, "info", "--output=json", str(src)],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, timeout=600)
     if proc.returncode != 0:
         return fail("qemu_failed", proc.stderr.strip()[:500])
     try:
