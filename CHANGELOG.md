@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Vips no longer discards image quality/compression/strip/metadata settings when a resize dimension is set. Previously, specifying a width or height rebuilt a bare `thumbnail in out <size>` command that dropped every selected `Q=`/`compression=`/`lossless=`/`effort=`/`strip=` option, so any resized output silently reverted to default quality with metadata intact. The save options now ride in the vips output-filename suffix (`out.jpg[Q=55,strip=true]`), which is how `thumbnail` accepts saver options. Also extends `strip=true` honoring to PNG/WebP/AVIF/HEIF/JXL/TIFF outputs (was JPEG-only).
+
 ### Security
 
 - Cap tool downloads at a per-tool size ceiling (default 1 GiB; 256 MiB for the non-checksum-required image tools resvg/vips/libjxl/libheif/imagemagick/potrace). A response whose declared `Content-Length` exceeds the cap is rejected before any byte is written, and the copy loop aborts (deleting the partial file) if a chunked/under-declaring body streams past the cap — a compromised or mis-pinned asset can no longer fill the disk ahead of the post-download checksum.

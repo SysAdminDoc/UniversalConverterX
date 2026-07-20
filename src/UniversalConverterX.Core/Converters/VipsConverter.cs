@@ -73,28 +73,73 @@ public partial class VipsConverter : BaseConverterStrategy
 
     public override string[] BuildArguments(ConversionJob job, ConversionOptions options)
     {
-        var args = new List<string>();
         var outputExt = job.OutputExtension.ToLowerInvariant();
 
-        // Determine the vips operation based on output format
-        var operation = GetVipsOperation(outputExt);
+        // Collect the per-format save options (Q=, compression=, lossless=,
+        // effort=, strip=, interlace=) once. These are honored two ways by the
+        // vips CLI: as trailing named arguments to a *save operation
+        // (jpegsave in out Q=80), or embedded in the output filename brackets
+        // for operations like `thumbnail` (out.jpg[Q=80,strip=true]).
+        var saveOptions = BuildSaveOptions(outputExt, options);
 
-        // Main conversion command
-        args.Add(operation);
-        args.Add(job.InputPath);
-        args.Add(job.OutputPath);
+        // Resize takes a different operation (`thumbnail`) that both scales and
+        // saves. Its saver is chosen from the output extension, so the same
+        // save options must ride along in the filename suffix — otherwise every
+        // resized output silently reverts to default quality with metadata
+        // intact, ignoring the user's settings.
+        if (options.Image.Width.HasValue || options.Image.Height.HasValue)
+        {
+            var args = new List<string>
+            {
+                "thumbnail",
+                job.InputPath,
+                AppendSaveOptions(job.OutputPath, saveOptions),
+            };
 
-        // Quality settings
+            if (options.Image.Width.HasValue && options.Image.Height.HasValue)
+                args.Add($"{options.Image.Width}x{options.Image.Height}");
+            else if (options.Image.Width.HasValue)
+                args.Add($"{options.Image.Width}");
+            else if (options.Image.Height.HasValue)
+                args.Add($"x{options.Image.Height}");
+
+            // Add crop mode
+            if (!options.Image.MaintainAspectRatio)
+                args.Add("crop=centre");
+
+            return [.. args];
+        }
+
+        // No resize: use the format-specific save operation with the options as
+        // trailing named arguments.
+        var saveArgs = new List<string>
+        {
+            GetVipsOperation(outputExt),
+            job.InputPath,
+            job.OutputPath,
+        };
+        saveArgs.AddRange(saveOptions);
+        return [.. saveArgs];
+    }
+
+    /// <summary>
+    /// Builds the ordered list of vips save options (e.g. "Q=80", "strip=true")
+    /// for the target format. Shared by the save-operation and thumbnail paths
+    /// so a resized image keeps the same quality/compression/strip settings.
+    /// </summary>
+    private static List<string> BuildSaveOptions(string outputExt, ConversionOptions options)
+    {
+        var opts = new List<string>();
         var quality = GetQualityValue(options.Quality, outputExt);
-        
+
         switch (outputExt)
         {
             case "jpg" or "jpeg":
-                args.Add($"Q={quality}");
+                opts.Add($"Q={quality}");
                 if (options.Image.Progressive)
-                    args.Add("interlace=true");
+                    opts.Add("interlace=true");
                 if (options.Image.StripMetadata)
-                    args.Add("strip=true");
+                    opts.Add("strip=true");
                 break;
 
             case "png":
@@ -109,36 +154,46 @@ public partial class VipsConverter : BaseConverterStrategy
                     QualityPreset.Lossless => 0,
                     _ => 5
                 };
-                args.Add($"compression={compression}");
+                opts.Add($"compression={compression}");
                 if (options.Image.Interlace)
-                    args.Add("interlace=true");
+                    opts.Add("interlace=true");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "webp":
-                args.Add($"Q={quality}");
+                opts.Add($"Q={quality}");
                 if (options.Quality == QualityPreset.Lossless)
-                    args.Add("lossless=true");
-                args.Add("effort=4");
+                    opts.Add("lossless=true");
+                opts.Add("effort=4");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "avif":
-                args.Add($"Q={quality}");
+                opts.Add($"Q={quality}");
                 if (options.Quality == QualityPreset.Lossless)
-                    args.Add("lossless=true");
-                args.Add("effort=4");
+                    opts.Add("lossless=true");
+                opts.Add("effort=4");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "heif" or "heic":
-                args.Add($"Q={quality}");
+                opts.Add($"Q={quality}");
                 if (options.Quality == QualityPreset.Lossless)
-                    args.Add("lossless=true");
+                    opts.Add("lossless=true");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "jxl":
-                args.Add($"Q={quality}");
+                opts.Add($"Q={quality}");
                 if (options.Quality == QualityPreset.Lossless)
-                    args.Add("lossless=true");
-                args.Add("effort=7");
+                    opts.Add("lossless=true");
+                opts.Add("effort=7");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "tiff" or "tif":
@@ -149,47 +204,34 @@ public partial class VipsConverter : BaseConverterStrategy
                     QualityPreset.Highest => "lzw",
                     _ => "jpeg"
                 };
-                args.Add($"compression={tiffCompression}");
+                opts.Add($"compression={tiffCompression}");
                 if (tiffCompression == "jpeg")
-                    args.Add($"Q={quality}");
+                    opts.Add($"Q={quality}");
+                if (options.Image.StripMetadata)
+                    opts.Add("strip=true");
                 break;
 
             case "gif":
                 // GIF options
-                args.Add("effort=7");
+                opts.Add("effort=7");
                 break;
         }
 
-        // Resize if dimensions specified
-        if (options.Image.Width.HasValue || options.Image.Height.HasValue)
-        {
-            // For resize, we need to use thumbnail or resize operation
-            // This requires a different command structure
-            // We'll handle this by prepending resize args
-            args.Clear();
-            args.Add("thumbnail");
-            args.Add(job.InputPath);
-            args.Add(job.OutputPath);
-            
-            if (options.Image.Width.HasValue && options.Image.Height.HasValue)
-            {
-                args.Add($"{options.Image.Width}x{options.Image.Height}");
-            }
-            else if (options.Image.Width.HasValue)
-            {
-                args.Add($"{options.Image.Width}");
-            }
-            else if (options.Image.Height.HasValue)
-            {
-                args.Add($"x{options.Image.Height}");
-            }
+        return opts;
+    }
 
-            // Add crop mode
-            if (!options.Image.MaintainAspectRatio)
-                args.Add("crop=centre");
-        }
+    /// <summary>
+    /// Encodes vips save options into the output filename as a bracketed
+    /// suffix, e.g. <c>out.jpg</c> + [Q=80,strip=true] → <c>out.jpg[Q=80,strip=true]</c>.
+    /// This is the only way `thumbnail` (and other load/save ops) accept saver
+    /// options. Returns the path unchanged when there are no options.
+    /// </summary>
+    private static string AppendSaveOptions(string outputPath, IReadOnlyList<string> saveOptions)
+    {
+        if (saveOptions.Count == 0)
+            return outputPath;
 
-        return [.. args];
+        return $"{outputPath}[{string.Join(",", saveOptions)}]";
     }
 
     private static string GetVipsOperation(string outputExt) => outputExt switch
