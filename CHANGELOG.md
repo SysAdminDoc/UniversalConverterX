@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- `PathSafety.SanitizeFileNameComponent` now neutralizes Windows reserved device names (`CON`/`NUL`/`PRN`/`AUX`/`COM1`–`COM9`/`LPT1`–`LPT9`, with or without an extension) by prefixing an underscore, and strips trailing dots/spaces that Windows silently removes. Untrusted metadata (EXIF/ID3/probe titles) resolving a stem to one of these previously produced a name the downstream file create would reject.
 - Vips no longer discards image quality/compression/strip/metadata settings when a resize dimension is set. Previously, specifying a width or height rebuilt a bare `thumbnail in out <size>` command that dropped every selected `Q=`/`compression=`/`lossless=`/`effort=`/`strip=` option, so any resized output silently reverted to default quality with metadata intact. The save options now ride in the vips output-filename suffix (`out.jpg[Q=55,strip=true]`), which is how `thumbnail` accepts saver options. Also extends `strip=true` honoring to PNG/WebP/AVIF/HEIF/JXL/TIFF outputs (was JPEG-only).
 
 ### Security
