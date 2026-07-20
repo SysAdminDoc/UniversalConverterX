@@ -213,20 +213,17 @@ public class LibreOfficeConverter : BaseConverterStrategy
         // UniqueOutputPath, or a filename template — the produced file lands
         // beside the intended path and the base validation (which checks
         // job.OutputPath) wrongly reports a successful conversion as failed.
-        // Relocate the produced file to the requested path first. Guarded so it
-        // is a no-op for the common same-stem case and cannot disturb it.
+        // Additionally, LibreOffice writes the *filter's native* extension, not
+        // necessarily the requested one (requesting .jpeg yields .jpg, .text
+        // yields .txt), so an exact-extension match alone can miss the file.
+        // Relocate the produced file to the requested path. Guarded so it is a
+        // no-op for the common same-stem/same-ext case and cannot disturb it.
         try
         {
             if (!File.Exists(job.OutputPath))
             {
-                var outputDir = Path.GetDirectoryName(job.OutputPath);
-                var producedName = Path.GetFileNameWithoutExtension(job.InputPath)
-                    + Path.GetExtension(job.OutputPath);
-                var producedPath = string.IsNullOrEmpty(outputDir)
-                    ? producedName
-                    : Path.Combine(outputDir, producedName);
-
-                if (File.Exists(producedPath)
+                var producedPath = FindProducedOutput(job, duration);
+                if (producedPath is not null
                     && !string.Equals(
                         Path.GetFullPath(producedPath),
                         Path.GetFullPath(job.OutputPath),
@@ -245,6 +242,69 @@ public class LibreOfficeConverter : BaseConverterStrategy
         return base.ValidateSuccessfulOutput(
             job, duration, exitCode, standardOutput, standardError,
             converter, commandLine, warnings);
+    }
+
+    /// <summary>
+    /// Requested-extension → filter's native extension(s). LibreOffice writes
+    /// the filter's own extension, so a job asking for one of these lands as
+    /// the aliased extension beside the requested path.
+    /// </summary>
+    private static readonly Dictionary<string, string[]> _extensionAliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["jpeg"] = ["jpg"],
+        ["jpg"] = ["jpeg"],
+        ["tif"] = ["tiff"],
+        ["tiff"] = ["tif"],
+        ["htm"] = ["html"],
+        ["html"] = ["htm"],
+        ["text"] = ["txt"],
+    };
+
+    /// <summary>
+    /// Locates the file LibreOffice actually produced for this job, accounting
+    /// for both the collision-suffix/template case (same stem, requested
+    /// extension) and the native-extension-alias case (e.g. .jpeg → .jpg).
+    /// Only considers files freshly written during this conversion and never
+    /// the input file, so a stale same-stem file is not picked up.
+    /// </summary>
+    private static string? FindProducedOutput(ConversionJob job, TimeSpan duration)
+    {
+        var outputDir = Path.GetDirectoryName(job.OutputPath);
+        var searchDir = string.IsNullOrEmpty(outputDir) ? "." : outputDir;
+        var sourceStem = Path.GetFileNameWithoutExtension(job.InputPath);
+        var requestedExt = Path.GetExtension(job.OutputPath).TrimStart('.');
+
+        // 1. Exact extension, the source stem (collision suffix / template case).
+        var exact = Path.Combine(searchDir, sourceStem + Path.GetExtension(job.OutputPath));
+        if (File.Exists(exact))
+            return exact;
+
+        // 2. Native-extension alias. Only fall through to a filesystem scan when
+        //    the requested extension actually has a known LibreOffice alias.
+        if (!_extensionAliases.TryGetValue(requestedExt, out var aliases))
+            return null;
+        if (!Directory.Exists(searchDir))
+            return null;
+
+        var inputFull = Path.GetFullPath(job.InputPath);
+        // Anything written after the conversion started is a fresh product.
+        // Pad the window generously to absorb clock granularity.
+        var freshAfter = DateTime.UtcNow - duration - TimeSpan.FromMinutes(1);
+
+        foreach (var alias in aliases)
+        {
+            var candidate = Path.Combine(searchDir, sourceStem + "." + alias);
+            if (!File.Exists(candidate))
+                continue;
+            if (string.Equals(Path.GetFullPath(candidate), inputFull, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (File.GetLastWriteTimeUtc(candidate) < freshAfter)
+                continue;
+
+            return candidate;
+        }
+
+        return null;
     }
 
     public override ConversionProgress? ParseProgress(string line, ConversionJob job)
