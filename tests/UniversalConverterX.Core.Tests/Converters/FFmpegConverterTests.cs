@@ -481,6 +481,46 @@ public class FFmpegConverterTests
         };
     }
 
+    [Fact]
+    public void BuildArguments_StreamCopyVideo_CopiesAllStreamsWithoutReencoding()
+    {
+        var job = CreateTestJob("input.mkv", "output.mp4");
+        var options = new ConversionOptions { StreamCopy = true };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-map 0");
+        joined.Should().Contain("-c copy");
+        joined.Should().NotContain("-crf");
+        joined.Should().NotContain("-c:v");
+        joined.Should().NotContain("-preset");
+        args.Should().Contain(job.OutputPath);
+    }
+
+    [Fact]
+    public void BuildArguments_StreamCopyAudioContainer_CopiesAudioOnly()
+    {
+        var job = CreateTestJob("input.mkv", "output.m4a");
+        var options = new ConversionOptions { StreamCopy = true };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-c:a copy");
+        args.Should().Contain("-vn");
+        joined.Should().NotContain("-crf");
+    }
+
+    [Fact]
+    public void ShouldRunNativeTwoPass_StreamCopy_IsFalse()
+    {
+        var job = CreateTwoPassJob();
+        job.Options.StreamCopy = true;
+
+        _converter.ShouldRunNativeTwoPass(job).Should().BeFalse();
+    }
+
     private static ConversionJob CreateTwoPassJob()
     {
         var job = CreateTestJob("input.mp4", "output.mp4");

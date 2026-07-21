@@ -88,6 +88,10 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [CommandOption("--report <PATH>")]
         [Description("Write a per-file batch report. The path must end in .json or .csv.")]
         public string? ReportPath { get; set; }
+
+        [CommandOption("--copy|--remux")]
+        [Description("Remux only: change the container without re-encoding (FFmpeg -c copy). Fast and lossless when the source codecs are allowed in the target container.")]
+        public bool StreamCopy { get; set; }
     }
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -434,6 +438,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             OverwriteExisting = settings.Force,
             PreserveMetadata = settings.KeepMetadata,
             UseHardwareAcceleration = settings.HardwareAccel,
+            StreamCopy = settings.StreamCopy,
             ForceConverter = settings.Converter,
             OutputDirectory = settings.OutputDirectory,
             PostConversionAction = sourceAction,

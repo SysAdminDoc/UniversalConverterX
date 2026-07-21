@@ -58,6 +58,14 @@ public class ConversionOptions
     public DocumentOptions Document { get; set; } = new();
 
     /// <summary>
+    /// Remux only: change the container without re-encoding any stream
+    /// (FFmpeg <c>-c copy</c>). Skips codec/quality/two-pass planning. FFmpeg
+    /// reports an error if a source codec is not allowed in the target
+    /// container, which surfaces as a failed conversion.
+    /// </summary>
+    public bool StreamCopy { get; set; } = false;
+
+    /// <summary>
     /// Additional custom arguments to pass to the converter
     /// </summary>
     public List<string> CustomArguments { get; set; } = [];

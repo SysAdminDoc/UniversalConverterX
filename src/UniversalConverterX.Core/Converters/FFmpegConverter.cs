@@ -124,7 +124,17 @@ public partial class FFmpegConverter : BaseConverterStrategy
         var isVideoOutput = IsVideoFormat(job.OutputExtension);
         var isAudioOutput = IsAudioFormat(job.OutputExtension);
 
-        if (isVideoOutput)
+        if (options.StreamCopy && isVideoOutput)
+        {
+            // Remux: copy every stream into the new container, no re-encode.
+            args.AddRange(["-map", "0", "-c", "copy"]);
+        }
+        else if (options.StreamCopy && isAudioOutput)
+        {
+            // Remux to an audio container: copy audio streams only, drop video.
+            args.AddRange(["-map", "0:a?", "-c:a", "copy", "-vn"]);
+        }
+        else if (isVideoOutput)
         {
             BuildVideoArgs(args, options);
         }
@@ -162,6 +172,7 @@ public partial class FFmpegConverter : BaseConverterStrategy
         return video.TwoPass == true
             && video.Bitrate.HasValue
             && !video.Crf.HasValue
+            && !job.Options.StreamCopy
             && job.Options.FfmpegArgumentOverride is not { Count: > 0 }
             && IsVideoFormat(job.OutputExtension);
     }
