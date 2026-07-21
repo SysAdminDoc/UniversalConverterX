@@ -108,6 +108,74 @@ public sealed class BatchQueueStoreTests : IDisposable
         Directory.GetFiles(_directory, "converter.json.corrupt.*").Should().ContainSingle();
     }
 
+    [Fact]
+    public void Save_ShouldNotLeaveTemporaryFileBehind()
+    {
+        var store = new JsonBatchQueueStore(_directory);
+
+        store.Save(new PersistedBatchQueue { QueueKey = "converter", PageName = "Converter" });
+
+        Directory.GetFiles(_directory, "*.tmp").Should().BeEmpty();
+        store.Load("converter").Should().NotBeNull();
+    }
+
+    [Fact]
+    public void TryClaimJob_FirstCallWins_SecondCallFails()
+    {
+        var store = new JsonBatchQueueStore(_directory);
+        store.Save(new PersistedBatchQueue
+        {
+            QueueKey = "converter",
+            Jobs = [new PersistedBatchJob { Id = "job-1", Status = "Queued" }],
+        });
+
+        store.TryClaimJob("converter", "job-1").Should().BeTrue();
+        store.TryClaimJob("converter", "job-1").Should().BeFalse();
+
+        store.Load("converter")!.Jobs[0].Status.Should().Be("Running");
+    }
+
+    [Fact]
+    public void TryClaimJob_MissingQueueOrJob_ReturnsFalse()
+    {
+        var store = new JsonBatchQueueStore(_directory);
+        store.TryClaimJob("nope", "job-1").Should().BeFalse();
+
+        store.Save(new PersistedBatchQueue
+        {
+            QueueKey = "converter",
+            Jobs = [new PersistedBatchJob { Id = "job-1", Status = "Queued" }],
+        });
+        store.TryClaimJob("converter", "does-not-exist").Should().BeFalse();
+    }
+
+    [Fact]
+    public void TryClaimJob_ConcurrentClaimsAcrossInstances_ExactlyOneSucceeds()
+    {
+        // Two stores on the same directory model two running instances. The
+        // cross-process mutex + atomic read-modify-write must let only one win.
+        var seeder = new JsonBatchQueueStore(_directory);
+        seeder.Save(new PersistedBatchQueue
+        {
+            QueueKey = "converter",
+            Jobs = [new PersistedBatchJob { Id = "job-1", Status = "Queued" }],
+        });
+
+        var storeA = new JsonBatchQueueStore(_directory);
+        var storeB = new JsonBatchQueueStore(_directory);
+        var successes = 0;
+
+        Parallel.For(0, 32, i =>
+        {
+            var store = (i % 2 == 0) ? storeA : storeB;
+            if (store.TryClaimJob("converter", "job-1"))
+                Interlocked.Increment(ref successes);
+        });
+
+        successes.Should().Be(1);
+        seeder.Load("converter")!.Jobs[0].Status.Should().Be("Running");
+    }
+
     public void Dispose()
     {
         try

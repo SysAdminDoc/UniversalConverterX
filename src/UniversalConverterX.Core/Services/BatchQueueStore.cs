@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,6 +11,14 @@ public interface IBatchQueueStore
     IReadOnlyList<PersistedBatchQueue> LoadAll();
     void Save(PersistedBatchQueue queue);
     void Clear(string queueKey);
+
+    /// <summary>
+    /// Atomically transition a job from "Queued" to "Running" and persist it.
+    /// Returns false when the queue/job is missing or the job is not "Queued"
+    /// (already claimed). Guarded by a cross-process lock so a second running
+    /// instance watching the same queue directory cannot double-claim a job.
+    /// </summary>
+    bool TryClaimJob(string queueKey, string jobId);
 }
 
 public sealed record PersistedBatchQueue
@@ -44,8 +54,11 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
         Converters = { new JsonStringEnumConverter() },
     };
 
+    private static readonly TimeSpan CrossProcessLockTimeout = TimeSpan.FromSeconds(10);
+
     private readonly string _directory;
     private readonly object _gate = new();
+    private readonly string _mutexName;
 
     public JsonBatchQueueStore(string directory)
     {
@@ -54,12 +67,13 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
 
         _directory = directory;
         Directory.CreateDirectory(_directory);
+        _mutexName = BuildMutexName(_directory);
     }
 
     public PersistedBatchQueue? Load(string queueKey)
     {
         var path = PathFor(queueKey);
-        lock (_gate)
+        return WithCrossProcessLock(() =>
         {
             try
             {
@@ -78,12 +92,12 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
                 PreserveCorruptQueue(path);
                 return null;
             }
-        }
+        });
     }
 
     public IReadOnlyList<PersistedBatchQueue> LoadAll()
     {
-        lock (_gate)
+        return WithCrossProcessLock<IReadOnlyList<PersistedBatchQueue>>(() =>
         {
             if (!Directory.Exists(_directory))
                 return [];
@@ -108,7 +122,7 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
             return queues
                 .OrderBy(queue => queue.QueueKey, StringComparer.OrdinalIgnoreCase)
                 .ToList();
-        }
+        });
     }
 
     public void Save(PersistedBatchQueue queue)
@@ -118,28 +132,123 @@ public sealed class JsonBatchQueueStore : IBatchQueueStore
 
         var path = PathFor(queue.QueueKey);
         var snapshot = queue with { UpdatedUtc = DateTime.UtcNow };
-        lock (_gate)
+        WithCrossProcessLock(() =>
         {
-            Directory.CreateDirectory(_directory);
-            var json = JsonSerializer.Serialize(snapshot, JsonOptions);
-            var tmp = path + ".tmp";
-            File.WriteAllText(tmp, json);
-            try { File.Move(tmp, path, overwrite: true); }
-            catch
-            {
-                File.WriteAllText(path, json);
-                try { File.Delete(tmp); } catch { }
-            }
-        }
+            WriteAtomic(path, snapshot);
+            return true;
+        });
     }
 
     public void Clear(string queueKey)
     {
         var path = PathFor(queueKey);
-        lock (_gate)
+        WithCrossProcessLock(() =>
         {
             try { if (File.Exists(path)) File.Delete(path); } catch { }
+            return true;
+        });
+    }
+
+    public bool TryClaimJob(string queueKey, string jobId)
+    {
+        if (string.IsNullOrWhiteSpace(queueKey) || string.IsNullOrWhiteSpace(jobId))
+            return false;
+
+        var path = PathFor(queueKey);
+        return WithCrossProcessLock(() =>
+        {
+            PersistedBatchQueue? queue;
+            try
+            {
+                if (!File.Exists(path))
+                    return false;
+                queue = JsonSerializer.Deserialize<PersistedBatchQueue>(
+                    File.ReadAllText(path), JsonOptions);
+            }
+            catch
+            {
+                PreserveCorruptQueue(path);
+                return false;
+            }
+
+            if (queue is null)
+                return false;
+
+            var index = queue.Jobs.FindIndex(job =>
+                job.Id.Equals(jobId, StringComparison.Ordinal));
+            if (index < 0)
+                return false;
+
+            if (!queue.Jobs[index].Status.Equals("Queued", StringComparison.OrdinalIgnoreCase))
+                return false; // already claimed by another instance/thread
+
+            queue.Jobs[index] = queue.Jobs[index] with { Status = "Running" };
+            WriteAtomic(path, queue with { UpdatedUtc = DateTime.UtcNow });
+            return true;
+        });
+    }
+
+    private void WriteAtomic(string path, PersistedBatchQueue snapshot)
+    {
+        Directory.CreateDirectory(_directory);
+        var json = JsonSerializer.Serialize(snapshot, JsonOptions);
+        var tmp = path + ".tmp";
+        File.WriteAllText(tmp, json);
+        try { File.Move(tmp, path, overwrite: true); }
+        catch
+        {
+            File.WriteAllText(path, json);
+            try { File.Delete(tmp); } catch { }
         }
+    }
+
+    /// <summary>
+    /// Serialize an operation across every process/thread that shares this queue
+    /// directory. The named mutex is combined with the in-process monitor so a
+    /// single process's own threads also serialize. Falls back to the in-process
+    /// lock only if the cross-process mutex cannot be acquired within the timeout,
+    /// which prevents a hung peer from deadlocking the whole app.
+    /// </summary>
+    private T WithCrossProcessLock<T>(Func<T> body)
+    {
+        using var mutex = new Mutex(initiallyOwned: false, _mutexName);
+        var acquired = false;
+        try
+        {
+            try
+            {
+                acquired = mutex.WaitOne(CrossProcessLockTimeout);
+            }
+            catch (AbandonedMutexException)
+            {
+                // A previous owner exited without releasing (crash). We now hold
+                // the mutex; the on-disk state is still consistent because every
+                // write is atomic (temp + rename).
+                acquired = true;
+            }
+
+            lock (_gate)
+            {
+                return body();
+            }
+        }
+        finally
+        {
+            if (acquired)
+            {
+                try { mutex.ReleaseMutex(); } catch { /* best effort */ }
+            }
+        }
+    }
+
+    private static string BuildMutexName(string directory)
+    {
+        var normalized = Path.GetFullPath(directory).TrimEnd('\\', '/').ToLowerInvariant();
+        var hash = Convert.ToHexString(
+            SHA256.HashData(Encoding.UTF8.GetBytes(normalized)))[..16];
+        // Local\ (per-session) is sufficient for same-user multi-instance and
+        // avoids the elevation Global\ requires.
+        return $"Local\\ucx-batch-queue-{hash}";
     }
 
     private string PathFor(string queueKey)
