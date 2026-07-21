@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.33.0] - 2026-07-21
+
 ### Added
 
 - **VVC / H.266 decode support (decode-only).** Raw VVC bitstreams (`.vvc`, `.h266`, `.266`) are now recognized as video, categorized correctly, and transcodable to common containers via FFmpeg's native `vvc` decoder (FFmpeg 8.1+; `vvc_qsv` hardware decode is also available where present). VVC is intentionally not offered as an output/encode target — decode-only, per the format's still-thin encode ecosystem. Covered by CanConvert tests.
