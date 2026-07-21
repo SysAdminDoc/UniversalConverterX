@@ -44,12 +44,12 @@ _2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHA
   Acceptance: CI/build launches the app offscreen, navigates all 53 pages, asserts no unhandled exception, captures a screenshot per page; a reintroduced page-init NRE fails the gate.
   Complexity: L
 
-- [ ] P1 — Item 126 — Encode-history replay / "Apply Last Used Settings"
-  Why: SQLite HistoryStore already persists versioned re-run payloads; a one-click "re-apply this job's full settings to new inputs" is a top FastFlix feature and nearly free.
-  Evidence: FastFlix 6.x CHANGES; `HistoryStore` re-run payloads already exist.
-  Touches: History page in `.UI`, `HistoryStore`, `ucx` CLI.
-  Acceptance: from any history row, "Apply settings" pre-fills the relevant page with that job's parameters; "Apply last used" is available on convert/compress pages; covered by a ViewModel test.
-  Complexity: M
+- [ ] P1 — Item 126b — Wire history replay into the UI
+  Why: the Core accessors shipped (`HistoryStore.GetRerunRequestAsync` for a row, `GetLastUsedRerunAsync` for "apply last used", both tested); the remaining piece is the History "Apply settings" button and an "Apply last used" affordance on convert/compress pages that pre-fill from the returned `ConversionRerunRequest`.
+  Evidence: `HistoryStore.GetRerunRequestAsync`/`GetLastUsedRerunAsync`; `ConversionRerunRequest`.
+  Touches: History page + convert/compress pages in `.UI`.
+  Acceptance: "Apply settings" from a row pre-fills the page; "Apply last used" pre-fills from the most recent replayable job; ViewModel test.
+  Complexity: S
 
 - [ ] P1 — Item 128b — Surface per-track keep/drop toggles in the Converter preflight UI
   Why: the Core `-map` selection + CLI flags shipped (v2.32.x); the remaining piece is the preflight-table toggle UI wired to `AudioTrackSelection`/`SubtitleTrackSelection`.

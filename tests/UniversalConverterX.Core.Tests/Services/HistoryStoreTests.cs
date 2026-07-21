@@ -175,6 +175,98 @@ public sealed class HistoryStoreTests : IDisposable
         (await migrated.GetAsync(id))!.RerunParameters.Should().Be("{\"schemaVersion\":1}");
     }
 
+    [Fact]
+    public async Task GetRerunRequestAsync_ReturnsSavedSettingsForRow()
+    {
+        using var store = CreateStore();
+        var rerunJson = ConversionRerunRequestCodec.Serialize(new ConversionRerunRequest
+        {
+            SourcePaths = [@"C:\In\clip.mov"],
+            OutputFormat = "mp4",
+            OutputDirectory = @"C:\Out",
+        });
+        var id = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush",
+            Action = "convert",
+            SourcePath = @"C:\In\clip.mov",
+            Success = true,
+            RerunParameters = rerunJson,
+        });
+
+        var rerun = await store.GetRerunRequestAsync(id);
+
+        rerun.Should().NotBeNull();
+        rerun!.OutputFormat.Should().Be("mp4");
+        rerun.SourcePaths.Should().ContainSingle().Which.Should().Be(@"C:\In\clip.mov");
+    }
+
+    [Fact]
+    public async Task GetRerunRequestAsync_RowWithoutOrInvalidParameters_ReturnsNull()
+    {
+        using var store = CreateStore();
+        var noParams = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\a.mov", Success = true,
+        });
+        var badParams = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\b.mov", Success = true,
+            RerunParameters = "{ not valid json",
+        });
+
+        (await store.GetRerunRequestAsync(noParams)).Should().BeNull();
+        (await store.GetRerunRequestAsync(badParams)).Should().BeNull();
+        (await store.GetRerunRequestAsync(999_999)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetLastUsedRerunAsync_ReturnsMostRecentRowWithValidParameters()
+    {
+        using var store = CreateStore();
+
+        // Older row WITH valid rerun params.
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush", Action = "convert", SourcePath = @"C:\old.mov", Success = true,
+            RerunParameters = ConversionRerunRequestCodec.Serialize(new ConversionRerunRequest
+            {
+                SourcePaths = [@"C:\old.mov"], OutputFormat = "webm",
+            }),
+        });
+        // Newer row WITHOUT rerun params — must be skipped, not block the lookup.
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\newer.mov", Success = true,
+        });
+        // Newest row WITH valid rerun params — this is "last used".
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush", Action = "convert", SourcePath = @"C:\newest.mov", Success = true,
+            RerunParameters = ConversionRerunRequestCodec.Serialize(new ConversionRerunRequest
+            {
+                SourcePaths = [@"C:\newest.mov"], OutputFormat = "mkv",
+            }),
+        });
+
+        var lastUsed = await store.GetLastUsedRerunAsync();
+
+        lastUsed.Should().NotBeNull();
+        lastUsed!.OutputFormat.Should().Be("mkv");
+    }
+
+    [Fact]
+    public async Task GetLastUsedRerunAsync_NoRerunRowsAtAll_ReturnsNull()
+    {
+        using var store = CreateStore();
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\a.mov", Success = true,
+        });
+
+        (await store.GetLastUsedRerunAsync()).Should().BeNull();
+    }
+
     public void Dispose()
     {
         try

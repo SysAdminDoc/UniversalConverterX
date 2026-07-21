@@ -134,6 +134,50 @@ public sealed class HistoryStore : IDisposable
         return Task.Run(() => Get(id), cancellationToken);
     }
 
+    /// <summary>
+    /// Reconstruct the re-run request saved with a specific history row, or null
+    /// when the row is missing or carries no valid re-run parameters. Backs the
+    /// History "Apply settings" action.
+    /// </summary>
+    public async Task<ConversionRerunRequest?> GetRerunRequestAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        var entry = await GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return TryReadRerun(entry);
+    }
+
+    /// <summary>
+    /// The most recent history row that carries valid re-run parameters. Backs
+    /// the "Apply last used settings" action on the convert/compress pages.
+    /// </summary>
+    public async Task<ConversionRerunRequest?> GetLastUsedRerunAsync(
+        CancellationToken cancellationToken = default)
+    {
+        // Query is ordered id DESC (most recent first); take the first row that
+        // still has usable re-run parameters.
+        var recent = await QueryAsync(search: null, limit: 100, cancellationToken)
+            .ConfigureAwait(false);
+        foreach (var entry in recent)
+        {
+            var rerun = TryReadRerun(entry);
+            if (rerun is not null)
+                return rerun;
+        }
+
+        return null;
+    }
+
+    private static ConversionRerunRequest? TryReadRerun(ConversionHistoryEntry? entry)
+    {
+        if (entry?.RerunParameters is null)
+            return null;
+
+        return ConversionRerunRequestCodec.TryDeserialize(entry.RerunParameters, out var request, out _)
+            ? request
+            : null;
+    }
+
     public Task<ConversionHistorySummary> SummarizeAsync(
         string? search = null,
         CancellationToken cancellationToken = default)
