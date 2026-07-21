@@ -49,6 +49,10 @@ public class Program
                 .WithDescription("Show information about a file")
                 .WithExample("info", "video.mp4");
 
+            config.AddCommand<RecommendCommand>("recommend")
+                .WithDescription("Recommend the best output format for a delivery target (offline)")
+                .WithExample("recommend", "clip.mov", "--target", "web");
+
             config.AddCommand<ConfigCommand>("config")
                 .WithDescription("View or modify configuration")
                 .WithExample("config", "show")
