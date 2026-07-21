@@ -81,36 +81,48 @@ public partial class LibJxlConverter : BaseConverterStrategy
         if (isEncoding)
         {
             // cjxl encoding options
+            var isJpegInput = inputExt is "jpg" or "jpeg";
 
-            // Quality/Distance setting
-            // JPEG XL uses distance (0-15) where 0 is lossless, 1.0 is visually lossless
-            var distance = GetDistanceValue(options.Quality);
-            args.AddRange(["-d", distance.ToString("F1", CultureInfo.InvariantCulture)]);
+            // Lossless JPEG recompression: only valid when the *input* is a JPEG.
+            // In this mode cjxl re-packs the original JPEG so djxl can reconstruct
+            // it byte-for-byte, and distance/effort/progressive/responsive do not
+            // apply (and --progressive actively conflicts with it). Previously
+            // --lossless_jpeg=1 was emitted for any Lossless input (e.g. PNG),
+            // which is invalid, and it was combined with --progressive.
+            var losslessJpeg = options.Quality == QualityPreset.Lossless && isJpegInput;
 
-            // Effort level (1-9, higher = slower but better compression)
-            var effort = GetEffortValue(options.Quality);
-            args.AddRange(["-e", effort.ToString()]);
-
-            // Lossless mode for appropriate inputs
-            if (options.Quality == QualityPreset.Lossless)
+            if (losslessJpeg)
             {
-                args.Add("--lossless_jpeg=1"); // Lossless JPEG recompression if input is JPEG
+                args.Add("--lossless_jpeg=1");
             }
+            else
+            {
+                // Quality/Distance setting: JPEG XL uses distance where 0 is
+                // mathematically lossless and 1.0 is visually lossless. A
+                // Lossless preset on a non-JPEG input encodes lossless pixels
+                // via -d 0.
+                var distance = GetDistanceValue(options.Quality);
+                args.AddRange(["-d", distance.ToString("F1", CultureInfo.InvariantCulture)]);
 
-            // Progressive decoding
-            args.Add("--progressive");
+                // Effort level (1-9, higher = slower but better compression)
+                var effort = GetEffortValue(options.Quality);
+                args.AddRange(["-e", effort.ToString()]);
+
+                // Progressive decoding
+                args.Add("--progressive");
+
+                // Responsive encoding (better progressive preview)
+                if (options.Quality >= QualityPreset.High)
+                {
+                    args.Add("--responsive");
+                }
+            }
 
             // Keep EXIF data unless stripping
             if (!options.Image.StripMetadata)
             {
                 args.Add("--keep_exif");
                 args.Add("--keep_xmp");
-            }
-
-            // Responsive encoding (better progressive preview)
-            if (options.Quality >= QualityPreset.High)
-            {
-                args.Add("--responsive");
             }
 
             // Parallel encoding
