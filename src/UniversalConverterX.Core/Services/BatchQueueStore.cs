@@ -46,6 +46,63 @@ public sealed record PersistedBatchJob
     public string? ErrorMessage { get; init; }
 }
 
+/// <summary>
+/// Non-destructive batch-queue operations: text search across jobs and
+/// "clone as a fresh job" — the Core primitives behind the queue search box and
+/// the "open copy as new settings" action.
+/// </summary>
+public static class BatchQueueOperations
+{
+    /// <summary>
+    /// True when the job matches a free-text query against its source/output
+    /// path, engine, action, preset, status, and error message (case-insensitive).
+    /// A blank query matches everything.
+    /// </summary>
+    public static bool Matches(PersistedBatchJob job, string? query)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+        if (string.IsNullOrWhiteSpace(query))
+            return true;
+
+        var q = query.Trim();
+        return Contains(job.SourcePath, q)
+            || Contains(job.OutputPath, q)
+            || Contains(job.Engine, q)
+            || Contains(job.Action, q)
+            || Contains(job.Preset, q)
+            || Contains(job.Status, q)
+            || Contains(job.ErrorMessage, q);
+    }
+
+    /// <summary>Filter a queue's jobs by <see cref="Matches"/>.</summary>
+    public static IReadOnlyList<PersistedBatchJob> Search(IEnumerable<PersistedBatchJob> jobs, string? query)
+    {
+        ArgumentNullException.ThrowIfNull(jobs);
+        return jobs.Where(job => Matches(job, query)).ToList();
+    }
+
+    /// <summary>
+    /// Clone a job into a fresh, re-queueable one: a new <see cref="PersistedBatchJob.Id"/>,
+    /// <c>Status = "Queued"</c>, and no carried-over error. The original is
+    /// untouched (records are immutable). Args are deep-copied so later edits to
+    /// the clone don't mutate the source.
+    /// </summary>
+    public static PersistedBatchJob CloneAsNew(PersistedBatchJob source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        return source with
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Status = "Queued",
+            ErrorMessage = null,
+            Args = [.. source.Args],
+        };
+    }
+
+    private static bool Contains(string? value, string query) =>
+        value is not null && value.Contains(query, StringComparison.OrdinalIgnoreCase);
+}
+
 public sealed class JsonBatchQueueStore : IBatchQueueStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)

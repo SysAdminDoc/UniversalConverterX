@@ -176,6 +176,51 @@ public sealed class BatchQueueStoreTests : IDisposable
         seeder.Load("converter")!.Jobs[0].Status.Should().Be("Running");
     }
 
+    [Fact]
+    public void Search_FiltersByFilenameEngineAndError()
+    {
+        var jobs = new[]
+        {
+            new PersistedBatchJob { SourcePath = @"C:\In\holiday.mov", Engine = "videocrush", Status = "Queued" },
+            new PersistedBatchJob { SourcePath = @"C:\In\invoice.pdf", Engine = "ghostscript", Status = "Failed", ErrorMessage = "timeout" },
+            new PersistedBatchJob { SourcePath = @"C:\In\song.flac", Engine = "audiopro", Status = "Completed" },
+        };
+
+        BatchQueueOperations.Search(jobs, "holiday").Should().ContainSingle()
+            .Which.SourcePath.Should().EndWith("holiday.mov");
+        BatchQueueOperations.Search(jobs, "ghostscript").Should().ContainSingle();
+        BatchQueueOperations.Search(jobs, "timeout").Should().ContainSingle();
+        BatchQueueOperations.Search(jobs, "").Should().HaveCount(3);      // blank matches all
+        BatchQueueOperations.Search(jobs, "nomatch").Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CloneAsNew_ResetsIdStatusAndError_WithoutMutatingSource()
+    {
+        var source = new PersistedBatchJob
+        {
+            Id = "orig-id",
+            SourcePath = @"C:\In\clip.mov",
+            Engine = "videocrush",
+            Args = ["--preset", "prores-422"],
+            Status = "Failed",
+            ErrorMessage = "boom",
+        };
+
+        var clone = BatchQueueOperations.CloneAsNew(source);
+
+        clone.Id.Should().NotBe("orig-id").And.NotBeNullOrWhiteSpace();
+        clone.Status.Should().Be("Queued");
+        clone.ErrorMessage.Should().BeNull();
+        clone.SourcePath.Should().Be(source.SourcePath);
+        clone.Args.Should().Equal("--preset", "prores-422");
+
+        // Editing the clone's args must not affect the source.
+        clone.Args.Add("--extra");
+        source.Args.Should().Equal("--preset", "prores-422");
+        source.Status.Should().Be("Failed"); // original untouched
+    }
+
     public void Dispose()
     {
         try

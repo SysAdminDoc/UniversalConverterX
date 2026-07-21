@@ -67,12 +67,12 @@ _2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHA
   Acceptance: the encoder dropdown lists the probe's detected HW encoders; selecting one routes it through FFmpeg; NVENC-only machines are unchanged.
   Complexity: S
 
-- [ ] P2 — Item 132 — Job-queue search + "clone job as new settings"
-  Why: MKVToolNix v100 added searchable queue jobs and non-destructive clone; batch-UX polish over UCX's existing queue.
-  Evidence: MKVToolNix v100 NEWS.md.
+- [ ] P2 — Item 132b — Wire queue search + clone into the queue/History UI
+  Why: the Core primitives shipped and are tested (`BatchQueueOperations.Search` filters jobs by filename/engine/status/error; `CloneAsNew` produces a fresh re-queueable job without mutating the original); the remaining piece is the search box + "open copy as new settings" action in the UI.
+  Evidence: `BatchQueueOperations.Search`/`CloneAsNew`.
   Touches: queue/History UI in `.UI`.
-  Acceptance: queue/history is filterable by filename/format/warning text; a job can be cloned into a fresh editable job without deleting the original; ViewModel test covers filter + clone.
-  Complexity: M
+  Acceptance: a search box filters the queue via `Search`; a clone action calls `CloneAsNew` and adds it; ViewModel test.
+  Complexity: S
 
 - [ ] P2 — Item 133 — Read MP4/MOV track names from `udta` on remux
   Why: metadata fidelity — mkvmerge v100 now reads track names from MP4 user-data atoms; UCX should preserve them through remux.
