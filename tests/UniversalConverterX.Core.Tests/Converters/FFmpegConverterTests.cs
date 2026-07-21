@@ -480,4 +480,74 @@ public class FFmpegConverterTests
             Options = new ConversionOptions()
         };
     }
+
+    private static ConversionJob CreateTwoPassJob()
+    {
+        var job = CreateTestJob("input.mp4", "output.mp4");
+        job.Options.Video.TwoPass = true;
+        job.Options.Video.Bitrate = 2000;
+        return job;
+    }
+
+    [Fact]
+    public void ShouldRunNativeTwoPass_BitrateTargetVideo_IsTrue()
+    {
+        _converter.ShouldRunNativeTwoPass(CreateTwoPassJob()).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ShouldRunNativeTwoPass_CrfModeOrNoBitrate_IsFalse()
+    {
+        var crfJob = CreateTwoPassJob();
+        crfJob.Options.Video.Crf = 20; // CRF wins → two-pass is a no-op
+        _converter.ShouldRunNativeTwoPass(crfJob).Should().BeFalse();
+
+        var noBitrate = CreateTestJob("input.mp4", "output.mp4");
+        noBitrate.Options.Video.TwoPass = true;
+        _converter.ShouldRunNativeTwoPass(noBitrate).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ShouldRunNativeTwoPass_AudioOutputOrOverride_IsFalse()
+    {
+        var audio = CreateTwoPassJob();
+        audio.OutputPath = "output.mp3";
+        _converter.ShouldRunNativeTwoPass(audio).Should().BeFalse();
+
+        var overridden = CreateTwoPassJob();
+        overridden.Options.FfmpegArgumentOverride = ["-i", "{input}", "{output}"];
+        _converter.ShouldRunNativeTwoPass(overridden).Should().BeFalse();
+    }
+
+    [Fact]
+    public void BuildPassArguments_Pass1_AnalyzesToNullSinkWithoutAudio()
+    {
+        var job = CreateTwoPassJob();
+
+        var args = _converter.BuildPassArguments(job, job.Options, 1, "PREFIX");
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-pass 1");
+        joined.Should().Contain("-passlogfile PREFIX");
+        args.Should().Contain("-an");
+        args.Should().Contain("-f");
+        args.Should().Contain("null");
+        args.Should().NotContain("-progress");        // analysis pass emits no progress
+        args.Should().NotContain(job.OutputPath);      // no real muxed output
+    }
+
+    [Fact]
+    public void BuildPassArguments_Pass2_WritesRealOutputWithProgress()
+    {
+        var job = CreateTwoPassJob();
+
+        var args = _converter.BuildPassArguments(job, job.Options, 2, "PREFIX");
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-pass 2");
+        joined.Should().Contain("-passlogfile PREFIX");
+        args.Should().Contain(job.OutputPath);
+        args.Should().Contain("-progress");
+        args.Should().NotContain("-an");
+    }
 }

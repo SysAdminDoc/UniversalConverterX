@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Localization;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Utilities;
 
@@ -148,6 +150,209 @@ public partial class FFmpegConverter : BaseConverterStrategy
         return [.. args];
     }
 
+    /// <summary>
+    /// True when the job asks for genuine average-bitrate two-pass encoding on the
+    /// native path. Two-pass only helps with an explicit target bitrate; in CRF
+    /// mode (or with a raw command override) it is a no-op, so those fall through
+    /// to the single-pass base implementation.
+    /// </summary>
+    internal bool ShouldRunNativeTwoPass(ConversionJob job)
+    {
+        var video = job.Options.Video;
+        return video.TwoPass == true
+            && video.Bitrate.HasValue
+            && !video.Crf.HasValue
+            && job.Options.FfmpegArgumentOverride is not { Count: > 0 }
+            && IsVideoFormat(job.OutputExtension);
+    }
+
+    /// <summary>
+    /// Derive the pass-1 or pass-2 command line from the single-pass arguments.
+    /// Pass 1 analyses to the OS null sink with audio disabled; pass 2 writes the
+    /// real output. Both carry <c>-pass N -passlogfile &lt;prefix&gt;</c>.
+    /// </summary>
+    internal string[] BuildPassArguments(ConversionJob job, ConversionOptions options, int pass, string passLogPrefix)
+    {
+        var args = BuildArguments(job, options).ToList();
+
+        // Strip the trailing "-progress pipe:1 -stats_period 0.1" tail; the token
+        // immediately before it is the output path.
+        var progressIndex = args.LastIndexOf("-progress");
+        if (progressIndex >= 0)
+            args.RemoveRange(progressIndex, args.Count - progressIndex);
+
+        var outputPath = args[^1];
+        args.RemoveAt(args.Count - 1);
+
+        args.AddRange(["-pass", pass.ToString(System.Globalization.CultureInfo.InvariantCulture), "-passlogfile", passLogPrefix]);
+
+        if (pass == 1)
+        {
+            // Analysis pass: no audio, no muxed output.
+            var nullSink = OperatingSystem.IsWindows() ? "NUL" : "/dev/null";
+            args.AddRange(["-an", "-f", "null", nullSink]);
+        }
+        else
+        {
+            args.Add(outputPath);
+            args.AddRange(["-progress", "pipe:1", "-stats_period", "0.1"]);
+        }
+
+        return [.. args];
+    }
+
+    public override async Task<ConversionResult> ConvertAsync(
+        ConversionJob job,
+        IProgress<ConversionProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ShouldRunNativeTwoPass(job))
+            return await base.ConvertAsync(job, progress, cancellationToken);
+
+        var stopwatch = Stopwatch.StartNew();
+        var warnings = new List<string>();
+        using var timeoutCts = job.Options.Timeout is TimeSpan timeout && timeout > TimeSpan.Zero
+            ? new CancellationTokenSource(timeout)
+            : null;
+        using var linkedCts = timeoutCts is null
+            ? null
+            : CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+        var ct = linkedCts?.Token ?? cancellationToken;
+
+        try
+        {
+            var validation = ValidateJob(job);
+            if (!validation.IsValid)
+                return ConversionResult.Failed(job, validation.ErrorMessage!, stopwatch.Elapsed);
+
+            job.InputFileSize = new FileInfo(job.InputPath).Length;
+            job.Status = ConversionStatus.Running;
+            job.StartedAt = DateTime.UtcNow;
+
+            var executablePath = GetExecutablePath();
+            if (!File.Exists(executablePath))
+                return ConversionResult.Failed(
+                    job,
+                    LocalizedText.Format(
+                        "Core_ConverterExecutableNotFound",
+                        "Converter executable was not found: {0}", executablePath),
+                    stopwatch.Elapsed);
+
+            var outputDir = Path.GetDirectoryName(job.OutputPath);
+            if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            var passLogPrefix = Path.Combine(
+                Path.GetTempPath(), "ucx-2pass-" + Guid.NewGuid().ToString("N"));
+
+            try
+            {
+                // Pass 1 — analysis.
+                progress?.Report(ConversionProgress.Indeterminate(
+                    LocalizedText.Get("Core_TwoPassAnalyzing", "Analyzing (pass 1 of 2)..."),
+                    ConversionStage.Initializing));
+
+                var pass1Args = BuildPassArguments(job, job.Options, 1, passLogPrefix);
+                var pass1 = await ExecuteProcessAsync(executablePath, pass1Args, job, null, warnings, ct);
+                if (!pass1.Success)
+                {
+                    job.Status = ConversionStatus.Failed;
+                    return ConversionResult.Failed(
+                        job,
+                        pass1.ErrorMessage ?? LocalizedText.Get(
+                            "Core_TwoPassAnalysisFailed", "Two-pass analysis (pass 1) failed."),
+                        stopwatch.Elapsed,
+                        pass1.ExitCode,
+                        pass1.StandardOutput,
+                        pass1.StandardError,
+                        Id,
+                        FormatCommandLine(executablePath, pass1Args),
+                        warnings);
+                }
+
+                // Pass 2 — real encode.
+                var pass2Args = BuildPassArguments(job, job.Options, 2, passLogPrefix);
+                var commandLine = FormatCommandLine(executablePath, pass2Args);
+                var pass2 = await ExecuteProcessAsync(executablePath, pass2Args, job, progress, warnings, ct);
+
+                stopwatch.Stop();
+                job.CompletedAt = DateTime.UtcNow;
+
+                if (pass2.Success)
+                {
+                    var outputFailure = ValidateSuccessfulOutput(
+                        job, stopwatch.Elapsed, pass2.ExitCode,
+                        pass2.StandardOutput, pass2.StandardError, Id, commandLine, warnings);
+                    if (outputFailure != null)
+                        return outputFailure;
+
+                    job.Status = ConversionStatus.Completed;
+                    return ConversionResult.Succeeded(
+                        job, job.OutputPath, stopwatch.Elapsed, Id, commandLine, warnings);
+                }
+
+                job.Status = ConversionStatus.Failed;
+                return ConversionResult.Failed(
+                    job,
+                    pass2.ErrorMessage ?? LocalizedText.Get("Core_UnknownError", "Unknown error"),
+                    stopwatch.Elapsed, pass2.ExitCode, pass2.StandardOutput, pass2.StandardError,
+                    Id, commandLine, warnings);
+            }
+            finally
+            {
+                CleanupPassLogs(passLogPrefix);
+            }
+        }
+        catch (OperationCanceledException) when (timeoutCts?.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
+        {
+            job.Status = ConversionStatus.Failed;
+            job.CompletedAt = DateTime.UtcNow;
+            if (File.Exists(job.OutputPath))
+            {
+                try { File.Delete(job.OutputPath); } catch { }
+            }
+            return ConversionResult.Failed(
+                job,
+                LocalizedText.Format("Core_ConversionTimedOut", "Conversion timed out after {0}.", job.Options.Timeout!.Value),
+                stopwatch.Elapsed, exitCode: -1, converter: Id);
+        }
+        catch (OperationCanceledException)
+        {
+            job.Status = ConversionStatus.Cancelled;
+            job.CompletedAt = DateTime.UtcNow;
+            if (File.Exists(job.OutputPath))
+            {
+                try { File.Delete(job.OutputPath); } catch { }
+            }
+            return ConversionResult.Cancelled(job, stopwatch.Elapsed);
+        }
+        catch (Exception ex)
+        {
+            job.Status = ConversionStatus.Failed;
+            job.CompletedAt = DateTime.UtcNow;
+            Logger?.LogError(ex, "Two-pass conversion failed for {Input}", job.InputPath);
+            return ConversionResult.Failed(job, ex.Message, stopwatch.Elapsed);
+        }
+    }
+
+    private static void CleanupPassLogs(string passLogPrefix)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(passLogPrefix);
+            var prefix = Path.GetFileName(passLogPrefix);
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+                return;
+
+            // ffmpeg writes "<prefix>-0.log" and "<prefix>-0.log.mbtree".
+            foreach (var file in Directory.EnumerateFiles(directory, prefix + "*"))
+            {
+                try { File.Delete(file); } catch { /* best effort */ }
+            }
+        }
+        catch { /* best effort cleanup */ }
+    }
+
     private void BuildVideoArgs(List<string> args, ConversionOptions options)
     {
         var video = options.Video;
@@ -231,12 +436,10 @@ public partial class FFmpegConverter : BaseConverterStrategy
         if (!string.IsNullOrEmpty(video.PixelFormat))
             args.AddRange(["-pix_fmt", video.PixelFormat]);
 
-        // Two-pass encoding
-        if (video.TwoPass == true)
-        {
-            // Note: Two-pass requires running ffmpeg twice, not implemented here
-            Logger?.LogWarning("Two-pass encoding requested but not implemented in single-pass mode");
-        }
+        // Two-pass encoding is handled by the ConvertAsync override (it runs
+        // ffmpeg twice with -pass 1/-pass 2 + -passlogfile). BuildArguments here
+        // always produces the single-invocation form; BuildPassArguments derives
+        // the per-pass command lines from it. See ShouldRunNativeTwoPass.
 
         // Audio handling
         if (video.RemoveAudio)
