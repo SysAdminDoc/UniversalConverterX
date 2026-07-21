@@ -131,7 +131,12 @@ public class PresetXmlSmokeTests
         {
             ["archive-ffv1.preset.xml"] = ("Video/Preservation", "mkv", "archive-ffv1"),
             ["production-prores-422.preset.xml"] = ("Video/Production", "mov", "prores-422"),
+            ["production-prores-422-hq.preset.xml"] = ("Video/Production", "mov", "prores-422-hq"),
+            ["production-prores-422-proxy.preset.xml"] = ("Video/Production", "mov", "prores-422-proxy"),
+            ["production-prores-4444.preset.xml"] = ("Video/Production", "mov", "prores-4444"),
             ["production-dnxhr.preset.xml"] = ("Video/Production", "mov", "dnxhr-hq"),
+            ["production-dnxhr-sq.preset.xml"] = ("Video/Production", "mov", "dnxhr-sq"),
+            ["production-dnxhr-hqx.preset.xml"] = ("Video/Production", "mov", "dnxhr-hqx"),
         };
 
         foreach (var (fileName, contract) in expected)
