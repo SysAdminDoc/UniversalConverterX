@@ -250,6 +250,17 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         }
     }
 
+    /// <summary>
+    /// Public seam over <see cref="GetExecutablePath"/> that returns the resolved
+    /// path only when the executable actually exists on disk (the protected
+    /// method returns an expected path even when the tool is missing).
+    /// </summary>
+    public virtual string? ResolveExecutablePath()
+    {
+        var path = GetExecutablePath();
+        return File.Exists(path) ? path : null;
+    }
+
     protected virtual string GetExecutablePath()
     {
         var exeName = OperatingSystem.IsWindows() ? $"{ExecutableName}.exe" : ExecutableName;

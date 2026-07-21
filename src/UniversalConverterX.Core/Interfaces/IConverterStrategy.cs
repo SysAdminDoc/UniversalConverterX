@@ -68,6 +68,13 @@ public interface IConverterStrategy
     /// Validate the conversion job before execution
     /// </summary>
     ValidationResult ValidateJob(ConversionJob job);
+
+    /// <summary>
+    /// Resolve the on-disk path to this converter's CLI tool, or null when the
+    /// executable cannot be located. Used by the security version gate to probe
+    /// the tool's reported version before a conversion runs.
+    /// </summary>
+    string? ResolveExecutablePath();
 }
 
 /// <summary>

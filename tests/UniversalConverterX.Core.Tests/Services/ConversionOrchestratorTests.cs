@@ -190,6 +190,67 @@ public class ConversionOrchestratorTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    private sealed class StubVersionProbe(ToolVersionAssessment? assessment) : IToolVersionProbe
+    {
+        public ToolVersionAssessment? Assess(IConverterStrategy converter) => assessment;
+    }
+
+    [Fact]
+    public async Task ConvertAsync_ToolBelowSecurityFloor_IsBlockedBeforeRunning()
+    {
+        var converter = CreateMockConverter("ffmpeg", "FFmpeg", 100);
+        converter.Setup(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ConversionResult.Succeeded(
+                CreateTestJob("input.mp4", "output.mkv"), "output.mkv", TimeSpan.Zero, "ffmpeg"));
+
+        var probe = new StubVersionProbe(ToolVersionPolicy.Assess("ffmpeg", "7.1.2"));
+        var orchestrator = new ConversionOrchestrator(
+            new List<IConverterStrategy> { converter.Object },
+            _optionsMock.Object,
+            probe,
+            _loggerMock.Object);
+
+        var result = await orchestrator.ConvertAsync(CreateTestJob("input.mp4", "output.mkv"));
+
+        result.Success.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("FFmpeg");
+        result.ErrorMessage.Should().Contain("8.1.2");
+        converter.Verify(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConvertAsync_ToolMeetsSecurityFloor_ProceedsToConverter()
+    {
+        var converter = CreateMockConverter("ffmpeg", "FFmpeg", 100);
+        converter.Setup(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ConversionJob j, IProgress<ConversionProgress>? _, CancellationToken _) =>
+                ConversionResult.Succeeded(j, j.OutputPath, TimeSpan.Zero, "ffmpeg"));
+
+        var probe = new StubVersionProbe(ToolVersionPolicy.Assess("ffmpeg", "8.1.2"));
+        var orchestrator = new ConversionOrchestrator(
+            new List<IConverterStrategy> { converter.Object },
+            _optionsMock.Object,
+            probe,
+            _loggerMock.Object);
+
+        var result = await orchestrator.ConvertAsync(CreateTestJob("input.mp4", "output.mkv"));
+
+        result.Success.Should().BeTrue();
+        converter.Verify(x => x.ConvertAsync(
+            It.IsAny<ConversionJob>(),
+            It.IsAny<IProgress<ConversionProgress>>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     [Fact]
     public async Task ConvertAsync_WithForceConverter_ShouldUseSpecifiedConverter()
     {

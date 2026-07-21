@@ -21,6 +21,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
     private readonly Dictionary<string, HashSet<string>> _conversionGraph;
     private readonly MagicBytesDetector _formatDetector;
     private readonly ConverterXOptions _options;
+    private readonly IToolVersionProbe? _versionProbe;
 
     public ConversionOrchestrator(
         IOptions<ConverterXOptions> options,
@@ -31,6 +32,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
         _formatDetector = new MagicBytesDetector();
         _converters = [];
         _conversionGraph = [];
+        _versionProbe = new ProcessToolVersionProbe();
 
         InitializeConverters();
         BuildConversionGraph();
@@ -40,12 +42,22 @@ public class ConversionOrchestrator : IConversionOrchestrator
         IEnumerable<IConverterStrategy> converters,
         IOptions<ConverterXOptions> options,
         ILogger<ConversionOrchestrator>? logger = null)
+        : this(converters, options, null, logger)
+    {
+    }
+
+    public ConversionOrchestrator(
+        IEnumerable<IConverterStrategy> converters,
+        IOptions<ConverterXOptions> options,
+        IToolVersionProbe? versionProbe,
+        ILogger<ConversionOrchestrator>? logger = null)
     {
         _options = options.Value;
         _logger = logger;
         _formatDetector = new MagicBytesDetector();
         _converters = converters.OrderByDescending(c => c.Priority).ToList();
         _conversionGraph = [];
+        _versionProbe = versionProbe ?? new ProcessToolVersionProbe();
 
         BuildConversionGraph();
     }
@@ -272,6 +284,20 @@ public class ConversionOrchestrator : IConversionOrchestrator
 
             job.ConverterUsed = converter.Id;
             _logger?.LogDebug("Using converter: {Converter}", converter.Name);
+
+            // Security floor: refuse to hand an untrusted input to a tool we have
+            // positively identified as an out-of-date, vulnerable build. Unknown
+            // or missing versions never block here (see ToolVersionGate.IsBlocked).
+            var versionAssessment = _versionProbe?.Assess(converter);
+            if (versionAssessment is not null && ToolVersionGate.IsBlocked(versionAssessment))
+            {
+                var message = ToolVersionGate.BuildBlockedMessage(versionAssessment);
+                _logger?.LogError(
+                    "Blocked conversion: {Message}", message);
+                job.Status = ConversionStatus.Failed;
+                job.CompletedAt = DateTime.UtcNow;
+                return ConversionResult.Failed(job, message, DateTime.UtcNow - startedAt);
+            }
 
             // Execute conversion, then apply any source-file action at the
             // orchestrator boundary so CLI, UI, and batch callers agree.
