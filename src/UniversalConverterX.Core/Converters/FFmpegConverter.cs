@@ -124,10 +124,15 @@ public partial class FFmpegConverter : BaseConverterStrategy
         var isVideoOutput = IsVideoFormat(job.OutputExtension);
         var isAudioOutput = IsAudioFormat(job.OutputExtension);
 
+        // Explicit per-track stream selection applies only to video output
+        // (an audio-container output is inherently audio-only).
+        var useExplicitMaps = isVideoOutput && HasTrackSelection(options);
+
         if (options.StreamCopy && isVideoOutput)
         {
-            // Remux: copy every stream into the new container, no re-encode.
-            args.AddRange(["-map", "0", "-c", "copy"]);
+            // Remux: copy the selected streams into the new container, no re-encode.
+            args.AddRange(useExplicitMaps ? BuildStreamMapArgs(options) : ["-map", "0"]);
+            args.AddRange(["-c", "copy"]);
         }
         else if (options.StreamCopy && isAudioOutput)
         {
@@ -136,6 +141,8 @@ public partial class FFmpegConverter : BaseConverterStrategy
         }
         else if (isVideoOutput)
         {
+            if (useExplicitMaps)
+                args.AddRange(BuildStreamMapArgs(options));
             BuildVideoArgs(args, options);
         }
         else if (isAudioOutput)
@@ -158,6 +165,35 @@ public partial class FFmpegConverter : BaseConverterStrategy
         args.AddRange(["-progress", "pipe:1", "-stats_period", "0.1"]);
 
         return [.. args];
+    }
+
+    internal static bool HasTrackSelection(ConversionOptions options) =>
+        options.AudioTrackSelection is not null || options.SubtitleTrackSelection is not null;
+
+    /// <summary>
+    /// Build explicit <c>-map</c> directives from the per-track selection. All
+    /// video streams are always kept. A null audio/subtitle selection keeps every
+    /// track of that kind; a list keeps exactly the listed zero-based indices; an
+    /// empty list drops that kind entirely. The <c>?</c> suffix makes each map
+    /// optional so a missing stream never fails the job.
+    /// </summary>
+    internal static string[] BuildStreamMapArgs(ConversionOptions options)
+    {
+        var maps = new List<string> { "-map", "0:v?" };
+
+        if (options.AudioTrackSelection is null)
+            maps.AddRange(["-map", "0:a?"]);
+        else
+            foreach (var index in options.AudioTrackSelection)
+                maps.AddRange(["-map", $"0:a:{index}?"]);
+
+        if (options.SubtitleTrackSelection is null)
+            maps.AddRange(["-map", "0:s?"]);
+        else
+            foreach (var index in options.SubtitleTrackSelection)
+                maps.AddRange(["-map", $"0:s:{index}?"]);
+
+        return [.. maps];
     }
 
     /// <summary>

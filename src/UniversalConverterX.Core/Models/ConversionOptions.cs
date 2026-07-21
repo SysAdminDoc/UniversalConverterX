@@ -66,6 +66,20 @@ public class ConversionOptions
     public bool StreamCopy { get; set; } = false;
 
     /// <summary>
+    /// Per-track audio stream selection for FFmpeg video output. <c>null</c> keeps
+    /// every audio track (default); an empty list drops all audio; a list of
+    /// zero-based audio-stream indices keeps exactly those. Drives explicit
+    /// <c>-map 0:a:&lt;i&gt;</c> mapping.
+    /// </summary>
+    public List<int>? AudioTrackSelection { get; set; }
+
+    /// <summary>
+    /// Per-track subtitle stream selection for FFmpeg video output. Same
+    /// semantics as <see cref="AudioTrackSelection"/> but for subtitle streams.
+    /// </summary>
+    public List<int>? SubtitleTrackSelection { get; set; }
+
+    /// <summary>
     /// Additional custom arguments to pass to the converter
     /// </summary>
     public List<string> CustomArguments { get; set; } = [];

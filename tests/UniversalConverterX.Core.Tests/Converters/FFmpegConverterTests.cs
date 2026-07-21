@@ -513,6 +513,73 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void BuildArguments_NoTrackSelection_EmitsNoExplicitMap()
+    {
+        var job = CreateTestJob("input.mkv", "output.mp4");
+        var options = new ConversionOptions();
+
+        var args = _converter.BuildArguments(job, options);
+
+        args.Should().NotContain("-map"); // default ffmpeg stream selection
+    }
+
+    [Fact]
+    public void BuildArguments_SelectedAudioTrack_MapsOnlyThatAudioStream()
+    {
+        var job = CreateTestJob("input.mkv", "output.mp4");
+        var options = new ConversionOptions { AudioTrackSelection = [1] };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-map 0:v?");
+        joined.Should().Contain("-map 0:a:1?");
+        joined.Should().Contain("-map 0:s?");   // subtitles default to keep-all
+        joined.Should().NotContain("0:a:0?");
+    }
+
+    [Fact]
+    public void BuildArguments_EmptyAudioSelection_DropsAllAudio()
+    {
+        var job = CreateTestJob("input.mkv", "output.mp4");
+        var options = new ConversionOptions { AudioTrackSelection = [] };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-map 0:v?");
+        joined.Should().NotContain("0:a"); // no audio mapped
+    }
+
+    [Fact]
+    public void BuildArguments_SubtitleSelection_MapsListedSubtitleStreams()
+    {
+        var job = CreateTestJob("input.mkv", "output.mkv");
+        var options = new ConversionOptions { SubtitleTrackSelection = [0, 2] };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-map 0:s:0?");
+        joined.Should().Contain("-map 0:s:2?");
+        joined.Should().Contain("-map 0:a?"); // audio default keep-all
+    }
+
+    [Fact]
+    public void BuildArguments_StreamCopyWithSelection_UsesExplicitMapsNotMapAll()
+    {
+        var job = CreateTestJob("input.mkv", "output.mp4");
+        var options = new ConversionOptions { StreamCopy = true, AudioTrackSelection = [0] };
+
+        var args = _converter.BuildArguments(job, options);
+        var joined = string.Join(" ", args);
+
+        joined.Should().Contain("-map 0:a:0?");
+        joined.Should().Contain("-c copy");
+        joined.Should().NotContain("-map 0 "); // not the copy-everything map
+    }
+
+    [Fact]
     public void ShouldRunNativeTwoPass_StreamCopy_IsFalse()
     {
         var job = CreateTwoPassJob();

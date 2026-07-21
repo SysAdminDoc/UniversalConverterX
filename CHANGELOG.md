@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Per-track audio/subtitle stream selection.** `ConversionOptions.AudioTrackSelection` and `SubtitleTrackSelection` drive explicit FFmpeg `-map` directives: `null` keeps every track of that kind, an empty list drops it, and a list of zero-based indices keeps exactly those streams (all video streams are always kept). Works for both re-encode and remux (`-c copy`) paths. Exposed on the CLI as `ucx convert --audio-tracks 0,2` / `--subtitle-tracks none`. Covered by command-builder tests.
+
 ## [2.32.0] - 2026-07-20
 
 ### Added

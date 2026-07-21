@@ -51,12 +51,12 @@ _2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHA
   Acceptance: from any history row, "Apply settings" pre-fills the relevant page with that job's parameters; "Apply last used" is available on convert/compress pages; covered by a ViewModel test.
   Complexity: M
 
-- [ ] P1 — Item 128 — Per-track subtitle/audio keep-drop UI in the preflight table
-  Why: choosing which subtitle/audio tracks survive is FFQueue's most-praised feature and fits UCX's HDR/subtitle-fidelity charter; the scan-review table already exists.
-  Evidence: FFQueue documentation; UCX preflight table shipped v2.23.0.
-  Touches: Converter preflight table in `.UI`, FFmpeg stream-mapping in `FFmpegConverter.cs`.
-  Acceptance: preflight lists each input stream with a keep/drop toggle; dropped tracks are excluded via `-map` on output; default preserves all; verified by a command-builder test.
-  Complexity: M
+- [ ] P1 — Item 128b — Surface per-track keep/drop toggles in the Converter preflight UI
+  Why: the Core `-map` selection + CLI flags shipped (v2.32.x); the remaining piece is the preflight-table toggle UI wired to `AudioTrackSelection`/`SubtitleTrackSelection`.
+  Evidence: `FFmpegConverter.BuildStreamMapArgs`; `ConversionOptions.AudioTrackSelection`; `ucx convert --audio-tracks/--subtitle-tracks`.
+  Touches: Converter preflight table in `.UI`.
+  Acceptance: preflight lists each input stream with a keep/drop toggle bound to the selection lists; default preserves all.
+  Complexity: S
 
 ### P2 — Formats, codecs, preset ergonomics
 

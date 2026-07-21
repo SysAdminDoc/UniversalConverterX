@@ -92,6 +92,32 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [CommandOption("--copy|--remux")]
         [Description("Remux only: change the container without re-encoding (FFmpeg -c copy). Fast and lossless when the source codecs are allowed in the target container.")]
         public bool StreamCopy { get; set; }
+
+        [CommandOption("--audio-tracks <INDICES>")]
+        [Description("Keep only these zero-based audio streams (comma-separated, e.g. 0,2). Omit to keep all; pass 'none' to drop all audio.")]
+        public string? AudioTracks { get; set; }
+
+        [CommandOption("--subtitle-tracks <INDICES>")]
+        [Description("Keep only these zero-based subtitle streams (comma-separated). Omit to keep all; pass 'none' to drop all subtitles.")]
+        public string? SubtitleTracks { get; set; }
+    }
+
+    private static List<int>? ParseTrackSelection(string? value)
+    {
+        if (value is null)
+            return null;
+
+        var trimmed = value.Trim();
+        if (trimmed.Length == 0 || trimmed.Equals("none", StringComparison.OrdinalIgnoreCase))
+            return [];
+
+        var indices = new List<int>();
+        foreach (var part in trimmed.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (int.TryParse(part, out var index) && index >= 0)
+                indices.Add(index);
+        }
+        return indices;
     }
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -439,6 +465,8 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             PreserveMetadata = settings.KeepMetadata,
             UseHardwareAcceleration = settings.HardwareAccel,
             StreamCopy = settings.StreamCopy,
+            AudioTrackSelection = ParseTrackSelection(settings.AudioTracks),
+            SubtitleTrackSelection = ParseTrackSelection(settings.SubtitleTracks),
             ForceConverter = settings.Converter,
             OutputDirectory = settings.OutputDirectory,
             PostConversionAction = sourceAction,
