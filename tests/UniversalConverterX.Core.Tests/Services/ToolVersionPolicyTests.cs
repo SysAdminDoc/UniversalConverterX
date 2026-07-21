@@ -20,6 +20,16 @@ public class ToolVersionPolicyTests
     [InlineData("yt-dlp", "2026.06.09", false, "2026.06.09")]
     [InlineData("deno", "deno 2.9.3", true, "2.9.3")]
     [InlineData("deno", "deno 2.2.0", false, "2.2.0")]
+    [InlineData("libheif", "libheif version: 1.22.0", true, "1.22.0")]
+    [InlineData("libheif", "1.18.1", false, "1.18.1")]
+    [InlineData("heif-enc", "1.19.0", false, "1.19.0")]
+    [InlineData("libjxl", "cjxl v0.11.2 [AVX2]", true, "0.11.2")]
+    [InlineData("cjxl", "0.11.1", false, "0.11.1")]
+    [InlineData("vips", "vips-8.19.0", true, "8.19.0")]
+    [InlineData("libvips", "8.18.2", false, "8.18.2")]
+    [InlineData("ghostscript", "GPL Ghostscript 10.07.1", true, "10.07.1")]
+    [InlineData("gswin64c", "10.05.1", false, "10.05.1")]
+    [InlineData("gs", "10.07.1", true, "10.07.1")]
     public void Assess_KnownTool_ComparesNumericComponents(
         string toolId,
         string reportedVersion,

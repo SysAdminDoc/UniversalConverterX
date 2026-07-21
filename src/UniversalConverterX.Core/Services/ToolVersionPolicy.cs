@@ -17,6 +17,10 @@ public static partial class ToolVersionPolicy
             ["libreoffice"] = new("libreoffice", "LibreOffice", "26.2.4", "CVE-2026-8356, CVE-2026-8357, and CVE-2026-8358"),
             ["yt-dlp"] = new("yt-dlp", "yt-dlp", "2026.07.04", "2026 downloader security rollup"),
             ["deno"] = new("deno", "Deno", "2.3.0", "minimum runtime supported by yt-dlp EJS"),
+            ["libheif"] = new("libheif", "libheif", "1.22.0", "CVE-2026-32740, CVE-2026-32741, and CVE-2026-32814"),
+            ["libjxl"] = new("libjxl", "libjxl", "0.11.2", "CVE-2026-1837 and earlier JXL decoder fixes"),
+            ["vips"] = new("vips", "libvips", "8.19.0", "CVE-2026-3281"),
+            ["ghostscript"] = new("ghostscript", "Ghostscript", "10.07.1", "PostScript/PDF parser hardening"),
         };
 
     private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
@@ -25,6 +29,14 @@ public static partial class ToolVersionPolicy
         ["ebook-convert"] = "calibre",
         ["soffice"] = "libreoffice",
         ["7z"] = "7zip",
+        ["libvips"] = "vips",
+        ["gswin64c"] = "ghostscript",
+        ["gswin32c"] = "ghostscript",
+        ["gs"] = "ghostscript",
+        ["cjxl"] = "libjxl",
+        ["djxl"] = "libjxl",
+        ["heif-enc"] = "libheif",
+        ["heif-dec"] = "libheif",
     };
 
     public static string Canonicalize(string toolId) =>
