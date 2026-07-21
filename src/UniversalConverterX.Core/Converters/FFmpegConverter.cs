@@ -58,7 +58,10 @@ public partial class FFmpegConverter : BaseConverterStrategy
         "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "m4v", "mpg", "mpeg",
         "3gp", "3g2", "mts", "m2ts", "ts", "vob", "ogv", "dv", "mxf", "nut",
         "rm", "rmvb", "asf", "divx", "f4v", "swf", "m2v", "mpv", "mp2", "mpe",
-        
+        // VVC / H.266 raw bitstreams — decode-only (FFmpeg 8.1 ships a native
+        // vvc decoder + vvc_qsv). No VVC encode output; see RESEARCH.md.
+        "vvc", "h266", "266",
+
         // Audio
         "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "opus", "aiff", "ape",
         "ac3", "dts", "eac3", "mka", "mpa", "ra", "tta", "wv", "au", "amr",

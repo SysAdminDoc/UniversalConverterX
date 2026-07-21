@@ -155,13 +155,6 @@ _2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHA
   Acceptance: a live/dynamic MPD downloads a bounded segment window (or clearly reports the recording semantics) instead of the current unsupported-log.
   Complexity: M
 
-- [ ] P3 — Item 145 — VVC/H.266 decode support (reconsider decode-only stance)
-  Why: Intel Lunar Lake HW-decodes VVC to 8K60 and DVB mandates it; FastFlix ships vvenc — decode is now worth wiring even though encode stays deprioritized.
-  Evidence: FastFlix 6.0; dacast H.266 overview; RESEARCH.md Rejected Ideas split.
-  Touches: FFmpeg decode probe, format detection tables.
-  Acceptance: a VVC-encoded input is detected and transcoded to a common target using the available decoder; encode remains out (documented).
-  Complexity: M
-
 - [ ] P3 — Item 146 — Complete shared sidecar `find_ffmpeg`/`emit` consolidation
   Why: `tools/_lib/ucx_sidecar.py` centralized the protocol/runtime/timeout but per-sidecar boilerplate remains across 212 engines; finishing it reduces drift and CVE-patch surface.
   Evidence: RESEARCH.md Architecture; `tools/_lib/ucx_sidecar.py`.

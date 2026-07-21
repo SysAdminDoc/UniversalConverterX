@@ -512,6 +512,23 @@ public class FFmpegConverterTests
         joined.Should().NotContain("-crf");
     }
 
+    [Theory]
+    [InlineData("vvc")]
+    [InlineData("h266")]
+    [InlineData("266")]
+    public void CanConvert_VvcInputToCommonContainer_IsSupportedDecodeOnly(string vvcExt)
+    {
+        var source = new FileFormat(vvcExt, "video/vvc", FormatCategory.Video);
+        var mp4 = new FileFormat("mp4", "video/mp4", FormatCategory.Video);
+
+        _converter.CanConvert(source, mp4).Should().BeTrue("VVC is decode-only but transcodable to MP4");
+
+        // Decode-only: VVC is not offered as an output container.
+        var anySource = new FileFormat("mp4", "video/mp4", FormatCategory.Video);
+        var vvcTarget = new FileFormat(vvcExt, "video/vvc", FormatCategory.Video);
+        _converter.CanConvert(anySource, vvcTarget).Should().BeFalse("VVC encode is intentionally unsupported");
+    }
+
     [Fact]
     public void BuildArguments_NoTrackSelection_EmitsNoExplicitMap()
     {

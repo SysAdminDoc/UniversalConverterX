@@ -550,8 +550,9 @@ public class ConversionOrchestrator : IConversionOrchestrator
     private static FormatCategory DetermineCategory(string extension) => extension switch
     {
         // Video
-        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or 
-        "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "mts" => FormatCategory.Video,
+        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or
+        "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "mts" or
+        "vvc" or "h266" or "266" => FormatCategory.Video,
 
         // Audio
         "mp3" or "wav" or "flac" or "aac" or "ogg" or "wma" or "m4a" or 
@@ -589,6 +590,7 @@ public class ConversionOrchestrator : IConversionOrchestrator
         "avi" => "video/x-msvideo",
         "mov" => "video/quicktime",
         "webm" => "video/webm",
+        "vvc" or "h266" or "266" => "video/vvc",
 
         // Audio
         "mp3" => "audio/mpeg",
