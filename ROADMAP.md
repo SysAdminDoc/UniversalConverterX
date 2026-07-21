@@ -60,12 +60,12 @@ _2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHA
 
 ### P2 — Formats, codecs, preset ergonomics
 
-- [ ] P2 — Item 130 — Detect-and-offer HW encoders beyond NVENC (AMD VCN AV1, Intel QSV)
-  Why: UCX only verifies NVENC; HandBrake 1.11 (AMD VCN AV1 10-bit) and Shutter (QSV) broadened HW encode. Detect available encoders at runtime and offer them.
-  Evidence: HandBrake 1.11 / Shutter Encoder 20.2 changelogs.
-  Touches: FFmpeg encoder capability probe in Core, Compressor/Convert encoder selection in `.UI`.
-  Acceptance: on a machine exposing `av1_amf`/`hevc_qsv`/`av1_qsv`, those encoders appear and produce valid output; on an NVENC-only machine, behavior is unchanged; probe is cached.
-  Complexity: M
+- [ ] P2 — Item 130b — Offer detected HW encoders in the Compressor/Convert UI
+  Why: the runtime detection shipped (`FfmpegEncoderProbe`, live-verified detecting av1_amf/av1_qsv/hevc_qsv/NVENC via `ucx encoders`); the remaining piece is populating the UI encoder dropdown from the probe and passing the chosen encoder through.
+  Evidence: `FfmpegEncoderProbe.Probe`; `ucx encoders`; `HardwareAcceleration` enum.
+  Touches: Compressor/Convert encoder selection in `.UI`.
+  Acceptance: the encoder dropdown lists the probe's detected HW encoders; selecting one routes it through FFmpeg; NVENC-only machines are unchanged.
+  Complexity: S
 
 - [ ] P2 — Item 132 — Job-queue search + "clone job as new settings"
   Why: MKVToolNix v100 added searchable queue jobs and non-destructive clone; batch-UX polish over UCX's existing queue.

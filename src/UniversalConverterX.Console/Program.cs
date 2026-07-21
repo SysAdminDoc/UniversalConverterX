@@ -53,6 +53,10 @@ public class Program
                 .WithDescription("Recommend the best output format for a delivery target (offline)")
                 .WithExample("recommend", "clip.mov", "--target", "web");
 
+            config.AddCommand<EncodersCommand>("encoders")
+                .WithDescription("List hardware video encoders the local FFmpeg build exposes")
+                .WithExample("encoders");
+
             config.AddCommand<ConfigCommand>("config")
                 .WithDescription("View or modify configuration")
                 .WithExample("config", "show")

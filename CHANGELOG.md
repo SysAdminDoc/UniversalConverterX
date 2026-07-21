@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- **Hardware video encoder detection beyond NVENC.** New `FfmpegEncoderProbe` parses `ffmpeg -encoders` and classifies the available hardware encoders by vendor (NVIDIA NVENC, AMD AMF, Intel Quick Sync, VAAPI, VideoToolbox, Vulkan) and codec. Exposed as `ucx encoders`, which lists what the local FFmpeg build actually supports — on this machine it detects AMD AMF AV1, Intel QSV AV1/HEVC, and NVENC alongside the previously-only-assumed NVENC. Parsing is unit-tested with fixture output; the live probe is cached per FFmpeg binary.
 - **Per-track audio/subtitle stream selection.** `ConversionOptions.AudioTrackSelection` and `SubtitleTrackSelection` drive explicit FFmpeg `-map` directives: `null` keeps every track of that kind, an empty list drops it, and a list of zero-based indices keeps exactly those streams (all video streams are always kept). Works for both re-encode and remux (`-c copy`) paths. Exposed on the CLI as `ucx convert --audio-tracks 0,2` / `--subtitle-tracks none`. Covered by command-builder tests.
 
 ## [2.32.0] - 2026-07-20
