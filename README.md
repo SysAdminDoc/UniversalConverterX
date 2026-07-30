@@ -24,7 +24,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
 - **Video Enhancer** — portable Real-ESRGAN export, optional Anime4K v4 GLSL chains through mpv, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
-- **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.2 and libavif 1.4.2 runtimes.
+- **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.3 and libavif 1.4.2 runtimes.
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
 - **Offline AI video tags** — sample images or video frames locally, identify 80 COCO object classes, and write bounded per-frame detections plus aggregate tags as atomic JSON.

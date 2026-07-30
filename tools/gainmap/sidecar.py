@@ -1,6 +1,6 @@
 """ISO 21496-1 gain-map preservation and AVIF writing sidecar.
 
-The opt-in runtime pins an official libvips 8.18.2 Windows build for UltraHDR
+The opt-in runtime pins an official libvips 8.18.3 Windows build for UltraHDR
 JPEG and a reproducible static libavif 1.4.2 avifgainmaputil build. Runtime
 downloads require explicit license acknowledgement and are hash verified.
 """
@@ -383,8 +383,11 @@ def cmd_preserve(args: argparse.Namespace) -> int:
 
 
 def _avif_encode_args(args: argparse.Namespace) -> list[str]:
-    return ["--qcolor", str(args.quality), "--qgain-map", str(args.gainmap_quality),
-            "--speed", str(args.speed)]
+    command = ["--qcolor", str(args.quality), "--qgain-map", str(args.gainmap_quality),
+               "--speed", str(args.speed)]
+    if args.depth:
+        command.extend(["--depth", str(args.depth)])
+    return command
 
 
 def cmd_convert(args: argparse.Namespace) -> int:
@@ -425,6 +428,7 @@ def cmd_create(args: argparse.Namespace) -> int:
         temp_output = _temp_output(output)
         command = [avif, "combine", str(base), str(alternate), str(temp_output),
                    *_avif_encode_args(args), "--downscaling", str(args.downscaling),
+                   "--depth-gain-map", str(args.gainmap_depth),
                    "--max-headroom", str(args.max_headroom),
                    "--cicp-base", args.cicp_base,
                    "--cicp-alternate", args.cicp_alternate]
@@ -464,6 +468,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--alternate", required=True)
     create.add_argument("--output", required=True)
     create.add_argument("--downscaling", type=int, choices=range(1, 17), default=2)
+    create.add_argument("--gainmap-depth", type=int, choices=(8, 10, 12), default=8)
     create.add_argument("--max-headroom", type=float, default=4.0)
     create.add_argument("--cicp-base", default="1/13/6")
     create.add_argument("--cicp-alternate", default="9/16/9")
@@ -471,6 +476,8 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--quality", type=int, choices=range(0, 101), default=90)
         command.add_argument("--gainmap-quality", type=int, choices=range(0, 101), default=100)
         command.add_argument("--speed", type=int, choices=range(0, 11), default=8)
+        command.add_argument("--depth", type=int, choices=(0, 8, 10, 12), default=0,
+                             help="AVIF base image bit depth (0 = automatic)")
     convert.set_defaults(func=cmd_convert)
     create.set_defaults(func=cmd_create)
     return parser

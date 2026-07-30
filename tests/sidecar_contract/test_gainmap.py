@@ -27,9 +27,12 @@ class GainMapTests(unittest.TestCase):
         manifest = gainmap._manifest()
         artifacts = {item["id"]: item for item in manifest["artifacts"]}
 
-        self.assertEqual("1.4.2+vips8.18.2", manifest["runtimeVersion"])
-        self.assertEqual(21145549, artifacts["libvips"]["bytes"])
-        self.assertEqual(64, len(artifacts["libvips"]["sha256"]))
+        self.assertEqual("1.4.2+vips8.18.3", manifest["runtimeVersion"])
+        self.assertEqual("8.18.3", artifacts["libvips"]["version"])
+        self.assertEqual(19645581, artifacts["libvips"]["bytes"])
+        self.assertEqual(
+            "0014aca71654d405f862eed0f7166ab57551b430154c82feffd394f743e938b8",
+            artifacts["libvips"]["sha256"])
         self.assertEqual(4254192, artifacts["avifgainmaputil"]["bytes"])
         self.assertEqual(
             "64fe22b44de6bb8ffd24e00fcfb0984689cc9634c250694099a5b7e6fa09e01c",
@@ -104,6 +107,22 @@ class GainMapTests(unittest.TestCase):
         self.assertEqual(
             ["--qcolor", "91", "--qgain-map", "99", "--speed", "7"],
             gainmap._avif_encode_args(args))
+
+    def test_encoder_argument_vector_supports_10_and_12_bit_avif(self) -> None:
+        for depth in ("10", "12"):
+            with self.subTest(depth=depth):
+                args = gainmap.build_parser().parse_args([
+                    "create-avif", "--base", "base.png",
+                    "--alternate", "alternate.png", "--output", "output.avif",
+                    "--depth", depth, "--gainmap-depth", depth,
+                ])
+
+                self.assertEqual(depth, str(args.depth))
+                self.assertEqual(depth, str(args.gainmap_depth))
+                self.assertEqual(
+                    ["--qcolor", "90", "--qgain-map", "100", "--speed", "8",
+                     "--depth", depth],
+                    gainmap._avif_encode_args(args))
 
     def test_operation_fails_cleanly_when_runtime_is_missing(self) -> None:
         protocol = io.StringIO()

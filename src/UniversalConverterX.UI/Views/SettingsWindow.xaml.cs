@@ -216,7 +216,9 @@ public sealed partial class SettingsWindow : Window
             var statusText = !tool.IsInstalled
                 ? $"Not installed • {tool.Description}"
                 : hasVersionWarning
-                    ? assessment.VersionKnown
+                    ? assessment.IsExplicitlyRejected
+                        ? $"Security update required: {assessment.DetectedVersion} is blocked"
+                        : assessment.VersionKnown
                         ? $"Security update required: {assessment.DetectedVersion} < {assessment.Requirement!.MinimumVersion}"
                         : $"Version unverified; requires {assessment.Requirement!.MinimumVersion}+"
                     : $"Installed • {tool.Description}";

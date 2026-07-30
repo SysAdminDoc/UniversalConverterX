@@ -4,6 +4,14 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- UltraHDR gain-map workflows can explicitly encode and decode-check 10-bit and 12-bit AVIF base/gain-map pairs; the headless runtime smoke also accepts an ISO 21496-1 JPEG fixture to verify metadata-preserving JPEG round-trips and JPEG-to-AVIF conversion.
+
+### Security
+
+- Corrected the libvips security policy for CVE-2026-3281: the official 8.18.3 Windows bundle is now the approved, exact-size/SHA-256-pinned UltraHDR runtime, while the known-affected 8.19.0 build is explicitly blocked instead of being accepted as the minimum safe version. CLI, Settings, sidecar health, and conversion-gate diagnostics now distinguish an explicitly rejected build from an older release.
+
 ## [2.33.0] - 2026-07-21
 
 ### Added

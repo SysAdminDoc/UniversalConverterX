@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "runtimeVersion": "1.4.2+vips8.18.2",
+  "runtimeVersion": "1.4.2+vips8.18.3",
   "artifacts": [
     {
       "id": "libvips",
-      "version": "8.18.2",
+      "version": "8.18.3",
       "license": "LGPL-2.1-or-later",
-      "url": "https://github.com/libvips/build-win64-mxe/releases/download/v8.18.2/vips-dev-x64-all-8.18.2.zip",
-      "bytes": 21145549,
-      "sha256": "aec9b8d5e79c06aade9fd51224570c87687675896d4da335955047c211d40e01",
+      "url": "https://github.com/libvips/build-win64-mxe/releases/download/v8.18.3/vips-dev-x64-all-8.18.3.zip",
+      "bytes": 19645581,
+      "sha256": "0014aca71654d405f862eed0f7166ab57551b430154c82feffd394f743e938b8",
       "archivePrefix": "vips-dev-8.18/"
     },
     {

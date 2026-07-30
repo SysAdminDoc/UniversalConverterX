@@ -25,8 +25,10 @@ public class ToolVersionPolicyTests
     [InlineData("heif-enc", "1.19.0", false, "1.19.0")]
     [InlineData("libjxl", "cjxl v0.11.2 [AVX2]", true, "0.11.2")]
     [InlineData("cjxl", "0.11.1", false, "0.11.1")]
-    [InlineData("vips", "vips-8.19.0", true, "8.19.0")]
+    [InlineData("vips", "vips-8.18.3", true, "8.18.3")]
     [InlineData("libvips", "8.18.2", false, "8.18.2")]
+    [InlineData("vips", "vips-8.19.0", false, "8.19.0")]
+    [InlineData("vips", "vips-8.19.1", true, "8.19.1")]
     [InlineData("ghostscript", "GPL Ghostscript 10.07.1", true, "10.07.1")]
     [InlineData("gswin64c", "10.05.1", false, "10.05.1")]
     [InlineData("gs", "10.07.1", true, "10.07.1")]
@@ -53,6 +55,17 @@ public class ToolVersionPolicyTests
         result.VersionKnown.Should().BeFalse();
         result.MeetsMinimum.Should().BeFalse();
         result.Requirement!.MinimumVersion.Should().Be("8.1.2");
+    }
+
+    [Fact]
+    public void Assess_ExplicitlyRejectedBuild_ReportsPolicyReason()
+    {
+        var result = ToolVersionPolicy.Assess("vips", "vips-8.19.0");
+
+        result.MeetsMinimum.Should().BeFalse();
+        result.IsExplicitlyRejected.Should().BeTrue();
+        result.Requirement!.MinimumVersion.Should().Be("8.18.3");
+        result.Requirement.RejectedVersions.Should().Contain("8.19.0");
     }
 
     [Fact]

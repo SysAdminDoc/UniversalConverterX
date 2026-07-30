@@ -8,14 +8,14 @@ namespace UniversalConverterX.Core.Services;
 
 /// <summary>
 /// Enforcement layer over <see cref="ToolVersionPolicy"/>. The policy defines the
-/// security floors; this gate decides whether a conversion must be refused because
-/// the backing tool was positively identified as an out-of-date, vulnerable build.
+/// security policy; this gate decides whether a conversion must be refused because
+/// the backing tool was positively identified as an out-of-date or rejected build.
 /// </summary>
 public static class ToolVersionGate
 {
     /// <summary>
-    /// Block only when we have a floor AND a readable version AND that version is
-    /// below the floor. An unknown/unparseable version (custom or nightly build)
+    /// Block only when we have a policy AND a readable version AND that version is
+    /// below the floor or explicitly rejected. An unknown/unparseable version (custom or nightly build)
     /// is surfaced as a warning elsewhere but never blocks a conversion here —
     /// refusing to run everything we cannot fingerprint would be worse than the
     /// risk, and the security floors exist to stop *known-old* binaries.
@@ -26,6 +26,16 @@ public static class ToolVersionGate
     public static string BuildBlockedMessage(ToolVersionAssessment assessment)
     {
         var requirement = assessment.Requirement!;
+        if (assessment.IsExplicitlyRejected)
+        {
+            return LocalizedText.Format(
+                "Core_ToolVersionRejected",
+                "Refusing to run {0} {1}: this build is explicitly blocked by the security policy ({2}). Install an approved release and try again.",
+                requirement.DisplayName,
+                assessment.DetectedVersion ?? "unknown",
+                requirement.SecurityReason);
+        }
+
         return LocalizedText.Format(
             "Core_ToolVersionBelowFloor",
             "Refusing to run {0} {1}: it is below the required minimum version {2} ({3}). Update {0} and try again.",

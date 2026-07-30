@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,13 +29,17 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--vips", required=True)
     parser.add_argument("--avifgainmaputil", required=True)
+    parser.add_argument(
+        "--ultrahdr-jpeg",
+        help="Optional ISO 21496-1 JPEG fixture for preservation and conversion smoke",
+    )
     args = parser.parse_args()
     env = dict(os.environ)
     env["UCX_VIPS_PATH"] = str(Path(args.vips).resolve())
     env["UCX_AVIFGAINMAPUTIL_PATH"] = str(Path(args.avifgainmaputil).resolve())
     with tempfile.TemporaryDirectory(prefix="ucx-gainmap-smoke-") as temp:
         root = Path(temp)
-        base, alternate, output = root / "base.png", root / "alternate.png", root / "fixture.avif"
+        base, alternate = root / "base.png", root / "alternate.png"
         coords, red, green, blue = (root / name for name in ("coords.v", "red.v", "green.v", "blue.v"))
         base_float, alternate_float = root / "base.v", root / "alternate.v"
         run([args.vips, "xyz", str(coords), "256", "128"])
@@ -47,14 +52,59 @@ def main() -> int:
         run([args.vips, "linear", str(base), str(alternate_float),
              "1.35 1.1 1.5", "20 16 24"])
         run([args.vips, "cast", str(alternate_float), str(alternate), "uchar"])
-        protocol = run([
-            sys.executable, str(SIDECAR), "create-avif",
-            "--base", str(base), "--alternate", str(alternate),
-            "--output", str(output), "--gainmap-quality", "100"], env)
-        complete = json.loads(protocol.splitlines()[-1])
-        if complete.get("event") != "complete" or not complete.get("metadata", {}).get("gainMap"):
-            raise RuntimeError(protocol)
-        print(json.dumps({"outputBytes": output.stat().st_size, **complete["metadata"]}))
+        results: list[dict[str, object]] = []
+        vipsheader = str(Path(args.vips).with_name("vipsheader.exe"))
+        for depth in (10, 12):
+            output = root / f"fixture-{depth}bit.avif"
+            protocol = run([
+                sys.executable, str(SIDECAR), "create-avif",
+                "--base", str(base), "--alternate", str(alternate),
+                "--output", str(output), "--gainmap-quality", "100",
+                "--depth", str(depth), "--gainmap-depth", str(depth)], env)
+            complete = json.loads(protocol.splitlines()[-1])
+            if complete.get("event") != "complete" or not complete.get("metadata", {}).get("gainMap"):
+                raise RuntimeError(protocol)
+            header = run([vipsheader, "-a", str(output)])
+            bits = re.search(r"bits-per-sample:\s+(\d+)", header)
+            if bits is None or int(bits.group(1)) != depth:
+                raise RuntimeError(f"Expected {depth}-bit AVIF metadata:\n{header}")
+            decoded = root / f"tonemapped-{depth}bit.png"
+            run([args.avifgainmaputil, "tonemap", str(output), str(decoded),
+                 "--headroom", "0"])
+            if not decoded.is_file() or decoded.stat().st_size == 0:
+                raise RuntimeError(f"{depth}-bit AVIF did not decode to a non-empty image.")
+            results.append({
+                "depth": depth,
+                "outputBytes": output.stat().st_size,
+                "decodedBytes": decoded.stat().st_size,
+                **complete["metadata"],
+            })
+
+        jpeg_result: dict[str, object] | None = None
+        if args.ultrahdr_jpeg:
+            source = Path(args.ultrahdr_jpeg).resolve()
+            preserved = root / "preserved.jpg"
+            converted = root / "from-jpeg-12bit.avif"
+            preserve_protocol = run([
+                sys.executable, str(SIDECAR), "preserve-jpeg",
+                "--input", str(source), "--output", str(preserved)], env)
+            convert_protocol = run([
+                sys.executable, str(SIDECAR), "to-avif",
+                "--input", str(preserved), "--output", str(converted),
+                "--depth", "12", "--gainmap-quality", "100"], env)
+            preserved_event = json.loads(preserve_protocol.splitlines()[-1])
+            converted_event = json.loads(convert_protocol.splitlines()[-1])
+            if (preserved_event.get("event") != "complete"
+                    or converted_event.get("event") != "complete"):
+                raise RuntimeError(preserve_protocol + "\n" + convert_protocol)
+            jpeg_result = {
+                "preservedBytes": preserved.stat().st_size,
+                "convertedBytes": converted.stat().st_size,
+                "jpegGainMap": preserved_event["metadata"]["gainMap"],
+                "avifGainMap": converted_event["metadata"]["gainMap"],
+            }
+
+        print(json.dumps({"avif": results, "ultrahdrJpeg": jpeg_result}))
     return 0
 
 

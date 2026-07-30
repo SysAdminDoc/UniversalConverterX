@@ -118,7 +118,9 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
                 : assessment.HasRequirement && !assessment.VersionKnown
                     ? "[yellow]⚠ Unverified[/]"
                     : assessment.HasRequirement && !assessment.MeetsMinimum
-                        ? "[yellow]⚠ Outdated[/]"
+                        ? assessment.IsExplicitlyRejected
+                            ? "[red]✗ Blocked[/]"
+                            : "[yellow]⚠ Outdated[/]"
                         : "[green]✓ Found[/]";
             var versionStr = version ?? "[dim]N/A[/]";
             var pathStr = found ? $"[dim]{TruncatePath(path!, 40)}[/]" : "[dim]N/A[/]";
@@ -131,9 +133,12 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
                 var detected = assessment.VersionKnown
                     ? $"detected {assessment.DetectedVersion}"
                     : "version could not be determined";
-                AnsiConsole.MarkupLine(
-                    $"[yellow]Warning:[/] {tool.Name} requires >= {requirement.MinimumVersion} " +
-                    $"for {requirement.SecurityReason}; {detected}.");
+                var warning = assessment.IsExplicitlyRejected
+                    ? $"{tool.Name} {assessment.DetectedVersion} is an explicitly blocked build " +
+                      $"for {requirement.SecurityReason}; install an approved release."
+                    : $"{tool.Name} requires >= {requirement.MinimumVersion} " +
+                      $"for {requirement.SecurityReason}; {detected}.";
+                AnsiConsole.MarkupLine($"[yellow]Warning:[/] {Markup.Escape(warning)}");
             }
         }
 

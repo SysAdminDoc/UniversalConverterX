@@ -19,7 +19,12 @@ public static partial class ToolVersionPolicy
             ["deno"] = new("deno", "Deno", "2.3.0", "minimum runtime supported by yt-dlp EJS"),
             ["libheif"] = new("libheif", "libheif", "1.22.0", "CVE-2026-32740, CVE-2026-32741, and CVE-2026-32814"),
             ["libjxl"] = new("libjxl", "libjxl", "0.11.2", "CVE-2026-1837 and earlier JXL decoder fixes"),
-            ["vips"] = new("vips", "libvips", "8.19.0", "CVE-2026-3281"),
+            ["vips"] = new(
+                "vips",
+                "libvips",
+                "8.18.3",
+                "CVE-2026-3281",
+                RejectedVersions: ["8.19.0"]),
             ["ghostscript"] = new("ghostscript", "Ghostscript", "10.07.1", "PostScript/PDF parser hardening"),
         };
 
@@ -63,13 +68,17 @@ public static partial class ToolVersionPolicy
         }
 
         _ = TryParseVersion(requirement.MinimumVersion, out var minimum);
+        var explicitlyRejected = requirement.RejectedVersions?.Any(
+            rejected => TryParseVersion(rejected, out var blocked)
+                && Compare(detected, blocked) == 0) is true;
         return new(
             HasRequirement: true,
             VersionKnown: true,
-            MeetsMinimum: Compare(detected, minimum) >= 0,
+            MeetsMinimum: Compare(detected, minimum) >= 0 && !explicitlyRejected,
             ReportedVersion: reportedVersion,
             DetectedVersion: detected.Text,
-            Requirement: requirement);
+            Requirement: requirement,
+            IsExplicitlyRejected: explicitlyRejected);
     }
 
     internal static bool TryParseVersion(string? value, out ParsedToolVersion parsed)
@@ -118,7 +127,8 @@ public sealed record ToolVersionRequirement(
     string ToolId,
     string DisplayName,
     string MinimumVersion,
-    string SecurityReason);
+    string SecurityReason,
+    IReadOnlyList<string>? RejectedVersions = null);
 
 public sealed record ToolVersionAssessment(
     bool HasRequirement,
@@ -126,4 +136,5 @@ public sealed record ToolVersionAssessment(
     bool MeetsMinimum,
     string? ReportedVersion,
     string? DetectedVersion,
-    ToolVersionRequirement? Requirement);
+    ToolVersionRequirement? Requirement,
+    bool IsExplicitlyRejected = false);

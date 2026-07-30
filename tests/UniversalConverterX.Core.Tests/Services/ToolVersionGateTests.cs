@@ -22,6 +22,17 @@ public class ToolVersionGateTests
     }
 
     [Fact]
+    public void IsBlocked_ExplicitlyRejectedVersion_Blocks()
+    {
+        var assessment = ToolVersionPolicy.Assess("vips", "8.19.0");
+
+        ToolVersionGate.IsBlocked(assessment).Should().BeTrue();
+        ToolVersionGate.BuildBlockedMessage(assessment)
+            .Should().Contain("explicitly blocked")
+            .And.Contain("CVE-2026-3281");
+    }
+
+    [Fact]
     public void IsBlocked_UnknownVersion_DoesNotBlock()
     {
         // A custom/nightly build whose version we cannot parse must never block.

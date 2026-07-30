@@ -403,15 +403,20 @@ public sealed class SidecarHealthService : ISidecarHealthService
                 if (!assessment.MeetsMinimum)
                 {
                     var detail = assessment.VersionKnown
-                        ? $"{tool.DisplayName} {assessment.DetectedVersion} is below the security floor {requirement.MinimumVersion}."
+                        ? assessment.IsExplicitlyRejected
+                            ? $"{tool.DisplayName} {assessment.DetectedVersion} is explicitly blocked by the security policy."
+                            : $"{tool.DisplayName} {assessment.DetectedVersion} is below the security floor {requirement.MinimumVersion}."
                         : $"{tool.DisplayName} was found, but its version could not be verified against the security floor {requirement.MinimumVersion}.";
+                    var versionRemediation = assessment.IsExplicitlyRejected
+                        ? $"Install an approved {tool.DisplayName} release ({requirement.SecurityReason})."
+                        : $"Upgrade {tool.DisplayName} to {requirement.MinimumVersion} or newer ({requirement.SecurityReason}).";
                     return new SidecarHealthRequirement(
                         engine,
                         "external-tool",
                         tool.DisplayName,
                         "Warning",
                         detail,
-                        $"Upgrade {tool.DisplayName} to {requirement.MinimumVersion} or newer ({requirement.SecurityReason}).",
+                        versionRemediation,
                         path,
                         SizeOf(path));
                 }
