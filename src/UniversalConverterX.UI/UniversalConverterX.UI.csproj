@@ -26,6 +26,7 @@
     <!-- Enable unpackaged deployment -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     
     <!-- Disable annoying warnings -->
     <NoWarn>$(NoWarn);NETSDK1206</NoWarn>

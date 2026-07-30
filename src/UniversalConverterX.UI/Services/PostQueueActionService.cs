@@ -59,6 +59,7 @@ public sealed class PostQueueActionService : IPostQueueActionService, IPostQueue
         var notification = new AppNotificationBuilder()
             .AddText(title)
             .AddText(message)
+            .AddArgument("route", "history")
             .BuildNotification();
         AppNotificationManager.Default.Show(notification);
         return Task.CompletedTask;

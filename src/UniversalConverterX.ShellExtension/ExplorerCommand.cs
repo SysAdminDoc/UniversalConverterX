@@ -123,12 +123,12 @@ public partial class ConverterExplorerCommand : IExplorerCommand
             using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\UniversalConverterX");
             var path = key?.GetValue("InstallPath") as string;
             if (!string.IsNullOrEmpty(path))
-                return Path.Combine(path!, "UniversalConverterX.UI.exe");
+                return Path.Combine(path!, "UniversalConverterX.exe");
         }
         catch { }
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "UniversalConverterX.UI.exe");
+            "UniversalConverterX", "UniversalConverterX.exe");
     }
 
     internal static string GetCliPath()

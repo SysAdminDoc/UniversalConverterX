@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Explorer, MSIX file/protocol/startup activation, Jump Lists, and completion notifications now converge on one AppLifecycle router. Every selected path is queued in the existing Converter window, secondary launches redirect to the primary instance, `ucx:` routes reach the requested page, and the invalid COM toast declaration was removed.
+
 ### Added
 
 - UltraHDR gain-map workflows can explicitly encode and decode-check 10-bit and 12-bit AVIF base/gain-map pairs; the headless runtime smoke also accepts an ISO 21496-1 JPEG fixture to verify metadata-preserving JPEG round-trips and JPEG-to-AVIF conversion.

@@ -1,20 +1,29 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
+using Microsoft.Windows.AppNotifications;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Localization;
+using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Security;
 using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.ViewModels;
 using UniversalConverterX.UI.Views;
 using UniversalConverterX.UI.Views.Pages;
+using Windows.ApplicationModel.Activation;
 
 namespace UniversalConverterX.UI;
 
 public partial class App : Application
 {
+    private static readonly object ActivationSync = new();
+    private static readonly Queue<UcxActivationRequest> PendingActivations = new();
     private static MainWindow? _mainWindow;
+    private static DispatcherQueue? _dispatcherQueue;
+    private static bool _notificationsRegistered;
 
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -85,8 +94,11 @@ public partial class App : Application
             Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language;
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override void OnLaunched(
+        Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
         // Eager-resolve the structured logger so the ring buffer is live for
         // the rest of launch — including the unhandled-exception bundler.
         var logger = Services.GetRequiredService<IStructuredLogger>();
@@ -121,8 +133,14 @@ public partial class App : Application
             catch { }
         };
 
+        RegisterNotificationActivation();
+        DispatchActivation(
+            Program.InitialActivationArguments,
+            Program.InitialCommandLine);
+
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
+        DrainPendingActivations();
 
         // Eagerly resolve singletons that need to start before any page is opened:
         //   * HistoryService: SQLite warm-up + initial Recent[] load on background thread.
@@ -145,6 +163,122 @@ public partial class App : Application
         });
 
         _ = ConfigureJumpListAsync();
+    }
+
+    internal static void DispatchActivation(AppActivationArguments arguments) =>
+        DispatchActivation(arguments, null);
+
+    private static void DispatchActivation(
+        AppActivationArguments arguments,
+        IReadOnlyList<string>? initialCommandLine)
+    {
+        UcxActivationRequest request;
+        try
+        {
+            request = arguments.Kind switch
+            {
+                ExtendedActivationKind.File
+                    when arguments.Data is IFileActivatedEventArgs files =>
+                    UcxActivationParser.ParseFiles(files.Files.Select(item => item.Path)),
+                ExtendedActivationKind.Protocol
+                    when arguments.Data is IProtocolActivatedEventArgs protocol =>
+                    UcxActivationParser.ParseProtocol(protocol.Uri),
+                ExtendedActivationKind.StartupTask =>
+                    UcxActivationParser.Startup(),
+                ExtendedActivationKind.AppNotification
+                    when arguments.Data is AppNotificationActivatedEventArgs notification =>
+                    UcxActivationParser.ParseToast(notification.Argument),
+                ExtendedActivationKind.Launch =>
+                    ParseLaunchActivation(arguments.Data, initialCommandLine),
+                _ => UcxActivationParser.ParseCommandLine(Array.Empty<string>()),
+            };
+        }
+        catch
+        {
+            request = UcxActivationParser.ParseCommandLine(Array.Empty<string>());
+        }
+
+        QueueActivation(request);
+    }
+
+    private static UcxActivationRequest ParseLaunchActivation(
+        object data,
+        IReadOnlyList<string>? initialCommandLine)
+    {
+        if (initialCommandLine is { Count: > 0 })
+            return UcxActivationParser.ParseCommandLine(initialCommandLine);
+        if (data is ILaunchActivatedEventArgs launch
+            && !string.IsNullOrWhiteSpace(launch.Arguments))
+        {
+            return UcxActivationParser.ParseCommandLine(launch.Arguments);
+        }
+        return UcxActivationParser.ParseCommandLine(Array.Empty<string>());
+    }
+
+    private static void QueueActivation(UcxActivationRequest request)
+    {
+        var dispatcher = _dispatcherQueue;
+        if (_mainWindow is null || dispatcher is null)
+        {
+            lock (ActivationSync)
+                PendingActivations.Enqueue(request);
+            return;
+        }
+
+        if (dispatcher.HasThreadAccess)
+            ApplyActivation(request);
+        else if (!dispatcher.TryEnqueue(() => ApplyActivation(request)))
+        {
+            lock (ActivationSync)
+                PendingActivations.Enqueue(request);
+        }
+    }
+
+    private static void DrainPendingActivations()
+    {
+        while (true)
+        {
+            UcxActivationRequest? request;
+            lock (ActivationSync)
+                request = PendingActivations.Count > 0
+                    ? PendingActivations.Dequeue()
+                    : null;
+            if (request is null)
+                return;
+            ApplyActivation(request);
+        }
+    }
+
+    private static void ApplyActivation(UcxActivationRequest request)
+    {
+        if (_mainWindow is null)
+            return;
+
+        _mainWindow.Activate();
+        if (request.Paths.Count > 0)
+            _mainWindow.RequestNavigation(
+                "converter",
+                new FileIntakeRequest(request.Paths));
+        else
+            _mainWindow.RequestNavigation(request.RouteKey);
+    }
+
+    private static void RegisterNotificationActivation()
+    {
+        if (_notificationsRegistered)
+            return;
+        try
+        {
+            var manager = AppNotificationManager.Default;
+            manager.NotificationInvoked += (_, notification) =>
+                QueueActivation(UcxActivationParser.ParseToast(notification.Argument));
+            manager.Register();
+            _notificationsRegistered = true;
+        }
+        catch
+        {
+            // App notifications are optional on unsupported or policy-blocked systems.
+        }
     }
 
     /// <summary>

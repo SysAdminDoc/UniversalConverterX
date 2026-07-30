@@ -392,7 +392,8 @@ public sealed partial class ProgressWindow : Window
             // Show Windows toast notification
             var builder = new Microsoft.Windows.AppNotifications.Builder.AppNotificationBuilder()
                 .AddText("Conversion Complete")
-                .AddText($"Converted {_completedCount} file(s) to {_targetFormat.ToUpperInvariant()}");
+                .AddText($"Converted {_completedCount} file(s) to {_targetFormat.ToUpperInvariant()}")
+                .AddArgument("route", "history");
 
             var notification = builder.BuildNotification();
             Microsoft.Windows.AppNotifications.AppNotificationManager.Default.Show(notification);

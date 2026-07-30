@@ -158,7 +158,7 @@ public static class ShellExtensionRegistrar
         if (clsidKey != null)
         {
             clsidKey.SetValue("", "UniversalConverterX Shell Extension");
-            
+
             using var inprocKey = clsidKey.CreateSubKey("InprocServer32");
             if (inprocKey != null)
             {
@@ -284,7 +284,7 @@ public static class ShellExtensionRegistrar
             {
                 var path = key.GetValue("InstallPath") as string;
                 if (!string.IsNullOrEmpty(path))
-                    return Path.Combine(path, "UniversalConverterX.UI.exe");
+                    return Path.Combine(path, "UniversalConverterX.exe");
             }
         }
         catch { }
@@ -292,7 +292,7 @@ public static class ShellExtensionRegistrar
         // Fallback
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "UniversalConverterX.UI.exe");
+            "UniversalConverterX", "UniversalConverterX.exe");
     }
 
     private static string GetDllPath()

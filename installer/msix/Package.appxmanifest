@@ -141,10 +141,6 @@
           <desktop:StartupTask TaskId="UCXStartup" Enabled="false" DisplayName="UniversalConverter X" />
         </desktop:Extension>
 
-        <!-- Toast Notifications -->
-        <desktop:Extension Category="windows.toastNotificationActivation">
-          <desktop:ToastNotificationActivation ToastActivatorCLSID="8F9C0B2D-3E4F-5A6B-C7D8-E9F0A1B2C3D4" />
-        </desktop:Extension>
       </Extensions>
     </Application>
   </Applications>

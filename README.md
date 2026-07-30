@@ -123,6 +123,10 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 3. Install any additional converter tools you need (or use `ucx tools download`).
 4. Start converting!
 
+Explorer and file-association launches send every selected path to a single
+running Converter window. Packaged builds also register `ucx:` routes such as
+`ucx:converter` and `ucx:history`; completion notifications reopen History.
+
 The release also includes an intentionally unsigned MSIX for managed sideload environments that choose to apply their own disposable local sideload key. The portable ZIP needs no certificate and is the artifact used by WinGet.
 
 ## CLI Usage

@@ -107,6 +107,8 @@ public sealed partial class ConverterPage : Page
         base.OnNavigatedTo(e);
         if (e.Parameter is ConversionRerunRequest request)
             ApplyRerunRequest(request);
+        else if (e.Parameter is FileIntakeRequest intake)
+            ApplyFileIntakeRequest(intake);
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -191,6 +193,30 @@ public sealed partial class ConverterPage : Page
         StatusText.Text = restored > 0
             ? $"Restored {restored} file(s) with the saved {outputFormat.ToUpperInvariant()} settings."
             : "The saved source file is no longer available.";
+    }
+
+    private void ApplyFileIntakeRequest(FileIntakeRequest request)
+    {
+        var before = _files.Count;
+        foreach (var path in request.Paths
+                     .Where(path => !string.IsNullOrWhiteSpace(path))
+                     .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (File.Exists(path))
+                AddFile(path, updateUi: false);
+            else if (Directory.Exists(path))
+                AddFolder(path);
+        }
+
+        var added = _files.Count - before;
+        PersistQueue();
+        UpdateUI();
+        StatusText.Text = added switch
+        {
+            0 => "Those items were already queued or could not be read.",
+            1 => "Added 1 item.",
+            _ => $"Added {added} items.",
+        };
     }
 
     private static bool PathsEqual(string? left, string? right)
