@@ -6,8 +6,8 @@
 .DESCRIPTION
     Fans out across tools/*/build.ps1, gathers exit codes, runs the NDJSON
     contract conformance check (tests/sidecar_contract/check_contract.py)
-    before any build, and writes a single build-report.json + build-report.md
-    summary so CI has one artifact instead of N.
+    before any build, verifies a revision- and hash-locked offline Python
+    wheelhouse, and writes one machine-readable build-report.json.
 
     Default behaviour: contract check, then sequential build of every sidecar
     that has a build.ps1.
@@ -26,6 +26,10 @@
     Build sidecars in parallel via ThreadJob (PS 7+) / Start-Job (PS 5.1).
     Use carefully — each sidecar's PyInstaller pass is already CPU-bound.
 
+.PARAMETER PrepareDependencies
+    Connected preparation step: resolve the selected sidecars, download exact
+    wheels, record their source URLs/sizes/SHA-256 values, then build offline.
+
 .EXAMPLE
     pwsh tools/build-all.ps1
     # Contract check + sequential build of every sidecar.
@@ -43,7 +47,10 @@ param(
     [string[]] $Tools,
     [switch]   $Clean,
     [switch]   $SkipContract,
-    [switch]   $Parallel
+    [switch]   $Parallel,
+    [switch]   $PrepareDependencies,
+    [string]   $DependencyLock,
+    [string]   $Wheelhouse
 )
 
 $ErrorActionPreference = 'Stop'
@@ -54,7 +61,19 @@ $ReportDir = Join-Path $RepoRoot 'artifacts\build-reports'
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 
 $JsonReport = Join-Path $ReportDir 'build-report.json'
-$MdReport   = Join-Path $ReportDir 'build-report.md'
+$DependencyRoot = Join-Path $RepoRoot 'artifacts\python-dependencies'
+if ([string]::IsNullOrWhiteSpace($DependencyLock)) {
+    $DependencyLock = Join-Path $DependencyRoot 'sidecar-lock.json'
+} elseif (-not [IO.Path]::IsPathRooted($DependencyLock)) {
+    $DependencyLock = Join-Path $RepoRoot $DependencyLock
+}
+if ([string]::IsNullOrWhiteSpace($Wheelhouse)) {
+    $Wheelhouse = Join-Path $DependencyRoot 'wheelhouse'
+} elseif (-not [IO.Path]::IsPathRooted($Wheelhouse)) {
+    $Wheelhouse = Join-Path $RepoRoot $Wheelhouse
+}
+$ConstraintsDir = Join-Path (Split-Path -Parent $DependencyLock) 'constraints'
+$DependencyScript = Join-Path $ToolsDir 'dependencies\sidecar_dependencies.py'
 
 # ── Discover sidecars with a build.ps1 ───────────────────────────────────────
 $discovered = Get-ChildItem -Path $ToolsDir -Directory |
@@ -74,6 +93,40 @@ if ($Tools) {
 
 Write-Host "[build-all] Target sidecars: $($targets -join ', ')" -ForegroundColor Cyan
 
+# ── Resolve/verify exact offline Python distributions ─────────────────────────
+& python $DependencyScript audit --repo-root $RepoRoot.Path
+if ($LASTEXITCODE -ne 0) {
+    Write-Error '[build-all] Python dependency-manifest audit failed.'
+}
+
+$dependencyArguments = @(
+    '--repo-root', $RepoRoot.Path,
+    '--wheelhouse', $Wheelhouse,
+    '--lock', $DependencyLock
+)
+foreach ($target in $targets) {
+    $dependencyArguments += @('--tool', $target)
+}
+
+if ($PrepareDependencies) {
+    Write-Host "[build-all] Preparing authenticated Python wheelhouse..." -ForegroundColor Cyan
+    & python $DependencyScript prepare @dependencyArguments
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error '[build-all] Dependency preparation failed.'
+    }
+}
+
+Write-Host "[build-all] Verifying offline Python wheelhouse..." -ForegroundColor Cyan
+& python $DependencyScript verify @dependencyArguments --constraints-dir $ConstraintsDir
+if ($LASTEXITCODE -ne 0) {
+    Write-Error (
+        '[build-all] Dependency lock/wheelhouse verification failed. ' +
+        'Run again with -PrepareDependencies on a connected machine.')
+}
+$DependencyLockSha256 = (
+    Get-FileHash -LiteralPath $DependencyLock -Algorithm SHA256
+).Hash.ToLowerInvariant()
+
 # ── Pre-build contract check ─────────────────────────────────────────────────
 if (-not $SkipContract) {
     $checker = Join-Path $RepoRoot 'tests\sidecar_contract\check_contract.py'
@@ -88,34 +141,166 @@ if (-not $SkipContract) {
     }
 }
 
-# ── Per-sidecar build ────────────────────────────────────────────────────────
+# ── Per-sidecar isolated environments and builds ─────────────────────────────
+function Initialize-LockedPythonEnvironment {
+    param(
+        [string] $Tool,
+        [string] $ToolsDir,
+        [bool]   $Clean,
+        [string] $Wheelhouse,
+        [string] $LockedRequirementsPath
+    )
+
+    $toolsRoot = [IO.Path]::GetFullPath($ToolsDir).TrimEnd('\', '/') +
+        [IO.Path]::DirectorySeparatorChar
+    $toolDirectory = [IO.Path]::GetFullPath((Join-Path $ToolsDir $Tool))
+    if (-not $toolDirectory.StartsWith(
+            $toolsRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Sidecar path escapes tools root: $toolDirectory"
+    }
+    if (-not (Test-Path -LiteralPath $LockedRequirementsPath -PathType Leaf)) {
+        throw "Locked requirements are missing for ${Tool}: $LockedRequirementsPath"
+    }
+
+    $venv = Join-Path $toolDirectory '.venv'
+    # The dependency environment is always recreated. This removes packages
+    # left by an earlier connected or developer build before hashes are checked.
+    if (Test-Path -LiteralPath $venv) {
+        Remove-Item -LiteralPath $venv -Recurse -Force
+    }
+    if ($Clean) {
+        foreach ($name in @('build', 'dist', 'spec')) {
+            $candidate = Join-Path $toolDirectory $name
+            if (Test-Path -LiteralPath $candidate) {
+                Remove-Item -LiteralPath $candidate -Recurse -Force
+            }
+        }
+        foreach ($specFile in @(Get-ChildItem `
+                -LiteralPath $toolDirectory `
+                -Filter '*.spec' `
+                -File `
+                -ErrorAction SilentlyContinue)) {
+            Remove-Item -LiteralPath $specFile.FullName -Force
+        }
+    }
+
+    $venvOutput = & python -m venv $venv 2>&1
+    $venvExitCode = $LASTEXITCODE
+    $venvOutput | ForEach-Object { Write-Host $_ }
+    if ($venvExitCode -ne 0) {
+        throw "Could not create isolated Python environment for $Tool."
+    }
+    $venvPython = Join-Path $venv 'Scripts\python.exe'
+    if (-not (Test-Path -LiteralPath $venvPython -PathType Leaf)) {
+        throw "Virtual environment did not create Python for $Tool."
+    }
+
+    $installOutput = & $venvPython -m pip --isolated install `
+        --disable-pip-version-check `
+        --no-index `
+        --find-links $Wheelhouse `
+        --only-binary ':all:' `
+        --require-hashes `
+        --no-deps `
+        --requirement $LockedRequirementsPath 2>&1
+    $installExitCode = $LASTEXITCODE
+    $installOutput | ForEach-Object { Write-Host $_ }
+    if ($installExitCode -ne 0) {
+        throw "Hash-locked offline dependency install failed for $Tool."
+    }
+    $checkOutput = & $venvPython -m pip --isolated check 2>&1
+    $checkExitCode = $LASTEXITCODE
+    $checkOutput | ForEach-Object { Write-Host $_ }
+    if ($checkExitCode -ne 0) {
+        throw "Installed dependency graph is inconsistent for $Tool."
+    }
+    return $venvPython
+}
+
 function Invoke-OneBuild {
     param(
         [string] $Tool,
         [string] $ToolsDir,
-        [bool]   $Clean
+        [string] $VenvPython,
+        [string] $Wheelhouse,
+        [string] $ConstraintPath,
+        [string] $DependencyLock
     )
 
     $script = Join-Path $ToolsDir "$Tool\build.ps1"
     $started = Get-Date
+    $environmentNames = @(
+        'PATH',
+        'PIP_CONFIG_FILE',
+        'PIP_CONSTRAINT',
+        'PIP_DISABLE_PIP_VERSION_CHECK',
+        'PIP_FIND_LINKS',
+        'PIP_NO_INDEX',
+        'PIP_NO_INPUT',
+        'PIP_ONLY_BINARY',
+        'PYTHONNOUSERSITE',
+        'UCX_PYTHON_DEPENDENCY_LOCK'
+    )
+    $previousEnvironment = @{}
+    foreach ($name in $environmentNames) {
+        $previousEnvironment[$name] = [Environment]::GetEnvironmentVariable(
+            $name, [EnvironmentVariableTarget]::Process)
+    }
 
-    $log = & {
-        $args = @()
-        if ($Clean) { $args += '-Clean' }
-        # Some build.ps1 reject unknown args; tolerate that case.
-        try {
-            & pwsh -NoProfile -File $script @args 2>&1
-        } catch {
-            "$($_.Exception.Message)"
+    try {
+        $env:PIP_CONFIG_FILE = if ($env:OS -eq 'Windows_NT') { 'NUL' } else { '/dev/null' }
+        $env:PIP_CONSTRAINT = $ConstraintPath
+        $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
+        $env:PIP_FIND_LINKS = $Wheelhouse
+        $env:PIP_NO_INDEX = '1'
+        $env:PIP_NO_INPUT = '1'
+        $env:PIP_ONLY_BINARY = ':all:'
+        $env:PYTHONNOUSERSITE = '1'
+        $env:UCX_PYTHON_DEPENDENCY_LOCK = $DependencyLock
+        $env:PATH = "$(Split-Path -Parent $VenvPython)$([IO.Path]::PathSeparator)$env:PATH"
+
+        $log = & {
+            $buildArguments = @()
+            $commandInfo = Get-Command -Name $script
+            if ($commandInfo.Parameters.ContainsKey('Python')) {
+                $buildArguments += @('-Python', $VenvPython)
+            } elseif ($commandInfo.Parameters.ContainsKey('PythonPath')) {
+                $buildArguments += @('-PythonPath', $VenvPython)
+            }
+            try {
+                & pwsh -NoProfile -File $script @buildArguments 2>&1
+            } catch {
+                "$($_.Exception.Message)"
+            }
+        } | Out-String
+        $exitCode = $LASTEXITCODE
+    } finally {
+        foreach ($name in $environmentNames) {
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                $previousEnvironment[$name],
+                [EnvironmentVariableTarget]::Process)
         }
-    } | Out-String
+    }
 
     return [PSCustomObject]@{
         Tool       = $Tool
-        ExitCode   = $LASTEXITCODE
+        ExitCode   = $exitCode
         DurationS  = [int]((Get-Date) - $started).TotalSeconds
         Log        = $log.TrimEnd()
     }
+}
+
+$pythonByTool = @{}
+foreach ($target in $targets) {
+    Write-Host "[build-all] Preparing isolated environment for $target..." -ForegroundColor Cyan
+    $pythonByTool[$target] = Initialize-LockedPythonEnvironment `
+        -Tool $target `
+        -ToolsDir $ToolsDir `
+        -Clean:$Clean `
+        -Wheelhouse $Wheelhouse `
+        -LockedRequirementsPath (
+            Join-Path $ConstraintsDir "$target.requirements.txt")
 }
 
 $results = New-Object System.Collections.Generic.List[object]
@@ -124,17 +309,49 @@ if ($Parallel -and $targets.Count -gt 1) {
     Write-Host "[build-all] Parallel mode (CPU-bound — be sure you have headroom)" -ForegroundColor Yellow
     $jobs = foreach ($t in $targets) {
         Start-ThreadJob -Name "build-$t" -ScriptBlock {
-            param($Tool, $ToolsDir, $Clean)
+            param(
+                $Tool,
+                $ToolsDir,
+                $VenvPython,
+                $Wheelhouse,
+                $ConstraintPath,
+                $DependencyLock
+            )
             $script = Join-Path $ToolsDir "$Tool\build.ps1"
             $started = Get-Date
-            $log = (& pwsh -NoProfile -File $script @(if ($Clean) { '-Clean' }) 2>&1) | Out-String
+            $env:PATH = "$(Split-Path -Parent $VenvPython)$([IO.Path]::PathSeparator)$env:PATH"
+            $env:PIP_CONFIG_FILE = if ($env:OS -eq 'Windows_NT') { 'NUL' } else { '/dev/null' }
+            $env:PIP_CONSTRAINT = $ConstraintPath
+            $env:PIP_DISABLE_PIP_VERSION_CHECK = '1'
+            $env:PIP_FIND_LINKS = $Wheelhouse
+            $env:PIP_NO_INDEX = '1'
+            $env:PIP_NO_INPUT = '1'
+            $env:PIP_ONLY_BINARY = ':all:'
+            $env:PYTHONNOUSERSITE = '1'
+            $env:UCX_PYTHON_DEPENDENCY_LOCK = $DependencyLock
+            $buildArguments = @()
+            $commandInfo = Get-Command -Name $script
+            if ($commandInfo.Parameters.ContainsKey('Python')) {
+                $buildArguments += @('-Python', $VenvPython)
+            } elseif ($commandInfo.Parameters.ContainsKey('PythonPath')) {
+                $buildArguments += @('-PythonPath', $VenvPython)
+            }
+            $log = (& pwsh -NoProfile -File $script @buildArguments 2>&1) |
+                Out-String
             [PSCustomObject]@{
                 Tool      = $Tool
                 ExitCode  = $LASTEXITCODE
                 DurationS = [int]((Get-Date) - $started).TotalSeconds
                 Log       = $log.TrimEnd()
             }
-        } -ArgumentList $t, $ToolsDir, $Clean.IsPresent
+        } -ArgumentList @(
+            $t,
+            $ToolsDir,
+            $pythonByTool[$t],
+            $Wheelhouse,
+            (Join-Path $ConstraintsDir "$t.txt"),
+            $DependencyLock
+        )
     }
     $jobs | Wait-Job | Out-Null
     foreach ($j in $jobs) { $results.Add(($j | Receive-Job)) | Out-Null }
@@ -142,7 +359,13 @@ if ($Parallel -and $targets.Count -gt 1) {
 } else {
     foreach ($t in $targets) {
         Write-Host "[build-all] $t ..." -ForegroundColor Cyan
-        $r = Invoke-OneBuild -Tool $t -ToolsDir $ToolsDir -Clean:$Clean
+        $r = Invoke-OneBuild `
+            -Tool $t `
+            -ToolsDir $ToolsDir `
+            -VenvPython $pythonByTool[$t] `
+            -Wheelhouse $Wheelhouse `
+            -ConstraintPath (Join-Path $ConstraintsDir "$t.txt") `
+            -DependencyLock $DependencyLock
         $results.Add($r) | Out-Null
         $tag = if ($r.ExitCode -eq 0) { 'OK ' } else { 'FAIL' }
         $color = if ($r.ExitCode -eq 0) { 'Green' } else { 'Red' }
@@ -155,6 +378,10 @@ $jsonPayload = @{
     timestamp = (Get-Date).ToString('o')
     repoRoot  = $RepoRoot.Path
     targets   = $targets
+    dependencyLock = @{
+        path   = $DependencyLock
+        sha256 = $DependencyLockSha256
+    }
     results   = $results | ForEach-Object {
         @{
             tool      = $_.Tool
@@ -165,27 +392,6 @@ $jsonPayload = @{
 }
 $jsonPayload | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 $JsonReport
 
-$mdLines = New-Object System.Collections.Generic.List[string]
-$mdLines.Add("# UCX Sidecar Build Report") | Out-Null
-$mdLines.Add('') | Out-Null
-$mdLines.Add("Generated: $((Get-Date).ToString('u'))") | Out-Null
-$mdLines.Add('') | Out-Null
-$mdLines.Add('| Tool | Result | Duration |') | Out-Null
-$mdLines.Add('|------|--------|----------|') | Out-Null
-foreach ($r in $results) {
-    $mark = if ($r.ExitCode -eq 0) { 'OK' } else { "FAIL (exit $($r.ExitCode))" }
-    $mdLines.Add("| $($r.Tool) | $mark | $($r.DurationS) s |") | Out-Null
-}
-$mdLines.Add('') | Out-Null
-foreach ($r in $results | Where-Object { $_.ExitCode -ne 0 }) {
-    $mdLines.Add("## $($r.Tool) — failure log") | Out-Null
-    $mdLines.Add('```') | Out-Null
-    $mdLines.Add($r.Log) | Out-Null
-    $mdLines.Add('```') | Out-Null
-    $mdLines.Add('') | Out-Null
-}
-($mdLines -join "`n") | Set-Content -Encoding utf8 $MdReport
-
 # ── Summary ──────────────────────────────────────────────────────────────────
 $failed = $results | Where-Object { $_.ExitCode -ne 0 }
 $totalS = ($results | Measure-Object -Property DurationS -Sum).Sum
@@ -194,11 +400,9 @@ Write-Host ''
 if ($failed.Count -gt 0) {
     Write-Host "[build-all] FAIL — $($failed.Count) of $($results.Count) sidecar(s) failed (total ${totalS}s)" -ForegroundColor Red
     Write-Host "[build-all] Reports: $JsonReport"
-    Write-Host "[build-all] Reports: $MdReport"
     exit 1
 } else {
     Write-Host "[build-all] OK — $($results.Count) sidecar(s) built in ${totalS}s" -ForegroundColor Green
     Write-Host "[build-all] Reports: $JsonReport"
-    Write-Host "[build-all] Reports: $MdReport"
     exit 0
 }

@@ -101,8 +101,9 @@ $msixOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion.msix"
 $msiOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion.msi"
 $portableOutput = Join-Path $outputDir "UniversalConverterX_$semanticVersion`_portable.zip"
 $releaseManifest = Join-Path $outputDir "UniversalConverterX_$semanticVersion.release.json"
+$releaseSbom = Join-Path $outputDir "UniversalConverterX_$semanticVersion.cdx.json"
 $wingetOutput = Join-Path $outputDir 'winget\manifests\s\SysAdminDoc\UniversalConverterX'
-$staleOutputs = @($releaseManifest)
+$staleOutputs = @($releaseManifest, $releaseSbom)
 if ($Type -eq 'msix' -or $Type -eq 'all') { $staleOutputs += $msixOutput }
 if ($Type -eq 'msi' -or $Type -eq 'all') { $staleOutputs += $msiOutput }
 if ($Type -eq 'portable' -or $Type -eq 'all') { $staleOutputs += $portableOutput }
@@ -200,6 +201,30 @@ if (-not [string]::IsNullOrWhiteSpace($FfmpegArchivePath)) {
 }
 & (Join-Path $scriptDir 'Stage-PinnedFfmpeg.ps1') @ffmpegStageArguments | Out-Null
 Write-Success "Staged FFmpeg 8.1.2 -> $($ffmpegStageArguments.DestinationPath)"
+
+# Inventory the exact staged tree before packaging. A prepared Python lock is
+# folded in when present; releases without Python sidecars still enumerate the
+# .NET graph, staged files, native manifests, and excluded optional model packs.
+Write-Step "Generating CycloneDX 1.7 staged-artifact SBOM..."
+$stagedSbom = Join-Path $publishDir 'win-x64\UniversalConverterX.cdx.json'
+$dependencyLock = Join-Path $rootDir 'artifacts\python-dependencies\sidecar-lock.json'
+$sbomArguments = @(
+    (Join-Path $rootDir 'tools\dependencies\sidecar_dependencies.py'),
+    'sbom',
+    '--repo-root', $rootDir,
+    '--stage-root', (Join-Path $publishDir 'win-x64'),
+    '--output', $stagedSbom,
+    '--product-version', $semanticVersion
+)
+if (Test-Path -LiteralPath $dependencyLock -PathType Leaf) {
+    $sbomArguments += @('--lock', $dependencyLock)
+}
+& python @sbomArguments
+if ($LASTEXITCODE -ne 0) {
+    throw 'Staged-artifact SBOM generation or reconciliation failed.'
+}
+Copy-Item -LiteralPath $stagedSbom -Destination $releaseSbom -Force
+Write-Success "CycloneDX SBOM created: $releaseSbom"
 
 # Build a directly runnable, unsigned portable archive. This is the WinGet
 # installer source and remains usable even when Windows refuses an unsigned
@@ -384,6 +409,7 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
 # exact bytes that will be uploaded. Missing requested artifacts
 # are fatal; stale files from a previous build must never satisfy this check.
 $releaseArtifacts = New-Object System.Collections.Generic.List[string]
+$releaseArtifacts.Add($releaseSbom) | Out-Null
 if ($Type -eq 'msix' -or $Type -eq 'all') {
     if (-not (Test-Path -LiteralPath $msixOutput -PathType Leaf) -or
         (Get-Item -LiteralPath $msixOutput).Length -eq 0) {

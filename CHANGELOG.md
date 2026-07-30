@@ -7,9 +7,11 @@ All notable changes to UniversalConverterX will be documented in this file.
 ### Added
 
 - UltraHDR gain-map workflows can explicitly encode and decode-check 10-bit and 12-bit AVIF base/gain-map pairs; the headless runtime smoke also accepts an ISO 21496-1 JPEG fixture to verify metadata-preserving JPEG round-trips and JPEG-to-AVIF conversion.
+- Sidecar builds now have a connected preparation/offline consumption pipeline: independent per-tool resolutions record authenticated wheel URLs, sizes, and SHA-256 values; clean builds recreate isolated environments and install only the hash-locked wheel set with indexes disabled. Installer staging now emits a separately publishable and bundled CycloneDX 1.7 SBOM covering exact staged files, NuGet and Python dependencies, native tools and runtimes, sidecars, and governed model packs.
 
 ### Security
 
+- Python build tooling is exactly pinned, undeclared inline dependencies fail the 212-sidecar manifest audit, extra or modified wheelhouse content fails closed, and resolutions containing Torch older than 2.6.0 are rejected for GHSA-53q9-r3pm-6pq6. Twenty-one previously inline-only sidecar dependency sets now have auditable requirements manifests.
 - Background-removal inference no longer trusts mutable Hugging Face cache state. BiRefNet and RMBG packs now install only through an explicit licence-gated action from full commit revisions and allowlisted files, verify exact sizes and cryptographic digests before atomic promotion, reject modified or additional code at every load, and isolate Transformers' dynamic-module cache. The frozen sidecar also carries the required CPU ONNX and BiRefNet dependencies and is smoke-tested with a real offline BiRefNet conversion.
 - Corrected the libvips security policy for CVE-2026-3281: the official 8.18.3 Windows bundle is now the approved, exact-size/SHA-256-pinned UltraHDR runtime, while the known-affected 8.19.0 build is explicitly blocked instead of being accepted as the minimum safe version. CLI, Settings, sidecar health, and conversion-gate diagnostics now distinguish an explicitly rejected build from an older release.
 

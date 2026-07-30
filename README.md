@@ -349,6 +349,29 @@ Configuration is stored in `%APPDATA%\UniversalConverterX\config.json`:
 
 The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Converter Tools** or `ucx tools download <tool>` for supported portable tools and updates. UCX installs only SHA-256 verified downloads and keeps replaced binaries under `tools/rollback/<tool>/`.
 
+### Reproducible sidecar builds
+
+Sidecar release builds use one connected preparation step followed by an
+offline build:
+
+```powershell
+# Resolve and download the selected environments, then build with indexes off.
+pwsh tools/build-all.ps1 -Tools hashkit,bgremove -Clean -PrepareDependencies
+
+# Rebuild later from the same verified lock and wheelhouse without a network.
+pwsh tools/build-all.ps1 -Tools hashkit,bgremove -Clean
+```
+
+Preparation writes `artifacts/python-dependencies/sidecar-lock.json` and its
+wheelhouse. The lock records each distribution's authenticated URL, exact size,
+and SHA-256; every build recreates its venv, rejects requirement drift and
+missing, changed, or additional wheels, installs with hashes and indexes
+disabled, and refuses Torch versions older than 2.6.0. Copy or archive that
+whole directory when transferring a release build to an offline machine.
+`installer/build-installer.ps1` also writes and bundles a CycloneDX 1.7 SBOM for
+the exact staged tree, reconciled with NuGet assets, locked Python packages,
+native runtimes, sidecars, and optional model manifests.
+
 AI inference never downloads models, packages, repositories, or executables. Supported optional packs expose a separate download action that shows the third-party licence, requires explicit consent, pins an immutable HTTPS source, and verifies both exact size and SHA-256 before atomic installation. Other engines require a pre-provisioned local model and fail closed when it is absent. User-requested online services such as cloud lip reading and local Ollama endpoints remain clearly separate from asset acquisition.
 
 The `bgremove` engine installs BiRefNet and RMBG packs only through its explicit

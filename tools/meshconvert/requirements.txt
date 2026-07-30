@@ -1,0 +1,6 @@
+trimesh>=4.0,<5
+lxml
+networkx
+pillow
+pyglet
+shapely
