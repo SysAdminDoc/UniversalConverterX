@@ -20,7 +20,9 @@ if (Test-Path (Join-Path $here 'requirements.txt')) {
   & $python -m pip install --quiet -r (Join-Path $here 'requirements.txt')
 }
 
-& $python -m PyInstaller --name bgremove --onefile --console --noconfirm --clean --log-level WARN --paths . --paths ../_lib sidecar.py
+& $python -m PyInstaller --name bgremove --onefile --console --noconfirm --clean --log-level WARN `
+  --paths . --paths ../_lib --add-data 'model-packs.json;.' `
+  --collect-all einops --collect-all kornia --collect-all timm sidecar.py
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }
 
 Copy-Item (Join-Path $here 'dist/bgremove.exe') (Join-Path $here 'bgremove.exe') -Force

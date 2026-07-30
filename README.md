@@ -351,6 +351,16 @@ The Windows installer carries a pinned FFmpeg 8.1.2 build. Use **Settings > Conv
 
 AI inference never downloads models, packages, repositories, or executables. Supported optional packs expose a separate download action that shows the third-party licence, requires explicit consent, pins an immutable HTTPS source, and verifies both exact size and SHA-256 before atomic installation. Other engines require a pre-provisioned local model and fail closed when it is absent. User-requested online services such as cloud lip reading and local Ollama endpoints remain clearly separate from asset acquisition.
 
+The `bgremove` engine installs BiRefNet and RMBG packs only through its explicit
+`download-model` action. For example,
+`ucx invoke-engine bgremove --args-json '["download-model","--backend","birefnet","--accept-license"]'`
+downloads an allowlisted file set from one full commit revision, verifies every
+file's size and cryptographic digest, and atomically records the pack's
+provenance. Inference re-verifies that pack, rejects additional or modified code,
+uses a private module cache, and keeps Hugging Face offline. BiRefNet is MIT;
+RMBG packs retain their BRIA model licences and may have access or commercial-use
+restrictions.
+
 The `videotag` engine uses Google's versioned MediaPipe EfficientDet-Lite0 int8
 model through standalone LiteRT, not MediaPipe Tasks. Install the 4,602,795-byte
 Apache-2.0 model only with `videotag download-model --accept-license`; the exact

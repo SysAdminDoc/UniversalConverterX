@@ -10,6 +10,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Security
 
+- Background-removal inference no longer trusts mutable Hugging Face cache state. BiRefNet and RMBG packs now install only through an explicit licence-gated action from full commit revisions and allowlisted files, verify exact sizes and cryptographic digests before atomic promotion, reject modified or additional code at every load, and isolate Transformers' dynamic-module cache. The frozen sidecar also carries the required CPU ONNX and BiRefNet dependencies and is smoke-tested with a real offline BiRefNet conversion.
 - Corrected the libvips security policy for CVE-2026-3281: the official 8.18.3 Windows bundle is now the approved, exact-size/SHA-256-pinned UltraHDR runtime, while the known-affected 8.19.0 build is explicitly blocked instead of being accepted as the minimum safe version. CLI, Settings, sidecar health, and conversion-gate diagnostics now distinguish an explicitly rejected build from an older release.
 
 ## [2.33.0] - 2026-07-21
