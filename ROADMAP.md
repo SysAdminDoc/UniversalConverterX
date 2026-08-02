@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 171 — Watch-folder "Convert" can overwrite the source file in place
-  Category: correctness (data loss)
-  Where: `src/UniversalConverterX.UI/Services/WatchFolderService.cs:486-501` (`BuildJob`, `WatchAction.Convert`), output computed at `:489`.
-  Problem: `outDir` defaults to the source directory (`:468`) and the Convert output is `{stem}.{fmt}` with no `UniqueOutputPath.Resolve` and no in==out guard. When the profile's `TargetFormat` normalizes to the arriving file's own extension (e.g. a `*.mp4` filter with `TargetFormat=mp4`, a plausible "normalize container" setup), the output path equals the input path, and clipforge `rewrap` is launched with `--input X.mp4 --output X.mp4`. The Compress branch avoids this by appending `_compressed` (`:477`); the Convert branch does not. `SidecarOutputBoundary.Validate` only checks the path stays within the approved root, not in!=out, and `_admission.SuppressOutput(output)` registers the source path itself as a suppressed output so no safety net applies. Even when `fmt` differs, re-dropping a same-named file silently overwrites the prior output (no unique-path), inconsistent with the app's default auto-rename `OverwriteBehavior`.
-  Evidence: `BuildJob` unconditionally forms `{stem}.{fmt}`; no `UniqueOutputPath`/same-path guard anywhere in the file.
-  Fix: in the Convert branch resolve collisions with `UniqueOutputPath.Resolve(output)` and refuse when `Path.GetFullPath(output) == Path.GetFullPath(path)` (skip with a clear event), mirroring the guards in `PostConversionHandler.Execute`.
-  Acceptance: a Convert profile whose target format equals an incoming file's extension produces a distinct `{stem} (1).mp4` or is skipped with a "would overwrite source" event; the original file is byte-for-byte unchanged. Add a WatchFolderService test.
-  Confidence: Verified (collision), Likely (final corruption depends on clipforge same-file behavior). Effort: S
-
 - [ ] P1 — Item 172 — Magic-byte detection misroutes every XML/JSON-based format by overriding the specific extension
   Category: correctness
   Where: `src/UniversalConverterX.Core/Detection/MagicBytesDetector.cs:343-344`; `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:216-221,266`.

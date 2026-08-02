@@ -350,7 +350,12 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                 profileToken.ThrowIfCancellationRequested();
                 PostEvent(profile, path, WatchEventStatus.Picked, null);
 
-                var (tool, args, output) = BuildJob(profile, path);
+                var (tool, args, output, buildError) = BuildJob(profile, path);
+                if (buildError is not null)
+                {
+                    PostEvent(profile, path, WatchEventStatus.Skipped, buildError);
+                    return;
+                }
                 if (tool is null)
                 {
                     PostEvent(profile, path, WatchEventStatus.Skipped, "no tool resolved");
@@ -461,7 +466,7 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
             TimeSpan.FromMilliseconds(250));
     }
 
-    private static (string? tool, IEnumerable<string>? args, string output) BuildJob(WatchProfile p, string path)
+    private static (string? tool, IEnumerable<string>? args, string output, string? error) BuildJob(WatchProfile p, string path)
     {
         var stem = Path.GetFileNameWithoutExtension(path);
         var srcDir = Path.GetDirectoryName(path) ?? Environment.CurrentDirectory;
@@ -481,12 +486,20 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                     "--output", output,
                     "--preset", string.IsNullOrWhiteSpace(p.Preset) ? "web-1080p" : p.Preset!,
                 };
-                    return ("videocrush", args, output);
+                    return ("videocrush", args, output, null);
                 }
             case WatchAction.Convert:
                 {
                     var fmt = NormalizeExtension(p.TargetFormat, "mp4");
-                    var output = Path.Combine(outDir, $"{stem}.{fmt}");
+                    var desiredOutput = Path.Combine(outDir, $"{stem}.{fmt}");
+                    if (!WatchOutputPathResolver.TryResolve(
+                            path,
+                            desiredOutput,
+                            out var output,
+                            out var outputError))
+                    {
+                        return (null, null, desiredOutput, outputError);
+                    }
                     // We use clipforge `op_rewrap` for like-codec container swaps; for a
                     // real encode pipeline, the converter sidecar would be a better fit
                     // but isn't a single binary -- watch profiles ship the rewrap path
@@ -497,10 +510,10 @@ public sealed class WatchFolderService : IWatchFolderService, IDisposable
                     "--input",  path,
                     "--output", output,
                 };
-                    return ("clipforge", args, output);
+                    return ("clipforge", args, output, null);
                 }
             default:
-                return (null, null, "");
+                return (null, null, "", null);
         }
     }
 
