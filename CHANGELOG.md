@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.34.0] - 2026-08-02
+
 ### Added
 
 - `build.ps1 -Target Test` is now the whole release contract in one fail-fast command. `tools/gates/Invoke-Gates.ps1` runs 17 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax sweep, 212-sidecar contract, sidecar and shared-library unit tests, localization parity, static UIA coverage, release-manifest tests, sidecar dependency manifests, NuGet vulnerability and deprecation audits, allowlist expiry, the runtime UI sweep, staged-artifact verification, and SBOM reconciliation — and writes `artifacts/gates/gate-summary.json`. Gates needing artifacts that are not present report as skipped with the reason instead of being silently dropped; `-Only`, `-Skip`, and `-ContinueOnFailure` support iteration.
