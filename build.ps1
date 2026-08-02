@@ -22,7 +22,7 @@ param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Release",
     
-    [ValidateSet("Build", "Test", "Publish", "Clean", "All")]
+    [ValidateSet("Build", "Test", "UiSmoke", "Publish", "Clean", "All")]
     [string]$Target = "Build",
 
     [ValidateSet("x64", "arm64")]
@@ -32,7 +32,11 @@ param(
 
     [string]$FfmpegArchivePath,
 
-    [string]$SidecarBuildReport
+    [string]$SidecarBuildReport,
+
+    # Optional launcher used by the runtime UI gate so the swept window opens
+    # somewhere isolated instead of on the operator's desktop.
+    [string]$UiSmokeLauncher
 )
 
 $ErrorActionPreference = "Stop"
@@ -118,6 +122,28 @@ function Invoke-Test {
     }
     
     Write-Host "Tests complete" -ForegroundColor Green
+}
+
+function Invoke-UiSmoke {
+    Write-Step "Runtime UI smoke"
+
+    if ($Architecture -eq "arm64" -or -not (Test-IsWindows)) {
+        Write-Host "Runtime UI smoke requires an x64 Windows host; skipping." -ForegroundColor Yellow
+        return
+    }
+
+    $smokeScript = Join-Path $PSScriptRoot 'tests\ui_smoke\Invoke-UiSmoke.ps1'
+    $smokeArguments = @{
+        ExePath = Join-Path $PSScriptRoot (
+            'src\UniversalConverterX.UI\bin\x64\' + $Configuration +
+            '\net10.0-windows10.0.19041.0\UniversalConverterX.exe')
+    }
+    if (-not [string]::IsNullOrWhiteSpace($UiSmokeLauncher)) {
+        $smokeArguments.Launcher = $UiSmokeLauncher
+    }
+    & $smokeScript @smokeArguments | Out-Null
+
+    Write-Host "Runtime UI smoke complete" -ForegroundColor Green
 }
 
 function Invoke-Publish {
@@ -254,8 +280,9 @@ try {
         "Clean" { Invoke-Clean }
         "Build" { Invoke-Build }
         "Test" { Invoke-Build; Invoke-Test }
+        "UiSmoke" { Invoke-Build; Invoke-UiSmoke }
         "Publish" { Invoke-Build; Invoke-Publish }
-        "All" { Invoke-Clean; Invoke-Build; Invoke-Test; Invoke-Publish }
+        "All" { Invoke-Clean; Invoke-Build; Invoke-Test; Invoke-UiSmoke; Invoke-Publish }
     }
     
     Write-Host "`nSuccess!" -ForegroundColor Green

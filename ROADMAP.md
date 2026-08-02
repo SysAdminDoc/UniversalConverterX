@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 124 — Runtime UI-automation smoke harness for page and state initialization
-  Why: page-init NREs and window `x:Uid` parse failures were previously found manually; static UIA inspection cannot prove runtime navigation, reflow, focus, or theme behavior.
-  Evidence: `src/UniversalConverterX.UI/Views/Pages/*.xaml.cs`; `tests/uia_contract/check_uia.py`; Microsoft Appium/UIA and accessibility-testing guidance.
-  Touches: new runtime UI test project, app test hooks, `build.ps1`.
-  Acceptance: Appium/UIA launches the x64 app, navigates all 53 pages in light/dark modes, exercises deterministic empty/loading/error paths, captures failure screenshots, and fails on unhandled exception or unreachable primary focus; reusable theme/scale hooks support Item 161.
-  Complexity: L
-
 - [ ] P1 — Item 152 — Make the canonical Test target aggregate every existing local gate
   Why: on 2026-07-29, `build.ps1 -Target Test` runs Core tests and VideoScaler smoke only, leaving Python, sidecar, localization, UIA, packaging, and dependency failures outside the release contract.
   Evidence: `build.ps1:86-109`; `tests/sidecar_contract/`; `tests/uia_contract/`; `tools/localization/`; `.NET` and PyPA audit guidance.

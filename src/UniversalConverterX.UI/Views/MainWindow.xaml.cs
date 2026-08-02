@@ -71,6 +71,12 @@ public sealed partial class MainWindow : Window
 
     private SettingsWindow? _settingsWindow;
 
+    /// <summary>
+    /// The shell's content frame. Exposed so automated UI passes can assert on
+    /// what actually landed after a navigation instead of inferring it.
+    /// </summary>
+    internal Frame NavigationFrame => ContentFrame;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -145,81 +151,14 @@ public sealed partial class MainWindow : Window
 
     public void NavigateTo(string routeKey, object? parameter = null)
     {
-        // "presets:meshconvert" -> nav to PresetsPage with "meshconvert" engine filter.
-        string? routeParam = null;
-        var colonIdx = routeKey.IndexOf(':');
-        if (colonIdx > 0)
-        {
-            routeParam = routeKey[(colonIdx + 1)..];
-            routeKey = routeKey[..colonIdx];
-        }
-
-        Type? pageType = routeKey switch
-        {
-            "home" => typeof(HomePage),
-            "converter" => typeof(ConverterPage),
-            "ai-lab" => typeof(AiLabPage),
-            "compressor" => typeof(CompressorPage),
-            "audio-converter" => typeof(AudioConverterPage),
-            "audio-compressor" => typeof(AudioCompressorPage),
-            "editor" => typeof(EditorPage),
-            "lossless-cut" => typeof(LosslessCutPage),
-            "dvd-rip" => typeof(DvdRipPage),
-            "disc-burn" => typeof(DiscBurnPage),
-            "downloader" => typeof(DownloaderPage),
-            "recorder" => typeof(RecorderPage),
-            "toolbox" => typeof(ToolboxPage),
-            "format-inspector" => typeof(FormatInspectorPage),
-            "frame-snapshot" => typeof(FrameSnapshotPage),
-            "ai-bgremove" => typeof(BackgroundRemoverPage),
-            "ai-video-enhancer" => typeof(VideoEnhancerPage),
-            "ai-image-enhancer" => typeof(ImageEnhancerPage),
-            "ai-watermark" => typeof(WatermarkRemoverPage),
-            "ai-subtitle" => typeof(AiSubtitlePage),
-            "ai-summarizer" => typeof(VideoSummarizerPage),
-            "ai-noise" => typeof(NoiseRemoverPage),
-            "ai-vocal" => typeof(VocalRemoverPage),
-            "ai-voice-changer" => typeof(VoiceChangerPage),
-            "ai-tts" => typeof(TextToSpeechPage),
-            "ai-stt" => typeof(SpeechToTextPage),
-            "ai-photo-restore" => typeof(PhotoRestorationPage),
-            "ai-colorize" => typeof(ColorizeVideoPage),
-            // ROADMAP Item 27 — AI Portrait wires to PresetsPage with the
-            // facerestore engine filter (CodeFormer fidelity slider +
-            // GFPGAN side-by-side). The fidelity-vs-restoration nuance lives
-            // in the preset args; the page UX is the existing PresetsPage.
-            "ai-portrait" => typeof(PresetsPage),
-            "lip-reading" => typeof(LipReadingPage),
-            "gif-maker" => typeof(GifMakerPage),
-            "slideshow-maker" => typeof(SlideshowPage),
-            "image-converter" => typeof(ImageConverterPage),
-            "auto-reframe" => typeof(AutoReframePage),
-            "chapter-marks" => typeof(ChapterMarksPage),
-            "watch-folders" => typeof(WatchFoldersPage),
-            "history" => typeof(HistoryPage),
-            "vmaf" => typeof(VmafAnalysisPage),
-            "scene-detect" => typeof(SceneDetectPage),
-            "auto-highlight" => typeof(AutoHighlightPage),
-            "timeline-preview" => typeof(TimelinePreviewPage),
-            "track-manager" => typeof(TrackManagerPage),
-            "document-converter" => typeof(DocumentConverterPage),
-            "archive" => typeof(ArchivePage),
-            "pdf-tools" => typeof(PdfToolsPage),
-            "subtitle-converter" => typeof(SubtitleConverterPage),
-            "font-converter" => typeof(FontConverterPage),
-            "ebook-converter" => typeof(EbookConverterPage),
-            "ocr" => typeof(OcrPage),
-            "presets" => typeof(PresetsPage),
-            "universal-convert" => typeof(UniversalConvertPage),
-            "batch-rename" => typeof(BatchRenamePage),
-            _ => typeof(PlaceholderPage)
-        };
-
-        parameter ??= routeParam;
-        if (pageType == typeof(PresetsPage) && parameter is null && routeKey == "ai-portrait")
-            parameter = "facerestore";
-
-        ContentFrame.Navigate(pageType, parameter, new EntranceNavigationTransitionInfo());
+        // The route table (including the "presets:meshconvert" engine-filter
+        // form) lives in NavigationRoutes so the runtime UI smoke harness can
+        // enumerate exactly what the shell will navigate to.
+        var (pageType, resolvedParameter) = NavigationRoutes.Resolve(routeKey, parameter);
+        ContentFrame.Navigate(
+            pageType,
+            resolvedParameter,
+            new EntranceNavigationTransitionInfo());
     }
 
     public void NavigateToPlaceholder(PlaceholderInfo info)

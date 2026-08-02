@@ -103,6 +103,8 @@ public partial class App : Application
         // the rest of launch — including the unhandled-exception bundler.
         var logger = Services.GetRequiredService<IStructuredLogger>();
 
+        var smokeOptions = UiSmokeHarness.TryParse(Program.InitialCommandLine);
+
         UnhandledException += (_, e) =>
         {
             LogUnhandledException(e.Exception);
@@ -112,6 +114,17 @@ public partial class App : Application
                 CrashBundle.Capture(logger, e.Exception);
             }
             catch { /* never throw from inside the unhandled-exception path */ }
+
+            // Under the smoke harness the run must survive a broken page so the
+            // report names every failure instead of only the first one. The
+            // exception is still recorded and still fails the run.
+            if (smokeOptions is not null)
+            {
+                UiSmokeHarness.RecordUnhandled("xaml", e.Exception);
+                e.Handled = true;
+                return;
+            }
+
             e.Handled = false;
         };
 
@@ -119,6 +132,10 @@ public partial class App : Application
         {
             var ex = e.ExceptionObject as Exception;
             LogUnhandledException(ex);
+            if (smokeOptions is not null)
+            {
+                UiSmokeHarness.RecordUnhandled("appdomain", ex);
+            }
             try
             {
                 logger.Log(LogLevel.Crash, "appdomain", "unhandled native-side exception", ex);
@@ -141,6 +158,17 @@ public partial class App : Application
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
         DrainPendingActivations();
+
+        if (smokeOptions is not null)
+        {
+            // Runtime UI gate: sweep every registered route in both themes and
+            // at the narrow reflow width, then exit with the verdict. Nothing
+            // below this point should start background work during a sweep.
+            var smokeWindow = _mainWindow;
+            _ = _dispatcherQueue.TryEnqueue(async () =>
+                await UiSmokeHarness.RunAsync(smokeWindow, smokeOptions));
+            return;
+        }
 
         // Eagerly resolve singletons that need to start before any page is opened:
         //   * HistoryService: SQLite warm-up + initial Recent[] load on background thread.

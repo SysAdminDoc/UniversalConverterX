@@ -34,6 +34,7 @@ tools/_models/*
 # tools/build-all.ps1 build reports
 artifacts/build-reports/
 artifacts/python-dependencies/
+artifacts/ui-smoke/
 
 # Installer-generated WiX fragments
 installer/wix/PresetFiles.generated.wxs

@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Runtime UI smoke gate (`build.ps1 -Target UiSmoke`, `tests/ui_smoke/Invoke-UiSmoke.ps1`). The real x64 shell is launched and driven through all 54 registered routes in light, dark, and a 640-DIP narrow reflow pass — 162 navigations — asserting each page constructs, lays out to a non-empty rect, and exposes a reachable focus target. Failures capture a PNG of the shell and are reported per route/theme with the exception; unhandled XAML and AppDomain exceptions are recorded rather than killing the sweep, so one broken page no longer hides the rest. Verified by fault injection: a thrown constructor is reported on all three passes with screenshots.
+
 ### Changed
 
 - Release artifacts now report sidecar readiness truthfully instead of implying every advertised engine ships. `tools/release/sidecar_readiness.py` stages only artifacts named in one authenticated clean build report, re-verifies every byte against it, and writes an architecture-scoped `sidecar-readiness.json` covering all 212 engines as bundled, on-demand, or unavailable with a reason. Untracked payload under `tools/` fails the stage. The MSI payload is generated from the clean staged tree (`installer/New-WixPayload.ps1`) rather than hand-listed in `Product.wxs`, so packaged content can no longer drift from what was published. `installer/Test-ReleaseArtifacts.ps1` extracts a fresh portable ZIP and MSI and runs a real FFmpeg-generated fixture through the packaged `ucx` CLI, probing the output. Toolbox tiles in a packaged build resolve their badge from the shipped catalog, so a workflow whose engine is absent reads Unavailable with an actionable reason instead of Ready.
