@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
@@ -21,6 +22,12 @@ public class LibreOfficeConverter : BaseConverterStrategy
     protected override HashSet<string> SupportedInputFormats => _inputFormats;
     protected override HashSet<string> SupportedOutputFormats => _outputFormats;
     protected override Dictionary<string, HashSet<string>> FormatMappings => _formatMappings;
+
+    // LibreOffice derives its output filename from the input stem and may
+    // overwrite a sibling before UCX gets a chance to relocate it. Keep each
+    // invocation isolated until validation has proved that a fresh artifact
+    // exists, then promote it to the collision-resolved destination.
+    private readonly ConcurrentDictionary<ConversionJob, string> _stagingDirectories = new();
 
     #region Format Definitions
 
@@ -131,6 +138,50 @@ public class LibreOfficeConverter : BaseConverterStrategy
         return base.GetExecutablePath();
     }
 
+    public override async Task<ConversionResult> ConvertAsync(
+        ConversionJob job,
+        IProgress<ConversionProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var stagingDirectory = Path.Combine(
+            Path.GetTempPath(),
+            $"ucx-libreoffice-{Guid.NewGuid():N}");
+
+        try
+        {
+            Directory.CreateDirectory(stagingDirectory);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return ConversionResult.Failed(
+                job,
+                $"Could not create LibreOffice staging directory: {ex.Message}",
+                TimeSpan.Zero,
+                converter: Id);
+        }
+
+        _stagingDirectories[job] = stagingDirectory;
+        try
+        {
+            return await base.ConvertAsync(job, progress, cancellationToken);
+        }
+        finally
+        {
+            _stagingDirectories.TryRemove(job, out _);
+            try
+            {
+                if (Directory.Exists(stagingDirectory))
+                    Directory.Delete(stagingDirectory, recursive: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Logger?.LogWarning(ex,
+                    "Could not remove LibreOffice staging directory '{Directory}'",
+                    stagingDirectory);
+            }
+        }
+    }
+
     public override string[] BuildArguments(ConversionJob job, ConversionOptions options)
     {
         var args = new List<string>();
@@ -147,7 +198,9 @@ public class LibreOfficeConverter : BaseConverterStrategy
         args.Add(filter);
 
         // Output directory
-        var outputDir = Path.GetDirectoryName(job.OutputPath);
+        var outputDir = _stagingDirectories.TryGetValue(job, out var stagingDirectory)
+            ? stagingDirectory
+            : Path.GetDirectoryName(job.OutputPath);
         if (!string.IsNullOrEmpty(outputDir))
         {
             args.Add("--outdir");
@@ -216,27 +269,64 @@ public class LibreOfficeConverter : BaseConverterStrategy
         // Additionally, LibreOffice writes the *filter's native* extension, not
         // necessarily the requested one (requesting .jpeg yields .jpg, .text
         // yields .txt), so an exact-extension match alone can miss the file.
-        // Relocate the produced file to the requested path. Guarded so it is a
-        // no-op for the common same-stem/same-ext case and cannot disturb it.
+        var hasStagingDirectory = _stagingDirectories.TryGetValue(job, out var stagingDirectory);
+        var producedPath = FindProducedOutput(
+            job,
+            duration,
+            hasStagingDirectory ? stagingDirectory : Path.GetDirectoryName(job.OutputPath));
+
+        // A direct converter invocation can legitimately write a custom output
+        // filename rather than LibreOffice's source-stem filename. It is still
+        // required to be a fresh file and never the input itself.
+        if (producedPath is null
+            && !hasStagingDirectory
+            && IsFreshProduct(job.OutputPath, job, duration))
+        {
+            producedPath = job.OutputPath;
+        }
+
+        // In the normal path the staged directory is the only trusted source.
+        // This also prevents a stale final output from turning a zero-output,
+        // exit-code-zero soffice run into a false success.
+        if (producedPath is null)
+        {
+            return MissingOutput(
+                job, duration, exitCode, standardOutput, standardError,
+                converter, commandLine, warnings,
+                hasStagingDirectory
+                    ? "LibreOffice completed without creating a fresh staged output."
+                    : "LibreOffice completed without creating a fresh output.");
+        }
+
+        // Relocate the produced file to the requested path. The final move is
+        // the first operation allowed to touch the user's output directory.
         try
         {
-            if (!File.Exists(job.OutputPath))
+            if (!string.Equals(
+                    Path.GetFullPath(producedPath),
+                    Path.GetFullPath(job.OutputPath),
+                    StringComparison.OrdinalIgnoreCase))
             {
-                var producedPath = FindProducedOutput(job, duration);
-                if (producedPath is not null
-                    && !string.Equals(
-                        Path.GetFullPath(producedPath),
-                        Path.GetFullPath(job.OutputPath),
-                        StringComparison.OrdinalIgnoreCase))
+                var outputExists = File.Exists(job.OutputPath);
+                if (outputExists && !job.Options.OverwriteExisting)
                 {
-                    File.Move(producedPath, job.OutputPath, overwrite: true);
+                    return MissingOutput(
+                        job, duration, exitCode, standardOutput, standardError,
+                        converter, commandLine, warnings,
+                        "LibreOffice produced an output, but the requested destination appeared during conversion and overwrite is disabled.");
                 }
+
+                File.Move(producedPath, job.OutputPath, overwrite: outputExists);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Logger?.LogWarning(ex,
                 "Could not relocate LibreOffice output to '{Output}'", job.OutputPath);
+            return MissingOutput(
+                job, duration, exitCode, standardOutput, standardError,
+                converter, commandLine, warnings,
+                $"Could not finalize LibreOffice output: {ex.Message}");
         }
 
         return base.ValidateSuccessfulOutput(
@@ -267,16 +357,19 @@ public class LibreOfficeConverter : BaseConverterStrategy
     /// Only considers files freshly written during this conversion and never
     /// the input file, so a stale same-stem file is not picked up.
     /// </summary>
-    private static string? FindProducedOutput(ConversionJob job, TimeSpan duration)
+    private static string? FindProducedOutput(
+        ConversionJob job,
+        TimeSpan duration,
+        string? outputDirectory)
     {
-        var outputDir = Path.GetDirectoryName(job.OutputPath);
-        var searchDir = string.IsNullOrEmpty(outputDir) ? "." : outputDir;
+        var searchDir = string.IsNullOrEmpty(outputDirectory) ? "." : outputDirectory;
         var sourceStem = Path.GetFileNameWithoutExtension(job.InputPath);
         var requestedExt = Path.GetExtension(job.OutputPath).TrimStart('.');
+        var freshAfter = GetFreshAfter(job, duration);
 
         // 1. Exact extension, the source stem (collision suffix / template case).
         var exact = Path.Combine(searchDir, sourceStem + Path.GetExtension(job.OutputPath));
-        if (File.Exists(exact))
+        if (IsFreshProduct(exact, job, freshAfter))
             return exact;
 
         // 2. Native-extension alias. Only fall through to a filesystem scan when
@@ -286,25 +379,78 @@ public class LibreOfficeConverter : BaseConverterStrategy
         if (!Directory.Exists(searchDir))
             return null;
 
-        var inputFull = Path.GetFullPath(job.InputPath);
-        // Anything written after the conversion started is a fresh product.
-        // Pad the window generously to absorb clock granularity.
-        var freshAfter = DateTime.UtcNow - duration - TimeSpan.FromMinutes(1);
-
         foreach (var alias in aliases)
         {
             var candidate = Path.Combine(searchDir, sourceStem + "." + alias);
-            if (!File.Exists(candidate))
-                continue;
-            if (string.Equals(Path.GetFullPath(candidate), inputFull, StringComparison.OrdinalIgnoreCase))
-                continue;
-            if (File.GetLastWriteTimeUtc(candidate) < freshAfter)
-                continue;
-
-            return candidate;
+            if (IsFreshProduct(candidate, job, freshAfter))
+                return candidate;
         }
 
         return null;
+    }
+
+    private static bool IsFreshProduct(string candidate, ConversionJob job, TimeSpan duration)
+    {
+        return IsFreshProduct(
+            candidate,
+            job,
+            GetFreshAfter(job, duration));
+    }
+
+    private static DateTime GetFreshAfter(ConversionJob job, TimeSpan duration)
+    {
+        // Prefer the actual process start when available. Deriving the start
+        // only from elapsed duration would eventually re-admit very old files
+        // after a sufficiently long conversion.
+        var startedAt = job.StartedAt ?? DateTime.UtcNow - duration;
+        return startedAt - TimeSpan.FromMinutes(1);
+    }
+
+    private static bool IsFreshProduct(
+        string candidate,
+        ConversionJob job,
+        DateTime freshAfter)
+    {
+        if (!File.Exists(candidate))
+            return false;
+
+        try
+        {
+            return !string.Equals(
+                       Path.GetFullPath(candidate),
+                       Path.GetFullPath(job.InputPath),
+                       StringComparison.OrdinalIgnoreCase)
+                && File.GetLastWriteTimeUtc(candidate) >= freshAfter;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    private static ConversionResult MissingOutput(
+        ConversionJob job,
+        TimeSpan duration,
+        int exitCode,
+        string? standardOutput,
+        string? standardError,
+        string? converter,
+        string? commandLine,
+        IReadOnlyList<string>? warnings,
+        string reason)
+    {
+        job.Status = ConversionStatus.Failed;
+        job.OutputFileSize = 0;
+        return ConversionResult.Failed(
+            job,
+            $"{reason} Expected output: {job.OutputPath}",
+            duration,
+            exitCode,
+            standardOutput,
+            standardError,
+            converter,
+            commandLine,
+            warnings);
     }
 
     public override ConversionProgress? ParseProgress(string line, ConversionJob job)

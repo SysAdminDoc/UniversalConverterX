@@ -106,6 +106,43 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
         File.ReadAllText(staleAlias).Should().Be("old");
     }
 
+    [Fact]
+    public void ValidateSuccessfulOutput_IgnoresStaleExactFile()
+    {
+        var input = Path.Combine(_tempDir, "report.docx");
+        File.WriteAllText(input, "source");
+        var staleOutput = Path.Combine(_tempDir, "report.pdf");
+        File.WriteAllText(staleOutput, "old");
+        File.SetLastWriteTimeUtc(staleOutput, DateTime.UtcNow.AddHours(-2));
+
+        var converter = new TestableLibreOfficeConverter(_tempDir);
+        var job = ConversionJob.Create(input, staleOutput);
+
+        var failure = converter.Validate(job);
+
+        failure.Should().NotBeNull("an exit-code-zero run without a fresh file must not trust a stale output");
+        File.ReadAllText(staleOutput).Should().Be("old");
+    }
+
+    [Fact]
+    public async Task ConvertAsync_StagesOutputBeforeRelocatingAroundAnExistingSibling()
+    {
+        var input = Path.Combine(_tempDir, "report.docx");
+        File.WriteAllText(input, "source");
+        var existingSibling = Path.Combine(_tempDir, "report.pdf");
+        File.WriteAllText(existingSibling, "keep me");
+        var requestedOutput = Path.Combine(_tempDir, "report (1).pdf");
+
+        var converter = new StagingProbeLibreOfficeConverter(_tempDir);
+        var job = ConversionJob.Create(input, requestedOutput);
+
+        var result = await converter.ConvertAsync(job);
+
+        result.Success.Should().BeTrue(result.ErrorMessage ?? result.StandardError ?? "conversion failed without diagnostics");
+        File.ReadAllText(existingSibling).Should().Be("keep me");
+        File.ReadAllText(requestedOutput).Trim().Should().Be("converted");
+    }
+
     public void Dispose()
     {
         try { Directory.Delete(_tempDir, recursive: true); }
@@ -117,5 +154,28 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
     {
         public ConversionResult? Validate(ConversionJob job) =>
             ValidateSuccessfulOutput(job, TimeSpan.Zero, 0, null, null, "libreoffice", null, null);
+    }
+
+    private sealed class StagingProbeLibreOfficeConverter(string toolsBasePath)
+        : LibreOfficeConverter(toolsBasePath)
+    {
+        protected override string GetExecutablePath() =>
+            Environment.GetEnvironmentVariable("ComSpec")
+            ?? throw new InvalidOperationException("cmd.exe is required for this test");
+
+        public override string[] BuildArguments(ConversionJob job, ConversionOptions options)
+        {
+            var libreOfficeArguments = base.BuildArguments(job, options);
+            var outDirIndex = Array.IndexOf(libreOfficeArguments, "--outdir");
+            outDirIndex.Should().BeGreaterOrEqualTo(0);
+
+            var stagedOutput = Path.Combine(
+                libreOfficeArguments[outDirIndex + 1],
+                Path.GetFileNameWithoutExtension(job.InputPath) + ".pdf");
+
+            // The test temp path is space-free, which avoids cmd.exe's special
+            // /c quoting rules while still exercising the real staged outdir.
+            return ["/c", $"echo converted>{stagedOutput}"];
+        }
     }
 }

@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- LibreOffice conversions now render into a per-job temporary directory and promote only a fresh, non-input artifact to the requested destination. Collision-resolved outputs cannot overwrite sibling files, and stale same-stem files no longer turn an exit-code-zero run into a false success.
+
 ## [2.34.0] - 2026-08-02
 
 ### Added
