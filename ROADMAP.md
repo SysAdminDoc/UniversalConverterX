@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 172 — Magic-byte detection misroutes every XML/JSON-based format by overriding the specific extension
-  Category: correctness
-  Where: `src/UniversalConverterX.Core/Detection/MagicBytesDetector.cs:343-344`; `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:216-221,266`.
-  Problem: `DetectFromBuffer` matches generic signatures `<?xml`→"xml" and `{`→"json", and the orchestrator selects the converter from the DETECTED extension. An SVG with an XML declaration (Inkscape/Illustrator default) becomes "xml": `svg→png` then routes to LibreOffice (prio 70) instead of resvg (97)/Inkscape (95)/ImageMagick (90); `svg→pdf` routes to Pandoc's "xml" reader. COLLADA `.dae` (XML) stops matching Assimp; ASCII `.gltf` (JSON) → "json" → "No converter available" even though Assimp supports it. `ValidateJob` also uses the detected `SourceFormat.Extension`, so the wrong route passes validation.
-  Evidence: `ConvertAsync` sets `job.SourceFormat = await DetectFormatAsync(...)` then `sourceExtension = job.SourceFormat?.Extension`; only LibreOffice declares "xml" as input, resvg/Inkscape/ImageMagick declare only "svg".
-  Fix: treat "xml"/"json" (and other generic container signatures) as ambiguous in `DetectFromBuffer` — keep the file extension when it names a known specific format (svg, dae, gltf, fb2, …), mirroring the existing zip/EBML/glTF disambiguation pattern already in the detector.
-  Acceptance: `<?xml`-prefixed `.svg`→png selects resvg; `.dae→obj` selects assimp; `.gltf→glb` selects assimp; add detection-precedence regression tests.
-  Confidence: Likely (verify orchestrator prefers detected over file extension in your build before implementing). Effort: S
-
 - [ ] P1 — Item 173 — `ToolManager._versionCache` is a non-thread-safe Dictionary mutated across awaits in a singleton
   Category: reliability (race)
   Where: `src/UniversalConverterX.Core/Services/ToolManager.cs:19` (field), reads/writes at `:85,90,127,135,143,161,193`.

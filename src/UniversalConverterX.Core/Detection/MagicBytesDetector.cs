@@ -26,6 +26,15 @@ public class MagicBytesDetector
     {
         "M4A", "M4B", "M4P"
     };
+    private static readonly HashSet<string> SpecificXmlExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "svg", "dae", "fb2", "html", "htm", "xhtml", "x3d", "kml", "gpx",
+        "mxl", "musicxml", "plist", "resx", "xlf", "xliff"
+    };
+    private static readonly HashSet<string> SpecificJsonExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "gltf", "geojson", "topojson"
+    };
 
     public MagicBytesDetector()
     {
@@ -141,6 +150,14 @@ public class MagicBytesDetector
         if (zipFamilyFormat is not null)
             return zipFamilyFormat;
 
+        // XML and JSON are generic signatures. Preserve a recognised, more
+        // specific text-container extension so the orchestrator can select the
+        // converter for the actual format (for example resvg for SVG or Assimp
+        // for COLLADA and ASCII glTF).
+        var textFamilyFormat = DetectSpecificTextFamilyFormat(buffer, bytesRead, fileExtension);
+        if (textFamilyFormat is not null)
+            return textFamilyFormat;
+
         foreach (var sig in _signatures)
         {
             if (sig.Matches(buffer, bytesRead))
@@ -212,6 +229,29 @@ public class MagicBytesDetector
         // plain JSON and starts with '{'. Trust the extension if it disagrees.
         var ext = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
         return ext == "gltf" ? GetFormatInfo("gltf") : GetFormatInfo("glb");
+    }
+
+    private FileFormat? DetectSpecificTextFamilyFormat(byte[] data, int length, string? fileExtension)
+    {
+        var extension = fileExtension?.Trim().TrimStart('.').ToLowerInvariant();
+        if (string.IsNullOrEmpty(extension))
+            return null;
+
+        var offset = 0;
+        if (length >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
+            offset = 3;
+
+        while (offset < length && data[offset] is 0x09 or 0x0A or 0x0D or 0x20)
+            offset++;
+
+        if (SpecificXmlExtensions.Contains(extension) && MatchesAscii(data, length, offset, "<?xml"))
+            return GetFormatInfo(extension);
+
+        if (SpecificJsonExtensions.Contains(extension) && offset < length &&
+            (data[offset] == (byte)'{' || data[offset] == (byte)'['))
+            return GetFormatInfo(extension);
+
+        return null;
     }
 
     private FileFormat? DetectStl(byte[] data, int length, string? fileExtension)

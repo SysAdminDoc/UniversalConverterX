@@ -1,6 +1,7 @@
 using FluentAssertions;
 using UniversalConverterX.Core.Detection;
 using UniversalConverterX.Core.Interfaces;
+using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Core.Tests.Detection;
 
@@ -226,6 +227,61 @@ public class MagicBytesDetectorTests
             // Should fall back to extension-based detection
             format.Should().NotBeNull();
             format!.Extension.Should().Be("txt");
+        }
+        finally
+        {
+            CleanupTempFile(tempFile);
+        }
+    }
+
+    [Theory]
+    [InlineData("svg", "<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\"/>", FormatCategory.Vector)]
+    [InlineData("dae", "<?xml version=\"1.0\"?><COLLADA version=\"1.4.1\"/>", FormatCategory.ThreeD)]
+    [InlineData("fb2", "<?xml version=\"1.0\"?><FictionBook xmlns=\"http://www.gribuser.ru/xml/fictionbook/2.0\"/>", FormatCategory.Ebook)]
+    [InlineData("gltf", "{\"asset\":{\"version\":\"2.0\"}}", FormatCategory.ThreeD)]
+    public void DetectFormat_SpecificTextExtension_ShouldTakePrecedenceOverGenericSignature(
+        string extension,
+        string content,
+        FormatCategory category)
+    {
+        var tempFile = CreateTempFileWithContent(System.Text.Encoding.UTF8.GetBytes(content), $".{extension}");
+
+        try
+        {
+            var format = _detector.DetectFormat(tempFile);
+
+            format.Should().NotBeNull();
+            format!.Extension.Should().Be(extension);
+            format.Category.Should().Be(category);
+        }
+        finally
+        {
+            CleanupTempFile(tempFile);
+        }
+    }
+
+    [Theory]
+    [InlineData("svg", "<?xml version=\"1.0\"?><svg/>", "png", "resvg")]
+    [InlineData("dae", "<?xml version=\"1.0\"?><COLLADA/>", "obj", "assimp")]
+    [InlineData("gltf", "{\"asset\":{\"version\":\"2.0\"}}", "glb", "assimp")]
+    public void DetectFormat_SpecificTextExtension_ShouldRouteToExpectedConverter(
+        string extension,
+        string content,
+        string outputExtension,
+        string expectedConverter)
+    {
+        var tempFile = CreateTempFileWithContent(System.Text.Encoding.UTF8.GetBytes(content), $".{extension}");
+
+        try
+        {
+            var detected = _detector.DetectFormat(tempFile);
+            var orchestrator = new ConversionOrchestrator(Path.Combine(Path.GetTempPath(), "ucx-detection-route-tests"));
+
+            detected.Should().NotBeNull();
+            var converter = orchestrator.GetBestConverter(detected!.Extension, outputExtension);
+
+            converter.Should().NotBeNull();
+            converter!.Id.Should().Be(expectedConverter);
         }
         finally
         {
