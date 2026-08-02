@@ -199,13 +199,20 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Uid="BatchRenamePage_StatusText" Grid.Column="0"
                        x:Name="StatusText"
                        VerticalAlignment="Center"
                        Foreground="{StaticResource TextMutedBrush}"
                        Text="Add files to begin."/>
-            <Button x:Uid="BatchRenamePage_ApplyButton" Grid.Column="1"
+            <Button x:Uid="BatchRenamePage_UndoButton" Grid.Column="1"
+                    x:Name="UndoButton"
+                    Content="Undo rename"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="BatchRename_UndoButton"
+                    Click="Undo_Click"/>
+            <Button x:Uid="BatchRenamePage_ApplyButton" Grid.Column="2"
                     x:Name="ApplyButton"
                     Content="Apply rename"
                     Style="{StaticResource PrimaryButtonStyle}"

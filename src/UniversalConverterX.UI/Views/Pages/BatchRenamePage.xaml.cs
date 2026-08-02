@@ -6,15 +6,18 @@ using System.Text.RegularExpressions;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Utilities;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
 /// <summary>
-/// Pattern-based batch file rename. Pure-C# (no sidecar): uses
-/// <see cref="System.IO.File.Move(string, string)"/> with a live preview that flags
-/// conflicts before any disk mutation.
+/// Pattern-based batch file rename. Pure-C# (no sidecar), with a live preview
+/// that flags conflicts before any disk mutation. The apply step goes through
+/// <see cref="BatchRenamePlanner"/> and <see cref="BatchRenameExecutor"/>, so
+/// swaps and cycles get a staging phase, a failure rolls the whole set back,
+/// and a journal supports one-click undo and restart recovery.
 ///
 /// Token catalogue (resolved per row):
 ///   {n}              1-based counter (start + step configurable)
@@ -47,6 +50,10 @@ public sealed partial class BatchRenamePage : Page
         AllowDrop = true;
         DragOver += (_, e) => { e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy; };
         Drop += BatchRenamePage_Drop;
+
+        // A journal on disk means the last run never finished cleanly. Offer
+        // the undo instead of leaving a half-renamed folder unexplained.
+        OfferRecovery();
     }
 
     private async void BatchRenamePage_Drop(object sender, DragEventArgs e)
@@ -309,42 +316,158 @@ public sealed partial class BatchRenamePage : Page
         ApplyButton.IsEnabled = rename > 0 && ConflictBadge.Visibility == Visibility.Collapsed;
     }
 
+    private BatchRenameJournal? _undoJournal;
+
     private async void Apply_Click(object sender, RoutedEventArgs e)
     {
         ApplyButton.IsEnabled = false;
-        var ok = 0;
-        var failed = 0;
+        UndoButton.IsEnabled = false;
 
-        // Two-pass safety: rename targets that don't collide with an
-        // *existing* source first; the second pass handles the cases that
-        // would have collided on disk had they gone first. Each File.Move
-        // is independently try/catched so one EACCES doesn't abort the run.
         var snapshot = Rows
             .Where(r => r.Error is null
                 && !string.Equals(r.NewName, Path.GetFileName(r.OriginalPath), StringComparison.Ordinal))
             .ToList();
 
-        foreach (var row in snapshot)
+        // Plan before anything moves: swaps and cycles get a staging phase, and
+        // a collision with an untouched file is refused up front instead of
+        // being discovered half-way through the set.
+        var plan = BatchRenamePlanner.Plan(
+            snapshot.Select(row => new RenameRequest(row.OriginalPath, row.NewName)));
+        if (!plan.IsExecutable)
         {
-            var dir = Path.GetDirectoryName(row.OriginalPath) ?? "";
-            var target = Path.Combine(dir, row.NewName);
+            var byPath = new Dictionary<string, RenameRow>(StringComparer.OrdinalIgnoreCase);
+            foreach (var row in snapshot)
+                byPath[Path.GetFullPath(row.OriginalPath)] = row;
+            foreach (var problem in plan.Problems)
+            {
+                if (byPath.TryGetValue(problem.SourcePath, out var row))
+                {
+                    row.SetStatus(
+                        "",
+                        App.Current.Resources["AccentRedBrush"] as Brush,
+                        problem.Reason);
+                }
+            }
+
+            StatusText.Text = plan.Problems.Count > 0
+                ? $"Nothing renamed — {plan.Problems[0].Reason}"
+                : "Nothing to rename.";
+            UpdateUi();
+            return;
+        }
+
+        var journalPath = ResolveJournalPath();
+        var result = await Task.Run(() => BatchRenameExecutor.Execute(plan, journalPath));
+
+        if (result.Succeeded)
+        {
+            foreach (var row in snapshot)
+            {
+                var directory = Path.GetDirectoryName(row.OriginalPath) ?? "";
+                row.OriginalPath = Path.Combine(directory, row.NewName);
+                row.SetStatus("", App.Current.Resources["AccentGreenBrush"] as Brush, "Renamed.");
+            }
+
+            _undoJournal = BatchRenameJournal.Load(journalPath);
+            StatusText.Text = $"Renamed {result.RenamedCount} · undo available";
+        }
+        else
+        {
+            _undoJournal = null;
+            StatusText.Text = result.RolledBack
+                ? $"Nothing renamed — rolled back after {Path.GetFileName(result.FailedFrom)} failed: {result.Error}"
+                : $"Rename failed on {Path.GetFileName(result.FailedFrom)} and could not be fully rolled back: {result.Error}";
+        }
+
+        RecomputePreview();
+        UndoButton.IsEnabled = _undoJournal is not null;
+    }
+
+    private async void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_undoJournal is null)
+            return;
+
+        UndoButton.IsEnabled = false;
+        var journal = _undoJournal;
+        var undone = await Task.Run(() => BatchRenameExecutor.Undo(journal));
+
+        _undoJournal = null;
+        TryDeleteJournal();
+        StatusText.Text = undone
+            ? "Rename undone — every file is back under its original name."
+            : "Undo was incomplete; some files could not be moved back.";
+        ReloadRowsFromDisk();
+    }
+
+    /// <summary>
+    /// Rebuilds row paths from what is actually on disk after an undo, so the
+    /// preview never claims a name the filesystem does not have.
+    /// </summary>
+    private void ReloadRowsFromDisk()
+    {
+        var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var directory in Rows
+            .Select(row => Path.GetDirectoryName(row.OriginalPath) ?? "")
+            .Where(directory => !string.IsNullOrEmpty(directory))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
             try
             {
-                File.Move(row.OriginalPath, target);
-                row.OriginalPath = target;
-                row.SetStatus("\uE73E", App.Current.Resources["AccentGreenBrush"] as Brush, "Renamed.");
-                ok++;
+                foreach (var file in Directory.EnumerateFiles(directory))
+                    existing.Add(file);
             }
-            catch (Exception ex)
+            catch (Exception exception) when (
+                exception is IOException or UnauthorizedAccessException)
             {
-                row.SetStatus("\uE783", App.Current.Resources["AccentRedBrush"] as Brush, $"Failed: {ex.Message}");
-                failed++;
             }
         }
 
-        StatusText.Text = $"Renamed {ok} · failed {failed}";
-        await Task.Yield();
+        foreach (var row in Rows)
+        {
+            if (existing.Contains(row.OriginalPath))
+                continue;
+
+            var directory = Path.GetDirectoryName(row.OriginalPath) ?? "";
+            var candidate = Path.Combine(directory, row.NewName);
+            if (existing.Contains(candidate))
+                row.OriginalPath = candidate;
+        }
+
         RecomputePreview();
+    }
+
+    private static string ResolveJournalPath() => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "UniversalConverterX",
+        "batch-rename-journal.json");
+
+    private static void TryDeleteJournal()
+    {
+        try { File.Delete(ResolveJournalPath()); }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException) { }
+    }
+
+    /// <summary>
+    /// Offers to undo a run a crash or power loss interrupted. Without this a
+    /// journal left on disk is dead weight, and the user is left with a
+    /// half-renamed folder and no record of what happened.
+    /// </summary>
+    private void OfferRecovery()
+    {
+        var journal = BatchRenameJournal.Load(ResolveJournalPath());
+        if (journal is null || journal.Applied.Count == 0)
+        {
+            TryDeleteJournal();
+            return;
+        }
+
+        _undoJournal = journal;
+        UndoButton.IsEnabled = true;
+        StatusText.Text = journal.Completed
+            ? $"A previous rename of {journal.Applied.Count} file(s) can still be undone."
+            : $"A previous rename was interrupted after {journal.Applied.Count} file(s). Undo to restore the original names.";
     }
 
     public sealed class RenameRow : INotifyPropertyChanged

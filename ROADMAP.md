@@ -60,13 +60,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
   Acceptance: UI, CLI, REST, PowerShell, and Explorer accept/reject the same valid, future-schema, XXE, traversal, invocation-mode, and output-template fixtures with one diagnostic vocabulary.
   Complexity: M
 
-- [ ] P1 — Item 159 — Make batch rename transactional and undoable
-  Why: the claimed two-pass algorithm performs sequential moves and can leave partial results or fail cycles.
-  Evidence: `BatchRenamePage.xaml.cs:318-343`; LosslessCut undo/redo behavior.
-  Touches: batch-rename planner/journal, UI preview, recovery store, tests.
-  Acceptance: swaps/cycles use a collision-safe temporary phase; a failure rolls back the whole set; an atomic journal supports restart recovery and one-click undo; source identity and timestamps are fixture-tested.
-  Complexity: M
-
 - [ ] P1 — Item 160 — Localize imperative runtime copy and add pseudo-localization
   Why: XAML resource parity is strong, but 54 C# files contain 493 direct user-visible assignments and only four `AppLocalizer` calls.
   Evidence: `src/UniversalConverterX.UI/Views/**/*.xaml.cs`; Microsoft globalization guidance; File Converter/Shutter localization history.

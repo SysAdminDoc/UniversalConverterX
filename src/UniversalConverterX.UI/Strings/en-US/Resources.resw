@@ -1152,6 +1152,9 @@
   <data name="BatchRenamePage_TemplateBox.PlaceholderText" xml:space="preserve">
     <value>e.g. {n:03}_{stem}{ext}</value>
   </data>
+  <data name="BatchRenamePage_UndoButton.Content" xml:space="preserve">
+    <value>Undo rename</value>
+  </data>
   <data name="ChapterMarksPage_AddButton.Content" xml:space="preserve">
     <value>Add Chapter</value>
   </data>
