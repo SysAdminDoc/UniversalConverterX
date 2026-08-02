@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 170 — `ucx serve` has no authentication, Origin, or Host check — any website can drive the API
-  Category: security
-  Where: `src/UniversalConverterX.Console/Commands/ServeCommand.cs:101-246` (`Handle`), `:129-189` (`/convert`), `:330-348` (`ResolveNativeConverter`), `:289-300` (`NormalizeLoopbackHost`).
-  Problem: the only gate is that the socket is loopback; the header comment (line 28) treats that as the security boundary ("Bound to 127.0.0.1 only -- never exposes the local conversion engine to the network"). Loopback is not an auth boundary. (a) CSRF: `/convert` parses the body with `JsonNode.Parse` and never checks `Content-Type`, so a cross-origin `fetch(url,{mode:'no-cors',body:'{"engine":"converter","args":[...]}'})` (a CORS simple request, no preflight) reaches `jobs.Start(engine, exe, launchArgs)` — the opaque response doesn't matter, the side effect fires. `engine:"converter"` re-executes `ucx convert <attacker args>` (arbitrary `-d`, inputs); any sidecar name resolves via `SidecarCatalog.Resolve` and args pass verbatim, so an engine wrapping ffmpeg/imagemagick can `--output` into the Startup folder or a `.ps1` profile → file-overwrite-to-code-execution as the serving user, triggered by browsing a page. (b) DNS rebinding: http.sys does NOT reject a foreign `Host` on an IP-literal prefix (verified: a raw request with `Host: evil.example.com` returned 200), so after a short-TTL rebind the attacker page is same-origin and can READ `/engines`, `/jobs/{id}`, and `/jobs/{id}/events` (sidecar stderr: file paths, content). Any other local low-priv process can also hit the port with no credential.
-  Evidence: no credential/Origin/Host/Content-Type check anywhere in `Handle` (grep of the Console for Origin/Authorization/Bearer/token/Content-Type finds none); loopback-only Host normalization is the sole gate.
-  Fix: mint a random bearer token at startup (print it / write 0600 to `%LocalAppData%`), require it on all non-`/healthz` routes; enforce an exact `Host` allow-list (`127.0.0.1:<port>`/`localhost:<port>`); reject non-`application/json` bodies on `/convert`; reject any request carrying `Origin` or `Sec-Fetch-Site: cross-site`. Also stop returning `ex.Message` verbatim in the 500 body (`:238-241`).
-  Acceptance: a POST to `/convert` without the token → 401; a request with a foreign `Host` or cross-site `Origin` → 403; documented automation clients still work by sending the token; an integration test simulates the browser simple-request and the rebind Host and both are rejected.
-  Confidence: Verified. Effort: M
-
 - [ ] P1 — Item 171 — Watch-folder "Convert" can overwrite the source file in place
   Category: correctness (data loss)
   Where: `src/UniversalConverterX.UI/Services/WatchFolderService.cs:486-501` (`BuildJob`, `WatchAction.Convert`), output computed at `:489`.

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -25,7 +26,9 @@ namespace UniversalConverterX.Console.Commands;
 ///   GET  /jobs/{id}                  -> { "id":..., "running":..., "exit":..., "events_total":... }
 ///   GET  /jobs/{id}/events?since=N   -> NDJSON stream of accumulated events from cursor N
 ///
-/// Bound to 127.0.0.1 only -- never exposes the local conversion engine to the network.
+/// Bound to loopback only. A fresh bearer token is printed at startup; every
+/// endpoint except /healthz requires it, an exact loopback Host header, and no
+/// browser Origin/cross-site fetch metadata.
 /// </summary>
 public class ServeCommand : AsyncCommand<ServeCommand.Settings>
 {
@@ -72,6 +75,8 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         }
 
         AnsiConsole.MarkupLineInterpolated($"[green]ucx serve[/] listening on [cyan]{prefix}[/]");
+        var security = ServeRequestSecurity.Create(host, settings.Port);
+        System.Console.WriteLine($"Bearer token: {security.Token}");
         AnsiConsole.MarkupLine("Press Ctrl+C to stop.");
 
         var jobs = new JobManager();
@@ -86,7 +91,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                 var doneTask = await Task.WhenAny(ctxTask, Task.Delay(Timeout.Infinite, stopCts.Token));
                 if (doneTask != ctxTask) break;
                 var ctx = ctxTask.Result;
-                _ = Task.Run(() => Handle(ctx, jobs));
+                _ = Task.Run(() => Handle(ctx, jobs, security));
             }
         }
         finally
@@ -98,13 +103,32 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         return 0;
     }
 
-    private static async Task Handle(HttpListenerContext ctx, JobManager jobs)
+    private static async Task Handle(
+        HttpListenerContext ctx,
+        JobManager jobs,
+        ServeRequestSecurity security)
     {
         var req = ctx.Request;
         var resp = ctx.Response;
         try
         {
             var path = req.Url?.AbsolutePath ?? "";
+            var rejection = security.Validate(
+                path,
+                req.HttpMethod,
+                req.Headers["Host"],
+                req.Headers.AllKeys,
+                req.Headers["Sec-Fetch-Site"],
+                req.Headers["Authorization"],
+                req.ContentType);
+            if (rejection is not null)
+            {
+                if (rejection.Value.StatusCode == 401)
+                    resp.Headers[HttpResponseHeader.WwwAuthenticate] = "Bearer";
+                await WriteJson(resp, rejection.Value.StatusCode, new { error = rejection.Value.ErrorCode });
+                return;
+            }
+
             if (path == "/healthz" && req.HttpMethod == "GET")
             {
                 await WriteJson(resp, 200, new { ok = true, version = Program.GetAssemblyVersion() });
@@ -128,6 +152,12 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
             }
             else if (path == "/convert" && req.HttpMethod == "POST")
             {
+                if (!ServeRequestSecurity.IsJsonContentType(req.ContentType))
+                {
+                    await WriteJson(resp, 415, new { error = "content_type_required", content_type = "application/json" });
+                    return;
+                }
+
                 string body;
                 try { body = await ReadBody(req); }
                 catch (InvalidDataException)
@@ -235,9 +265,9 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                 await WriteJson(resp, 404, new { error = "not_found", path });
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            await WriteJson(resp, 500, new { error = "internal", message = ex.Message });
+            await WriteJson(resp, 500, new { error = "internal", message = "Request failed." });
         }
         finally
         {
@@ -347,6 +377,108 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         return (executable, launchArguments);
     }
 }
+
+internal sealed class ServeRequestSecurity
+{
+    private readonly HashSet<string> _allowedHosts;
+
+    private ServeRequestSecurity(string token, IEnumerable<string> allowedHosts)
+    {
+        Token = token;
+        _allowedHosts = new HashSet<string>(allowedHosts, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public string Token { get; }
+
+    public static ServeRequestSecurity Create(string boundHost, int port)
+    {
+        var normalizedHost = boundHost.Trim();
+        var allowedHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            $"127.0.0.1:{port}",
+            $"localhost:{port}",
+            $"[::1]:{port}",
+            $"{normalizedHost}:{port}"
+        };
+
+        var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        return new ServeRequestSecurity(token, allowedHosts);
+    }
+
+    public bool IsHostAllowed(string? hostHeader) =>
+        hostHeader is not null && _allowedHosts.Contains(hostHeader.Trim());
+
+    public bool IsAuthorized(string? authorizationHeader)
+    {
+        const string prefix = "Bearer ";
+        if (authorizationHeader is null
+            || !authorizationHeader.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var candidate = authorizationHeader[prefix.Length..].Trim();
+        if (candidate.Length != Token.Length)
+            return false;
+
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(candidate),
+            Encoding.UTF8.GetBytes(Token));
+    }
+
+    public bool IsCrossOrigin(IEnumerable<string?> headerNames, string? secFetchSite)
+    {
+        if (headerNames.Any(name =>
+                name is not null
+                && name.Equals("Origin", StringComparison.OrdinalIgnoreCase)))
+            return true;
+
+        return secFetchSite?.Split(',', StringSplitOptions.TrimEntries)
+            .Any(value => value.Equals("cross-site", StringComparison.OrdinalIgnoreCase)) == true;
+    }
+
+    public ServeRequestRejection? Validate(
+        string path,
+        string method,
+        string? hostHeader,
+        IEnumerable<string?> headerNames,
+        string? secFetchSite,
+        string? authorizationHeader,
+        string? contentType)
+    {
+        if (!IsHostAllowed(hostHeader))
+            return new ServeRequestRejection(403, "forbidden_host");
+
+        if (IsCrossOrigin(headerNames, secFetchSite))
+            return new ServeRequestRejection(403, "cross_origin_forbidden");
+
+        if (!string.Equals(path, "/healthz", StringComparison.Ordinal)
+            && !IsAuthorized(authorizationHeader))
+        {
+            return new ServeRequestRejection(401, "unauthorized");
+        }
+
+        if (string.Equals(path, "/convert", StringComparison.Ordinal)
+            && string.Equals(method, "POST", StringComparison.OrdinalIgnoreCase)
+            && !IsJsonContentType(contentType))
+        {
+            return new ServeRequestRejection(415, "content_type_required");
+        }
+
+        return null;
+    }
+
+    public static bool IsJsonContentType(string? contentType)
+    {
+        if (string.IsNullOrWhiteSpace(contentType))
+            return false;
+
+        var mediaType = contentType.Split(';', 2)[0].Trim();
+        return mediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+internal readonly record struct ServeRequestRejection(int StatusCode, string ErrorCode);
 
 internal sealed class JobManager
 {

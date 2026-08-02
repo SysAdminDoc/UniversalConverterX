@@ -1,6 +1,9 @@
 scrape_configs:
   - job_name: universalconverterx
     scrape_interval: 15s
+    authorization:
+      type: Bearer
+      credentials: REPLACE_WITH_TOKEN_PRINTED_BY_UCX_SERVE
     static_configs:
       - targets:
           - 127.0.0.1:17654

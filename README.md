@@ -171,12 +171,12 @@ ucx community-presets list
 ucx community-presets preview community-h264-720p-compact
 ucx community-presets install community-h264-720p-compact --accept-sha256 <digest>
 
-# Start the loopback-only REST surface; GET /engines discovers the catalogue
-# and POST /convert accepts {"engine":"...","args":["..."]}
+# Start the loopback-only REST surface; it prints a fresh bearer token.
+# GET /engines and POST /convert require Authorization: Bearer <token>.
 ucx serve --port 17654
 
 # Scrape dependency-free local job counters and gauges in Prometheus 0.0.4 format
-curl http://127.0.0.1:17654/metrics
+curl -H "Authorization: Bearer <token>" http://127.0.0.1:17654/metrics
 ```
 
 ### Commands
