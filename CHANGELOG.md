@@ -6,6 +6,9 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- `build.ps1 -Target Test` is now the whole release contract in one fail-fast command. `tools/gates/Invoke-Gates.ps1` runs 17 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax sweep, 212-sidecar contract, sidecar and shared-library unit tests, localization parity, static UIA coverage, release-manifest tests, sidecar dependency manifests, NuGet vulnerability and deprecation audits, allowlist expiry, the runtime UI sweep, staged-artifact verification, and SBOM reconciliation — and writes `artifacts/gates/gate-summary.json`. Gates needing artifacts that are not present report as skipped with the reason instead of being silently dropped; `-Only`, `-Skip`, and `-ContinueOnFailure` support iteration.
+- NuGet restore is reproducible: `packages.lock.json` is committed for all seven projects, `RestorePackagesWithLockFile` and `NuGetAudit` are on repo-wide, and the gate restores with `--locked-mode`.
+- Vulnerability and deprecation suppressions live in `tools/gates/allowlist.json` and must carry a reason, an owner, and an expiry no more than 180 days out. The gate fails on a lapsed entry and an expired entry stops suppressing its finding, so a suppression cannot become permanent by neglect.
 - Runtime UI smoke gate (`build.ps1 -Target UiSmoke`, `tests/ui_smoke/Invoke-UiSmoke.ps1`). The real x64 shell is launched and driven through all 54 registered routes in light, dark, and a 640-DIP narrow reflow pass — 162 navigations — asserting each page constructs, lays out to a non-empty rect, and exposes a reachable focus target. Failures capture a PNG of the shell and are reported per route/theme with the exception; unhandled XAML and AppDomain exceptions are recorded rather than killing the sweep, so one broken page no longer hides the rest. Verified by fault injection: a thrown constructor is reported on all three passes with screenshots.
 
 ### Changed
@@ -14,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
+- The AlphaCut export test asserted a successful background-removal run without checking that the human-seg model pack was installed. Automatic model downloads are disabled by design, so the test could only fail on a clean machine; it now skips with that reason. It had never run under the old Test target, which is why it went unnoticed.
 - Explorer, MSIX file/protocol/startup activation, Jump Lists, and completion notifications now converge on one AppLifecycle router. Every selected path is queued in the existing Converter window, secondary launches redirect to the primary instance, `ucx:` routes reach the requested page, and the invalid COM toast declaration was removed.
 
 ### Added

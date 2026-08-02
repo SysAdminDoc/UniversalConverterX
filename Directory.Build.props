@@ -12,6 +12,16 @@
          and self-contained outputs. The installer script enforces 10.0.9+. -->
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>LatestPatch</RollForward>
+    <!-- Restore is reproducible: packages.lock.json is committed and the
+         release gate restores with RestoreLockedMode so a transitive bump
+         cannot enter a build unnoticed. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- Fail restore on a known-vulnerable package rather than discovering it
+         in a separate audit pass. The aggregate gate still runs the explicit
+         vulnerability and deprecation reports. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -260,6 +260,7 @@ UniversalConverterX/
 ### Prerequisites
 
 - .NET 10 SDK
+- Python 3.12 (the sidecar, packaging, and dependency gates)
 - Windows 10 version 1809 or newer for the WinUI project; Windows SDK and WinUI build tools restore from NuGet
 
 ### Build
@@ -268,13 +269,50 @@ UniversalConverterX/
 # Build the full Windows solution
 .\build.ps1 -Target Build -Configuration Release
 
-# Run the focused core test suite
-.\build.ps1 -Target Test -Configuration Release
-
 # SDK-native builds can also use dotnet directly
 dotnet build src/UniversalConverterX.sln -c Release -p:Platform=x64
 dotnet build src/UniversalConverterX.Console/UniversalConverterX.Console.csproj -c Release
+```
 
+NuGet restore is locked: `packages.lock.json` is committed per project and the
+release gate restores with `--locked-mode`, so a transitive version change has
+to be an explicit, reviewed lock-file update.
+
+### Test
+
+`-Target Test` is the whole release contract in one fail-fast command. It runs
+17 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax
+sweep, 212-sidecar contract, sidecar and shared-library unit tests,
+localization parity, static UIA coverage, release-manifest tests, sidecar
+dependency manifests, NuGet vulnerability and deprecation audits, allowlist
+expiry, the runtime UI sweep, staged-artifact verification, and SBOM
+reconciliation — and writes `artifacts/gates/gate-summary.json`. Gates needing
+artifacts you have not built (a staged publish tree) report as skipped with the
+reason rather than being silently dropped.
+
+```bash
+# Everything
+.\build.ps1 -Target Test -Configuration Release
+
+# One gate while iterating (ids are in the summary)
+.\tools\gates\Invoke-Gates.ps1 -Only core-tests
+
+# Report every failure instead of stopping at the first
+.\tools\gates\Invoke-Gates.ps1 -ContinueOnFailure
+```
+
+The runtime UI gate launches the real app and sweeps every registered route in
+light, dark, and a narrow reflow pass, capturing a screenshot for any page that
+throws, lays out empty, or exposes no reachable focus target. Pass
+`-UiSmokeLauncher <script>` to open that window somewhere other than your
+desktop.
+
+Vulnerability and deprecation findings can be suppressed only through
+`tools/gates/allowlist.json`, where every entry needs a reason, an owner, and an
+expiry date; the gate fails on a lapsed entry, so a suppression cannot become
+permanent by neglect.
+
+```bash
 # Verify representative sidecar manifests, imports, and help/operation surfaces
 .\tools\verify-sidecars.ps1 -Mode Fast
 

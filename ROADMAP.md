@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 152 — Make the canonical Test target aggregate every existing local gate
-  Why: on 2026-07-29, `build.ps1 -Target Test` runs Core tests and VideoScaler smoke only, leaving Python, sidecar, localization, UIA, packaging, and dependency failures outside the release contract.
-  Evidence: `build.ps1:86-109`; `tests/sidecar_contract/`; `tests/uia_contract/`; `tools/localization/`; `.NET` and PyPA audit guidance.
-  Touches: `build.ps1`, test scripts, release compatibility/dependency checks.
-  Acceptance: one fail-fast x64 command runs Core, Python unit/syntax, 212-sidecar contract/integrity, localization, static UIA, Item 124 runtime UI, staged-artifact, NuGet vulnerability, reviewed-deprecation, lock, and SBOM reconciliation gates with a machine-readable summary and expiring allowlist entries.
-  Complexity: M
-
 - [ ] P1 — Item 153 — Contain sidecar process trees and validate output boundaries
   Why: untrusted files reach 212 executables, but the shared runner has no Job Object, process/memory limit, private temp root, or common canonical output enforcement.
   Evidence: `SidecarRunner.cs`; `ServeCommand.cs:128-188`; ImageMagick security policy; ConvertX 0.18.0 path-traversal fix.
@@ -194,6 +187,13 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
   Touches: README contribution/platform sections, manifests, installer checks, changelog/roadmap validation.
   Acceptance: one tested matrix states OS, architecture, package type, runtime, sidecar availability, migration, and unsigned-install behavior; the missing CONTRIBUTING link is removed or replaced in README, and broken local links, duplicate Unreleased headings, completed roadmap rows, and conflicting version/floor claims fail the release gate.
   Complexity: S
+
+- [ ] P2 — Item 168 — Migrate the Core test suite from xunit 2.x to xunit.v3
+  Why: NuGet marks xunit 2.9.3 and its four transitive packages Legacy because xunit.v3 supersedes them; the deprecation is currently suppressed in `tools/gates/allowlist.json` and that suppression expires 2027-01-29.
+  Evidence: `dotnet list package --deprecated` via `tools/gates/dependency_gate.py`; `tests/UniversalConverterX.Core.Tests/UniversalConverterX.Core.Tests.csproj`; xunit v3 migration guidance.
+  Touches: Core test project references, runner/test-platform wiring, `tools/gates/Invoke-Gates.ps1` if the invocation changes, allowlist removal.
+  Acceptance: the Core suite runs on xunit.v3 with the same 2400+ tests green under `build.ps1 -Target Test`, and the five xunit allowlist entries are deleted rather than extended.
+  Complexity: M
 
 - [ ] P2 — Item 167 — Service .NET packages and validate Windows App SDK 2.3.1
   Why: UCX repeats Microsoft 10.0.9 versions across projects while .NET 10.0.10 is a security servicing release, and Windows App SDK 2.3.1 supersedes the 2.2.0 UI/runtime smoke dependency.

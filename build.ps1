@@ -36,7 +36,11 @@ param(
 
     # Optional launcher used by the runtime UI gate so the swept window opens
     # somewhere isolated instead of on the operator's desktop.
-    [string]$UiSmokeLauncher
+    [string]$UiSmokeLauncher,
+
+    # Gate ids to skip during -Target Test. Every skip is recorded in the
+    # machine-readable summary, so a release run cannot hide one.
+    [string[]]$SkipGate = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,8 +53,6 @@ $PublishPath = if ($Architecture -eq "x64") {
     Join-Path $PSScriptRoot "publish\$RuntimeIdentifier"
 }
 $SrcPath = [System.IO.Path]::Combine($PSScriptRoot, "src")
-$CoreTestsPath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.Core.Tests", "UniversalConverterX.Core.Tests.csproj")
-$VideoScalerSmokePath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.VideoScalerSmoke", "UniversalConverterX.VideoScalerSmoke.csproj")
 if ([string]::IsNullOrWhiteSpace($Version)) {
     [xml]$versionProps = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Directory.Build.props')
     $Version = [string]($versionProps.Project.PropertyGroup.Version |
@@ -101,26 +103,28 @@ function Invoke-Build {
 
 function Invoke-Test {
     Write-Step "Running Tests"
-    
+
     if ($Architecture -eq "arm64") {
         Write-Host "Skipping execution of ARM64 test binaries on this host; x64 tests remain the runtime gate." -ForegroundColor Yellow
         return
     }
 
-    dotnet test $CoreTestsPath -c $Configuration --nologo --no-build --no-restore --verbosity minimal -p:Platform=$Architecture
-    
-    if ($LASTEXITCODE -ne 0) {
-        throw "Tests failed"
+    # One aggregate, fail-fast gate run. Everything the release contract depends
+    # on -- Core, Python, sidecar contract, localization, UIA, runtime UI,
+    # packaging, NuGet lock/vulnerability/deprecation, SBOM -- runs here and
+    # lands in a machine-readable summary. Individual gates can be selected
+    # with tools/gates/Invoke-Gates.ps1 -Only <id>.
+    $gateArguments = @{
+        Configuration = $Configuration
     }
+    if (-not [string]::IsNullOrWhiteSpace($UiSmokeLauncher)) {
+        $gateArguments.UiSmokeLauncher = $UiSmokeLauncher
+    }
+    if ($SkipGate.Count -gt 0) {
+        $gateArguments.Skip = $SkipGate
+    }
+    & (Join-Path $PSScriptRoot 'tools\gates\Invoke-Gates.ps1') @gateArguments | Out-Null
 
-    if (Test-IsWindows) {
-        Write-Host "Running Windows AI VideoScaler capability/benchmark smoke..." -ForegroundColor Yellow
-        dotnet run --project $VideoScalerSmokePath -c $Configuration --nologo --verbosity quiet
-        if ($LASTEXITCODE -ne 0) {
-            throw "Windows AI VideoScaler smoke failed"
-        }
-    }
-    
     Write-Host "Tests complete" -ForegroundColor Green
 }
 
@@ -279,10 +283,10 @@ try {
     switch ($Target) {
         "Clean" { Invoke-Clean }
         "Build" { Invoke-Build }
-        "Test" { Invoke-Build; Invoke-Test }
+        "Test" { Invoke-Test }
         "UiSmoke" { Invoke-Build; Invoke-UiSmoke }
         "Publish" { Invoke-Build; Invoke-Publish }
-        "All" { Invoke-Clean; Invoke-Build; Invoke-Test; Invoke-UiSmoke; Invoke-Publish }
+        "All" { Invoke-Clean; Invoke-Test; Invoke-Publish }
     }
     
     Write-Host "`nSuccess!" -ForegroundColor Green

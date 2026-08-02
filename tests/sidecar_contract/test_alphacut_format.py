@@ -2,9 +2,12 @@
 
 Regression guard for the bug where the sidecar validated the UI's short
 format tags (webm / mp4 / png_sequence / mov) against AlphaCut's display-name
-keys, silently downgrading every video export to the first format. The full
-run needs PyQt6 + rembg + AlphaCut and downloads a small human-seg model, so
-it skips when those are unavailable.
+keys, silently downgrading every video export to the first format.
+
+The full export run needs PyQt6 + rembg + AlphaCut *and* an already-installed
+human-seg model. Automatic model downloads are deliberately disabled — packs
+install only through the consent-gated, digest-pinned action — so this test
+skips rather than reaching for the network when the pack is absent.
 """
 
 from __future__ import annotations
@@ -36,6 +39,24 @@ def _ffmpeg() -> str | None:
     return shutil.which("ffmpeg")
 
 
+def _model_installed(model_key: str) -> bool:
+    """True when the pinned pack for ``model_key`` is already on disk.
+
+    Mirrors ``AlphaCutEngine._ensure_model``: a pack counts as installed only
+    when the weights file exists and is large enough to be real. Anything else
+    would require the consent-gated download, which a test must never trigger.
+    """
+    try:
+        sys.path.insert(0, str(ROOT / "tools" / "alphacut"))
+        import AlphaCut
+
+        config = AlphaCut.MODELS[model_key]
+        path = Path(AlphaCut.MODELS_DIR) / config["file"]
+        return path.is_file() and path.stat().st_size > 1_000_000
+    except Exception:
+        return False
+
+
 def _events(output: str) -> list[dict]:
     return [json.loads(line) for line in output.splitlines()
             if line.strip().startswith("{")]
@@ -56,6 +77,10 @@ class AlphaCutFormatTests(unittest.TestCase):
         ffmpeg = _ffmpeg()
         if not ffmpeg or not _deps_available():
             self.skipTest("FFmpeg/PyQt6/rembg/AlphaCut not available")
+        if not _model_installed("u2net_human_seg"):
+            self.skipTest(
+                "u2net_human_seg pack is not installed; automatic model "
+                "downloads are disabled by design")
         import tempfile
         with tempfile.TemporaryDirectory() as temp:
             clip = Path(temp) / "subj.mp4"

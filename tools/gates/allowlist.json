@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "comment": [
+    "Temporary suppressions for the dependency gates. Every entry MUST carry an",
+    "expiry; the gate fails once an entry is past it, so a suppression cannot",
+    "quietly become permanent. Removing the underlying finding is always",
+    "preferable to extending the date.",
+    "",
+    "vulnerabilities[]: { package, advisoryUrl, reason, expiresUtc, owner }",
+    "deprecations[]:    { package, reason, expiresUtc, owner }"
+  ],
+  "vulnerabilities": [],
+  "deprecations": [
+    {
+      "package": "xunit",
+      "reason": "xunit 2.x is marked Legacy because xunit.v3 supersedes it, not because of a defect. Moving 2400+ tests and the runner model is tracked as ROADMAP Item 168.",
+      "expiresUtc": "2027-01-29",
+      "owner": "SysAdminDoc"
+    },
+    {
+      "package": "xunit.assert",
+      "reason": "Transitive of xunit 2.x; see the xunit entry and ROADMAP Item 168.",
+      "expiresUtc": "2027-01-29",
+      "owner": "SysAdminDoc"
+    },
+    {
+      "package": "xunit.core",
+      "reason": "Transitive of xunit 2.x; see the xunit entry and ROADMAP Item 168.",
+      "expiresUtc": "2027-01-29",
+      "owner": "SysAdminDoc"
+    },
+    {
+      "package": "xunit.extensibility.core",
+      "reason": "Transitive of xunit 2.x; see the xunit entry and ROADMAP Item 168.",
+      "expiresUtc": "2027-01-29",
+      "owner": "SysAdminDoc"
+    },
+    {
+      "package": "xunit.extensibility.execution",
+      "reason": "Transitive of xunit 2.x; see the xunit entry and ROADMAP Item 168.",
+      "expiresUtc": "2027-01-29",
+      "owner": "SysAdminDoc"
+    }
+  ]
+}

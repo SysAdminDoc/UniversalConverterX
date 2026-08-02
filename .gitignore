@@ -35,6 +35,7 @@ tools/_models/*
 artifacts/build-reports/
 artifacts/python-dependencies/
 artifacts/ui-smoke/
+artifacts/gates/
 
 # Installer-generated WiX fragments
 installer/wix/PresetFiles.generated.wxs
