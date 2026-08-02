@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Commands;
@@ -375,10 +376,33 @@ internal sealed class JobManager
             StandardErrorEncoding = Encoding.UTF8,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
+
+        // The REST surface launches the same 212 untrusted engines the UI does,
+        // so it gets the same containment: a private scratch root that is
+        // deleted with the job, and a job object so a headless server crash
+        // cannot leave an encoder running.
+        SidecarWorkspace? workspace = null;
+        try
+        {
+            workspace = SidecarWorkspace.Create();
+            workspace.ApplyTo(psi.EnvironmentVariables);
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException)
+        {
+            workspace = null;
+        }
+
         var proc = new Process { StartInfo = psi };
         var metricEngine = engine.Trim().ToLowerInvariant();
         var counters = _metrics.GetOrAdd(metricEngine, static _ => new EngineJobCounters());
-        var rec = new JobRecord(id, engine, proc, exitCode => counters.MarkCompleted(exitCode));
+        var rec = new JobRecord(
+            id,
+            engine,
+            proc,
+            exitCode => counters.MarkCompleted(exitCode),
+            ProcessContainment.Create(ProcessContainmentLimits.Default),
+            workspace);
         rec.Start();
         counters.MarkStarted();
         _jobs[id] = rec;
@@ -486,9 +510,23 @@ internal sealed class JobRecord : IDisposable
     /// </summary>
     public bool IsRunning => !_hasExited;
 
-    public JobRecord(string id, string engine, Process proc, Action<int?>? onExited = null)
+    private readonly ProcessContainment? _containment;
+    private readonly SidecarWorkspace? _workspace;
+
+    public JobRecord(
+        string id,
+        string engine,
+        Process proc,
+        Action<int?>? onExited = null,
+        ProcessContainment? containment = null,
+        SidecarWorkspace? workspace = null)
     {
-        Id = id; Engine = engine; _proc = proc; _onExited = onExited;
+        Id = id;
+        Engine = engine;
+        _proc = proc;
+        _onExited = onExited;
+        _containment = containment;
+        _workspace = workspace;
     }
 
     public int EventCount { get { lock (_lock) return _totalEvents; } }
@@ -519,6 +557,9 @@ internal sealed class JobRecord : IDisposable
         };
         _proc.EnableRaisingEvents = true;
         _proc.Start();
+        // Contain before the engine can spawn helpers; a failure here is not
+        // fatal, the tree-kill in Kill() still applies.
+        try { _containment?.TryAssign(_proc.Handle); } catch { }
         try { _proc.StandardInput.Close(); } catch { }
         _proc.BeginOutputReadLine();
         _proc.BeginErrorReadLine();
@@ -566,6 +607,11 @@ internal sealed class JobRecord : IDisposable
 
     public void Dispose()
     {
+        // Close the job before disposing the process: the job kills anything
+        // still inside it, so the workspace delete below is not fighting a live
+        // writer.
+        try { _containment?.Dispose(); } catch { }
         try { _proc.Dispose(); } catch { }
+        try { _workspace?.Dispose(); } catch { }
     }
 }

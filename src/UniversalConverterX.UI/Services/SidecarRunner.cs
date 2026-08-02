@@ -168,6 +168,16 @@ public sealed class SidecarRunner : ISidecarRunner
 
         var ffmpegReview = ConfigureFfmpegReview(psi, toolsBin, log);
 
+        // Give the engine its own scratch root so one job's frame dumps and
+        // demuxes are never visible to the next, and cleanup is unambiguous.
+        // The using declaration deletes it on every exit path, including the
+        // cancellation and watchdog returns below.
+        using var workspace = TryCreatePrivateWorkspace(psi, log);
+
+        using var containment = _options?.ContainSidecarProcesses != false
+            ? ProcessContainment.Create(BuildContainmentLimits())
+            : null;
+
         using var process = new Process { StartInfo = psi };
 
         string? finalOutput = null;
@@ -233,6 +243,29 @@ public sealed class SidecarRunner : ISidecarRunner
                 ErrorCode: "spawn_failed",
                 ErrorMessage: $"Could not launch '{toolName}': {ex.Message}",
                 ExitCode: -1);
+        }
+
+        // Assign before the engine has a chance to spawn helpers. Anything it
+        // forks from here on is inside the job and dies with it, including if
+        // this app is terminated rather than exiting cleanly.
+        if (containment is not null)
+        {
+            try
+            {
+                if (!containment.TryAssign(process.Handle) && containment.FailureReason is not null)
+                {
+                    log?.Report(new SidecarLog(
+                        "debug",
+                        $"Process containment unavailable: {containment.FailureReason}"));
+                }
+            }
+            catch (Exception exception) when (
+                exception is InvalidOperationException or NotSupportedException)
+            {
+                log?.Report(new SidecarLog(
+                    "debug",
+                    $"Process containment unavailable: {exception.Message}"));
+            }
         }
 
         // Close stdin: the sidecar will see EOF on read and abort cleanly rather
@@ -417,6 +450,32 @@ public sealed class SidecarRunner : ISidecarRunner
 
         var success = exitCode == 0 && errorCode is null;
 
+        // The reported output path comes from an engine that just consumed an
+        // untrusted file, so it is untrusted too. Confine it to the destination
+        // this app named before anything downstream opens, probes, moves, or
+        // reports it.
+        if (success
+            && finalOutput is not null
+            && _options?.EnforceSidecarOutputBoundary != false)
+        {
+            var boundary = SidecarOutputBoundary.Validate(
+                finalOutput,
+                SidecarOutputBoundary.ResolveApprovedRoot(args));
+            if (!boundary.IsAllowed)
+            {
+                log?.Report(new SidecarLog("error", boundary.Rejection ?? "Output rejected."));
+                return new SidecarResult(
+                    Success: false,
+                    OutputPath: null,
+                    SizeBytes: null,
+                    ErrorCode: "output_outside_destination",
+                    ErrorMessage: boundary.Rejection,
+                    ExitCode: exitCode);
+            }
+
+            finalOutput = boundary.CanonicalPath;
+        }
+
         // ROADMAP Item 72: post-encode duration validation. Only fires on a
         // successful job whose input/output both look like media files; on
         // anything else (probe missing, sidecar isn't a media converter, etc.)
@@ -464,6 +523,48 @@ public sealed class SidecarRunner : ISidecarRunner
             ErrorCode: success ? null : (errorCode ?? "exit_nonzero"),
             ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {exitCode}"),
             ExitCode: exitCode);
+    }
+
+    private SidecarWorkspace? TryCreatePrivateWorkspace(
+        ProcessStartInfo startInfo,
+        IProgress<SidecarLog>? log)
+    {
+        if (_options?.UsePrivateSidecarTemp == false)
+        {
+            return null;
+        }
+
+        try
+        {
+            var workspace = SidecarWorkspace.Create();
+            workspace.ApplyTo(startInfo.EnvironmentVariables);
+            return workspace;
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException)
+        {
+            log?.Report(new SidecarLog(
+                "warn",
+                $"Could not create a private job workspace ({exception.Message}); "
+                + "the sidecar will use the shared temp directory."));
+            return null;
+        }
+    }
+
+    private ProcessContainmentLimits BuildContainmentLimits()
+    {
+        if (_options is null)
+        {
+            return ProcessContainmentLimits.Default;
+        }
+
+        var memoryBytes = _options.SidecarMaxMemoryMegabytes > 0
+            ? (long)_options.SidecarMaxMemoryMegabytes * 1024L * 1024L
+            : ProcessContainmentLimits.Default.MaxMemoryBytes;
+        return new ProcessContainmentLimits(
+            MaxProcesses: Math.Max(0, _options.SidecarMaxProcesses),
+            MaxMemoryBytes: memoryBytes,
+            MaxRuntime: _options.SidecarMaxRuntime);
     }
 
     private string? ResolveManagedToolsBin()

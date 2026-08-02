@@ -124,6 +124,44 @@ public class ConverterXOptions
     /// </summary>
     public TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromHours(1);
 
+    /// <summary>
+    /// Hold each sidecar process tree in a Windows job object so its children
+    /// die with the job and with the app. Disabling it falls back to the
+    /// direct tree-kill, which cannot reach a process that outlived a crash.
+    /// </summary>
+    public bool ContainSidecarProcesses { get; set; } = true;
+
+    /// <summary>
+    /// Maximum live processes in one contained sidecar tree. Zero is unlimited.
+    /// </summary>
+    public int SidecarMaxProcesses { get; set; } = 128;
+
+    /// <summary>
+    /// Committed-memory ceiling in MB for one contained sidecar tree. Zero
+    /// falls back to 90% of physical RAM, which stops a runaway from wedging
+    /// the machine without breaking a legitimate model load.
+    /// </summary>
+    public int SidecarMaxMemoryMegabytes { get; set; }
+
+    /// <summary>
+    /// Hard wall-clock ceiling for one sidecar job. Zero — the default — leaves
+    /// pacing to the silence watchdog, because a long encode is slow rather
+    /// than stuck and a fixed clock would kill it.
+    /// </summary>
+    public TimeSpan SidecarMaxRuntime { get; set; } = TimeSpan.Zero;
+
+    /// <summary>
+    /// Give each sidecar job a private temp root that is deleted when the job
+    /// ends, instead of letting every engine share the user's %TEMP%.
+    /// </summary>
+    public bool UsePrivateSidecarTemp { get; set; } = true;
+
+    /// <summary>
+    /// Refuse a reported output path that resolves outside the destination the
+    /// app asked the sidecar to write to, or that crosses a link or junction.
+    /// </summary>
+    public bool EnforceSidecarOutputBoundary { get; set; } = true;
+
     #endregion
 
     #region Quality & Performance

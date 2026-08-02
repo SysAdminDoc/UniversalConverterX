@@ -177,6 +177,15 @@ public partial class App : Application
         _ = Services.GetRequiredService<IHistoryService>();
         _ = Services.GetRequiredService<IWatchFolderService>();
 
+        // Reclaim job workspaces left behind by a hard kill or power loss. A
+        // day-old directory cannot belong to a live job, so this never disturbs
+        // a concurrent run.
+        _ = Task.Run(() =>
+        {
+            try { SidecarWorkspace.PurgeStale(TimeSpan.FromDays(1)); }
+            catch { /* housekeeping must never affect launch */ }
+        });
+
         // Fire-and-forget app/tool update and compatibility probe
         // (24h-throttled, honours ConverterXOptions.CheckForUpdates opt-out,
         // never blocks launch). Results land in update-cache.json.

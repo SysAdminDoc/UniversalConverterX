@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 153 — Contain sidecar process trees and validate output boundaries
-  Why: untrusted files reach 212 executables, but the shared runner has no Job Object, process/memory limit, private temp root, or common canonical output enforcement.
-  Evidence: `SidecarRunner.cs`; `ServeCommand.cs:128-188`; ImageMagick security policy; ConvertX 0.18.0 path-traversal fix.
-  Touches: `SidecarRunner`, native process-containment helper, REST/native launch paths, malicious contract fixtures.
-  Acceptance: child processes die with the job/app, configured process/memory/time limits are enforced, private temp work is cleaned, launch and reported-output paths are canonicalized under the user-approved destination, and traversal/symlink/reparse fixtures are rejected before finalization.
-  Complexity: L
-
 - [ ] P1 — Item 154 — Centralize NDJSON progress and immutable job provenance
   Why: the runner accepts arbitrary numeric percentages/ETA and pages interpret progress independently; users cannot reproduce which preset, binary, fallback, or arguments produced an output.
   Evidence: `SidecarRunner.cs:290-304`; Tdarr issue 1236; File Converter v2.2; Unmanic 0.4.0.
