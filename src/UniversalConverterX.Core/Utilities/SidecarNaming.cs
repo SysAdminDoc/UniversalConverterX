@@ -7,10 +7,18 @@ namespace UniversalConverterX.Core.Utilities;
 /// </summary>
 public static class SidecarNaming
 {
-    public static string ExecutableName(string engine) =>
-        engine.Equals("ab-av1", StringComparison.OrdinalIgnoreCase)
-            ? "ab-av1-sidecar.exe"
-            : engine.Equals("av1an", StringComparison.OrdinalIgnoreCase)
-                ? "av1an-sidecar.exe"
-                : engine + ".exe";
+    public static string ExecutableName(string engine)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(engine);
+
+        return engine.ToLowerInvariant() switch
+        {
+            "ab-av1" => "ab-av1-sidecar.exe",
+            "av1an" => "av1an-sidecar.exe",
+            "comskip" => "comskip-sidecar.exe",
+            "demucs" => "demucs-sidecar.exe",
+            "whisper-stt" => "ucx-whisper-stt.exe",
+            _ => engine + ".exe",
+        };
+    }
 }

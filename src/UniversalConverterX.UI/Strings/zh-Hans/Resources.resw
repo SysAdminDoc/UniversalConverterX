@@ -2973,62 +2973,62 @@
   <data name="HistoryPage_StatTotal.Text" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="HomePage_BrowseFilesButton.Content" xml:space="preserve">
+    <value>浏览文件</value>
+  </data>
   <data name="HomePage_DiagnosticsStatusText.Text" xml:space="preserve">
     <value>本届会议没有记录任何议题。</value>
   </data>
   <data name="HomePage_ExportCrashBundleButton.Content" xml:space="preserve">
     <value>导出崩溃包</value>
   </data>
-  <data name="HomePage_HomePageButton01.Content" xml:space="preserve">
-    <value>转换文件</value>
+  <data name="HomePage_FileIntakeSubtitle.Text" xml:space="preserve">
+    <value>从任意媒体、文档、压缩包或图像开始。</value>
   </data>
-  <data name="HomePage_HomePageButton02.Content" xml:space="preserve">
-    <value>开放 AI实验室</value>
+  <data name="HomePage_FileIntakeTitle.Text" xml:space="preserve">
+    <value>将文件拖到此处即可开始</value>
   </data>
-  <data name="HomePage_HomePageButton03.Content" xml:space="preserve">
-    <value>浏览工具</value>
+  <data name="HomePage_HeroSubtitle.Text" xml:space="preserve">
+    <value>在本地转换、压缩、下载、录制和检查媒体。</value>
   </data>
-  <data name="HomePage_Item_003.Text" xml:space="preserve">
-    <value>LOCAL MEDIA WORKSPACE</value>
+  <data name="HomePage_HeroTitle.Text" xml:space="preserve">
+    <value>让您的媒体应对一切。</value>
   </data>
-  <data name="HomePage_Item_004.Text" xml:space="preserve">
-    <value>转换、压缩、下载、记录和检查当地媒体。</value>
+  <data name="HomePage_LocalProcessingText.Text" xml:space="preserve">
+    <value>本地处理</value>
   </data>
-  <data name="HomePage_Item_020.Text" xml:space="preserve">
-    <value>流动流量</value>
-  </data>
-  <data name="HomePage_Item_022.Text" xml:space="preserve">
-    <value>AI实验室</value>
-  </data>
-  <data name="HomePage_Item_024.Text" xml:space="preserve">
-    <value>工具箱</value>
-  </data>
-  <data name="HomePage_Item_026.Text" xml:space="preserve">
-    <value>诊断</value>
-  </data>
-  <data name="HomePage_Item_027.Text" xml:space="preserve">
-    <value>本地日志和崩溃捆包</value>
-  </data>
-  <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.3</value>
-  </data>
-  <data name="HomePage_Item_032.Text" xml:space="preserve">
-    <value>当地一级处理</value>
-  </data>
-  <data name="HomePage_Item_033.Text" xml:space="preserve">
-    <value>无遥测</value>
+  <data name="HomePage_OpenHistoryButton.Content" xml:space="preserve">
+    <value>打开历史记录</value>
   </data>
   <data name="HomePage_OpenLogFolderButton.Content" xml:space="preserve">
     <value>打开日志文件夹</value>
   </data>
+  <data name="HomePage_QuickWorkflowsSubtitle.Text" xml:space="preserve">
+    <value>从最常用的任务开始。</value>
+  </data>
+  <data name="HomePage_QuickWorkflowsTitle.Text" xml:space="preserve">
+    <value>快速工作流</value>
+  </data>
+  <data name="HomePage_RecentActivitySubtitle.Text" xml:space="preserve">
+    <value>您最近的操作将显示在这里。</value>
+  </data>
+  <data name="HomePage_RecentActivityTitle.Text" xml:space="preserve">
+    <value>最近活动</value>
+  </data>
+  <data name="HomePage_RecentEmptyState.Text" xml:space="preserve">
+    <value>暂无最近活动。</value>
+  </data>
   <data name="HomePage_TaskSearchBox.PlaceholderText" xml:space="preserve">
-    <value>搜索任务: 转换、压缩、记录、检查、框架</value>
+    <value>搜索工具和工作流</value>
   </data>
   <data name="HomePage_UpdateBanner.Title" xml:space="preserve">
     <value>现有最新更新</value>
   </data>
   <data name="HomePage_UpdateBannerActionButton.Content" xml:space="preserve">
     <value>开放式发布注释</value>
+  </data>
+  <data name="HomePage_VersionText.Text" xml:space="preserve">
+    <value>UniversalConverter X v2.33.0</value>
   </data>
   <data name="ImageConverterPage_BlurBox.Header" xml:space="preserve">
     <value>模糊 px</value>
@@ -3537,6 +3537,9 @@
   <data name="MainWindow_AboutItem.Content" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="MainWindow_HomeItem.Content" xml:space="preserve">
+    <value>主页</value>
+  </data>
   <data name="MainWindow_Item_001.Title" xml:space="preserve">
     <value>UniversalConverter X</value>
   </data>
@@ -3564,11 +3567,14 @@
   <data name="MainWindow_Item_013.Content" xml:space="preserve">
     <value>通用转换</value>
   </data>
-  <data name="MainWindow_Item_017.Text" xml:space="preserve">
-    <value>本地第一工作空间</value>
+  <data name="MainWindow_LocalProcessingText.Text" xml:space="preserve">
+    <value>本地处理</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
     <value>搜索任务和工具</value>
+  </data>
+  <data name="MainWindow_NoTelemetryText.Text" xml:space="preserve">
+    <value>无遥测</value>
   </data>
   <data name="NoiseRemoverPage_AudioFormatCombo.Header" xml:space="preserve">
     <value>音音容器</value>

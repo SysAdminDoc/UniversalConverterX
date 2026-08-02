@@ -304,14 +304,19 @@ public static class ShellExtensionRegistrar
             {
                 var path = key.GetValue("InstallPath") as string;
                 if (!string.IsNullOrEmpty(path))
-                    return Path.Combine(path, "UniversalConverterX.ShellExtension.comhost.dll");
+                    return Path.Combine(
+                        path,
+                        "shell",
+                        "UniversalConverterX.ShellExtension.comhost.dll");
             }
         }
         catch { }
 
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UniversalConverterX", "UniversalConverterX.ShellExtension.comhost.dll");
+            "UniversalConverterX",
+            "shell",
+            "UniversalConverterX.ShellExtension.comhost.dll");
     }
 
     private static string GetIconPath()

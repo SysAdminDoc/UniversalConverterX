@@ -12,11 +12,17 @@
         <!-- Solid theme fallback remains visible when compositor materials are unavailable. -->
         <Border Width="216"
                 HorizontalAlignment="Left"
-                Background="{StaticResource SurfaceBrush}"/>
+                Background="{StaticResource NavigationSurfaceBrush}"/>
         <controls:SystemBackdropElement x:Name="NavigationBackdropHost"
                                         Width="216"
                                         HorizontalAlignment="Left"
+                                        Opacity="0.28"
                                         IsHitTestVisible="False"/>
+        <Border Width="1"
+                Margin="215,0,0,0"
+                HorizontalAlignment="Left"
+                Background="{StaticResource DividerBrush}"
+                IsHitTestVisible="False"/>
         <NavigationView x:Name="MainNav"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
@@ -29,17 +35,23 @@
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent"/>
                 <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent"/>
+                <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground"
+                                 Color="{ThemeResource BrandAccentPrimary}"/>
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected"
+                                 Color="{ThemeResource BrandSurfaceLight}"/>
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver"
+                                 Color="{ThemeResource BrandSurfaceRaised}"/>
             </NavigationView.Resources>
 
             <NavigationView.PaneHeader>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="12,10,0,10">
-                    <Image Width="32" Height="32"
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,10,6,12">
+                    <Image Width="30" Height="30"
                            Source="ms-appx:///Assets/AppLogo.png"
                            Stretch="Uniform"/>
                     <TextBlock x:Uid="MainWindow_Item_002"
                                Text="UniversalConverter X"
                                Style="{StaticResource LabelTextStyle}"
-                               FontSize="14"
+                               FontSize="13"
                                VerticalAlignment="Center"
                                TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
@@ -68,6 +80,14 @@
             </NavigationView.AutoSuggestBox>
 
             <NavigationView.MenuItems>
+                <NavigationViewItem x:Uid="MainWindow_HomeItem"
+                                    Tag="home"
+                                    Content="Home"
+                                    AutomationProperties.AutomationId="MainWindow_Home">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_006" Tag="converter" Content="Converter">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;"/>
@@ -114,14 +134,38 @@
             </NavigationView.FooterMenuItems>
 
             <NavigationView.PaneFooter>
-                <StackPanel Orientation="Horizontal" Spacing="8" Margin="18,8,12,12">
-                    <Ellipse Width="7" Height="7"
-                             Fill="{StaticResource AccentGreenBrush}"
-                             VerticalAlignment="Center"/>
-                    <TextBlock x:Uid="MainWindow_Item_017" Text="Ready"
-                               Style="{StaticResource MutedTextStyle}"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
-                </StackPanel>
+                <Border Margin="10,6,10,10"
+                        Padding="10"
+                        Background="{StaticResource SurfaceMutedBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                    <Grid ColumnSpacing="9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="30"
+                                Height="30"
+                                Background="{StaticResource SurfaceSoftBrush}"
+                                CornerRadius="9">
+                            <FontIcon Glyph="&#xEA18;"
+                                      FontSize="14"
+                                      Foreground="{StaticResource AccentGreenBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="1">
+                            <TextBlock x:Uid="MainWindow_LocalProcessingText"
+                                       Text="Local processing"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock x:Uid="MainWindow_NoTelemetryText"
+                                       Text="No telemetry"
+                                       Style="{StaticResource SubtleTextStyle}"
+                                       Foreground="{StaticResource AccentGreenBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </NavigationView.PaneFooter>
 
             <Frame x:Name="ContentFrame" Background="{StaticResource BackgroundBrush}"/>

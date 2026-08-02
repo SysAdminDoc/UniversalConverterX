@@ -2973,62 +2973,62 @@
   <data name="HistoryPage_StatTotal.Text" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="HomePage_BrowseFilesButton.Content" xml:space="preserve">
+    <value>Dateien auswählen</value>
+  </data>
   <data name="HomePage_DiagnosticsStatusText.Text" xml:space="preserve">
     <value>Diese Sitzung wurde ohne Probleme aufgezeichnet.</value>
   </data>
   <data name="HomePage_ExportCrashBundleButton.Content" xml:space="preserve">
     <value>Crashpaket exportieren</value>
   </data>
-  <data name="HomePage_HomePageButton01.Content" xml:space="preserve">
-    <value>Dateien konvertieren</value>
+  <data name="HomePage_FileIntakeSubtitle.Text" xml:space="preserve">
+    <value>Beginnen Sie mit Medien, Dokumenten, Archiven oder Bildern.</value>
   </data>
-  <data name="HomePage_HomePageButton02.Content" xml:space="preserve">
-    <value>AI-Labor öffnen</value>
+  <data name="HomePage_FileIntakeTitle.Text" xml:space="preserve">
+    <value>Dateien hier ablegen, um zu starten</value>
   </data>
-  <data name="HomePage_HomePageButton03.Content" xml:space="preserve">
-    <value>Werkzeug durchsuchen</value>
+  <data name="HomePage_HeroSubtitle.Text" xml:space="preserve">
+    <value>Medien lokal konvertieren, komprimieren, herunterladen, aufnehmen und prüfen.</value>
   </data>
-  <data name="HomePage_Item_003.Text" xml:space="preserve">
-    <value>LOCAL MEDIA WORKSPACE</value>
+  <data name="HomePage_HeroTitle.Text" xml:space="preserve">
+    <value>Ihre Medien, bereit für alles.</value>
   </data>
-  <data name="HomePage_Item_004.Text" xml:space="preserve">
-    <value>Konvertieren, komprimieren, herunterladen, aufnehmen und inspizieren Sie Medien lokal.</value>
+  <data name="HomePage_LocalProcessingText.Text" xml:space="preserve">
+    <value>Lokale Verarbeitung</value>
   </data>
-  <data name="HomePage_Item_020.Text" xml:space="preserve">
-    <value>Workflows</value>
-  </data>
-  <data name="HomePage_Item_022.Text" xml:space="preserve">
-    <value>AI Labor</value>
-  </data>
-  <data name="HomePage_Item_024.Text" xml:space="preserve">
-    <value>Werkzeugkasten</value>
-  </data>
-  <data name="HomePage_Item_026.Text" xml:space="preserve">
-    <value>Diagnose</value>
-  </data>
-  <data name="HomePage_Item_027.Text" xml:space="preserve">
-    <value>Lokale Protokolle und Crashpakete</value>
-  </data>
-  <data name="HomePage_Item_031.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.31.3</value>
-  </data>
-  <data name="HomePage_Item_032.Text" xml:space="preserve">
-    <value>Lokale Erstverarbeitung</value>
-  </data>
-  <data name="HomePage_Item_033.Text" xml:space="preserve">
-    <value>Keine Telemetrie</value>
+  <data name="HomePage_OpenHistoryButton.Content" xml:space="preserve">
+    <value>Verlauf öffnen</value>
   </data>
   <data name="HomePage_OpenLogFolderButton.Content" xml:space="preserve">
     <value>Protokollordner öffnen</value>
   </data>
+  <data name="HomePage_QuickWorkflowsSubtitle.Text" xml:space="preserve">
+    <value>Starten Sie mit den häufigsten Aufgaben.</value>
+  </data>
+  <data name="HomePage_QuickWorkflowsTitle.Text" xml:space="preserve">
+    <value>Schnellzugriff</value>
+  </data>
+  <data name="HomePage_RecentActivitySubtitle.Text" xml:space="preserve">
+    <value>Ihre letzten Vorgänge werden hier angezeigt.</value>
+  </data>
+  <data name="HomePage_RecentActivityTitle.Text" xml:space="preserve">
+    <value>Letzte Aktivitäten</value>
+  </data>
+  <data name="HomePage_RecentEmptyState.Text" xml:space="preserve">
+    <value>Noch keine Aktivitäten.</value>
+  </data>
   <data name="HomePage_TaskSearchBox.PlaceholderText" xml:space="preserve">
-    <value>Suchaufgaben: konvertieren, komprimieren, aufnehmen, inspizieren, Frames</value>
+    <value>Werkzeuge und Workflows durchsuchen</value>
   </data>
   <data name="HomePage_UpdateBanner.Title" xml:space="preserve">
     <value>Verfügbare Updates</value>
   </data>
   <data name="HomePage_UpdateBannerActionButton.Content" xml:space="preserve">
     <value>Anmerkungen zur Veröffentlichung öffnen</value>
+  </data>
+  <data name="HomePage_VersionText.Text" xml:space="preserve">
+    <value>UniversalConverter X v2.33.0</value>
   </data>
   <data name="ImageConverterPage_BlurBox.Header" xml:space="preserve">
     <value>Blur px</value>
@@ -3537,6 +3537,9 @@
   <data name="MainWindow_AboutItem.Content" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="MainWindow_HomeItem.Content" xml:space="preserve">
+    <value>Start</value>
+  </data>
   <data name="MainWindow_Item_001.Title" xml:space="preserve">
     <value>UniversalConverter X</value>
   </data>
@@ -3564,11 +3567,14 @@
   <data name="MainWindow_Item_013.Content" xml:space="preserve">
     <value>Universelles Konvertieren</value>
   </data>
-  <data name="MainWindow_Item_017.Text" xml:space="preserve">
-    <value>Arbeitsplatz vor Ort</value>
+  <data name="MainWindow_LocalProcessingText.Text" xml:space="preserve">
+    <value>Lokale Verarbeitung</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
     <value>Suchaufgaben und -werkzeuge</value>
+  </data>
+  <data name="MainWindow_NoTelemetryText.Text" xml:space="preserve">
+    <value>Keine Telemetrie</value>
   </data>
   <data name="NoiseRemoverPage_AudioFormatCombo.Header" xml:space="preserve">
     <value>Audio-Container</value>

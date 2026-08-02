@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -15,6 +16,7 @@ REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "installer" / "New-ReleaseManifest.ps1"
 INSTALLER_SCRIPT = REPO / "installer" / "build-installer.ps1"
 WIX_PRODUCT = REPO / "installer" / "wix" / "Product.wxs"
+WIX_PAYLOAD_SCRIPT = REPO / "installer" / "New-WixPayload.ps1"
 
 
 def test_installer_accepts_local_or_global_wix_tool() -> None:
@@ -24,14 +26,18 @@ def test_installer_accepts_local_or_global_wix_tool() -> None:
     assert "& wix @wixArguments" in source
 
 
-def test_wix_uses_current_ui_publish_names() -> None:
+def test_wix_installs_the_generated_complete_release_payload() -> None:
     source = WIX_PRODUCT.read_text(encoding="utf-8-sig")
-    assert "UniversalConverterX.UI.exe" not in source
-    assert "UniversalConverterX.UI.deps.json" not in source
-    assert "UniversalConverterX.UI.runtimeconfig.json" not in source
-    assert "UniversalConverterX.exe" in source
-    assert "UniversalConverterX.deps.json" in source
-    assert "UniversalConverterX.runtimeconfig.json" in source
+    installer = INSTALLER_SCRIPT.read_text(encoding="utf-8-sig")
+    assert '<ComponentGroupRef Id="ReleasePayload" />' in source
+    assert '<ComponentGroupRef Id="ApplicationFiles" />' not in source
+    assert "New-WixPayload.ps1" in installer
+    assert "ReleasePayload.generated.wxs" in installer
+    assert "Removing previous stage" in installer
+    assert "sidecar_readiness.py" in installer
+    assert "Test-ReleaseArtifacts.ps1" in installer
+    assert '-o "$releaseStage\\cli"' in installer
+    assert '-o "$releaseStage\\shell"' in installer
 
 
 class ReleaseManifestTests(unittest.TestCase):
@@ -116,6 +122,61 @@ class ReleaseManifestTests(unittest.TestCase):
             self.assertEqual(
                 hashlib.sha256(ffmpeg.read_bytes()).hexdigest(),
                 tools["tools/ffmpeg/ffmpeg.exe"]["sha256"],
+            )
+
+    def test_generated_wix_payload_is_complete_and_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            stage = root / "stage"
+            output = root / "payload.wxs"
+            (stage / "tools" / "demo").mkdir(parents=True)
+            (stage / "UniversalConverterX.exe").write_bytes(b"ui")
+            (stage / "tools" / "demo" / "ucx.sidecar.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+
+            command = [
+                self.pwsh,
+                "-NoProfile",
+                "-File",
+                str(WIX_PAYLOAD_SCRIPT),
+                "-StageRoot",
+                str(stage),
+                "-OutputPath",
+                str(output),
+            ]
+            first = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(0, first.returncode, first.stderr)
+            first_bytes = output.read_bytes()
+            second = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(0, second.returncode, second.stderr)
+            self.assertEqual(first_bytes, output.read_bytes())
+
+            namespace = {"w": "http://wixtoolset.org/schemas/v4/wxs"}
+            tree = ET.parse(output)
+            group = tree.find(".//w:ComponentGroup[@Id='ReleasePayload']", namespace)
+            self.assertIsNotNone(group)
+            sources = {
+                element.attrib["Source"]
+                for element in tree.findall(".//w:File", namespace)
+            }
+            self.assertEqual(
+                {
+                    r"$(var.PublishDir)UniversalConverterX.exe",
+                    r"$(var.PublishDir)tools\demo\ucx.sidecar.json",
+                },
+                sources,
             )
 
     def test_rejects_empty_artifact(self) -> None:

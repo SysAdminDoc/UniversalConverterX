@@ -134,6 +134,46 @@ public class FFmpegConverterTests
         args.Should().Contain("-vn"); // No video
     }
 
+    [Theory]
+    [InlineData("mp3", "libmp3lame")]
+    [InlineData("wav", "pcm_s16le")]
+    [InlineData("aiff", "pcm_s16be")]
+    [InlineData("flac", "flac")]
+    [InlineData("ogg", "libvorbis")]
+    [InlineData("opus", "libopus")]
+    [InlineData("wma", "wmav2")]
+    [InlineData("ac3", "ac3")]
+    [InlineData("m4a", "aac")]
+    public void BuildArguments_DefaultAudioCodec_MatchesOutputContainer(
+        string extension,
+        string expectedCodec)
+    {
+        var job = CreateTestJob("input.wav", $"output.{extension}");
+
+        var args = _converter.BuildArguments(job, new ConversionOptions());
+
+        var codecIndex = Array.IndexOf(args, "-c:a");
+        codecIndex.Should().BeGreaterThanOrEqualTo(0);
+        args[codecIndex + 1].Should().Be(expectedCodec);
+    }
+
+    [Theory]
+    [InlineData("webm", "libopus")]
+    [InlineData("ogv", "libvorbis")]
+    [InlineData("mp4", "aac")]
+    public void BuildArguments_DefaultVideoAudioCodec_MatchesOutputContainer(
+        string extension,
+        string expectedCodec)
+    {
+        var job = CreateTestJob("input.mp4", $"output.{extension}");
+
+        var args = _converter.BuildArguments(job, new ConversionOptions());
+
+        var codecIndex = Array.IndexOf(args, "-c:a");
+        codecIndex.Should().BeGreaterThanOrEqualTo(0);
+        args[codecIndex + 1].Should().Be(expectedCodec);
+    }
+
     [Fact]
     public void BuildArguments_WithQualityPreset_ShouldSetAppropriateCrf()
     {

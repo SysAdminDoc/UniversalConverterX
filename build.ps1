@@ -26,7 +26,13 @@ param(
     [string]$Target = "Build",
 
     [ValidateSet("x64", "arm64")]
-    [string]$Architecture = "x64"
+    [string]$Architecture = "x64",
+
+    [string]$Version,
+
+    [string]$FfmpegArchivePath,
+
+    [string]$SidecarBuildReport
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,6 +47,12 @@ $PublishPath = if ($Architecture -eq "x64") {
 $SrcPath = [System.IO.Path]::Combine($PSScriptRoot, "src")
 $CoreTestsPath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.Core.Tests", "UniversalConverterX.Core.Tests.csproj")
 $VideoScalerSmokePath = [System.IO.Path]::Combine($PSScriptRoot, "tests", "UniversalConverterX.VideoScalerSmoke", "UniversalConverterX.VideoScalerSmoke.csproj")
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    [xml]$versionProps = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Directory.Build.props')
+    $Version = [string]($versionProps.Project.PropertyGroup.Version |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Select-Object -First 1)
+}
 
 function Write-Step {
     param([string]$Message)
@@ -110,8 +122,17 @@ function Invoke-Test {
 
 function Invoke-Publish {
     Write-Step "Publishing"
-    
-    # Create publish directory
+
+    $resolvedRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+    $resolvedPublish = [IO.Path]::GetFullPath($PublishPath)
+    if (-not $resolvedPublish.StartsWith(
+            $resolvedRoot + [IO.Path]::DirectorySeparatorChar,
+            [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to clean publish path outside the repository: $resolvedPublish"
+    }
+    if (Test-Path -LiteralPath $resolvedPublish) {
+        Remove-Item -LiteralPath $resolvedPublish -Recurse -Force
+    }
     New-Item -ItemType Directory -Path $PublishPath -Force | Out-Null
     
     # Publish CLI
@@ -160,10 +181,55 @@ function Invoke-Publish {
     
     # Copy README and LICENSE
     Copy-Item "README.md" $PublishPath -ErrorAction SilentlyContinue
-    
-    # Create tools directory
-    $toolsPath = Join-Path $PublishPath "tools/bin"
+
+    Write-Host "Staging presets..." -ForegroundColor Yellow
+    $presetsPath = Join-Path $PublishPath 'presets'
+    New-Item -ItemType Directory -Path $presetsPath -Force | Out-Null
+    Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'presets') -Filter '*.preset.xml' |
+        Copy-Item -Destination $presetsPath -Force
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'presets\README.md') `
+        -Destination $presetsPath -Force
+
+    $toolsPath = Join-Path $PublishPath 'tools\bin'
     New-Item -ItemType Directory -Path $toolsPath -Force | Out-Null
+    if ($Architecture -eq 'x64') {
+        Write-Host "Staging pinned FFmpeg..." -ForegroundColor Yellow
+        $ffmpegArguments = @{
+            ManifestPath = (Join-Path $PSScriptRoot 'tools\ffmpeg\bundle.json')
+            DestinationPath = $toolsPath
+        }
+        if (-not [string]::IsNullOrWhiteSpace($FfmpegArchivePath)) {
+            $ffmpegArguments.ArchivePath = $FfmpegArchivePath
+        }
+        & (Join-Path $PSScriptRoot 'installer\Stage-PinnedFfmpeg.ps1') @ffmpegArguments |
+            Out-Null
+    }
+
+    Write-Host "Staging sidecar readiness..." -ForegroundColor Yellow
+    $readinessScript = Join-Path $PSScriptRoot 'tools\release\sidecar_readiness.py'
+    $readinessArguments = @(
+        $readinessScript,
+        'stage',
+        '--repo-root', $PSScriptRoot,
+        '--stage-root', $PublishPath,
+        '--source-tools', (Join-Path $PSScriptRoot 'tools'),
+        '--architecture', $RuntimeIdentifier,
+        '--product-version', $Version
+    )
+    if (-not [string]::IsNullOrWhiteSpace($SidecarBuildReport)) {
+        $readinessArguments += @('--build-report', $SidecarBuildReport)
+    }
+    & python @readinessArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Sidecar readiness staging failed"
+    }
+    & python $readinessScript verify `
+        --stage-root $PublishPath `
+        --source-tools (Join-Path $PSScriptRoot 'tools') `
+        --architecture $RuntimeIdentifier
+    if ($LASTEXITCODE -ne 0) {
+        throw "Sidecar readiness verification failed"
+    }
 
     if ($Architecture -eq "arm64") {
         Write-Host "Auditing ARM64 artifacts and sidecar compatibility..." -ForegroundColor Yellow

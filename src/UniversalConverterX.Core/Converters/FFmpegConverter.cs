@@ -146,11 +146,11 @@ public partial class FFmpegConverter : BaseConverterStrategy
         {
             if (useExplicitMaps)
                 args.AddRange(BuildStreamMapArgs(options));
-            BuildVideoArgs(args, options);
+            BuildVideoArgs(args, options, job.OutputExtension);
         }
         else if (isAudioOutput)
         {
-            BuildAudioArgs(args, options);
+            BuildAudioArgs(args, options, job.OutputExtension);
             args.Add("-vn"); // No video
         }
 
@@ -403,7 +403,10 @@ public partial class FFmpegConverter : BaseConverterStrategy
         catch { /* best effort cleanup */ }
     }
 
-    private void BuildVideoArgs(List<string> args, ConversionOptions options)
+    private void BuildVideoArgs(
+        List<string> args,
+        ConversionOptions options,
+        string outputExtension)
     {
         var video = options.Video;
 
@@ -492,17 +495,20 @@ public partial class FFmpegConverter : BaseConverterStrategy
         // the per-pass command lines from it. See ShouldRunNativeTwoPass.
 
         // Audio handling
-        if (video.RemoveAudio)
+        if (video.RemoveAudio || outputExtension == "gif")
         {
             args.Add("-an");
         }
         else
         {
-            BuildAudioArgs(args, options);
+            BuildAudioArgs(args, options, outputExtension);
         }
     }
 
-    private void BuildAudioArgs(List<string> args, ConversionOptions options)
+    private static void BuildAudioArgs(
+        List<string> args,
+        ConversionOptions options,
+        string outputExtension)
     {
         var audio = options.Audio;
 
@@ -513,7 +519,7 @@ public partial class FFmpegConverter : BaseConverterStrategy
         }
         else
         {
-            args.AddRange(["-c:a", "aac"]);
+            args.AddRange(["-c:a", DefaultAudioCodec(outputExtension)]);
         }
 
         // Bitrate
@@ -552,6 +558,20 @@ public partial class FFmpegConverter : BaseConverterStrategy
         if (audio.Normalize)
             args.AddRange(["-af", "loudnorm"]);
     }
+
+    private static string DefaultAudioCodec(string outputExtension) =>
+        outputExtension.ToLowerInvariant() switch
+        {
+            "mp3" => "libmp3lame",
+            "wav" or "caf" => "pcm_s16le",
+            "aiff" or "au" => "pcm_s16be",
+            "flac" => "flac",
+            "ogg" or "ogv" => "libvorbis",
+            "opus" or "webm" => "libopus",
+            "wma" => "wmav2",
+            "ac3" => "ac3",
+            _ => "aac",
+        };
 
     private static string[] GetHardwareAccelArgs(HardwareAcceleration accel) => accel switch
     {

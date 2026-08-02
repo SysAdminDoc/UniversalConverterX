@@ -12,8 +12,8 @@
 
             <!-- ════════════════════════════════════════════════════════════════
                  PALETTE
-                 Default = Dark (existing UCX identity).
-                 Light   = Catppuccin Latte-inspired companion (#54).
+                 Default = deep-ink media workbench.
+                 Light   = low-glare companion for daylight use.
                  ThemeResource refs in the SolidColorBrush definitions below mean
                  every consumer page that uses `{StaticResource SurfaceBrush}`
                  etc. picks up the theme switch automatically — no per-page churn.
@@ -21,65 +21,75 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
                     <!-- Surfaces -->
-                    <Color x:Key="BrandBackground">#0b0f14</Color>
-                    <Color x:Key="BrandSurface">#151c27</Color>
-                    <Color x:Key="BrandSurfaceMuted">#10161f</Color>
-                    <Color x:Key="BrandSurfaceLight">#1b2533</Color>
-                    <Color x:Key="BrandSurfaceSoft">#162a20</Color>
-                    <Color x:Key="BrandSurfaceWarm">#1e160a</Color>
-                    <Color x:Key="BrandSurfaceDanger">#200d0d</Color>
-                    <Color x:Key="BrandSurfaceInfo">#0c1629</Color>
+                    <Color x:Key="BrandBackground">#080e16</Color>
+                    <Color x:Key="BrandNavigation">#0b121c</Color>
+                    <Color x:Key="BrandSurface">#111a26</Color>
+                    <Color x:Key="BrandSurfaceRaised">#152132</Color>
+                    <Color x:Key="BrandSurfaceMuted">#0d1520</Color>
+                    <Color x:Key="BrandSurfaceLight">#182536</Color>
+                    <Color x:Key="BrandSurfaceSoft">#102a25</Color>
+                    <Color x:Key="BrandSurfaceWarm">#281c10</Color>
+                    <Color x:Key="BrandSurfaceDanger">#2a1518</Color>
+                    <Color x:Key="BrandSurfaceInfo">#0d1d34</Color>
+                    <Color x:Key="BrandAccentPrimarySoft">#132c52</Color>
+                    <Color x:Key="BrandHeroStart">#121f30</Color>
+                    <Color x:Key="BrandHeroEnd">#0b1623</Color>
                     <!-- Borders -->
-                    <Color x:Key="BrandBorder">#2a3443</Color>
-                    <Color x:Key="BrandBorderStrong">#3a4658</Color>
-                    <Color x:Key="BrandDivider">#222c39</Color>
+                    <Color x:Key="BrandBorder">#253547</Color>
+                    <Color x:Key="BrandBorderStrong">#385069</Color>
+                    <Color x:Key="BrandDivider">#1c2938</Color>
                     <!-- Accents -->
-                    <Color x:Key="BrandAccentPrimary">#3b82f6</Color>
-                    <Color x:Key="BrandAccentPrimaryHover">#5b9af8</Color>
-                    <Color x:Key="BrandAccentPrimaryPressed">#2563eb</Color>
-                    <Color x:Key="BrandAccentBlue">#60a5fa</Color>
-                    <Color x:Key="BrandAccentCyan">#22d3ee</Color>
+                    <Color x:Key="BrandAccentPrimary">#3e7bfa</Color>
+                    <Color x:Key="BrandAccentPrimaryHover">#5a91ff</Color>
+                    <Color x:Key="BrandAccentPrimaryPressed">#2f64d8</Color>
+                    <Color x:Key="BrandAccentBlue">#5a9bff</Color>
+                    <Color x:Key="BrandAccentCyan">#2ed3e8</Color>
                     <Color x:Key="BrandAccentGreen">#2dd4a7</Color>
-                    <Color x:Key="BrandAccentOrange">#fb923c</Color>
-                    <Color x:Key="BrandAccentYellow">#fbbf24</Color>
-                    <Color x:Key="BrandAccentRed">#f87171</Color>
+                    <Color x:Key="BrandAccentOrange">#ff9b50</Color>
+                    <Color x:Key="BrandAccentYellow">#f4c95d</Color>
+                    <Color x:Key="BrandAccentRed">#ff6b72</Color>
                     <!-- Text -->
-                    <Color x:Key="BrandTextPrimary">#f3f6fa</Color>
-                    <Color x:Key="BrandTextSecondary">#aab4c3</Color>
-                    <Color x:Key="BrandTextMuted">#8793a6</Color>
-                    <Color x:Key="BrandTextSubtle">#667387</Color>
-                    <Color x:Key="BrandTextInverse">#0f172a</Color>
+                    <Color x:Key="BrandTextPrimary">#f3f7fc</Color>
+                    <Color x:Key="BrandTextSecondary">#afbbcb</Color>
+                    <Color x:Key="BrandTextMuted">#8290a3</Color>
+                    <Color x:Key="BrandTextSubtle">#637187</Color>
+                    <Color x:Key="BrandTextInverse">#07111f</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
-                    <!-- Surfaces — Catppuccin Latte mantle / base / surfaces -->
-                    <Color x:Key="BrandBackground">#eff1f5</Color>
+                    <!-- Surfaces -->
+                    <Color x:Key="BrandBackground">#f2f5f9</Color>
+                    <Color x:Key="BrandNavigation">#e9eef5</Color>
                     <Color x:Key="BrandSurface">#ffffff</Color>
-                    <Color x:Key="BrandSurfaceMuted">#e6e9ef</Color>
-                    <Color x:Key="BrandSurfaceLight">#dce0e8</Color>
-                    <Color x:Key="BrandSurfaceSoft">#dceee0</Color>
-                    <Color x:Key="BrandSurfaceWarm">#f7e8d6</Color>
-                    <Color x:Key="BrandSurfaceDanger">#fadcdc</Color>
-                    <Color x:Key="BrandSurfaceInfo">#d6e4ff</Color>
+                    <Color x:Key="BrandSurfaceRaised">#ffffff</Color>
+                    <Color x:Key="BrandSurfaceMuted">#e9eef5</Color>
+                    <Color x:Key="BrandSurfaceLight">#dfe7f1</Color>
+                    <Color x:Key="BrandSurfaceSoft">#ddf1e9</Color>
+                    <Color x:Key="BrandSurfaceWarm">#faeadc</Color>
+                    <Color x:Key="BrandSurfaceDanger">#fde1e3</Color>
+                    <Color x:Key="BrandSurfaceInfo">#dce9ff</Color>
+                    <Color x:Key="BrandAccentPrimarySoft">#dbe7ff</Color>
+                    <Color x:Key="BrandHeroStart">#f8fbff</Color>
+                    <Color x:Key="BrandHeroEnd">#eaf1fb</Color>
                     <!-- Borders -->
-                    <Color x:Key="BrandBorder">#bcc0cc</Color>
-                    <Color x:Key="BrandBorderStrong">#9ca0b0</Color>
-                    <Color x:Key="BrandDivider">#ccd0da</Color>
-                    <!-- Accents — Catppuccin Latte tints -->
-                    <Color x:Key="BrandAccentPrimary">#1e66f5</Color>
-                    <Color x:Key="BrandAccentPrimaryHover">#3a7af7</Color>
-                    <Color x:Key="BrandAccentPrimaryPressed">#1850c4</Color>
-                    <Color x:Key="BrandAccentBlue">#1e66f5</Color>
-                    <Color x:Key="BrandAccentCyan">#04a5e5</Color>
-                    <Color x:Key="BrandAccentGreen">#40a02b</Color>
-                    <Color x:Key="BrandAccentOrange">#fe640b</Color>
-                    <Color x:Key="BrandAccentYellow">#df8e1d</Color>
-                    <Color x:Key="BrandAccentRed">#d20f39</Color>
-                    <!-- Text — dark on light -->
-                    <Color x:Key="BrandTextPrimary">#4c4f69</Color>
-                    <Color x:Key="BrandTextSecondary">#5c5f77</Color>
-                    <Color x:Key="BrandTextMuted">#6c6f85</Color>
-                    <Color x:Key="BrandTextSubtle">#8c8fa1</Color>
-                    <Color x:Key="BrandTextInverse">#eff1f5</Color>
+                    <Color x:Key="BrandBorder">#c6d0dd</Color>
+                    <Color x:Key="BrandBorderStrong">#aebdcc</Color>
+                    <Color x:Key="BrandDivider">#d5dde7</Color>
+                    <!-- Accents -->
+                    <Color x:Key="BrandAccentPrimary">#2764de</Color>
+                    <Color x:Key="BrandAccentPrimaryHover">#3c76e7</Color>
+                    <Color x:Key="BrandAccentPrimaryPressed">#1f50b7</Color>
+                    <Color x:Key="BrandAccentBlue">#2764de</Color>
+                    <Color x:Key="BrandAccentCyan">#087f9c</Color>
+                    <Color x:Key="BrandAccentGreen">#16845f</Color>
+                    <Color x:Key="BrandAccentOrange">#c75f11</Color>
+                    <Color x:Key="BrandAccentYellow">#a96800</Color>
+                    <Color x:Key="BrandAccentRed">#c43b47</Color>
+                    <!-- Text -->
+                    <Color x:Key="BrandTextPrimary">#172335</Color>
+                    <Color x:Key="BrandTextSecondary">#40516a</Color>
+                    <Color x:Key="BrandTextMuted">#62738a</Color>
+                    <Color x:Key="BrandTextSubtle">#8693a5</Color>
+                    <Color x:Key="BrandTextInverse">#f7faff</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
@@ -88,13 +98,23 @@
                  ════════════════════════════════════════════════════════════════ -->
 
             <SolidColorBrush x:Key="BackgroundBrush" Color="{ThemeResource BrandBackground}"/>
+            <SolidColorBrush x:Key="NavigationSurfaceBrush" Color="{ThemeResource BrandNavigation}"/>
             <SolidColorBrush x:Key="SurfaceBrush" Color="{ThemeResource BrandSurface}"/>
+            <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="{ThemeResource BrandSurfaceRaised}"/>
             <SolidColorBrush x:Key="SurfaceMutedBrush" Color="{ThemeResource BrandSurfaceMuted}"/>
             <SolidColorBrush x:Key="SurfaceLightBrush" Color="{ThemeResource BrandSurfaceLight}"/>
             <SolidColorBrush x:Key="SurfaceSoftBrush" Color="{ThemeResource BrandSurfaceSoft}"/>
             <SolidColorBrush x:Key="SurfaceWarmBrush" Color="{ThemeResource BrandSurfaceWarm}"/>
             <SolidColorBrush x:Key="SurfaceDangerBrush" Color="{ThemeResource BrandSurfaceDanger}"/>
             <SolidColorBrush x:Key="SurfaceInfoBrush" Color="{ThemeResource BrandSurfaceInfo}"/>
+            <SolidColorBrush x:Key="AccentPrimarySoftBrush" Color="{ThemeResource BrandAccentPrimarySoft}"/>
+
+            <LinearGradientBrush x:Key="HeroSurfaceBrush"
+                                 StartPoint="0,0"
+                                 EndPoint="1,1">
+                <GradientStop Offset="0" Color="{ThemeResource BrandHeroStart}"/>
+                <GradientStop Offset="1" Color="{ThemeResource BrandHeroEnd}"/>
+            </LinearGradientBrush>
 
             <SolidColorBrush x:Key="BorderBrush" Color="{ThemeResource BrandBorder}"/>
             <SolidColorBrush x:Key="BorderStrongBrush" Color="{ThemeResource BrandBorderStrong}"/>
@@ -307,13 +327,13 @@
             </Style>
 
             <Style x:Key="PageLayoutStyle" TargetType="Grid">
-                <Setter Property="Padding" Value="28,20,28,24"/>
-                <Setter Property="RowSpacing" Value="14"/>
+                <Setter Property="Padding" Value="32,22,32,28"/>
+                <Setter Property="RowSpacing" Value="16"/>
             </Style>
 
             <Style x:Key="PageStackLayoutStyle" TargetType="StackPanel">
-                <Setter Property="Padding" Value="28,20,28,24"/>
-                <Setter Property="Spacing" Value="14"/>
+                <Setter Property="Padding" Value="32,22,32,28"/>
+                <Setter Property="Spacing" Value="16"/>
             </Style>
 
             <!-- ════════════════════════════════════════════════════════════════
@@ -430,6 +450,10 @@
             <Style TargetType="AutoSuggestBox">
                 <Setter Property="MinHeight" Value="38"/>
                 <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Background" Value="{StaticResource SurfaceRaisedBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
             </Style>
 
         </ResourceDictionary>

@@ -24,13 +24,26 @@ public sealed class ActivationContractTests
             "installer",
             "wix",
             "Product.wxs"));
+        var payloadGenerator = File.ReadAllText(Path.Combine(
+            root,
+            "installer",
+            "New-WixPayload.ps1"));
 
         explorer.Should().Contain("\"UniversalConverterX.exe\"");
         registrar.Should().Contain("\"UniversalConverterX.exe\"");
         explorer.Should().NotContain("UniversalConverterX.UI.exe");
         registrar.Should().NotContain("UniversalConverterX.UI.exe");
+
+        // The MSI payload is generated from the clean staged tree rather than
+        // hand-listed in Product.wxs, so the published executable is resolved
+        // through the generator plus the shortcut/icon references that remain
+        // authored here.
+        payloadGenerator.Should().Contain("'$(var.PublishDir)'");
         wix.Should().Contain(
-            "Source=\"$(var.PublishDir)UniversalConverterX.exe\"");
+            "SourceFile=\"$(var.PublishDir)UniversalConverterX.exe\"");
+        wix.Should().Contain(
+            "Target=\"[INSTALLFOLDER]UniversalConverterX.exe\"");
+        wix.Should().Contain("<ComponentGroupRef Id=\"ReleasePayload\" />");
     }
 
     [Fact]

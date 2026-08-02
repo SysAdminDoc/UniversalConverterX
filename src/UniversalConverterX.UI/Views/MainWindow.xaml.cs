@@ -9,7 +9,7 @@ namespace UniversalConverterX.UI.Views;
 public sealed partial class MainWindow : Window
 {
     private bool _isSelectingNavigationItem;
-    private string _currentNavigationTag = "converter";
+    private string _currentNavigationTag = "home";
 
     private readonly List<NavSearchSuggestion> _searchSuggestions =
     [
@@ -99,18 +99,18 @@ public sealed partial class MainWindow : Window
             titleBar.ExtendsContentIntoTitleBar = true;
             titleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Tall;
 
-            // Match design system: transparent title-bar background, primary text,
-            // surface-light hover/pressed for system buttons.
-            titleBar.BackgroundColor = Microsoft.UI.Colors.Transparent;
-            titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+            // Keep the extended title bar visually continuous with the deep-ink
+            // workbench instead of exposing whatever window sits behind UCX.
+            titleBar.BackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x08, 0x0e, 0x16);
+            titleBar.InactiveBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x08, 0x0e, 0x16);
             titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
             titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
-            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
-            titleBar.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(0xff, 0x6d, 0x7d, 0x96);
-            titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x1f, 0x23, 0x38);
-            titleBar.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
-            titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x25, 0x2a, 0x38);
-            titleBar.ButtonPressedForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xe8, 0xec, 0xf3);
+            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xf3, 0xf7, 0xfc);
+            titleBar.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(0xff, 0x63, 0x71, 0x87);
+            titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x18, 0x25, 0x36);
+            titleBar.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xf3, 0xf7, 0xfc);
+            titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(0xff, 0x15, 0x21, 0x32);
+            titleBar.ButtonPressedForegroundColor = Windows.UI.Color.FromArgb(0xff, 0xf3, 0xf7, 0xfc);
         }
 
         App.Register(this);
@@ -123,7 +123,7 @@ public sealed partial class MainWindow : Window
         // Default landing — JumpList passes `--route <key>` as activation arg
         // (see App.ConfigureJumpListAsync); honour it on first activate.
         var route = ParseJumpListRoute(Environment.GetCommandLineArgs());
-        RequestNavigation(route ?? "converter");
+        RequestNavigation(route ?? "home");
     }
 
     private static string? ParseJumpListRoute(string[] argv)

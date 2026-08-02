@@ -4,11 +4,52 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Security;
+using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class ToolboxPage : Page
 {
+    private static readonly IReadOnlyDictionary<string, string> RouteEngines =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ai-bgremove"] = "alphacut",
+            ["ai-image-enhancer"] = "realesrgan",
+            ["ai-noise"] = "rnnoise",
+            ["ai-photo-restore"] = "gfpgan",
+            ["ai-portrait"] = "facerestore",
+            ["ai-stt"] = "whisper-stt",
+            ["ai-subtitle"] = "whisper-stt",
+            ["ai-tts"] = "edge-tts",
+            ["ai-video-enhancer"] = "realesrgan",
+            ["ai-vocal"] = "demucs",
+            ["ai-voice-changer"] = "voice-changer",
+            ["ai-watermark"] = "videosubtitleremover",
+            ["archive"] = "archive",
+            ["audio-compressor"] = "audio-compressor",
+            ["audio-converter"] = "audiopro",
+            ["auto-highlight"] = "scenedetect",
+            ["auto-reframe"] = "vertigo",
+            ["chapter-marks"] = "chaptermark",
+            ["disc-burn"] = "discburn",
+            ["document-converter"] = "docconvert",
+            ["downloader"] = "streamkeep",
+            ["ebook-converter"] = "ebookconvert",
+            ["font-converter"] = "fontconvert",
+            ["gif-maker"] = "gifstudio",
+            ["image-converter"] = "heicshift",
+            ["lip-reading"] = "lipsight",
+            ["ocr"] = "ocr",
+            ["pdf-tools"] = "pdftools",
+            ["recorder"] = "recordcast",
+            ["scene-detect"] = "scenedetect",
+            ["slideshow-maker"] = "slideshow",
+            ["subtitle-converter"] = "subconvert",
+            ["timeline-preview"] = "clipforge",
+            ["track-manager"] = "clipforge",
+            ["vmaf"] = "clipforge",
+        };
+
     public ObservableCollection<ToolboxTile> ImageTools { get; } = new();
     public ObservableCollection<ToolboxTile> VideoTools { get; } = new();
     public ObservableCollection<ToolboxTile> AiTools { get; } = new();
@@ -35,6 +76,7 @@ public sealed partial class ToolboxPage : Page
         DedupeTiles(DiscTools);
         DedupeTiles(OtherTools);
         DedupeTiles(PluginTools);
+        ApplyReleaseReadiness();
 
         ImageGrid.ItemsSource = ImageTools;
         VideoGrid.ItemsSource = VideoTools;
@@ -45,6 +87,107 @@ public sealed partial class ToolboxPage : Page
         OtherGrid.ItemsSource = OtherTools;
         PluginGrid.ItemsSource = PluginTools;
         PluginSection.Visibility = PluginTools.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void ApplyReleaseReadiness()
+    {
+        var load = SidecarReleaseCatalogLoader.FindAndLoad();
+        if (!load.Found)
+        {
+            // Source-tree and test launches intentionally keep their existing
+            // health behavior. Packaged releases always carry the catalog.
+            return;
+        }
+
+        var bundled = (Brush)Application.Current.Resources["AccentGreenBrush"];
+        var install = (Brush)Application.Current.Resources["AccentOrangeBrush"];
+        var unavailable = (Brush)Application.Current.Resources["AccentRedBrush"];
+        foreach (var tile in FirstPartyTiles())
+        {
+            var engine = EngineForRoute(tile.RouteKey);
+            if (engine is null || tile.StatusBadge is not "Ready")
+            {
+                continue;
+            }
+
+            tile.AvailabilityEngine = engine;
+            if (!load.IsValid)
+            {
+                tile.StatusBadge = "Unavailable";
+                tile.StatusBrush = unavailable;
+                tile.AvailabilityDetail =
+                    $"This package's sidecar inventory is invalid. {load.Error}";
+                continue;
+            }
+
+            if (!load.Catalog!.Engines.TryGetValue(engine, out var entry))
+            {
+                tile.StatusBadge = "Unavailable";
+                tile.StatusBrush = unavailable;
+                tile.AvailabilityDetail =
+                    $"{engine} is not declared in this package's sidecar inventory.";
+                continue;
+            }
+
+            switch (entry.Status)
+            {
+                case SidecarReleaseStatus.Bundled:
+                    tile.StatusBadge = "Bundled";
+                    tile.StatusBrush = bundled;
+                    tile.AvailabilityDetail =
+                        string.IsNullOrWhiteSpace(entry.Reason)
+                            ? $"{engine} is bundled for {load.Catalog.Architecture}."
+                            : entry.Reason;
+                    break;
+                case SidecarReleaseStatus.OnDemand:
+                    tile.StatusBadge = "Install";
+                    tile.StatusBrush = install;
+                    tile.AvailabilityDetail =
+                        string.IsNullOrWhiteSpace(entry.Reason)
+                            ? $"{engine} must be installed before use."
+                            : entry.Reason;
+                    break;
+                default:
+                    tile.StatusBadge = "Unavailable";
+                    tile.StatusBrush = unavailable;
+                    tile.AvailabilityDetail =
+                        string.IsNullOrWhiteSpace(entry.Reason)
+                            ? $"{engine} is unavailable for {load.Catalog.Architecture}."
+                            : entry.Reason;
+                    break;
+            }
+        }
+    }
+
+    private IEnumerable<ToolboxTile> FirstPartyTiles()
+    {
+        foreach (var group in new[]
+                 {
+                     ImageTools,
+                     VideoTools,
+                     AiTools,
+                     AudioTools,
+                     DocumentTools,
+                     DiscTools,
+                     OtherTools,
+                 })
+        {
+            foreach (var tile in group)
+            {
+                yield return tile;
+            }
+        }
+    }
+
+    private static string? EngineForRoute(string routeKey)
+    {
+        const string presetPrefix = "presets:";
+        if (routeKey.StartsWith(presetPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return routeKey[presetPrefix.Length..];
+        }
+
+        return RouteEngines.GetValueOrDefault(routeKey);
     }
 
     private void SeedPluginTiles()
@@ -387,7 +530,7 @@ public sealed partial class ToolboxPage : Page
     {
         if (e.ClickedItem is ToolboxTile tile)
         {
-            if (tile.StatusBadge == "Ready")
+            if (tile.StatusBadge is "Ready" or "Bundled")
             {
                 App.RequestNavigation(tile.RouteKey);
                 return;
@@ -397,10 +540,10 @@ public sealed partial class ToolboxPage : Page
                 Title: tile.Title,
                 Subtitle: tile.Description,
                 IconGlyph: tile.Glyph,
-                Headline: $"{tile.Title} is not available yet.",
-                Description: tile.PoweredBy is not null
+                Headline: $"{tile.Title} is not available in this build.",
+                Description: tile.AvailabilityDetail ?? (tile.PoweredBy is not null
                     ? $"Planned engine: {tile.PoweredBy}. Import, preview, export, and recovery are not wired yet."
-                    : "This tool is tracked, but the runnable workflow is not wired into this build.",
+                    : "This tool is tracked, but the runnable workflow is not wired into this build."),
                 StatusBadge: tile.StatusBadge,
                 PoweredBy: tile.PoweredBy);
 
@@ -416,10 +559,13 @@ public sealed class ToolboxTile
     public string Description { get; }
     public string Glyph { get; }
     public Brush AccentBrush { get; }
-    public string StatusBadge { get; }
-    public Brush StatusBrush { get; }
+    public string StatusBadge { get; set; }
+    public Brush StatusBrush { get; set; }
     public Visibility ShowAi { get; }
     public string? PoweredBy { get; }
+    public string? AvailabilityEngine { get; set; }
+    public string? AvailabilityDetail { get; set; }
+    public string ToolTipText => AvailabilityDetail ?? Description;
 
     public ToolboxTile(string routeKey, string title, string description, string glyph,
         Brush accentBrush, string statusBadge, Brush statusBrush, bool isAi, string? poweredBy)

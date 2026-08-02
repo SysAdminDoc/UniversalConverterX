@@ -41,7 +41,7 @@ NestedInstallerType: portable
 NestedInstallerFiles:
   - RelativeFilePath: UniversalConverterX.exe
     PortableCommandAlias: universalconverterx
-  - RelativeFilePath: ucx.exe
+  - RelativeFilePath: cli\ucx.exe
     PortableCommandAlias: ucx
 Installers:
   - Architecture: x64

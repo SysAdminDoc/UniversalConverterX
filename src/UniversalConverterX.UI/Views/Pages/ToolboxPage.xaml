@@ -15,7 +15,7 @@
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
                     CornerRadius="12"
                     AutomationProperties.Name="{Binding Title}"
-                    ToolTipService.ToolTip="{Binding Description}">
+                    ToolTipService.ToolTip="{Binding ToolTipText}">
                 <Grid RowSpacing="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

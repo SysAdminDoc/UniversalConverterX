@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,34 +9,42 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.UI.Services;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class HomePage : Page
 {
     private readonly List<HomeSearchSuggestion> _allSuggestions = [];
+    private readonly IHistoryService _history;
     private string? _primaryUpdateUrl;
+    private bool _historyAttached;
 
     public ObservableCollection<HomeActionTile> Actions { get; } = [];
-    public ObservableCollection<HomeAiFeatureTile> AiFeatures { get; } = [];
-    public ObservableCollection<HomeClusterTile> Clusters { get; } = [];
+    public ObservableCollection<HomeRecentActivityItem> RecentActivity { get; } = [];
 
     public HomePage()
     {
         InitializeComponent();
+        _history = App.Services.GetRequiredService<IHistoryService>();
         SeedDashboard();
         SeedSearch();
 
-        ActionsGrid.ItemsSource = Actions;
-        AiGrid.ItemsSource = AiFeatures;
-        ClustersGrid.ItemsSource = Clusters;
+        ActionsRepeater.ItemsSource = Actions;
+        RecentActivityList.ItemsSource = RecentActivity;
         TaskSearchBox.ItemsSource = _allSuggestions;
 
         Loaded += HomePage_Loaded;
+        Unloaded += HomePage_Unloaded;
     }
 
     private void HomePage_Loaded(object sender, RoutedEventArgs e)
     {
+        AttachHistory();
+        RefreshRecentActivity();
+
         // Item 7 Phase 2: read the cached update probe — never hits the network from here.
         // UpdateCheckService writes the cache opportunistically on app start when the
         // user's CheckForUpdates toggle is on; we just surface what's already there.
@@ -84,6 +94,38 @@ public sealed partial class HomePage : Page
         }
     }
 
+    private void HomePage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (!_historyAttached)
+            return;
+
+        _history.Recent.CollectionChanged -= HistoryRecent_CollectionChanged;
+        _historyAttached = false;
+    }
+
+    private void AttachHistory()
+    {
+        if (_historyAttached)
+            return;
+
+        _history.Recent.CollectionChanged += HistoryRecent_CollectionChanged;
+        _historyAttached = true;
+    }
+
+    private void HistoryRecent_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        RefreshRecentActivity();
+
+    private void RefreshRecentActivity()
+    {
+        RecentActivity.Clear();
+        foreach (var record in _history.Recent.Take(3))
+            RecentActivity.Add(HomeRecentActivityItem.FromRecord(record));
+
+        RecentEmptyState.Visibility = RecentActivity.Count == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
     private void UpdateBannerAction_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_primaryUpdateUrl)) return;
@@ -107,28 +149,18 @@ public sealed partial class HomePage : Page
         var cyan = (Brush)Application.Current.Resources["AccentCyanBrush"];
         var green = (Brush)Application.Current.Resources["AccentGreenBrush"];
         var orange = (Brush)Application.Current.Resources["AccentOrangeBrush"];
-        var yellow = (Brush)Application.Current.Resources["AccentYellowBrush"];
         var red = (Brush)Application.Current.Resources["AccentRedBrush"];
         var blueSurface = (Brush)Application.Current.Resources["SurfaceLightBrush"];
         var greenSurface = (Brush)Application.Current.Resources["SurfaceSoftBrush"];
+        var warmSurface = (Brush)Application.Current.Resources["SurfaceWarmBrush"];
+        var dangerSurface = (Brush)Application.Current.Resources["SurfaceDangerBrush"];
 
-        Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, PDFs, and 3D files.", "\uE895", green, greenSurface, "Ready", "Convert files", "converter"));
-        Actions.Add(new HomeActionTile("Video Enhancer", "Upscale, denoise, anime-sharpen, and face-enhance clips locally.", "\uE7B3", blue, blueSurface, "Ready", "Enhance video", "ai-video-enhancer"));
-        Actions.Add(new HomeActionTile("Compressor", "Compress video for web, email, and archive targets.", "\uE91F", cyan, blueSurface, "Ready", "Compress video", "compressor"));
-        Actions.Add(new HomeActionTile("Downloader", "Paste URLs, choose quality, and save to the local queue.", "\uE896", blue, blueSurface, "Ready", "Download media", "downloader"));
-        Actions.Add(new HomeActionTile("Recorder", "Capture fixed-duration desktop recordings with local FFmpeg processing.", "\uE7C8", red, blueSurface, "Ready", "Record screen", "recorder"));
-        Actions.Add(new HomeActionTile("Toolbox", "Open utilities for subtitles, watermarks, audio, discs, and metadata.", "\uE713", orange, greenSurface, "Mapped", "Browse tools", "toolbox"));
-
-        AiFeatures.Add(new HomeAiFeatureTile("Video Summarizer", "Create transcript-backed summaries from long recordings.", "\uE8D2", blue, "Planned", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("AI Subtitle & Translation", "Transcribe, translate, edit, export, and burn local captions.", "\uED1E", green, "Ready", "ai-subtitle"));
-        AiFeatures.Add(new HomeAiFeatureTile("Watermark Remover", "Inpaint selected logos, text, or objects.", "\uE71B", orange, "Planned", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Image Enhancer", "Sharpen, denoise, upscale, and restore photos locally.", "\uEB9F", cyan, "Ready", "ai-image-enhancer"));
-        AiFeatures.Add(new HomeAiFeatureTile("Noise Remover", "Reduce background noise in speech and camera audio.", "\uE767", blue, "Planned", "ai-lab"));
-        AiFeatures.Add(new HomeAiFeatureTile("Vocal Remover", "Split vocals and instrumentals for editing.", "\uEC4F", red, "Planned", "ai-lab"));
-
-        Clusters.Add(new HomeClusterTile("Create", "Edit and generate", "Trim clips, create subtitles, repair metadata, generate speech, and prepare chapters.", "\uE70F", green, greenSurface, "toolbox"));
-        Clusters.Add(new HomeClusterTile("Repair", "Clean up media", "Remove noise, isolate vocals, restore photos, and remove selected backgrounds or watermarks.", "\uE950", blue, blueSurface, "ai-lab"));
-        Clusters.Add(new HomeClusterTile("Export", "Prepare output", "Convert formats, compress files, extract frames, build GIFs, and prepare delivery presets.", "\uE8AB", orange, greenSurface, "toolbox"));
+        Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, and more.", "\uE895", green, greenSurface, "Convert files", "converter"));
+        Actions.Add(new HomeActionTile("Video Enhancer", "Upscale, denoise, anime-sharpen, and restore clips locally.", "\uE7B3", blue, blueSurface, "Enhance video", "ai-video-enhancer"));
+        Actions.Add(new HomeActionTile("Compressor", "Compress video for web, email, and archive targets.", "\uE91F", cyan, blueSurface, "Compress video", "compressor"));
+        Actions.Add(new HomeActionTile("Downloader", "Paste URLs, choose quality, and save to the local queue.", "\uE896", blue, blueSurface, "Download media", "downloader"));
+        Actions.Add(new HomeActionTile("Recorder", "Capture the desktop with local FFmpeg processing.", "\uE7C8", red, dangerSurface, "Record screen", "recorder"));
+        Actions.Add(new HomeActionTile("Toolbox", "Open utilities for subtitles, metadata, audio, discs, and more.", "\uE713", orange, warmSurface, "Browse tools", "toolbox"));
     }
 
     private void SeedSearch()
@@ -192,32 +224,86 @@ public sealed partial class HomePage : Page
             App.RequestNavigation(suggestion.RouteKey);
     }
 
-    private void ActionTile_Click(object sender, ItemClickEventArgs e)
+    private void WorkflowCard_Click(object sender, RoutedEventArgs e)
     {
-        if (e.ClickedItem is HomeActionTile tile)
-            App.RequestNavigation(tile.RouteKey);
+        if (sender is Button { Tag: string routeKey })
+            App.RequestNavigation(routeKey);
     }
 
-    private void AiTile_Click(object sender, ItemClickEventArgs e)
+    private async void BrowseFiles_Click(object sender, RoutedEventArgs e)
     {
-        if (e.ClickedItem is HomeAiFeatureTile tile)
-            App.RequestNavigation(tile.RouteKey);
+        var picker = new FileOpenPicker
+        {
+            ViewMode = PickerViewMode.List,
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+        };
+        picker.FileTypeFilter.Add("*");
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindowHandle);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+        var files = await picker.PickMultipleFilesAsync();
+        if (files is null || files.Count == 0)
+            return;
+
+        NavigateToConverter(files.Select(file => file.Path));
     }
 
-    private void ClusterTile_Click(object sender, ItemClickEventArgs e)
+    private void FileIntake_DragOver(object sender, DragEventArgs e)
     {
-        if (e.ClickedItem is HomeClusterTile tile)
-            App.RequestNavigation(tile.RouteKey);
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+            return;
+
+        e.AcceptedOperation = DataPackageOperation.Copy;
+        e.DragUIOverride.Caption = "Add to the conversion queue";
+        e.DragUIOverride.IsCaptionVisible = true;
+        e.DragUIOverride.IsGlyphVisible = true;
+        FileIntakeSurface.Background =
+            (Brush)Application.Current.Resources["AccentPrimarySoftBrush"];
+        FileIntakeSurface.BorderBrush =
+            (Brush)Application.Current.Resources["AccentPrimaryHoverBrush"];
     }
 
-    private void OpenConverter_Click(object sender, RoutedEventArgs e) =>
-        App.RequestNavigation("converter");
+    private void FileIntake_DragLeave(object sender, DragEventArgs e) =>
+        ResetFileIntakeSurface();
 
-    private void OpenAiLab_Click(object sender, RoutedEventArgs e) =>
-        App.RequestNavigation("ai-lab");
+    private async void FileIntake_Drop(object sender, DragEventArgs e)
+    {
+        ResetFileIntakeSurface();
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+            return;
 
-    private void OpenToolbox_Click(object sender, RoutedEventArgs e) =>
-        App.RequestNavigation("toolbox");
+        var items = await e.DataView.GetStorageItemsAsync();
+        NavigateToConverter(items.Select(item => item switch
+        {
+            StorageFile file => file.Path,
+            StorageFolder folder => folder.Path,
+            _ => "",
+        }));
+    }
+
+    private void ResetFileIntakeSurface()
+    {
+        FileIntakeSurface.Background =
+            (Brush)Application.Current.Resources["HeroSurfaceBrush"];
+        FileIntakeSurface.BorderBrush =
+            (Brush)Application.Current.Resources["AccentPrimaryBrush"];
+    }
+
+    private static void NavigateToConverter(IEnumerable<string> paths)
+    {
+        var normalized = paths
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (normalized.Count == 0)
+            return;
+
+        App.RequestNavigation("converter", new FileIntakeRequest(normalized));
+    }
+
+    private void OpenHistory_Click(object sender, RoutedEventArgs e) =>
+        App.RequestNavigation("history");
 
     private void OpenLogFolder_Click(object sender, RoutedEventArgs e)
     {
@@ -294,66 +380,55 @@ public sealed class HomeActionTile
     public string Glyph { get; }
     public Brush AccentBrush { get; }
     public Brush AccentSurfaceBrush { get; }
-    public string Badge { get; }
     public string ActionText { get; }
     public string RouteKey { get; }
-    public Visibility BadgeVisibility => string.IsNullOrWhiteSpace(Badge) ? Visibility.Collapsed : Visibility.Visible;
 
     public HomeActionTile(string title, string description, string glyph, Brush accentBrush,
-        Brush accentSurfaceBrush, string badge, string actionText, string routeKey)
+        Brush accentSurfaceBrush, string actionText, string routeKey)
     {
         Title = title;
         Description = description;
         Glyph = glyph;
         AccentBrush = accentBrush;
         AccentSurfaceBrush = accentSurfaceBrush;
-        Badge = badge;
         ActionText = actionText;
         RouteKey = routeKey;
     }
 }
 
-public sealed class HomeAiFeatureTile
+public sealed class HomeRecentActivityItem
 {
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string Glyph { get; set; }
-    public Brush AccentBrush { get; set; }
-    public string StatusText { get; set; }
-    public string RouteKey { get; set; }
+    public string Title { get; set; } = "";
+    public string Subtitle { get; set; } = "";
+    public string Timestamp { get; set; } = "";
+    public string StatusText { get; set; } = "";
+    public string Glyph { get; set; } = "";
+    public Brush StatusBrush { get; set; } = null!;
+    public Brush StatusSurfaceBrush { get; set; } = null!;
 
-    public HomeAiFeatureTile(string title, string description, string glyph, Brush accentBrush,
-        string statusText, string routeKey)
+    public static HomeRecentActivityItem FromRecord(HistoryRecord record)
     {
-        Title = title;
-        Description = description;
-        Glyph = glyph;
-        AccentBrush = accentBrush;
-        StatusText = statusText;
-        RouteKey = routeKey;
-    }
-}
+        var success = record.Success;
+        var displayPath = string.IsNullOrWhiteSpace(record.OutputPath)
+            ? record.SourcePath
+            : record.OutputPath;
+        var title = Path.GetFileName(displayPath);
+        if (string.IsNullOrWhiteSpace(title))
+            title = string.IsNullOrWhiteSpace(record.Action) ? "Conversion job" : record.Action;
 
-public sealed class HomeClusterTile
-{
-    public string Title { get; set; }
-    public string Subtitle { get; set; }
-    public string Description { get; set; }
-    public string Glyph { get; set; }
-    public Brush AccentBrush { get; set; }
-    public Brush AccentSurfaceBrush { get; set; }
-    public string RouteKey { get; set; }
-
-    public HomeClusterTile(string title, string subtitle, string description, string glyph,
-        Brush accentBrush, Brush accentSurfaceBrush, string routeKey)
-    {
-        Title = title;
-        Subtitle = subtitle;
-        Description = description;
-        Glyph = glyph;
-        AccentBrush = accentBrush;
-        AccentSurfaceBrush = accentSurfaceBrush;
-        RouteKey = routeKey;
+        return new HomeRecentActivityItem
+        {
+            Title = title,
+            Subtitle = string.Join(" · ", new[] { record.Engine, record.Action }
+                .Where(value => !string.IsNullOrWhiteSpace(value))),
+            Timestamp = record.Timestamp.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+            StatusText = success ? "Completed" : "Needs attention",
+            Glyph = success ? "\uE73E" : "\uE783",
+            StatusBrush = (Brush)Application.Current.Resources[
+                success ? "AccentGreenBrush" : "AccentRedBrush"],
+            StatusSurfaceBrush = (Brush)Application.Current.Resources[
+                success ? "SurfaceSoftBrush" : "SurfaceDangerBrush"],
+        };
     }
 }
 

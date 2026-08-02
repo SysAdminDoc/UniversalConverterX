@@ -18,6 +18,7 @@ UI_ROOT = REPO / "src" / "UniversalConverterX.UI"
 STRINGS_ROOT = UI_ROOT / "Strings"
 LOCALES = ("en-US", "de-DE", "fr-FR", "es-ES", "pl-PL", "zh-Hans")
 CODE_RESOURCES = {
+    "ConverterPage_QueueSortEstimateButton.Content": "Est. output",
     "Core_ConversionCancelled": "Conversion was cancelled",
     "Core_ConverterExecutableNotFound": "Converter executable was not found: {0}",
     "Core_ConversionTimedOut": "Conversion timed out after {0}.",
@@ -32,6 +33,9 @@ CODE_RESOURCES = {
     "Core_PostActionFailed": "Conversion succeeded, but the post-conversion source action failed: {0}",
     "Core_StartingConversion": "Starting conversion...",
     "Core_UnknownError": "Unknown error",
+    "MainWindow_Item_001.Title": "UniversalConverter X",
+    "ProgressWindow_Item_001.Title": "Converting - UniversalConverter X",
+    "SettingsWindow_Item_001.Title": "Settings - UniversalConverter X",
 }
 LOCALIZABLE_PROPERTIES = {
     "Text": "Text",

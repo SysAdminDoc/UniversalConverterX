@@ -1,164 +1,242 @@
 # UniversalConverterX — Product Roadmap
 
-**Status:** v2.33.0 · 212 sidecar engines · 300+ presets · 53 UI pages
-**Last updated:** 2026-07-21
+**Status:** v2.33.0 · 212 sidecar engines · 459 preset files · 53 UI pages
+**Last updated:** 2026-07-29
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
 Shipped work is recorded in [`CHANGELOG.md`](CHANGELOG.md).
 
-**Design charter:** Offline-first. No cloud. No accounts. No telemetry.
-Windows 10 21H2+. Beat every competitor on: format coverage, batch UX,
-programmability (CLI + REST + PS module), and AI depth.
+**Design charter:** Offline-first. No cloud fallback. No accounts. No telemetry. Windows 10 21H2+. Preserve user files and metadata; expose the same trusted engine behavior through UI, CLI, REST, and PowerShell.
 
 ---
 
 ## Legend
 
-| Symbol | Meaning |
-|--------|---------|
-| **Now** | Ship next (v2.21–v2.22). High certainty, well-scoped. |
-| **Next** | v2.23–v2.27 window. Design complete or dependencies blocked on Now items. |
-| **Later** | v2.27+. Higher effort, lower urgency, or needs community signal. |
-| **UC** | Under Consideration — needs more investigation before placement. |
-| **Impact** | User value 1 (niche) – 5 (universal). |
-| **Effort** | Engineering cost 1 (hours) – 5 (weeks of cross-cutting work). |
+| Tier | Meaning |
+|------|---------|
+| **P0 / Now** | Release-blocking security, data-safety, activation, or artifact-integrity work |
+| **P1 / Next** | Next reliability, accessibility, testing, and workflow-foundation work |
+| **P2 / Later** | Product depth, performance, compatibility, and upgrade work after P1 foundations |
+| **P3 / Later** | Lower-urgency specialist capability or consolidation |
+| **UC** | Under Consideration; evidence or upstream capability is not yet sufficient |
 
 ---
 
 ## Under Consideration
 
+- [ ] UC — Item 134 — Prove Opus 1.6 HD interoperability before exposing 96 kHz
+  Why: libopus 1.6 ships experimental 96 kHz Opus HD, but UCX's bundled FFmpeg/libopus path reports at most 48 kHz and the scalable-quality extension remains an Internet-Draft.
+  Evidence: Opus 1.6 official release/demo; `draft-valin-opus-scalable-quality-extension-02`; `FFmpegConverter`.
+  Touches: FFmpeg capability probe, audio fixtures, `AudioConverterPage`.
+  Acceptance: a pinned build demonstrates encode/decode/remux interoperability at 96 kHz across UCX, FFmpeg, and at least two independent players before any user-facing option is enabled.
+  Complexity: M
+
 ---
 
 ## Research-Driven Additions
 
-_2026-07-20 research pass. IDs continue from Item 120 (max used, in archived PHASE4 notes). Evidence in [`RESEARCH.md`](RESEARCH.md)._
+_2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs continue at Item 147. Evidence is in [`RESEARCH.md`](RESEARCH.md)._
 
-### P0 — Security / data-safety (root-cause)
+### P1 — Reliability, trust, accessibility, and test foundations
 
-### P1 — Reliability / trust + quick wins
-
-- [ ] P1 — Item 124 — Runtime UI-automation smoke harness for page init
-  Why: the v2.31.4 nine-page launch-NRE cluster + three window `x:Uid` XamlParseExceptions were all caught by hand; a headless drive-and-screenshot gate would catch them pre-ship. Single biggest quality gap.
-  Evidence: RESEARCH.md Architecture Assessment; `src/UniversalConverterX.UI/Views/Pages/*.xaml.cs` init handlers; existing static `tests/uia_contract/check_uia.py` is not runtime.
-  Touches: new `tests/` UI-automation project (WinAppDriver/UIA or offscreen host), `build.ps1` gate.
-  Acceptance: CI/build launches the app offscreen, navigates all 53 pages, asserts no unhandled exception, captures a screenshot per page; a reintroduced page-init NRE fails the gate.
+- [ ] P1 — Item 124 — Runtime UI-automation smoke harness for page and state initialization
+  Why: page-init NREs and window `x:Uid` parse failures were previously found manually; static UIA inspection cannot prove runtime navigation, reflow, focus, or theme behavior.
+  Evidence: `src/UniversalConverterX.UI/Views/Pages/*.xaml.cs`; `tests/uia_contract/check_uia.py`; Microsoft Appium/UIA and accessibility-testing guidance.
+  Touches: new runtime UI test project, app test hooks, `build.ps1`.
+  Acceptance: Appium/UIA launches the x64 app, navigates all 53 pages in light/dark modes, exercises deterministic empty/loading/error paths, captures failure screenshots, and fails on unhandled exception or unreachable primary focus; reusable theme/scale hooks support Item 161.
   Complexity: L
 
-- [ ] P1 — Item 126b — Wire history replay into the UI
-  Why: the Core accessors shipped (`HistoryStore.GetRerunRequestAsync` for a row, `GetLastUsedRerunAsync` for "apply last used", both tested); the remaining piece is the History "Apply settings" button and an "Apply last used" affordance on convert/compress pages that pre-fill from the returned `ConversionRerunRequest`.
-  Evidence: `HistoryStore.GetRerunRequestAsync`/`GetLastUsedRerunAsync`; `ConversionRerunRequest`.
-  Touches: History page + convert/compress pages in `.UI`.
-  Acceptance: "Apply settings" from a row pre-fills the page; "Apply last used" pre-fills from the most recent replayable job; ViewModel test.
-  Complexity: S
-
-- [ ] P1 — Item 128b — Surface per-track keep/drop toggles in the Converter preflight UI
-  Why: the Core `-map` selection + CLI flags shipped (v2.32.x); the remaining piece is the preflight-table toggle UI wired to `AudioTrackSelection`/`SubtitleTrackSelection`.
-  Evidence: `FFmpegConverter.BuildStreamMapArgs`; `ConversionOptions.AudioTrackSelection`; `ucx convert --audio-tracks/--subtitle-tracks`.
-  Touches: Converter preflight table in `.UI`.
-  Acceptance: preflight lists each input stream with a keep/drop toggle bound to the selection lists; default preserves all.
-  Complexity: S
-
-### P2 — Formats, codecs, preset ergonomics
-
-- [ ] P2 — Item 130b — Offer detected HW encoders in the Compressor/Convert UI
-  Why: the runtime detection shipped (`FfmpegEncoderProbe`, live-verified detecting av1_amf/av1_qsv/hevc_qsv/NVENC via `ucx encoders`); the remaining piece is populating the UI encoder dropdown from the probe and passing the chosen encoder through.
-  Evidence: `FfmpegEncoderProbe.Probe`; `ucx encoders`; `HardwareAcceleration` enum.
-  Touches: Compressor/Convert encoder selection in `.UI`.
-  Acceptance: the encoder dropdown lists the probe's detected HW encoders; selecting one routes it through FFmpeg; NVENC-only machines are unchanged.
-  Complexity: S
-
-- [ ] P2 — Item 132b — Wire queue search + clone into the queue/History UI
-  Why: the Core primitives shipped and are tested (`BatchQueueOperations.Search` filters jobs by filename/engine/status/error; `CloneAsNew` produces a fresh re-queueable job without mutating the original); the remaining piece is the search box + "open copy as new settings" action in the UI.
-  Evidence: `BatchQueueOperations.Search`/`CloneAsNew`.
-  Touches: queue/History UI in `.UI`.
-  Acceptance: a search box filters the queue via `Search`; a clone action calls `CloneAsNew` and adds it; ViewModel test.
-  Complexity: S
-
-- [ ] P2 — Item 133 — Read MP4/MOV track names from `udta` on remux
-  Why: metadata fidelity — mkvmerge v100 now reads track names from MP4 user-data atoms; UCX should preserve them through remux.
-  Evidence: MKVToolNix v100 NEWS.md.
-  Touches: `FFmpegConverter.cs` / probe layer, remux path (Item 125).
-  Acceptance: remuxing an MP4/MOV with named tracks preserves the names on output; verified against a fixture with `udta` track names.
-  Complexity: S
-
-- [ ] P2 — Item 134 — Opus 1.6 "HD" (96 kHz) + libopus floor bump
-  Why: libopus 1.6 adds 96 kHz Opus HD, band-width extension, and LACE/NoLACE + DRED speech enhancement — free quality wins from a floor bump plus one exposed option.
-  Evidence: Opus 1.6 release (Phoronix / opus-codec.org).
-  Touches: audio sidecar(s), Opus encode option in `.UI`, dependency floor.
-  Acceptance: Opus HD (48/96 kHz) selectable; encoded output reports the expected sample rate; DRED path documented; floor bumped to 1.6.x.
-  Complexity: S
-
-- [ ] P2 — Item 136 — KEPUB output + KFX input + KCC comic pipeline for ebook/comic conversion
-  Why: Calibre 9.11 supports KEPUB in/out and KFX input; KCC produces device-optimized comics — extends the ebook/archive story. Format conversion only; no DeDRM.
-  Evidence: Calibre 9.11 conversion docs; Kindle Comic Converter (github.com/ciromattia/kcc).
-  Touches: `tools/ebookconvert/`, a new comic sidecar, presets.
-  Acceptance: EPUB↔KEPUB and KFX→EPUB convert successfully; CBZ/CBR→device-profiled EPUB/MOBI works; DRM-protected inputs are rejected with a clear message (no DeDRM shipped).
+- [ ] P1 — Item 152 — Make the canonical Test target aggregate every existing local gate
+  Why: on 2026-07-29, `build.ps1 -Target Test` runs Core tests and VideoScaler smoke only, leaving Python, sidecar, localization, UIA, packaging, and dependency failures outside the release contract.
+  Evidence: `build.ps1:86-109`; `tests/sidecar_contract/`; `tests/uia_contract/`; `tools/localization/`; `.NET` and PyPA audit guidance.
+  Touches: `build.ps1`, test scripts, release compatibility/dependency checks.
+  Acceptance: one fail-fast x64 command runs Core, Python unit/syntax, 212-sidecar contract/integrity, localization, static UIA, Item 124 runtime UI, staged-artifact, NuGet vulnerability, reviewed-deprecation, lock, and SBOM reconciliation gates with a machine-readable summary and expiring allowlist entries.
   Complexity: M
 
-### P2/P3 — Local AI engines (SHA-256-pinned, consent-gated, kill-switchable)
-
-- [ ] P2 — Item 137 — RIFE 4.25+ frame-interpolation sidecar
-  Why: 30→60/120 fps interpolation is a common creator request; RIFE runs locally (ncnn/Vulkan or CUDA); Video2X/SVFI validate the design.
-  Evidence: Video2X 6.x; SVFI model-spec.
-  Touches: new `tools/` interpolation sidecar, AI Lab page, model download (SHA-256 pinned).
-  Acceptance: a clip interpolates to a target fps with pinned-model download + consent gate + `UCX_*=0` kill-switch honored; falls back cleanly when no GPU.
+- [ ] P1 — Item 153 — Contain sidecar process trees and validate output boundaries
+  Why: untrusted files reach 212 executables, but the shared runner has no Job Object, process/memory limit, private temp root, or common canonical output enforcement.
+  Evidence: `SidecarRunner.cs`; `ServeCommand.cs:128-188`; ImageMagick security policy; ConvertX 0.18.0 path-traversal fix.
+  Touches: `SidecarRunner`, native process-containment helper, REST/native launch paths, malicious contract fixtures.
+  Acceptance: child processes die with the job/app, configured process/memory/time limits are enforced, private temp work is cleaned, launch and reported-output paths are canonicalized under the user-approved destination, and traversal/symlink/reparse fixtures are rejected before finalization.
   Complexity: L
 
-- [ ] P2 — Item 138 — Kokoro-82M TTS engine option
-  Why: Apache-2.0, 82M params, CPU-realtime, 54 voices — best license/quality/hardware balance for the existing TTS sidecar.
-  Evidence: Kokoro TTS local-setup writeups.
-  Touches: `tools/voice-changer`/TTS sidecar, model pack (SHA-256 pinned).
-  Acceptance: Kokoro selectable as a TTS engine, produces audio on CPU without GPU, pinned model + consent gate; existing engine unaffected.
+- [ ] P1 — Item 154 — Centralize NDJSON progress and immutable job provenance
+  Why: the runner accepts arbitrary numeric percentages/ETA and pages interpret progress independently; users cannot reproduce which preset, binary, fallback, or arguments produced an output.
+  Evidence: `SidecarRunner.cs:290-304`; Tdarr issue 1236; File Converter v2.2; Unmanic 0.4.0.
+  Touches: shared progress model, `PersistedBatchJob`, `HistoryStore`, queue/history UI, diagnostics export.
+  Acceptance: progress is finite, clamped, non-regressing, reaches 100% on verified success, and expires stale ETA; each job stores redacted args, preset/hash, executable version/hash, input identity, capability/fallback decision, and output probe summary.
   Complexity: M
 
-- [ ] P2 — Item 139 — BiRefNet background-removal backend for alphacut
-  Why: BiRefNet keeps hair/fur edges that rembg/ISNet lose; exposed by rembg v2 as `birefnet-general`. Edge-fidelity upgrade on an existing sidecar.
-  Evidence: BiRefNet writeups; rembg v2.
-  Touches: `tools/alphacut/`, model pack (~930MB, pinned).
-  Acceptance: alphacut offers a BiRefNet backend selectable in UI; pinned-model + consent gate; default rembg path unchanged.
+- [ ] P1 — Item 155 — Add a media metadata and output-fidelity regression corpus
+  Why: competitors repeatedly regress language labels, track names, attachments, color data, and fallback selection; UCX's broad claims need fixture proof.
+  Evidence: Shutter issue 228; LosslessCut 3.69.0; VidCoder 12.23; MKVToolNix v100; Netflix VMAF; C2PA security considerations.
+  Touches: `FFmpegConverter`, native converters, representative sidecars, `ffprobe` comparator, staged-artifact tests.
+  Acceptance: fixed fixtures round-trip named/language-tagged audio/subtitles, dispositions, chapters, attachments, rotation, HDR/color, cover art, C2PA/UltraHDR metadata, malformed inputs, cancellation, and output duration/streams without mutating sources.
   Complexity: M
 
-- [ ] P2 — Item 140 — Surya OCR + Marker PDF→Markdown pipeline
-  Why: Surya (90+ langs, strong olmOCR-bench) + Marker give deterministic layout/table/equation extraction to Markdown — upgrades subocr and adds a doc→Markdown converter.
-  Evidence: Surya/Marker (datalab); OSS-OCR roundups.
-  Touches: `tools/subocr` (or new doc sidecar), a new document converter surface.
-  Acceptance: a scanned PDF converts to structured Markdown (headings/tables preserved) fully offline; pinned models; batch-capable.
-  Complexity: L
-
-- [ ] P3 — Item 141 — Speaker diarization in whisper-stt transcription
-  Why: Shutter 20.2 added speaker-ID; pairs local pyannote/NeMo diarization with the existing whisper-stt sidecar.
-  Evidence: Shutter Encoder 20.2 changelog.
-  Touches: `tools/whisper-stt`, subtitle output format, model pack.
-  Acceptance: transcripts optionally include speaker labels; runs offline with pinned models; toggle off by default.
-  Complexity: L
-
-- [ ] P3 — Item 142 — GPU-gated restore tier: SeedVR2 / DiffBIR (denoise + upscale)
-  Why: modern one-step diffusion restoration for old/noisy footage and stills, runnable on the dev's RTX; local equivalent of Topaz Starlight (which is cloud/paywalled).
-  Evidence: SeedVR2 / DiffBIR / SUPIR repos; AI-restoration roundups.
-  Touches: new/existing enhance sidecar, AI Lab, pinned models, GPU capability probe.
-  Acceptance: a restore pass runs on a CUDA GPU with pinned model + consent gate, degrades gracefully (clear message) without a supported GPU; no cloud calls.
+- [ ] P1 — Item 156 — Introduce a durable app-scoped job coordinator and job center
+  Why: dozens of pages own cancellation/process state and only Converter persists its queue, so navigation, restart recovery, retry, and preflight behavior vary by workflow.
+  Evidence: page-level `CancellationTokenSource` usage; `ConverterPage`/`BatchQueueStore`; Adobe Media Encoder, Apple Compressor, UniConverter, and Topaz queue behavior.
+  Touches: new UI/Core job coordinator, queue store schema/migration, pages, navigation shell, history.
+  Acceptance: jobs survive page navigation; queued jobs restore after restart and formerly running jobs return as interrupted/retryable; cancel/retry/skip work from one job center; preflight separates blocking errors from warnings for tool/model/input/output/free-space/capability checks.
   Complexity: XL
 
-- [ ] P3 — Item 143 — DDColor / ColorMNet colorization quality tier
-  Why: better temporal stability than the current Zhang CPU model in the colorize sidecar (vs-deoldify bundles these).
-  Evidence: vs-deoldify (github.com/dan64/vs-deoldify).
-  Touches: `tools/colorize`, model packs (pinned).
-  Acceptance: DDColor/ColorMNet selectable as a quality tier; pinned model + consent gate; existing CPU path retained as default/fallback.
-  Complexity: L
-
-### P3 — Capability + debt
-
-- [ ] P3 — Item 144 — Live/dynamic DASH download support
-  Why: `dash.py` logs dynamic MPD (`type=dynamic`) as unsupported — live streams silently fail.
-  Evidence: `tools/streamkeep/streamkeep/dash.py:55`.
-  Touches: `tools/streamkeep/streamkeep/dash.py`, downloader tests.
-  Acceptance: a live/dynamic MPD downloads a bounded segment window (or clearly reports the recording semantics) instead of the current unsupported-log.
+- [ ] P1 — Item 158 — Route Console and Shell preset parsing through Core `PresetDocument`
+  Why: three XML readers enforce different validation and path semantics, creating a security/compatibility drift point.
+  Evidence: `Core/Utilities/PresetDocument.cs`; `Console/Presets/ConversionPreset.cs`; `ShellExtension/Presets/PresetReader.cs`.
+  Touches: Core adapter model, Console and Shell preset readers, shared fixture tests.
+  Acceptance: UI, CLI, REST, PowerShell, and Explorer accept/reject the same valid, future-schema, XXE, traversal, invocation-mode, and output-template fixtures with one diagnostic vocabulary.
   Complexity: M
 
-- [ ] P3 — Item 146 — Complete shared sidecar `find_ffmpeg`/`emit` consolidation
-  Why: `tools/_lib/ucx_sidecar.py` centralized the protocol/runtime/timeout but per-sidecar boilerplate remains across 212 engines; finishing it reduces drift and CVE-patch surface.
-  Evidence: RESEARCH.md Architecture; `tools/_lib/ucx_sidecar.py`.
-  Touches: `tools/_lib/`, per-sidecar `sidecar.py` files.
-  Acceptance: sidecars import shared discovery/emit helpers rather than re-declaring them; contract gate still passes for all 212.
+- [ ] P1 — Item 159 — Make batch rename transactional and undoable
+  Why: the claimed two-pass algorithm performs sequential moves and can leave partial results or fail cycles.
+  Evidence: `BatchRenamePage.xaml.cs:318-343`; LosslessCut undo/redo behavior.
+  Touches: batch-rename planner/journal, UI preview, recovery store, tests.
+  Acceptance: swaps/cycles use a collision-safe temporary phase; a failure rolls back the whole set; an atomic journal supports restart recovery and one-click undo; source identity and timestamps are fixture-tested.
+  Complexity: M
+
+- [ ] P1 — Item 160 — Localize imperative runtime copy and add pseudo-localization
+  Why: XAML resource parity is strong, but 54 C# files contain 493 direct user-visible assignments and only four `AppLocalizer` calls.
+  Evidence: `src/UniversalConverterX.UI/Views/**/*.xaml.cs`; Microsoft globalization guidance; File Converter/Shutter localization history.
+  Touches: `.resw` files, `AppLocalizer`, code-string extraction/formatting contract, locale tests.
+  Acceptance: no user-visible status/error/dialog literal remains in code outside a narrow documented allowlist; formatted/plural values use resources; pseudo-locale UI automation finds clipping, missing keys, or fallback English.
   Complexity: L
 
+- [ ] P1 — Item 161 — Establish accessible status, keyboard, contrast, and reflow primitives
+  Why: the UI has three live regions, no accelerator/access-key infrastructure, no adaptive states or high-contrast resources, 54 wide fixed widths, and subtle text below 4.5:1 contrast.
+  Evidence: `App.xaml`; `Views/**/*.xaml`; Microsoft accessibility checklist/text/layout guidance; WCAG 2.2 status messages.
+  Touches: shared XAML resources/components, shell/pages, Item 124 runtime tests.
+  Acceptance: progress/success/error changes are announced without focus theft; core actions have documented accelerators; all pages pass keyboard, Narrator, high-contrast, 4.5:1 text, 225% scale, and narrow-window reflow checks.
+  Complexity: XL
+
+- [ ] P1 — Item 162 — Implement or remove every persisted setting
+  Why: accent, minimize-to-tray, start-minimized, and completion-sound values are loaded/saved but have no runtime consumers, undermining settings trust.
+  Evidence: `SettingsWindow.xaml.cs`; `ConverterXOptions.cs`; repository-wide consumer scan.
+  Touches: app/window lifecycle, notification service, theme resources, settings schema/migrations/tests.
+  Acceptance: each visible setting has an observable tested effect immediately or after clearly stated restart; unused options are removed through a versioned migration and no-op settings fail a contract test.
+  Complexity: M
+
+- [ ] P1 — Item 157 — Replace duplicated discovery lists with one stable workflow catalog
+  Why: Main, Home, Toolbox, Presets, and Universal Convert diverge, and Toolbox deduplication by route removes distinct tasks sharing the same destination.
+  Evidence: `MainWindow.xaml.cs`; `HomePage.xaml.cs`; `ToolboxPage.DedupeTiles`; Adobe/Apple/Topaz preset browsers.
+  Touches: new catalog model/service, all discovery/search surfaces, sidecar health, resources.
+  Acceptance: every task has a stable ID independent of route, localized title/search metadata, input/output capabilities, readiness, favorite/recent state, and local/one-time-download/network disclosure; all surfaces consume the same catalog and no ClipForge task disappears.
+  Complexity: M
+
+- [ ] P1 — Item 126b — Wire history replay into the UI
+  Why: Core replay accessors are shipped and tested; users still lack History “Apply settings” and page-level “Apply last used” affordances.
+  Evidence: `HistoryStore.GetRerunRequestAsync`; `GetLastUsedRerunAsync`; `ConversionRerunRequest`.
+  Touches: History, Converter, and Compressor pages.
+  Acceptance: a history row or latest replayable job pre-fills the destination page without starting work; ViewModel tests cover missing presets/tools.
+  Complexity: S
+
+- [ ] P1 — Item 128b — Surface per-track keep/drop controls in Converter preflight
+  Why: Core and CLI stream selection shipped, but the preflight UI cannot control it.
+  Evidence: `FFmpegConverter.BuildStreamMapArgs`; `ConversionOptions.AudioTrackSelection`/`SubtitleTrackSelection`; Shutter issue 228.
+  Touches: Converter preflight table and job snapshot.
+  Acceptance: named/language-tagged streams show keep/drop controls, default to preserve all, persist into the job snapshot, and pass Item 155 fixtures.
+  Complexity: S
+
+### P2 — Product depth, performance, and compatibility
+
+- [ ] P2 — Item 130b — Offer capability-gated hardware encoders and safe fallback
+  Why: runtime detection exists, but UI selection must show why a device/preset is unavailable and snapshot the actual encoder/fallback used.
+  Evidence: `FfmpegEncoderProbe`; HandBrake preset gating; FileFlows fallback; VidCoder 12.23; FFmpeg 8.1 D3D12/Vulkan capabilities.
+  Touches: Converter/Compressor encoder UI, job preflight/provenance, diagnostics.
+  Acceptance: only probed encoders appear enabled; disabled choices explain driver/tool/VRAM requirements; a tested per-job software fallback preserves requested scale/deinterlace and is recorded in history.
+  Complexity: S
+
+- [ ] P2 — Item 132b — Wire queue search and clone into queue/History UI
+  Why: tested Core primitives exist, while professional queues make warnings, prior jobs, and copied settings searchable.
+  Evidence: `BatchQueueOperations.Search`/`CloneAsNew`; MKVToolNix v100.
+  Touches: queue and History UI.
+  Acceptance: search filters filename/engine/status/error, and “open copy as new settings” creates a fresh job without mutating the original.
+  Complexity: S
+
+- [ ] P2 — Item 133 — Preserve MP4/MOV `udta` track names on remux
+  Why: named-track fidelity remains incomplete and MKVToolNix v100 now imports these names.
+  Evidence: MKVToolNix v100; Item 155 fixture matrix.
+  Touches: probe/remux layer and `FFmpegConverter`.
+  Acceptance: MP4/MOV remux preserves `udta` audio/subtitle track names verified by independent probe.
+  Complexity: S
+
+- [ ] P2 — Item 136 — Add KEPUB interchange and a governed KCC comic pipeline
+  Why: KFX input already exists; remaining value is EPUB↔KEPUB plus device-profiled comic output with explicit protected-input rejection.
+  Evidence: `CalibreConverter.cs`; `tools/ebookconvert/sidecar.py`; Calibre/KCC documentation.
+  Touches: ebook/comic sidecars, presets, readiness catalog.
+  Acceptance: EPUB↔KEPUB and CBZ/CBR→device-profiled EPUB/MOBI pass fixtures; protected KFX/Kindle inputs fail with a clear no-DeDRM message.
+  Complexity: M
+
+- [ ] P2 — Item 137 — Promote existing ClipForge RIFE into the managed workflow contract
+  Why: `rife-ncnn-vulkan` already works in legacy ClipForge, but it is not governed by the main catalog, queue, artifact, and fallback contracts.
+  Evidence: `tools/clipforge/clipforge.py:163-164,935-1010`; Video2X/RIFE precedent.
+  Touches: managed sidecar operation/preset, workflow catalog, artifact manifest, Video Enhancer UI.
+  Acceptance: a catalog-visible job interpolates to a target FPS through the app-scoped queue with a pinned runtime, GPU readiness reason, cancel/retry, and source-preserving output validation.
+  Complexity: M
+
+- [ ] P2 — Item 163 — Virtualize Toolbox, Presets, and History
+  Why: nested grids and fully materialized lists scale poorly at 459 presets and the retained-history ceiling.
+  Evidence: `ToolboxPage.xaml`; `PresetsPage.xaml`; `HistoryPage.xaml`.
+  Touches: list/repeater layouts, incremental data sources, search debounce, performance tests.
+  Acceptance: only visible containers are realized; scrolling/filtering 459 presets and 500 history rows remains responsive; cold-navigation and memory budgets are recorded in tests.
+  Complexity: M
+
+- [ ] P2 — Item 164 — Add representative sample render and synchronized comparison
+  Why: users need evidence before committing to expensive compression/restoration settings, and UCX already computes VMAF.
+  Evidence: Movavi sample conversion; Topaz/Apple preview; StaxRip issue 702; `VmafAnalysisPage`.
+  Touches: Compressor/Enhancer job builder, preview cache, `VmafAnalysisPage`.
+  Acceptance: users render a bounded representative segment, compare source/output with linked seek or split view, see estimated size/time plus VMAF summary, and promote the exact settings into a full job.
+  Complexity: M
+
+- [ ] P2 — Item 165 — Version plugin and sidecar host-compatibility manifests
+  Why: plugin schema validates trust but not minimum/maximum host or capability contracts, while built-in sidecar manifests omit schema and engine versions.
+  Evidence: `PluginTrustService.CurrentSchemaVersion`; `tools/*/ucx.sidecar.json`; FileFlows plugin/server compatibility.
+  Touches: plugin and sidecar schemas, discovery/readiness service, CLI diagnostics, compatibility tests.
+  Acceptance: manifests declare schema, engine version, min/max host, capabilities, architecture, tools/models, and migration behavior; incompatible extensions are quarantined with an actionable reason before execution.
+  Complexity: M
+
+- [ ] P2 — Item 166 — Enforce documentation and supported-platform truth
+  Why: README links missing CONTRIBUTING guidance and conflicts with project/MSIX/WiX/runtime floors; stale changelog/roadmap state has repeatedly survived releases.
+  Evidence: `README.md:112-113,258-259,441`; `src/UniversalConverterX.UI/UniversalConverterX.UI.csproj`; `installer/msix/Package.appxmanifest`; `installer/wix/Product.wxs`; version-consistency tests.
+  Touches: README contribution/platform sections, manifests, installer checks, changelog/roadmap validation.
+  Acceptance: one tested matrix states OS, architecture, package type, runtime, sidecar availability, migration, and unsigned-install behavior; the missing CONTRIBUTING link is removed or replaced in README, and broken local links, duplicate Unreleased headings, completed roadmap rows, and conflicting version/floor claims fail the release gate.
+  Complexity: S
+
+- [ ] P2 — Item 167 — Service .NET packages and validate Windows App SDK 2.3.1
+  Why: UCX repeats Microsoft 10.0.9 versions across projects while .NET 10.0.10 is a security servicing release, and Windows App SDK 2.3.1 supersedes the 2.2.0 UI/runtime smoke dependency.
+  Evidence: project package references; .NET 10.0.10 release notes; Windows App SDK downloads; live 2026-07-29 outdated-package audit.
+  Touches: central package-version props, Core/Console/UI/Shell/tests, installer runtime checks, Items 124 and 152.
+  Acceptance: Microsoft 10.0.x packages resolve centrally to 10.0.10; UI and VideoScaler use 2.3.1; restore/build/Core tests/runtime page smoke/publish/portable/MSI/MSIX checks pass with no unsupported-OS or activation regression.
+  Complexity: M
+
+### P2/P3 — Governed local AI capability
+
+- [ ] P3 — Item 141 — Finish governed offline speaker diarization output
+  Why: `whisper-stt --diarize` assigns speakers in memory but depends on an HF token/cache and does not provide a pinned offline pack, complete writers, or first-class UI.
+  Evidence: `tools/whisper-stt/sidecar.py:332,381-405`; pyannote offline guidance; Shutter 20.2.
+  Touches: whisper sidecar, model-pack manifest/downloader, TXT/SRT/VTT/JSON writers, transcription UI.
+  Acceptance: after explicit model terms/consent, a revision/hash-pinned local pack works air-gapped; every selected writer preserves speaker labels; toggle is off by default and no telemetry/network call occurs during inference.
+  Complexity: L
+
+- [ ] P3 — Item 143 — Add DDColor/ColorMNet temporal colorization tier
+  Why: the existing Zhang CPU model is fast but temporally weaker; these local models offer a quality tier without removing the portable fallback.
+  Evidence: `tools/colorize`; `vs-deoldify`.
+  Touches: colorize sidecar, pinned model packs, capability UI, temporal fixtures.
+  Acceptance: DDColor/ColorMNet is consented, revision/hash pinned, kill-switchable, and measurably reduces frame-to-frame color flicker while retaining the portable CPU default/fallback.
+  Complexity: L
+
+### P3 — Specialist capability and consolidation
+
+- [ ] P3 — Item 144 — Support bounded live/dynamic DASH recording
+  Why: Streamkeep logs dynamic MPD as unsupported, so live downloads fail without recording semantics.
+  Evidence: `tools/streamkeep/streamkeep/dash.py:55`.
+  Touches: DASH parser/downloader, CLI/UI recording controls, fixtures.
+  Acceptance: a dynamic MPD records a user-bounded duration/segment window with discontinuity recovery, or fails before writing with a precise unsupported-feature reason.
+  Complexity: M
+
+- [ ] P3 — Item 146 — Complete shared sidecar discovery and emit consolidation
+  Why: the shared protocol/runtime exists, but local `find_ffmpeg` and emit implementations still create drift across 212 engines.
+  Evidence: `tools/_lib/ucx_sidecar.py`; remaining per-sidecar helper definitions.
+  Touches: `tools/_lib/`, per-sidecar entry points, contract checker.
+  Acceptance: all sidecars import the shared discovery/emit helpers unless an allowlisted engine proves a distinct contract; all 212 contract fixtures remain green.
+  Complexity: L

@@ -1,108 +1,172 @@
 # Research — UniversalConverterX
-Date: 2026-07-20 — replaces all prior research (previous pass 2026-07-16 @ v2.22.1 is fully stale).
+Date: 2026-07-29 — replaces all prior research.
+Confidence: repository and source claims are **[Verified]** as of 2026-07-29. No **[Assumption]** claim is used for prioritization; hardware/model outcomes that still need execution are acceptance work, not present-tense claims.
 
 ## Executive Summary
-UniversalConverterX (v2.31.5) is a mature offline-first Windows media suite: .NET 10 / WinUI 3 shell, Core strategy engine, `ucx` CLI + REST + PowerShell module, Explorer shell extension, 212 NDJSON sidecar engines, 300+ presets, 53 UI pages, 6 locales. **The entire 2026-07-16 research queue has shipped** — the July CVE floors, ImgConverter ports (batch edit pipeline, binary-search quality targeting, SHA-256 default-deny plugin trust, scan-review table, post-batch actions), CompressorPage size-target + VMAF targeting, the full preset editor, WinAppSDK 2.2 / Mica backdrop, and the 190→212 sidecar health-manifest rollout. The chronic WinUI PRI build blocker is also resolved (`dotnet build -p:Platform=x64`). Verified against CHANGELOG v2.23.0→v2.31.5 and source.
 
-The result: UCX's remaining gaps are narrow and specific, not broad. The highest-value directions now are (1) **closing a security policy gap** — four untrusted-file parsers (libheif, libjxl, libvips, Ghostscript) are absent from `ToolVersionPolicy.cs` despite fresh 2026 parse-triggered CVEs (libheif CVE-2026-32740, CVSS 8.8, fires on the default decode path); (2) **a native FFmpeg two-pass silent no-op** (`FFmpegConverter.cs:234`) that lies to the user; (3) **a runtime UI-automation smoke harness** — the biggest quality gap, since the v2.31.4 nine-page launch-NRE cluster was caught entirely by hand; and (4) **surfacing power UCX already ships** as named workflows — one-click Remux (change container, no re-encode), encode-history replay, Production/Preservation preset families, and JXL lossless-JPEG recompression. Chasing bleeding-edge *encode* formats (AV2, VVC-encode) buys near-zero 2026 playback and is correctly deprioritized; the wins are ergonomics, reliability, and exposing hidden capability.
+UniversalConverterX (UCX) is an offline-first Windows conversion suite whose strongest 2026-07-29 shape is not another isolated format engine: it is the combination of a native WinUI shell, a capable Core/CLI/REST layer, 212 NDJSON sidecars, 459 preset files, explicit download consent, local recovery stores, and unusually broad specialist coverage. The highest-value direction is to make that breadth reliably installable, activatable, observable, accessible, and reproducible before adding more engines. Priority opportunities:
 
-Top opportunities in priority order: security policy coverage for the 4 ungated parsers → native two-pass correctness → UI-automation harness → Remux action → encode-history replay → atomic queue persistence → JXL lossless-JPEG → track keep/drop UI → Production/Preservation presets → HW-encoder detection (AMD VCN / Intel QSV) → local AI tiers (RIFE, Kokoro TTS, Surya OCR→Markdown).
+1. Correct the libvips CVE policy and refresh the pinned UltraHDR runtime.
+2. Eliminate mutable cached model code and lock the Python/PyInstaller supply chain.
+3. Repair Explorer, file, protocol, startup, and toast activation end to end.
+4. Make installer/portable artifacts contain—or truthfully mark unavailable—every advertised workflow.
+5. Aggregate all existing test, localization, sidecar, UI, dependency, and release checks behind the canonical build.
+6. Move page-owned conversions into a durable app-scoped job coordinator with preflight, recovery, retry, and trustworthy progress.
+7. Unify Home, navigation search, Toolbox, Presets, and Universal Convert around one stable localized workflow catalog.
+8. Establish metadata-fidelity, accessibility, runtime-localization, and transactional file-operation contracts.
 
 ## Product Map
-- **Core workflows:** batch convert (native `IConverterStrategy` + presets), compress (two-pass size-target + ab-av1 VMAF), edit (image pipeline), download (yt-dlp/Deno), record, 212-engine Toolbox/AI Lab, CLI/REST/PowerShell automation, Explorer context menu, watch folders, SQLite history with re-run.
-- **Personas:** Windows power users converting mixed local files; creators producing social/web outputs; archivists (HDR, subtitles, metadata, lossless); scripters automating long-tail conversions.
-- **Platforms/distribution:** Windows 10 21H2+/11, .NET 10, WinUI 3 (WindowsAppSDK 2.2.0), ARM64 cross-published. WiX MSI + portable ZIP; MSIX/WinGet blocked only on the standing no-code-signing policy. Sidecars frozen under `tools/<engine>/`.
-- **Data flows:** UI/CLI → Core strategy or `SidecarRunner` (NDJSON events) → `OutputDurationValidator`/`PostConversionHandler`; settings/history/logs under `%LOCALAPPDATA%/UniversalConverterX`; managed tool downloads SHA-256-verified with rollback and per-tool size caps.
+
+- **Core workflows:** discover a conversion by file or task; configure and queue batch conversion/compression; run specialist media/document/data/AI sidecars; inspect, edit, or preserve tracks/metadata; automate through CLI, PowerShell, loopback REST, presets, and watch folders.
+- **User personas:** Windows users replacing paid converter suites; creators managing repeated media jobs; archivists who need metadata and provenance fidelity; technical users integrating local conversion into scripts; specialists converting scientific, geospatial, medical, CAD, and legacy formats.
+- **Platforms and distribution:** MIT-licensed Windows 10/11 desktop; canonical x64 WinUI/.NET 10 build; CLI and PowerShell surfaces; portable ZIP, MSI, MSIX, and WinGet-oriented packaging; ARM64 publish compatibility audit exists but sidecar parity is not established.
+- **Key integrations and data flows:** WinUI/CLI create native Core jobs or launch `tools/<engine>` over NDJSON; presets describe engine arguments; optional tools/models are consented and cached locally; queue/settings/history/logs remain local JSON or SQLite; FFmpeg/ffprobe provide most media execution and validation.
 
 ## Competitive Landscape
-- **HandBrake 1.11** — shipped "Production" (ProRes/DNxHR/MOV) and "Preservation" (FFV1-in-MP4, FLAC vs PCM) named preset families, plus AMD VCN AV1 10-bit HW encode. Learn: outcome-named preset families; broaden HW encode past NVENC. Avoid: 4-container ceiling, zero AI story.
-- **FastFlix 6.2** — "Apply Last Used Settings" (history replay), atomic + file-locked queue persistence, full vvenc VVC encode UI. Learn: replay UX and queue durability directly patch UCX's untested UI-side `WatchFolderService`. Avoid: nothing notable.
-- **MKVToolNix v100** — in-GUI PowerShell post-job action, job-queue *search*, "open copy as new settings" (clone without delete), reads MP4/MOV track names from `udta`. Learn: queue ergonomics + metadata fidelity on remux are table stakes. Avoid: nothing.
-- **LosslessCut 3.69 / Shutter Encoder 20.2** — lossless crop/AR via container metadata (UCX shipped a Lossless Cut page v2.24.0); Shutter added blur-faces + speaker-ID diarization to transcription. Learn: diarization pairs with the existing whisper-stt sidecar. Avoid: Shutter's monolithic single-window UX.
-- **FileFlows 25/26** — VMAF-target "Optimized" encode (UCX shipped this), Dolby Vision RPU passthrough. Learn: extend HDR fidelity to DV passthrough. Avoid: server-first multi-node scope.
-- **Wondershare UniConverter v17 / Movavi** — paywall a **container-only "SuperSpeed" remux**, AI format-recommendation, guided upscale modes, voice clone, 145-language subtitle gen. Learn: the remux action is a trivial `-c copy` UCX can give away free; format-recommendation can be rule-based/offline. Avoid: cloud models, subscriptions, telemetry (Topaz Starlight is cloud — bundle only local equivalents).
-- **VERT.sh / ConvertX** (privacy-converter trend) — "files never leave your machine" marketing but WASM 2GB ceilings / Docker friction. Learn: UCX is the stronger native form of this thesis; surface verifiable zero-telemetry + upstream FFmpeg/encoder attribution in-app (HN punishes hidden analytics and missing credit). Avoid: WASM build envy.
+
+- **HandBrake:** excels at capability-aware presets, queue discipline, upgrade warnings, and accessible release hardening. UCX should copy disabled-state reasons, software fallback, and queue-safe upgrades; it should avoid narrowing its cross-domain coverage to a video-only expert tool.
+- **Shutter Encoder:** proves that broad local professional workflows, hardware paths, transcription, and localization can coexist. UCX should learn from its rapid metadata/preview fixes and add fixture-backed stream fidelity; it should avoid breadth that outruns regression coverage.
+- **LosslessCut and File Converter:** provide the clearest models for keyboard-first lossless editing and Explorer-native intake. UCX should adopt tested activation, selected-file routing, undoable operations, and metadata preservation; it should avoid promising “smart lossless” cuts while upstream still documents sync, subtitle, and multi-stream limits.
+- **FileFlows, Tdarr, and Unmanic:** lead in durable jobs, health checks, conditional flows, retries, fingerprints, and job reports. UCX should first build local app-scoped job ownership and a small versioned recipe model; distributed workers, remote administration, and licensed server features conflict with its present priorities.
+- **ConvertX and VERT:** validate demand for broad, privacy-forward conversion and lazy optional capabilities. UCX should disclose local/download/network readiness and canonicalize execution boundaries; accounts, SSO, shared histories, and a browser/WASM rewrite would weaken its native offline charter.
+- **Wondershare UniConverter and Movavi:** make task discovery, unfinished-job recovery, sample conversion, output-size feedback, and remembered settings approachable. UCX should borrow those interaction patterns while avoiding paywalls, trial ambiguity, credits, duplicated tools, and AI feature sprawl.
+- **Adobe Media Encoder and Apple Compressor:** remain the strongest queue, preset-browser, watch-folder, preflight, history, and automation references. UCX should borrow persistent queues, blocking-versus-warning preflight, searchable presets, and reusable chains without importing suite-scale panel complexity or distributed rendering.
+- **Topaz Video:** demonstrates bounded previews, local model purpose, visible queues, and quality comparison. UCX should add short representative renders and synchronized source/output review only after job recovery and model readiness are reliable; it should avoid cloud fallback and opaque model/hardware behavior.
 
 ## Security, Privacy, and Reliability
-**Shipped and verified** (v2.23.0–v2.31.5): `ToolVersionPolicy.cs` min-version gate for FFmpeg 8.1.2 / ImageMagick 7.1.2-15 / Calibre 9.10.0 / 7-Zip 26.01 / LibreOffice 26.2.4 / yt-dlp 2026.07.04 / Deno 2.3.0; shipped ImageMagick `policy.xml`; Ghostscript already invoked with `-dSAFER` (`GhostscriptConverter.cs:101`); MotW/Zone.Identifier propagation; tar-slip guards (`safe_tar_extractall`); CSV formula-injection neutralization; per-tool download size caps; per-call subprocess timeouts across all 212 sidecars.
 
-**Genuine gaps found (2026-07-20):**
-- **Four untrusted-file parsers are NOT in `ToolVersionPolicy.cs`** (dictionary at lines 13–20 lists only 7 tools). All have 2026 parse-triggered CVEs:
-  - **libheif <1.22.0** — CVE-2026-32740 grid-tile compositing → 64-byte attacker-controlled heap OOB write on the **default decode path**, CVSS 8.8 (+ -32741/-32738/-32814). A repo source comment still references `libheif v1.18.1`. Highest-severity uncovered item.
-  - **libjxl** — CVE-2026-1837 grayscale + LCMS2 color transform mis-sizes buffer → write to uninitialized/unallocated memory (UAF). Bump to current 0.11.x.
-  - **libvips <8.19.x** (past commit fd28c54) — CVE-2026-3281 `vips_bandrank_build` heap overflow (local, CVSS 4.8, public PoC).
-  - **Ghostscript <10.07.1** — not floor-gated (invocation is `-dSAFER`-hardened, but no version floor); long RCE history via crafted PS/EPS/PDF.
-- **No confirmation the version gate BLOCKS execution.** `ToolVersionPolicy.Assess` is consumed by `SidecarHealthService`, `ToolsCommand`, and `SettingsWindow` (warn/report surfaces). Needs live validation that `ConversionOrchestrator` refuses a job when `MeetsMinimum == false` rather than only warning.
-- **ImageMagick floor is 7.1.2-15** (covers the SVG→MVG injection); consider bumping to 7.1.2-27 to also cover CVE-2026-25638 (MSL memory-exhaustion DoS). Low priority.
-- **Deno-mandatory-for-YouTube claim is unverified.** The 2026-07-16 research asserted YouTube extraction now requires an external Deno runtime; the security refresh could not confirm a hard cutover (Deno remains the *recommended* optional JS interpreter as of yt-dlp 2026.06.09). Needs live validation before treating Deno provisioning as load-bearing.
-- **ONNX Runtime 1.27 drops CUDA 12** (CUDA 13 only). Pin ORT to 1.26.x for any sidecar shipping CUDA 12 GPU packs; audit before bumping.
-- **7-Zip CVE-2026-58052** (RAR5 `:Zone.Identifier:$DATA` MotW bypass) has **no patched release** — cannot be version-gated away; UCX's own MotW propagation is the compensating control (already shipped — verify it re-stamps archive-extraction outputs).
-
-**Reliability residue:** UI-side `WatchFolderService` (FSW callback/threading) has no test coverage — the testable admission logic was correctly extracted to Core (`WatchFileAdmission` + tests), but the orchestration path is unexercised and lacks atomic/file-locked queue persistence (FastFlix 6.2 pattern). No runtime UI-automation smoke beyond the static UIA gate.
+- **[Verified] Incorrect security rule:** `src/UniversalConverterX.Core/Services/ToolVersionPolicy.cs:22` marks libvips `8.19.0` as the minimum safe release for CVE-2026-3281, while NVD explicitly lists `8.19.0` as affected and names patch commit `fd28c546…`. The 2026-07-29 rule rejects the pinned `8.18.2` runtime but accepts the known-affected version. Replace minimum-only semantics with affected-build/approved-build policy and refresh `tools/gainmap/runtime.bundle.json` to the Windows `8.18.3` bundle available on 2026-07-29 with new size and SHA-256 pins.
+- **[Verified] Mutable executable model code:** `tools/bgremove/sidecar.py:57-59` loads cached Hugging Face repository code with `trust_remote_code=True`, no immutable revision, and no code digest. `local_files_only=True` prevents a runtime download but does not authenticate what entered the cache. Package an allowlisted, revision-pinned model/code pack or remove remote-code execution.
+- **[Verified] Unreproducible Python estate:** 117 requirements files contain 280 dependency entries, only 15 exact pins, no hashes, and no lockfile; sidecar build scripts also install unbounded PyInstaller. Several `torch>=2.2`/`>=2.4` floors permit releases affected by CVE-2025-32434. Build from hash-locked wheels, reject affected resolutions, and generate an artifact-level SBOM.
+- **[Verified] Process boundary is weaker than plugin trust:** `src/UniversalConverterX.UI/Services/SidecarRunner.cs` has a silence watchdog and process-tree kill but no Windows Job Object, child/process-count limit, memory limit, private temp root, or common output-containment contract. `src/UniversalConverterX.Console/Commands/ServeCommand.cs:128-188` forwards loopback REST argument arrays to resolved engines. Add bounded execution and malicious-path/process-tree tests without restricting legitimate user-selected destinations.
+- **[Verified] NuGet audit:** `dotnet list package --vulnerable --include-transitive` reported no known vulnerable NuGet package on 2026-07-29. Do not claim otherwise; add a repeatable gate and service the .NET 10.0.x packages from `10.0.9` to `10.0.10`.
+- **[Verified] Broken Windows intake:** the shell resolves `UniversalConverterX.UI.exe` in `ExplorerCommand.cs:126-131` and `ShellExtensionRegistrar.cs:287-295`, while WiX installs `UniversalConverterX.exe`. The shell forwards selected paths, but `MainWindow.xaml.cs:123-136` parses only `--route`. The MSIX manifest declares file, protocol, startup, and toast activation without a matching AppLifecycle router.
+- **[Verified] Release capability gap:** `build.ps1:111-176` and `installer/build-installer.ps1:115-209` publish .NET binaries, presets, and FFmpeg but never build or stage specialist sidecars. A fresh installer/portable artifact therefore cannot execute much of the Toolbox marked “Ready.”
+- **[Verified] Partial file mutation:** `BatchRenamePage.xaml.cs:318-343` describes two-pass safety but performs sequential `File.Move` calls with no temporary phase, journal, rollback, cycle handling, or undo. A mid-batch error leaves a partially renamed set.
+- **[Verified] Navigation-sensitive work:** conversions are owned by dozens of page-level `CancellationTokenSource` fields; only Converter uses `IBatchQueueStore`. Jobs can outlive or be lost with page/window lifecycle, and recovery semantics differ by surface.
 
 ## Architecture Assessment
-- **Native FFmpeg two-pass is a silent no-op** — `FFmpegConverter.cs:234-238` logs `"Two-pass encoding requested but not implemented in single-pass mode"` and proceeds single-pass. Real two-pass/size-targeting runs only through the videocrush sidecar; the native `VideoOptions.TwoPass=true` flag lies. Reject the flag or wire it.
-- **Biggest quality gap: no runtime UI-automation smoke.** The v2.31.4 launch-crash cluster (9 pages `SelectionChanged` NRE, three `x:Uid`-on-Window `XamlParseException`, density-pass clipping) was all caught by hand. A headless/offscreen WinUI drive-and-screenshot harness over `src/UniversalConverterX.UI/Views/Pages/*.xaml.cs` init handlers would gate these pre-ship.
-- **Live/dynamic DASH unsupported** — `tools/streamkeep/streamkeep/dash.py:55` logs dynamic MPD as unsupported. Niche but a real capability limit.
-- **Sidecar `find_ffmpeg`/`emit` consolidation is only partially drained** — `tools/_lib/ucx_sidecar.py` now carries the NDJSON protocol, FFmpeg discovery, `run()`/timeout, and tar-safety, and v2.31.5 routed all 212 through `run()`, but per-sidecar boilerplate remains (P3 debt).
-- **Doc drift:** `CLAUDE.md` carries materially false claims — "Services … currently stubs" (Navigation/Dialog/Settings are fully implemented in `Services.cs`), "29 tools / 10 sidecar engines / 8 pages" (actual: 212 sidecars, 53 pages). Misleads any agent doing the Session Start Ritual.
-- **Hygiene:** 8 stray root `.md` files predate the AGENTS.md hygiene rule (all gitignored, untracked): `COMPLETED.md`, `RESEARCH_REPORT.md`, `PHASE4_LAUNCH_SUMMARY.md`, `PHASE4_READINESS_CHECKLIST.md`, `POLISH_AUDIT_SUMMARY.md`, `PREMIUM_POLISH_CHECKLIST.md`, `PREMIUM_POLISH_FINAL_SUMMARY.md`, `LOGO_PROMPTS.md`. Note: PHASE4 files hold "Item 101–120", so the roadmap ID scheme must continue at **121**.
-- **Test coverage is otherwise strong** — HistoryStore (SQLite), shell-extension preset quoting, end-to-end preset execution, and `WatchFileAdmission` all have tests; sidecar contract gate covers all 212 (static/`--help` for most, functional freeze-exec for a 5-engine subset).
+
+- **Authoritative workflow boundary:** `MainWindow.xaml.cs`, `HomePage.xaml.cs`, and `ToolboxPage.xaml.cs` each hard-code overlapping catalogs. `ToolboxPage.DedupeTiles` removes entries by `RouteKey`, collapsing distinct ClipForge tasks that share one route. Introduce stable workflow IDs, localized metadata, readiness/network disclosure, search terms, and one catalog consumed by every discovery surface.
+- **Observability and app-scoped execution boundary:** place job state, cancellation, progress normalization, preflight, postflight, persistence, retry, and redacted provenance in a `JobCoordinator`; keep pages as projections. Successful NDJSON completion must reach 100%, percentages must be finite/non-regressing, and stale ETA must expire.
+- **Preset boundary:** Core’s `Utilities/PresetDocument.cs` performs the canonical schema and path validation, while Console `Presets/ConversionPreset.cs` and Shell `Presets/PresetReader.cs` parse XML independently. Adapt all consumers to the Core document model and run one malicious/compatibility fixture suite.
+- **Sidecar/release boundary:** extend `ucx.sidecar.json` with schema/engine version, host compatibility, capabilities, artifact/runtime requirements, and architecture availability. Build a release manifest from the staged tree, not the source tree, and reconcile it with Toolbox claims and the SBOM.
+- **UI boundary:** approximately 40 pages own cancellation state and 54 C# files assign user-visible strings directly. Only four `AppLocalizer` calls, three live-region declarations, no keyboard accelerator/access-key infrastructure, no adaptive XAML state, and no high-contrast resources were found. Move imperative copy to resources, add pseudo-localization, shared live status, keyboard/focus contracts, high-contrast resources, and 225% text-scale/adaptive layout tests.
+- **Performance:** Toolbox nests eight `GridView`s inside one `ScrollViewer`; Presets and History also materialize large result sets. Use one virtualized, incremental source per surface and measure cold navigation/filter latency with 459 presets and 500 history rows.
+- **Test gap:** canonical `build.ps1 -Target Test` runs Core tests and one VideoScaler smoke only. It omits Python unit tests, sidecar contract/integrity tests, UIA/runtime page navigation, localization, release compatibility, packaging contents, and dependency advisories. Existing Item 124 should use Appium/UIA rather than deprecated WinAppDriver.
+- **Documentation and upgrade gap:** README links a missing `CONTRIBUTING.md`; Windows floors conflict across README, the UI project, MSIX, and WiX; README says the runtime is required while published UI/CLI artifacts are self-contained; duplicate Unreleased changelog sections and shipped-roadmap entries have recurred. Add executable documentation/release assertions and sequence Windows App SDK 2.3.1 behind the runtime UI harness.
+- **Existing-roadmap corrections:** narrow Item 136 to KEPUB/KCC because KFX input exists; narrow Item 137 to managed RIFE exposure because ClipForge already integrates it; delete duplicate Kokoro, BiRefNet, Surya/Marker, and SeedVR2 rows; make Item 141 a governed offline diarization-pack/output/UI task; keep Opus HD under consideration because 96 kHz remains experimental and is not delivered by a floor bump.
 
 ## Rejected Ideas
-- **VVC/H.266 *encode* investment** (FastFlix ships vvenc): decode-only still suffices in 2026, but *decode* support is now roadmap-eligible given Intel Lunar Lake HW decode + DVB mandate — split the old blanket rejection.
-- **AV2 encode** (AOM AV2 1.0, 2026-05-28): no ffmpeg/browser/HW ecosystem; encoder is impractically slow. Decode-probe only when ffmpeg lands support.
-- **Topaz Starlight / UniFab cloud models** (UniConverter 17 licensing): cloud-only; bundle local equivalents (SeedVR2/DiffBIR/Real-ESRGAN) instead — never call their endpoints.
-- **Calibre DeDRM plugin** (KFX round-trip idea): legally sensitive; ship KEPUB/KFX *format* conversion only, never DRM removal.
-- **aria2c external downloader for streamkeep** (yt-dlp GHSA-vx4q-3cr2-7cg2): upstream removed HLS/DASH-via-aria2c after RCE — never reintroduce; use native `-N` concurrent fragments.
-- **WASM/browser build** (VERT.sh envy): 2GB WASM ceilings are exactly what UCX's native form beats.
-- **Cloud/model-marketplace anything** (Wondershare/Topaz pressure): contradicts the offline/no-telemetry charter.
-- **Nuitka sidecar migration** (packaging comparisons): PyInstaller onedir already wins; the real lever is shared-runtime consolidation, not switching freezers.
+
+- **Cloud conversion, accounts, telemetry, shared histories, or multi-user mode** — conflict with `CLAUDE.md` and the offline/local privacy differentiator; ConvertX/Stirling/Topaz show the accompanying server, policy, and trust burden.
+- **Mobile client or browser/WASM rewrite** — VERT still needs a daemon for video, and UCX depends on Windows shell integration, native codecs, and specialist executables.
+- **Distributed worker architecture now** — Tdarr/FileFlows/Compressor prove its value for farms, but UCX has not yet made one local staged artifact deterministic.
+- **AV2 encode/mux now** — AV2 1.0 is final, but AOMedia identifies container bindings, conformance streams, and tooling as follow-on work; bundled FFmpeg 8.1.2 exposes no AV2 codec.
+- **C2PA authoring/signing** — read-only offline inspection fits; authoring adds key custody and trust-list governance and conflicts with the repository’s no-signing policy.
+- **DVD decryption/DeDRM** — legal, maintenance, and malware-surface costs do not fit a general converter; retain clear rejection of protected inputs.
+- **More AI backends before governance** — existing Kokoro, BiRefNet, Surya, Marker, SeedVR2, and diarization work already need immutable assets, readiness, artifact parity, and regression coverage.
+- **Pause button before checkpoint semantics** — community evidence shows false pause/resume is worse than cancel/retry; do not expose it until each engine can prove resumability.
+- **Arbitrary post-job executables** — MKVToolNix and batch tools expose them, but they bypass UCX’s plugin trust boundary; prefer versioned local recipes with allowlisted operations.
+- **Hybrid smart cut as a default promise** — LosslessCut still documents seeking, audio-sync, subtitle, codec, and multi-stream limitations; keep UCX’s explicit keyframe-copy versus frame-exact re-encode modes.
 
 ## Sources
-OSS / releases:
-- https://github.com/HandBrake/HandBrake/releases/tag/1.11.0
-- https://www.omgubuntu.co.uk/2026/03/handbrake-update-prores-encoding
-- https://github.com/cdgriffith/FastFlix/blob/master/CHANGES
-- https://github.com/cdgriffith/FastFlix/releases/tag/6.2.1
-- https://mkvtoolnix.download/doc/NEWS.md
-- https://www.bunkus.org/2026/07/2026-07-05-mkvtoolnix-v100-released/
-- https://www.shutterencoder.com/changelog
-- https://fileflows.com/
-- https://github.com/staxrip/staxrip/issues/1353
-- https://github.com/k4yt3x/video2x
+
+### Open-source and adjacent products
+
+- https://github.com/HandBrake/HandBrake/releases/tag/1.11.2
+- https://handbrake.fr/docs/en/latest/technical/official-presets.html
+- https://www.shutterencoder.com/changelog-en/
+- https://github.com/paulpacifico/shutter-encoder/issues/228
+- https://github.com/mifi/lossless-cut/releases/tag/v3.69.0
+- https://github.com/mifi/lossless-cut/issues/126
+- https://github.com/Tichau/FileConverter/releases/tag/v2.2
+- https://github.com/RandomEngy/VidCoder/releases/tag/v12.23
+- https://fileflows.com/docs/webconsole/flows/definitions
+- https://fileflows.com/docs/versions
+- https://github.com/HaveAGitGat/Tdarr
+- https://github.com/HaveAGitGat/Tdarr/issues/1236
+- https://github.com/Unmanic/unmanic/releases/tag/0.4.0
+- https://github.com/C4illin/ConvertX/releases/tag/v0.18.0
 - https://github.com/VERT-sh/VERT
-- https://github.com/C4illin/ConvertX/issues
-- https://news.ycombinator.com/item?id=43663865
+- https://github.com/VERT-sh/VERT/issues/214
+- https://github.com/staxrip/staxrip/issues/702
+- https://help.mkvtoolnix.download/t/mkvtoolnix-v100-0-released/1580
+- https://github.com/Stirling-Tools/Stirling-PDF
+- https://manual.calibre-ebook.com/conversion.html
+- https://manual.calibre-ebook.com/en/faq.html
+- https://calibre-ebook.com/whats-new
+- https://github.com/ciromattia/kcc
+- https://github.com/k4yt3x/video2x
+- https://github.com/nihui/rife-ncnn-vulkan
+- https://github.com/dan64/vs-deoldify
 
-Commercial:
-- https://betanews.com/2025/12/22/wondershare-adds-topaz-labs-ai-video-tools-to-uniconverter-17/
-- https://www.dealarious.com/blog/wondershare-uniconverter-vs-movavi/
+### Commercial products and community signal
 
-Security (CVE):
-- https://jfrog.com/blog/pixelsmash-critical-ffmpeg-vulnerability-turns-media-files-into-weapons/
-- https://cve.threatint.eu/CVE/CVE-2026-32740
-- https://ubuntu.com/security/notices/USN-8526-1
-- https://github.com/advisories/GHSA-76gx-97cq-65f5
-- https://radar.offseq.com/threat/cve-2026-3281-heap-based-buffer-overflow-in-libvip-f2781821
-- https://github.com/ImageMagick/ImageMagick/security/advisories/GHSA-xpg8-7m6m-jf56
-- https://github.com/kovidgoyal/calibre/security/advisories/GHSA-32vh-whvh-9fxr
-- https://socprime.com/blog/cve-2026-48095-7-zip-heap-overflow-flaw/
-- https://nvd.nist.gov/vuln/detail/CVE-2026-58052
-- https://github.com/yt-dlp/yt-dlp/security/advisories/GHSA-vx4q-3cr2-7cg2
-- https://ghostscript.com/releases/cve/index.html
-- https://imagemagick.org/script/security-policy.php
+- https://helpx.adobe.com/media-encoder/using/encode-export-video-audio.html
+- https://helpx.adobe.com/ie/media-encoder/using/overview-media-encoder-user-interface.html
+- https://support.apple.com/guide/compressor/welcome-cpsrfd48c390/mac
+- https://docs.topazlabs.com/topaz-video/quick-start
+- https://community.topazlabs.com/t/topaz-video-1-6-1-patch/103309
+- https://www.movavi.com/support/how-to/how-to-convert-video.html
+- https://www.movavi.com/videoconverter/buynow.html
+- https://videoconverter.wondershare.com/guide/preferences.html
+- https://videoconverter.wondershare.com/guide/brief-introduction.html
+- https://videoconverter.wondershare.com/store/windows-individuals-mi.html
+- https://www.topazlabs.com/topaz-video
+- https://www.adobe.com/creativecloud/plans.html
+- https://news.ycombinator.com/item?id=45397629
+- https://www.reddit.com/r/software/comments/1ruui1y/im_tired_of_these_trial_limits_on_uniconverter/
+- https://www.reddit.com/r/TopazLabs/comments/1tp7g2l/issues_pausingresuming_video_exports/
+- https://www.reddit.com/r/TopazLabs/comments/1lbawt0
 
-Formats / AI / platform:
-- https://en.wikipedia.org/wiki/Advanced_Professional_Video
-- https://cloudinary.com/blog/jpeg-xl-and-the-pareto-front
-- https://www.phoronix.com/news/Opus-1.6-Released
-- https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
-- https://localaimaster.com/blog/kokoro-tts-local-setup
-- https://ice-ice-bear.github.io/posts/2026-04-15-birefnet/
-- https://github.com/microsoft/onnxruntime/releases
+### Platform, standards, and accessibility
+
+- https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/applifecycle/applifecycle
+- https://learn.microsoft.com/en-us/windows/apps/develop/testing/
+- https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility-checklist
+- https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility-testing
+- https://learn.microsoft.com/en-us/windows/apps/design/globalizing/globalizing-portal
+- https://learn.microsoft.com/en-us/windows/apps/develop/ui/layouts-with-xaml
+- https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessible-text-requirements
+- https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html
+- https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
+- https://spec.c2pa.org/specifications/specifications/2.4/security/Security_Considerations.html
+- https://developer.android.com/media/platform/hdr-image-format
+- https://aomediacodec.github.io/iamf/v1.1.0.html
+- https://av2.aomedia.org/
+- https://aomedia.org/press%20releases/Alliance-for-Open-Media-Releases-AV2-Codec/
+
+### Dependencies, security, and supply chain
+
+- https://nvd.nist.gov/vuln/detail/CVE-2026-3281
+- https://github.com/libvips/libvips/commit/fd28c5463697712cb0ab116a2c55e4f4d92c4088
+- https://github.com/libvips/build-win64-mxe/releases
+- https://github.com/advisories/GHSA-53q9-r3pm-6pq6
+- https://packaging.python.org/en/latest/specifications/pylock-toml/
+- https://pip.pypa.io/en/stable/topics/secure-installs/
+- https://huggingface.co/docs/transformers/en/models
+- https://huggingface.co/docs/huggingface_hub/guides/download
+- https://cyclonedx.org/specification/overview/
+- https://www.cisa.gov/sites/default/files/2025-08/2025_CISA_SBOM_Minimum_Elements.pdf
+- https://github.com/dotnet/core/blob/main/release-notes/10.0/10.0.10/10.0.10.md
+- https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads
+- https://ffmpeg.org/download.html
+- https://www.ffmpeg.org/security.html
+- https://imagemagick.org/security-policy/
+- https://opus-codec.org/release/stable/2025/12/15/libopus-1_6.html
+- https://datatracker.ietf.org/doc/html/draft-valin-opus-scalable-quality-extension-02
+
+### Engineering, research, and discovery
+
+- https://github.com/Netflix/vmaf
+- https://medium.com/netflix-techblog/vmaf-v1-good-is-not-good-enough-60d7e4244ea8
+- https://engineering.fb.com/2026/03/02/video-engineering/ffmpeg-at-meta-media-processing-at-scale/
+- https://arxiv.org/abs/2605.15800
+- https://github.com/pyannote/pyannote-audio
+- https://github.com/sitkevij/awesome-video
+- https://github.com/ebu/awesome-broadcasting
 
 ## Open Questions
-- Does `ConversionOrchestrator` **block** a job when `ToolVersionPolicy.Assess` returns `MeetsMinimum == false`, or only warn via `SidecarHealthService`? Determines whether Item 121 is "add tools to policy" or "add tools + enforce block." (Needs live validation — inspect the orchestrator invocation path.)
-- Is an external Deno runtime **mandatory** for YouTube extraction in the shipped yt-dlp channel, or still optional? Prior research treated it as load-bearing; the 2026 CVE refresh could not confirm. (Needs live validation against the current extractor.)
-- MSIX/WinGet remains gated on the standing no-code-signing policy — a product decision, not a research question.
+
+- None. The prioritization and first implementation slices are answerable from the repository and cited public sources.

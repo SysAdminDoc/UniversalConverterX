@@ -37,6 +37,7 @@ artifacts/python-dependencies/
 
 # Installer-generated WiX fragments
 installer/wix/PresetFiles.generated.wxs
+installer/wix/ReleasePayload.generated.wxs
 installer/output/
 
 # Python bytecode cache

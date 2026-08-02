@@ -10,7 +10,9 @@ param(
     
     [string]$Version = '2.33.0.0',
 
-    [string]$FfmpegArchivePath
+    [string]$FfmpegArchivePath,
+
+    [string]$SidecarBuildReport
 )
 
 $ErrorActionPreference = 'Stop'
@@ -54,44 +56,6 @@ function Write-Error($text) {
     Write-Host "✗ $text" -ForegroundColor Red
 }
 
-function Write-PresetWixFragment {
-    param(
-        [Parameter(Mandatory=$true)][string]$PresetDirectory,
-        [Parameter(Mandatory=$true)][string]$OutputPath
-    )
-
-    $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add('<?xml version="1.0" encoding="UTF-8"?>')
-    $lines.Add('<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">')
-    $lines.Add('  <Fragment>')
-    $lines.Add('    <ComponentGroup Id="PresetFiles" Directory="PresetsFolder">')
-
-    $index = 0
-    $readme = Join-Path $PresetDirectory 'README.md'
-    if (Test-Path $readme) {
-        $lines.Add('      <Component Id="PresetFile_0000" Guid="*">')
-        $lines.Add('        <File Id="PresetFilePayload_0000" Source="$(var.PublishDir)presets\README.md" KeyPath="yes" />')
-        $lines.Add('      </Component>')
-        $index = 1
-    }
-
-    Get-ChildItem -Path $PresetDirectory -Filter '*.preset.xml' | Sort-Object Name | ForEach-Object {
-        $componentId = 'PresetFile_{0:0000}' -f $index
-        $fileId = 'PresetFilePayload_{0:0000}' -f $index
-        $source = '$(var.PublishDir)presets\{0}' -f $_.Name
-        $escapedSource = [Security.SecurityElement]::Escape($source)
-        $lines.Add("      <Component Id=`"$componentId`" Guid=`"*`">")
-        $lines.Add("        <File Id=`"$fileId`" Source=`"$escapedSource`" KeyPath=`"yes`" />")
-        $lines.Add('      </Component>')
-        $index++
-    }
-
-    $lines.Add('    </ComponentGroup>')
-    $lines.Add('  </Fragment>')
-    $lines.Add('</Wix>')
-    Set-Content -Path $OutputPath -Value $lines -Encoding UTF8
-}
-
 # Ensure output directory exists
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
@@ -116,6 +80,19 @@ foreach ($staleOutput in $staleOutputs) {
 # Build the application first
 Write-Header "Building UniversalConverter X"
 
+$releaseStage = [IO.Path]::GetFullPath((Join-Path $publishDir 'win-x64'))
+$resolvedRoot = [IO.Path]::GetFullPath($rootDir).TrimEnd('\', '/')
+if (-not $releaseStage.StartsWith(
+        $resolvedRoot + [IO.Path]::DirectorySeparatorChar,
+        [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Refusing to clean stage outside the repository: $releaseStage"
+}
+if (Test-Path -LiteralPath $releaseStage) {
+    Write-Step "Removing previous stage: $releaseStage"
+    Remove-Item -LiteralPath $releaseStage -Recurse -Force
+}
+New-Item -ItemType Directory -Path $releaseStage -Force | Out-Null
+
 Write-Step "Publishing UI application..."
 dotnet publish "$rootDir\src\UniversalConverterX.UI\UniversalConverterX.UI.csproj" `
     -c $Configuration `
@@ -123,7 +100,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.UI\UniversalConverterX.UI.cspro
     --self-contained true `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
-    -o "$publishDir\win-x64"
+    -o $releaseStage
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to publish UI application"
@@ -137,7 +114,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.Console\UniversalConverterX.Con
     --self-contained true `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
-    -o "$publishDir\win-x64"
+    -o "$releaseStage\cli"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to publish Console application"
@@ -149,7 +126,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.ShellExtension\UniversalConvert
     -c $Configuration `
     -r win-x64 `
     -p:Version=$semanticVersion `
-    -o "$publishDir\win-x64"
+    -o "$releaseStage\shell"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to publish Shell Extension"
@@ -163,7 +140,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.FfmpegProxy\UniversalConverterX
     --self-contained false `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
-    -o "$publishDir\win-x64\tools\ffmpeg-proxy"
+    -o "$releaseStage\tools\ffmpeg-proxy"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to publish FFmpeg command proxy"
@@ -184,11 +161,6 @@ Copy-Item -Path (Join-Path $presetsSrc 'README.md') -Destination $presetsDst -Fo
 $presetCount = (Get-ChildItem -Path $presetsDst -Filter '*.preset.xml' | Measure-Object).Count
 Write-Success "Staged $presetCount preset(s) -> $presetsDst"
 
-$presetFragmentPath = Join-Path $scriptDir 'wix\PresetFiles.generated.wxs'
-Write-Step "Generating WiX preset fragment..."
-Write-PresetWixFragment -PresetDirectory $presetsDst -OutputPath $presetFragmentPath
-Write-Success "Generated $presetFragmentPath"
-
 # Bundle the exact FFmpeg build declared in tools/ffmpeg/bundle.json. The
 # staging script verifies SHA-256 before extracting any executable.
 Write-Step "Staging pinned FFmpeg..."
@@ -201,6 +173,35 @@ if (-not [string]::IsNullOrWhiteSpace($FfmpegArchivePath)) {
 }
 & (Join-Path $scriptDir 'Stage-PinnedFfmpeg.ps1') @ffmpegStageArguments | Out-Null
 Write-Success "Staged FFmpeg 8.1.2 -> $($ffmpegStageArguments.DestinationPath)"
+
+# Package sidecars only from the authenticated build report. When no report is
+# supplied, every source engine remains represented but explicitly unavailable.
+Write-Step "Staging architecture-specific sidecar readiness..."
+$readinessScript = Join-Path $rootDir 'tools\release\sidecar_readiness.py'
+$readinessArguments = @(
+    $readinessScript,
+    'stage',
+    '--repo-root', $rootDir,
+    '--stage-root', $releaseStage,
+    '--source-tools', (Join-Path $rootDir 'tools'),
+    '--architecture', 'win-x64',
+    '--product-version', $semanticVersion
+)
+if (-not [string]::IsNullOrWhiteSpace($SidecarBuildReport)) {
+    $readinessArguments += @('--build-report', $SidecarBuildReport)
+}
+& python @readinessArguments
+if ($LASTEXITCODE -ne 0) {
+    throw 'Sidecar readiness staging failed.'
+}
+& python $readinessScript verify `
+    --stage-root $releaseStage `
+    --source-tools (Join-Path $rootDir 'tools') `
+    --architecture win-x64
+if ($LASTEXITCODE -ne 0) {
+    throw 'Sidecar readiness verification failed.'
+}
+Write-Success "Sidecar readiness manifest created: $releaseStage\sidecar-readiness.json"
 
 # Inventory the exact staged tree before packaging. A prepared Python lock is
 # folded in when present; releases without Python sidecars still enumerate the
@@ -225,6 +226,13 @@ if ($LASTEXITCODE -ne 0) {
 }
 Copy-Item -LiteralPath $stagedSbom -Destination $releaseSbom -Force
 Write-Success "CycloneDX SBOM created: $releaseSbom"
+
+$payloadFragmentPath = Join-Path $scriptDir 'wix\ReleasePayload.generated.wxs'
+Write-Step "Generating complete WiX payload fragment..."
+& (Join-Path $scriptDir 'New-WixPayload.ps1') `
+    -StageRoot $releaseStage `
+    -OutputPath $payloadFragmentPath | Out-Null
+Write-Success "Generated $payloadFragmentPath"
 
 # Build a directly runnable, unsigned portable archive. This is the WinGet
 # installer source and remains usable even when Windows refuses an unsigned
@@ -343,7 +351,7 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         Push-Location $wixDir
         try {
             $wixArguments = @(
-                'build', 'Product.wxs', $presetFragmentPath,
+                'build', 'Product.wxs', $payloadFragmentPath,
                 '-d', "PublishDir=$publishDir\win-x64\",
                 '-d', "Version=$semanticVersion",
                 '-o', $msiOutput
@@ -379,15 +387,15 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
             -d "Version=$semanticVersion" `
             -out "$wixObjDir\Product.wixobj"
         if ($LASTEXITCODE -eq 0) {
-            & $candlePath $presetFragmentPath `
+            & $candlePath $payloadFragmentPath `
                 -d "PublishDir=$publishDir\win-x64\" `
                 -d "Version=$Version" `
-                -out "$wixObjDir\PresetFiles.generated.wixobj"
+                -out "$wixObjDir\ReleasePayload.generated.wixobj"
         }
         
         if ($LASTEXITCODE -eq 0) {
             # Link
-            & $lightPath "$wixObjDir\Product.wixobj" "$wixObjDir\PresetFiles.generated.wixobj" `
+            & $lightPath "$wixObjDir\Product.wixobj" "$wixObjDir\ReleasePayload.generated.wixobj" `
                 -ext WixUIExtension `
                 -out $msiOutput
             
@@ -403,6 +411,25 @@ if ($Type -eq 'msi' -or $Type -eq 'all') {
         Write-Error "WiX Toolset not found. Install WiX v4 (dotnet tool install wix) or WiX v3."
     }
     
+}
+
+# Exercise each requested redistributable from a fresh extraction. This checks
+# the exact archived/MSI bytes, including the bundled FFmpeg conversion path
+# and sidecar inventory, rather than the source-tree publish directory.
+if ($Type -in @('portable', 'msi', 'all')) {
+    Write-Step "Smoke-testing fresh release artifact extraction(s)..."
+    $smokeArguments = @{
+        SourceToolsRoot = (Join-Path $rootDir 'tools')
+    }
+    if ($Type -eq 'portable' -or $Type -eq 'all') {
+        $smokeArguments.PortablePath = $portableOutput
+    }
+    if ($Type -eq 'msi' -or $Type -eq 'all') {
+        $smokeArguments.MsiPath = $msiOutput
+    }
+    & (Join-Path $scriptDir 'Test-ReleaseArtifacts.ps1') @smokeArguments |
+        Format-Table -AutoSize
+    Write-Success "Fresh release artifact smoke passed"
 }
 
 # Generate release metadata only after packaging so every digest describes the

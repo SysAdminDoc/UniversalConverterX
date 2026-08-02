@@ -50,7 +50,9 @@ param(
     [switch]   $Parallel,
     [switch]   $PrepareDependencies,
     [string]   $DependencyLock,
-    [string]   $Wheelhouse
+    [string]   $Wheelhouse,
+    [ValidateSet('win-x64', 'win-arm64')]
+    [string]   $Architecture = 'win-x64'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -217,6 +219,78 @@ function Initialize-LockedPythonEnvironment {
     return $venvPython
 }
 
+function Get-SidecarExecutableName {
+    param([Parameter(Mandatory=$true)][string] $Tool)
+
+    switch ($Tool.ToLowerInvariant()) {
+        'ab-av1'      { return 'ab-av1-sidecar.exe' }
+        'av1an'       { return 'av1an-sidecar.exe' }
+        'comskip'     { return 'comskip-sidecar.exe' }
+        'demucs'      { return 'demucs-sidecar.exe' }
+        'whisper-stt' { return 'ucx-whisper-stt.exe' }
+        default       { return "$Tool.exe" }
+    }
+}
+
+function Get-SidecarArtifact {
+    param(
+        [Parameter(Mandatory=$true)][string] $Tool,
+        [Parameter(Mandatory=$true)][string] $ToolsDir,
+        [Parameter(Mandatory=$true)][string] $RepoRoot,
+        [Parameter(Mandatory=$true)][DateTime] $BuildStartedUtc
+    )
+
+    $dist = [IO.Path]::GetFullPath((Join-Path $ToolsDir "$Tool\dist"))
+    if (-not (Test-Path -LiteralPath $dist -PathType Container)) {
+        throw "Successful build did not create a dist directory for $Tool."
+    }
+    $expected = Get-SidecarExecutableName -Tool $Tool
+    $candidates = @(
+        Get-ChildItem -LiteralPath $dist -File -Recurse -Filter $expected |
+            Sort-Object @{ Expression = { $_.FullName.Length } }, FullName
+    )
+    if ($candidates.Count -eq 0) {
+        throw "Successful build did not produce the expected $expected for $Tool."
+    }
+    $entrypoint = $candidates[0]
+    if ($entrypoint.LastWriteTimeUtc -lt $BuildStartedUtc.AddSeconds(-2)) {
+        throw "The reported $Tool entrypoint predates this build."
+    }
+
+    $artifactRoot = $entrypoint.Directory.FullName
+    $layout = if (
+        $artifactRoot.TrimEnd('\', '/').Equals(
+            $dist.TrimEnd('\', '/'),
+            [StringComparison]::OrdinalIgnoreCase)
+    ) { 'onefile' } else { 'onedir' }
+    $files = @(
+        Get-ChildItem -LiteralPath $artifactRoot -File -Recurse |
+            Sort-Object FullName |
+            ForEach-Object {
+                [ordered]@{
+                    path = [IO.Path]::GetRelativePath(
+                        $artifactRoot, $_.FullName).Replace('\', '/')
+                    sizeBytes = $_.Length
+                    sha256 = (
+                        Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256
+                    ).Hash.ToLowerInvariant()
+                }
+            }
+    )
+    if ($files.Count -eq 0) {
+        throw "Successful build produced an empty artifact for $Tool."
+    }
+
+    return [ordered]@{
+        layout = $layout
+        rootPath = [IO.Path]::GetRelativePath(
+            $RepoRoot, $artifactRoot).Replace('\', '/')
+        entrypoint = [IO.Path]::GetRelativePath(
+            $artifactRoot, $entrypoint.FullName).Replace('\', '/')
+        files = $files
+    }
+}
+
 function Invoke-OneBuild {
     param(
         [string] $Tool,
@@ -283,11 +357,27 @@ function Invoke-OneBuild {
         }
     }
 
+    $artifact = $null
+    if ($exitCode -eq 0) {
+        try {
+            $artifact = Get-SidecarArtifact `
+                -Tool $Tool `
+                -ToolsDir $ToolsDir `
+                -RepoRoot $RepoRoot.Path `
+                -BuildStartedUtc $started.ToUniversalTime()
+        } catch {
+            $log = ($log.TrimEnd() + [Environment]::NewLine +
+                "[artifact] $($_.Exception.Message)").Trim()
+            $exitCode = 1
+        }
+    }
+
     return [PSCustomObject]@{
         Tool       = $Tool
         ExitCode   = $exitCode
         DurationS  = [int]((Get-Date) - $started).TotalSeconds
         Log        = $log.TrimEnd()
+        Artifact   = $artifact
     }
 }
 
@@ -343,6 +433,7 @@ if ($Parallel -and $targets.Count -gt 1) {
                 ExitCode  = $LASTEXITCODE
                 DurationS = [int]((Get-Date) - $started).TotalSeconds
                 Log       = $log.TrimEnd()
+                StartedUtc = $started.ToUniversalTime()
             }
         } -ArgumentList @(
             $t,
@@ -354,7 +445,24 @@ if ($Parallel -and $targets.Count -gt 1) {
         )
     }
     $jobs | Wait-Job | Out-Null
-    foreach ($j in $jobs) { $results.Add(($j | Receive-Job)) | Out-Null }
+    foreach ($j in $jobs) {
+        $result = $j | Receive-Job
+        if ($result.ExitCode -eq 0) {
+            try {
+                $result | Add-Member -NotePropertyName Artifact -NotePropertyValue (
+                    Get-SidecarArtifact `
+                        -Tool $result.Tool `
+                        -ToolsDir $ToolsDir `
+                        -RepoRoot $RepoRoot.Path `
+                        -BuildStartedUtc $result.StartedUtc)
+            } catch {
+                $result.ExitCode = 1
+                $result.Log = ($result.Log.TrimEnd() + [Environment]::NewLine +
+                    "[artifact] $($_.Exception.Message)").Trim()
+            }
+        }
+        $results.Add($result) | Out-Null
+    }
     $jobs | Remove-Job
 } else {
     foreach ($t in $targets) {
@@ -374,23 +482,32 @@ if ($Parallel -and $targets.Count -gt 1) {
 }
 
 # ── Reports ──────────────────────────────────────────────────────────────────
-$jsonPayload = @{
+$sourceCommit = (& git -C $RepoRoot.Path rev-parse HEAD 2>$null |
+    Select-Object -First 1).Trim()
+$sourceDirty = @(& git -C $RepoRoot.Path status --porcelain 2>$null).Count -gt 0
+$jsonPayload = [ordered]@{
+    schemaVersion = 2
     timestamp = (Get-Date).ToString('o')
     repoRoot  = $RepoRoot.Path
-    targets   = $targets
+    architecture = $Architecture
+    sourceCommit = $sourceCommit
+    sourceDirty = $sourceDirty
+    clean = [bool]$Clean
+    targets   = @($targets)
     dependencyLock = @{
         path   = $DependencyLock
         sha256 = $DependencyLockSha256
     }
-    results   = $results | ForEach-Object {
+    results   = @($results | ForEach-Object {
         @{
             tool      = $_.Tool
             exitCode  = $_.ExitCode
             durationS = $_.DurationS
+            artifact  = $_.Artifact
         }
-    }
+    })
 }
-$jsonPayload | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 $JsonReport
+$jsonPayload | ConvertTo-Json -Depth 10 | Set-Content -Encoding utf8 $JsonReport
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 $failed = $results | Where-Object { $_.ExitCode -ne 0 }
