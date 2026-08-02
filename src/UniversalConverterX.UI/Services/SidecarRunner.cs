@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.Core.Security;
 
@@ -19,7 +20,15 @@ public sealed record SidecarResult(
     long? SizeBytes,
     string? ErrorCode,
     string? ErrorMessage,
-    int ExitCode);
+    int ExitCode)
+{
+    /// <summary>
+    /// How this output was produced — redacted args, the binary that ran, input
+    /// and output identity, the capability decision, and the post-hoc probe.
+    /// Null only for results produced before the engine was even launched.
+    /// </summary>
+    public JobProvenance? Provenance { get; init; }
+}
 
 public interface ISidecarRunner
 {
@@ -93,6 +102,16 @@ public sealed class SidecarRunner : ISidecarRunner
         Action<string, JsonElement>? onRawEvent = null,
         TimeSpan? silenceTimeout = null)
     {
+        // Materialize once: the vector is walked for the input path, the
+        // approved output root, and the provenance record, and an
+        // IEnumerable built from a generator would give different answers.
+        var argumentVector = args as IReadOnlyList<string> ?? [.. args];
+        args = argumentVector;
+
+        var startedUtc = DateTime.UtcNow;
+        var stopwatch = Stopwatch.StartNew();
+        var progressTracker = new JobProgressTracker();
+
         var exe = Locate(toolName);
         if (exe is null)
         {
@@ -321,11 +340,21 @@ public sealed class SidecarRunner : ISidecarRunner
                         switch (evName)
                         {
                             case "progress":
+                            {
+                                // Normalize centrally. Engines report NaN, values
+                                // above 100, and percentages that walk backwards;
+                                // pages must not each re-derive the rules, and a
+                                // stale ETA must expire rather than keep counting.
+                                var normalized = progressTracker.Report(
+                                    root.TryGetProperty("percent", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetDouble() : double.NaN,
+                                    root.TryGetProperty("stage", out var s) && s.ValueKind == JsonValueKind.String ? s.GetString() : null,
+                                    root.TryGetProperty("eta_seconds", out var e) && e.ValueKind == JsonValueKind.Number && e.TryGetInt32(out var etaValue) ? etaValue : null);
                                 progress?.Report(new SidecarProgress(
-                                    Percent: root.TryGetProperty("percent", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetDouble() : 0,
-                                    Stage: root.TryGetProperty("stage", out var s) && s.ValueKind == JsonValueKind.String ? s.GetString() ?? "" : "",
-                                    EtaSeconds: root.TryGetProperty("eta_seconds", out var e) && e.ValueKind == JsonValueKind.Number ? e.GetInt32() : null));
+                                    normalized.Percent,
+                                    normalized.Stage,
+                                    normalized.EtaSeconds));
                                 break;
+                            }
 
                             case "log":
                                 log?.Report(new SidecarLog(
@@ -476,6 +505,17 @@ public sealed class SidecarRunner : ISidecarRunner
             finalOutput = boundary.CanonicalPath;
         }
 
+        // A verified success pins the bar at 100; a failure leaves it where it
+        // stopped, because claiming completion for a job that produced nothing
+        // is a lie the user then has to untangle.
+        var finalProgress = progressTracker.Complete(success);
+        progress?.Report(new SidecarProgress(
+            finalProgress.Percent,
+            finalProgress.Stage,
+            finalProgress.EtaSeconds));
+
+        OutputProbeSummary? outputProbe = null;
+
         // ROADMAP Item 72: post-encode duration validation. Only fires on a
         // successful job whose input/output both look like media files; on
         // anything else (probe missing, sidecar isn't a media converter, etc.)
@@ -499,6 +539,17 @@ public sealed class SidecarRunner : ISidecarRunner
                         var validation = await OutputDurationValidator.ValidateAsync(
                             ffprobePath!, inputPath!, finalOutput!,
                             opts.MinDurationDeltaSeconds, ct).ConfigureAwait(false);
+
+                        // The probe used to be discarded after one log line, so
+                        // a truncation warning could not be reviewed afterwards.
+                        // Keep it on the job record.
+                        outputProbe = new OutputProbeSummary(
+                            SizeBytes: finalSize,
+                            DurationSeconds: validation.OutputSeconds,
+                            SourceDurationSeconds: validation.InputSeconds,
+                            DurationWithinTolerance: validation.IsValid,
+                            Note: validation.Reason);
+
                         if (!validation.IsValid)
                         {
                             log?.Report(new SidecarLog(
@@ -516,13 +567,89 @@ public sealed class SidecarRunner : ISidecarRunner
             }
         }
 
+        outputProbe ??= finalSize is not null
+            ? new OutputProbeSummary(finalSize, null, null, null, null)
+            : null;
+
         return new SidecarResult(
             Success: success,
             OutputPath: finalOutput,
             SizeBytes: finalSize,
             ErrorCode: success ? null : (errorCode ?? "exit_nonzero"),
             ErrorMessage: success ? null : (errorMessage ?? $"Sidecar exited with code {exitCode}"),
-            ExitCode: exitCode);
+            ExitCode: exitCode)
+        {
+            Provenance = BuildProvenance(
+                toolName,
+                exe,
+                argumentVector,
+                startedUtc,
+                stopwatch.Elapsed,
+                finalOutput,
+                outputProbe,
+                exitCode,
+                success,
+                success ? null : (errorCode ?? "exit_nonzero")),
+        };
+    }
+
+    /// <summary>
+    /// Assembles the immutable record of how one output was produced. Every
+    /// string is redacted at capture so the result can go straight into a
+    /// diagnostics bundle or a bug report.
+    /// </summary>
+    private JobProvenance BuildProvenance(
+        string toolName,
+        string executablePath,
+        IReadOnlyList<string> args,
+        DateTime startedUtc,
+        TimeSpan duration,
+        string? outputPath,
+        OutputProbeSummary? outputProbe,
+        int exitCode,
+        bool success,
+        string? errorCode)
+    {
+        var inputPath = ExtractInputPathFromArgs(args);
+        return new JobProvenance
+        {
+            StartedUtc = startedUtc,
+            DurationSeconds = duration.TotalSeconds,
+            Engine = toolName,
+            RedactedArgs = [.. ArgumentRedactor.Redact(args)],
+            Executable = ExecutableIdentity.Capture(
+                toolName,
+                executablePath,
+                ResolveExecutableVersion(executablePath)),
+            Input = FileIdentity.Capture(inputPath),
+            Output = FileIdentity.Capture(outputPath),
+            OutputProbe = outputProbe,
+            ProductVersion = typeof(SidecarRunner).Assembly.GetName().Version?.ToString(3),
+            ExitCode = exitCode,
+            Succeeded = success,
+            ErrorCode = errorCode,
+        };
+    }
+
+    private static string? ResolveExecutableVersion(string? executablePath)
+    {
+        if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var info = FileVersionInfo.GetVersionInfo(executablePath);
+            return string.IsNullOrWhiteSpace(info.FileVersion)
+                ? info.ProductVersion
+                : info.FileVersion;
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return null;
+        }
     }
 
     private SidecarWorkspace? TryCreatePrivateWorkspace(

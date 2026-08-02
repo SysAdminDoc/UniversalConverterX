@@ -11,6 +11,15 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Vulnerability and deprecation suppressions live in `tools/gates/allowlist.json` and must carry a reason, an owner, and an expiry no more than 180 days out. The gate fails on a lapsed entry and an expired entry stops suppressing its finding, so a suppression cannot become permanent by neglect.
 - Runtime UI smoke gate (`build.ps1 -Target UiSmoke`, `tests/ui_smoke/Invoke-UiSmoke.ps1`). The real x64 shell is launched and driven through all 54 registered routes in light, dark, and a 640-DIP narrow reflow pass — 162 navigations — asserting each page constructs, lays out to a non-empty rect, and exposes a reachable focus target. Failures capture a PNG of the shell and are reported per route/theme with the exception; unhandled XAML and AppDomain exceptions are recorded rather than killing the sweep, so one broken page no longer hides the rest. Verified by fault injection: a thrown constructor is reported on all three passes with screenshots.
 
+### Changed
+
+- Sidecar progress is normalized once, in the runner, instead of by each of the ~49 handlers that consume it. Non-finite readings are ignored, values are clamped to 0–100, progress never walks backwards when a two-pass engine restarts its counter, a verified success pins the bar at 100 while a failure leaves it where it stopped, and an ETA the engine stopped refreshing expires rather than counting down on its own. `JobProgressTracker.Scale` maps a per-item reading into a whole run, so a preset over N files no longer sweeps 0–100 once per file.
+
+### Added
+
+- Every sidecar job now carries an immutable provenance record: redacted arguments, the executable that ran with its version and size, input and output file identity, the capability/fallback decision, the post-hoc output probe, product version, and exit code. It is persisted alongside history rows (`provenance_json`, added by additive migration so existing databases keep working) and on restored queue jobs, and read back through `HistoryStore.GetProvenanceAsync`. A payload from another schema is reported as absent rather than partially trusted.
+- `ArgumentRedactor` strips credentials before anything is persisted or exported: secret-flag values in both `--flag value` and `--flag=value` forms, URL userinfo and query strings, inline `token=`/`Authorization: Bearer` secrets in messages, and the operator's profile directory (rewritten as `~`).
+
 ### Security
 
 - Sidecar process trees are now contained. Each run is held in a Windows job object with `KILL_ON_JOB_CLOSE`, so an engine's children — FFmpeg, PyInstaller bootstraps, ncnn workers — die with the job and with the app instead of being stranded by a cancel or a crash. Process-count and committed-memory ceilings are enforced (defaults: 128 processes, 90% of physical RAM), with an optional wall-clock cap left off by default so a slow-but-healthy encode is not killed. Applies to the UI runner and the `ucx serve` REST launcher alike.

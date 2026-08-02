@@ -22,6 +22,12 @@ public sealed record HistoryRecord
     public string? ErrorMessage { get; init; }
     public string? Profile { get; init; }
     public string? RerunParameters { get; init; }
+
+    /// <summary>
+    /// Serialized job provenance: redacted arguments, the binary that ran,
+    /// input and output identity, and the post-hoc probe.
+    /// </summary>
+    public string? Provenance { get; init; }
     public string ErrorDetails =>
         string.IsNullOrWhiteSpace(ErrorMessage) ? "No error details were provided." : ErrorMessage;
 
@@ -77,6 +83,7 @@ public sealed record HistoryRecord
         ErrorMessage = ErrorMessage,
         Profile = Profile,
         RerunParameters = RerunParameters,
+        Provenance = Provenance,
     };
 
     internal static HistoryRecord FromEntry(ConversionHistoryEntry entry) => new()
@@ -95,6 +102,7 @@ public sealed record HistoryRecord
         ErrorMessage = entry.ErrorMessage,
         Profile = entry.Profile,
         RerunParameters = entry.RerunParameters,
+        Provenance = entry.Provenance,
     };
 }
 

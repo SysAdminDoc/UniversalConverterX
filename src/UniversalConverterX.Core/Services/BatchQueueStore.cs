@@ -44,6 +44,13 @@ public sealed record PersistedBatchJob
     public List<string> Args { get; init; } = [];
     public string Status { get; init; } = "Queued";
     public string? ErrorMessage { get; init; }
+
+    /// <summary>
+    /// Serialized <see cref="Models.JobProvenance"/> for a job that has already
+    /// run, so a restored queue can still say which binary and arguments
+    /// produced an output. Null while the job is queued.
+    /// </summary>
+    public string? Provenance { get; init; }
 }
 
 /// <summary>
@@ -95,6 +102,9 @@ public static class BatchQueueOperations
             Id = Guid.NewGuid().ToString("N"),
             Status = "Queued",
             ErrorMessage = null,
+            // A copy has not run yet, so it must not inherit the original's
+            // record of how the original was produced.
+            Provenance = null,
             Args = [.. source.Args],
         };
     }

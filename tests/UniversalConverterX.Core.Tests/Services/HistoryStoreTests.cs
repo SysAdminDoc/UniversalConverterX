@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
+using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Services;
 
 namespace UniversalConverterX.Core.Tests.Services;
@@ -278,6 +280,116 @@ public sealed class HistoryStoreTests : IDisposable
         {
             // SQLite may briefly retain a file handle while a failed test unwinds.
         }
+    }
+
+    [Fact]
+    public async Task Store_ShouldPersistAndReadBackJobProvenance()
+    {
+        using var store = CreateStore("provenance.db");
+        var provenance = new JobProvenance
+        {
+            Engine = "videocrush",
+            PresetName = "web-1080p",
+            RedactedArgs = ["--input", "clip.mkv", "--token", ArgumentRedactor.Placeholder],
+            Executable = new ExecutableIdentity("videocrush", @"D:\tools\videocrush.exe", "1.4.0", 2048, null),
+            Capability = new CapabilityDecision("h264_nvenc", "libx264", true, "no NVENC device"),
+            OutputProbe = new OutputProbeSummary(512, 30.0, 30.1, true, null),
+            Succeeded = true,
+        };
+
+        var id = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush",
+            Action = "Compress",
+            SourcePath = "clip.mkv",
+            Success = true,
+            Provenance = JobProvenanceCodec.Serialize(provenance),
+        });
+
+        var restored = await store.GetProvenanceAsync(id);
+
+        restored.Should().NotBeNull();
+        restored!.PresetName.Should().Be("web-1080p");
+        restored.Capability!.FellBack.Should().BeTrue();
+        restored.Executable!.Version.Should().Be("1.4.0");
+        restored.RedactedArgs.Should().Contain(ArgumentRedactor.Placeholder);
+    }
+
+    [Fact]
+    public async Task Store_ShouldReportAbsentProvenanceRatherThanPartiallyTrustingIt()
+    {
+        using var store = CreateStore("provenance-invalid.db");
+
+        var withoutProvenance = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush",
+            Action = "Compress",
+            SourcePath = "clip.mkv",
+            Success = true,
+        });
+        var corrupt = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush",
+            Action = "Compress",
+            SourcePath = "clip.mkv",
+            Success = true,
+            Provenance = "{ not json",
+        });
+
+        (await store.GetProvenanceAsync(withoutProvenance)).Should().BeNull();
+        (await store.GetProvenanceAsync(corrupt)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Store_ShouldAddTheProvenanceColumnToAnExistingDatabase()
+    {
+        // Rows written before provenance existed must keep working, and the
+        // additive migration must not require a rebuild.
+        var path = Path.Combine(_tempDirectory, "legacy.db");
+        Directory.CreateDirectory(_tempDirectory);
+        using (var connection = new SqliteConnection($"Data Source={path}"))
+        {
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp_utc TEXT NOT NULL,
+                    engine TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    source_path TEXT NOT NULL,
+                    output_path TEXT,
+                    source_bytes INTEGER,
+                    output_bytes INTEGER,
+                    duration_sec REAL NOT NULL DEFAULT 0,
+                    success INTEGER NOT NULL,
+                    error_code TEXT,
+                    error_message TEXT,
+                    profile TEXT
+                );
+                INSERT INTO history
+                    (timestamp_utc, engine, action, source_path, success)
+                VALUES ('2026-01-01T00:00:00.0000000Z', 'legacy', 'Convert', 'old.mkv', 1);
+                """;
+            command.ExecuteNonQuery();
+        }
+
+        using var store = new HistoryStore(path);
+        var rows = await store.QueryAsync();
+
+        rows.Should().ContainSingle();
+        rows[0].Engine.Should().Be("legacy");
+        rows[0].Provenance.Should().BeNull();
+
+        var id = await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush",
+            Action = "Compress",
+            SourcePath = "new.mkv",
+            Success = true,
+            Provenance = JobProvenanceCodec.Serialize(new JobProvenance { Engine = "videocrush" }),
+        });
+        (await store.GetProvenanceAsync(id)).Should().NotBeNull();
     }
 
     private HistoryStore CreateStore(

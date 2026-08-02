@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 154 — Centralize NDJSON progress and immutable job provenance
-  Why: the runner accepts arbitrary numeric percentages/ETA and pages interpret progress independently; users cannot reproduce which preset, binary, fallback, or arguments produced an output.
-  Evidence: `SidecarRunner.cs:290-304`; Tdarr issue 1236; File Converter v2.2; Unmanic 0.4.0.
-  Touches: shared progress model, `PersistedBatchJob`, `HistoryStore`, queue/history UI, diagnostics export.
-  Acceptance: progress is finite, clamped, non-regressing, reaches 100% on verified success, and expires stale ETA; each job stores redacted args, preset/hash, executable version/hash, input identity, capability/fallback decision, and output probe summary.
-  Complexity: M
-
 - [ ] P1 — Item 155 — Add a media metadata and output-fidelity regression corpus
   Why: competitors repeatedly regress language labels, track names, attachments, color data, and fallback selection; UCX's broad claims need fixture proof.
   Evidence: Shutter issue 228; LosslessCut 3.69.0; VidCoder 12.23; MKVToolNix v100; Netflix VMAF; C2PA security considerations.

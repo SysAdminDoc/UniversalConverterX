@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.Data.Sqlite;
+using UniversalConverterX.Core.Models;
 
 namespace UniversalConverterX.Core.Services;
 
@@ -22,6 +23,14 @@ public sealed record ConversionHistoryEntry
     public string? ErrorMessage { get; init; }
     public string? Profile { get; init; }
     public string? RerunParameters { get; init; }
+
+    /// <summary>
+    /// Serialized <see cref="Models.JobProvenance"/> describing how this output
+    /// was produced: redacted arguments, the binary that ran, input and output
+    /// identity, the capability decision, and the post-hoc probe. Null for rows
+    /// written before provenance was recorded.
+    /// </summary>
+    public string? Provenance { get; init; }
 }
 
 public sealed record ConversionHistorySummary(
@@ -80,11 +89,12 @@ public sealed class HistoryStore : IDisposable
                 INSERT INTO history
                     (timestamp_utc, engine, action, source_path, output_path,
                      source_bytes, output_bytes, duration_sec, success,
-                     error_code, error_message, profile, rerun_json)
+                     error_code, error_message, profile, rerun_json,
+                     provenance_json)
                 VALUES
                     (@ts, @engine, @action, @src, @out,
                      @sb, @ob, @dur, @ok,
-                     @ec, @em, @prof, @rerun);
+                     @ec, @em, @prof, @rerun, @prov);
                 SELECT last_insert_rowid();
                 """;
             var timestamp = entry.Timestamp.Kind == DateTimeKind.Utc
@@ -103,6 +113,7 @@ public sealed class HistoryStore : IDisposable
             command.Parameters.AddWithValue("@em", (object?)entry.ErrorMessage ?? DBNull.Value);
             command.Parameters.AddWithValue("@prof", (object?)entry.Profile ?? DBNull.Value);
             command.Parameters.AddWithValue("@rerun", (object?)entry.RerunParameters ?? DBNull.Value);
+            command.Parameters.AddWithValue("@prov", (object?)entry.Provenance ?? DBNull.Value);
             var id = (long)(command.ExecuteScalar() ?? 0L);
 
             Prune(connection, transaction);
@@ -166,6 +177,24 @@ public sealed class HistoryStore : IDisposable
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Reads back the provenance for one job. A payload written by a different
+    /// schema, or corrupted, is reported as absent rather than partially
+    /// trusted — a half-read provenance record is worse than none.
+    /// </summary>
+    public async Task<JobProvenance?> GetProvenanceAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        var entry = await GetAsync(id, cancellationToken).ConfigureAwait(false);
+        if (entry?.Provenance is null)
+            return null;
+
+        return JobProvenanceCodec.TryDeserialize(entry.Provenance, out var provenance, out _)
+            ? provenance
+            : null;
     }
 
     private static ConversionRerunRequest? TryReadRerun(ConversionHistoryEntry? entry)
@@ -240,7 +269,8 @@ public sealed class HistoryStore : IDisposable
         command.CommandText = $"""
             SELECT id, timestamp_utc, engine, action, source_path, output_path,
                    source_bytes, output_bytes, duration_sec, success,
-                   error_code, error_message, profile, rerun_json
+                   error_code, error_message, profile, rerun_json,
+                   provenance_json
             FROM history
             {where}
             ORDER BY id DESC
@@ -262,7 +292,8 @@ public sealed class HistoryStore : IDisposable
         command.CommandText = """
             SELECT id, timestamp_utc, engine, action, source_path, output_path,
                    source_bytes, output_bytes, duration_sec, success,
-                   error_code, error_message, profile, rerun_json
+                   error_code, error_message, profile, rerun_json,
+                   provenance_json
             FROM history
             WHERE id = @id
             LIMIT 1;
@@ -299,6 +330,7 @@ public sealed class HistoryStore : IDisposable
             ErrorMessage = reader.IsDBNull(11) ? null : reader.GetString(11),
             Profile = reader.IsDBNull(12) ? null : reader.GetString(12),
             RerunParameters = reader.IsDBNull(13) ? null : reader.GetString(13),
+            Provenance = reader.IsDBNull(14) ? null : reader.GetString(14),
         };
     }
 
@@ -393,7 +425,8 @@ public sealed class HistoryStore : IDisposable
                 error_code      TEXT,
                 error_message   TEXT,
                 profile         TEXT,
-                rerun_json      TEXT
+                rerun_json      TEXT,
+                provenance_json TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_history_ts     ON history(timestamp_utc);
             CREATE INDEX IF NOT EXISTS idx_history_engine ON history(engine);
@@ -401,6 +434,7 @@ public sealed class HistoryStore : IDisposable
             """;
         command.ExecuteNonQuery();
         EnsureColumn(connection, "rerun_json", "TEXT");
+        EnsureColumn(connection, "provenance_json", "TEXT");
     }
 
     private static void EnsureColumn(SqliteConnection connection, string columnName, string declaration)
