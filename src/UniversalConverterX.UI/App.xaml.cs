@@ -54,6 +54,7 @@ public partial class App : Application
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "UniversalConverterX",
                 "queues")));
+        services.AddSingleton<IAppJobCoordinator, AppJobCoordinator>();
         services.AddSingleton<IToolDownloader>(sp => new ToolDownloader(
             sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>(),
             new HttpClient()));
@@ -174,6 +175,7 @@ public partial class App : Application
         //   * HistoryService: SQLite warm-up + initial Recent[] load on background thread.
         //   * WatchFolderService: saved profiles begin watching folders immediately.
         // WatchFolderService also depends on HistoryService for job logging, so order matters.
+        _ = Services.GetRequiredService<IAppJobCoordinator>();
         _ = Services.GetRequiredService<IHistoryService>();
         _ = Services.GetRequiredService<IWatchFolderService>();
 

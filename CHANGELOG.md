@@ -4,6 +4,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added an app-scoped durable Job Center over the shared queue store. Converter and Compressor queues now restore across navigation and restart, recover in-flight jobs as interrupted, expose centralized cancel/retry/skip actions, and publish preflight blocker-versus-warning diagnostics.
+
 ### Fixed
 
 - LibreOffice conversions now render into a per-job temporary directory and promote only a fresh, non-input artifact to the requested destination. Collision-resolved outputs cannot overwrite sibling files, and stale same-stem files no longer turn an exit-code-zero run into a false success.

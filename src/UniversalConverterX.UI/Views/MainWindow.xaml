@@ -93,6 +93,12 @@
                         <FontIcon Glyph="&#xE895;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Uid="MainWindow_MainWindow_JobCenter" Tag="job-center" Content="Job Center"
+                                    AutomationProperties.AutomationId="MainWindow_JobCenter">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE916;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="MainWindow_Item_010" Tag="downloader" Content="Downloader">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE896;"/>

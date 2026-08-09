@@ -17,7 +17,7 @@ public class VisualSystemContractTests
             "Pages");
 
         var pages = Directory.GetFiles(pagesRoot, "*.xaml", SearchOption.TopDirectoryOnly);
-        pages.Should().HaveCount(53);
+        pages.Should().HaveCount(54);
 
         foreach (var page in pages)
         {

@@ -3312,6 +3312,45 @@
   <data name="ImageEnhancerPage_TtaCheck.Content" xml:space="preserve">
     <value>TTA (lento, ligero bache de calidad)</value>
   </data>
+  <data name="JobCenterPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Cancel job</value>
+  </data>
+  <data name="JobCenterPage_Item_001.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="JobCenterPage_Item_002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Retry job</value>
+  </data>
+  <data name="JobCenterPage_Item_002.Content" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="JobCenterPage_Item_003.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Skip job</value>
+  </data>
+  <data name="JobCenterPage_Item_003.Content" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="JobCenterPage_Item_004.Text" xml:space="preserve">
+    <value>Job Center</value>
+  </data>
+  <data name="JobCenterPage_Item_005.Text" xml:space="preserve">
+    <value>One durable view of queued, running, interrupted, and retryable work across workflows.</value>
+  </data>
+  <data name="JobCenterPage_Item_006.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Refresh jobs</value>
+  </data>
+  <data name="JobCenterPage_Item_006.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="JobCenterPage_Item_008.Text" xml:space="preserve">
+    <value>No queued jobs</value>
+  </data>
+  <data name="JobCenterPage_Item_009.Text" xml:space="preserve">
+    <value>Jobs created by a workflow will stay here until they finish, fail, or are skipped.</value>
+  </data>
+  <data name="JobCenterPage_SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Filter by workflow, file, status, engine, or error...</value>
+  </data>
   <data name="LipReadingPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>
   </data>
@@ -3572,6 +3611,9 @@
   </data>
   <data name="MainWindow_LocalProcessingText.Text" xml:space="preserve">
     <value>Procesamiento local</value>
+  </data>
+  <data name="MainWindow_MainWindow_JobCenter.Content" xml:space="preserve">
+    <value>Job Center</value>
   </data>
   <data name="MainWindow_NavSearchBox.PlaceholderText" xml:space="preserve">
     <value>Tareas e instrumentos de búsqueda</value>

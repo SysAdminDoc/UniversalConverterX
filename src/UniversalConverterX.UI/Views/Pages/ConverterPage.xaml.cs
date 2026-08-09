@@ -58,6 +58,7 @@ public sealed partial class ConverterPage : Page
 
     private readonly IConversionOrchestrator _orchestrator;
     private readonly IBatchQueueStore _queueStore;
+    private readonly IAppJobCoordinator _jobCoordinator;
     private readonly IHistoryService _history;
     private readonly IPostQueueActionService _postQueueActions;
     private readonly ISidecarRunner _sidecarRunner;
@@ -87,6 +88,7 @@ public sealed partial class ConverterPage : Page
         // 13 converter strategies for no reason.
         _orchestrator = App.Services.GetRequiredService<IConversionOrchestrator>();
         _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
+        _jobCoordinator = App.Services.GetRequiredService<IAppJobCoordinator>();
         _history = App.Services.GetRequiredService<IHistoryService>();
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         _sidecarRunner = App.Services.GetRequiredService<ISidecarRunner>();
@@ -872,9 +874,10 @@ public sealed partial class ConverterPage : Page
                 var info = new FileInfo(job.SourcePath);
                 var status = job.Status switch
                 {
-                    "Running" or "Converting" => "Interrupted - ready to retry",
+                    "Running" or "Converting" or "Cancelling" or "Interrupted" => "Interrupted - ready to retry",
                     "Failed" => "Failed - ready to retry",
                     "Cancelled" => "Cancelled - ready to retry",
+                    "Skipped" => "Skipped",
                     _ => "Queued",
                 };
 
@@ -925,6 +928,7 @@ public sealed partial class ConverterPage : Page
         if (activeJobs.Count == 0)
         {
             _queueStore.Clear(QueueKey);
+            _jobCoordinator.NotifyJobsChanged();
             return;
         }
 
@@ -946,6 +950,7 @@ public sealed partial class ConverterPage : Page
             },
             Jobs = activeJobs,
         });
+        _jobCoordinator.NotifyJobsChanged();
     }
 
     private static string NormalizePersistedStatus(string status)
@@ -956,6 +961,8 @@ public sealed partial class ConverterPage : Page
             return "Failed";
         if (status.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase))
             return "Cancelled";
+        if (status.StartsWith("Skipped", StringComparison.OrdinalIgnoreCase))
+            return "Skipped";
         if (status.Equals("Converting", StringComparison.OrdinalIgnoreCase)
             || status.EndsWith("%", StringComparison.Ordinal))
             return "Running";
@@ -1169,6 +1176,11 @@ public sealed partial class ConverterPage : Page
         var completionItems = new ConcurrentQueue<QueueCompletionItem>();
         var cancellation = _cancellationTokenSource
             ?? throw new InvalidOperationException("Conversion cancellation source was not initialized.");
+        var registeredHandles = queuedJobs
+            .Select(queued => new AppJobHandle(QueueKey, queued.File.Id))
+            .ToList();
+        foreach (var handle in registeredHandles)
+            _jobCoordinator.RegisterCancellation(handle, cancellation.Cancel);
 
         // Get max parallel jobs from settings
         var options = App.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>().Value;
@@ -1346,6 +1358,8 @@ public sealed partial class ConverterPage : Page
         }
         finally
         {
+            foreach (var handle in registeredHandles)
+                _jobCoordinator.UnregisterCancellation(handle);
             semaphore?.Dispose();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;

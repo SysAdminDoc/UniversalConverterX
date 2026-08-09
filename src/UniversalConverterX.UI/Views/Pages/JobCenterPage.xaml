@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UniversalConverterX.UI.Views.Pages.JobCenterPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="using:UniversalConverterX.Core.Services"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource BackgroundBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="JobRowTemplate" x:DataType="core:AppJobCenterItem">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0"
+                    CornerRadius="12"
+                    Padding="16"
+                    Margin="0,0,0,10">
+                <Grid ColumnSpacing="16" RowSpacing="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="{x:Bind FileName}"
+                                   Style="{StaticResource LabelTextStyle}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind DisplayStatusLine}"
+                                   Style="{StaticResource SubtitleTextStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind DisplaySource}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind DisplayOutput}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{x:Bind DisplayError}"
+                                   Foreground="{StaticResource AccentRedBrush}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                VerticalAlignment="Center">
+                        <Button x:Uid="JobCenterPage_Item_001" Content="Cancel"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Tag="{x:Bind Key}"
+                                IsEnabled="{x:Bind CanCancel}"
+                                AutomationProperties.Name="Cancel job"
+                                Click="Cancel_Click"/>
+                        <Button x:Uid="JobCenterPage_Item_002" Content="Retry"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Tag="{x:Bind Key}"
+                                IsEnabled="{x:Bind CanRetry}"
+                                AutomationProperties.Name="Retry job"
+                                Click="Retry_Click"/>
+                        <Button x:Uid="JobCenterPage_Item_003" Content="Skip"
+                                Style="{StaticResource GhostButtonStyle}"
+                                Tag="{x:Bind Key}"
+                                IsEnabled="{x:Bind CanSkip}"
+                                AutomationProperties.Name="Skip job"
+                                Click="Skip_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Style="{StaticResource PageLayoutStyle}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="6">
+                <TextBlock x:Uid="JobCenterPage_Item_004" Text="Job Center" Style="{StaticResource PageTitleTextStyle}"/>
+                <TextBlock x:Uid="JobCenterPage_Item_005" Text="One durable view of queued, running, interrupted, and retryable work across workflows."
+                           Style="{StaticResource PageDescriptionTextStyle}"
+                           TextWrapping="Wrap"
+                           MaxWidth="760"/>
+            </StackPanel>
+            <Button x:Uid="JobCenterPage_Item_006" Grid.Column="1"
+                    Content="Refresh"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Refresh_Click"
+                    AutomationProperties.AutomationId="JobCenterRefreshButton"
+                    AutomationProperties.Name="Refresh jobs"/>
+        </Grid>
+
+        <AutoSuggestBox x:Uid="JobCenterPage_SearchBox" Grid.Row="1"
+                        x:Name="SearchBox"
+                        PlaceholderText="Filter by workflow, file, status, engine, or error..."
+                        QueryIcon="Find"
+                        Padding="12,8"
+                        TextChanged="Search_TextChanged"
+                        AutomationProperties.AutomationId="JobCenterSearchBox"/>
+
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="18">
+            <Grid>
+                <StackPanel x:Name="EmptyState"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="12">
+                    <Border Width="88" Height="88" CornerRadius="12"
+                            Background="{StaticResource SurfaceLightBrush}">
+                        <FontIcon Glyph="&#xE916;" FontSize="40"
+                                  Foreground="{StaticResource AccentBlueBrush}"/>
+                    </Border>
+                    <TextBlock x:Uid="JobCenterPage_Item_008" Text="No queued jobs"
+                               Style="{StaticResource TitleTextStyle}"
+                               HorizontalAlignment="Center"
+                               FontSize="18"/>
+                    <TextBlock x:Uid="JobCenterPage_Item_009" Text="Jobs created by a workflow will stay here until they finish, fail, or are skipped."
+                               Style="{StaticResource MutedTextStyle}"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="360"
+                               TextAlignment="Center"/>
+                </StackPanel>
+                <ListView x:Name="JobsList"
+                          Background="Transparent"
+                          SelectionMode="None"
+                          ItemTemplate="{StaticResource JobRowTemplate}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="StatusText"
+                   Style="{StaticResource MutedTextStyle}"
+                   TextTrimming="CharacterEllipsis"/>
+    </Grid>
+</Page>

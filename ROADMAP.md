@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 156 — Introduce a durable app-scoped job coordinator and job center
-  Why: dozens of pages own cancellation/process state and only Converter persists its queue, so navigation, restart recovery, retry, and preflight behavior vary by workflow.
-  Evidence: page-level `CancellationTokenSource` usage; `ConverterPage`/`BatchQueueStore`; Adobe Media Encoder, Apple Compressor, UniConverter, and Topaz queue behavior.
-  Touches: new UI/Core job coordinator, queue store schema/migration, pages, navigation shell, history.
-  Acceptance: jobs survive page navigation; queued jobs restore after restart and formerly running jobs return as interrupted/retryable; cancel/retry/skip work from one job center; preflight separates blocking errors from warnings for tool/model/input/output/free-space/capability checks.
-  Complexity: XL
-
 - [ ] P1 — Item 158 — Route Console and Shell preset parsing through Core `PresetDocument`
   Why: three XML readers enforce different validation and path semantics, creating a security/compatibility drift point.
   Evidence: `Core/Utilities/PresetDocument.cs`; `Console/Presets/ConversionPreset.cs`; `ShellExtension/Presets/PresetReader.cs`.

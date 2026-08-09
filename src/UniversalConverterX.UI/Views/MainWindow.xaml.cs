@@ -48,6 +48,7 @@ public sealed partial class MainWindow : Window
         new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
         new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
         new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
+        new("Job Center", "Queued, running, interrupted, and retryable jobs across workflows", "job-center"),
         new("VMAF Quality", "Score a compressed clip against its reference (libvmaf)", "vmaf"),
         new("Scene Detection", "Find scene cuts in a video and export to CSV / EDL", "scene-detect"),
         new("Auto Highlight", "Rank scene-change and motion peaks, then export a reel / EDL / OTIO", "auto-highlight"),

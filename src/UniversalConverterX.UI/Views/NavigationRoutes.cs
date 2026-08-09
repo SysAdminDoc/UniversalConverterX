@@ -57,6 +57,7 @@ public static class NavigationRoutes
             ["chapter-marks"] = typeof(ChapterMarksPage),
             ["watch-folders"] = typeof(WatchFoldersPage),
             ["history"] = typeof(HistoryPage),
+            ["job-center"] = typeof(JobCenterPage),
             ["vmaf"] = typeof(VmafAnalysisPage),
             ["scene-detect"] = typeof(SceneDetectPage),
             ["auto-highlight"] = typeof(AutoHighlightPage),

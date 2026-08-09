@@ -21,6 +21,8 @@ namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class CompressorPage : Page
 {
+    private const string QueueKey = "compressor";
+    private const string QueuePageName = "Compressor";
     private static readonly string[] VideoExtensions =
     [
         ".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".wmv", ".ts", ".mts", ".m4v"
@@ -44,23 +46,29 @@ public sealed partial class CompressorPage : Page
 
     private readonly ISidecarRunner _runner;
     private readonly ISidecarHealthService _health;
+    private readonly IBatchQueueStore _queueStore;
+    private readonly IAppJobCoordinator _jobCoordinator;
     private readonly IHistoryService _history;
     private readonly IPostQueueActionService _postQueueActions;
     private readonly ObservableCollection<CompressionFileItem> _files = [];
     private readonly ObservableCollection<CompressionFinishedItem> _finished = [];
     private CancellationTokenSource? _cts;
     private string? _outputDirectory;
+    private bool _restoringQueue;
 
     public CompressorPage()
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _health = App.Services.GetRequiredService<ISidecarHealthService>();
+        _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
+        _jobCoordinator = App.Services.GetRequiredService<IAppJobCoordinator>();
         _history = App.Services.GetRequiredService<IHistoryService>();
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         UpdatePresetSummaries();
+        RestorePersistedQueue();
         UpdateUi();
     }
 
@@ -158,6 +166,7 @@ public sealed partial class CompressorPage : Page
         _outputDirectory = folder.Path;
         OutputDirectoryBox.Text = _outputDirectory;
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void SameAsSource_Click(object sender, RoutedEventArgs e)
@@ -165,6 +174,7 @@ public sealed partial class CompressorPage : Page
         _outputDirectory = null;
         OutputDirectoryBox.Text = "";
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void AddFolder(string path)
@@ -244,7 +254,10 @@ public sealed partial class CompressorPage : Page
         });
 
         if (updateUi)
+        {
             UpdateUi();
+            PersistQueue();
+        }
 
         return true;
     }
@@ -273,6 +286,7 @@ public sealed partial class CompressorPage : Page
 
         _files.Clear();
         UpdateUi();
+        PersistQueue();
     }
 
     private void QueuePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -303,6 +317,7 @@ public sealed partial class CompressorPage : Page
         UpdateD3D12Options();
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void ProPreset_Changed(object sender, SelectionChangedEventArgs e)
@@ -310,6 +325,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null) return;
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void SocialTarget_Changed(object sender, SelectionChangedEventArgs e)
@@ -325,6 +341,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null) return;
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void TargetSize_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -332,6 +349,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null || !IsTargetSizeMode) return;
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void VmafTarget_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -339,6 +357,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null || !IsVmafTargetMode) return;
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void VmafEncoder_Changed(object sender, SelectionChangedEventArgs e)
@@ -346,6 +365,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null || !IsVmafTargetMode) return;
         UpdatePresetSummaries();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void HwAccel_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -353,6 +373,7 @@ public sealed partial class CompressorPage : Page
         if (StatusText is null) return;
         UpdateD3D12Options();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void UpdateD3D12Options()
@@ -369,6 +390,131 @@ public sealed partial class CompressorPage : Page
         if (HwAccelCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
             return tag;
         return "none";
+    }
+
+    private void RestorePersistedQueue()
+    {
+        _restoringQueue = true;
+        try
+        {
+            var queue = _queueStore.Load(QueueKey);
+            if (queue is null || queue.Jobs.Count == 0)
+                return;
+
+            if (queue.Settings.TryGetValue("outputDirectory", out var outputDirectory)
+                && !string.IsNullOrWhiteSpace(outputDirectory))
+            {
+                _outputDirectory = outputDirectory;
+                OutputDirectoryBox.Text = outputDirectory;
+            }
+
+            foreach (var job in queue.Jobs)
+            {
+                if (string.IsNullOrWhiteSpace(job.SourcePath)
+                    || _files.Any(file => file.Path.Equals(job.SourcePath, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                var sourceInfo = new FileInfo(job.SourcePath);
+                var sourceExists = sourceInfo.Exists;
+                var sourceSize = sourceExists ? sourceInfo.Length : 0;
+                _files.Add(new CompressionFileItem
+                {
+                    Id = string.IsNullOrWhiteSpace(job.Id) ? Guid.NewGuid().ToString("N") : job.Id,
+                    Path = job.SourcePath,
+                    FileName = sourceInfo.Name,
+                    Extension = sourceInfo.Extension.TrimStart('.').ToUpperInvariant(),
+                    SourceSizeBytes = sourceSize,
+                    SourceSummary = sourceExists
+                        ? $"{FormatSize(sourceSize)} - {sourceInfo.Extension.TrimStart('.').ToUpperInvariant()}"
+                        : "Source file is missing",
+                    PresetSummary = SelectedPresetLabel(),
+                    OutputPath = job.OutputPath,
+                    ErrorMessage = job.ErrorMessage,
+                    Engine = job.Engine,
+                    StatusText = RestoreStatus(job.Status),
+                });
+            }
+
+            if (_files.Count > 0)
+                StatusText.Text = $"Restored {_files.Count} compression job(s) from the previous session.";
+        }
+        finally
+        {
+            _restoringQueue = false;
+        }
+
+        PersistQueue();
+    }
+
+    private void PersistQueue()
+    {
+        if (_restoringQueue || _queueStore is null || _jobCoordinator is null)
+            return;
+
+        var activeJobs = _files
+            .Where(file => !file.StatusText.Equals("Done", StringComparison.OrdinalIgnoreCase))
+            .Select(file => new PersistedBatchJob
+            {
+                Id = string.IsNullOrWhiteSpace(file.Id) ? Guid.NewGuid().ToString("N") : file.Id,
+                SourcePath = file.Path,
+                OutputPath = file.OutputPath,
+                Engine = string.IsNullOrWhiteSpace(file.Engine) ? "videocrush" : file.Engine,
+                Action = "compress",
+                Preset = SelectedPresetTag(),
+                Status = NormalizePersistedStatus(file.StatusText),
+                ErrorMessage = file.ErrorMessage,
+            })
+            .ToList();
+
+        if (activeJobs.Count == 0)
+        {
+            _queueStore.Clear(QueueKey);
+            _jobCoordinator.NotifyJobsChanged();
+            return;
+        }
+
+        _queueStore.Save(new PersistedBatchQueue
+        {
+            QueueKey = QueueKey,
+            PageName = QueuePageName,
+            Settings = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["outputDirectory"] = _outputDirectory,
+                ["preset"] = SelectedPresetTag(),
+                ["hardwareAcceleration"] = SelectedHwAccel(),
+                ["targetPreset"] = SelectedTargetPresetTag(),
+                ["targetMegabytes"] = SelectedTargetLimitMb().ToString(CultureInfo.InvariantCulture),
+                ["vmafEncoder"] = SelectedVmafEncoder(),
+                ["vmafTarget"] = SelectedVmafTarget().ToString(CultureInfo.InvariantCulture),
+            },
+            Jobs = activeJobs,
+        });
+        _jobCoordinator.NotifyJobsChanged();
+    }
+
+    private static string RestoreStatus(string? status) => status?.ToLowerInvariant() switch
+    {
+        "interrupted" or "running" or "converting" or "cancelling" => "Interrupted - ready to retry",
+        "failed" => "Failed - ready to retry",
+        "cancelled" => "Cancelled - ready to retry",
+        "skipped" => "Skipped",
+        _ => "Queued",
+    };
+
+    private static string NormalizePersistedStatus(string? status)
+    {
+        if (status?.StartsWith("Interrupted", StringComparison.OrdinalIgnoreCase) == true)
+            return "Interrupted";
+        if (status?.StartsWith("Failed", StringComparison.OrdinalIgnoreCase) == true)
+            return "Failed";
+        if (status?.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase) == true)
+            return "Cancelled";
+        if (status?.StartsWith("Skipped", StringComparison.OrdinalIgnoreCase) == true)
+            return "Skipped";
+        if (status?.Equals("Compressing", StringComparison.OrdinalIgnoreCase) == true
+            || status?.EndsWith("%", StringComparison.Ordinal) == true)
+            return "Running";
+        return "Queued";
     }
 
     private async void Compress_Click(object sender, RoutedEventArgs e)
@@ -441,7 +587,13 @@ public sealed partial class CompressorPage : Page
         var batchStartedAt = DateTime.UtcNow;
         var completionItems = new List<QueueCompletionItem>();
 
-        _cts = new CancellationTokenSource();
+        var cancellation = new CancellationTokenSource();
+        _cts = cancellation;
+        var registeredHandles = jobs
+            .Select(item => new AppJobHandle(QueueKey, item.Id))
+            .ToList();
+        foreach (var handle in registeredHandles)
+            _jobCoordinator.RegisterCancellation(handle, cancellation.Cancel);
         CompressButton.IsEnabled = false;
         ProgressLog.Text = "";
         ShowOverlay($"Compressing {jobs.Count} files ({preset})");
@@ -456,10 +608,14 @@ public sealed partial class CompressorPage : Page
                 var outputPath = BuildOutputPath(item.Path, smartQualityMode);
                 var request = workflow.BuildInvocation(item.Path, outputPath);
 
+                item.Engine = engine;
+                item.OutputPath = outputPath;
                 item.StatusText = "Compressing";
+                item.ErrorMessage = null;
                 item.Progress = 0;
                 ProgressTitle.Text = $"Compressing {item.FileName}";
                 ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                PersistQueue();
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -514,7 +670,7 @@ public sealed partial class CompressorPage : Page
                 }
 
                 var result = await _runner.RunAsync(
-                    request.Engine, request.Arguments, progress, log, _cts.Token, rawEvent);
+                    request.Engine, request.Arguments, progress, log, cancellation.Token, rawEvent);
                 if (result.Success)
                 {
                     completed++;
@@ -522,6 +678,8 @@ public sealed partial class CompressorPage : Page
                     item.StatusText = verifiedVmaf is double vmaf
                         ? $"Done · VMAF {vmaf:0.00}"
                         : "Done";
+                    item.OutputPath = result.OutputPath ?? outputPath;
+                    item.ErrorMessage = null;
                     item.ResultSizeBytes = result.SizeBytes ?? 0;
                     resultBytes += item.ResultSizeBytes;
                 }
@@ -529,7 +687,10 @@ public sealed partial class CompressorPage : Page
                 {
                     failed++;
                     item.StatusText = result.ErrorCode == "cancelled" ? "Cancelled" : "Failed";
+                    item.OutputPath = result.OutputPath ?? outputPath;
+                    item.ErrorMessage = result.ErrorMessage;
                 }
+                PersistQueue();
 
                 AddFinishedItem(item, result, verifiedVmaf, finalCrf);
                 completionItems.Add(new QueueCompletionItem
@@ -573,7 +734,9 @@ public sealed partial class CompressorPage : Page
         }
         finally
         {
-            _cts.Dispose();
+            foreach (var handle in registeredHandles)
+                _jobCoordinator.UnregisterCancellation(handle);
+            cancellation.Dispose();
             _cts = null;
         }
 
@@ -688,6 +851,7 @@ public sealed partial class CompressorPage : Page
         ClearButton.IsEnabled = hasFiles && _cts is null;
         UpdateTotals();
         UpdateStatusText();
+        PersistQueue();
     }
 
     private void UpdateTotals(long? explicitResultBytes = null)
@@ -891,11 +1055,15 @@ public sealed class CompressionFileItem : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Path { get; set; } = "";
     public string FileName { get; set; } = "";
     public string Extension { get; set; } = "";
     public string SourceSummary { get; set; } = "";
     public long SourceSizeBytes { get; set; }
+    public string? OutputPath { get; set; }
+    public string? ErrorMessage { get; set; }
+    public string Engine { get; set; } = "videocrush";
 
     public long ResultSizeBytes
     {
