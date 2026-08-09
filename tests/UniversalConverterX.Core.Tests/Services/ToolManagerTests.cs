@@ -108,6 +108,32 @@ public class ToolManagerTests
     }
 
     [Fact]
+    public async Task GetToolVersionAsync_ConcurrentCallers_ShouldKeepVersionCacheConsistent()
+    {
+        var toolNames = new[]
+        {
+            "ffmpeg", "imagemagick", "pandoc", "calibre", "libreoffice",
+            "7zip", "inkscape", "ghostscript", "yt-dlp", "deno"
+        };
+        var tasks = Enumerable.Range(0, 512)
+            .Select(index => Task.Run(async () =>
+            {
+                var toolName = toolNames[index % toolNames.Length];
+                var version = await _toolManager.GetToolVersionAsync(
+                    index % 2 == 0 ? toolName : toolName.ToUpperInvariant());
+
+                _toolManager.GetAvailableTools().Should().NotBeEmpty();
+                return version;
+            }))
+            .ToArray();
+        var allTasks = Task.WhenAll(tasks);
+
+        var completed = await Task.WhenAny(allTasks, Task.Delay(TimeSpan.FromSeconds(5)));
+        completed.Should().Be(allTasks);
+        await allTasks;
+    }
+
+    [Fact]
     public void GetAvailableTools_ShouldReturnAllKnownTools()
     {
         var tools = _toolManager.GetAvailableTools();

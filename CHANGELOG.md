@@ -10,6 +10,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - `ucx serve` now prints a fresh bearer token per startup and requires it for every route except `/healthz`. Exact loopback Host validation, browser Origin/Sec-Fetch rejection, and `application/json` enforcement prevent cross-origin or rebinding-triggered conversion requests; internal errors no longer echo exception details.
 - Watch-folder Convert jobs now resolve collisions to a unique sibling before suppression or sidecar launch and refuse any residual input/output identity match, preserving the source in unattended same-extension workflows.
 - Magic-byte detection now preserves specific XML/JSON-backed extensions such as SVG, COLLADA, FB2, and ASCII glTF, so converter selection reaches resvg or Assimp instead of a generic XML/JSON route.
+- Tool version cache reads and writes are now safe across concurrent callers, including cached unavailable-tool results and downloader invalidation.
 
 ## [2.34.0] - 2026-08-02
 

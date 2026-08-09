@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,7 +17,9 @@ public class ToolManager : IToolManager
     private readonly ConverterXOptions _options;
     private readonly IToolDownloader? _downloader;
     private readonly Dictionary<string, ToolDefinition> _toolDefinitions;
-    private readonly Dictionary<string, string?> _versionCache = new(StringComparer.OrdinalIgnoreCase);
+    // ConcurrentDictionary does not accept null values, so keep the nullable
+    // result inside a non-null cache entry rather than using a sentinel string.
+    private readonly ConcurrentDictionary<string, VersionCacheEntry> _versionCache = new(StringComparer.OrdinalIgnoreCase);
 
     public ToolManager(IOptions<ConverterXOptions> options, ILogger<ToolManager>? logger = null)
     {
@@ -83,11 +86,11 @@ public class ToolManager : IToolManager
     public async Task<string?> GetToolVersionAsync(string toolName, CancellationToken cancellationToken = default)
     {
         if (_versionCache.TryGetValue(toolName, out var cachedVersion))
-            return cachedVersion;
+            return cachedVersion.Version;
 
         if (!IsToolAvailable(toolName))
         {
-            _versionCache[toolName] = null;
+            _versionCache[toolName] = new VersionCacheEntry(null);
             return null;
         }
 
@@ -124,7 +127,7 @@ public class ToolManager : IToolManager
 
             var allOutput = output + error;
             var version = ExtractVersion(allOutput);
-            _versionCache[toolName] = version;
+            _versionCache[toolName] = new VersionCacheEntry(version);
 
             return version;
         }
@@ -132,14 +135,14 @@ public class ToolManager : IToolManager
         {
             try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
             _logger?.LogWarning("Timed out while getting version for {Tool}", toolName);
-            _versionCache[toolName] = null;
+            _versionCache[toolName] = new VersionCacheEntry(null);
             return null;
         }
         catch (Exception ex)
         {
             try { if (process is not null && !process.HasExited) process.Kill(entireProcessTree: true); } catch { }
             _logger?.LogWarning(ex, "Failed to get version for {Tool}", toolName);
-            _versionCache[toolName] = null;
+            _versionCache[toolName] = new VersionCacheEntry(null);
             return null;
         }
         finally
@@ -158,7 +161,7 @@ public class ToolManager : IToolManager
             var result = await _downloader.DownloadToolAsync(toolName, progress, cancellationToken)
                 .ConfigureAwait(false);
             if (result.Success)
-                _versionCache.Remove(toolName);
+                _versionCache.TryRemove(toolName, out _);
             return result;
         }
 
@@ -190,7 +193,9 @@ public class ToolManager : IToolManager
                 catch { }
             }
 
-            _versionCache.TryGetValue(id, out var version);
+            var version = _versionCache.TryGetValue(id, out var cachedVersion)
+                ? cachedVersion.Version
+                : null;
 
             tools.Add(new ToolInfo(
                 Id: id,
@@ -303,6 +308,8 @@ public class ToolManager : IToolManager
 
         return firstLine.Length > 50 ? firstLine[..50] + "..." : firstLine;
     }
+
+    private sealed record VersionCacheEntry(string? Version);
 
     private record ToolDefinition(string Executable, string Name, string VersionArg, string Description);
 }

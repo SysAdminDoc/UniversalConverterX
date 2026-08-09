@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 173 — `ToolManager._versionCache` is a non-thread-safe Dictionary mutated across awaits in a singleton
-  Category: reliability (race)
-  Where: `src/UniversalConverterX.Core/Services/ToolManager.cs:19` (field), reads/writes at `:85,90,127,135,143,161,193`.
-  Problem: `_versionCache` is a plain `Dictionary<string,string?>`; `GetToolVersionAsync` reads it, then after two awaits (continuations on thread-pool threads) writes it. `ToolManager` is a singleton (`App.xaml.cs`). Concurrent callers — launch-time `UpdateCheckService.ProbeYtDlpAsync`→`GetToolVersionAsync("yt-dlp")` overlapping `SidecarHealthService.EvaluateToolAsync`→`GetToolVersionAsync` fired from Home/Presets/Compressor/Downloader — produce concurrent writes. Undefined behavior: `InvalidOperationException`, corrupted reads, or an infinite spin during a bucket resize pegging a core. This is the exact class already fixed for `SidecarHealthService._manifestCache` (v2.31.4 item 5); `_versionCache` was left unconverted.
-  Evidence: plain Dictionary at line 19; singleton registration; overlapping async callers traced above.
-  Fix: change to `ConcurrentDictionary<string,string?>` (matching the `_manifestCache` fix); `Remove`→`TryRemove`.
-  Acceptance: a stress test issuing overlapping `GetToolVersionAsync` for distinct tools from many threads on one instance completes with no exception/hang; static review shows every access on a thread-safe map.
-  Confidence: Verified (structure). Effort: S
-
 - [ ] P1 — Item 174 — `FFmpegConverter` per-instance progress/warning state is shared across concurrent jobs
   Category: correctness (race)
   Where: `src/UniversalConverterX.Core/Converters/FFmpegConverter.cs:51,618-627,652-654` (`_totalDuration`, `ParseProgress`); `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs:321-333,448-469` (`warnings` list + stdout/stderr callbacks); orchestrator holds one converter instance (`ConversionOrchestrator.cs:76`) and runs up to 4 jobs via `Parallel.ForEachAsync` (`:409-443`).
