@@ -15,6 +15,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Preset, Explorer, generic sidecar, and REST launches now apply the configured output collision policy before spawning an engine, auto-renaming or skipping existing outputs instead of silently overwriting them.
 - The CLI now loads the shared settings document once per process and applies persisted defaults for conversion, inspection, listing, presets, sidecars, tools, and REST, while explicit command flags continue to win.
 - Core settings writes now merge into the existing JSON document so UI-owned preferences survive CLI edits and schema migrations; Reset to defaults restores every public option, including sidecar containment, output-boundary, and language settings.
+- Settings edits now use a draft snapshot: Reset and theme preview remain discardable until Save, and the hardware-acceleration choices persist their explicit Auto/NVENC/QSV/AMF/CPU-only enum values.
 
 ## [2.34.0] - 2026-08-02
 

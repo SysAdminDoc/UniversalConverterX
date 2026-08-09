@@ -211,11 +211,11 @@
                                   SelectionChanged="SettingsSelection_Changed"
                                   HorizontalAlignment="Stretch"
                             AutomationProperties.AutomationId="HardwareAccelComboBox">
-                            <ComboBoxItem x:Uid="SettingsWindow_Item_042" Content="Auto-detect"/>
-                            <ComboBoxItem x:Uid="SettingsWindow_Item_043" Content="NVIDIA NVENC (CUDA)"/>
-                            <ComboBoxItem x:Uid="SettingsWindow_Item_044" Content="Intel Quick Sync"/>
-                            <ComboBoxItem x:Uid="SettingsWindow_Item_045" Content="AMD AMF"/>
-                            <ComboBoxItem x:Uid="SettingsWindow_Item_046" Content="Disabled (CPU only)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_042" Tag="Auto" Content="Auto-detect"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_043" Tag="Nvenc" Content="NVIDIA NVENC (CUDA)"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_044" Tag="Qsv" Content="Intel Quick Sync"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_045" Tag="Amf" Content="AMD AMF"/>
+                            <ComboBoxItem x:Uid="SettingsWindow_Item_046" Tag="None" Content="Disabled (CPU only)"/>
                         </ComboBox>
 
                         <!-- Parallel Conversions -->

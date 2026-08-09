@@ -221,24 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 179 — Settings "Reset" and theme preview mutate the live options singleton; Cancel/Discard doesn't revert
-  Category: correctness / ux
-  Where: `src/UniversalConverterX.UI/Views/SettingsWindow.xaml.cs:474-490` (`ThemeComboBox_SelectionChanged`→`App.ApplyTheme`), `:611-632` (`ResetSettings_Click`→`ResetToDefaults` at 628), Cancel/Discard `:634-661`.
-  Problem: the window edits the DI-singleton `ConverterXOptions` that the orchestrator, `SidecarRunner`, and `PostQueueActionService` read live. Normal edits touch it only on Save (good), but (a) changing the theme calls `App.ApplyTheme` globally on every selection change, and (b) Reset calls `ResetToDefaults()` immediately on the singleton. If the user then clicks Cancel/Discard, nothing reverts and nothing is persisted: the running session keeps the previewed theme and the reset options (parallelism, overwrite behavior, sidecar containment, queue-completion action…), while `settings.json` still holds the old values — silently reverting on restart. "Discard unsaved changes" is a lie here.
-  Evidence: `_options` is the shared singleton; `ResetToDefaults` mutates in place; Cancel/Discard only calls `Close()` with no reload-from-disk or theme restore.
-  Fix: edit a cloned options object committed to the singleton + `Save()` only on Save; preview theme on a snapshot and restore the original `RequestedTheme` on cancel (or reload `_options` from disk on discard).
-  Acceptance: change theme + Reset, then Cancel → app theme and `_options` (assert on `MaxParallelConversions`) are identical to their pre-dialog state.
-  Confidence: Verified. Effort: M
-
-- [ ] P1 — Item 180 — Hardware-acceleration ComboBox persists the wrong enum via positional index
-  Category: correctness
-  Where: `src/UniversalConverterX.UI/Views/SettingsWindow.xaml:207-219` (items), `SettingsWindow.xaml.cs:160,699` (load/save); enum `src/UniversalConverterX.Core/Models/ConversionOptions.cs:149-160`.
-  Problem: save does `(HardwareAcceleration)HardwareAccelComboBox.SelectedIndex`. The ComboBox order is Auto-detect(0), NVIDIA NVENC(1), Intel Quick Sync(2), AMD AMF(3), Disabled(4), but the enum is `Auto,None,Cuda,Nvenc,Qsv,Amf,VideoToolbox,Vaapi,Vulkan`. So "NVIDIA NVENC" persists as `None`, "Intel Quick Sync" as `Cuda`, "AMD AMF" as `Nvenc`, "Disabled (CPU only)" as `Qsv` — every non-Auto choice saves the wrong value (e.g. `ucx config get hardware-accel` after choosing NVENC shows None). The setting currently has no consumer (see Item 162), so there's no runtime effect today, but the mismatch is a latent landmine the moment Item 130b wires it.
-  Evidence: enum ordering vs XAML item ordering as above; `(HardwareAcceleration)SelectedIndex` cast at save.
-  Fix: bind ComboBox items to explicit enum tags (`Tag="{x:Bind}"` / a value list) and persist the tag, not the index; add a test asserting each label round-trips to the matching enum value.
-  Acceptance: selecting each option persists the enum value that matches the label; test covers all five.
-  Confidence: Verified. Effort: S
-
 - [ ] P1 — Item 181 — PowerShell `Invoke-UcxNdjson` deadlocks on any sidecar that writes more than a pipe buffer to stderr
   Category: reliability
   Where: `integrations/powershell/UniversalConverterX.psm1:132-172` (stderr drained at `:169`, after `WaitForExit` at `:166`); affects `Compress-MediaFile` (`:339`) and `Invoke-UcxEngine` (`:283`).

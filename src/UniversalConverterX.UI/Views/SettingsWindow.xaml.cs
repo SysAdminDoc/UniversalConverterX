@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,6 +26,7 @@ public sealed partial class SettingsWindow : Window
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ConverterXOptions _options;
+    private ConverterXOptions _draftOptions;
     private readonly IToolManager _toolManager;
     private readonly IToolDownloader? _toolDownloader;
     private readonly IPluginTrustService _pluginTrustService;
@@ -38,6 +41,7 @@ public sealed partial class SettingsWindow : Window
     {
         _serviceProvider = serviceProvider;
         _options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>().Value;
+        _draftOptions = CloneOptions(_options);
         _toolManager = serviceProvider.GetRequiredService<IToolManager>();
         _toolDownloader = serviceProvider.GetService<IToolDownloader>();
         _pluginTrustService = serviceProvider.GetRequiredService<IPluginTrustService>();
@@ -53,6 +57,8 @@ public sealed partial class SettingsWindow : Window
         appWindow.Resize(new Windows.Graphics.SizeInt32(820, 920));
         appWindow.Title = AppLocalizer.Get(
             "SettingsWindow_Item_001.Title", "Settings - UniversalConverter X");
+
+        Closed += (_, _) => RestoreThemePreview();
 
         LoadSettings();
         LoadTools();
@@ -144,32 +150,33 @@ public sealed partial class SettingsWindow : Window
     private void LoadSettings()
     {
         // General
-        OutputDirectoryTextBox.Text = _options.DefaultOutputDirectory ?? "";
-        OverwriteBehaviorComboBox.SelectedIndex = (int)_options.OverwriteBehavior;
-        PostConversionActionComboBox.SelectedIndex = (int)_options.PostConversionAction;
-        PostConversionArchiveTextBox.Text = _options.PostConversionArchiveFolder ?? "";
+        OutputDirectoryTextBox.Text = _draftOptions.DefaultOutputDirectory ?? "";
+        OverwriteBehaviorComboBox.SelectedIndex = (int)_draftOptions.OverwriteBehavior;
+        PostConversionActionComboBox.SelectedIndex = (int)_draftOptions.PostConversionAction;
+        PostConversionArchiveTextBox.Text = _draftOptions.PostConversionArchiveFolder ?? "";
         UpdatePostConversionArchiveState();
-        NotificationsToggle.IsOn = _options.ShowNotifications;
-        SoundToggle.IsOn = _options.PlaySoundOnComplete;
-        QueueCompletionActionComboBox.SelectedIndex = (int)_options.QueueCompletionAction;
-        QueueCompletionScriptTextBox.Text = _options.QueueCompletionScriptPath ?? "";
+        NotificationsToggle.IsOn = _draftOptions.ShowNotifications;
+        SoundToggle.IsOn = _draftOptions.PlaySoundOnComplete;
+        QueueCompletionActionComboBox.SelectedIndex = (int)_draftOptions.QueueCompletionAction;
+        QueueCompletionScriptTextBox.Text = _draftOptions.QueueCompletionScriptPath ?? "";
         UpdateQueueCompletionScriptState();
 
         // Quality & Performance
-        DefaultQualityComboBox.SelectedIndex = (int)_options.DefaultQuality;
-        HardwareAccelComboBox.SelectedIndex = (int)_options.DefaultHardwareAcceleration;
-        ParallelSlider.Value = _options.MaxParallelConversions;
-        PreserveMetadataToggle.IsOn = _options.PreserveMetadataByDefault;
+        DefaultQualityComboBox.SelectedIndex = (int)_draftOptions.DefaultQuality;
+        HardwareAccelComboBox.SelectedIndex = GetHardwareAccelerationIndex(
+            _draftOptions.DefaultHardwareAcceleration);
+        ParallelSlider.Value = _draftOptions.MaxParallelConversions;
+        PreserveMetadataToggle.IsOn = _draftOptions.PreserveMetadataByDefault;
 
         // Tools
-        ToolsPathTextBox.Text = _options.ToolsBasePath;
+        ToolsPathTextBox.Text = _draftOptions.ToolsBasePath;
 
         // Shell Integration
-        ContextMenuToggle.IsOn = _options.ShellIntegrationEnabled;
-        ContextMenuStyleComboBox.SelectedIndex = (int)_options.ContextMenuStyle;
+        ContextMenuToggle.IsOn = _draftOptions.ShellIntegrationEnabled;
+        ContextMenuStyleComboBox.SelectedIndex = (int)_draftOptions.ContextMenuStyle;
 
         // Load preset checkboxes
-        var presets = _options.QuickConvertPresets ?? [];
+        var presets = _draftOptions.QuickConvertPresets ?? [];
         PresetWebpCheckBox.IsChecked = presets.Contains("webp");
         PresetPngCheckBox.IsChecked = presets.Contains("png");
         PresetJpgCheckBox.IsChecked = presets.Contains("jpg");
@@ -178,16 +185,16 @@ public sealed partial class SettingsWindow : Window
         PresetPdfCheckBox.IsChecked = presets.Contains("pdf");
 
         // Appearance
-        ThemeComboBox.SelectedIndex = (int)_options.Theme;
+        ThemeComboBox.SelectedIndex = (int)_draftOptions.Theme;
         var languageIndex = Array.FindIndex(
             LanguageTags,
-            tag => tag.Equals(_options.Language ?? "", StringComparison.OrdinalIgnoreCase));
+            tag => tag.Equals(_draftOptions.Language ?? "", StringComparison.OrdinalIgnoreCase));
         LanguageComboBox.SelectedIndex = languageIndex >= 0 ? languageIndex : 0;
-        MinimizeToTrayToggle.IsOn = _options.MinimizeToTray;
-        StartMinimizedToggle.IsOn = _options.StartMinimized;
+        MinimizeToTrayToggle.IsOn = _draftOptions.MinimizeToTray;
+        StartMinimizedToggle.IsOn = _draftOptions.StartMinimized;
 
         // Advanced
-        FfmpegCommandEditingToggle.IsOn = _options.EnableFfmpegCommandEditing;
+        FfmpegCommandEditingToggle.IsOn = _draftOptions.EnableFfmpegCommandEditing;
 
         // Version
         var version = typeof(SettingsWindow).Assembly.GetName().Version;
@@ -483,10 +490,7 @@ public sealed partial class SettingsWindow : Window
             _ => ElementTheme.Default
         };
 
-        if (Content is FrameworkElement root)
-            root.RequestedTheme = theme;
-
-        App.ApplyTheme(theme);
+        ApplyThemePreview(theme);
     }
 
     private void AccentColor_Click(object sender, RoutedEventArgs e)
@@ -624,8 +628,7 @@ public sealed partial class SettingsWindow : Window
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            // Reset to defaults
-            _options.ResetToDefaults();
+            _draftOptions.ResetToDefaults();
             LoadSettings();
             MarkDirty();
         }
@@ -639,6 +642,7 @@ public sealed partial class SettingsWindow : Window
             return;
         }
 
+        RestoreThemePreview();
         Close();
     }
 
@@ -657,7 +661,10 @@ public sealed partial class SettingsWindow : Window
 
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
+        {
+            RestoreThemePreview();
             Close();
+        }
     }
 
     private async void Save_Click(object sender, RoutedEventArgs e)
@@ -696,7 +703,7 @@ public sealed partial class SettingsWindow : Window
 
         // Quality & Performance
         _options.DefaultQuality = (Core.Models.QualityPreset)DefaultQualityComboBox.SelectedIndex;
-        _options.DefaultHardwareAcceleration = (Core.Models.HardwareAcceleration)HardwareAccelComboBox.SelectedIndex;
+        _options.DefaultHardwareAcceleration = GetSelectedHardwareAcceleration();
         _options.MaxParallelConversions = (int)ParallelSlider.Value;
         _options.PreserveMetadataByDefault = PreserveMetadataToggle.IsOn;
 
@@ -728,10 +735,59 @@ public sealed partial class SettingsWindow : Window
 
         // Save to file
         _options.Save();
+        _draftOptions = CloneOptions(_options);
 
         _isDirty = false;
         UpdateDirtyState();
     }
+
+    private static ConverterXOptions CloneOptions(ConverterXOptions options)
+    {
+        var serializerOptions = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var json = JsonSerializer.Serialize(options, serializerOptions);
+        return JsonSerializer.Deserialize<ConverterXOptions>(json, serializerOptions)
+               ?? new ConverterXOptions();
+    }
+
+    private static int GetHardwareAccelerationIndex(HardwareAcceleration value) => value switch
+    {
+        HardwareAcceleration.Nvenc or HardwareAcceleration.Cuda => 1,
+        HardwareAcceleration.Qsv => 2,
+        HardwareAcceleration.Amf => 3,
+        HardwareAcceleration.None => 4,
+        _ => 0,
+    };
+
+    private HardwareAcceleration GetSelectedHardwareAcceleration()
+    {
+        if (HardwareAccelComboBox.SelectedItem is ComboBoxItem { Tag: string tag }
+            && Enum.TryParse<HardwareAcceleration>(tag, ignoreCase: true, out var value))
+        {
+            return value;
+        }
+
+        return HardwareAcceleration.Auto;
+    }
+
+    private static ElementTheme ToElementTheme(AppTheme theme) => theme switch
+    {
+        AppTheme.Light => ElementTheme.Light,
+        AppTheme.Dark => ElementTheme.Dark,
+        _ => ElementTheme.Default,
+    };
+
+    private void ApplyThemePreview(ElementTheme theme)
+    {
+        if (Content is FrameworkElement root)
+            root.RequestedTheme = theme;
+
+        App.ApplyTheme(theme);
+    }
+
+    private void RestoreThemePreview() => ApplyThemePreview(ToElementTheme(_options.Theme));
 
     private void UpdatePostConversionArchiveState()
     {
