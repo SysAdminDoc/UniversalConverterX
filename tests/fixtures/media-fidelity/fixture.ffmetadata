@@ -1,0 +1,17 @@
+;FFMETADATA1
+title=UCX metadata fidelity fixture
+comment=round-trip regression corpus
+c2pa_manifest=local-test-manifest.json
+ultrahdr_gain_map=iso-21496-1
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+END=600
+title=Opening
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=600
+END=1200
+title=Closing

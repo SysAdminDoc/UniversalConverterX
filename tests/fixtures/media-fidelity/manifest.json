@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "media-fidelity-round-trip",
+  "sourceFormat": "matroska",
+  "requiredFamilies": [
+    "named-language-audio",
+    "named-language-subtitles",
+    "dispositions",
+    "chapters",
+    "attachments-cover-art",
+    "rotation",
+    "hdr-color",
+    "c2pa-opaque-tag",
+    "ultrahdr-opaque-tag",
+    "duration-and-stream-count",
+    "malformed-input",
+    "cancellation",
+    "source-preservation"
+  ],
+  "roundTrip": {
+    "mode": "stream-copy",
+    "outputExtension": ".mkv",
+    "ignoredFormatTags": ["encoder"]
+  }
+}

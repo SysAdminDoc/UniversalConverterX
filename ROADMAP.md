@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 155 — Add a media metadata and output-fidelity regression corpus
-  Why: competitors repeatedly regress language labels, track names, attachments, color data, and fallback selection; UCX's broad claims need fixture proof.
-  Evidence: Shutter issue 228; LosslessCut 3.69.0; VidCoder 12.23; MKVToolNix v100; Netflix VMAF; C2PA security considerations.
-  Touches: `FFmpegConverter`, native converters, representative sidecars, `ffprobe` comparator, staged-artifact tests.
-  Acceptance: fixed fixtures round-trip named/language-tagged audio/subtitles, dispositions, chapters, attachments, rotation, HDR/color, cover art, C2PA/UltraHDR metadata, malformed inputs, cancellation, and output duration/streams without mutating sources.
-  Complexity: M
-
 - [ ] P1 — Item 156 — Introduce a durable app-scoped job coordinator and job center
   Why: dozens of pages own cancellation/process state and only Converter persists its queue, so navigation, restart recovery, retry, and preflight behavior vary by workflow.
   Evidence: page-level `CancellationTokenSource` usage; `ConverterPage`/`BatchQueueStore`; Adobe Media Encoder, Apple Compressor, UniConverter, and Topaz queue behavior.

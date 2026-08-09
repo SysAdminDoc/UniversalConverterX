@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Core settings writes now merge into the existing JSON document so UI-owned preferences survive CLI edits and schema migrations; Reset to defaults restores every public option, including sidecar containment, output-boundary, and language settings.
 - Settings edits now use a draft snapshot: Reset and theme preview remain discardable until Save, and the hardware-acceleration choices persist their explicit Auto/NVENC/QSV/AMF/CPU-only enum values.
 - PowerShell sidecar invocation now drains stderr concurrently with NDJSON stdout, preventing redirected-pipe deadlocks; `Watch-MediaFolder` passes captured state through event metadata and filters non-media arrivals safely.
+- Added a bounded FFprobe metadata-fidelity snapshot/comparator and fixed media corpus. Headless FFmpeg remux coverage now verifies named/language-tagged tracks, dispositions, chapters, attachments, rotation, HDR/color fields, opaque C2PA/UltraHDR tags, malformed input, cancellation cleanup, duration/stream counts, and source immutability.
 
 ## [2.34.0] - 2026-08-02
 
