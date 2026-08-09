@@ -37,6 +37,8 @@
 
   <ItemGroup>
     <None Include="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="..\..\src\UniversalConverterX.ShellExtension\Presets\PresetReader.cs"
+             Link="ShellExtension\PresetReader.cs" />
   </ItemGroup>
 
 </Project>

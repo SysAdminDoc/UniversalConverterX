@@ -1,5 +1,3 @@
-using System.Xml;
-using System.Xml.Linq;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Presets;
@@ -15,6 +13,17 @@ public sealed record ConversionPreset(
     IReadOnlyList<string> Args,
     string SourcePath)
 {
+    public static ConversionPreset FromDocument(PresetDefinition definition, string sourcePath) => new(
+        definition.Name,
+        definition.Folder,
+        definition.InputTypes,
+        definition.OutputFileNameTemplate,
+        definition.OutputExtension,
+        definition.Engine,
+        PresetInvocationModes.Parse(definition.InvocationMode),
+        definition.Args,
+        sourcePath);
+
     public bool MatchesAll(IReadOnlyList<string> selectedFiles)
     {
         if (InputTypes.Count == 0) return true;     // wildcard preset
@@ -32,13 +41,6 @@ public sealed record ConversionPreset(
 
 public static class PresetLoader
 {
-    private const string Ns = "https://universalconverterx.io/preset/v1";
-    private static readonly XmlReaderSettings XmlSettings = new()
-    {
-        DtdProcessing = DtdProcessing.Prohibit,
-        XmlResolver = null,
-    };
-
     /// <summary>Resolution order:
     /// 1. <c>%LocalAppData%\UniversalConverterX\presets\</c> (user overrides)
     /// 2. <c>%ProgramFiles%\UniversalConverterX\presets\</c> (installer defaults)
@@ -91,77 +93,23 @@ public static class PresetLoader
         return byName.Values.ToList();
     }
 
-    public static ConversionPreset? TryLoad(string path)
+    public static ConversionPreset? TryLoad(string path) => TryLoad(path, out _);
+
+    /// <summary>
+    /// Loads the canonical Core document and projects it into the CLI's
+    /// execution shape. The optional diagnostics are the same strings returned
+    /// by <see cref="PresetDocument.Load"/> so callers do not need to infer
+    /// why a preset was rejected from a null result.
+    /// </summary>
+    public static ConversionPreset? TryLoad(
+        string path,
+        out IReadOnlyList<string> errors)
     {
-        try
-        {
-            using var reader = XmlReader.Create(path, XmlSettings);
-            var doc = XDocument.Load(reader, LoadOptions.None);
-            var root = doc.Root;
-            if (root is null || root.Name.LocalName != "Preset") return null;
-
-            string Get(string name) =>
-                root.Element(XName.Get(name, Ns))?.Value
-                ?? root.Element(name)?.Value
-                ?? "";
-
-            var name = Get("Name").Trim();
-            if (string.IsNullOrEmpty(name)) return null;
-
-            var folder = Get("Folder");
-            var template = Get("OutputFileNameTemplate");
-            var rawExt = Get("OutputExtension").Trim();
-            var ext = string.Empty;
-            var engine = Get("Engine");
-            if (!string.IsNullOrEmpty(rawExt) &&
-                !PathSafety.TryNormalizeExtension(rawExt, out ext, allowDirectorySentinel: true))
-                return null;
-            if (!IsSafeToolName(engine))
-                return null;
-
-            var inputTypesElem =
-                root.Element(XName.Get("InputTypes", Ns))
-                ?? root.Element("InputTypes");
-            var inputTypes = inputTypesElem?
-                .Elements()
-                .Select(e => e.Value.Trim().TrimStart('.').ToLowerInvariant())
-                .Where(s => s.Length > 0)
-                .ToList()
-                ?? [];
-
-            var mode = PresetInvocationModes.Parse(Get("InvocationMode"));
-
-            var argsElem =
-                root.Element(XName.Get("Args", Ns))
-                ?? root.Element("Args");
-            var args = argsElem?
-                .Elements()
-                .Select(e => e.Value)
-                .ToList()
-                ?? [];
-
-            return new ConversionPreset(
-                Name: name,
-                Folder: string.IsNullOrEmpty(folder) ? null : folder,
-                InputTypes: inputTypes,
-                OutputFileNameTemplate: template,
-                OutputExtension: ext,
-                Engine: engine,
-                Mode: mode,
-                Args: args,
-                SourcePath: path);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static bool IsSafeToolName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        if (value is "." or "..") return false;
-        return value.IndexOfAny(['/', '\\', ':', '\0']) < 0;
+        var result = PresetDocument.Load(path);
+        errors = result.Errors;
+        return result.Succeeded && result.Preset is not null
+            ? ConversionPreset.FromDocument(result.Preset, path)
+            : null;
     }
 
     /// <summary>

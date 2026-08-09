@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 158 — Route Console and Shell preset parsing through Core `PresetDocument`
-  Why: three XML readers enforce different validation and path semantics, creating a security/compatibility drift point.
-  Evidence: `Core/Utilities/PresetDocument.cs`; `Console/Presets/ConversionPreset.cs`; `ShellExtension/Presets/PresetReader.cs`.
-  Touches: Core adapter model, Console and Shell preset readers, shared fixture tests.
-  Acceptance: UI, CLI, REST, PowerShell, and Explorer accept/reject the same valid, future-schema, XXE, traversal, invocation-mode, and output-template fixtures with one diagnostic vocabulary.
-  Complexity: M
-
 - [ ] P1 — Item 160 — Localize imperative runtime copy and add pseudo-localization
   Why: XAML resource parity is strong, but 54 C# files contain 493 direct user-visible assignments and only four `AppLocalizer` calls.
   Evidence: `src/UniversalConverterX.UI/Views/**/*.xaml.cs`; Microsoft globalization guidance; File Converter/Shutter localization history.

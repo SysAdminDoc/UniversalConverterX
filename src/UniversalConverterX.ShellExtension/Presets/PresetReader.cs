@@ -1,5 +1,5 @@
-using System.Xml;
-using System.Xml.Linq;
+using UniversalConverterX.Core.Utilities;
+using System.Runtime.Versioning;
 
 namespace UniversalConverterX.ShellExtension.Presets;
 
@@ -16,6 +16,12 @@ public sealed record ShellPreset(
     IReadOnlyList<string> InputTypes,
     string SourcePath)
 {
+    public static ShellPreset FromDocument(PresetDefinition definition, string sourcePath) => new(
+        definition.Name,
+        definition.Folder,
+        definition.InputTypes,
+        sourcePath);
+
     public bool MatchesAll(IReadOnlyList<string> exts)
     {
         if (InputTypes.Count == 0) return true; // wildcard
@@ -31,15 +37,9 @@ public sealed record ShellPreset(
     }
 }
 
+[SupportedOSPlatform("windows")]
 public static class PresetReader
 {
-    private const string Ns = "https://universalconverterx.io/preset/v1";
-    private static readonly XmlReaderSettings XmlSettings = new()
-    {
-        DtdProcessing = DtdProcessing.Prohibit,
-        XmlResolver = null,
-    };
-
     public static IReadOnlyList<string> ResolvePresetDirs()
     {
         var dirs = new List<string>();
@@ -110,43 +110,21 @@ public static class PresetReader
         return byName.Values.ToList();
     }
 
-    public static ShellPreset? TryLoad(string path)
+    public static ShellPreset? TryLoad(string path) => TryLoad(path, out _);
+
+    /// <summary>
+    /// Reads the same canonical Core document as the CLI. The shell keeps its
+    /// small projection, while callers can still inspect the shared diagnostic
+    /// vocabulary when Explorer rejects a preset.
+    /// </summary>
+    public static ShellPreset? TryLoad(
+        string path,
+        out IReadOnlyList<string> errors)
     {
-        try
-        {
-            using var reader = XmlReader.Create(path, XmlSettings);
-            var doc = XDocument.Load(reader, LoadOptions.None);
-            var root = doc.Root;
-            if (root is null || root.Name.LocalName != "Preset") return null;
-
-            string Get(string name) =>
-                root.Element(XName.Get(name, Ns))?.Value
-                ?? root.Element(name)?.Value
-                ?? "";
-
-            var name = Get("Name").Trim();
-            if (name.Length == 0) return null;
-
-            var folder = Get("Folder");
-            var inputTypesElem =
-                root.Element(XName.Get("InputTypes", Ns))
-                ?? root.Element("InputTypes");
-            var inputTypes = inputTypesElem?
-                .Elements()
-                .Select(e => e.Value.Trim().TrimStart('.').ToLowerInvariant())
-                .Where(s => s.Length > 0)
-                .ToList()
-                ?? [];
-
-            return new ShellPreset(
-                Name: name,
-                Folder: string.IsNullOrEmpty(folder) ? null : folder,
-                InputTypes: inputTypes,
-                SourcePath: path);
-        }
-        catch
-        {
-            return null;
-        }
+        var result = PresetDocument.Load(path);
+        errors = result.Errors;
+        return result.Succeeded && result.Preset is not null
+            ? ShellPreset.FromDocument(result.Preset, path)
+            : null;
     }
 }
