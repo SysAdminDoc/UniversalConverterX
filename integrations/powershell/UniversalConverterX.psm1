@@ -138,38 +138,48 @@ function Invoke-UcxNdjson {
     foreach ($a in $ArgsList) { $psi.ArgumentList.Add($a) | Out-Null }
 
     $proc = [System.Diagnostics.Process]::Start($psi)
-    while (-not $proc.StandardOutput.EndOfStream) {
-        $line = $proc.StandardOutput.ReadLine()
-        if (-not $line) { continue }
-        try {
-            $ev = $line | ConvertFrom-Json -ErrorAction Stop
-        } catch {
-            Write-Verbose "non-JSON: $line"
-            continue
-        }
-        switch ($ev.event) {
-            'progress' {
-                $stage = if ($ev.PSObject.Properties['stage']) { $ev.stage } else { '' }
-                Write-Progress -Activity $Activity -Status $stage -PercentComplete ([int]$ev.percent)
+    # Drain stderr immediately and concurrently. Waiting for stdout to finish
+    # before reading stderr deadlocks when a sidecar writes past the OS pipe
+    # buffer (FFmpeg banners and Python tracebacks can do this easily).
+    $stderrTask = $proc.StandardError.ReadToEndAsync()
+    $stderr = ''
+    try {
+        while (-not $proc.StandardOutput.EndOfStream) {
+            $line = $proc.StandardOutput.ReadLine()
+            if (-not $line) { continue }
+            try {
+                $ev = $line | ConvertFrom-Json -ErrorAction Stop
+            } catch {
+                Write-Verbose "non-JSON: $line"
+                continue
             }
-            'log'      {
-                if ($ev.level -eq 'error')      { Write-Warning $ev.message }
-                elseif ($ev.level -eq 'warn')   { Write-Warning $ev.message }
-                else                            { Write-Verbose $ev.message }
+            switch ($ev.event) {
+                'progress' {
+                    $stage = if ($ev.PSObject.Properties['stage']) { $ev.stage } else { '' }
+                    Write-Progress -Activity $Activity -Status $stage -PercentComplete ([int]$ev.percent)
+                }
+                'log'      {
+                    if ($ev.level -eq 'error')      { Write-Warning $ev.message }
+                    elseif ($ev.level -eq 'warn')   { Write-Warning $ev.message }
+                    else                            { Write-Verbose $ev.message }
+                }
+                'error'    {
+                    Write-Error "UCX error [$($ev.code)]: $($ev.message)"
+                }
+                default    { $ev }   # surface other events to the pipeline
             }
-            'error'    {
-                Write-Error "UCX error [$($ev.code)]: $($ev.message)"
-            }
-            default    { $ev }   # surface other events to the pipeline
         }
     }
-    $proc.WaitForExit()
-    Write-Progress -Activity $Activity -Completed
+    finally {
+        $proc.WaitForExit()
+        $stderr = $stderrTask.GetAwaiter().GetResult()
+        Write-Progress -Activity $Activity -Completed
+    }
     if ($proc.ExitCode -ne 0) {
-        $stderr = $proc.StandardError.ReadToEnd()
         if ($stderr) { Write-Warning $stderr }
         throw "$([System.IO.Path]::GetFileName($Exe)) exited with code $($proc.ExitCode)."
     }
+    $proc.Dispose()
 }
 
 
@@ -427,23 +437,32 @@ function Watch-MediaFolder {
     $watcher.IncludeSubdirectories = $false
     $watcher.EnableRaisingEvents = $true
 
-    Register-ObjectEvent $watcher 'Created' -Action {
+    $eventState = [pscustomobject]@{
+        StableSeconds = $StableSeconds
+        Filter = @($Filter)
+        Action = $Action
+        OutputFormat = $OutputFormat
+        Preset = $Preset
+    }
+
+    Register-ObjectEvent $watcher 'Created' -MessageData $eventState -Action {
+        $state = $Event.MessageData
         $arrival = $Event.SourceEventArgs.FullPath
-        Start-Sleep -Seconds $using:StableSeconds   # let copies settle
+        Start-Sleep -Seconds $state.StableSeconds   # let copies settle
 
         if (-not (Test-Path $arrival)) { return }
         $matched = $false
-        foreach ($f in $using:Filter) {
+        foreach ($f in $state.Filter) {
             if ([IO.Path]::GetFileName($arrival) -like $f) { $matched = $true; break }
         }
         if (-not $matched) { return }
 
         Write-Host "[$(Get-Date -Format HH:mm:ss)] Picked up: $arrival"
         try {
-            if ($using:Action -eq 'Convert') {
-                Convert-MediaFile -Path $arrival -OutputFormat $using:OutputFormat -ErrorAction Stop
+            if ($state.Action -eq 'Convert') {
+                Convert-MediaFile -Path $arrival -OutputFormat $state.OutputFormat -ErrorAction Stop
             } else {
-                Compress-MediaFile -Path $arrival -Preset $using:Preset -ErrorAction Stop
+                Compress-MediaFile -Path $arrival -Preset $state.Preset -ErrorAction Stop
             }
         } catch {
             Write-Warning "Failed for $($arrival): $_"

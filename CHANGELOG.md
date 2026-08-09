@@ -16,6 +16,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - The CLI now loads the shared settings document once per process and applies persisted defaults for conversion, inspection, listing, presets, sidecars, tools, and REST, while explicit command flags continue to win.
 - Core settings writes now merge into the existing JSON document so UI-owned preferences survive CLI edits and schema migrations; Reset to defaults restores every public option, including sidecar containment, output-boundary, and language settings.
 - Settings edits now use a draft snapshot: Reset and theme preview remain discardable until Save, and the hardware-acceleration choices persist their explicit Auto/NVENC/QSV/AMF/CPU-only enum values.
+- PowerShell sidecar invocation now drains stderr concurrently with NDJSON stdout, preventing redirected-pipe deadlocks; `Watch-MediaFolder` passes captured state through event metadata and filters non-media arrivals safely.
 
 ## [2.34.0] - 2026-08-02
 

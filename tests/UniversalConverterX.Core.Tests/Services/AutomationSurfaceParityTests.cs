@@ -78,6 +78,10 @@ public sealed class AutomationSurfaceParityTests
         presetRunner.Should().Contain("OutputCollisionPolicy.TryResolvePath");
         module.Should().Contain("function Get-UcxEngine");
         module.Should().Contain("function Invoke-UcxEngine");
+        module.Should().Contain("ReadToEndAsync()");
+        module.Should().Contain("-MessageData $eventState");
+        module.Should().Contain("$Event.MessageData");
+        module.Should().NotContain("$using:");
         manifest.Should().Contain("'Get-UcxEngine'");
         manifest.Should().Contain("'Invoke-UcxEngine'");
     }

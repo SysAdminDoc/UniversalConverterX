@@ -221,24 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 181 — PowerShell `Invoke-UcxNdjson` deadlocks on any sidecar that writes more than a pipe buffer to stderr
-  Category: reliability
-  Where: `integrations/powershell/UniversalConverterX.psm1:132-172` (stderr drained at `:169`, after `WaitForExit` at `:166`); affects `Compress-MediaFile` (`:339`) and `Invoke-UcxEngine` (`:283`).
-  Problem: both stdout and stderr are redirected, but the function reads stdout to end-of-stream in the `:141` loop and only reads stderr after the process exits. If a sidecar emits more than the OS pipe buffer to stderr (a Python traceback, an ffmpeg banner) the child blocks writing stderr while the parent blocks reading stdout — classic redirected-pipe deadlock, hanging the cmdlet forever.
-  Evidence: no async stderr reader; `ReadToEnd` on stderr sits after `WaitForExit`.
-  Fix: drain stderr concurrently — start `$proc.StandardError.ReadToEndAsync()` (or `BeginErrorReadLine` with a handler) before the stdout loop, await it after exit.
-  Acceptance: a stub exe that writes 1 MB to stderr and NDJSON to stdout completes through `Invoke-UcxEngine` without hanging.
-  Confidence: Verified. Effort: S
-
-- [ ] P1 — Item 182 — PowerShell `Watch-MediaFolder` never converts anything (`$using:` illegal in `Register-ObjectEvent -Action`)
-  Category: correctness
-  Where: `integrations/powershell/UniversalConverterX.psm1:430-451`.
-  Problem: the `Register-ObjectEvent -Action` block uses `$using:StableSeconds`, `$using:Filter`, `$using:Action`, `$using:OutputFormat`, `$using:Preset`. `$using:` is only valid with `Invoke-Command`/`Start-Job`/`InlineScript`; in an event action PS 5.1 throws `UsingWithoutInvokeCommand`. The error goes to the subscriber's job error stream, not the console, so the cmdlet prints "Watching …" and then silently does nothing forever. Also `$watcher.Filter` is never set, so after a fix the watcher fires on every file, not just the `$Filter` list.
-  Evidence: live PS 5.1 repro produces `A Using variable can be used only with Invoke-Command, Start-Job, or InlineScript`.
-  Fix: pass state via `-MessageData` and read `$Event.MessageData` inside the action (or capture via `GetNewClosure()`); set `$watcher.Filter` or keep the manual match but document it.
-  Acceptance: dropping a matching file into the watched folder runs the configured Convert/Compress action; a non-matching extension is ignored.
-  Confidence: Verified. Effort: S
-
 ### P2 — reliability, correctness edges, security hardening, performance
 
 - [ ] P2 — Item 183 — Potrace emits `-b` without its required backend name — PDF/DXF/GeoJSON/XFig output is dead on arrival
