@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 175 — Preset/REST/Explorer spawn paths bypass the overwrite policy the native converter enforces
-  Category: correctness (data loss)
-  Where: `src/UniversalConverterX.Console/Presets/PresetRunner.cs:56-70,97-111,113-127`; `src/UniversalConverterX.Console/Commands/ServeCommand.cs:181-188`; vs `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:167-207`.
-  Problem: `ConversionOrchestrator.ConvertAsync` applies `ResolveOverwriteBehavior`→`Skip`/`UniqueOutputPath.Resolve` before any converter runs. But `PresetRunner.RunPerFile`/`RunBatchSingleOutput`/`RunExtractEach` compute the output path and pass it straight as `--output` with no collision check, and REST `/convert` for any non-`converter` engine goes straight to `Process.Start`. So the same user converting the same file gets auto-rename via `ucx convert` but a silent destructive overwrite via `ucx convert-preset`, the Explorer right-click menu, `ucx invoke-engine`, and `POST /convert`.
-  Evidence: grep shows no `UniqueOutputPath`/overwrite handling in `PresetRunner` or the REST sidecar path; the orchestrator is the only place the policy lives.
-  Fix: move the collision decision into a shared helper (input+desired output → final output/skip) that all spawn paths call before launching a sidecar.
-  Acceptance: converting a file that already has an output through convert-preset / right-click / invoke-engine / POST /convert auto-renames or skips per the configured `OverwriteBehavior`; add tests for each spawn path.
-  Confidence: Verified. Effort: M
-
 - [ ] P1 — Item 176 — The CLI never loads user configuration; `ucx config set` is inert for conversions
   Category: correctness
   Where: `src/UniversalConverterX.Console/Commands/ConvertCommand.cs:179-181,41-42,575-590`; `InfoCommand.cs:32`; `ListCommand.cs:35`; `ToolsCommand.cs:170-177`.

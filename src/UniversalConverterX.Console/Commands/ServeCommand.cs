@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Utilities;
 
@@ -80,6 +81,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         AnsiConsole.MarkupLine("Press Ctrl+C to stop.");
 
         var jobs = new JobManager();
+        var options = ConverterXOptions.Load();
         using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         System.Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopCts.Cancel(); };
 
@@ -91,7 +93,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                 var doneTask = await Task.WhenAny(ctxTask, Task.Delay(Timeout.Infinite, stopCts.Token));
                 if (doneTask != ctxTask) break;
                 var ctx = ctxTask.Result;
-                _ = Task.Run(() => Handle(ctx, jobs, security));
+                _ = Task.Run(() => Handle(ctx, jobs, security, options));
             }
         }
         finally
@@ -106,7 +108,8 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
     private static async Task Handle(
         HttpListenerContext ctx,
         JobManager jobs,
-        ServeRequestSecurity security)
+        ServeRequestSecurity security,
+        ConverterXOptions options)
     {
         var req = ctx.Request;
         var resp = ctx.Response;
@@ -209,6 +212,39 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                 else
                 {
                     exe = SidecarCatalog.Resolve(engine);
+                    if (exe is null)
+                    {
+                        await WriteJson(resp, 404, new { error = "sidecar_not_found", engine });
+                        return;
+                    }
+
+                    if (!OutputCollisionPolicy.TryProtectArguments(
+                            args,
+                            options.OverwriteBehavior,
+                            out var protectedArguments,
+                            out var skippedOutput,
+                            out var outputPolicyError))
+                    {
+                        await WriteJson(resp, 400, new
+                        {
+                            error = "invalid_output_path",
+                            message = outputPolicyError
+                        });
+                        return;
+                    }
+
+                    if (skippedOutput is not null)
+                    {
+                        await WriteJson(resp, 200, new
+                        {
+                            skipped = true,
+                            output_path = skippedOutput,
+                            reason = "output_exists"
+                        });
+                        return;
+                    }
+
+                    launchArgs = protectedArguments.ToList();
                 }
                 if (exe is null)
                 {

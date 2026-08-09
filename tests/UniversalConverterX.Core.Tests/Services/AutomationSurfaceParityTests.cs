@@ -54,6 +54,7 @@ public sealed class AutomationSurfaceParityTests
         var root = FindRepoRoot();
         var program = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Program.cs"));
         var server = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Commands", "ServeCommand.cs"));
+        var presetRunner = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Presets", "PresetRunner.cs"));
         var module = File.ReadAllText(Path.Combine(root, "integrations", "powershell", "UniversalConverterX.psm1"));
         var manifest = File.ReadAllText(Path.Combine(root, "integrations", "powershell", "UniversalConverterX.psd1"));
 
@@ -65,6 +66,9 @@ public sealed class AutomationSurfaceParityTests
         server.Should().Contain("SidecarCatalog.Resolve(engine)");
         server.Should().Contain("ResolveNativeConverter(args)");
         server.Should().Contain("jobs.Start(engine, exe, launchArgs)");
+        server.Should().Contain("OutputCollisionPolicy.TryProtectArguments");
+        presetRunner.Should().Contain("OutputCollisionPolicy.TryProtectArguments");
+        presetRunner.Should().Contain("OutputCollisionPolicy.TryResolvePath");
         module.Should().Contain("function Get-UcxEngine");
         module.Should().Contain("function Invoke-UcxEngine");
         manifest.Should().Contain("'Get-UcxEngine'");

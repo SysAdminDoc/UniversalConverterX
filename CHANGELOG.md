@@ -12,6 +12,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Magic-byte detection now preserves specific XML/JSON-backed extensions such as SVG, COLLADA, FB2, and ASCII glTF, so converter selection reaches resvg or Assimp instead of a generic XML/JSON route.
 - Tool version cache reads and writes are now safe across concurrent callers, including cached unavailable-tool results and downloader invalidation.
 - FFmpeg progress duration and converter warnings are now isolated per conversion job and safe when stdout/stderr callbacks arrive concurrently.
+- Preset, Explorer, generic sidecar, and REST launches now apply the configured output collision policy before spawning an engine, auto-renaming or skipping existing outputs instead of silently overwriting them.
 
 ## [2.34.0] - 2026-08-02
 

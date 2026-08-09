@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Console.Presets;
@@ -21,7 +22,7 @@ public static class PresetRunner
             return 3;
         }
 
-        return Spawn(executable, args, engine);
+        return SpawnWithOutputPolicy(executable, args, engine, ConverterXOptions.Load());
     }
 
     public static int Run(ConversionPreset preset, IReadOnlyList<string> inputs)
@@ -42,18 +43,23 @@ public static class PresetRunner
             return 3;
         }
 
+        var options = ConverterXOptions.Load();
         return preset.Mode switch
         {
-            PresetInvocationMode.PerFile => RunPerFile(exe, preset, inputs),
-            PresetInvocationMode.BatchInputList => RunBatchInputList(exe, preset, inputs),
-            PresetInvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs),
-            PresetInvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs),
-            PresetInvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs),
+            PresetInvocationMode.PerFile => RunPerFile(exe, preset, inputs, options),
+            PresetInvocationMode.BatchInputList => RunBatchInputList(exe, preset, inputs, options),
+            PresetInvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs, options),
+            PresetInvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs, options),
+            PresetInvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs, options),
             _ => 4,
         };
     }
 
-    private static int RunPerFile(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    private static int RunPerFile(
+        string exe,
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions options)
     {
         int rc = 0;
         for (int i = 0; i < inputs.Count; i++)
@@ -63,13 +69,18 @@ public static class PresetRunner
             EnsureDir(output);
 
             var args = BuildArgList(preset, ["--input", input, "--output", output]);
-            var code = Spawn(exe, args, $"[{i + 1}/{inputs.Count}] {Path.GetFileName(input)}");
+            var code = SpawnWithOutputPolicy(
+                exe, args, $"[{i + 1}/{inputs.Count}] {Path.GetFileName(input)}", options);
             if (code != 0) rc = code;
         }
         return rc;
     }
 
-    private static int RunBatchOutputDir(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    private static int RunBatchOutputDir(
+        string exe,
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions options)
     {
         // All outputs land in the directory of the first input (or a
         // template-resolved one). Sidecar names files by stem internally.
@@ -85,16 +96,24 @@ public static class PresetRunner
             "--input",
         };
         args.AddRange(inputs);
-        return Spawn(exe, args, $"batch -> {outDir}");
+        return SpawnWithOutputPolicy(exe, args, $"batch -> {outDir}", options);
     }
 
-    private static int RunBatchInputList(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    private static int RunBatchInputList(
+        string exe,
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions options)
     {
         var args = PresetInvocationModes.BuildBatchInputArguments(preset.Args, inputs);
-        return Spawn(exe, args, $"batch inputs ({inputs.Count})");
+        return SpawnWithOutputPolicy(exe, args, $"batch inputs ({inputs.Count})", options);
     }
 
-    private static int RunBatchSingleOutput(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    private static int RunBatchSingleOutput(
+        string exe,
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions options)
     {
         // Pack -> single archive named after the first input's stem.
         var first = inputs[0];
@@ -107,20 +126,45 @@ public static class PresetRunner
             "--input",
         };
         args.AddRange(inputs);
-        return Spawn(exe, args, $"pack -> {Path.GetFileName(output)}");
+        return SpawnWithOutputPolicy(exe, args, $"pack -> {Path.GetFileName(output)}", options);
     }
 
-    private static int RunExtractEach(string exe, ConversionPreset preset, IReadOnlyList<string> inputs)
+    private static int RunExtractEach(
+        string exe,
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions options)
     {
         int rc = 0;
         for (int i = 0; i < inputs.Count; i++)
         {
             var input = inputs[i];
-            var outDir = PresetLoader.ResolveOutputPath(preset, input);
+            var desiredOutDir = PresetLoader.ResolveOutputPath(preset, input);
+            if (!OutputCollisionPolicy.TryResolvePath(
+                    desiredOutDir,
+                    options.OverwriteBehavior,
+                    out var outDir,
+                    out var shouldSkip,
+                    out var error))
+            {
+                System.Console.Error.WriteLine(error);
+                if (rc == 0) rc = 4;
+                continue;
+            }
+
+            if (shouldSkip)
+            {
+                System.Console.WriteLine(
+                    $">> skipped [{i + 1}/{inputs.Count}] {Path.GetFileName(input)}: " +
+                    $"output directory already exists at '{desiredOutDir}'.");
+                continue;
+            }
+
             Directory.CreateDirectory(outDir);
 
             var args = BuildArgList(preset, ["--input", input, "--output-dir", outDir]);
-            var code = Spawn(exe, args, $"[{i + 1}/{inputs.Count}] {Path.GetFileName(input)}");
+            var code = SpawnWithOutputPolicy(
+                exe, args, $"[{i + 1}/{inputs.Count}] {Path.GetFileName(input)}", options);
             if (code != 0) rc = code;
         }
         return rc;
@@ -156,6 +200,34 @@ public static class PresetRunner
             System.Console.Error.WriteLine($"Spawn failed: {ex.Message}");
             return -1;
         }
+    }
+
+    private static int SpawnWithOutputPolicy(
+        string exe,
+        IReadOnlyList<string> args,
+        string label,
+        ConverterXOptions options)
+    {
+        if (!OutputCollisionPolicy.TryProtectArguments(
+                args,
+                options.OverwriteBehavior,
+                out var protectedArguments,
+                out var skippedOutput,
+                out var error))
+        {
+            System.Console.Error.WriteLine(error);
+            return 4;
+        }
+
+        if (skippedOutput is not null)
+        {
+            System.Console.WriteLine(
+                $">> skipped {label}: output already exists at '{skippedOutput}' " +
+                "and the overwrite policy is Skip.");
+            return 0;
+        }
+
+        return Spawn(exe, protectedArguments, label);
     }
 
     private static void EnsureDir(string path)
