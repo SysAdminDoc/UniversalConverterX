@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Console.Presets;
 using UniversalConverterX.Core.Utilities;
 
@@ -65,6 +66,6 @@ public sealed class InvokeEngineCommand : Command<InvokeEngineCommand.Settings>
             return 2;
         }
 
-        return PresetRunner.RunRaw(settings.Engine, arguments);
+        return PresetRunner.RunRaw(settings.Engine, arguments, CliConfiguration.Get(context));
     }
 }

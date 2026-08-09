@@ -221,33 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 176 — The CLI never loads user configuration; `ucx config set` is inert for conversions
-  Category: correctness
-  Where: `src/UniversalConverterX.Console/Commands/ConvertCommand.cs:179-181,41-42,575-590`; `InfoCommand.cs:32`; `ListCommand.cs:35`; `ToolsCommand.cs:170-177`.
-  Problem: every command builds a fresh `Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath })`. `ConverterXOptions.Load()` is called only by the WinUI app; `ConfigCommand` is the only Console file that touches the settings file, and only to read/write it. So `ucx config set` for tools-path, max-parallel, hardware-accel, default-quality, preserve-metadata, default-timeout, temp-directory, keep-failed-output is persisted then ignored: `--parallel` defaults to a hardcoded 4, `--quality` to `"high"`, tools path to a disk probe. Knock-on: `_options.OverwriteBehavior` is always the fresh default, so a user-configured `Skip` is unreachable from the CLI.
-  Evidence: each command constructs a new options object; only `ConfigCommand` reads settings.json.
-  Fix: load `ConverterXOptions.Load()` once at CLI startup and flow it into every command; let explicit flags override, otherwise fall back to the loaded values.
-  Acceptance: `ucx config set default-quality low` then `ucx convert x.png -o jpg` (no `--quality`) applies low; `max-parallel`/`tools-path`/`overwrite` similarly honored; add a Console test.
-  Confidence: Verified. Effort: M
-
-- [ ] P1 — Item 177 — CLI and UI write `settings.json` with different schemas; each silently destroys the other's keys
-  Category: correctness (data loss)
-  Where: `src/UniversalConverterX.Console/Commands/ConfigCommand.cs:28-31,158,244-254`; `src/UniversalConverterX.Core/Configuration/ConverterXOptions.cs:336-359,400-430`; `src/UniversalConverterX.UI/Services/Services.cs:134-205`.
-  Problem: `%LocalAppData%\UniversalConverterX\settings.json` has two independent owners — Core/CLI serialize the whole typed `ConverterXOptions`; the UI `SettingsService` writes a free-form `Dictionary<string,object>` with different key names (`ToolsPath`, `PreserveMetadata`, `OverwriteExisting`, `OutputDirectory`, `UseCustomOutputDirectory`). Any `ucx config set` runs `LoadConfig`→`SaveConfig`, serializing only `ConverterXOptions` and dropping all UI-only keys. Conversely a UI-written file has no `SchemaVersion`, so at UI startup `LoadFromJson` treats it as v1 and, with `persistMigrated:true`, rewrites the file in `ConverterXOptions` shape — dropping the UI keys without the CLI's involvement.
-  Evidence: two serializers over one path with disjoint key sets; `persistMigrated` save at `ConverterXOptions.cs:417-428`.
-  Fix: unify on one model, or have each writer merge into the existing `JsonObject` (preserving unknown keys) instead of overwriting.
-  Acceptance: set a UI-only value, run `ucx config set` on an unrelated key, reopen the UI — the UI value survives; and vice-versa. Add a round-trip test.
-  Confidence: Verified. Effort: M
-
-- [ ] P1 — Item 178 — `ResetToDefaults()` silently skips 7 settings, including the sidecar-security toggles
-  Category: correctness (security)
-  Where: `src/UniversalConverterX.Core/Configuration/ConverterXOptions.cs:436-479`; invoked by `SettingsWindow.xaml.cs:628`.
-  Problem: `ResetToDefaults` copies each property by hand and omits `ContainSidecarProcesses`, `SidecarMaxProcesses`, `SidecarMaxMemoryMegabytes`, `SidecarMaxRuntime`, `UsePrivateSidecarTemp`, `EnforceSidecarOutputBoundary`, and `Language`. A user who disabled `EnforceSidecarOutputBoundary` or `ContainSidecarProcesses` (security controls) and then clicks "Reset to defaults" is NOT returned to the secure defaults, and `LoadSettings()` repaints the (unchanged) values so the UI looks reset while the live singleton still holds the weakened settings. The existing test (`SettingsMigrationsTests.cs:149`) only asserts two properties, so the drift is uncaught; this recurs whenever a property is added.
-  Evidence: property-by-property comparison of the class vs the reset method (7 missing); the reset test checks only `QueueCompletionAction`/`QueueCompletionScriptPath`.
-  Fix: reset via reflection over all public settable properties (copy from a fresh instance), or add every property; back it with a contract test that reflects over the type and asserts each property equals its default after `ResetToDefaults`.
-  Acceptance: after toggling every setting and calling `ResetToDefaults`, a reflection-based test finds all public properties at their default values.
-  Confidence: Verified. Effort: S
-
 - [ ] P1 — Item 179 — Settings "Reset" and theme preview mutate the live options singleton; Cancel/Discard doesn't revert
   Category: correctness / ux
   Where: `src/UniversalConverterX.UI/Views/SettingsWindow.xaml.cs:474-490` (`ThemeComboBox_SelectionChanged`→`App.ApplyTheme`), `:611-632` (`ResetSettings_Click`→`ResetToDefaults` at 628), Cancel/Discard `:634-661`.

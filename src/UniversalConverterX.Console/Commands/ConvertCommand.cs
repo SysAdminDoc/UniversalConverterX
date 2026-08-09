@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
@@ -28,8 +29,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         [CommandOption("-q|--quality <QUALITY>")]
         [Description("Quality preset: lowest, low, medium, high, highest, lossless")]
-        [DefaultValue("high")]
-        public string Quality { get; set; } = "high";
+        public string? Quality { get; set; }
 
         [CommandOption("-f|--force")]
         [Description("Overwrite existing files")]
@@ -38,8 +38,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         [CommandOption("-p|--parallel <COUNT>")]
         [Description("Maximum parallel conversions")]
-        [DefaultValue(4)]
-        public int Parallel { get; set; } = 4;
+        public int? Parallel { get; set; }
 
         [CommandOption("--no-progress")]
         [Description("Disable progress display")]
@@ -52,13 +51,11 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         [CommandOption("--keep-metadata")]
         [Description("Preserve metadata from source file")]
-        [DefaultValue(true)]
-        public bool KeepMetadata { get; set; } = true;
+        public bool? KeepMetadata { get; set; }
 
         [CommandOption("--hw-accel")]
         [Description("Enable hardware acceleration")]
-        [DefaultValue(true)]
-        public bool HardwareAccel { get; set; } = true;
+        public bool? HardwareAccel { get; set; }
 
         [CommandOption("--width <PIXELS>")]
         [Description("Output width (images/video)")]
@@ -78,8 +75,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         [CommandOption("--source-action <ACTION>")]
         [Description("After successful conversion: keep, move, or delete the source file")]
-        [DefaultValue("keep")]
-        public string SourceAction { get; set; } = "keep";
+        public string? SourceAction { get; set; }
 
         [CommandOption("--source-archive <PATH>")]
         [Description("Archive folder for --source-action move. Relative paths resolve beside each source file.")]
@@ -122,6 +118,11 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
+        var options = CliConfiguration.Get(context);
+        ApplyConfigurationDefaults(settings, options);
+        options.ToolsBasePath = settings.ToolsPath!;
+        options.MaxParallelConversions = Math.Max(1, settings.Parallel!.Value);
+
         // Validate input
         if (settings.Files.Length == 0)
         {
@@ -176,9 +177,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
 
         // Create orchestrator
-        var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
-        var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
-        var orchestrator = new ConversionOrchestrator(options);
+        var orchestrator = new ConversionOrchestrator(Options.Create(options));
 
         // Validate every distinct extension in the batch — otherwise a mixed
         // selection like "*.png *.jpg -o webp" would silently skip whichever
@@ -207,7 +206,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
 
         // Build conversion options
-        var conversionOptions = BuildOptions(settings, sourceAction);
+        var conversionOptions = BuildOptions(settings, options, sourceAction);
 
         // Create jobs
         var jobs = inputFiles.Select(f => CreateJob(f, settings, conversionOptions)).ToList();
@@ -326,7 +325,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 
         if (settings.NoProgress)
         {
-            batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, cancellationToken: cancellationToken);
+            batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel!.Value, cancellationToken: cancellationToken);
             failedCount = batchResult.FailureCount;
 
             foreach (var result in batchResult.Results)
@@ -371,7 +370,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                         }
                     });
 
-                    batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel, progress, cancellationToken);
+                    batchResult = await orchestrator.ConvertBatchAsync(jobs, settings.Parallel!.Value, progress, cancellationToken);
                     
                     overallTask.Value = jobs.Count;
                     currentTask.Value = 100;
@@ -445,9 +444,25 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
     }
 
-    private static ConversionOptions BuildOptions(Settings settings, PostConversionAction sourceAction)
+    internal static void ApplyConfigurationDefaults(Settings settings, ConverterXOptions options)
     {
-        var quality = settings.Quality.ToLowerInvariant() switch
+        if (string.IsNullOrWhiteSpace(settings.Quality))
+            settings.Quality = options.DefaultQuality.ToString();
+        settings.Parallel ??= options.MaxParallelConversions;
+        settings.KeepMetadata ??= options.PreserveMetadataByDefault;
+        settings.HardwareAccel ??= options.EnableHardwareAcceleration;
+        settings.ToolsPath ??= options.ToolsBasePath;
+        settings.OutputDirectory ??= options.DefaultOutputDirectory;
+        settings.SourceAction ??= options.PostConversionAction.ToString();
+        settings.SourceArchive ??= options.PostConversionArchiveFolder;
+    }
+
+    private static ConversionOptions BuildOptions(
+        Settings settings,
+        ConverterXOptions options,
+        PostConversionAction sourceAction)
+    {
+        var quality = (settings.Quality ?? options.DefaultQuality.ToString()).ToLowerInvariant() switch
         {
             "lowest" => QualityPreset.Lowest,
             "low" => QualityPreset.Low,
@@ -462,8 +477,10 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         {
             Quality = quality,
             OverwriteExisting = settings.Force,
-            PreserveMetadata = settings.KeepMetadata,
-            UseHardwareAcceleration = settings.HardwareAccel,
+            PreserveMetadata = settings.KeepMetadata ?? options.PreserveMetadataByDefault,
+            UseHardwareAcceleration = settings.HardwareAccel ?? options.EnableHardwareAcceleration,
+            HardwareAccel = options.DefaultHardwareAcceleration,
+            Timeout = options.DefaultTimeout > TimeSpan.Zero ? options.DefaultTimeout : null,
             StreamCopy = settings.StreamCopy,
             AudioTrackSelection = ParseTrackSelection(settings.AudioTracks),
             SubtitleTrackSelection = ParseTrackSelection(settings.SubtitleTracks),

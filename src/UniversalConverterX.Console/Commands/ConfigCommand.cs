@@ -1,8 +1,7 @@
 using System.ComponentModel;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Models;
 
@@ -25,32 +24,21 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
         public string? Value { get; set; }
     }
 
-    private static readonly string ConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "UniversalConverterX",
-        "settings.json");
-
-    private static readonly string LegacyConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "UniversalConverterX",
-        "config.json");
-
     protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
+        var config = CliConfiguration.Get(context);
         return settings.Action.ToLowerInvariant() switch
         {
-            "show" => ShowConfig(),
-            "set" => SetConfig(settings.Key, settings.Value),
+            "show" => ShowConfig(config),
+            "set" => SetConfig(settings.Key, settings.Value, config),
             "reset" => ResetConfig(),
             "path" => ShowConfigPath(),
             _ => InvalidAction(settings.Action)
         };
     }
 
-    private int ShowConfig()
+    private int ShowConfig(ConverterXOptions config)
     {
-        var config = LoadConfig();
-
         AnsiConsole.MarkupLine("[green]Current Configuration:[/]");
         AnsiConsole.WriteLine();
 
@@ -61,6 +49,7 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
 
         AddConfigRow(table, "tools-path", config.ToolsBasePath);
         AddConfigRow(table, "search-system-tools", config.SearchSystemTools.ToString());
+        AddConfigRow(table, "overwrite", config.OverwriteBehavior.ToString());
         AddConfigRow(table, "max-parallel", config.MaxParallelConversions.ToString());
         AddConfigRow(table, "default-timeout", config.DefaultTimeout.ToString());
         AddConfigRow(table, "hardware-accel", config.EnableHardwareAcceleration.ToString());
@@ -74,12 +63,12 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
         AnsiConsole.Write(table);
 
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine($"[dim]Config file: {ConfigPath}[/]");
+        AnsiConsole.MarkupLine($"[dim]Config file: {CliConfiguration.SettingsPath}[/]");
 
         return 0;
     }
 
-    private int SetConfig(string? key, string? value)
+    private int SetConfig(string? key, string? value, ConverterXOptions config)
     {
         if (string.IsNullOrEmpty(key))
         {
@@ -92,8 +81,6 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
             AnsiConsole.MarkupLine("[red]Error:[/] Value is required for set action");
             return 1;
         }
-
-        var config = LoadConfig();
 
         try
         {
@@ -121,6 +108,13 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
 
                 case "searchsystemtools":
                     config.SearchSystemTools = bool.Parse(value);
+                    break;
+
+                case "overwrite" or "overwritebehavior":
+                    if (!Enum.TryParse<OverwriteBehavior>(value, ignoreCase: true, out var overwrite))
+                        throw new ArgumentException(
+                            $"overwrite must be one of: {string.Join(", ", Enum.GetNames<OverwriteBehavior>())}");
+                    config.OverwriteBehavior = overwrite;
                     break;
 
                 case "tempdirectory":
@@ -170,15 +164,15 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
     {
         var reset = false;
 
-        if (File.Exists(ConfigPath))
+        if (File.Exists(CliConfiguration.SettingsPath))
         {
-            File.Delete(ConfigPath);
+            File.Delete(CliConfiguration.SettingsPath);
             reset = true;
         }
 
-        if (File.Exists(LegacyConfigPath))
+        if (File.Exists(CliConfiguration.LegacySettingsPath))
         {
-            File.Delete(LegacyConfigPath);
+            File.Delete(CliConfiguration.LegacySettingsPath);
             reset = true;
         }
 
@@ -196,7 +190,7 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
 
     private int ShowConfigPath()
     {
-        AnsiConsole.MarkupLine($"[green]Configuration file:[/] {ConfigPath}");
+        AnsiConsole.MarkupLine($"[green]Configuration file:[/] {CliConfiguration.SettingsPath}");
         return 0;
     }
 
@@ -211,46 +205,14 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
     {
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[dim]Available keys:[/]");
-        AnsiConsole.MarkupLine("  tools-path, search-system-tools, max-parallel, default-timeout, hardware-accel,");
+        AnsiConsole.MarkupLine("  tools-path, search-system-tools, overwrite, max-parallel, default-timeout, hardware-accel,");
         AnsiConsole.MarkupLine("  temp-directory, keep-failed-output, verbose-logging,");
         AnsiConsole.MarkupLine("  auto-download-tools, default-quality, preserve-metadata");
     }
 
-    private static ConverterXOptions LoadConfig()
-    {
-        var path = File.Exists(ConfigPath) ? ConfigPath : LegacyConfigPath;
-        if (File.Exists(path))
-        {
-            try
-            {
-                var json = File.ReadAllText(path);
-                // Route through Core's migration-aware loader so legacy
-                // settings files (no SchemaVersion field, future renames)
-                // get the same upgrade treatment as the GUI path. We do NOT
-                // persist the migration back from the CLI — `ucx config`
-                // is allowed to inspect read-only files and shouldn't write
-                // through silently.
-                return ConverterXOptions.LoadFromJson(json, persistMigrated: false);
-            }
-            catch
-            {
-                return new ConverterXOptions();
-            }
-        }
-
-        return new ConverterXOptions();
-    }
-
     private static void SaveConfig(ConverterXOptions config)
     {
-        var dir = Path.GetDirectoryName(ConfigPath);
-        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-        {
-            Directory.CreateDirectory(dir);
-        }
-
-        var json = JsonSerializer.Serialize(config, CreateJsonOptions());
-        File.WriteAllText(ConfigPath, json);
+        config.Save();
     }
 
     private static void AddConfigRow(Table table, string setting, string value)
@@ -278,9 +240,4 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
         return parsed;
     }
 
-    private static JsonSerializerOptions CreateJsonOptions() => new()
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() }
-    };
 }

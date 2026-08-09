@@ -11,7 +11,10 @@ namespace UniversalConverterX.Console.Presets;
 /// </summary>
 public static class PresetRunner
 {
-    public static int RunRaw(string engine, IReadOnlyList<string> args)
+    public static int RunRaw(
+        string engine,
+        IReadOnlyList<string> args,
+        ConverterXOptions? options = null)
     {
         var executable = ResolveSidecar(engine);
         if (executable is null)
@@ -22,10 +25,17 @@ public static class PresetRunner
             return 3;
         }
 
-        return SpawnWithOutputPolicy(executable, args, engine, ConverterXOptions.Load());
+        return SpawnWithOutputPolicy(
+            executable,
+            args,
+            engine,
+            options ?? ConverterXOptions.Load());
     }
 
-    public static int Run(ConversionPreset preset, IReadOnlyList<string> inputs)
+    public static int Run(
+        ConversionPreset preset,
+        IReadOnlyList<string> inputs,
+        ConverterXOptions? options = null)
     {
         if (inputs.Count == 0)
         {
@@ -43,14 +53,14 @@ public static class PresetRunner
             return 3;
         }
 
-        var options = ConverterXOptions.Load();
+        var effectiveOptions = options ?? ConverterXOptions.Load();
         return preset.Mode switch
         {
-            PresetInvocationMode.PerFile => RunPerFile(exe, preset, inputs, options),
-            PresetInvocationMode.BatchInputList => RunBatchInputList(exe, preset, inputs, options),
-            PresetInvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs, options),
-            PresetInvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs, options),
-            PresetInvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs, options),
+            PresetInvocationMode.PerFile => RunPerFile(exe, preset, inputs, effectiveOptions),
+            PresetInvocationMode.BatchInputList => RunBatchInputList(exe, preset, inputs, effectiveOptions),
+            PresetInvocationMode.BatchOutputDir => RunBatchOutputDir(exe, preset, inputs, effectiveOptions),
+            PresetInvocationMode.BatchSingleOutput => RunBatchSingleOutput(exe, preset, inputs, effectiveOptions),
+            PresetInvocationMode.ExtractEach => RunExtractEach(exe, preset, inputs, effectiveOptions),
             _ => 4,
         };
     }

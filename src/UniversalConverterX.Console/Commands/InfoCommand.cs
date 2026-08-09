@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Services;
 
@@ -28,9 +29,10 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
             return 1;
         }
 
-        var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
-        var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
-        var orchestrator = new ConversionOrchestrator(options);
+        var cliOptions = CliConfiguration.Get(context);
+        settings.ToolsPath ??= cliOptions.ToolsBasePath;
+        cliOptions.ToolsBasePath = settings.ToolsPath!;
+        var orchestrator = new ConversionOrchestrator(Options.Create(cliOptions));
 
         var fileInfo = new FileInfo(settings.FilePath);
         var format = await orchestrator.DetectFormatAsync(settings.FilePath, cancellationToken);

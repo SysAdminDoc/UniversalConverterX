@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Console.Presets;
 using UniversalConverterX.Core.Services;
 
@@ -121,7 +122,7 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
 
         AnsiConsole.MarkupLineInterpolated(
             $"[green]Preset:[/] {match.Name} [grey]({match.Engine}, {match.Mode}, {resolved.Count} input(s))[/]");
-        return PresetRunner.Run(match, resolved);
+        return PresetRunner.Run(match, resolved, CliConfiguration.Get(context));
     }
 
     private static void DumpPresets(IReadOnlyList<ConversionPreset> presets, bool preserveOrder = false)

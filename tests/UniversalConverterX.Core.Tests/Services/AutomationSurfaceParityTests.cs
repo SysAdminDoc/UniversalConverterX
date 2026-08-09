@@ -53,6 +53,8 @@ public sealed class AutomationSurfaceParityTests
     {
         var root = FindRepoRoot();
         var program = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Program.cs"));
+        var convert = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Commands", "ConvertCommand.cs"));
+        var config = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Commands", "ConfigCommand.cs"));
         var server = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Commands", "ServeCommand.cs"));
         var presetRunner = File.ReadAllText(Path.Combine(root, "src", "UniversalConverterX.Console", "Presets", "PresetRunner.cs"));
         var module = File.ReadAllText(Path.Combine(root, "integrations", "powershell", "UniversalConverterX.psm1"));
@@ -60,6 +62,11 @@ public sealed class AutomationSurfaceParityTests
 
         program.Should().Contain("AddCommand<EnginesCommand>(\"engines\")");
         program.Should().Contain("AddCommand<InvokeEngineCommand>(\"invoke-engine\")");
+        program.Should().Contain("var options = CliConfiguration.Load()");
+        program.Should().Contain(".WithData(options)");
+        convert.Should().Contain("ApplyConfigurationDefaults(settings, options)");
+        convert.Should().Contain("options.MaxParallelConversions =");
+        config.Should().Contain("case \"overwrite\" or \"overwritebehavior\"");
         server.Should().Contain("path == \"/engines\"");
         server.Should().Contain("path == \"/metrics\"");
         server.Should().Contain("PrometheusTextExporter.Render(");

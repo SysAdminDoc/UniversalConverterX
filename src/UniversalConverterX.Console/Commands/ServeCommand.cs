@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Utilities;
@@ -81,7 +82,7 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         AnsiConsole.MarkupLine("Press Ctrl+C to stop.");
 
         var jobs = new JobManager();
-        var options = ConverterXOptions.Load();
+        var options = CliConfiguration.Get(context);
         using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         System.Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopCts.Cancel(); };
 

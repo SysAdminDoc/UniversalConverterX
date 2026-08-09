@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Services;
 
@@ -51,6 +52,9 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
+        var cliOptions = CliConfiguration.Get(context);
+        settings.ToolsPath ??= cliOptions.ToolsBasePath;
+
         return settings.Action.ToLowerInvariant() switch
         {
             "list" => ListTools(settings),

@@ -347,7 +347,20 @@ public class ConverterXOptions
             Converters = { new JsonStringEnumConverter() }
         };
 
-        var json = JsonSerializer.Serialize(this, options);
+        var serialized = JsonSerializer.Serialize(this, options);
+        string? existing = null;
+        try
+        {
+            if (File.Exists(SettingsFilePath))
+                existing = File.ReadAllText(SettingsFilePath);
+        }
+        catch
+        {
+            // A locked or unreadable prior file should not prevent a settings
+            // write. The current typed values can still replace it atomically.
+        }
+
+        var json = MergeSerializedSettings(existing, serialized);
         var tmp = SettingsFilePath + ".tmp";
         File.WriteAllText(tmp, json);
         try { File.Move(tmp, SettingsFilePath, overwrite: true); }
@@ -437,45 +450,59 @@ public class ConverterXOptions
     {
         var defaults = new ConverterXOptions();
 
-        // Copy all properties
-        ToolsBasePath = defaults.ToolsBasePath;
-        SearchSystemTools = defaults.SearchSystemTools;
-        DefaultOutputDirectory = defaults.DefaultOutputDirectory;
-        OverwriteBehavior = defaults.OverwriteBehavior;
-        DeleteSourceOnSuccess = defaults.DeleteSourceOnSuccess;
-        PostConversionAction = defaults.PostConversionAction;
-        PostConversionArchiveFolder = defaults.PostConversionArchiveFolder;
-        ShowNotifications = defaults.ShowNotifications;
-        PlaySoundOnComplete = defaults.PlaySoundOnComplete;
-        QueueCompletionAction = defaults.QueueCompletionAction;
-        QueueCompletionScriptPath = defaults.QueueCompletionScriptPath;
-        MaxParallelConversions = defaults.MaxParallelConversions;
-        DefaultTimeout = defaults.DefaultTimeout;
-        DefaultQuality = defaults.DefaultQuality;
-        DefaultHardwareAcceleration = defaults.DefaultHardwareAcceleration;
-        EnableHardwareAcceleration = defaults.EnableHardwareAcceleration;
-        PreserveMetadataByDefault = defaults.PreserveMetadataByDefault;
-        ShellIntegrationEnabled = defaults.ShellIntegrationEnabled;
-        ContextMenuStyle = defaults.ContextMenuStyle;
-        QuickConvertPresets = defaults.QuickConvertPresets;
-        ShellExtension = defaults.ShellExtension;
-        Theme = defaults.Theme;
-        AccentColor = defaults.AccentColor;
-        MinimizeToTray = defaults.MinimizeToTray;
-        StartMinimized = defaults.StartMinimized;
-        StartWithWindows = defaults.StartWithWindows;
-        TempDirectory = defaults.TempDirectory;
-        KeepFailedOutput = defaults.KeepFailedOutput;
-        VerboseLogging = defaults.VerboseLogging;
-        AutoDownloadTools = defaults.AutoDownloadTools;
-        VerifyToolIntegrity = defaults.VerifyToolIntegrity;
-        CheckForUpdates = defaults.CheckForUpdates;
-        EnableFfmpegCommandEditing = defaults.EnableFfmpegCommandEditing;
-        EnableHistory = defaults.EnableHistory;
-        MaxHistoryEntries = defaults.MaxHistoryEntries;
-        HistoryRetentionDays = defaults.HistoryRetentionDays;
-        ValidateOutputDuration = defaults.ValidateOutputDuration;
-        MinDurationDeltaSeconds = defaults.MinDurationDeltaSeconds;
+        // Keep this contract reflection-driven so a newly-added setting cannot
+        // silently escape Reset. JSON cloning gives reference-valued defaults
+        // (lists and ShellExtensionOptions) independent instances.
+        foreach (var property in typeof(ConverterXOptions).GetProperties())
+        {
+            if (property.SetMethod is null)
+                continue;
+
+            var defaultValue = property.GetValue(defaults);
+            if (defaultValue is null)
+            {
+                property.SetValue(this, null);
+                continue;
+            }
+
+            var serialized = JsonSerializer.Serialize(defaultValue, property.PropertyType);
+            var clone = JsonSerializer.Deserialize(serialized, property.PropertyType);
+            property.SetValue(this, clone);
+        }
+    }
+
+    /// <summary>
+    /// Merge the typed Core settings into an existing JSON object without
+    /// discarding keys owned by another local surface (for example the UI's
+    /// SettingsViewModel). Core properties win on name collisions; unknown
+    /// properties remain available to their original owner.
+    /// </summary>
+    internal static string MergeSerializedSettings(string? existingJson, string currentJson)
+    {
+        var current = JsonNode.Parse(currentJson) as JsonObject
+                      ?? throw new JsonException("current settings root is not a JSON object");
+        var merged = new JsonObject();
+
+        if (!string.IsNullOrWhiteSpace(existingJson))
+        {
+            try
+            {
+                if (JsonNode.Parse(existingJson) is JsonObject existing)
+                {
+                    foreach (var property in existing)
+                        merged[property.Key] = property.Value?.DeepClone();
+                }
+            }
+            catch (JsonException)
+            {
+                // Replace malformed settings with the current typed document.
+            }
+        }
+
+        foreach (var property in current)
+            merged[property.Key] = property.Value?.DeepClone();
+
+        return merged.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
     private static string GetDefaultToolsPath()

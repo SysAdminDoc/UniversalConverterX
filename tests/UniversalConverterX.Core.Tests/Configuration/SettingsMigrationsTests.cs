@@ -1,5 +1,6 @@
-using System.Text.Json.Nodes;
 using FluentAssertions;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Models;
 
@@ -149,6 +150,59 @@ public class SettingsMigrationsTests
         loaded.ResetToDefaults();
         loaded.QueueCompletionAction.Should().Be(QueueCompletionAction.Notify);
         loaded.QueueCompletionScriptPath.Should().BeNull();
+    }
+
+    [Fact]
+    public void MergeSerializedSettings_PreservesUiOwnedKeysAndUpdatesCoreKeys()
+    {
+        var existing = """
+        {
+          "ToolsPath": "C:\\ui-tools",
+          "UseCustomOutputDirectory": true,
+          "MaxParallelConversions": 2,
+          "UiOnlyObject": { "keep": true }
+        }
+        """;
+        var current = """
+        {
+          "SchemaVersion": 3,
+          "ToolsBasePath": "C:\\core-tools",
+          "MaxParallelConversions": 8
+        }
+        """;
+
+        var merged = JsonNode.Parse(
+            ConverterXOptions.MergeSerializedSettings(existing, current))!.AsObject();
+
+        ((string?)merged["ToolsPath"]).Should().Be(@"C:\ui-tools");
+        ((bool?)merged["UseCustomOutputDirectory"]).Should().BeTrue();
+        ((int?)merged["MaxParallelConversions"]).Should().Be(8);
+        ((string?)merged["ToolsBasePath"]).Should().Be(@"C:\core-tools");
+        ((bool?)merged["UiOnlyObject"]?["keep"]).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ResetToDefaults_RestoresEveryPublicSettableProperty()
+    {
+        var options = new ConverterXOptions
+        {
+            ContainSidecarProcesses = false,
+            SidecarMaxProcesses = 1,
+            SidecarMaxMemoryMegabytes = 512,
+            SidecarMaxRuntime = TimeSpan.FromMinutes(5),
+            UsePrivateSidecarTemp = false,
+            EnforceSidecarOutputBoundary = false,
+            Language = "fr-FR",
+            MaxParallelConversions = 1,
+            DefaultQuality = QualityPreset.Low,
+            QuickConvertPresets = ["changed"],
+        };
+
+        options.ResetToDefaults();
+
+        var expected = JsonSerializer.Serialize(new ConverterXOptions());
+        var actual = JsonSerializer.Serialize(options);
+        actual.Should().Be(expected);
     }
 
     [Fact]

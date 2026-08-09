@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Services;
@@ -31,9 +32,10 @@ public class ListCommand : Command<ListCommand.Settings>
 
     protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
-        var options = Options.Create(new ConverterXOptions { ToolsBasePath = toolsPath });
-        var orchestrator = new ConversionOrchestrator(options);
+        var cliOptions = CliConfiguration.Get(context);
+        settings.ToolsPath ??= cliOptions.ToolsBasePath;
+        cliOptions.ToolsBasePath = settings.ToolsPath!;
+        var orchestrator = new ConversionOrchestrator(Options.Create(cliOptions));
 
         return settings.Type.ToLowerInvariant() switch
         {

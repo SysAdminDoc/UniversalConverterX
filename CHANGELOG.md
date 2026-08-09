@@ -13,6 +13,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Tool version cache reads and writes are now safe across concurrent callers, including cached unavailable-tool results and downloader invalidation.
 - FFmpeg progress duration and converter warnings are now isolated per conversion job and safe when stdout/stderr callbacks arrive concurrently.
 - Preset, Explorer, generic sidecar, and REST launches now apply the configured output collision policy before spawning an engine, auto-renaming or skipping existing outputs instead of silently overwriting them.
+- The CLI now loads the shared settings document once per process and applies persisted defaults for conversion, inspection, listing, presets, sidecars, tools, and REST, while explicit command flags continue to win.
+- Core settings writes now merge into the existing JSON document so UI-owned preferences survive CLI edits and schema migrations; Reset to defaults restores every public option, including sidecar containment, output-boundary, and language settings.
 
 ## [2.34.0] - 2026-08-02
 
