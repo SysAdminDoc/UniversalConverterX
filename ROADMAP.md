@@ -221,15 +221,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P1 — correctness, data-safety, security
 
-- [ ] P1 — Item 174 — `FFmpegConverter` per-instance progress/warning state is shared across concurrent jobs
-  Category: correctness (race)
-  Where: `src/UniversalConverterX.Core/Converters/FFmpegConverter.cs:51,618-627,652-654` (`_totalDuration`, `ParseProgress`); `src/UniversalConverterX.Core/Converters/BaseConverterStrategy.cs:321-333,448-469` (`warnings` list + stdout/stderr callbacks); orchestrator holds one converter instance (`ConversionOrchestrator.cs:76`) and runs up to 4 jobs via `Parallel.ForEachAsync` (`:409-443`).
-  Problem: (a) `ParseProgress` writes `_totalDuration` on the converter instance, not the job, so with concurrent jobs, job A's percent/ETA is computed against job B's duration (>100% bars, bogus ETAs); it is also never reset between sequential jobs. (b) `OutputDataReceived` and `ErrorDataReceived` fire on different threads and both call `ProcessOutputLine`, which does `warnings.Add(...)` on a plain `List<string>` — concurrent `Add` can throw inside the handler or drop warnings that flow into `ConversionResult.Warnings`/history provenance.
-  Evidence: single converter instance + parallel batch; `_totalDuration` is instance state; both process event handlers registered on the same process mutate the shared list.
-  Fix: store detected duration on `ConversionJob` (a `job` is already passed to `ParseProgress`) or a per-invocation context; guard `ProcessOutputLine` with a lock or use a `ConcurrentQueue` snapshotted at exit.
-  Acceptance: a concurrent test with two stub streams of different durations yields independent, monotonic per-job percentages and no lost/duplicated warnings.
-  Confidence: Likely (structural). Effort: S
-
 - [ ] P1 — Item 175 — Preset/REST/Explorer spawn paths bypass the overwrite policy the native converter enforces
   Category: correctness (data loss)
   Where: `src/UniversalConverterX.Console/Presets/PresetRunner.cs:56-70,97-111,113-127`; `src/UniversalConverterX.Console/Commands/ServeCommand.cs:181-188`; vs `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:167-207`.

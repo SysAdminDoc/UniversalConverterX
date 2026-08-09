@@ -48,8 +48,6 @@ public partial class FFmpegConverter : BaseConverterStrategy
     protected override HashSet<string> SupportedOutputFormats => _outputFormats;
     protected override Dictionary<string, HashSet<string>> FormatMappings => [];
 
-    private TimeSpan? _totalDuration;
-
     #region Format Definitions
 
     private static readonly HashSet<string> _inputFormats =
@@ -616,14 +614,20 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Try to extract duration first
         var durationMatch = DurationRegex().Match(line);
-        if (durationMatch.Success)
+        TimeSpan? totalDuration;
+        lock (job)
         {
-            _totalDuration = new TimeSpan(
-                0,
-                int.Parse(durationMatch.Groups[1].Value),
-                int.Parse(durationMatch.Groups[2].Value),
-                int.Parse(durationMatch.Groups[3].Value),
-                int.Parse(durationMatch.Groups[4].Value) * 10);
+            if (durationMatch.Success)
+            {
+                job.DetectedProgressDuration = new TimeSpan(
+                    0,
+                    int.Parse(durationMatch.Groups[1].Value),
+                    int.Parse(durationMatch.Groups[2].Value),
+                    int.Parse(durationMatch.Groups[3].Value),
+                    int.Parse(durationMatch.Groups[4].Value) * 10);
+            }
+
+            totalDuration = job.DetectedProgressDuration;
         }
 
         // Parse progress line
@@ -649,9 +653,9 @@ public partial class FFmpegConverter : BaseConverterStrategy
         }
 
         double percent = 0;
-        if (currentTime.HasValue && _totalDuration.HasValue && _totalDuration.Value.TotalSeconds > 0)
+        if (currentTime.HasValue && totalDuration.HasValue && totalDuration.Value.TotalSeconds > 0)
         {
-            percent = currentTime.Value.TotalSeconds / _totalDuration.Value.TotalSeconds * 100;
+            percent = currentTime.Value.TotalSeconds / totalDuration.Value.TotalSeconds * 100;
         }
 
         double? speed = speedMatch.Success ? double.Parse(speedMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
@@ -661,9 +665,9 @@ public partial class FFmpegConverter : BaseConverterStrategy
         string? bitrate = bitrateMatch.Success ? $"{bitrateMatch.Groups[1].Value} kbits/s" : null;
 
         TimeSpan? eta = null;
-        if (currentTime.HasValue && _totalDuration.HasValue && speed.HasValue && speed.Value > 0)
+        if (currentTime.HasValue && totalDuration.HasValue && speed.HasValue && speed.Value > 0)
         {
-            var remaining = _totalDuration.Value - currentTime.Value;
+            var remaining = totalDuration.Value - currentTime.Value;
             eta = TimeSpan.FromSeconds(remaining.TotalSeconds / speed.Value);
         }
 
@@ -671,7 +675,7 @@ public partial class FFmpegConverter : BaseConverterStrategy
         {
             Percent = Math.Clamp(percent, 0, 100),
             CurrentTime = currentTime,
-            TotalDuration = _totalDuration,
+            TotalDuration = totalDuration,
             CurrentFrame = frame,
             Fps = fps,
             Speed = speed,

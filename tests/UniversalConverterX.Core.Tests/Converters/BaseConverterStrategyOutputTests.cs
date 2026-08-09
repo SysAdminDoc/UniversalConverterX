@@ -113,6 +113,17 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         File.ReadAllText(job.OutputPath).Should().Be("hardened");
     }
 
+    [Fact]
+    public void ProcessOutputLine_WhenStreamsReportWarningsConcurrently_RetainsEveryWarning()
+    {
+        var converter = new FakeConverterStrategy(_scriptPath, "write");
+
+        var warnings = converter.CollectWarningsConcurrently(4_096);
+
+        warnings.Should().HaveCount(4_096);
+        warnings.Should().OnlyHaveUniqueItems();
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
@@ -178,5 +189,21 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
 
         protected override string GetExecutablePath() =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+
+        public IReadOnlyList<string> CollectWarningsConcurrently(int count)
+        {
+            var warnings = new List<string>();
+            var job = new ConversionJob
+            {
+                InputPath = "input.source",
+                OutputPath = "output.target",
+                Options = new ConversionOptions()
+            };
+
+            Parallel.For(0, count, index =>
+                ProcessOutputLine($"warning-{index}", job, progress: null, warnings));
+
+            return warnings;
+        }
     }
 }

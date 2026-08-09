@@ -63,6 +63,13 @@ public class ConversionJob
     public DateTime? CompletedAt { get; set; }
 
     /// <summary>
+    /// Duration reported by the converter while parsing progress output.
+    /// This is invocation state and is intentionally internal so it is not
+    /// persisted with queue snapshots or exposed as user job metadata.
+    /// </summary>
+    internal TimeSpan? DetectedProgressDuration { get; set; }
+
+    /// <summary>
     /// Input file size in bytes
     /// </summary>
     public long InputFileSize { get; set; }

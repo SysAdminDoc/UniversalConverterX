@@ -457,7 +457,13 @@ public abstract class BaseConverterStrategy : IConverterStrategy
         // Check for warnings
         if (line.Contains("warning", StringComparison.OrdinalIgnoreCase))
         {
-            warnings.Add(line.Trim());
+            // stdout and stderr are drained by separate asynchronous event
+            // handlers. Serialize additions so a concurrent pair of warning
+            // lines cannot corrupt the per-invocation list.
+            lock (warnings)
+            {
+                warnings.Add(line.Trim());
+            }
         }
 
         // Try to parse progress

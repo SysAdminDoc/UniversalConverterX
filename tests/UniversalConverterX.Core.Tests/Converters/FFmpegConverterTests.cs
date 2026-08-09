@@ -403,6 +403,29 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void ParseProgress_ConcurrentJobs_ShouldKeepDurationStatePerJob()
+    {
+        var shortJob = CreateTestJob("short.mp4", "short-output.mp4");
+        var longJob = CreateTestJob("long.mp4", "long-output.mp4");
+
+        _converter.ParseProgress("Duration: 00:01:00.00, start: 0.000000", shortJob);
+        _converter.ParseProgress("Duration: 00:02:00.00, start: 0.000000", longJob);
+
+        var shortProgress = _converter.ParseProgress(
+            "frame=  60 fps=30.0 time=00:01:00.00 speed=1.0x", shortJob);
+        var longProgress = _converter.ParseProgress(
+            "frame= 120 fps=30.0 time=00:02:00.00 speed=1.0x", longJob);
+
+        shortProgress.Should().NotBeNull();
+        shortProgress!.Percent.Should().BeApproximately(100, 0.1);
+        shortProgress.TotalDuration.Should().Be(TimeSpan.FromMinutes(1));
+
+        longProgress.Should().NotBeNull();
+        longProgress!.Percent.Should().BeApproximately(100, 0.1);
+        longProgress.TotalDuration.Should().Be(TimeSpan.FromMinutes(2));
+    }
+
+    [Fact]
     public void ParseProgress_EmptyLine_ShouldReturnNull()
     {
         var job = CreateTestJob("input.mp4", "output.mp4");
