@@ -51,6 +51,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Removed the inert hardcoded border color from `DangerButtonStyle`, keeping the destructive action style entirely theme-token based.
 - Fixed REST per-engine metrics to normalize live job names consistently with their counters; jobs without an observable exit code remain unknown instead of being counted as failures.
 - Fixed CLI preset tables and tool diagnostics to escape user- and tool-supplied strings before Spectre renders them as markup.
+- Fixed shell-extension registration by removing the recursive managed COM hook and passing sparse-package manifest paths through PowerShell argument boundaries.
 - Fixed Potrace PDF, DXF, GeoJSON, and XFig argument construction so each `-b` option is followed by its required backend name.
 - Fixed libheif encoding for small requested widths by removing the incomplete `heif-enc -t` thumbnail flag; image width is no longer misinterpreted as a thumbnail request.
 - Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.

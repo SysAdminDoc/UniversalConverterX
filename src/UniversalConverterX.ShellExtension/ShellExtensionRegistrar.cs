@@ -105,13 +105,19 @@ public static class ShellExtensionRegistrar
         // This requires an appxmanifest.xml with desktop extension
         try
         {
-            var process = Process.Start(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo
             {
-                FileName = "powershell",
-                Arguments = $"-Command \"Add-AppxPackage -Path '{manifestPath}' -Register\"",
+                FileName = "powershell.exe",
                 UseShellExecute = false,
                 CreateNoWindow = true
-            });
+            };
+            startInfo.ArgumentList.Add("-NoProfile");
+            startInfo.ArgumentList.Add("-NonInteractive");
+            startInfo.ArgumentList.Add("-Command");
+            startInfo.ArgumentList.Add(
+                "& { param($manifestPath) Add-AppxPackage -Path $manifestPath -Register }");
+            startInfo.ArgumentList.Add(manifestPath);
+            var process = Process.Start(startInfo);
             process?.WaitForExit();
         }
         catch (Exception ex)
@@ -323,45 +329,5 @@ public static class ShellExtensionRegistrar
     {
         var exePath = GetExePath();
         return File.Exists(exePath) ? $"{exePath},0" : "";
-    }
-}
-
-/// <summary>
-/// Managed entry points for COM registration
-/// </summary>
-public static class ComRegistration
-{
-    [ComRegisterFunction]
-    public static void Register(Type type)
-    {
-        if (type == typeof(ConverterExplorerCommand))
-        {
-            try
-            {
-                var dllPath = typeof(ComRegistration).Assembly.Location;
-                ShellExtensionRegistrar.Register(dllPath);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"COM registration failed: {ex.Message}");
-            }
-        }
-    }
-
-    [ComUnregisterFunction]
-    public static void Unregister(Type type)
-    {
-        if (type == typeof(ConverterExplorerCommand))
-        {
-            try
-            {
-                var dllPath = typeof(ComRegistration).Assembly.Location;
-                ShellExtensionRegistrar.Unregister(dllPath);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"COM unregistration failed: {ex.Message}");
-            }
-        }
     }
 }
