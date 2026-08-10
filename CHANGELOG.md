@@ -37,6 +37,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 - Fixed Potrace PDF, DXF, GeoJSON, and XFig argument construction so each `-b` option is followed by its required backend name.
 - Fixed libheif encoding for small requested widths by removing the incomplete `heif-enc -t` thumbnail flag; image width is no longer misinterpreted as a thumbnail request.
+- Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.
 - LibreOffice conversions now render into a per-job temporary directory and promote only a fresh, non-input artifact to the requested destination. Collision-resolved outputs cannot overwrite sibling files, and stale same-stem files no longer turn an exit-code-zero run into a false success.
 - `ucx serve` now prints a fresh bearer token per startup and requires it for every route except `/healthz`. Exact loopback Host validation, browser Origin/Sec-Fetch rejection, and `application/json` enforcement prevent cross-origin or rebinding-triggered conversion requests; internal errors no longer echo exception details.
 - Watch-folder Convert jobs now resolve collisions to a unique sibling before suppression or sidecar launch and refuse any residual input/output identity match, preserving the source in unattended same-extension workflows.

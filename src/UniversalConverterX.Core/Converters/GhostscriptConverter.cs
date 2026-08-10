@@ -140,7 +140,10 @@ public partial class GhostscriptConverter : BaseConverterStrategy
         }
 
         // Output file
-        args.Add($"-sOutputFile={job.OutputPath}");
+        // Ghostscript treats percent sequences as page-number templates. Double
+        // each percent so a legal Windows filename is emitted literally.
+        var ghostscriptOutputPath = job.OutputPath.Replace("%", "%%", StringComparison.Ordinal);
+        args.Add($"-sOutputFile={ghostscriptOutputPath}");
 
         // Custom arguments
         args.AddRange(options.CustomArguments);

@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 185 — Ghostscript `-sOutputFile=` treats `%` in user paths as a page-number template
-  Category: correctness
-  Where: `src/UniversalConverterX.Core/Converters/GhostscriptConverter.cs:143`.
-  Problem: `%` is legal in Windows filenames; GS interprets `%d`/`%03d`/`%s` in OutputFile as a multi-page template. Converting to e.g. `report 100%d.png` writes `report 1001.png`… per page and the requested path never exists → `ValidateSuccessfulOutput` fails (or stray files litter the directory).
-  Evidence: `-sOutputFile={job.OutputPath}` with no escaping.
-  Fix: escape `%` as `%%` in the OutputFile value (GS's documented escape).
-  Acceptance: pdf→png with a `%` in the output filename succeeds at the exact requested path.
-  Confidence: Verified. Effort: S
-
 - [ ] P2 — Item 186 — FFmpeg `-progress pipe:1 -stats_period 0.1` is appended after the output path and ignored
   Category: correctness
   Where: `src/UniversalConverterX.Core/Converters/FFmpegConverter.cs:164-168` (and pass-2 at `:247-249`).
