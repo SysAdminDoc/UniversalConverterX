@@ -26,7 +26,7 @@ public sealed class PersistedSettingsContractTests
         var root = FindRepoRoot();
         var settingsCode = Read(root, "src/UniversalConverterX.UI/Views/SettingsWindow.xaml.cs");
         var converter = Read(root, "src/UniversalConverterX.UI/Views/Pages/ConverterPage.xaml.cs");
-        var progress = Read(root, "src/UniversalConverterX.UI/Views/ProgressWindow.xaml.cs");
+        var postQueue = Read(root, "src/UniversalConverterX.UI/Services/PostQueueActionService.cs");
         var app = Read(root, "src/UniversalConverterX.UI/App.xaml.cs");
 
         settingsCode.Should().Contain("_options.ShowNotifications = NotificationsToggle.IsOn");
@@ -43,9 +43,9 @@ public sealed class PersistedSettingsContractTests
         converter.Should().Contain("_appOptions.DefaultHardwareAcceleration");
         converter.Should().Contain("_appOptions.PreserveMetadataByDefault");
         converter.Should().Contain("_appOptions.DefaultOutputDirectory");
-        progress.Should().Contain("if (_options.PlaySoundOnComplete)");
-        progress.Should().Contain("if (_options.ShowNotifications)");
-        progress.Should().Contain("MessageBeep");
+        postQueue.Should().Contain("_options.PlaySoundOnComplete");
+        postQueue.Should().Contain("_options.ShowNotifications");
+        postQueue.Should().Contain("MessageBeep");
         app.Should().Contain("_startupOptions?.StartMinimized");
         app.Should().Contain("HideToBackground");
     }

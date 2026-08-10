@@ -101,16 +101,10 @@ public sealed class ActivationContractTests
     public void CompletionNotifications_RouteBackToHistory()
     {
         var root = FindRepoRoot();
-        var uiRoot = Path.Combine(root, "src", "UniversalConverterX.UI");
-        foreach (var path in new[]
-                 {
-                     Path.Combine(uiRoot, "Services", "PostQueueActionService.cs"),
-                     Path.Combine(uiRoot, "Views", "ProgressWindow.xaml.cs"),
-                 })
-        {
-            File.ReadAllText(path).Should()
-                .Contain(".AddArgument(\"route\", \"history\")");
-        }
+        var service = File.ReadAllText(Path.Combine(
+            root, "src", "UniversalConverterX.UI", "Services", "PostQueueActionService.cs"));
+
+        service.Should().Contain(".AddArgument(\"route\", \"history\")");
     }
 
     private static string FindRepoRoot()

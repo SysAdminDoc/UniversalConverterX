@@ -35,7 +35,6 @@ CODE_RESOURCES = {
     "Core_StartingConversion": "Starting conversion...",
     "Core_UnknownError": "Unknown error",
     "MainWindow_Item_001.Title": "UniversalConverter X",
-    "ProgressWindow_Item_001.Title": "Converting - UniversalConverter X",
     "SettingsWindow_Item_001.Title": "Settings - UniversalConverter X",
 }
 LOCALIZABLE_PROPERTIES = {

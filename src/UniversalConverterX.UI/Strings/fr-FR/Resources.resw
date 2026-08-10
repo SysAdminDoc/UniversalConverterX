@@ -1476,6 +1476,9 @@
   <data name="Code_1B72C7DCE6B3ED474BFC" xml:space="preserve">
     <value>Ready to export {0} videos with {1}.</value>
   </data>
+  <data name="Code_1CAD95BB44DC4158BC00" xml:space="preserve">
+    <value>Download output directory is unavailable: {0}</value>
+  </data>
   <data name="Code_1CDD1463C4D0F062EB7E" xml:space="preserve">
     <value>Blu-ray burn completed; BDMV retained at {0}.</value>
   </data>
@@ -1550,6 +1553,9 @@
   </data>
   <data name="Code_24D2C67C71417CE2AD21" xml:space="preserve">
     <value>Done - {0}</value>
+  </data>
+  <data name="Code_252F85F867A97DEEBDB9" xml:space="preserve">
+    <value>Clipboard text is empty.</value>
   </data>
   <data name="Code_25D384F31985031D150E" xml:space="preserve">
     <value>FFprobe is not available. Install it or set FFPROBE_PATH to inspect tracks.</value>
@@ -1983,6 +1989,9 @@
   <data name="Code_5000B45DCB0B2DDB9540" xml:space="preserve">
     <value>Unpack failed: {0}</value>
   </data>
+  <data name="Code_5016571758F8929DE8A8" xml:space="preserve">
+    <value>Plugins folder unavailable</value>
+  </data>
   <data name="Code_507BCA03A0EEFB96078F" xml:space="preserve">
     <value>Install / update runtimes</value>
   </data>
@@ -2088,6 +2097,9 @@
   <data name="Code_5B6F88A12DE7C1071F8D" xml:space="preserve">
     <value>Threshold -20 dB · Ratio 3:1 · Attack 10 ms · Release 200 ms · Makeup +4 dB</value>
   </data>
+  <data name="Code_5B990C2CFB98BA02DA5B" xml:space="preserve">
+    <value>No writable download output directory is available. Last tried: {0}.</value>
+  </data>
   <data name="Code_5C13E58886D1B014044D" xml:space="preserve">
     <value>Add a recording session, or click Record All to capture the current setup.</value>
   </data>
@@ -2151,6 +2163,9 @@
   <data name="Code_620872429120E0CA3A3D" xml:space="preserve">
     <value>Drop files to inspect</value>
   </data>
+  <data name="Code_620E2E43437991320F80" xml:space="preserve">
+    <value>The missing tools could not be installed: {0}</value>
+  </data>
   <data name="Code_6237BCA8EA656B4DA350" xml:space="preserve">
     <value>Added {0} images from {1}.</value>
   </data>
@@ -2195,6 +2210,9 @@
   </data>
   <data name="Code_684BF93DFDDDFB9299A1" xml:space="preserve">
     <value>Slideshow created</value>
+  </data>
+  <data name="Code_6884BA138D670655FA60" xml:space="preserve">
+    <value>Your settings could not be saved. Check disk space and permissions, then try again.</value>
   </data>
   <data name="Code_68BE0AEEA56A87CAC69C" xml:space="preserve">
     <value>Download the DDColor temporal model?</value>
@@ -2595,6 +2613,9 @@
   <data name="Code_96C34A0719EB565C268A" xml:space="preserve">
     <value>Invalid</value>
   </data>
+  <data name="Code_97166319F80DC96503D1" xml:space="preserve">
+    <value>Tool download failed</value>
+  </data>
   <data name="Code_9718CC761CFD5810041E" xml:space="preserve">
     <value>Timed out</value>
   </data>
@@ -2619,6 +2640,9 @@
   <data name="Code_9B107895FCB872600DB4" xml:space="preserve">
     <value>Drop into background removal queue</value>
   </data>
+  <data name="Code_9BB5ECAE7500A845968B" xml:space="preserve">
+    <value>Downloads will be saved to: {0}</value>
+  </data>
   <data name="Code_9BE2A507ADABCFE907CA" xml:space="preserve">
     <value>Bundle export failed (disk full or permission denied).</value>
   </data>
@@ -2627,6 +2651,9 @@
   </data>
   <data name="Code_9C24BB5010E381F9F54D" xml:space="preserve">
     <value>New release available for: {0}.</value>
+  </data>
+  <data name="Code_9C3D2B16F1803915FBF1" xml:space="preserve">
+    <value>{0} unavailable: {1}.</value>
   </data>
   <data name="Code_9C479460C5D752B769A9" xml:space="preserve">
     <value>{0: "")}{1}% ({2})</value>
@@ -2775,6 +2802,9 @@
   <data name="Code_AD1A64057F9AB34FECFE" xml:space="preserve">
     <value>split</value>
   </data>
+  <data name="Code_AD7E3C1DC0A6FCE0B4FA" xml:space="preserve">
+    <value>The missing tools could not be installed. Check disk space, permissions, and network access.</value>
+  </data>
   <data name="Code_AD892B81182C351C603C" xml:space="preserve">
     <value>Ripping Title {0}…</value>
   </data>
@@ -2805,6 +2835,9 @@
   <data name="Code_AF38430B746A4B5A7A5B" xml:space="preserve">
     <value>No supported images found in that folder.</value>
   </data>
+  <data name="Code_AF3A8AFFE6BB476C4429" xml:space="preserve">
+    <value>{0} Using {1}: {2}.</value>
+  </data>
   <data name="Code_AF413C56F12C39F3470A" xml:space="preserve">
     <value>Colourising image…</value>
   </data>
@@ -2831,6 +2864,9 @@
   </data>
   <data name="Code_B0E8AD298ADF566AA221" xml:space="preserve">
     <value>Caption file exported, but burn-in failed: {0}</value>
+  </data>
+  <data name="Code_B0EBCB44A8DA60A69D88" xml:space="preserve">
+    <value>Settings not saved</value>
   </data>
   <data name="Code_B1A9E561106EA030330A" xml:space="preserve">
     <value>registered</value>
@@ -3132,6 +3168,9 @@ SHA-256: {0}</value>
   <data name="Code_D20851C58A0AAB4D8919" xml:space="preserve">
     <value>No presets accept {0}. Try installing/wiring a sidecar for this format.</value>
   </data>
+  <data name="Code_D296F11EE957C9D5226E" xml:space="preserve">
+    <value>Clipboard does not contain text.</value>
+  </data>
   <data name="Code_D2A44BF4F227888E5AA0" xml:space="preserve">
     <value>Done -- {0} eBook(s) -&gt; .{1}.</value>
   </data>
@@ -3219,6 +3258,9 @@ SHA-256: {0}</value>
   <data name="Code_D9D34FFF222B9F7EA59E" xml:space="preserve">
     <value>Permission denied for that folder.</value>
   </data>
+  <data name="Code_DA1573591AE382AAA414" xml:space="preserve">
+    <value>No writable download output directory is available.</value>
+  </data>
   <data name="Code_DA8F07A9B8E6849277FF" xml:space="preserve">
     <value>Transcribing - {0:F0}%</value>
   </data>
@@ -3248,6 +3290,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_DD72E5C4BB3FA510E37A" xml:space="preserve">
     <value>Synthesising '{0}'...</value>
+  </data>
+  <data name="Code_DD84E104E3C62B1FDD1D" xml:space="preserve">
+    <value>Download output directory is unavailable. Choose a writable location in Settings.</value>
   </data>
   <data name="Code_DDA182F150968D998AF6" xml:space="preserve">
     <value>Ready to restore {0} photo(s). {1}</value>
@@ -3522,6 +3567,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_F7EE71BF6214DC65112A" xml:space="preserve">
     <value>Cancelled — {0} reframed, {1} failed.</value>
+  </data>
+  <data name="Code_F803E1C5EA93F17997AD" xml:space="preserve">
+    <value>Clipboard could not be read. Try again.</value>
   </data>
   <data name="Code_F863D8F9ED4D31839FF6" xml:space="preserve">
     <value>Track title (optional)</value>
@@ -6585,30 +6633,6 @@ SHA-256: {0}</value>
   </data>
   <data name="PresetsPage_StatusText.Text" xml:space="preserve">
     <value>Chargement des préréglages...</value>
-  </data>
-  <data name="ProgressWindow_CancelButton.Content" xml:space="preserve">
-    <value>Annuler</value>
-  </data>
-  <data name="ProgressWindow_CloseButton.Content" xml:space="preserve">
-    <value>Fermer</value>
-  </data>
-  <data name="ProgressWindow_Item_001.Title" xml:space="preserve">
-    <value>Convertir - UniversalConverter X</value>
-  </data>
-  <data name="ProgressWindow_OpenFolderButton.Content" xml:space="preserve">
-    <value>Ouvrir le dossier de sortie</value>
-  </data>
-  <data name="ProgressWindow_OverallProgressText.Text" xml:space="preserve">
-    <value>0 de 0 fichiers</value>
-  </data>
-  <data name="ProgressWindow_PauseButton.Content" xml:space="preserve">
-    <value>Pause</value>
-  </data>
-  <data name="ProgressWindow_StatusText.Text" xml:space="preserve">
-    <value>Préparation de la file d'attente...</value>
-  </data>
-  <data name="ProgressWindow_TitleText.Text" xml:space="preserve">
-    <value>Conversion des fichiers</value>
   </data>
   <data name="RecorderPage_AudioDeviceCombo.PlaceholderText" xml:space="preserve">
     <value>Dispositifs de chargement...</value>

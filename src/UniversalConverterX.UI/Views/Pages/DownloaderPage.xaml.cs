@@ -670,9 +670,10 @@ public sealed partial class DownloaderPage : Page
                     continue;
                 }
 
+                var failureSummary = string.Join(" ", failures);
                 string? warning = failures.Count == 0 && index == 0
                     ? null
-                    : AppLocalizer.Format($"{string.Join(" ", failures)} Using {candidate.Label}: {fullPath}.");
+                    : AppLocalizer.Format($"{failureSummary} Using {candidate.Label}: {fullPath}.");
                 return (fullPath, warning, true);
             }
             catch (Exception ex)

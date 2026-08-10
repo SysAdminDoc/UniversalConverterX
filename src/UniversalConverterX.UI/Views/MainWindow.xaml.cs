@@ -59,7 +59,7 @@ public sealed partial class MainWindow : Window
         // Set the title in code-behind. A WinUI 3 Window is not a FrameworkElement,
         // so an x:Uid on the Window root fails resource application at load with a
         // XamlParseException ("Failed to assign to property Window.Title"). Match the
-        // SettingsWindow/ProgressWindow pattern and localize the title here instead.
+        // SettingsWindow pattern and localize the title here instead.
         appWindow.Title = AppLocalizer.Get("MainWindow_Item_001.Title", "UniversalConverter X");
 
         var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(windowId,

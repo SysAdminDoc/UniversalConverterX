@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
@@ -36,13 +37,18 @@ public sealed class PostQueueActionService : IPostQueueActionService, IPostQueue
     {
         try
         {
-            return await _runner.ExecuteAsync(
+            var result = await _runner.ExecuteAsync(
                     _options.QueueCompletionAction,
                     _options.QueueCompletionScriptPath,
                     _options.ShowNotifications,
                     summary,
                     cancellationToken)
                 .ConfigureAwait(false);
+
+            if (summary.Cancelled == 0 && _options.PlaySoundOnComplete)
+                PlayCompletionSound();
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -114,4 +120,13 @@ public sealed class PostQueueActionService : IPostQueueActionService, IPostQueue
         if (Process.Start(startInfo) is null)
             throw new InvalidOperationException($"Could not start {Path.GetFileName(executable)}.");
     }
+
+    private static void PlayCompletionSound()
+    {
+        try { MessageBeep(0xFFFFFFFF); }
+        catch { /* completion feedback is supplementary */ }
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool MessageBeep(uint type);
 }
