@@ -39,6 +39,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Fixed `ucx convert` so explicitly named missing input files are reported and return a non-zero exit instead of being silently omitted from a successful batch.
 - Fixed all UI drag-and-drop storage snapshots to use a shared deferral-backed helper that swallows virtual-provider retrieval failures instead of crashing async event handlers.
 - Fixed Downloader clipboard paste so locked clipboards, empty text, and faulted text retrieval show a status message instead of escaping through an async event handler.
+- Fixed Settings Save failures to show an error while keeping the window open and the draft marked dirty for retry.
 - Fixed Potrace PDF, DXF, GeoJSON, and XFig argument construction so each `-b` option is followed by its required backend name.
 - Fixed libheif encoding for small requested widths by removing the incomplete `heif-enc -t` thumbnail flag; image width is no longer misinterpreted as a thumbnail request.
 - Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.

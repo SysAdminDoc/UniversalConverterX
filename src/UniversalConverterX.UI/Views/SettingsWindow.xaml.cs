@@ -732,11 +732,28 @@ public sealed partial class SettingsWindow : Window
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
-        // Save all settings
-        SaveSettings();
+        try
+        {
+            // Save all settings
+            SaveSettings();
 
-        await ShowMessageAsync(AppLocalizer.Get("Settings Saved"), AppLocalizer.Get("Your settings have been saved successfully."));
-        Close();
+            await ShowMessageAsync(AppLocalizer.Get("Settings Saved"), AppLocalizer.Get("Your settings have been saved successfully."));
+            Close();
+        }
+        catch (Exception ex)
+        {
+            // Keep the window and all controls open so the operator can retry
+            // after fixing a read-only profile, disk-full condition, or AV
+            // lock. SaveSettings only clears the draft after the atomic write
+            // succeeds, so the edits remain available for the next attempt.
+            Debug.WriteLine($"Settings save failed: {ex.GetType().Name}: {ex.Message}");
+            _isDirty = true;
+            UpdateDirtyState();
+            ShowUpdateStatus(
+                AppLocalizer.Get("Settings not saved"),
+                AppLocalizer.Get("Your settings could not be saved. Check disk space and permissions, then try again."),
+                InfoBarSeverity.Error);
+        }
     }
 
     private void SaveSettings()
