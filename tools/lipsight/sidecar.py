@@ -4,13 +4,6 @@
 import sys
 import os
 import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import argparse
 import tempfile
 import shutil
@@ -20,6 +13,7 @@ import multiprocessing
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit
 import hw_decode
 
 # PyInstaller multiprocessing guard must run before any heavy imports — when
@@ -55,11 +49,6 @@ try:
 except Exception:
     _HAS_MEDIAPIPE = False
     _mp = None
-
-# ── NDJSON helpers ───────────────────────────────────────────────────────────
-def emit(obj: dict):
-    sys.stdout.write(json.dumps(obj) + '\n')
-    sys.stdout.flush()
 
 def emit_progress(percent: float, stage: str, eta: int | None = None):
     payload: dict = {"event": "progress", "percent": round(percent, 1), "stage": stage}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -27,8 +28,7 @@ def _here() -> Path:
     return Path(__file__).resolve().parent
 
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(_here())
+find_ffmpeg = partial(shared_find_ffmpeg, _here())
 
 
 def discover_models() -> list[Path]:

@@ -9,6 +9,7 @@ Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -46,12 +47,10 @@ def fail(code: str, message: str) -> "int":
 
 # ─── FFmpeg discovery ────────────────────────────────────────────────────────
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
-def find_ffprobe() -> str | None:
-    return shared_find_ffprobe(Path(__file__).resolve().parent)
+find_ffprobe = partial(shared_find_ffprobe, Path(__file__).resolve().parent)
 
 
 def probe(ffprobe: str, path: str) -> dict | None:

@@ -9,23 +9,16 @@ Contract: see ../README.md (sidecar contract).
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
 
 _here = Path(__file__).resolve().parent
 sys.path.insert(0, str(_here))
+sys.path.insert(0, str(_here.parent / "_lib"))
+from ucx_sidecar import emit
 
 _IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff", ".tif"}
-
-
-# ─── NDJSON emitter ──────────────────────────────────────────────────────────
-
-def emit(event: str, **fields) -> None:
-    payload = {"event": event, **fields}
-    sys.stdout.write(_dumps(payload) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:

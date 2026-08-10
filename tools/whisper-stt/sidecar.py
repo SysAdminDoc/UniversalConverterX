@@ -33,6 +33,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit
 from ucx_assets import enforce_offline
 from diarization_pack import (  # noqa: E402
     PACK_ID,
@@ -42,10 +43,6 @@ from diarization_pack import (  # noqa: E402
     resolve_pack_dir,
     validate_pack,
 )
-
-
-def emit(event: dict) -> None:
-    print(json.dumps(event), flush=True)
 
 
 def log(message: str, level: str = "info") -> None:

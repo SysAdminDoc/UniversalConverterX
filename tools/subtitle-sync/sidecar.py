@@ -16,6 +16,7 @@ NDJSON contract: progress · log · complete · error · subtitle_synced
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -63,8 +64,7 @@ def _find_subsync() -> tuple[str | None, str]:
     return None, "subsync"
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 # ── Process runner ──────────────────────────────────────────────────

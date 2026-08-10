@@ -30,6 +30,16 @@ class SharedSidecarUtilsTests(unittest.TestCase):
         self.assertEqual(1, len(lines))
         self.assertEqual("résumé 日本語", json.loads(lines[0])["message"])
 
+    def test_emit_accepts_prebuilt_event_payload(self):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            ucx_sidecar.emit({"event": "stem", "name": "vocals"})
+
+        self.assertEqual(
+            {"event": "stem", "name": "vocals"},
+            json.loads(output.getvalue()),
+        )
+
     def test_find_tool_honors_existing_environment_override(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             executable = Path(temp_dir) / "ffmpeg.exe"
@@ -66,10 +76,7 @@ class SharedSidecarUtilsTests(unittest.TestCase):
         self.assertEqual(100.0, progress[-1]["percent"])
 
     def test_sidecars_use_shared_protocol_and_media_helpers(self):
-        specialized_emitters = {
-            "ab-av1", "alphacut", "demucs", "lipsight", "videocrush",
-            "videosubtitleremover", "whisper-stt",
-        }
+        specialized_emitters = {"videocrush"}
         helper_names = {
             "find_ffmpeg": "shared_find_ffmpeg",
             "_find_ffmpeg": "shared_find_ffmpeg",

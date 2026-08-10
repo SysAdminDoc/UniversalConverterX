@@ -10,6 +10,7 @@ builds or FFmpeg-Builds. Drop it next to this sidecar or under tools/_bin/.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -41,8 +42,7 @@ def _find_binary() -> str | None:
     return shutil.which("svtav1encapp") or shutil.which("SvtAv1EncApp")
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 TUNE_MODES = {

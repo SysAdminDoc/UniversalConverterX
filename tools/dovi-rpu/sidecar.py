@@ -18,6 +18,7 @@ NDJSON contract: progress · log · complete · error · dovi_rpu
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -60,8 +61,7 @@ def _find_dovi_tool() -> str | None:
     return None
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 # ── Process runner ──────────────────────────────────────────────────

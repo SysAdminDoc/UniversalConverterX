@@ -29,6 +29,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Changed
 
+- Consolidated built-in sidecars on the shared FFmpeg/FFprobe discovery aliases and NDJSON emitter, retaining prebuilt event compatibility and documenting VideoCrush's ASCII-safe emitter as the sole distinct contract.
 - Migrated the 2,648-test Core suite to xUnit.net v3 with the standalone executable project model and v3 Visual Studio adapter; removed the five xUnit v2 deprecation suppressions from the dependency allowlist.
 - Centralized the .NET servicing package pin at 10.0.10 and the Windows App SDK pin at 2.3.1 across the product, VideoScaler smoke, lockfiles, installer runtime floor, documentation, and release consistency gates.
 

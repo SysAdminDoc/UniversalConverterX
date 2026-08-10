@@ -20,6 +20,7 @@ Standard NDJSON contract: progress / log / complete / error events on stdout.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import hashlib
 import json
 import os
@@ -122,12 +123,10 @@ def _find_realesrgan() -> str | None:
     return None
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
-def _find_ffprobe() -> str | None:
-    return shared_find_ffprobe(Path(__file__).resolve().parent)
+_find_ffprobe = partial(shared_find_ffprobe, Path(__file__).resolve().parent)
 
 
 def _find_mpv() -> str | None:

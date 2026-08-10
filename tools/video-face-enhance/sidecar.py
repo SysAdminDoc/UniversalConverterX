@@ -8,6 +8,7 @@ The sidecar owns orchestration only; model inference remains in facerestore.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -50,8 +51,7 @@ def runtime_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(runtime_dir())
+find_ffmpeg = partial(shared_find_ffmpeg, runtime_dir())
 
 
 def _script_command(script: Path) -> list[str] | None:

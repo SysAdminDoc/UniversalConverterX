@@ -33,6 +33,7 @@ Write-Host "[build] Freezing sidecar.py..."
 
 & $PythonPath -m PyInstaller `
     --onefile `
+    --paths (Join-Path $ScriptDir "../_lib") `
     --name "demucs-sidecar" `
     --distpath $DistDir `
     --workpath "$ScriptDir\build" `

@@ -45,13 +45,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P3 — Specialist capability and consolidation
 
-- [ ] P3 — Item 146 — Complete shared sidecar discovery and emit consolidation
-  Why: the shared protocol/runtime exists, but local `find_ffmpeg` and emit implementations still create drift across 212 engines.
-  Evidence: `tools/_lib/ucx_sidecar.py`; remaining per-sidecar helper definitions.
-  Touches: `tools/_lib/`, per-sidecar entry points, contract checker.
-  Acceptance: all sidecars import the shared discovery/emit helpers unless an allowlisted engine proves a distinct contract; all 212 contract fixtures remain green.
-  Complexity: L
-
 ---
 
 ## Audit Findings — 2026-08-02

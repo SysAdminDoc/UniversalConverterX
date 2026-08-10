@@ -16,6 +16,7 @@ Standard NDJSON contract: progress / log / complete / error / model / segment.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -73,8 +74,7 @@ def find_whisper_cli() -> Path | None:
     return None
 
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(_here())
+find_ffmpeg = partial(shared_find_ffmpeg, _here())
 
 
 def discover_models() -> list[dict]:

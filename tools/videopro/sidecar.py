@@ -18,6 +18,7 @@ sources.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import shutil
@@ -37,8 +38,7 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 # Container -> FFmpeg muxer + recommended audio/video codec pair.

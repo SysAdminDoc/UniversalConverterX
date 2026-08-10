@@ -10,6 +10,7 @@ NDJSON contract: emits progress, log, complete, and error events.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import math
 import os
@@ -60,12 +61,10 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
-def _find_ffprobe() -> str | None:
-    return shared_find_ffprobe(Path(__file__).resolve().parent)
+_find_ffprobe = partial(shared_find_ffprobe, Path(__file__).resolve().parent)
 
 
 def _clamp(value: float, low: float, high: float) -> float:

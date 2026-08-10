@@ -8,14 +8,6 @@ Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 from __future__ import annotations
 
 import argparse
-import json
-try:
-    import orjson
-    def _dumps(obj):
-        return orjson.dumps(obj).decode()
-except ImportError:
-    def _dumps(obj):
-        return json.dumps(obj, ensure_ascii=False)
 import os
 import sys
 from pathlib import Path
@@ -26,6 +18,7 @@ _parent = _here.parent
 sys.path.insert(0, str(_parent))
 sys.path.insert(0, str(_here))
 sys.path.insert(0, str(_parent / "_lib"))
+from ucx_sidecar import emit
 from ucx_assets import AssetError, LicenseNotAccepted, VerifiedAsset, cached_asset, download_verified, enforce_offline
 
 
@@ -41,15 +34,6 @@ def _model_root(args: argparse.Namespace) -> Path:
         args.model_dir
         or os.environ.get("UCX_MODEL_DIR")
         or Path.home() / ".alphacut" / "models")
-
-
-# ─── NDJSON emitter ──────────────────────────────────────────────────────────
-
-def emit(event: str, **fields) -> None:
-    """Write a single NDJSON line to stdout and flush immediately."""
-    payload = {"event": event, **fields}
-    sys.stdout.write(_dumps(payload) + "\n")
-    sys.stdout.flush()
 
 
 def fail(code: str, message: str) -> int:

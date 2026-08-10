@@ -5,6 +5,7 @@ SoundFont file (path passed via --soundfont or auto-discovered).
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import shutil
@@ -36,8 +37,7 @@ def _find_fluidsynth() -> str | None:
     return None
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 def _find_soundfont(hint: str | None) -> str | None:

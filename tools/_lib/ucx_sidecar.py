@@ -83,9 +83,18 @@ _PROGRESS_KEYS = (
 )
 
 
-def emit(event: str, **fields: object) -> None:
-    """Write one UTF-8 NDJSON protocol event and flush it immediately."""
-    sys.stdout.write(_dumps({"event": event, **fields}) + "\n")
+def emit(event: str | dict[str, object], **fields: object) -> None:
+    """Write one UTF-8 NDJSON protocol event and flush it immediately.
+
+    The normal form is ``emit("progress", percent=...)``.  Dict input is
+    retained for older specialized engines that already construct their
+    event payload before calling the shared runtime.
+    """
+    if isinstance(event, dict):
+        payload = {**event, **fields}
+    else:
+        payload = {"event": event, **fields}
+    sys.stdout.write(_dumps(payload) + "\n")
     sys.stdout.flush()
 
 

@@ -19,6 +19,7 @@ Standard NDJSON contract: progress / log / complete / error / model events.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -53,8 +54,9 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
 
 # ── ffmpeg discovery ─────────────────────────────────────────────────────────
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+find_ffmpeg = partial(
+    shared_find_ffmpeg, Path(__file__).resolve().parent
+)
 
 
 def probe_duration(ffmpeg: str, path: Path) -> float:

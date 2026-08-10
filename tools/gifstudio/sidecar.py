@@ -13,6 +13,7 @@ Standard NDJSON contract: progress / log / complete / error events on stdout.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -37,9 +38,9 @@ def fail(code: str, message: str) -> int:
 
 # ── ffmpeg discovery ─────────────────────────────────────────────────────────
 
-def find_ffmpeg() -> str | None:
-    """Search PATH, FFMPEG_PATH env, the sidecar dir, and the shared tools/_bin."""
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+find_ffmpeg = partial(
+    shared_find_ffmpeg, Path(__file__).resolve().parent
+)
 
 
 def probe_duration(ffmpeg: str, path: Path) -> float:

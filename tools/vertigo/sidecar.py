@@ -23,6 +23,7 @@ ROADMAP tracks broader vendoring as a separate decision.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import math
 import os
@@ -59,8 +60,7 @@ def progress(percent: float, stage: str = "", eta: int | None = None) -> None:
 
 # ── ffmpeg discovery + probe ─────────────────────────────────────────────────
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 def probe_video(ffmpeg: str, path: Path) -> tuple[int, int, float, float]:

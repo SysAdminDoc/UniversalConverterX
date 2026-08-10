@@ -17,7 +17,6 @@ NDJSON events emitted to stdout:
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
 import subprocess
@@ -26,9 +25,8 @@ import tempfile
 import time
 from pathlib import Path
 
-
-def emit(event: dict) -> None:
-    print(json.dumps(event), flush=True)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit
 
 
 def log(message: str, level: str = "info") -> None:

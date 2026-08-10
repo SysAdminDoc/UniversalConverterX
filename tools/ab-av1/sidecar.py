@@ -15,7 +15,6 @@ Standard NDJSON contract: progress / log / complete / error events on stdout.
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
 import shutil
@@ -23,13 +22,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-
-# ── NDJSON helpers ───────────────────────────────────────────────────────────
-
-def emit(event: str, **fields) -> None:
-    payload = json.dumps({"event": event, **fields}, ensure_ascii=True, separators=(",", ":"))
-    sys.stdout.write(payload + "\n")
-    sys.stdout.flush()
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
+from ucx_sidecar import emit
 
 
 def fail(code: str, message: str) -> int:

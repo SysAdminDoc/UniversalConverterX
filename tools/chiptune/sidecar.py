@@ -20,6 +20,7 @@ hvl_player CLI shellouts for SID / AHX / HVL.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import shutil
@@ -44,8 +45,7 @@ GME_EXTS = {".nsf", ".nsfe", ".spc", ".vgm", ".vgz", ".gbs", ".hes",
             ".kss", ".gym", ".ay", ".sap"}
 
 
-def _find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(Path(__file__).resolve().parent)
+_find_ffmpeg = partial(shared_find_ffmpeg, Path(__file__).resolve().parent)
 
 
 def _gme_render(src: Path, out_dir: Path, target: str,

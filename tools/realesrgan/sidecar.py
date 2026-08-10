@@ -14,6 +14,7 @@ Standard NDJSON contract: progress / log / complete / error / model events.
 from __future__ import annotations
 
 import argparse
+from functools import partial
 import json
 import os
 import re
@@ -107,8 +108,7 @@ def discover_models() -> list[dict]:
     return list(seen.values())
 
 
-def find_ffmpeg() -> str | None:
-    return shared_find_ffmpeg(_here())
+find_ffmpeg = partial(shared_find_ffmpeg, _here())
 
 
 # ── list-models ──────────────────────────────────────────────────────────────
