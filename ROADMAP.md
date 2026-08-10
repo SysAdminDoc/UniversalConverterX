@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 184 — `heif-enc -t` emitted without the required thumbnail-size argument
-  Category: correctness
-  Where: `src/UniversalConverterX.Core/Converters/LibHeifConverter.cs:116-126`.
-  Problem: when `options.Image.Width <= 256`, a bare `-t` is added (`:119`), then `-o <out>` follows (`:123`); heif-enc's `-t/--thumb` takes a numeric size, so it consumes `-o` as the size and the output filename is lost → parse failure / no output. The `Width<=256 ⇒ make a thumbnail` heuristic is also questionable (a small target size is not a thumbnail request).
-  Evidence: args become `[-q,60,-t,-o,<out>,<in>]`.
-  Fix: pass the size (`["-t", size]`) or drop the thumbnail heuristic entirely; verify against the shipped heif-enc.
-  Acceptance: `png→heic` with Width=200 produces the file and heif-enc exits 0.
-  Confidence: Likely (heif-enc option contract). Effort: S
-
 - [ ] P2 — Item 185 — Ghostscript `-sOutputFile=` treats `%` in user paths as a page-number template
   Category: correctness
   Where: `src/UniversalConverterX.Core/Converters/GhostscriptConverter.cs:143`.

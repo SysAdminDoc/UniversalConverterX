@@ -113,12 +113,6 @@ public partial class LibHeifConverter : BaseConverterStrategy
                 args.AddRange(["-A"]); // Use AV1 encoder
             }
 
-            // Thumbnail generation
-            if (options.Image.Width.HasValue && options.Image.Width.Value <= 256)
-            {
-                args.Add("-t"); // Create thumbnail
-            }
-
             // Output file
             args.AddRange(["-o", job.OutputPath]);
 
