@@ -53,9 +53,9 @@ public sealed partial class DvdRipPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         var folder = items.OfType<StorageFolder>().FirstOrDefault();
         if (folder is not null)
             await ScanAsync(folder.Path);

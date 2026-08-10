@@ -52,9 +52,9 @@ public sealed partial class AiSubtitlePage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         var first = items.OfType<StorageFile>().FirstOrDefault();
         if (first is not null)
             AcceptFile(first.Path);

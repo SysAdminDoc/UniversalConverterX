@@ -73,8 +73,8 @@ public sealed partial class DocumentConverterPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
-        var items = await e.DataView.GetStorageItemsAsync();
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null) return;
         foreach (var item in items)
         {
             if (item is StorageFile f) AddFile(f.Path);

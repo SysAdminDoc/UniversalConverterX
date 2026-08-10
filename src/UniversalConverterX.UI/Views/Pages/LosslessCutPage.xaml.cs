@@ -71,9 +71,9 @@ public sealed partial class LosslessCutPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         var file = items.OfType<StorageFile>()
             .FirstOrDefault(f => VideoExtensions.Contains(Path.GetExtension(f.Path).ToLowerInvariant()));
         if (file is not null)

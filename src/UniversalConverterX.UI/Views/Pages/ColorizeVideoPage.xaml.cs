@@ -150,8 +150,8 @@ public sealed partial class ColorizeVideoPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
-        var items = await e.DataView.GetStorageItemsAsync();
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null) return;
         var file = items.OfType<StorageFile>().FirstOrDefault(f =>
         {
             var ext = Path.GetExtension(f.Path).ToLowerInvariant();

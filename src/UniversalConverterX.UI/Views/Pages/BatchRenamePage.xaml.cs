@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Utilities;
+using UniversalConverterX.UI.Services;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
@@ -58,9 +59,9 @@ public sealed partial class BatchRenamePage : Page
 
     private async void BatchRenamePage_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         foreach (var item in items)
         {
             if (item is StorageFile sf) AddPath(sf.Path);

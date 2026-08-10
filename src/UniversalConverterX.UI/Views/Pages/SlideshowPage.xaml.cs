@@ -68,10 +68,9 @@ public sealed partial class SlideshowPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-
-        var items = await e.DataView.GetStorageItemsAsync();
         foreach (var item in items)
         {
             switch (item)

@@ -96,9 +96,9 @@ public sealed partial class DiscBurnPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         if (IsVideoDisc)
         {
             var files = items.OfType<StorageFile>().Select(file => new DiscSource(file.Name, file.Path));

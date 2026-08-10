@@ -42,9 +42,9 @@ public sealed partial class VideoSummarizerPage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-        var items = await e.DataView.GetStorageItemsAsync();
         var file = items.OfType<StorageFile>().FirstOrDefault(f => IsSupported(f.Path));
         if (file is not null)
             LoadSource(file.Path);

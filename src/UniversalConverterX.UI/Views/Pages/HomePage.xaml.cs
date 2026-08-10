@@ -284,10 +284,9 @@ public sealed partial class HomePage : Page
     private async void FileIntake_Drop(object sender, DragEventArgs e)
     {
         ResetFileIntakeSurface();
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null)
             return;
-
-        var items = await e.DataView.GetStorageItemsAsync();
         NavigateToConverter(items.Select(item => item switch
         {
             StorageFile file => file.Path,

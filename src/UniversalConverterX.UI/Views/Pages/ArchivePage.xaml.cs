@@ -72,8 +72,8 @@ public sealed partial class ArchivePage : Page
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
-        var items = await e.DataView.GetStorageItemsAsync();
+        var items = await DropSnapshotHelper.TrySnapshotDropAsync(e);
+        if (items is null) return;
         if (_packMode)
         {
             foreach (var it in items)
