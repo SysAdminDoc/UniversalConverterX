@@ -330,6 +330,9 @@ public sealed partial class RecorderPage : Page
                     result = new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", 130);
                 }
 
+                if (result.ErrorCode == "cancelled")
+                    result = RemoveCancelledOutput(outputPath, result);
+
                 if (result.Success)
                 {
                     completed++;
@@ -359,6 +362,35 @@ public sealed partial class RecorderPage : Page
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         StatusText.Text = AppLocalizer.Format($"{completed} recordings completed, {failed} failed.");
         UpdateUi(updateStatus: false);
+    }
+
+    private static SidecarResult RemoveCancelledOutput(string outputPath, SidecarResult result)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath) || !File.Exists(outputPath))
+            return result with { OutputPath = null, SizeBytes = null };
+
+        try
+        {
+            File.Delete(outputPath);
+            if (!File.Exists(outputPath))
+                return result with { OutputPath = null, SizeBytes = null };
+
+            return result with
+            {
+                OutputPath = null,
+                SizeBytes = null,
+                ErrorMessage = $"Cancelled by user. The partial recording could not be removed: {outputPath}",
+            };
+        }
+        catch (Exception ex)
+        {
+            return result with
+            {
+                OutputPath = null,
+                SizeBytes = null,
+                ErrorMessage = $"Cancelled by user. The partial recording could not be removed from '{outputPath}': {ex.Message}",
+            };
+        }
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
