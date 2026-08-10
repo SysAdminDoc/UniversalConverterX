@@ -87,11 +87,15 @@ public class ConfigCommand : Command<ConfigCommand.Settings>
             switch (key.ToLowerInvariant().Replace("-", "").Replace("_", ""))
             {
                 case "toolspath":
-                    if (!Directory.Exists(value))
+                    if (!CliConfiguration.TryNormalizeToolsPath(value, out var normalizedToolsPath, out var toolsPathError))
+                        throw new ArgumentException(toolsPathError);
+
+                    value = normalizedToolsPath;
+                    if (!Directory.Exists(normalizedToolsPath))
                     {
-                        AnsiConsole.MarkupLine($"[yellow]Warning:[/] Directory does not exist: {Markup.Escape(value)}");
+                        AnsiConsole.MarkupLine($"[yellow]Warning:[/] Directory does not exist: {Markup.Escape(normalizedToolsPath)}");
                     }
-                    config.ToolsBasePath = value;
+                    config.ToolsBasePath = normalizedToolsPath;
                     break;
 
                 case "maxparallel":

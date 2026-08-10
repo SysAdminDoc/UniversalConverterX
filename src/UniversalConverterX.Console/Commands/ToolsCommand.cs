@@ -53,7 +53,14 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var cliOptions = CliConfiguration.Get(context);
-        settings.ToolsPath ??= cliOptions.ToolsBasePath;
+        var requestedToolsPath = settings.ToolsPath ?? cliOptions.ToolsBasePath;
+        if (!CliConfiguration.TryNormalizeToolsPath(requestedToolsPath, out var normalizedToolsPath, out var pathError))
+        {
+            AnsiConsole.MarkupLine($"[red]Error:[/] Invalid --tools-path: {Markup.Escape(pathError)}");
+            return 1;
+        }
+
+        settings.ToolsPath = normalizedToolsPath;
 
         return settings.Action.ToLowerInvariant() switch
         {

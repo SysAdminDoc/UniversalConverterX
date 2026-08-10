@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using UniversalConverterX.Console.Configuration;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Services;
 
@@ -21,7 +22,13 @@ public class EncodersCommand : Command<EncodersCommand.Settings>
 
     protected override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var toolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
+        var requestedToolsPath = settings.ToolsPath ?? GetDefaultToolsPath();
+        if (!CliConfiguration.TryNormalizeToolsPath(requestedToolsPath, out var toolsPath, out var pathError))
+        {
+            AnsiConsole.MarkupLine($"[red]Error:[/] Invalid --tools-path: {Markup.Escape(pathError)}");
+            return 1;
+        }
+
         var ffmpegPath = new FFmpegConverter(toolsPath).ResolveExecutablePath();
 
         if (ffmpegPath is null)

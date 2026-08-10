@@ -120,7 +120,14 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
     {
         var options = CliConfiguration.Get(context);
         ApplyConfigurationDefaults(settings, options);
-        options.ToolsBasePath = settings.ToolsPath!;
+        if (!CliConfiguration.TryNormalizeToolsPath(settings.ToolsPath, out var normalizedToolsPath, out var pathError))
+        {
+            AnsiConsole.MarkupLine($"[red]Error:[/] Invalid --tools-path: {Markup.Escape(pathError)}");
+            return 1;
+        }
+
+        settings.ToolsPath = normalizedToolsPath;
+        options.ToolsBasePath = normalizedToolsPath;
         options.MaxParallelConversions = Math.Max(1, settings.Parallel!.Value);
 
         // Validate input
