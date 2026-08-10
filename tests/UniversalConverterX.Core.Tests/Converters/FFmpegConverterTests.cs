@@ -710,6 +710,30 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void BuildArguments_StreamCopyMp4_RestoresUdtaTrackNames()
+    {
+        var job = CreateTestJob("input.mp4", "output.mov");
+        job.SourceTrackNames = new Dictionary<string, string>
+        {
+            ["a:0"] = "English commentary",
+            ["a:1"] = "Spanish commentary",
+            ["s:0"] = "English captions",
+        };
+        var options = new ConversionOptions
+        {
+            StreamCopy = true,
+            AudioTrackSelection = [1],
+            SubtitleTrackSelection = [0],
+        };
+
+        var args = _converter.BuildArguments(job, options);
+
+        args.Should().ContainInOrder("-metadata:s:a:0", "title=Spanish commentary");
+        args.Should().ContainInOrder("-metadata:s:s:0", "title=English captions");
+        args.Should().NotContain("title=English commentary");
+    }
+
+    [Fact]
     public void BuildArguments_StreamCopyAudioContainer_CopiesAudioOnly()
     {
         var job = CreateTestJob("input.mkv", "output.m4a");

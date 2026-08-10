@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 133 — Preserve MP4/MOV `udta` track names on remux
-  Why: named-track fidelity remains incomplete and MKVToolNix v100 now imports these names.
-  Evidence: MKVToolNix v100; Item 155 fixture matrix.
-  Touches: probe/remux layer and `FFmpegConverter`.
-  Acceptance: MP4/MOV remux preserves `udta` audio/subtitle track names verified by independent probe.
-  Complexity: S
-
 - [ ] P2 — Item 136 — Add KEPUB interchange and a governed KCC comic pipeline
   Why: KFX input already exists; remaining value is EPUB↔KEPUB plus device-profiled comic output with explicit protected-input rejection.
   Evidence: `CalibreConverter.cs`; `tools/ebookconvert/sidecar.py`; Calibre/KCC documentation.

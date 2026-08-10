@@ -16,6 +16,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Converter preflight now probes named and language-tagged audio/subtitle streams and exposes keep/drop controls. Explicit per-kind selections flow into FFmpeg job snapshots and durable queue recovery, while the default preserves every track.
 - Hardware encoder choices now stay disabled until the configured FFmpeg build exposes a matching encoder. Missing-tool, driver, and VRAM requirements are explained inline; hardware initialization failures retry per job on CPU while preserving scale/deinterlace settings and recording the actual encoder and fallback reason in history provenance.
 - Job Center search now exposes the durable queue's filename, engine, status, and error filtering, while History adds an “Open copy” action that restores a fresh settings job without reusing or mutating the original history row.
+- MP4/MOV stream-copy now probes source audio, video, and subtitle names and writes them back as QuickTime `udta` track names; both containers are covered by an FFprobe-verified remux regression.
 
 ### Fixed
 

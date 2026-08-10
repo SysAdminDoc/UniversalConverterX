@@ -85,6 +85,13 @@ public class ConversionJob
     public OutputSizeEstimate? EstimatedOutput { get; set; }
 
     /// <summary>
+    /// Source per-track names captured by FFprobe immediately before an MP4/MOV
+    /// stream-copy. This is invocation state, not a user setting or persisted
+    /// job field; FFmpeg uses it to re-materialize QuickTime <c>udta</c> names.
+    /// </summary>
+    internal IReadOnlyDictionary<string, string>? SourceTrackNames { get; set; }
+
+    /// <summary>
     /// Converter that handled this job
     /// </summary>
     public string? ConverterUsed { get; set; }

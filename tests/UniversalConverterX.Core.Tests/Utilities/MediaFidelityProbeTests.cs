@@ -225,6 +225,75 @@ public sealed class MediaFidelityProbeTests
         }
     }
 
+    [Theory]
+    [InlineData("mp4")]
+    [InlineData("mov")]
+    public async Task FfmpegMp4MovRemuxPreservesUdtaAudioAndSubtitleNames(
+        string outputExtension)
+    {
+        var ffmpeg = FindExecutable("ffmpeg");
+        var ffprobe = FindExecutable("ffprobe");
+        if (ffmpeg is null || ffprobe is null)
+            return;
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"ucx-udta-remux-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempRoot);
+
+        try
+        {
+            var subtitles = Path.Combine(tempRoot, "captions.srt");
+            File.WriteAllText(
+                subtitles,
+                "1\n00:00:00,000 --> 00:00:00,500\nHello\n",
+                System.Text.Encoding.UTF8);
+            var source = Path.Combine(tempRoot, "source.mp4");
+            var output = Path.Combine(tempRoot, $"remux.{outputExtension}");
+            var generated = await RunToolAsync(
+                ffmpeg,
+                [
+                    "-y", "-hide_banner", "-loglevel", "error",
+                    "-f", "lavfi", "-i", "color=c=black:s=320x180:r=24:d=1",
+                    "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=1",
+                    "-i", subtitles,
+                    "-map", "0:v:0", "-map", "1:a:0", "-map", "2:0",
+                    "-c:v", "libx264", "-preset", "ultrafast",
+                    "-c:a", "aac", "-c:s", "mov_text",
+                    "-metadata:s:a:0", "title=English Commentary",
+                    "-metadata:s:a:0", "language=eng",
+                    "-metadata:s:s:0", "title=English Captions",
+                    "-metadata:s:s:0", "language=eng",
+                    source,
+                ]);
+            generated.ExitCode.Should().Be(0, generated.StandardError);
+
+            var before = await MediaFidelityProbe.ProbeAsync(ffprobe, source);
+            before.Succeeded.Should().BeTrue(before.Diagnostic);
+            var sourceNames = MediaFidelityProbe.ExtractTrackNames(before.Snapshot!);
+            sourceNames.Should().ContainValues("English Commentary", "English Captions");
+
+            var conversion = await new FFmpegConverter(Path.Combine(tempRoot, "no-managed-tools"))
+                .ConvertAsync(ConversionJob.Create(
+                    source,
+                    output,
+                    new ConversionOptions
+                    {
+                        OverwriteExisting = true,
+                        PreserveMetadata = true,
+                        StreamCopy = true,
+                    }));
+            conversion.Success.Should().BeTrue(conversion.ErrorMessage);
+
+            var after = await MediaFidelityProbe.ProbeAsync(ffprobe, output);
+            after.Succeeded.Should().BeTrue(after.Diagnostic);
+            var outputNames = MediaFidelityProbe.ExtractTrackNames(after.Snapshot!);
+            outputNames.Should().BeEquivalentTo(sourceNames);
+        }
+        finally
+        {
+            try { Directory.Delete(tempRoot, recursive: true); } catch { }
+        }
+    }
+
     [Fact]
     public async Task FfmpegCancellationDoesNotLeaveAnOutputOrChangeTheSource()
     {

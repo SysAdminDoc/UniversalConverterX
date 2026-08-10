@@ -168,6 +168,49 @@ public static class MediaFidelityProbe
     }
 
     /// <summary>
+    /// Extracts user-facing per-track names using the FFprobe stream type and
+    /// zero-based ordinal that FFmpeg accepts in a stream metadata specifier.
+    /// QuickTime/MOV exposes its <c>udta</c> track name as the stream
+    /// <c>name</c> tag; <c>title</c> is accepted as a fallback for other
+    /// containers.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> ExtractTrackNames(
+        MediaFidelitySnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var ordinals = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var stream in snapshot.Streams)
+        {
+            var type = stream.Type.ToLowerInvariant() switch
+            {
+                "video" => "v",
+                "audio" => "a",
+                "subtitle" => "s",
+                _ => null,
+            };
+            if (type is null)
+                continue;
+
+            var ordinal = ordinals.TryGetValue(type, out var current) ? current : 0;
+            ordinals[type] = ordinal + 1;
+
+            if ((!stream.Tags.TryGetValue("name", out var name)
+                    || string.IsNullOrWhiteSpace(name))
+                && (!stream.Tags.TryGetValue("title", out name)
+                    || string.IsNullOrWhiteSpace(name)))
+            {
+                continue;
+            }
+
+            names[$"{type}:{ordinal}"] = name;
+        }
+
+        return names;
+    }
+
+    /// <summary>
     /// Parses a previously captured FFprobe JSON document. Keeping this parser
     /// public lets release tests prove malformed-input handling without needing
     /// a native media fixture or a process invocation.

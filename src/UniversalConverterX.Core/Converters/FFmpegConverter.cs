@@ -155,7 +155,11 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Metadata
         if (options.PreserveMetadata)
+        {
             args.AddRange(["-map_metadata", "0"]);
+            if (options.StreamCopy && IsMp4Mov(job.OutputExtension))
+                args.AddRange(BuildTrackNameMetadataArgs(job, options));
+        }
 
         // Custom arguments
         args.AddRange(options.CustomArguments);
@@ -167,6 +171,85 @@ public partial class FFmpegConverter : BaseConverterStrategy
         args.AddRange(["-progress", "pipe:1", "-stats_period", "0.1"]);
 
         return [.. args];
+    }
+
+    /// <summary>
+    /// Re-materialize source <c>name</c>/<c>title</c> tags as FFmpeg
+    /// stream-title metadata. The MP4/MOV muxer writes that value into the
+    /// track's QuickTime <c>udta</c> name atom; a plain <c>-map_metadata 0</c>
+    /// only copies global metadata and otherwise drops it.
+    /// </summary>
+    internal static string[] BuildTrackNameMetadataArgs(
+        ConversionJob job,
+        ConversionOptions options)
+    {
+        var names = job.SourceTrackNames;
+        if (options.PreserveMetadata
+            && options.StreamCopy
+            && IsMp4Mov(job.OutputExtension)
+            && names is not null
+            && names.Count > 0)
+        {
+            var args = new List<string>();
+            AppendTrackNameMetadata(args, names, "v", selected: null);
+            AppendTrackNameMetadata(args, names, "a", options.AudioTrackSelection);
+            AppendTrackNameMetadata(args, names, "s", options.SubtitleTrackSelection);
+            return [.. args];
+        }
+
+        return [];
+    }
+
+    private static void AppendTrackNameMetadata(
+        ICollection<string> args,
+        IReadOnlyDictionary<string, string> names,
+        string type,
+        IReadOnlyList<int>? selected)
+    {
+        foreach (var pair in names
+                     .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            var separator = pair.Key.IndexOf(':');
+            if (separator <= 0
+                || !pair.Key[..separator].Equals(type, StringComparison.OrdinalIgnoreCase)
+                || !int.TryParse(
+                    pair.Key[(separator + 1)..],
+                    NumberStyles.None,
+                    CultureInfo.InvariantCulture,
+                    out var sourceIndex))
+            {
+                continue;
+            }
+
+            var outputIndex = FindOutputTrackIndex(selected, sourceIndex);
+            if (outputIndex < 0)
+                continue;
+
+            var name = pair.Value.Replace("\0", string.Empty, StringComparison.Ordinal);
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            if (name.Length > 1024)
+                name = name[..1024];
+
+            args.Add($"-metadata:s:{type}:{outputIndex}");
+            args.Add($"title={name}");
+        }
+    }
+
+    private static int FindOutputTrackIndex(
+        IReadOnlyList<int>? selected,
+        int sourceIndex)
+    {
+        if (selected is null)
+            return sourceIndex;
+
+        for (var index = 0; index < selected.Count; index++)
+        {
+            if (selected[index] == sourceIndex)
+                return index;
+        }
+
+        return -1;
     }
 
     internal static bool HasTrackSelection(ConversionOptions options) =>
@@ -255,8 +338,19 @@ public partial class FFmpegConverter : BaseConverterStrategy
         IProgress<ConversionProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        job.SourceTrackNames = null;
+        await PrepareTrackNamesAsync(job, cancellationToken).ConfigureAwait(false);
+
         var capability = CaptureCapability(job);
-        var result = await ConvertOnceAsync(job, progress, cancellationToken);
+        ConversionResult result;
+        try
+        {
+            result = await ConvertOnceAsync(job, progress, cancellationToken);
+        }
+        finally
+        {
+            job.SourceTrackNames = null;
+        }
 
         if (!capability.RequestedHardware)
             return AttachCapability(result, capability, fellBack: false, reason: null);
@@ -307,6 +401,72 @@ public partial class FFmpegConverter : BaseConverterStrategy
             job.Options.HardwareAccel = originalHardwareAcceleration;
             job.Options.Video.Codec = originalVideoCodec;
         }
+    }
+
+    private async Task PrepareTrackNamesAsync(
+        ConversionJob job,
+        CancellationToken cancellationToken)
+    {
+        if (!job.Options.PreserveMetadata
+            || !job.Options.StreamCopy
+            || job.Options.FfmpegArgumentOverride is { Count: > 0 }
+            || !IsMp4Mov(job.OutputExtension)
+            || !File.Exists(job.InputPath))
+        {
+            return;
+        }
+
+        var ffprobePath = ResolveFfprobePath();
+        if (ffprobePath is null)
+        {
+            Logger?.LogDebug("Skipping MP4/MOV track-name probe because ffprobe is unavailable.");
+            return;
+        }
+
+        var probe = await MediaFidelityProbe.ProbeAsync(
+            ffprobePath,
+            job.InputPath,
+            cancellationToken).ConfigureAwait(false);
+        if (!probe.Succeeded || probe.Snapshot is null)
+        {
+            Logger?.LogDebug(
+                "Skipping MP4/MOV track-name preservation for {Input}: {Diagnostic}",
+                job.InputPath,
+                probe.Diagnostic);
+            return;
+        }
+
+        job.SourceTrackNames = MediaFidelityProbe.ExtractTrackNames(probe.Snapshot);
+    }
+
+    private string? ResolveFfprobePath()
+    {
+        var executable = OperatingSystem.IsWindows() ? "ffprobe.exe" : "ffprobe";
+        var ffmpegPath = ResolveExecutablePath();
+        if (ffmpegPath is not null)
+        {
+            var directory = Path.GetDirectoryName(ffmpegPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                var sibling = Path.Combine(directory, executable);
+                if (File.Exists(sibling))
+                    return sibling;
+            }
+        }
+
+        var configured = Path.Combine(ToolsBasePath, "bin", executable);
+        if (File.Exists(configured))
+            return configured;
+
+        foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var candidate = Path.Combine(directory.Trim(), executable);
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
+        return null;
     }
 
     private async Task<ConversionResult> ConvertOnceAsync(
@@ -820,6 +980,10 @@ public partial class FFmpegConverter : BaseConverterStrategy
         "opus" or "aiff" or "ac3" or "mka" or "au" or "caf" => true,
         _ => false
     };
+
+    private static bool IsMp4Mov(string ext) =>
+        ext.Equals("mp4", StringComparison.OrdinalIgnoreCase)
+        || ext.Equals("mov", StringComparison.OrdinalIgnoreCase);
 
     public override ConversionProgress? ParseProgress(string line, ConversionJob job)
     {
