@@ -15,11 +15,12 @@ namespace UniversalConverterX.UI.Views.Pages;
 public sealed class UniversalMatchItem : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    public required WorkflowCatalogItem CatalogItem { get; init; }
     public required UiPreset Preset { get; init; }
     public required IReadOnlyList<string> AcceptedInputs { get; init; }
     public required IReadOnlyList<string> AllInputs { get; init; }
 
-    public string Name => Preset.Name;
+    public string Name => CatalogItem.LocalizedTitle;
     public string Glyph { get; init; } = "\uE8B7";
 
     public string Subtitle
@@ -57,7 +58,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
 
     private readonly IPresetExecutor _executor;
     private readonly IHistoryService _history;
-    private readonly IUiPresetCache _presetCache;
+    private readonly IWorkflowCatalog _catalog;
     private readonly ObservableCollection<UniversalMatchItem> _displayed = [];
     private List<UniversalMatchItem> _all = [];
     private List<string> _selectedFiles = [];
@@ -84,7 +85,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         InitializeComponent();
         _executor    = App.Services.GetRequiredService<IPresetExecutor>();
         _history     = App.Services.GetRequiredService<IHistoryService>();
-        _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
+        _catalog    = App.Services.GetRequiredService<IWorkflowCatalog>();
         MatchList.ItemsSource = _displayed;
     }
 
@@ -155,10 +156,12 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
                         .Where(e => !string.IsNullOrEmpty(e))
                         .ToList();
 
-        var presets = _presetCache.Get();
+        var presets = _catalog.GetPresets();
         var matches = new List<UniversalMatchItem>();
-        foreach (var p in presets)
+        foreach (var catalogItem in presets)
         {
+            if (catalogItem.Preset is not UiPreset p)
+                continue;
             var allowed = p.InputTypes.Select(s => s.TrimStart('.').ToLowerInvariant()).ToHashSet();
             var accepted = _selectedFiles.Where(path =>
             {
@@ -169,10 +172,11 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
             if (accepted.Count == 0 && allowed.Count > 0) continue;
             matches.Add(new UniversalMatchItem
             {
+                CatalogItem = catalogItem,
                 Preset = p,
                 AcceptedInputs = accepted,
                 AllInputs = _selectedFiles,
-                Glyph = GlyphFor(p.Engine),
+                Glyph = catalogItem.Glyph,
             });
         }
         // Sort: full-coverage matches first, then by engine, then by name.
@@ -232,8 +236,9 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
 
     private async void RunPreset_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button b || b.Tag is not string presetName) return;
-        var card = _all.FirstOrDefault(c => c.Name == presetName);
+        if (sender is not Button b || b.Tag is not string workflowId) return;
+        var card = _all.FirstOrDefault(c =>
+            string.Equals(c.CatalogItem.Id, workflowId, StringComparison.OrdinalIgnoreCase));
         if (card is null) return;
         var preset = card.Preset;
         if (card.AcceptedInputs.Count == 0)

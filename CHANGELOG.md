@@ -11,6 +11,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Runtime status, error, dialog, and formatted summary copy now uses deterministic resource-backed localization across the UI code-behind, with pseudo-locale support and static resource-coverage checks.
 - Added shared accessibility primitives: polite live regions for status/progress updates, stable Ctrl+K/Ctrl+1/Ctrl+2/Ctrl+J shell accelerators, high-contrast palette resources, WCAG-AA text tokens, visible focus brushes, and automatic narrow-window reflow for every page.
 - Persisted settings now have observable consumers for converter defaults, completion feedback, accent color, startup behavior, and Explorer presentation; unsupported tray and auto-start toggles are removed by the v4 settings migration.
+- Home, Toolbox, Presets, Universal Convert, and shell search now consume one stable workflow catalog with localized metadata, capability/readiness disclosures, favorite/recent state, and route-independent IDs that preserve distinct ClipForge tasks.
 
 ### Fixed
 

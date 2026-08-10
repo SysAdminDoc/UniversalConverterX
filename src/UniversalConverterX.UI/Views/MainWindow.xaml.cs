@@ -16,64 +16,8 @@ public sealed partial class MainWindow : Window
     private bool _isSelectingNavigationItem;
     private string _currentNavigationTag = "home";
 
-    private readonly List<NavSearchSuggestion> _searchSuggestions =
-    [
-        new("Home", "Start a workflow or search tools", "home"),
-        new("Converter", "Batch convert video, audio, image, document, and archive formats", "converter"),
-        new("AI Lab", "AI tool status and planned workflows", "ai-lab"),
-        new("Compressor", "Shrink videos for web, email, archive, and social delivery", "compressor"),
-        new("Editor", "Trim, crop, rotate, upscale, filter, and export clips", "editor"),
-        new("Lossless Cut", "Keyframe-accurate stream-copy trimming with a visual timeline — no re-encode", "lossless-cut"),
-        new("DVD Rip", "Rip titles from an unprotected VIDEO_TS folder to MP4 or MKV", "dvd-rip"),
-        new("Disc Burner", "Create data CD/DVD or DVD-Video images and burn them through Windows IMAPI2", "disc-burn"),
-        new("Downloader", "Download video or audio from supported URLs", "downloader"),
-        new("Recorder", "Screen recording plus planned webcam and audio capture", "recorder"),
-        new("Toolbox", "Specialized media utilities and availability", "toolbox"),
-        new("Format Inspector", "Probe codecs, streams, metadata, and conversion targets", "format-inspector"),
-        new("Frame Snapshot", "Export still frames and image-sequence samples from video", "frame-snapshot"),
-        new("GIF Maker", "Convert video clips to high-quality animated GIFs", "gif-maker"),
-        new("Slideshow Maker", "Turn image folders into videos with motion, transitions, text, and music", "slideshow-maker"),
-        new("Image Converter", "Convert HEIC, AVIF, JPEG, PNG, WebP, TIFF, BMP", "image-converter"),
-        new("UltraHDR Gain Maps", "Preserve ISO 21496-1 JPEG gain maps or write gain-map AVIF", "presets:gainmap"),
-        new("Auto Reframe", "Convert horizontal video to 9:16 / 1:1 / 4:5 with optional face tracking", "auto-reframe"),
-        new("Image Upscaler", "Real-ESRGAN super-resolution up to 4× for photos / illustrations", "ai-image-enhancer"),
-        new("Video Upscaler", "Real-ESRGAN, Anime4K GLSL, or SeedVR2 video restoration", "ai-video-enhancer"),
-        new("Video Denoise", "Real-ESRGAN frame-by-frame cleanup presets", "presets:realesrgan"),
-        new("Anime Video Sharpen", "Anime4K GLSL and Real-ESRGAN video upscaling", "ai-video-enhancer"),
-        new("Video Face Enhance", "CodeFormer frame-by-frame face enhancement presets", "presets:video-face-enhance"),
-        new("Auto Crop", "ClipForge cropdetect presets for video crop cleanup", "presets:clipforge"),
-        new("Intro & Outro", "ClipForge presets for branded intro and outro assembly", "presets:clipforge"),
-        new("Lens Correction", "ClipForge lens correction and stabilization presets", "presets:clipforge"),
-        new("VR Converter", "ClipForge 360 / VR projection conversion presets", "presets:clipforge"),
-        new("Metadata Editor", "ExifTool metadata read, write, and clear presets", "presets:exiftool-meta"),
-        new("Subtitle Remover", "VideoSubtitleRemover preset workflow", "presets:videosubtitleremover"),
-        new("Photo Restoration", "GFPGAN blind face restoration for old / degraded portraits", "ai-photo-restore"),
-        new("Colorize", "Add colour to black-and-white photos and video offline on the CPU", "ai-colorize"),
-        new("AI Portrait", "CodeFormer / GFPGAN portrait upscale + restoration with fidelity slider", "ai-portrait"),
-        new("Chapter Marks", "Read, edit, and rewrite MKV / MP4 / MOV chapter markers", "chapter-marks"),
-        new("Watch Folders", "Auto-process new files dropped into a watched folder", "watch-folders"),
-        new("History", "Persistent log of every conversion / compression job (search + re-run)", "history"),
-        new("Job Center", "Queued, running, interrupted, and retryable jobs across workflows", "job-center"),
-        new("VMAF Quality", "Score a compressed clip against its reference (libvmaf)", "vmaf"),
-        new("Scene Detection", "Find scene cuts in a video and export to CSV / EDL", "scene-detect"),
-        new("Auto Highlight", "Rank scene-change and motion peaks, then export a reel / EDL / OTIO", "auto-highlight"),
-        new("Timeline Preview", "Render a thumbnail strip + audio waveform for any video", "timeline-preview"),
-        new("Track Manager", "Add or remove audio / subtitle / data tracks (no re-encode)", "track-manager"),
-        new("Document Converter", "Convert DOCX / PDF / ODT / XLSX / PPTX / EPUB / HTML and friends", "document-converter"),
-        new("Archive Tool", "Pack / unpack 7z / ZIP / TAR / RAR (read) / ISO via 7-Zip", "archive"),
-        new("PDF Tools", "Merge / split / rotate / extract / encrypt / compress PDFs (pikepdf)", "pdf-tools"),
-        new("Subtitle Converter", "Convert SRT / VTT / ASS / SSA / SUB plus shift / retime", "subtitle-converter"),
-        new("Font Converter", "Convert TTF / OTF / WOFF / WOFF2 (fonttools)", "font-converter"),
-        new("eBook Converter", "Convert EPUB / MOBI / AZW3 / PDF / FB2 / DOCX (Calibre)", "ebook-converter"),
-        new("OCR", "Extract text from images and scans -> TXT / hOCR / PDF (Tesseract)", "ocr"),
-        new("Presets", "Browse and run any of the shipped or user-defined conversion presets", "presets"),
-        new("3D Models", "Convert STL / OBJ / PLY / GLB / GLTF / FBX / DAE / 3DS via trimesh", "presets:meshconvert"),
-        new("Pandoc Documents", "Markdown / RST / DOCX / EPUB / HTML / LaTeX / PDF universal markup", "presets:pandoc-cli"),
-        new("RAW Photos", "Develop CR2 / CR3 / NEF / ARW / DNG / RAF -> JPEG / TIFF / PNG", "presets:rawphoto"),
-        new("Scanned PDF OCR", "Add a searchable text layer to scanned PDFs (ocrmypdf)", "presets:pdfocr"),
-        new("GIS Data", "KML / GPX / GeoJSON / Shapefile / GeoPackage via GDAL", "presets:gisconvert"),
-        new("Settings", "Preferences, tool paths, shell integration, and performance", "settings"),
-    ];
+    private readonly IWorkflowCatalog _catalog;
+    private readonly List<NavSearchSuggestion> _searchSuggestions = [];
 
     private SettingsWindow? _settingsWindow;
 
@@ -86,6 +30,12 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _catalog = App.Services.GetRequiredService<IWorkflowCatalog>();
+        _searchSuggestions.AddRange(_catalog.GetAll().Select(item => new NavSearchSuggestion(
+            item.LocalizedTitle,
+            item.LocalizedDescription,
+            item.RouteKey,
+            item.Id)));
         var configuredOptions = App.Services
             .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
             .Value;
@@ -447,11 +397,13 @@ public sealed class NavSearchSuggestion
     public string Title { get; set; }
     public string Subtitle { get; set; }
     public string RouteKey { get; set; }
+    public string WorkflowId { get; set; }
 
-    public NavSearchSuggestion(string title, string subtitle, string routeKey)
+    public NavSearchSuggestion(string title, string subtitle, string routeKey, string workflowId = "")
     {
         Title = title;
         Subtitle = subtitle;
         RouteKey = routeKey;
+        WorkflowId = workflowId;
     }
 }

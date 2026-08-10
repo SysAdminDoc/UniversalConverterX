@@ -52,7 +52,7 @@
                         <Button x:Uid="UniversalConvertPage_Item_001" Content="Run preset"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Click="RunPreset_Click"
-                                Tag="{Binding Name}"/>
+                                Tag="{Binding CatalogItem.Id}"/>
                         <TextBlock Text="{Binding StatusText, Mode=OneWay}"
                                    Style="{StaticResource MutedTextStyle}"
                                    FontSize="12"

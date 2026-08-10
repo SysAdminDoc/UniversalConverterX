@@ -59,24 +59,32 @@ public sealed partial class ToolboxPage : Page
     public ObservableCollection<ToolboxTile> OtherTools { get; } = new();
     public ObservableCollection<ToolboxTile> PluginTools { get; } = new();
 
-    public ToolboxPage()
+    public ToolboxPage() : this(catalogOnly: false)
     {
+    }
+
+    private ToolboxPage(bool catalogOnly)
+    {
+        if (catalogOnly)
+            return;
+
         InitializeComponent();
-        SeedTiles();
-        SeedPluginTiles();
-        // The wave-by-wave SeedTiles() body has accreted over 20+ releases and
-        // a few tiles end up with the same RouteKey across waves (e.g.
-        // presets:codeformat, presets:audiotag, presets:gisconvert). Dedupe
-        // before binding so the user doesn't see two identical cards.
-        DedupeTiles(ImageTools);
-        DedupeTiles(VideoTools);
-        DedupeTiles(AiTools);
-        DedupeTiles(AudioTools);
-        DedupeTiles(DocumentTools);
-        DedupeTiles(DiscTools);
-        DedupeTiles(OtherTools);
-        DedupeTiles(PluginTools);
-        ApplyReleaseReadiness();
+        var catalog = App.Services.GetRequiredService<IWorkflowCatalog>();
+        foreach (var item in catalog.GetToolbox())
+        {
+            var tile = ToolboxTile.FromCatalog(item);
+            switch (item.Category)
+            {
+                case WorkflowCatalogCategory.Image: ImageTools.Add(tile); break;
+                case WorkflowCatalogCategory.Video: VideoTools.Add(tile); break;
+                case WorkflowCatalogCategory.Ai: AiTools.Add(tile); break;
+                case WorkflowCatalogCategory.Audio: AudioTools.Add(tile); break;
+                case WorkflowCatalogCategory.Documents: DocumentTools.Add(tile); break;
+                case WorkflowCatalogCategory.Disc: DiscTools.Add(tile); break;
+                case WorkflowCatalogCategory.Plugin: PluginTools.Add(tile); break;
+                default: OtherTools.Add(tile); break;
+            }
+        }
 
         ImageGrid.ItemsSource = ImageTools;
         VideoGrid.ItemsSource = VideoTools;
@@ -87,6 +95,45 @@ public sealed partial class ToolboxPage : Page
         OtherGrid.ItemsSource = OtherTools;
         PluginGrid.ItemsSource = PluginTools;
         PluginSection.Visibility = PluginTools.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Supplies the one Toolbox source list to <see cref="WorkflowCatalog"/>
+    /// without constructing a visible page. Dedupe uses the semantic stable
+    /// ID, never the route, so distinct ClipForge tasks sharing one route stay
+    /// discoverable.
+    /// </summary>
+    internal static IReadOnlyList<ToolboxTile> CreateCatalogTiles()
+    {
+        var page = new ToolboxPage(catalogOnly: true);
+        page.SeedTiles();
+        page.SeedPluginTiles();
+
+        var groups = new[]
+        {
+            (WorkflowCatalogCategory.Image, page.ImageTools),
+            (WorkflowCatalogCategory.Video, page.VideoTools),
+            (WorkflowCatalogCategory.Ai, page.AiTools),
+            (WorkflowCatalogCategory.Audio, page.AudioTools),
+            (WorkflowCatalogCategory.Documents, page.DocumentTools),
+            (WorkflowCatalogCategory.Disc, page.DiscTools),
+            (WorkflowCatalogCategory.Other, page.OtherTools),
+            (WorkflowCatalogCategory.Plugin, page.PluginTools),
+        };
+
+        var all = new List<ToolboxTile>();
+        foreach (var (category, tiles) in groups)
+        {
+            DedupeTiles(tiles);
+            foreach (var tile in tiles)
+            {
+                tile.Category = category;
+                all.Add(tile);
+            }
+        }
+
+        page.ApplyReleaseReadiness();
+        return all;
     }
 
     private void ApplyReleaseReadiness()
@@ -216,7 +263,7 @@ public sealed partial class ToolboxPage : Page
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var i = 0; i < tiles.Count; i++)
         {
-            if (!seen.Add(tiles[i].RouteKey))
+            if (!seen.Add(tiles[i].StableId))
             {
                 tiles.RemoveAt(i);
                 i--;
@@ -554,6 +601,7 @@ public sealed partial class ToolboxPage : Page
 
 public sealed class ToolboxTile
 {
+    public string StableId { get; }
     public string RouteKey { get; }
     public string Title { get; }
     public string Description { get; }
@@ -562,14 +610,18 @@ public sealed class ToolboxTile
     public string StatusBadge { get; set; }
     public Brush StatusBrush { get; set; }
     public Visibility ShowAi { get; }
+    public bool IsAi { get; }
     public string? PoweredBy { get; }
+    public WorkflowCatalogCategory Category { get; set; } = WorkflowCatalogCategory.Other;
     public string? AvailabilityEngine { get; set; }
     public string? AvailabilityDetail { get; set; }
     public string ToolTipText => AvailabilityDetail ?? Description;
 
     public ToolboxTile(string routeKey, string title, string description, string glyph,
-        Brush accentBrush, string statusBadge, Brush statusBrush, bool isAi, string? poweredBy)
+        Brush accentBrush, string statusBadge, Brush statusBrush, bool isAi, string? poweredBy,
+        string? stableId = null)
     {
+        StableId = stableId ?? WorkflowCatalogIds.ForTool(title, description);
         RouteKey = routeKey;
         Title = title;
         Description = description;
@@ -578,6 +630,53 @@ public sealed class ToolboxTile
         StatusBadge = statusBadge;
         StatusBrush = statusBrush;
         ShowAi = isAi ? Visibility.Visible : Visibility.Collapsed;
+        IsAi = isAi;
         PoweredBy = poweredBy;
+    }
+
+    public static ToolboxTile FromCatalog(WorkflowCatalogItem item)
+    {
+        var accent = item.Category switch
+        {
+            WorkflowCatalogCategory.Ai => (Brush)Application.Current.Resources["AccentGreenBrush"],
+            WorkflowCatalogCategory.Video => (Brush)Application.Current.Resources["AccentBlueBrush"],
+            WorkflowCatalogCategory.Audio => (Brush)Application.Current.Resources["AccentCyanBrush"],
+            WorkflowCatalogCategory.Documents => (Brush)Application.Current.Resources["AccentBlueBrush"],
+            WorkflowCatalogCategory.Disc => (Brush)Application.Current.Resources["AccentRedBrush"],
+            _ => (Brush)Application.Current.Resources["AccentOrangeBrush"],
+        };
+        var statusBrush = item.Readiness switch
+        {
+            WorkflowReadiness.Bundled or WorkflowReadiness.Ready =>
+                (Brush)Application.Current.Resources["AccentGreenBrush"],
+            WorkflowReadiness.Install or WorkflowReadiness.Planned =>
+                (Brush)Application.Current.Resources["AccentOrangeBrush"],
+            _ => (Brush)Application.Current.Resources["AccentRedBrush"],
+        };
+        var status = item.Readiness switch
+        {
+            WorkflowReadiness.Bundled => "Bundled",
+            WorkflowReadiness.Install => "Install",
+            WorkflowReadiness.Unavailable => "Unavailable",
+            WorkflowReadiness.Planned => "Planned",
+            WorkflowReadiness.Future => "Future",
+            _ => "Ready",
+        };
+        return new ToolboxTile(
+            item.RouteKey,
+            item.LocalizedTitle,
+            item.LocalizedDescription,
+            item.Glyph,
+            accent,
+            status,
+            statusBrush,
+            item.IsAi,
+            item.PoweredBy,
+            item.Id)
+        {
+            AvailabilityEngine = item.Engine,
+            AvailabilityDetail = item.AvailabilityDetail,
+            Category = item.Category,
+        };
     }
 }

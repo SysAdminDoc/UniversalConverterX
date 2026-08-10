@@ -19,6 +19,7 @@ public sealed partial class HomePage : Page
 {
     private readonly List<HomeSearchSuggestion> _allSuggestions = [];
     private readonly IHistoryService _history;
+    private readonly IWorkflowCatalog _catalog;
     private string? _primaryUpdateUrl;
     private bool _historyAttached;
 
@@ -29,6 +30,7 @@ public sealed partial class HomePage : Page
     {
         InitializeComponent();
         _history = App.Services.GetRequiredService<IHistoryService>();
+        _catalog = App.Services.GetRequiredService<IWorkflowCatalog>();
         SeedDashboard();
         SeedSearch();
 
@@ -145,50 +147,62 @@ public sealed partial class HomePage : Page
 
     private void SeedDashboard()
     {
-        var blue = (Brush)Application.Current.Resources["AccentBlueBrush"];
-        var cyan = (Brush)Application.Current.Resources["AccentCyanBrush"];
-        var green = (Brush)Application.Current.Resources["AccentGreenBrush"];
-        var orange = (Brush)Application.Current.Resources["AccentOrangeBrush"];
-        var red = (Brush)Application.Current.Resources["AccentRedBrush"];
-        var blueSurface = (Brush)Application.Current.Resources["SurfaceLightBrush"];
-        var greenSurface = (Brush)Application.Current.Resources["SurfaceSoftBrush"];
-        var warmSurface = (Brush)Application.Current.Resources["SurfaceWarmBrush"];
-        var dangerSurface = (Brush)Application.Current.Resources["SurfaceDangerBrush"];
+        var featured = new[]
+        {
+            (Route: "converter", Action: "Convert files"),
+            (Route: "ai-video-enhancer", Action: "Enhance video"),
+            (Route: "compressor", Action: "Compress video"),
+            (Route: "downloader", Action: "Download media"),
+            (Route: "recorder", Action: "Record screen"),
+            (Route: "toolbox", Action: "Browse tools"),
+        };
+        var catalog = _catalog.GetAll();
+        foreach (var (route, action) in featured)
+        {
+            var item = catalog.FirstOrDefault(candidate =>
+                candidate.RouteKey.Equals(route, StringComparison.OrdinalIgnoreCase));
+            if (item is null)
+                continue;
 
-        Actions.Add(new HomeActionTile("Converter", "Batch convert media, documents, images, e-books, and more.", "\uE895", green, greenSurface, "Convert files", "converter"));
-        Actions.Add(new HomeActionTile("Video Enhancer", "Upscale, denoise, anime-sharpen, and restore clips locally.", "\uE7B3", blue, blueSurface, "Enhance video", "ai-video-enhancer"));
-        Actions.Add(new HomeActionTile("Compressor", "Compress video for web, email, and archive targets.", "\uE91F", cyan, blueSurface, "Compress video", "compressor"));
-        Actions.Add(new HomeActionTile("Downloader", "Paste URLs, choose quality, and save to the local queue.", "\uE896", blue, blueSurface, "Download media", "downloader"));
-        Actions.Add(new HomeActionTile("Recorder", "Capture the desktop with local FFmpeg processing.", "\uE7C8", red, dangerSurface, "Record screen", "recorder"));
-        Actions.Add(new HomeActionTile("Toolbox", "Open utilities for subtitles, metadata, audio, discs, and more.", "\uE713", orange, warmSurface, "Browse tools", "toolbox"));
+            var (accent, surface) = HomeBrushes(item);
+            Actions.Add(new HomeActionTile(
+                item.LocalizedTitle,
+                item.LocalizedDescription,
+                item.Glyph,
+                accent,
+                surface,
+                AppLocalizer.Get(action),
+                item.RouteKey,
+                item.Id));
+        }
     }
 
     private void SeedSearch()
     {
-        _allSuggestions.AddRange([
-            new("Convert files", "Open the batch converter", "converter"),
-            new("Compress video", "Open preset video compression", "compressor"),
-            new("Trim a clip", "Open video editor trim workflow", "editor"),
-            new("Download from URL", "Open downloader", "downloader"),
-            new("Record screen", "Open desktop screen recorder", "recorder"),
-            new("Video enhancer", "Open Real-ESRGAN video enhancement", "ai-video-enhancer"),
-            new("Video denoise", "Run Real-ESRGAN video cleanup presets", "presets:realesrgan"),
-            new("Anime video sharpen", "Run anime-focused Real-ESRGAN presets", "presets:anime-upscale"),
-            new("Video face enhance", "Run CodeFormer frame enhancement presets", "presets:video-face-enhance"),
-            new("Auto crop", "Run ClipForge cropdetect presets", "presets:clipforge"),
-            new("Intro outro", "Run ClipForge intro/outro presets", "presets:clipforge"),
-            new("Lens correction", "Run ClipForge lens correction and stabilization presets", "presets:clipforge"),
-            new("VR converter", "Run ClipForge 360 / VR projection presets", "presets:clipforge"),
-            new("Metadata editor", "Run ExifTool metadata presets", "presets:exiftool-meta"),
-            new("Subtitle remover", "Run VideoSubtitleRemover presets", "presets:videosubtitleremover"),
-            new("Subtitle generator", "Open the local subtitle studio", "ai-subtitle"),
-            new("Watermark remover", "View AI Lab status", "ai-lab"),
-            new("Background remover", "Open background remover", "ai-bgremove"),
-            new("Vocal remover", "View AI Lab status", "ai-lab"),
-            new("Inspect file format", "Probe codecs, streams, and conversion targets", "format-inspector"),
-            new("Extract video frames", "Open Frame Snapshot", "frame-snapshot"),
-            new("Toolbox", "Browse all specialized tools", "toolbox"),
-        ]);
+        _allSuggestions.AddRange(_catalog.GetAll().Select(item => new HomeSearchSuggestion(
+            item.LocalizedTitle,
+            item.LocalizedDescription,
+            item.RouteKey,
+            item.Id)));
+    }
+
+    private static (Brush Accent, Brush Surface) HomeBrushes(WorkflowCatalogItem item)
+    {
+        var resources = Application.Current.Resources;
+        var accentKey = item.Category switch
+        {
+            WorkflowCatalogCategory.Ai => "AccentGreenBrush",
+            WorkflowCatalogCategory.Audio => "AccentCyanBrush",
+            WorkflowCatalogCategory.Disc => "AccentRedBrush",
+            WorkflowCatalogCategory.Other => "AccentOrangeBrush",
+            _ => "AccentBlueBrush",
+        };
+        var surfaceKey = item.ExecutionDisclosure == WorkflowExecutionDisclosure.Network
+            ? "SurfaceDangerBrush"
+            : item.Category == WorkflowCatalogCategory.Ai
+                ? "SurfaceSoftBrush"
+                : "SurfaceLightBrush";
+        return ((Brush)resources[accentKey], (Brush)resources[surfaceKey]);
     }
 
     private void TaskSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -359,12 +373,15 @@ public sealed partial class HomePage : Page
     {
         try
         {
-            var cache = App.Services?.GetService<IUiPresetCache>();
+            var catalog = App.Services?.GetService<IWorkflowCatalog>();
             var health = App.Services?.GetService<ISidecarHealthService>();
-            if (cache is null || health is null)
+            if (catalog is null || health is null)
                 return [];
 
-            return await health.EvaluateAllAsync(cache.Get());
+            return await health.EvaluateAllAsync(
+                catalog.GetPresets()
+                    .Where(item => item.Preset is not null)
+                    .Select(item => item.Preset!));
         }
         catch
         {
@@ -382,9 +399,10 @@ public sealed class HomeActionTile
     public Brush AccentSurfaceBrush { get; }
     public string ActionText { get; }
     public string RouteKey { get; }
+    public string WorkflowId { get; }
 
     public HomeActionTile(string title, string description, string glyph, Brush accentBrush,
-        Brush accentSurfaceBrush, string actionText, string routeKey)
+        Brush accentSurfaceBrush, string actionText, string routeKey, string workflowId = "")
     {
         Title = title;
         Description = description;
@@ -393,6 +411,7 @@ public sealed class HomeActionTile
         AccentSurfaceBrush = accentSurfaceBrush;
         ActionText = actionText;
         RouteKey = routeKey;
+        WorkflowId = workflowId;
     }
 }
 
@@ -437,11 +456,13 @@ public sealed class HomeSearchSuggestion
     public string Title { get; set; }
     public string Subtitle { get; set; }
     public string RouteKey { get; set; }
+    public string WorkflowId { get; set; }
 
-    public HomeSearchSuggestion(string title, string subtitle, string routeKey)
+    public HomeSearchSuggestion(string title, string subtitle, string routeKey, string workflowId = "")
     {
         Title = title;
         Subtitle = subtitle;
         RouteKey = routeKey;
+        WorkflowId = workflowId;
     }
 }

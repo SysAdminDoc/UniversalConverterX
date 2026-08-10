@@ -55,7 +55,7 @@
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Padding="14,9"
                                     Click="RunPreset_Click"
-                                    Tag="{Binding Name}"
+                                    Tag="{Binding CatalogItem.Id}"
                                     IsEnabled="{Binding CanRun}"
                                     ToolTipService.ToolTip="{Binding HealthDetail}"/>
                             <Button x:Uid="PresetsPage_Item_002" Content="Edit"

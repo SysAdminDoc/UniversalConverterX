@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 157 — Replace duplicated discovery lists with one stable workflow catalog
-  Why: Main, Home, Toolbox, Presets, and Universal Convert diverge, and Toolbox deduplication by route removes distinct tasks sharing the same destination.
-  Evidence: `MainWindow.xaml.cs`; `HomePage.xaml.cs`; `ToolboxPage.DedupeTiles`; Adobe/Apple/Topaz preset browsers.
-  Touches: new catalog model/service, all discovery/search surfaces, sidecar health, resources.
-  Acceptance: every task has a stable ID independent of route, localized title/search metadata, input/output capabilities, readiness, favorite/recent state, and local/one-time-download/network disclosure; all surfaces consume the same catalog and no ClipForge task disappears.
-  Complexity: M
-
 - [ ] P1 — Item 126b — Wire history replay into the UI
   Why: Core replay accessors are shipped and tested; users still lack History “Apply settings” and page-level “Apply last used” affordances.
   Evidence: `HistoryStore.GetRerunRequestAsync`; `GetLastUsedRerunAsync`; `ConversionRerunRequest`.

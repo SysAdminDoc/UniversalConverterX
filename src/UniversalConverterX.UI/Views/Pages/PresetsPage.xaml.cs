@@ -17,8 +17,9 @@ namespace UniversalConverterX.UI.Views.Pages;
 public sealed class PresetCardItem : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    public required WorkflowCatalogItem CatalogItem { get; init; }
     public required UiPreset Preset { get; init; }
-    public string Name => Preset.Name;
+    public string Name => CatalogItem.LocalizedTitle;
     public string SourcePath => Preset.SourcePath;
     public string Glyph { get; init; } = "\uE8B7";
     public bool CanEdit => UiPresetLoader.IsUserPreset(Preset.SourcePath);
@@ -68,7 +69,7 @@ public sealed partial class PresetsPage : Page
 {
     private readonly IPresetExecutor _executor;
     private readonly IHistoryService _history;
-    private readonly IUiPresetCache _presetCache;
+    private readonly IWorkflowCatalog _catalog;
     private readonly ISidecarHealthService _health;
     private readonly ObservableCollection<PresetCardItem> _displayed = [];
     private List<PresetCardItem> _all = [];
@@ -90,7 +91,7 @@ public sealed partial class PresetsPage : Page
         InitializeComponent();
         _executor    = App.Services.GetRequiredService<IPresetExecutor>();
         _history     = App.Services.GetRequiredService<IHistoryService>();
-        _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
+        _catalog    = App.Services.GetRequiredService<IWorkflowCatalog>();
         _health      = App.Services.GetRequiredService<ISidecarHealthService>();
         PresetList.ItemsSource = _displayed;
         FamilyFilter.SelectedIndex = 0;
@@ -109,17 +110,20 @@ public sealed partial class PresetsPage : Page
         // Force-refresh from disk on explicit reload — the user clicking the
         // refresh button is a clear signal they expect a fresh scan even if
         // the TTL hasn't expired.
-        _presetCache.Invalidate();
-        var presets = _presetCache.Get();
-        _all = presets.Select(p => new PresetCardItem
+        _catalog.Invalidate();
+        var catalogItems = _catalog.GetPresets();
+        _all = catalogItems
+            .Where(item => item.Preset is not null)
+            .Select(item => new PresetCardItem
         {
-            Preset = p,
-            Glyph = GlyphFor(p.Engine),
+            CatalogItem = item,
+            Preset = item.Preset!,
+            Glyph = GlyphFor(item.Preset!.Engine),
         }).ToList();
         await RefreshHealthAsync();
 
         // Populate engine filter combo (first item "(all engines)" stays).
-        var engines = presets.Select(p => p.Engine).Distinct()
+        var engines = catalogItems.Select(item => item.Preset!.Engine).Distinct()
                              .OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
         // Wipe everything except the first sentinel item.
         while (EngineFilter.Items.Count > 1) EngineFilter.Items.RemoveAt(1);
@@ -304,8 +308,9 @@ public sealed partial class PresetsPage : Page
 
     private async void RunPreset_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button b || b.Tag is not string presetName) return;
-        var card = _all.FirstOrDefault(c => c.Name == presetName);
+        if (sender is not Button b || b.Tag is not string workflowId) return;
+        var card = _all.FirstOrDefault(c =>
+            string.Equals(c.CatalogItem.Id, workflowId, StringComparison.OrdinalIgnoreCase));
         if (card is null) return;
         var preset = card.Preset;
         var health = await _health.EvaluateAsync(preset);
