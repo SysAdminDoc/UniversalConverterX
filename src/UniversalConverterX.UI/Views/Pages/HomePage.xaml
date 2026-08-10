@@ -339,7 +339,7 @@
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}"/>
                                 <TextBlock x:Uid="HomePage_VersionText"
-                                           Text="UniversalConverter X v2.34.0"
+                                           Text="UniversalConverter X v2.35.0"
                                            Style="{StaticResource SubtleTextStyle}"/>
                                 <TextBlock x:Uid="HomePage_DiagnosticsStatusText"
                                            x:Name="DiagnosticsStatusText"

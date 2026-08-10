@@ -5492,7 +5492,7 @@ SHA-256: {0}</value>
     <value>Open release notes</value>
   </data>
   <data name="HomePage_VersionText.Text" xml:space="preserve">
-    <value>UniversalConverter X v2.34.0</value>
+    <value>UniversalConverter X v2.35.0</value>
   </data>
   <data name="ImageConverterPage_BlurBox.Header" xml:space="preserve">
     <value>Blur px</value>
@@ -7248,7 +7248,7 @@ libx264
     <value>Update status</value>
   </data>
   <data name="SettingsWindow_VersionText.Text" xml:space="preserve">
-    <value>Version 2.34.0</value>
+    <value>Version 2.35.0</value>
   </data>
   <data name="SlideshowPage_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>

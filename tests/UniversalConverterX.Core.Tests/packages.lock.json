@@ -439,7 +439,7 @@
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[10.0.10, )",
           "Spectre.Console": "[0.57.1, )",
           "Spectre.Console.Cli": "[0.55.0, )",
-          "UniversalConverterX.Core": "[2.34.0, )"
+          "UniversalConverterX.Core": "[2.35.0, )"
         }
       },
       "universalconverterx.core": {

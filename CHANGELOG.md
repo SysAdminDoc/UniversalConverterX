@@ -4,6 +4,8 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.35.0] - 2026-08-10
+
 ### Added
 
 - Added bounded dynamic DASH recording to StreamKeep. Dynamic MPDs with explicit segment addressing now expose timing metadata, CLI `--record-seconds`/`--record-segments` bounds, a UI record-limit control, ffmpeg reconnect/discontinuity recovery, and a precise pre-write refusal for unbounded captures.
