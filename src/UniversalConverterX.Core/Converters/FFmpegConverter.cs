@@ -83,6 +83,9 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
     #endregion
 
+    private static readonly string[] _progressArguments =
+        ["-progress", "pipe:1", "-stats_period", "0.1"];
+
     public override string[] BuildArguments(ConversionJob job, ConversionOptions options)
     {
         if (options.FfmpegArgumentOverride is { Count: > 0 } commandOverride)
@@ -103,6 +106,9 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Always overwrite and hide banner
         args.AddRange(["-y", "-hide_banner"]);
+
+        // These are global options and must precede the input/output options.
+        args.AddRange(_progressArguments);
 
         // Hardware acceleration
         if (options.UseHardwareAcceleration && options.HardwareAccel != HardwareAcceleration.None)
@@ -166,9 +172,6 @@ public partial class FFmpegConverter : BaseConverterStrategy
 
         // Output
         args.Add(job.OutputPath);
-
-        // Progress output
-        args.AddRange(["-progress", "pipe:1", "-stats_period", "0.1"]);
 
         return [.. args];
     }
@@ -307,11 +310,11 @@ public partial class FFmpegConverter : BaseConverterStrategy
     {
         var args = BuildArguments(job, options).ToList();
 
-        // Strip the trailing "-progress pipe:1 -stats_period 0.1" tail; the token
-        // immediately before it is the output path.
-        var progressIndex = args.LastIndexOf("-progress");
+        // Remove the global progress options while deriving the analysis pass.
+        // They are reinserted before -i for the real output pass below.
+        var progressIndex = args.IndexOf("-progress");
         if (progressIndex >= 0)
-            args.RemoveRange(progressIndex, args.Count - progressIndex);
+            args.RemoveRange(progressIndex, _progressArguments.Length);
 
         var outputPath = args[^1];
         args.RemoveAt(args.Count - 1);
@@ -326,8 +329,10 @@ public partial class FFmpegConverter : BaseConverterStrategy
         }
         else
         {
+            var inputIndex = args.IndexOf("-i");
+            if (inputIndex >= 0)
+                args.InsertRange(inputIndex, _progressArguments);
             args.Add(outputPath);
-            args.AddRange(["-progress", "pipe:1", "-stats_period", "0.1"]);
         }
 
         return [.. args];

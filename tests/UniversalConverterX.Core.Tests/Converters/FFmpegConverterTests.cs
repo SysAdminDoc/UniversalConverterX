@@ -274,6 +274,21 @@ public class FFmpegConverterTests
     }
 
     [Fact]
+    public void BuildArguments_ProgressOptionsAreGlobalBeforeInput()
+    {
+        var job = CreateTestJob("input.mp4", "output.mkv");
+
+        var args = _converter.BuildArguments(job, new ConversionOptions());
+
+        var progressIndex = Array.IndexOf(args, "-progress");
+        var inputIndex = Array.IndexOf(args, "-i");
+        progressIndex.Should().BeGreaterOrEqualTo(0);
+        progressIndex.Should().BeLessThan(inputIndex);
+        args[(progressIndex + 1)..(progressIndex + 4)]
+            .Should().Equal("pipe:1", "-stats_period", "0.1");
+    }
+
+    [Fact]
     public void BuildArguments_AudioExtraction_ShouldIncludeNoVideoFlag()
     {
         var job = CreateTestJob("input.mp4", "output.mp3");
@@ -910,5 +925,9 @@ public class FFmpegConverterTests
         args.Should().Contain(job.OutputPath);
         args.Should().Contain("-progress");
         args.Should().NotContain("-an");
+
+        var progressIndex = Array.IndexOf(args, "-progress");
+        var inputIndex = Array.IndexOf(args, "-i");
+        progressIndex.Should().BeLessThan(inputIndex);
     }
 }

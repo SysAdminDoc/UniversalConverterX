@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 186 — FFmpeg `-progress pipe:1 -stats_period 0.1` is appended after the output path and ignored
-  Category: correctness
-  Where: `src/UniversalConverterX.Core/Converters/FFmpegConverter.cs:164-168` (and pass-2 at `:247-249`).
-  Problem: ffmpeg treats options after the last output file as trailing and ignores them. The machine-readable `-progress pipe:1` channel never activates and the 0.1 s cadence never applies; progress works only by accident via default ~0.5 s stderr stats that `ParseProgress` happens to match. Any future reliance on the `pipe:1` key=value stream silently gets nothing.
-  Evidence: `args.Add(job.OutputPath)` then `args.AddRange(["-progress","pipe:1","-stats_period","0.1"])`.
-  Fix: move `-progress pipe:1 -stats_period 0.1` to global position (before `-i`); adjust `BuildPassArguments` tail handling.
-  Acceptance: a conversion run with `-v warning` shows no "Trailing option(s)" warning and progress arrives at 10 Hz.
-  Confidence: Verified. Effort: S
-
 - [ ] P2 — Item 187 — Potrace's ImageMagick preprocessing fallback runs `magick` without the hardened policy
   Category: security
   Where: `src/UniversalConverterX.Core/Converters/PotraceConverter.cs:353-401` (`ConvertWithImageMagickPreprocessAsync`) vs `src/UniversalConverterX.Core/Converters/ImageMagickConverter.cs:161-172`; policy at `src/UniversalConverterX.Core/Security/ImageMagick/policy.xml`.
