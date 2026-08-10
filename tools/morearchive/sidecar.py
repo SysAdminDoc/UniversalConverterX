@@ -35,7 +35,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_zip_extractall
 
 
 
@@ -55,7 +55,7 @@ def _extract_zip_like(src: Path, dest: Path) -> int:
     """ZIP-family containers (APK / IPA / NUPKG / MSIX / XAPK)."""
     try:
         with zipfile.ZipFile(str(src)) as zf:
-            zf.extractall(str(dest))
+            safe_zip_extractall(zf, dest)
             for info in zf.infolist():
                 emit("archive_extra_entry",
                      archive=str(src), path=info.filename,

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import sys
+import tarfile
+import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -42,6 +45,73 @@ class RunTimeoutTests(unittest.TestCase):
                 timeout=30,
                 check=True,
             )
+
+
+class SafeZipExtractionTests(unittest.TestCase):
+    def test_extracts_members_under_destination(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive_path = root / "archive.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr("nested/result.txt", "ok")
+
+            with zipfile.ZipFile(archive_path) as archive:
+                count = u.safe_zip_extractall(archive, root / "dest")
+
+            self.assertEqual(count, 1)
+            self.assertEqual((root / "dest" / "nested" / "result.txt").read_text(), "ok")
+
+    def test_rejects_path_traversal(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive_path = root / "archive.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr("../outside.txt", "escape")
+
+            with self.assertRaises(ValueError):
+                with zipfile.ZipFile(archive_path) as archive:
+                    u.safe_zip_extractall(archive, root / "dest")
+            self.assertFalse((root / "outside.txt").exists())
+
+    def test_rejects_zip_symlinks(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive_path = root / "archive.zip"
+            info = zipfile.ZipInfo("link")
+            info.external_attr = (0o120777 & 0xFFFF) << 16
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr(info, "target")
+
+            with self.assertRaises(ValueError):
+                with zipfile.ZipFile(archive_path) as archive:
+                    u.safe_zip_extractall(archive, root / "dest")
+
+    def test_rejects_oversized_zip_member_before_writing(self):
+        info = zipfile.ZipInfo("huge.bin")
+        info.file_size = u.MAX_ARCHIVE_MEMBER_BYTES + 1
+        info.compress_size = 1
+
+        class Archive:
+            def infolist(self):
+                return [info]
+
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaises(ValueError):
+                u.safe_zip_extractall(Archive(), Path(temp) / "dest")
+
+
+class SafeTarExtractionTests(unittest.TestCase):
+    def test_rejects_oversized_tar_member_before_writing(self):
+        info = tarfile.TarInfo("huge.bin")
+        info.size = u.MAX_ARCHIVE_MEMBER_BYTES + 1
+
+        class Archive:
+            def getmembers(self):
+                return [info]
+
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaises(ValueError):
+                u.safe_tar_extractall(Archive(), Path(temp) / "dest")
 
 
 if __name__ == "__main__":

@@ -27,7 +27,11 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import (
+    MAX_ARCHIVE_TOTAL_BYTES,
+    emit,
+    safe_zip_extract_member,
+)
 
 
 
@@ -177,9 +181,14 @@ def op_reddit_archive_csv(args: argparse.Namespace) -> int:
             with zipfile.ZipFile(src) as z:
                 target = out_dir / src.stem
                 target.mkdir(parents=True, exist_ok=True)
-                for n in z.namelist():
-                    if not n.lower().endswith(".csv"): continue
-                    z.extract(n, target)
+                members = [
+                    info for info in z.infolist()
+                    if info.filename.lower().endswith(".csv")
+                ]
+                if sum(max(0, int(info.file_size)) for info in members) > MAX_ARCHIVE_TOTAL_BYTES:
+                    raise ValueError("CSV members exceed the archive extraction safety limit")
+                for info in members:
+                    safe_zip_extract_member(z, info, target)
                     written += 1
         except Exception as ex:
             return fail("parse_failed", f"{src.name}: {ex}")

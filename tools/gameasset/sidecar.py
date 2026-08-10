@@ -26,7 +26,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit, safe_extract_path
+from ucx_sidecar import emit, safe_extract_path, safe_zip_extractall
 
 
 
@@ -36,19 +36,63 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
+_MAX_ENTRY_BYTES = 512 * 1024 * 1024
+_MAX_TOTAL_EXTRACT_BYTES = 4 * 1024 * 1024 * 1024
+_MAX_ENTRY_COUNT = 1_000_000
+_MAX_ENTRY_NAME_BYTES = 1 * 1024 * 1024
+
+
+def _read_exact(stream, size: int, label: str) -> bytes:
+    if size < 0:
+        raise ValueError(f"Negative {label} length.")
+    data = stream.read(size)
+    if len(data) != size:
+        raise ValueError(f"Truncated {label}.")
+    return data
+
+
+def _validate_span(file_size: int, offset: int, size: int, label: str) -> None:
+    if offset < 0 or size < 0 or offset > file_size or size > file_size - offset:
+        raise ValueError(f"{label} points outside the input file.")
+    if size > _MAX_ENTRY_BYTES:
+        raise ValueError(f"{label} exceeds the {_MAX_ENTRY_BYTES} byte safety limit.")
+
+
+def _copy_entry(stream, target: Path, offset: int, size: int, file_size: int) -> None:
+    _validate_span(file_size, offset, size, "archive entry")
+    stream.seek(offset)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    remaining = size
+    with target.open("wb") as output:
+        while remaining:
+            chunk = stream.read(min(1024 * 1024, remaining))
+            if not chunk:
+                raise ValueError("Truncated archive entry data.")
+            output.write(chunk)
+            remaining -= len(chunk)
+
+
 # ── Quake PAK (id Software, also used by Source GoldSrc as .pak) ───────
 
 def _read_pak(path: Path) -> tuple[str, list[dict]]:
+    file_size = path.stat().st_size
     with path.open("rb") as f:
-        magic = f.read(4)
+        magic = _read_exact(f, 4, "PAK magic")
         if magic != b"PACK":
             raise ValueError("Not a Quake PAK file (magic != 'PACK').")
-        offset, length = struct.unpack("<II", f.read(8))
+        offset, length = struct.unpack("<II", _read_exact(f, 8, "PAK header"))
+        if length % 64 != 0:
+            raise ValueError("PAK directory length is not record-aligned.")
+        _validate_span(file_size, offset, length, "PAK directory")
+        if length // 64 > _MAX_ENTRY_COUNT:
+            raise ValueError("PAK contains too many entries.")
         f.seek(offset)
         entries = []
         for _ in range(length // 64):
-            name = f.read(56).rstrip(b"\x00").decode("ascii", errors="replace")
-            ofs, sz = struct.unpack("<II", f.read(8))
+            name = _read_exact(f, 56, "PAK entry name").rstrip(b"\x00").decode(
+                "ascii", errors="replace")
+            ofs, sz = struct.unpack("<II", _read_exact(f, 8, "PAK entry"))
+            _validate_span(file_size, ofs, sz, "PAK entry")
             entries.append({"name": name, "offset": ofs, "size": sz})
     return "quake-pak", entries
 
@@ -56,16 +100,24 @@ def _read_pak(path: Path) -> tuple[str, list[dict]]:
 # ── Doom WAD ───────────────────────────────────────────────────────────
 
 def _read_wad(path: Path) -> tuple[str, list[dict]]:
+    file_size = path.stat().st_size
     with path.open("rb") as f:
-        magic = f.read(4)
+        magic = _read_exact(f, 4, "WAD magic")
         if magic not in (b"IWAD", b"PWAD"):
             raise ValueError("Not a Doom WAD (magic != IWAD/PWAD).")
-        num_lumps, dir_offset = struct.unpack("<II", f.read(8))
+        num_lumps, dir_offset = struct.unpack(
+            "<II", _read_exact(f, 8, "WAD header"))
+        if num_lumps > _MAX_ENTRY_COUNT:
+            raise ValueError("WAD contains too many lumps.")
+        directory_size = num_lumps * 16
+        _validate_span(file_size, dir_offset, directory_size, "WAD directory")
         f.seek(dir_offset)
         entries = []
         for _ in range(num_lumps):
-            ofs, sz = struct.unpack("<II", f.read(8))
-            name = f.read(8).rstrip(b"\x00").decode("ascii", errors="replace")
+            ofs, sz = struct.unpack("<II", _read_exact(f, 8, "WAD lump"))
+            _validate_span(file_size, ofs, sz, "WAD lump")
+            name = _read_exact(f, 8, "WAD lump name").rstrip(b"\x00").decode(
+                "ascii", errors="replace")
             entries.append({"name": name, "offset": ofs, "size": sz})
     return f"doom-wad ({magic.decode()})", entries
 
@@ -73,22 +125,31 @@ def _read_wad(path: Path) -> tuple[str, list[dict]]:
 # ── Valve VPK v1 / v2 ──────────────────────────────────────────────────
 
 def _read_vpk(path: Path) -> tuple[str, list[dict]]:
+    file_size = path.stat().st_size
     with path.open("rb") as f:
-        sig = struct.unpack("<I", f.read(4))[0]
+        sig = struct.unpack("<I", _read_exact(f, 4, "VPK signature"))[0]
         if sig != 0x55aa1234:
             raise ValueError("Not a Valve VPK (signature mismatch).")
-        version = struct.unpack("<I", f.read(4))[0]
-        tree_size = struct.unpack("<I", f.read(4))[0]
+        version = struct.unpack("<I", _read_exact(f, 4, "VPK version"))[0]
+        tree_size = struct.unpack("<I", _read_exact(f, 4, "VPK tree size"))[0]
+        if version not in (1, 2):
+            raise ValueError(f"Unsupported VPK version: {version}")
         if version == 2:
-            f.read(4 * 4)  # FileDataSectionSize, ArchiveMD5SectionSize, OtherMD5SectionSize, SignatureSectionSize
+            _read_exact(f, 4 * 4, "VPK v2 header")
+        if tree_size > file_size - f.tell():
+            raise ValueError("VPK tree extends beyond the input file.")
         end_of_tree = f.tell() + tree_size
         entries: list[dict] = []
         # tree: ext\0 path\0 name\0 entry-struct (18 bytes)
         def _read_str() -> str:
             buf = bytearray()
             while True:
-                ch = f.read(1)
-                if not ch or ch == b"\x00": break
+                if f.tell() >= end_of_tree:
+                    raise ValueError("Unterminated VPK tree string.")
+                ch = _read_exact(f, 1, "VPK tree string")
+                if ch == b"\x00": break
+                if len(buf) >= _MAX_ENTRY_NAME_BYTES:
+                    raise ValueError("VPK tree string is too long.")
                 buf.extend(ch)
             return buf.decode("utf-8", errors="replace")
         while f.tell() < end_of_tree:
@@ -100,12 +161,15 @@ def _read_vpk(path: Path) -> tuple[str, list[dict]]:
                 while True:
                     name = _read_str()
                     if not name: break
-                    f.read(4)   # CRC
-                    preload = struct.unpack("<H", f.read(2))[0]
-                    arc_idx = struct.unpack("<H", f.read(2))[0]
-                    ofs, sz = struct.unpack("<II", f.read(8))
-                    f.read(2)   # terminator
-                    if preload: f.read(preload)
+                    if len(entries) >= _MAX_ENTRY_COUNT:
+                        raise ValueError("VPK contains too many entries.")
+                    _read_exact(f, 4, "VPK CRC")
+                    preload = struct.unpack("<H", _read_exact(f, 2, "VPK preload length"))[0]
+                    arc_idx = struct.unpack("<H", _read_exact(f, 2, "VPK archive index"))[0]
+                    ofs, sz = struct.unpack("<II", _read_exact(f, 8, "VPK entry"))
+                    _read_exact(f, 2, "VPK entry terminator")
+                    if preload:
+                        _read_exact(f, preload, "VPK preload data")
                     full = (f"{directory}/{name}.{ext}"
                             if directory != " " else f"{name}.{ext}")
                     entries.append({"name": full, "archive": arc_idx,
@@ -116,24 +180,31 @@ def _read_vpk(path: Path) -> tuple[str, list[dict]]:
 # ── Godot PCK ──────────────────────────────────────────────────────────
 
 def _read_pck(path: Path) -> tuple[str, list[dict]]:
+    file_size = path.stat().st_size
     with path.open("rb") as f:
-        magic = f.read(4)
+        magic = _read_exact(f, 4, "PCK magic")
         if magic != b"GDPC":
             raise ValueError("Not a Godot PCK (magic != 'GDPC').")
-        pack_version = struct.unpack("<I", f.read(4))[0]
-        f.read(4 * 3)  # godot major/minor/patch
-        f.read(4)      # flags
-        f.read(8)      # file_base
-        f.read(16 * 4) # reserved
-        file_count = struct.unpack("<I", f.read(4))[0]
+        pack_version = struct.unpack("<I", _read_exact(f, 4, "PCK version"))[0]
+        _read_exact(f, 4 * 3, "PCK Godot version")
+        _read_exact(f, 4, "PCK flags")
+        _read_exact(f, 8, "PCK file base")
+        _read_exact(f, 16 * 4, "PCK reserved header")
+        file_count = struct.unpack("<I", _read_exact(f, 4, "PCK file count"))[0]
+        remaining_header = file_size - f.tell()
+        if file_count > _MAX_ENTRY_COUNT or file_count > remaining_header // 36:
+            raise ValueError("PCK contains too many or truncated entries.")
         entries = []
         for _ in range(file_count):
-            path_len = struct.unpack("<I", f.read(4))[0]
-            name = f.read(path_len).rstrip(b"\x00").decode("utf-8",
-                                                           errors="replace")
-            ofs = struct.unpack("<Q", f.read(8))[0]
-            sz = struct.unpack("<Q", f.read(8))[0]
-            f.read(16)  # MD5
+            path_len = struct.unpack("<I", _read_exact(f, 4, "PCK path length"))[0]
+            if path_len > _MAX_ENTRY_NAME_BYTES:
+                raise ValueError("PCK entry name is too long.")
+            name = _read_exact(f, path_len, "PCK entry name").rstrip(b"\x00").decode(
+                "utf-8", errors="replace")
+            ofs = struct.unpack("<Q", _read_exact(f, 8, "PCK entry offset"))[0]
+            sz = struct.unpack("<Q", _read_exact(f, 8, "PCK entry size"))[0]
+            _read_exact(f, 16, "PCK entry hash")
+            _validate_span(file_size, ofs, sz, "PCK entry")
             entries.append({"name": name, "offset": ofs, "size": sz})
     return f"godot-pck v{pack_version}", entries
 
@@ -193,12 +264,15 @@ def op_list(args: argparse.Namespace) -> int:
 def _extract_pak(src: Path, dest: Path) -> int:
     _, entries = _read_pak(src)
     n = 0
+    total = 0
+    file_size = src.stat().st_size
     with src.open("rb") as f:
         for e in entries:
-            f.seek(e["offset"])
-            target = dest / e["name"]
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(f.read(e["size"]))
+            target = safe_extract_path(dest, e["name"])
+            total += e["size"]
+            if total > _MAX_TOTAL_EXTRACT_BYTES:
+                raise ValueError("PAK contents exceed the extraction safety limit.")
+            _copy_entry(f, target, e["offset"], e["size"], file_size)
             n += 1
     return n
 
@@ -206,21 +280,23 @@ def _extract_pak(src: Path, dest: Path) -> int:
 def _extract_pck(src: Path, dest: Path) -> int:
     _, entries = _read_pck(src)
     n = 0
+    total = 0
+    file_size = src.stat().st_size
     with src.open("rb") as f:
         for e in entries:
-            f.seek(e["offset"])
             rel = e["name"].lstrip("/").replace("res://", "")
             target = safe_extract_path(dest, rel)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(f.read(e["size"]))
+            total += e["size"]
+            if total > _MAX_TOTAL_EXTRACT_BYTES:
+                raise ValueError("PCK contents exceed the extraction safety limit.")
+            _copy_entry(f, target, e["offset"], e["size"], file_size)
             n += 1
     return n
 
 
 def _extract_zip(src: Path, dest: Path) -> int:
     with zipfile.ZipFile(src) as z:
-        z.extractall(dest)
-        return len(z.infolist())
+        return safe_zip_extractall(z, dest)
 
 
 def op_extract(args: argparse.Namespace) -> int:

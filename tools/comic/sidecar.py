@@ -33,7 +33,14 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit, safe_extract_path, safe_tar_extractall
+from ucx_sidecar import (
+    MAX_ARCHIVE_MEMBER_BYTES,
+    MAX_ARCHIVE_TOTAL_BYTES,
+    emit,
+    safe_extract_path,
+    safe_tar_extractall,
+    safe_zip_extractall,
+)
 
 
 
@@ -56,20 +63,47 @@ DEVICE_PROFILES = {
 
 
 def _safe_zip_extractall(archive: zipfile.ZipFile, dest: Path) -> None:
+    safe_zip_extractall(archive, dest)
+
+
+def _safe_rar_extractall(archive, dest: Path) -> int:
+    """Extract RAR members without traversal, links, or unbounded reads."""
     dest.mkdir(parents=True, exist_ok=True)
-    for info in archive.infolist():
+    members = archive.infolist()
+    total_size = 0
+    for info in members:
+        safe_extract_path(dest, info.filename)
+        if info.is_symlink():
+            raise ValueError(f"unsafe RAR symlink rejected: {info.filename!r}")
+        if info.is_dir():
+            continue
+        size = int(info.file_size)
+        if size < 0 or size > MAX_ARCHIVE_MEMBER_BYTES:
+            raise ValueError(f"RAR member exceeds the {MAX_ARCHIVE_MEMBER_BYTES} byte safety limit: {info.filename!r}")
+        total_size += size
+        if total_size > MAX_ARCHIVE_TOTAL_BYTES:
+            raise ValueError(f"RAR contents exceed the {MAX_ARCHIVE_TOTAL_BYTES} byte safety limit")
+
+    for info in members:
         target = safe_extract_path(dest, info.filename)
         if info.is_dir():
             target.mkdir(parents=True, exist_ok=True)
             continue
-        # ZIP symlinks are represented in the Unix mode bits. Never materialise
-        # one while staging an untrusted comic archive.
-        mode = (info.external_attr >> 16) & 0o170000
-        if mode == 0o120000:
-            raise ValueError(f"unsafe ZIP symlink rejected: {info.filename!r}")
+        size = int(info.file_size)
         target.parent.mkdir(parents=True, exist_ok=True)
-        with target.open("wb") as output:
-            output.write(archive.read(info))
+        written = 0
+        with archive.open(info) as source, target.open("wb") as output:
+            while True:
+                chunk = source.read(1024 * 1024)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > size:
+                    raise ValueError(f"RAR member expanded beyond its declared size: {info.filename!r}")
+                output.write(chunk)
+        if written != size:
+            raise ValueError(f"RAR member is truncated: {info.filename!r}")
+    return len(members)
 
 
 def _extract_rar_with_7zip(src: Path, dest: Path, reason: str) -> int:
@@ -111,9 +145,7 @@ def _extract(src: Path, dest: Path) -> int:
             try:
                 import rarfile
                 with rarfile.RarFile(str(src)) as rf:
-                    for info in rf.infolist():
-                        safe_extract_path(dest, info.filename)
-                    rf.extractall(str(dest))
+                    _safe_rar_extractall(rf, dest)
             except ImportError as ex:
                 return _extract_rar_with_7zip(
                     src, dest,

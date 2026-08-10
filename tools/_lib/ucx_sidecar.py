@@ -245,7 +245,116 @@ def safe_extract_path(dest: str | Path, name: str) -> Path:
     return target
 
 
-def safe_tar_extractall(tar, dest: str | Path) -> int:
+MAX_ARCHIVE_MEMBER_BYTES = 512 * 1024 * 1024
+MAX_ARCHIVE_TOTAL_BYTES = 4 * 1024 * 1024 * 1024
+MAX_ARCHIVE_COMPRESSION_RATIO = 1_000
+
+
+def _safe_zip_member(
+    archive,
+    member,
+    dest_root: Path,
+    *,
+    max_member_bytes: int,
+) -> tuple[Path, int]:
+    target, size = _validate_zip_member(member, dest_root, max_member_bytes)
+    if member.is_dir():
+        target.mkdir(parents=True, exist_ok=True)
+        return target, 0
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    written = 0
+    with archive.open(member, "r") as source, target.open("wb") as output:
+        while True:
+            chunk = source.read(1024 * 1024)
+            if not chunk:
+                break
+            written += len(chunk)
+            if written > size or written > max_member_bytes:
+                raise ValueError(f"ZIP member expanded beyond its declared size: {member.filename!r}")
+            output.write(chunk)
+    if written != size:
+        raise ValueError(f"ZIP member is truncated: {member.filename!r}")
+    return target, written
+
+
+def _validate_zip_member(
+    member,
+    dest_root: Path,
+    max_member_bytes: int,
+) -> tuple[Path, int]:
+    if not member.filename:
+        return dest_root, 0
+    target = safe_extract_path(dest_root, member.filename)
+    mode = (member.external_attr >> 16) & 0o170000
+    if mode == 0o120000:
+        raise ValueError(f"unsafe ZIP symlink rejected: {member.filename!r}")
+    if member.is_dir():
+        return target, 0
+
+    size = int(member.file_size)
+    compressed_size = int(member.compress_size)
+    if size < 0 or size > max_member_bytes:
+        raise ValueError(
+            f"ZIP member exceeds the {max_member_bytes} byte safety limit: "
+            f"{member.filename!r}")
+    if compressed_size > 0 and size > compressed_size * MAX_ARCHIVE_COMPRESSION_RATIO:
+        raise ValueError(f"ZIP compression ratio is unsafe: {member.filename!r}")
+    return target, size
+
+
+def safe_zip_extract_member(
+    archive,
+    member,
+    dest: str | Path,
+    *,
+    max_member_bytes: int = MAX_ARCHIVE_MEMBER_BYTES,
+) -> Path:
+    """Extract one ZIP member below ``dest`` without traversal or links."""
+    dest_path = Path(dest)
+    dest_path.mkdir(parents=True, exist_ok=True)
+    target, _ = _safe_zip_member(
+        archive, member, dest_path.resolve(), max_member_bytes=max_member_bytes)
+    return target
+
+
+def safe_zip_extractall(
+    archive,
+    dest: str | Path,
+    *,
+    max_member_bytes: int = MAX_ARCHIVE_MEMBER_BYTES,
+    max_total_bytes: int = MAX_ARCHIVE_TOTAL_BYTES,
+) -> int:
+    """Extract ZIP members below ``dest`` without traversal or bombs."""
+    dest_path = Path(dest)
+    dest_path.mkdir(parents=True, exist_ok=True)
+    dest_root = dest_path.resolve()
+    total_size = 0
+    members = archive.infolist()
+    for member in members:
+        _, size = _validate_zip_member(member, dest_root, max_member_bytes)
+        total_size += size
+        if total_size > max_total_bytes:
+            raise ValueError(
+                f"ZIP contents exceed the {max_total_bytes} byte safety limit")
+    total_size = 0
+    for member in members:
+        _, written = _safe_zip_member(
+            archive, member, dest_root, max_member_bytes=max_member_bytes)
+        total_size += written
+        if total_size > max_total_bytes:
+            raise ValueError(
+                f"ZIP contents exceed the {max_total_bytes} byte safety limit")
+    return len(members)
+
+
+def safe_tar_extractall(
+    tar,
+    dest: str | Path,
+    *,
+    max_member_bytes: int = MAX_ARCHIVE_MEMBER_BYTES,
+    max_total_bytes: int = MAX_ARCHIVE_TOTAL_BYTES,
+) -> int:
     """Extract a tar archive, rejecting traversal and unsafe link members.
 
     ``tarfile.extractall`` performs no path validation, so a malicious archive
@@ -257,7 +366,17 @@ def safe_tar_extractall(tar, dest: str | Path) -> int:
     dest_path.mkdir(parents=True, exist_ok=True)
     dest_root = dest_path.resolve()
     members = tar.getmembers()
+    total_size = 0
     for member in members:
+        size = int(member.size)
+        if size < 0 or size > max_member_bytes:
+            raise ValueError(
+                f"tar member exceeds the {max_member_bytes} byte safety limit: "
+                f"{member.name!r}")
+        total_size += size
+        if total_size > max_total_bytes:
+            raise ValueError(
+                f"tar contents exceed the {max_total_bytes} byte safety limit")
         target = (dest_root / member.name).resolve()
         if target != dest_root and dest_root not in target.parents:
             raise ValueError(f"unsafe tar entry rejected: {member.name!r}")

@@ -32,7 +32,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_zip_extractall
 from xml.etree import ElementTree as ET
 
 
@@ -243,7 +243,7 @@ def op_lcc_extract(args: argparse.Namespace) -> int:
         target.mkdir(parents=True, exist_ok=True)
         try:
             with zipfile.ZipFile(src) as z:
-                z.extractall(target)
+                safe_zip_extractall(z, target)
                 count = len(z.infolist())
         except Exception as ex:
             return fail("extract_failed", f"{src.name}: {ex}")

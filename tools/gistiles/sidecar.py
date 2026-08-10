@@ -31,7 +31,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
-from ucx_sidecar import emit
+from ucx_sidecar import emit, safe_zip_extractall
 
 
 
@@ -97,7 +97,7 @@ def op_kmz_to_kml(args: argparse.Namespace) -> int:
         sub.mkdir(parents=True, exist_ok=True)
         try:
             with zipfile.ZipFile(str(src)) as zf:
-                zf.extractall(str(sub))
+                safe_zip_extractall(zf, sub)
         except Exception as ex:
             return fail("extract_failed", f"{src.name}: {ex}")
         kml_files = list(sub.glob("*.kml")) + list(sub.glob("**/*.kml"))

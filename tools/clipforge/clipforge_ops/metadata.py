@@ -262,7 +262,7 @@ def op_loudnorm(args: argparse.Namespace) -> int:
               "-af", p1_filter,
               "-f", "null",
               "NUL" if sys.platform == "win32" else "/dev/null"]
-    proc = subprocess.run(p1_cmd, capture_output=True, text=True)
+    proc = subprocess.run(p1_cmd, capture_output=True, text=True, timeout=600)
     # loudnorm stats come on stderr as a JSON block
     measured: dict = {}
     try:
