@@ -6,6 +6,7 @@
   "capabilities": [
     "ndjson",
     "models",
+    "offline-diarization",
     "gpu:cuda-optional",
     "tool:ffmpeg"
   ],

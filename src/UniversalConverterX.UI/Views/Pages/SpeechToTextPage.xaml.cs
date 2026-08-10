@@ -36,6 +36,7 @@ public sealed partial class SpeechToTextPage : Page
     private string? _previewedWaveformPath;
     private string? _outputFolder;
     private bool _parakeetModelReady;
+    private bool _diarizationModelReady;
     private bool _modelActionRunning;
 
     public SpeechToTextPage()
@@ -45,6 +46,7 @@ public sealed partial class SpeechToTextPage : Page
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         ApplyBackendCapabilities();
+        _ = RefreshDiarizationModelStatusAsync();
         UpdateUi();
     }
 
@@ -232,6 +234,8 @@ public sealed partial class SpeechToTextPage : Page
         Settings_Changed(sender, e);
         if (SelectedComboTag(BackendCombo) == "parakeet-stt")
             await RefreshParakeetModelStatusAsync();
+        else if (SelectedComboTag(BackendCombo) == "whisper-stt")
+            await RefreshDiarizationModelStatusAsync();
     }
 
     private void Settings_Changed(object sender, object e)
@@ -258,12 +262,31 @@ public sealed partial class SpeechToTextPage : Page
 
         WhisperModelPanel.Visibility = parakeet ? Visibility.Collapsed : Visibility.Visible;
         ParakeetModelPanel.Visibility = parakeet ? Visibility.Visible : Visibility.Collapsed;
+        DiarizationModelPanel.Visibility = backend == "whisper-stt"
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         LanguageCombo.Visibility = parakeet ? Visibility.Collapsed : Visibility.Visible;
         ParakeetLanguageNote.Visibility = parakeet ? Visibility.Visible : Visibility.Collapsed;
         BatchSizeBox.IsEnabled = backend == "whisper-stt";
         VadCheck.IsEnabled = backend != "parakeet-stt";
+        DiarizationCheck.IsEnabled = backend == "whisper-stt";
         if (parakeet)
             VadCheck.IsChecked = false;
+        if (backend != "whisper-stt")
+            DiarizationCheck.IsChecked = false;
+        UpdateUi();
+    }
+
+    private async void Diarization_Changed(object sender, RoutedEventArgs e)
+    {
+        if (TranscribeButton is null) return;
+        Settings_Changed(sender, e);
+        if (DiarizationCheck.IsChecked == true &&
+            SelectedComboTag(BackendCombo) == "whisper-stt" &&
+            !_diarizationModelReady)
+        {
+            await RefreshDiarizationModelStatusAsync();
+        }
         UpdateUi();
     }
 
@@ -352,6 +375,92 @@ public sealed partial class SpeechToTextPage : Page
         }
     }
 
+    private async Task RefreshDiarizationModelStatusAsync()
+    {
+        if (_modelActionRunning || SelectedComboTag(BackendCombo) != "whisper-stt") return;
+        if (_runner.Locate("whisper-stt") is null)
+        {
+            _diarizationModelReady = false;
+            DownloadDiarizationModelButton.IsEnabled = false;
+            DiarizationModelStatus.Text = AppLocalizer.Get("Whisper sidecar is not installed in this build.");
+            UpdateUi();
+            return;
+        }
+
+        _modelActionRunning = true;
+        _diarizationModelReady = false;
+        DownloadDiarizationModelButton.IsEnabled = false;
+        DiarizationModelStatus.Text = AppLocalizer.Get("Checking local speaker model pack...");
+        UpdateUi();
+        try
+        {
+            var result = await _runner.RunAsync(
+                "whisper-stt",
+                ["model-status"],
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromSeconds(30));
+            _diarizationModelReady = result.Success;
+            DiarizationModelStatus.Text = result.Success
+                ? AppLocalizer.Get("Speaker model ready — pinned local pack found.")
+                : result.ErrorCode == "sidecar_not_found"
+                    ? AppLocalizer.Get("Whisper sidecar is not installed in this build.")
+                    : AppLocalizer.Get("Speaker model not installed. Review the terms and download it when ready.");
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadDiarizationModelButton.IsEnabled = true;
+            UpdateUi();
+        }
+    }
+
+    private async void DownloadDiarizationModel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_modelActionRunning || _runner.Locate("whisper-stt") is null) return;
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = AppLocalizer.Get("Download the offline speaker model?"),
+            Content = AppLocalizer.Get("This downloads the revision-pinned pyannote 3.1 speaker model pack (approximately 32 MB) from Hugging Face. The model is MIT-licensed but access is gated by the upstream model terms, which may request contact information. Downloading confirms that you accept those terms. UCX stores and verifies the local files, then performs diarization without network access or telemetry."),
+            PrimaryButtonText = AppLocalizer.Get("Accept terms & download"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        _modelActionRunning = true;
+        _diarizationModelReady = false;
+        DownloadDiarizationModelButton.IsEnabled = false;
+        DiarizationModelStatus.Text = AppLocalizer.Get("Downloading pinned speaker model pack...");
+        UpdateUi();
+        try
+        {
+            var progress = new Progress<SidecarProgress>(value =>
+                DispatcherQueue.TryEnqueue(() =>
+                    DiarizationModelStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
+                        ? AppLocalizer.Format($"Downloading... {value.Percent:F0}%")
+                        : AppLocalizer.Format($"{value.Stage} ({value.Percent:F0}%)")));
+            var result = await _runner.RunAsync(
+                "whisper-stt",
+                ["download-model", "--accept-license"],
+                progress,
+                ct: CancellationToken.None,
+                silenceTimeout: TimeSpan.FromHours(2));
+            _diarizationModelReady = result.Success;
+            DiarizationModelStatus.Text = result.Success
+                ? AppLocalizer.Get("Speaker model ready — pinned local pack installed.")
+                : AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? "Unknown error"}");
+        }
+        finally
+        {
+            _modelActionRunning = false;
+            DownloadDiarizationModelButton.IsEnabled = true;
+            UpdateUi();
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Transcribe
     // -------------------------------------------------------------------------
@@ -366,10 +475,16 @@ public sealed partial class SpeechToTextPage : Page
         var format = SelectedComboTag(FormatCombo) ?? "srt";
         var wordTs = WordTimestampsToggle.IsOn;
         var useVad = VadCheck?.IsChecked == true;
+        var useDiarization = backend == "whisper-stt" && DiarizationCheck?.IsChecked == true;
         var batchSize = SafeBatchSize(BatchSizeBox?.Value);
         if (backend == "parakeet-stt" && !_parakeetModelReady)
         {
             StatusLabel.Text = AppLocalizer.Get("Download the Parakeet model pack before transcription.");
+            return;
+        }
+        if (useDiarization && !_diarizationModelReady)
+        {
+            StatusLabel.Text = AppLocalizer.Get("Download the offline speaker model pack before transcription.");
             return;
         }
 
@@ -444,6 +559,7 @@ public sealed partial class SpeechToTextPage : Page
                     ];
                     if (wordTs) args.Add("--word-timestamps");
                     if (useVad) args.Add("--vad");
+                    if (useDiarization) args.Add("--diarize");
                     args.Add("--batch-size");
                     args.Add(batchSize.ToString(CultureInfo.InvariantCulture));
                 }
@@ -575,7 +691,10 @@ public sealed partial class SpeechToTextPage : Page
             return $"Parakeet TDT v3 / .{format} / auto";
         var batch = backend == "whisper-stt" ? $" / b{SafeBatchSize(BatchSizeBox?.Value)}" : "";
         var vad = VadCheck?.IsChecked == true ? " / VAD" : "";
-        return $"{model} / .{format}{batch}{vad}";
+        var speakers = backend == "whisper-stt" && DiarizationCheck?.IsChecked == true
+            ? " / speakers"
+            : "";
+        return $"{model} / .{format}{batch}{vad}{speakers}";
     }
 
     private static string? SelectedComboTag(ComboBox combo)
@@ -610,7 +729,11 @@ public sealed partial class SpeechToTextPage : Page
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
 
         var selectedBackend = SelectedComboTag(BackendCombo) ?? "whisper-stt";
-        var modelReady = selectedBackend != "parakeet-stt" || _parakeetModelReady;
+        var diarizationReady = selectedBackend != "whisper-stt"
+            || DiarizationCheck?.IsChecked != true
+            || _diarizationModelReady;
+        var modelReady = (selectedBackend != "parakeet-stt" || _parakeetModelReady)
+            && diarizationReady;
         TranscribeButton.IsEnabled = hasFiles && _cts is null && modelReady && !_modelActionRunning;
         CancelButton.IsEnabled = _cts is not null;
 

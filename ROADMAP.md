@@ -43,13 +43,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2/P3 — Governed local AI capability
 
-- [ ] P3 — Item 141 — Finish governed offline speaker diarization output
-  Why: `whisper-stt --diarize` assigns speakers in memory but depends on an HF token/cache and does not provide a pinned offline pack, complete writers, or first-class UI.
-  Evidence: `tools/whisper-stt/sidecar.py:332,381-405`; pyannote offline guidance; Shutter 20.2.
-  Touches: whisper sidecar, model-pack manifest/downloader, TXT/SRT/VTT/JSON writers, transcription UI.
-  Acceptance: after explicit model terms/consent, a revision/hash-pinned local pack works air-gapped; every selected writer preserves speaker labels; toggle is off by default and no telemetry/network call occurs during inference.
-  Complexity: L
-
 - [ ] P3 — Item 143 — Add DDColor/ColorMNet temporal colorization tier
   Why: the existing Zhang CPU model is fast but temporally weaker; these local models offer a quality tier without removing the portable fallback.
   Evidence: `tools/colorize`; `vs-deoldify`.

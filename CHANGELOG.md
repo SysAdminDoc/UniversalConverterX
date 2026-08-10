@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added governed offline speaker diarization to faster-whisper Speech-to-Text. Speaker labels are opt-in and remain disabled until the user accepts the upstream model terms and installs the revision-pinned, SHA-256-verified pyannote 3.1 pack; SRT, VTT, TXT, JSON, and NDJSON output preserve labels, while inference fails closed without the local pack and network/telemetry access is disabled.
 - Added an app-scoped durable Job Center over the shared queue store. Converter and Compressor queues now restore across navigation and restart, recover in-flight jobs as interrupted, expose centralized cancel/retry/skip actions, and publish preflight blocker-versus-warning diagnostics.
 - Routed Console and Explorer preset loading through the Core `PresetDocument` validator, with shared diagnostics and compatibility coverage for valid, future-schema, XXE, traversal, invocation-mode, and rooted-output fixtures.
 - Runtime status, error, dialog, and formatted summary copy now uses deterministic resource-backed localization across the UI code-behind, with pseudo-locale support and static resource-coverage checks.

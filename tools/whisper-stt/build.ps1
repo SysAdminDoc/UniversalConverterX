@@ -8,6 +8,12 @@ $OutDir   = Join-Path $RepoRoot "src\UniversalConverterX.UI\Sidecars\whisper-stt
 
 Write-Host "Building whisper-stt sidecar..."
 
+if (Test-Path (Join-Path $ToolDir "requirements.txt")) {
+    Write-Host "Provisioning declared whisper-stt dependencies..."
+    & python -m pip install --quiet -r (Join-Path $ToolDir "requirements.txt")
+    if ($LASTEXITCODE -ne 0) { throw "whisper-stt dependency installation failed (exit $LASTEXITCODE)" }
+}
+
 if (-not (Get-Command pyinstaller -ErrorAction SilentlyContinue)) {
     Write-Host "Installing PyInstaller..."
     & python -m pip install pyinstaller --quiet
@@ -23,6 +29,9 @@ try {
         --distpath $OutDir `
         --workpath (Join-Path $ToolDir "build") `
         --specpath (Join-Path $ToolDir "spec") `
+        --paths (Join-Path $ToolDir "../_lib") `
+        --collect-submodules "pyannote.audio" `
+        --collect-data "pyannote.audio" `
         $Sidecar
 
     if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed (exit $LASTEXITCODE)" }

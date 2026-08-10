@@ -376,6 +376,34 @@
                                       OnContent="On"
                                       Toggled="Settings_Changed"
                             AutomationProperties.AutomationId="WordTimestampsToggle"/>
+                        <CheckBox x:Uid="SpeechToTextPage_DiarizationCheck" x:Name="DiarizationCheck"
+                                  Content="Add speaker labels (offline)"
+                                  IsChecked="False"
+                                  Checked="Diarization_Changed"
+                                  Unchecked="Diarization_Changed"
+                            AutomationProperties.AutomationId="DiarizationCheck"/>
+                        <StackPanel x:Name="DiarizationModelPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock x:Uid="SpeechToTextPage_DiarizationModelTitle"
+                                       Text="Offline speaker model"
+                                       Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock x:Uid="SpeechToTextPage_DiarizationModelDescription"
+                                       Text="Pinned pyannote 3.1 model pack · MIT · approximately 32 MB. Accept the model terms before download. UCX never connects during transcription."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <Button x:Uid="SpeechToTextPage_DownloadDiarizationModelButton"
+                                    x:Name="DownloadDiarizationModelButton"
+                                    Content="Review &amp; download speaker model"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HorizontalAlignment="Stretch"
+                                    Click="DownloadDiarizationModel_Click"
+                                    AutomationProperties.AutomationId="DownloadDiarizationModelButton"/>
+                            <TextBlock x:Uid="SpeechToTextPage_DiarizationModelStatus"
+                                       x:Name="DiarizationModelStatus"
+                                       Text="Checking local speaker model pack..."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
                         <NumberBox x:Uid="SpeechToTextPage_BatchSizeBox" x:Name="BatchSizeBox"
                                    Header="faster-whisper batch size"
                                    Value="8"

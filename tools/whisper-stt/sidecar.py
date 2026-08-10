@@ -34,6 +34,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_assets import enforce_offline
+from diarization_pack import (  # noqa: E402
+    PACK_ID,
+    PACK_LICENSE,
+    PACK_TERMS_URL,
+    download_pack,
+    resolve_pack_dir,
+    validate_pack,
+)
 
 
 def emit(event: dict) -> None:
@@ -136,7 +144,7 @@ def segments_to_srt(segments: list[dict]) -> str:
     for i, seg in enumerate(segments, 1):
         lines.append(str(i))
         lines.append(f"{_ts_srt(seg['start'])} --> {_ts_srt(seg['end'])}")
-        lines.append(seg["text"].strip())
+        lines.append(_render_segment_text(seg))
         lines.append("")
     return "\n".join(lines)
 
@@ -145,17 +153,78 @@ def segments_to_vtt(segments: list[dict]) -> str:
     lines = ["WEBVTT", ""]
     for seg in segments:
         lines.append(f"{_ts_vtt(seg['start'])} --> {_ts_vtt(seg['end'])}")
-        lines.append(seg["text"].strip())
+        lines.append(_render_segment_text(seg))
         lines.append("")
     return "\n".join(lines)
 
 
 def segments_to_txt(segments: list[dict]) -> str:
-    return "\n".join(seg["text"].strip() for seg in segments)
+    return "\n".join(_render_segment_text(seg) for seg in segments)
 
 
 def segments_to_json(segments: list[dict]) -> str:
     return json.dumps(segments, ensure_ascii=False, indent=2)
+
+
+def _render_segment_text(segment: dict) -> str:
+    text = str(segment.get("text") or "").strip()
+    speaker = str(segment.get("speaker") or "").strip()
+    return f"[{speaker}] {text}" if speaker else text
+
+
+def assign_speakers(segments: list[dict], turns: list[tuple[float, float, str]]) -> list[dict]:
+    """Assign the label with the greatest overlap to each transcript segment."""
+    for segment in segments:
+        best: str | None = None
+        best_overlap = 0.0
+        for start, end, speaker in turns:
+            overlap = max(
+                0.0,
+                min(float(end), float(segment["end"]))
+                - max(float(start), float(segment["start"])),
+            )
+            if overlap > best_overlap:
+                best = str(speaker)
+                best_overlap = overlap
+        segment["speaker"] = best or "SPEAKER_UNKNOWN"
+    return segments
+
+
+def diarization_turns(diarization) -> list[tuple[float, float, str]]:
+    return [
+        (float(turn.start), float(turn.end), str(speaker))
+        for turn, _, speaker in diarization.itertracks(yield_label=True)
+    ]
+
+
+def run_diarization(audio_path: Path, segments: list[dict], pack_dir: Path) -> None:
+    """Run pyannote strictly from the validated local pack."""
+    ready, reason = validate_pack(pack_dir)
+    if not ready:
+        raise RuntimeError(f"Diarization model pack is not ready: {reason}")
+
+    # Set all offline/telemetry switches before importing pyannote. Passing a
+    # local path also prevents the library from resolving a Hub identifier.
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    enforce_offline()
+    os.environ["PYANNOTE_METRICS_ENABLED"] = "0"
+    try:
+        from pyannote.audio import Pipeline as PyaPipeline  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError(f"pyannote.audio is not provisioned: {exc}") from exc
+
+    config_path = pack_dir / "pyannote_diarization_config.yaml"
+    progress(95.0, "Running offline speaker diarization...")
+    current_dir = Path.cwd()
+    try:
+        # pyannote 3.1 resolves relative model paths against the process CWD.
+        os.chdir(pack_dir)
+        pipeline = PyaPipeline.from_pretrained(str(config_path))
+        diarization = pipeline(str(audio_path))
+    finally:
+        os.chdir(current_dir)
+    assign_speakers(segments, diarization_turns(diarization))
 
 
 # ---------------------------------------------------------------------------
@@ -224,7 +293,6 @@ def transcribe_faster(
     for seg in result_segments:
         seg_dict = {"start": seg.start, "end": seg.end, "text": seg.text}
         all_segments.append(seg_dict)
-        emit({"event": "segment", "start": seg.start, "end": seg.end, "text": seg.text.strip()})
 
         # Estimate progress from segment end time vs duration
         if total_duration > 0:
@@ -273,7 +341,6 @@ def transcribe_openai(
     for i, seg in enumerate(segments):
         seg_dict = {"start": seg["start"], "end": seg["end"], "text": seg["text"]}
         all_segments.append(seg_dict)
-        emit({"event": "segment", "start": seg["start"], "end": seg["end"], "text": seg["text"].strip()})
         pct = 10.0 + 85.0 * (i + 1) / max(n, 1)
         progress(pct, f"Segment {i + 1}/{n}")
 
@@ -304,8 +371,12 @@ def probe_duration(path: Path) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="UCX Whisper STT sidecar")
-    parser.add_argument("--input", required=True, help="Input audio/video file")
-    parser.add_argument("--output", required=True, help="Output transcript file (.srt/.txt/.vtt/.json)")
+    parser.add_argument(
+        "command", nargs="?", choices=("model-status", "download-model"),
+        help="Manage the explicit offline diarization model pack.",
+    )
+    parser.add_argument("--input", help="Input audio/video file")
+    parser.add_argument("--output", help="Output transcript file (.srt/.txt/.vtt/.json)")
     parser.add_argument("--model", default="large-v3-turbo",
                         choices=[
                             # Multilingual base
@@ -327,14 +398,62 @@ def main() -> None:
                         help="Enable word-level timestamps")
     parser.add_argument("--model-dir", default=None,
                         help="Directory for cached model weights")
+    parser.add_argument("--diarization-model-dir", default=None,
+                        help="Directory for the verified offline diarization pack")
     parser.add_argument("--vad", action="store_true",
                         help="Use Silero VAD to skip silence (faster + cleaner segments)")
     parser.add_argument("--diarize", action="store_true",
-                        help="Speaker diarization via pyannote 3.1 (requires HF token in HF_TOKEN env)")
+                        help="Opt-in offline speaker labels from the installed pyannote 3.1 pack")
+    parser.add_argument("--accept-license", action="store_true",
+                        help="Confirm the pyannote model terms for the explicit download command")
     parser.add_argument("--batch-size", type=int, default=8,
                         help="Batched inference size (faster-whisper>=1.1; ~4x throughput on long-form GPU audio). "
                              "Set to 1 to force sequential streaming.")
     args = parser.parse_args()
+
+    if args.command == "model-status":
+        pack_dir = resolve_pack_dir(args.diarization_model_dir)
+        ready, reason = validate_pack(pack_dir)
+        emit({
+            "event": "model",
+            "name": PACK_ID,
+            "path": str(pack_dir),
+            "ready": ready,
+            "license": PACK_LICENSE,
+            "terms_url": PACK_TERMS_URL,
+        })
+        if not ready:
+            error_exit("model_not_installed", f"Offline diarization pack is not ready: {reason}")
+        emit({"event": "complete", "output": str(pack_dir)})
+        return
+
+    if args.command == "download-model":
+        if not args.accept_license:
+            error_exit(
+                "license_acceptance_required",
+                f"Accept the {PACK_LICENSE} terms at {PACK_TERMS_URL} before downloading the gated model pack.",
+            )
+        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+        if not token:
+            error_exit(
+                "credentials_required",
+                "A Hugging Face access token is required only for the explicit model download. "
+                "Set HF_TOKEN after accepting the model terms, then retry.",
+            )
+        try:
+            emit({"event": "progress", "percent": 1.0, "stage": "Downloading pinned diarization pack...", "eta_seconds": -1})
+            download_pack(resolve_pack_dir(args.diarization_model_dir), token)
+        except ImportError as exc:
+            error_exit("missing_dep", f"huggingface-hub is required for model download: {exc}")
+        except Exception as exc:
+            error_exit("model_download_failed", str(exc))
+        pack_dir = resolve_pack_dir(args.diarization_model_dir)
+        emit({"event": "progress", "percent": 100.0, "stage": "Offline diarization pack ready", "eta_seconds": 0})
+        emit({"event": "complete", "output": str(pack_dir)})
+        return
+
+    if not args.input or not args.output:
+        parser.error("--input and --output are required for transcription")
 
     model_dir_env = os.environ.get("UCX_MODEL_DIR")
     model_dir = Path(args.model_dir) if args.model_dir else (
@@ -354,6 +473,9 @@ def main() -> None:
     # Duration for progress estimation
     total_duration = probe_duration(input_path)
 
+    # Apply the network guard before importing any inference backend. The
+    # diarization pack is validated and loaded locally after this point.
+    enforce_offline()
     backend = bootstrap()
     log(f"Backend: {backend}")
     progress(2.0, "Initializing...")
@@ -378,36 +500,23 @@ def main() -> None:
                 args.word_timestamps, model_dir,
             )
 
-        # Optional speaker diarization via pyannote 3.1.
+        # Optional, governed speaker diarization from the local pack.
         if args.diarize:
-            try:
-                from pyannote.audio import Pipeline as PyaPipeline  # type: ignore
-                token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
-                if not token:
-                    log("Diarization skipped: set HF_TOKEN to use pyannote/speaker-diarization-3.1.", "warn")
-                else:
-                    progress(95.0, "Running speaker diarization...")
-                    os.environ["HF_HUB_OFFLINE"] = "1"
-                    os.environ["TRANSFORMERS_OFFLINE"] = "1"
-                    pipe = PyaPipeline.from_pretrained(
-                        "pyannote/speaker-diarization-3.1", use_auth_token=token)
-                    diar = pipe(str(input_path))
-                    # Assign speaker to each segment by max overlap.
-                    for seg in segments:
-                        best, best_overlap = None, 0.0
-                        for turn, _, speaker in diar.itertracks(yield_label=True):
-                            ov = max(0.0, min(turn.end, seg["end"]) - max(turn.start, seg["start"]))
-                            if ov > best_overlap:
-                                best, best_overlap = speaker, ov
-                        if best:
-                            seg["speaker"] = best
-            except ImportError as ex:
-                log(f"Diarization unavailable: {ex}", "warn")
-            except Exception as ex:
-                log(f"Diarization failed: {ex}", "warn")
+            run_diarization(input_path, segments, resolve_pack_dir(args.diarization_model_dir))
     except Exception as exc:
         error_exit("transcription_failed", str(exc))
         return
+
+    for seg in segments:
+        event = {
+            "event": "segment",
+            "start": seg["start"],
+            "end": seg["end"],
+            "text": seg["text"].strip(),
+        }
+        if seg.get("speaker"):
+            event["speaker"] = seg["speaker"]
+        emit(event)
 
     # Write output
     progress(97.0, "Writing transcript...")

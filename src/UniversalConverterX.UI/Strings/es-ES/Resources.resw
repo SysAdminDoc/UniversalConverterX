@@ -1254,6 +1254,9 @@
   <data name="Code_04FC5167489FC34AE9ED" xml:space="preserve">
     <value>yt-dlp: {0}.</value>
   </data>
+  <data name="Code_0542DADF7AF59A16AA93" xml:space="preserve">
+    <value>Downloading pinned speaker model pack...</value>
+  </data>
   <data name="Code_058580A5173D6CC6F798" xml:space="preserve">
     <value>Applying {0} removal(s) and {1} audio delay(s) -- copy mux, no re-encode.</value>
   </data>
@@ -1581,6 +1584,9 @@
   <data name="Code_27C2CCD962C2B8DCCB52" xml:space="preserve">
     <value>Unknown error</value>
   </data>
+  <data name="Code_2868E10631F2E58F6AB3" xml:space="preserve">
+    <value>Speaker model ready — pinned local pack installed.</value>
+  </data>
   <data name="Code_28A9F0C04231BF4EA5AB" xml:space="preserve">
     <value>Invalid end time. Enter seconds, for example 12.5.</value>
   </data>
@@ -1646,6 +1652,9 @@
   </data>
   <data name="Code_2F343666AAA88C44430B" xml:space="preserve">
     <value>Format</value>
+  </data>
+  <data name="Code_2F72167348F36AF7D989" xml:space="preserve">
+    <value>This downloads the revision-pinned pyannote 3.1 speaker model pack (approximately 32 MB) from Hugging Face. The model is MIT-licensed but access is gated by the upstream model terms, which may request contact information. Downloading confirms that you accept those terms. UCX stores and verifies the local files, then performs diarization without network access or telemetry.</value>
   </data>
   <data name="Code_2F95FB6976C8878D829F" xml:space="preserve">
     <value>{0:F2} ({1})</value>
@@ -2088,6 +2097,9 @@
   <data name="Code_5D681D2CCE303FF6EE9F" xml:space="preserve">
     <value>Showing {0} of {1} most recent of {2} total.</value>
   </data>
+  <data name="Code_5D92ED4E8851B7FB5B66" xml:space="preserve">
+    <value>Whisper sidecar is not installed in this build.</value>
+  </data>
   <data name="Code_5DA2BACBA76540982953" xml:space="preserve">
     <value>Discovering...</value>
   </data>
@@ -2379,6 +2391,9 @@
   <data name="Code_8119623EF7F0D0FBB63E" xml:space="preserve">
     <value>Checking ab-av1 smart-compression requirements...</value>
   </data>
+  <data name="Code_815206D00AE315DA9767" xml:space="preserve">
+    <value>Speaker model ready — pinned local pack found.</value>
+  </data>
   <data name="Code_81B2744B52D808A10E30" xml:space="preserve">
     <value>Add video or image files to start a removal queue.</value>
   </data>
@@ -2499,11 +2514,17 @@
   <data name="Code_8C56B4D65C29D633D3F9" xml:space="preserve">
     <value>LibreOffice not found. Install it from libreoffice.org and try again.</value>
   </data>
+  <data name="Code_8C9E1AA63DEC68481D1F" xml:space="preserve">
+    <value>Speaker model not installed. Review the terms and download it when ready.</value>
+  </data>
   <data name="Code_8D0151D69C88DC32FC89" xml:space="preserve">
     <value>Lossless crop edges must be non-negative integers, with at least one value above zero.</value>
   </data>
   <data name="Code_8DC001980584AC42EEFF" xml:space="preserve">
     <value>Open for lossless cutting</value>
+  </data>
+  <data name="Code_8E09E8E3244BE84067B4" xml:space="preserve">
+    <value>Download the offline speaker model pack before transcription.</value>
   </data>
   <data name="Code_8E114F8962C6E3EF5974" xml:space="preserve">
     <value>Version {0}.{1}.{2}</value>
@@ -2544,6 +2565,9 @@
   <data name="Code_942087CC2D41E01304B7" xml:space="preserve">
     <value>Retry</value>
   </data>
+  <data name="Code_9447CECF704F31C31146" xml:space="preserve">
+    <value>Download the offline speaker model?</value>
+  </data>
   <data name="Code_94E927333C9C4D226474" xml:space="preserve">
     <value>Settings Saved</value>
   </data>
@@ -2573,6 +2597,9 @@
   </data>
   <data name="Code_9889EDDCC6D96B6AF27D" xml:space="preserve">
     <value>Pack failed: {0}</value>
+  </data>
+  <data name="Code_98BA628BDB54277093E2" xml:space="preserve">
+    <value>Checking local speaker model pack...</value>
   </data>
   <data name="Code_98CD916DF7B83D790FEA" xml:space="preserve">
     <value>Compress (videocrush)</value>
@@ -2609,6 +2636,9 @@
   </data>
   <data name="Code_9D59AA851D0F5A244B1E" xml:space="preserve">
     <value>unknown time</value>
+  </data>
+  <data name="Code_9DF596A19302F2F9DF61" xml:space="preserve">
+    <value>Accept terms &amp; download</value>
   </data>
   <data name="Code_9E7C930321BD8764F27F" xml:space="preserve">
     <value>No .rnnn models found</value>
@@ -7329,6 +7359,21 @@ SHA-256: {0}</value>
   </data>
   <data name="SpeechToTextPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>
+  </data>
+  <data name="SpeechToTextPage_DiarizationCheck.Content" xml:space="preserve">
+    <value>Add speaker labels (offline)</value>
+  </data>
+  <data name="SpeechToTextPage_DiarizationModelDescription.Text" xml:space="preserve">
+    <value>Pinned pyannote 3.1 model pack · MIT · approximately 32 MB. Accept the model terms before download. UCX never connects during transcription.</value>
+  </data>
+  <data name="SpeechToTextPage_DiarizationModelStatus.Text" xml:space="preserve">
+    <value>Checking local speaker model pack...</value>
+  </data>
+  <data name="SpeechToTextPage_DiarizationModelTitle.Text" xml:space="preserve">
+    <value>Offline speaker model</value>
+  </data>
+  <data name="SpeechToTextPage_DownloadDiarizationModelButton.Content" xml:space="preserve">
+    <value>Review &amp; download speaker model</value>
   </data>
   <data name="SpeechToTextPage_DownloadParakeetModelButton.Content" xml:space="preserve">
     <value>Modelo de revisión y descarga</value>
