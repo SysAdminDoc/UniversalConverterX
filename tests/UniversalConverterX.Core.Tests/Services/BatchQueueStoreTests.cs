@@ -34,6 +34,8 @@ public sealed class BatchQueueStoreTests : IDisposable
                     Action = "convert",
                     Preset = "mp4",
                     Args = ["--format", "mp4", "--output", @"C:\Out\clip.mp4"],
+                    AudioTrackSelection = [1],
+                    SubtitleTrackSelection = [],
                     Status = "Queued",
                 },
             ],
@@ -48,6 +50,8 @@ public sealed class BatchQueueStoreTests : IDisposable
         loaded.Jobs.Should().ContainSingle();
         loaded.Jobs[0].OutputPath.Should().Be(@"C:\Out\clip.mp4");
         loaded.Jobs[0].Args.Should().Equal("--format", "mp4", "--output", @"C:\Out\clip.mp4");
+        loaded.Jobs[0].AudioTrackSelection.Should().Equal(1);
+        loaded.Jobs[0].SubtitleTrackSelection.Should().BeEmpty();
     }
 
     [Fact]
@@ -203,6 +207,8 @@ public sealed class BatchQueueStoreTests : IDisposable
             SourcePath = @"C:\In\clip.mov",
             Engine = "videocrush",
             Args = ["--preset", "prores-422"],
+            AudioTrackSelection = [0, 2],
+            SubtitleTrackSelection = [],
             Status = "Failed",
             ErrorMessage = "boom",
         };
@@ -218,6 +224,10 @@ public sealed class BatchQueueStoreTests : IDisposable
         // Editing the clone's args must not affect the source.
         clone.Args.Add("--extra");
         source.Args.Should().Equal("--preset", "prores-422");
+        clone.AudioTrackSelection!.RemoveAt(0);
+        clone.SubtitleTrackSelection!.Add(1);
+        source.AudioTrackSelection.Should().Equal(0, 2);
+        source.SubtitleTrackSelection.Should().BeEmpty();
         source.Status.Should().Be("Failed"); // original untouched
     }
 

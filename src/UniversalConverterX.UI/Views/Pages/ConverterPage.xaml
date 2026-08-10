@@ -25,6 +25,7 @@
                         <ColumnDefinition Width="62"/>
                         <ColumnDefinition Width="96"/>
                         <ColumnDefinition Width="96"/>
+                        <ColumnDefinition Width="72"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -99,6 +100,17 @@
                                    Foreground="{StaticResource AccentGreenBrush}"/>
                     </StackPanel>
 
+                    <Button x:Uid="ConverterPage_TrackSelectionButton"
+                            Grid.Column="6"
+                            Grid.RowSpan="2"
+                            Content="Tracks"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Padding="8,6"
+                            Click="TrackSelection_Click"
+                            Visibility="{Binding TrackButtonVisibility}"
+                            AutomationProperties.AutomationId="ConverterTrackSelectionButton"
+                            AutomationProperties.Name="Choose audio and subtitle tracks"/>
+
                     <Grid Grid.Column="2" Grid.ColumnSpan="4" Grid.Row="1">
                         <ProgressBar x:Uid="ConverterPage_Item_005" AutomationProperties.Name="Progress" Minimum="0" Maximum="100"
                                      Value="{Binding Progress}"
@@ -107,6 +119,29 @@
                     </Grid>
                 </Grid>
             </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TrackSelectionTemplate">
+            <Grid ColumnSpacing="10" Padding="4,7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0"
+                          IsChecked="{Binding Keep, Mode=TwoWay}"
+                          IsEnabled="{Binding IsSelectable}"
+                          VerticalAlignment="Center"
+                          AutomationProperties.Name="{Binding AutomationName}"/>
+                <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="{Binding DisplayName}"
+                               Style="{StaticResource LabelTextStyle}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Detail}"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="FinishedFileTemplate">
@@ -269,6 +304,7 @@
                                             <ColumnDefinition Width="62"/>
                                             <ColumnDefinition Width="96"/>
                                             <ColumnDefinition Width="96"/>
+                                            <ColumnDefinition Width="72"/>
                                         </Grid.ColumnDefinitions>
                                         <CheckBox x:Uid="ConverterPage_SelectAllQueueCheckBox" x:Name="SelectAllQueueCheckBox" Grid.Column="0"
                                                   HorizontalAlignment="Center"

@@ -218,6 +218,12 @@ public sealed partial class ConverterPage : Page
                 OutputPath = request.SourcePaths.Count == 1 ? request.OutputPath : null,
             };
             item.RerunParameters = ConversionRerunRequestCodec.Serialize(perFileRequest);
+            item.AudioTrackSelection = perFileRequest.Options.AudioTrackSelection is null
+                ? null
+                : [.. perFileRequest.Options.AudioTrackSelection];
+            item.SubtitleTrackSelection = perFileRequest.Options.SubtitleTrackSelection is null
+                ? null
+                : [.. perFileRequest.Options.SubtitleTrackSelection];
             item.OutputPath = perFileRequest.OutputPath;
             item.StatusText = "Restored from history";
             restored++;
@@ -520,6 +526,7 @@ public sealed partial class ConverterPage : Page
             EstimatedSizeLabel = $"≈ {estimate.DisplayLabel}",
             EstimatedSizeCaveat =
                 "Planning estimate based on source size; codec settings determine the final output.",
+            HasTrackControls = VideoExtensions.Contains(fileInfo.Extension.TrimStart('.')),
         };
         RefreshFileReview(file);
         return file;
@@ -548,6 +555,244 @@ public sealed partial class ConverterPage : Page
         file.WarningCount = warnings.Count;
         file.HasBlockingWarning = warnings.Any(item =>
             item.Severity == ConverterPreflightSeverity.Error);
+    }
+
+    private async void TrackSelection_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: FileItem file })
+            return;
+
+        if (XamlRoot is null)
+        {
+            StatusText.Text = AppLocalizer.Get("Track controls are unavailable until the Converter page is loaded.");
+            return;
+        }
+
+        var rows = new ObservableCollection<ConverterTrackRow>();
+        var status = new TextBlock
+        {
+            Text = AppLocalizer.Get("Reading audio and subtitle streams..."),
+            TextWrapping = TextWrapping.Wrap,
+        };
+        var list = new ItemsControl
+        {
+            ItemsSource = rows,
+            ItemTemplate = Resources["TrackSelectionTemplate"] as DataTemplate,
+        };
+        var content = new StackPanel
+        {
+            Spacing = 10,
+            MinWidth = 420,
+        };
+        content.Children.Add(status);
+        content.Children.Add(new ScrollViewer
+        {
+            Content = list,
+            MaxHeight = 440,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+        });
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = AppLocalizer.Format($"Tracks · {file.FileName}"),
+            Content = content,
+            PrimaryButtonText = AppLocalizer.Get("Apply"),
+            SecondaryButtonText = AppLocalizer.Get("Cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = false,
+        };
+
+        var loadTask = LoadTrackRowsAsync(file, rows, status, dialog);
+        ContentDialogResult result;
+        try
+        {
+            result = await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = AppLocalizer.Format($"Could not open track controls: {ex.Message}");
+            return;
+        }
+
+        var loaded = await loadTask;
+        if (result != ContentDialogResult.Primary || !loaded)
+            return;
+
+        file.AudioTrackSelection = CaptureTrackSelection(rows, audio: true);
+        file.SubtitleTrackSelection = CaptureTrackSelection(rows, audio: false);
+        PersistQueue();
+        UpdateUI();
+        StatusText.Text = file.HasTrackSelectionOverride
+            ? AppLocalizer.Get("Custom audio and subtitle tracks will be used for this file.")
+            : AppLocalizer.Get("All audio and subtitle tracks will be preserved for this file.");
+    }
+
+    private async Task<bool> LoadTrackRowsAsync(
+        FileItem file,
+        ObservableCollection<ConverterTrackRow> rows,
+        TextBlock status,
+        ContentDialog dialog)
+    {
+        var ffprobePath = FindFfprobePath();
+        if (ffprobePath is null)
+        {
+            status.Text = AppLocalizer.Get("FFprobe is not available. Install it or set FFPROBE_PATH to inspect tracks.");
+            return false;
+        }
+
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var result = await MediaFidelityProbe.ProbeAsync(ffprobePath, file.Path, timeout.Token);
+            if (!result.Succeeded || result.Snapshot is null)
+            {
+                status.Text = AppLocalizer.Format(
+                    $"Could not read tracks: {result.Diagnostic ?? "FFprobe returned no stream data."}");
+                return false;
+            }
+
+            foreach (var row in BuildTrackRows(result.Snapshot, file))
+                rows.Add(row);
+
+            status.Text = rows.Any(row => row.IsSelectable)
+                ? AppLocalizer.Get("Clear a track to drop it. Video streams are always preserved.")
+                : AppLocalizer.Get("This file has no selectable audio or subtitle streams.");
+            dialog.IsPrimaryButtonEnabled = true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            status.Text = AppLocalizer.Format($"Could not inspect tracks: {ex.Message}");
+            return false;
+        }
+    }
+
+    private static IReadOnlyList<ConverterTrackRow> BuildTrackRows(
+        MediaFidelitySnapshot snapshot,
+        FileItem file)
+    {
+        var rows = new List<ConverterTrackRow>();
+        var videoIndex = 0;
+        var audioIndex = 0;
+        var subtitleIndex = 0;
+
+        foreach (var stream in snapshot.Streams)
+        {
+            var type = stream.Type.Trim().ToLowerInvariant();
+            if (type is not ("video" or "audio" or "subtitle"))
+                continue;
+
+            var kindIndex = type switch
+            {
+                "video" => videoIndex++,
+                "audio" => audioIndex++,
+                _ => subtitleIndex++,
+            };
+            var tags = stream.Tags;
+            var dimensions = TryGetStreamDimensions(stream.Properties);
+            var channels = TryGetStreamInt(stream.Properties, "channels");
+            var row = new ConverterTrackRow
+            {
+                StreamIndex = stream.Index ?? rows.Count,
+                KindIndex = kindIndex,
+                StreamType = type,
+                Codec = string.IsNullOrWhiteSpace(stream.Codec) ? type : stream.Codec!,
+                Language = tags.TryGetValue("language", out var language) ? language : null,
+                Title = tags.TryGetValue("title", out var title) ? title : null,
+                IsDefault = stream.Disposition.TryGetValue("default", out var isDefault) && isDefault == 1,
+                Channels = channels,
+                Dimensions = dimensions,
+            };
+
+            var selected = type == "audio"
+                ? file.AudioTrackSelection
+                : type == "subtitle"
+                    ? file.SubtitleTrackSelection
+                    : null;
+            row.Keep = selected is null || selected.Contains(kindIndex);
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+    private static string? TryGetStreamDimensions(IReadOnlyDictionary<string, string> properties)
+    {
+        if (!properties.TryGetValue("width", out var width)
+            || !properties.TryGetValue("height", out var height)
+            || string.IsNullOrWhiteSpace(width)
+            || string.IsNullOrWhiteSpace(height))
+        {
+            return null;
+        }
+
+        return $"{width}x{height}";
+    }
+
+    private static int? TryGetStreamInt(
+        IReadOnlyDictionary<string, string> properties,
+        string property)
+    {
+        return properties.TryGetValue(property, out var value)
+            && int.TryParse(value, out var parsed)
+                ? parsed
+                : null;
+    }
+
+    private static List<int>? CaptureTrackSelection(
+        IEnumerable<ConverterTrackRow> rows,
+        bool audio)
+    {
+        var selectable = rows
+            .Where(row => audio ? row.IsAudio : row.IsSubtitle)
+            .OrderBy(row => row.KindIndex)
+            .ToList();
+        if (selectable.Count == 0 || selectable.All(row => row.Keep))
+            return null;
+
+        return selectable
+            .Where(row => row.Keep)
+            .Select(row => row.KindIndex)
+            .ToList();
+    }
+
+    private string? FindFfprobePath()
+    {
+        var executable = OperatingSystem.IsWindows() ? "ffprobe.exe" : "ffprobe";
+        var candidates = new List<string?>
+        {
+            Environment.GetEnvironmentVariable("FFPROBE_PATH"),
+            Path.Combine(_appOptions.ToolsBasePath, "bin", executable),
+            Path.Combine(_appOptions.ToolsBasePath, executable),
+            Path.Combine(_appOptions.ToolsBasePath, "ffmpeg", executable),
+            Path.Combine(_appOptions.ToolsBasePath, "_bin", executable),
+            Path.Combine(_appOptions.ToolsBasePath, "videocrush", executable),
+            Path.Combine(_appOptions.ToolsBasePath, "clipforge", executable),
+            Path.Combine(AppContext.BaseDirectory, "tools", "bin", executable),
+            Path.Combine(AppContext.BaseDirectory, "tools", "_bin", executable),
+        };
+
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            candidates.Add(Path.Combine(directory.FullName, "tools", "ffmpeg", executable));
+            candidates.Add(Path.Combine(directory.FullName, "tools", "_bin", executable));
+            candidates.Add(Path.Combine(directory.FullName, "tools", "videocrush", executable));
+            candidates.Add(Path.Combine(directory.FullName, "tools", "clipforge", executable));
+            directory = directory.Parent;
+        }
+
+        if (_appOptions.SearchSystemTools)
+        {
+            var path = Environment.GetEnvironmentVariable("PATH") ?? "";
+            candidates.AddRange(path
+                .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Select(directory => Path.Combine(directory.Trim(), executable)));
+        }
+
+        return candidates.FirstOrDefault(path =>
+            !string.IsNullOrWhiteSpace(path) && File.Exists(path));
     }
 
     private void QueueThumbnail(FileItem file) => _ = LoadThumbnailAsync(file, _thumbnailCts.Token);
@@ -921,6 +1166,12 @@ public sealed partial class ConverterPage : Page
                 restoredFile.OutputPath = job.OutputPath;
                 restoredFile.ErrorMessage = job.ErrorMessage;
                 restoredFile.PersistedArgs = [.. job.Args];
+                restoredFile.AudioTrackSelection = job.AudioTrackSelection is null
+                    ? null
+                    : [.. job.AudioTrackSelection];
+                restoredFile.SubtitleTrackSelection = job.SubtitleTrackSelection is null
+                    ? null
+                    : [.. job.SubtitleTrackSelection];
                 _files.Add(restoredFile);
                 QueueThumbnail(restoredFile);
                 restored++;
@@ -953,6 +1204,12 @@ public sealed partial class ConverterPage : Page
                 Action = "convert",
                 Preset = _selectedFormat,
                 Args = f.PersistedArgs,
+                AudioTrackSelection = f.AudioTrackSelection is null
+                    ? null
+                    : [.. f.AudioTrackSelection],
+                SubtitleTrackSelection = f.SubtitleTrackSelection is null
+                    ? null
+                    : [.. f.SubtitleTrackSelection],
                 Status = NormalizePersistedStatus(f.StatusText),
                 ErrorMessage = f.ErrorMessage,
             })
@@ -1195,7 +1452,8 @@ public sealed partial class ConverterPage : Page
                         selectedFormat,
                         outputPath,
                         savedRequest?.Options,
-                        commandTemplate),
+                        commandTemplate,
+                        f),
                     selectedFormat,
                     _outputDirectory,
                     commandTemplate);
@@ -1531,7 +1789,8 @@ public sealed partial class ConverterPage : Page
         string outputFormat,
         string? outputPathOverride = null,
         ConversionOptions? optionsOverride = null,
-        string? ffmpegCommandTemplate = null)
+        string? ffmpegCommandTemplate = null,
+        FileItem? file = null)
     {
         var outputPath = string.IsNullOrWhiteSpace(outputPathOverride)
             ? BuildOutputPath(inputPath, outputFormat)
@@ -1551,7 +1810,7 @@ public sealed partial class ConverterPage : Page
             };
         }
 
-        ApplyVisibleOutputProfile(conversionOptions);
+        ApplyVisibleOutputProfile(conversionOptions, file);
 
         ffmpegCommandTemplate ??= EditFfmpegCommandToggle.IsOn
             ? FfmpegCommandBox.Text
@@ -1574,7 +1833,7 @@ public sealed partial class ConverterPage : Page
         return ConversionJob.Create(inputPath, outputPath, conversionOptions);
     }
 
-    private void ApplyVisibleOutputProfile(ConversionOptions options)
+    private void ApplyVisibleOutputProfile(ConversionOptions options, FileItem? file = null)
     {
         options.Quality = _qualityPreset;
         options.UseHardwareAcceleration = HighSpeedToggle.IsOn
@@ -1585,6 +1844,16 @@ public sealed partial class ConverterPage : Page
         options.Video.Width = _outputWidth;
         options.Video.Height = _outputHeight;
         options.Video.Fps = _outputFrameRate;
+
+        if (file?.HasTrackSelectionOverride == true)
+        {
+            options.AudioTrackSelection = file.AudioTrackSelection is null
+                ? null
+                : [.. file.AudioTrackSelection];
+            options.SubtitleTrackSelection = file.SubtitleTrackSelection is null
+                ? null
+                : [.. file.SubtitleTrackSelection];
+        }
 
         if (_audioProfile.Equals("source", StringComparison.OrdinalIgnoreCase))
         {
@@ -1701,7 +1970,7 @@ public sealed partial class ConverterPage : Page
             return;
         }
 
-        var job = CreateJob(first.Path, _selectedFormat, BuildOutputPath(first.Path, _selectedFormat));
+        var job = CreateJob(first.Path, _selectedFormat, BuildOutputPath(first.Path, _selectedFormat), file: first);
         var arguments = ffmpeg.BuildArguments(job, job.Options);
         SetFfmpegCommandText(FfmpegCommandTemplate.Create(arguments, job.InputPath, job.OutputPath));
         var editHint = appOptions.EnableFfmpegCommandEditing
@@ -1923,6 +2192,9 @@ public class FileItem : INotifyPropertyChanged
     private string _warningBadgeText = "Ready";
     private int _warningCount;
     private bool _hasBlockingWarning;
+    private bool _hasTrackControls;
+    private List<int>? _audioTrackSelection;
+    private List<int>? _subtitleTrackSelection;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -1941,6 +2213,55 @@ public class FileItem : INotifyPropertyChanged
     public string? ErrorMessage { get; set; }
     public List<string> PersistedArgs { get; set; } = [];
     public string? RerunParameters { get; set; }
+
+    public bool HasTrackControls
+    {
+        get => _hasTrackControls;
+        set
+        {
+            if (!SetProperty(ref _hasTrackControls, value))
+                return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackButtonVisibility)));
+        }
+    }
+
+    public Microsoft.UI.Xaml.Visibility TrackButtonVisibility =>
+        HasTrackControls
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    /// <summary>
+    /// Null means the preflight default: preserve every audio stream. A
+    /// non-null list is an explicit zero-based per-kind selection, including
+    /// an empty list to drop every audio stream.
+    /// </summary>
+    public List<int>? AudioTrackSelection
+    {
+        get => _audioTrackSelection;
+        set
+        {
+            if (!SetProperty(ref _audioTrackSelection, value))
+                return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackSelectionLabel)));
+        }
+    }
+
+    /// <summary>Subtitle equivalent of <see cref="AudioTrackSelection"/>.</summary>
+    public List<int>? SubtitleTrackSelection
+    {
+        get => _subtitleTrackSelection;
+        set
+        {
+            if (!SetProperty(ref _subtitleTrackSelection, value))
+                return;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackSelectionLabel)));
+        }
+    }
+
+    public bool HasTrackSelectionOverride =>
+        AudioTrackSelection is not null || SubtitleTrackSelection is not null;
+
+    public string TrackSelectionLabel => HasTrackSelectionOverride ? "Tracks *" : "Tracks";
     public long? EstimatedSizeBytes { get; set; }
     public string EstimatedSizeLabel { get; set; } = "";
     public string EstimatedSizeCaveat { get; set; } = "";

@@ -133,7 +133,10 @@ class DownloadIntegrityContractTests(unittest.TestCase):
         code = (ROOT / "src" / "UniversalConverterX.UI" / "Views" / "Pages" /
                 "BackgroundRemoverPage.xaml.cs").read_text(encoding="utf-8-sig")
         self.assertIn('Click="DownloadModel_Click"', xaml)
-        self.assertIn('PrimaryButtonText = "Accept & download"', code)
+        self.assertTrue(
+            'PrimaryButtonText = "Accept & download"' in code
+            or 'PrimaryButtonText = AppLocalizer.Get("Accept & download")' in code
+        )
         self.assertIn('"--check-model"', code)
         self.assertIn('"--accept-license"', code)
 

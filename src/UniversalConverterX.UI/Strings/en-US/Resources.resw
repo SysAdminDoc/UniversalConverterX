@@ -1533,6 +1533,9 @@
   <data name="Code_24D2C67C71417CE2AD21" xml:space="preserve">
     <value>Done - {0}</value>
   </data>
+  <data name="Code_25D384F31985031D150E" xml:space="preserve">
+    <value>FFprobe is not available. Install it or set FFPROBE_PATH to inspect tracks.</value>
+  </data>
   <data name="Code_25FB1FA503AC9F4257AC" xml:space="preserve">
     <value>Ready to image {0}.</value>
   </data>
@@ -1544,6 +1547,9 @@
   </data>
   <data name="Code_2671332CF2AE3AFBC12D" xml:space="preserve">
     <value>Failed ({0})</value>
+  </data>
+  <data name="Code_26964E97499E212EB193" xml:space="preserve">
+    <value>Reading audio and subtitle streams...</value>
   </data>
   <data name="Code_269BDD7634BC36FA195C" xml:space="preserve">
     <value>The original generated argument vector will run unchanged.</value>
@@ -1652,6 +1658,9 @@
   </data>
   <data name="Code_31CD1F0C0D2F703BD079" xml:space="preserve">
     <value>Ready to compress {0} videos using {1}. Output: {2}.</value>
+  </data>
+  <data name="Code_31E392D1C0378BECA611" xml:space="preserve">
+    <value>Apply</value>
   </data>
   <data name="Code_3227AA9666253F7A7365" xml:space="preserve">
     <value>Browse</value>
@@ -1856,6 +1865,9 @@
   </data>
   <data name="Code_48BE3E865C106B5EACEC" xml:space="preserve">
     <value>Cancelled — {0} converted, {1} failed.</value>
+  </data>
+  <data name="Code_48E7E827A497FF87946E" xml:space="preserve">
+    <value>All audio and subtitle tracks will be preserved for this file.</value>
   </data>
   <data name="Code_4948813DE1A8ACB5E9FB" xml:space="preserve">
     <value>Loaded {0} stream(s). Remove streams or set audio delays, then Apply.</value>
@@ -2163,6 +2175,9 @@
   <data name="Code_6EB0A41D50268093D04C" xml:space="preserve">
     <value>Imported {0} chapter(s). Save media to apply them without re-encoding.</value>
   </data>
+  <data name="Code_6F0B62DFC124FB280A5A" xml:space="preserve">
+    <value>Could not inspect tracks: {0}</value>
+  </data>
   <data name="Code_6F6C955A81EDF91E5A7E" xml:space="preserve">
     <value>Preview ready. Review the cues, then export.</value>
   </data>
@@ -2451,6 +2466,9 @@
   <data name="Code_8E777620C60DDF44B68D" xml:space="preserve">
     <value>Listing contents of {0}...</value>
   </data>
+  <data name="Code_8E8213AC5C9E2A586849" xml:space="preserve">
+    <value>Custom audio and subtitle tracks will be used for this file.</value>
+  </data>
   <data name="Code_8E99C7C8FCAD2D11CC32" xml:space="preserve">
     <value>Transcription failed ({0}).</value>
   </data>
@@ -2696,6 +2714,9 @@
   </data>
   <data name="Code_AF413C56F12C39F3470A" xml:space="preserve">
     <value>Colourising image…</value>
+  </data>
+  <data name="Code_AF5100089DD30F80F175" xml:space="preserve">
+    <value>Could not read tracks: {0}</value>
   </data>
   <data name="Code_B02D881DA251979987AC" xml:space="preserve">
     <value>Output folder unavailable: {0}</value>
@@ -2979,6 +3000,9 @@ SHA-256: {0}</value>
   <data name="Code_CECE6CCE1FEF9BD36A9A" xml:space="preserve">
     <value>Recording {0} queued sessions...</value>
   </data>
+  <data name="Code_CFBB4D38D4A4E28D981A" xml:space="preserve">
+    <value>Tracks · {0}</value>
+  </data>
   <data name="Code_D027959F825A7B569A7C" xml:space="preserve">
     <value>Done -- {0} subtitle(s) -&gt; .{1}.</value>
   </data>
@@ -3080,6 +3104,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_D9793EEBC26A1C6CC1CD" xml:space="preserve">
     <value>Voice catalog timed out — check network and try Refresh Voices.</value>
+  </data>
+  <data name="Code_D98226C8B79BF767D715" xml:space="preserve">
+    <value>Clear a track to drop it. Video streams are always preserved.</value>
   </data>
   <data name="Code_D9D34FFF222B9F7EA59E" xml:space="preserve">
     <value>Permission denied for that folder.</value>
@@ -3201,6 +3228,9 @@ SHA-256: {0}</value>
   <data name="Code_E618C6E03E94B7E0132E" xml:space="preserve">
     <value>Threshold -18 dB · Ratio 2:1 · Attack 20 ms · Release 250 ms · Makeup +2 dB</value>
   </data>
+  <data name="Code_E62A8B7622B7145B1F3F" xml:space="preserve">
+    <value>Track controls are unavailable until the Converter page is loaded.</value>
+  </data>
   <data name="Code_E76485A17A39A840A53E" xml:space="preserve">
     <value>Try a broader locale or 'all locales'.</value>
   </data>
@@ -3248,6 +3278,12 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_EA4EDD2B452CBDB8FF8C" xml:space="preserve">
     <value>Health unavailable</value>
+  </data>
+  <data name="Code_EA94FE2D022BC00D73DE" xml:space="preserve">
+    <value>Could not open track controls: {0}</value>
+  </data>
+  <data name="Code_EAAAB0E3E5D4D4E831A6" xml:space="preserve">
+    <value>This file has no selectable audio or subtitle streams.</value>
   </data>
   <data name="Code_EB1A70E39274BB762B5D" xml:space="preserve">
     <value>Discard</value>
@@ -3987,6 +4023,12 @@ SHA-256: {0}</value>
   </data>
   <data name="ConverterPage_StatusText.Text" xml:space="preserve">
     <value>Ready</value>
+  </data>
+  <data name="ConverterPage_TrackSelectionButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Choose audio and subtitle tracks</value>
+  </data>
+  <data name="ConverterPage_TrackSelectionButton.Content" xml:space="preserve">
+    <value>Tracks</value>
   </data>
   <data name="Core_ConversionCancelled" xml:space="preserve">
     <value>Conversion was cancelled</value>

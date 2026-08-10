@@ -42,6 +42,17 @@ public sealed record PersistedBatchJob
     public string Action { get; init; } = "";
     public string? Preset { get; init; }
     public List<string> Args { get; init; } = [];
+    /// <summary>
+    /// Optional zero-based audio stream indices selected by the Converter
+    /// preflight. A null value preserves every audio stream.
+    /// </summary>
+    public List<int>? AudioTrackSelection { get; init; }
+
+    /// <summary>
+    /// Optional zero-based subtitle stream indices selected by the Converter
+    /// preflight. A null value preserves every subtitle stream.
+    /// </summary>
+    public List<int>? SubtitleTrackSelection { get; init; }
     public string Status { get; init; } = "Queued";
     public string? ErrorMessage { get; init; }
 
@@ -106,6 +117,12 @@ public static class BatchQueueOperations
             // record of how the original was produced.
             Provenance = null,
             Args = [.. source.Args],
+            AudioTrackSelection = source.AudioTrackSelection is null
+                ? null
+                : [.. source.AudioTrackSelection],
+            SubtitleTrackSelection = source.SubtitleTrackSelection is null
+                ? null
+                : [.. source.SubtitleTrackSelection],
         };
     }
 

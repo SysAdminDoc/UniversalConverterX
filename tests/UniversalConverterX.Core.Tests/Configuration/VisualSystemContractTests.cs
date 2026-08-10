@@ -107,7 +107,7 @@ public class VisualSystemContractTests
         converterXaml.Should().Contain("BorderThickness=\"0,0,0,1\"");
         converterXaml.Should().NotContain("Text=\"Output\" Style=\"{StaticResource PanelTitleTextStyle}\"");
 
-        converterCode.Should().Contain("ApplyVisibleOutputProfile(conversionOptions)");
+        converterCode.Should().Contain("ApplyVisibleOutputProfile(conversionOptions, file)");
         converterCode.Should().Contain("options.Video.Width = _outputWidth");
         converterCode.Should().Contain("options.Video.Fps = _outputFrameRate");
         converterCode.Should().Contain("options.Audio.Bitrate =");

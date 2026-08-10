@@ -13,6 +13,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Persisted settings now have observable consumers for converter defaults, completion feedback, accent color, startup behavior, and Explorer presentation; unsupported tray and auto-start toggles are removed by the v4 settings migration.
 - Home, Toolbox, Presets, Universal Convert, and shell search now consume one stable workflow catalog with localized metadata, capability/readiness disclosures, favorite/recent state, and route-independent IDs that preserve distinct ClipForge tasks.
 - History rows and the Converter/Compressor pages can now apply saved settings without starting a job, with surface-filtered latest replay, Compressor profile persistence, and legacy-row fallback diagnostics.
+- Converter preflight now probes named and language-tagged audio/subtitle streams and exposes keep/drop controls. Explicit per-kind selections flow into FFmpeg job snapshots and durable queue recovery, while the default preserves every track.
 
 ### Fixed
 

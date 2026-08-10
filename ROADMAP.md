@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 128b — Surface per-track keep/drop controls in Converter preflight
-  Why: Core and CLI stream selection shipped, but the preflight UI cannot control it.
-  Evidence: `FFmpegConverter.BuildStreamMapArgs`; `ConversionOptions.AudioTrackSelection`/`SubtitleTrackSelection`; Shutter issue 228.
-  Touches: Converter preflight table and job snapshot.
-  Acceptance: named/language-tagged streams show keep/drop controls, default to preserve all, persist into the job snapshot, and pass Item 155 fixtures.
-  Complexity: S
-
 ### P2 — Product depth, performance, and compatibility
 
 - [ ] P2 — Item 130b — Offer capability-gated hardware encoders and safe fallback
