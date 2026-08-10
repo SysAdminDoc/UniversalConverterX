@@ -15,12 +15,22 @@ public sealed record ConversionRerunRequest
     public const int CurrentSchemaVersion = 1;
 
     public int SchemaVersion { get; init; } = CurrentSchemaVersion;
+    /// <summary>
+    /// Destination page for an apply-settings action. Older payloads omitted
+    /// this field and therefore continue to target the Converter page.
+    /// </summary>
+    public string Surface { get; init; } = "converter";
     public List<string> SourcePaths { get; init; } = [];
     public string OutputFormat { get; init; } = "";
     public string? OutputDirectory { get; init; }
     public string? OutputPath { get; init; }
     public ConversionOptions Options { get; init; } = new();
     public string? FfmpegCommandTemplate { get; init; }
+    /// <summary>
+    /// Page-specific settings retained without coupling the Core request to a
+    /// WinUI control tree. Compressor uses this for its preset and target mode.
+    /// </summary>
+    public Dictionary<string, string?> PageSettings { get; init; } = [];
 }
 
 public static class ConversionRerunRequestCodec
@@ -72,12 +82,16 @@ public static class ConversionRerunRequestCodec
     {
         if (request.SchemaVersion != ConversionRerunRequest.CurrentSchemaVersion)
             throw new InvalidDataException($"Unsupported re-run schema version {request.SchemaVersion}.");
+        if (request.Surface is not ("converter" or "compressor"))
+            throw new InvalidDataException($"Unsupported re-run surface '{request.Surface}'.");
         if (request.SourcePaths is null || request.SourcePaths.Count is < 1 or > MaxSourcePaths)
             throw new InvalidDataException($"A re-run must contain 1-{MaxSourcePaths} source paths.");
         if (request.SourcePaths.Any(string.IsNullOrWhiteSpace))
             throw new InvalidDataException("Re-run source paths cannot be empty.");
         if (request.Options is null)
             throw new InvalidDataException("Saved conversion options are missing.");
+        if (request.PageSettings is null)
+            throw new InvalidDataException("Saved page settings are missing.");
         if (!PathSafety.TryNormalizeExtension(request.OutputFormat, out _))
             throw new InvalidDataException("The saved output format is invalid.");
         if (request.FfmpegCommandTemplate?.Length > MaxTemplateLength)

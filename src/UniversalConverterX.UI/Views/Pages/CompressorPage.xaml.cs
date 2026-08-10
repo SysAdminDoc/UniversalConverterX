@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
@@ -72,6 +73,104 @@ public sealed partial class CompressorPage : Page
         UpdatePresetSummaries();
         RestorePersistedQueue();
         UpdateUi();
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is ConversionRerunRequest request
+            && string.Equals(request.Surface, "compressor", StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyRerunRequest(request);
+        }
+    }
+
+    private async void ApplyLastUsed_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var request = await _history.GetLastUsedRerunAsync(surface: "compressor");
+            if (request is null)
+            {
+                StatusText.Text = AppLocalizer.Get("No saved Compressor settings are available yet.");
+                return;
+            }
+
+            ApplyRerunRequest(request);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = AppLocalizer.Format($"Could not restore the last Compressor settings: {ex.Message}");
+        }
+    }
+
+    private void ApplyRerunRequest(ConversionRerunRequest request)
+    {
+        var settings = request.PageSettings ?? [];
+        _restoringQueue = true;
+        try
+        {
+            if (settings.TryGetValue("preset", out var preset))
+            {
+                switch (preset)
+                {
+                    case "email-10mb": PresetEmail.IsChecked = true; break;
+                    case "__target__": PresetTarget.IsChecked = true; break;
+                    case "__vmaf__": PresetVmaf.IsChecked = true; break;
+                    case "archive-av1": PresetArchive.IsChecked = true; break;
+                    case "__pro__": PresetPro.IsChecked = true; break;
+                    default: PresetWeb.IsChecked = true; break;
+                }
+            }
+
+            if (settings.TryGetValue("targetPreset", out var targetPreset))
+                SelectTaggedItem(SocialTargetCombo, targetPreset);
+            if (settings.TryGetValue("proPreset", out var proPreset))
+                SelectTaggedItem(ProPresetCombo, proPreset);
+            if (settings.TryGetValue("targetMegabytes", out var targetMegabytes)
+                && double.TryParse(targetMegabytes, NumberStyles.Float, CultureInfo.InvariantCulture, out var megabytes))
+                TargetSizeBox.Value = megabytes;
+            if (settings.TryGetValue("vmafEncoder", out var vmafEncoder))
+                SelectTaggedItem(VmafEncoderCombo, vmafEncoder);
+            if (settings.TryGetValue("vmafTarget", out var vmafTarget)
+                && double.TryParse(vmafTarget, NumberStyles.Float, CultureInfo.InvariantCulture, out var vmaf))
+                VmafTargetBox.Value = vmaf;
+            if (settings.TryGetValue("hardwareAcceleration", out var hardwareAcceleration))
+                SelectTaggedItem(HwAccelCombo, hardwareAcceleration);
+            if (settings.TryGetValue("d3d12Deinterlace", out var deinterlace))
+                D3D12DeinterlaceToggle.IsChecked = bool.TryParse(deinterlace, out var enabled) && enabled;
+
+            _outputDirectory = string.IsNullOrWhiteSpace(request.OutputDirectory)
+                ? null
+                : request.OutputDirectory;
+            OutputDirectoryBox.Text = _outputDirectory ?? "";
+
+            foreach (var sourcePath in request.SourcePaths.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (File.Exists(sourcePath)
+                    && !_files.Any(file => file.Path.Equals(sourcePath, StringComparison.OrdinalIgnoreCase)))
+                    AddFile(sourcePath, updateUi: false);
+            }
+
+            if (request.SourcePaths.Count == 1)
+            {
+                var restoredFile = _files.FirstOrDefault(file =>
+                    file.Path.Equals(request.SourcePaths[0], StringComparison.OrdinalIgnoreCase));
+                if (restoredFile is not null && !string.IsNullOrWhiteSpace(request.OutputPath))
+                    restoredFile.OutputPath = request.OutputPath;
+            }
+        }
+        finally
+        {
+            _restoringQueue = false;
+        }
+
+        UpdatePresetSummaries();
+        PersistQueue();
+        UpdateUi();
+        StatusText.Text = _files.Count > 0
+            ? AppLocalizer.Format($"Restored {_files.Count} file(s) with the saved Compressor settings.")
+            : AppLocalizer.Get("The saved Compressor source file is no longer available.");
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -394,6 +493,19 @@ public sealed partial class CompressorPage : Page
         return "none";
     }
 
+    private static void SelectTaggedItem(ComboBox selector, string? tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag))
+            return;
+
+        var match = selector.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => string.Equals(
+                item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        if (match is not null)
+            selector.SelectedItem = match;
+    }
+
     private void ApplyConfiguredHardwareAcceleration()
     {
         var options = App.Services
@@ -510,6 +622,9 @@ public sealed partial class CompressorPage : Page
                 ["hardwareAcceleration"] = SelectedHwAccel(),
                 ["targetPreset"] = SelectedTargetPresetTag(),
                 ["targetMegabytes"] = SelectedTargetLimitMb().ToString(CultureInfo.InvariantCulture),
+                ["proPreset"] = ProPresetCombo?.SelectedItem is ComboBoxItem proItem
+                    ? proItem.Tag?.ToString()
+                    : "prores-422-hq",
                 ["vmafEncoder"] = SelectedVmafEncoder(),
                 ["vmafTarget"] = SelectedVmafTarget().ToString(CultureInfo.InvariantCulture),
             },
@@ -751,6 +866,8 @@ public sealed partial class CompressorPage : Page
                         ErrorCode = result.ErrorCode,
                         ErrorMessage = result.ErrorMessage,
                         Profile = preset,
+                        RerunParameters = ConversionRerunRequestCodec.Serialize(
+                            BuildRerunRequest(item.Path, outputPath)),
                     });
                 }
 
@@ -994,6 +1111,32 @@ public sealed partial class CompressorPage : Page
             return item.Content?.ToString() ?? "SVT-AV1";
         return "SVT-AV1";
     }
+
+    private ConversionRerunRequest BuildRerunRequest(string sourcePath, string outputPath) =>
+        new()
+        {
+            Surface = "compressor",
+            SourcePaths = [sourcePath],
+            OutputFormat = Path.GetExtension(outputPath).TrimStart('.'),
+            OutputDirectory = _outputDirectory,
+            OutputPath = outputPath,
+            PageSettings = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["preset"] = PresetTarget.IsChecked == true
+                    ? "__target__"
+                    : PresetVmaf.IsChecked == true
+                        ? "__vmaf__"
+                        : PresetPro.IsChecked == true
+                            ? "__pro__"
+                            : SelectedPresetTag(),
+                ["targetPreset"] = SelectedTargetPresetTag(),
+                ["targetMegabytes"] = SelectedTargetLimitMb().ToString(CultureInfo.InvariantCulture),
+                ["vmafEncoder"] = SelectedVmafEncoder(),
+                ["vmafTarget"] = SelectedVmafTarget().ToString(CultureInfo.InvariantCulture),
+                ["hardwareAcceleration"] = SelectedHwAccel(),
+                ["d3d12Deinterlace"] = (D3D12DeinterlaceToggle.IsChecked == true).ToString(),
+            },
+        };
 
     private string BuildOutputPath(string inputPath, bool smartQualityMode = false)
     {

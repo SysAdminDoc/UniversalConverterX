@@ -12,6 +12,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Added shared accessibility primitives: polite live regions for status/progress updates, stable Ctrl+K/Ctrl+1/Ctrl+2/Ctrl+J shell accelerators, high-contrast palette resources, WCAG-AA text tokens, visible focus brushes, and automatic narrow-window reflow for every page.
 - Persisted settings now have observable consumers for converter defaults, completion feedback, accent color, startup behavior, and Explorer presentation; unsupported tray and auto-start toggles are removed by the v4 settings migration.
 - Home, Toolbox, Presets, Universal Convert, and shell search now consume one stable workflow catalog with localized metadata, capability/readiness disclosures, favorite/recent state, and route-independent IDs that preserve distinct ClipForge tasks.
+- History rows and the Converter/Compressor pages can now apply saved settings without starting a job, with surface-filtered latest replay, Compressor profile persistence, and legacy-row fallback diagnostics.
 
 ### Fixed
 

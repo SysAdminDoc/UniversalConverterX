@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 126b — Wire history replay into the UI
-  Why: Core replay accessors are shipped and tested; users still lack History “Apply settings” and page-level “Apply last used” affordances.
-  Evidence: `HistoryStore.GetRerunRequestAsync`; `GetLastUsedRerunAsync`; `ConversionRerunRequest`.
-  Touches: History, Converter, and Compressor pages.
-  Acceptance: a history row or latest replayable job pre-fills the destination page without starting work; ViewModel tests cover missing presets/tools.
-  Complexity: S
-
 - [ ] P1 — Item 128b — Surface per-track keep/drop controls in Converter preflight
   Why: Core and CLI stream selection shipped, but the preflight UI cannot control it.
   Evidence: `FFmpegConverter.BuildStreamMapArgs`; `ConversionOptions.AudioTrackSelection`/`SubtitleTrackSelection`; Shutter issue 228.

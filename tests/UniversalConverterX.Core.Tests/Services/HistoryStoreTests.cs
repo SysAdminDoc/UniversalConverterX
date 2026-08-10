@@ -269,6 +269,36 @@ public sealed class HistoryStoreTests : IDisposable
         (await store.GetLastUsedRerunAsync()).Should().BeNull();
     }
 
+    [Fact]
+    public async Task GetLastUsedRerunAsync_CanFilterByDestinationSurface()
+    {
+        using var store = CreateStore();
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush", Action = "convert", SourcePath = @"C:\convert.mov", Success = true,
+            RerunParameters = ConversionRerunRequestCodec.Serialize(new ConversionRerunRequest
+            {
+                SourcePaths = [@"C:\convert.mov"], OutputFormat = "mp4", Surface = "converter",
+            }),
+        });
+        await store.AddAsync(new ConversionHistoryEntry
+        {
+            Engine = "videocrush", Action = "compress", SourcePath = @"C:\compress.mov", Success = true,
+            RerunParameters = ConversionRerunRequestCodec.Serialize(new ConversionRerunRequest
+            {
+                SourcePaths = [@"C:\compress.mov"], OutputFormat = "mp4", Surface = "compressor",
+            }),
+        });
+
+        var converter = await store.GetLastUsedRerunAsync(surface: "converter");
+        var compressor = await store.GetLastUsedRerunAsync(surface: "compressor");
+
+        converter.Should().NotBeNull();
+        converter!.SourcePaths.Should().ContainSingle().Which.Should().Be(@"C:\convert.mov");
+        compressor.Should().NotBeNull();
+        compressor!.SourcePaths.Should().ContainSingle().Which.Should().Be(@"C:\compress.mov");
+    }
+
     public void Dispose()
     {
         try

@@ -135,6 +135,10 @@
                            Style="{StaticResource PageDescriptionTextStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Button x:Uid="CompressorPage_ApplyLastUsedButton" Content="Apply last used"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="ApplyLastUsed_Click"
+                        AutomationProperties.AutomationId="CompressorApplyLastUsedButton"/>
                 <Button x:Uid="CompressorPage_CompressorPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="CompressorPageButton01"/>

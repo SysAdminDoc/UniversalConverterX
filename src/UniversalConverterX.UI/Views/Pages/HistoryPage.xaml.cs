@@ -152,14 +152,9 @@ public sealed partial class HistoryPage : Page
             return;
         }
 
-        ConversionRerunRequest? request;
-        if (!ConversionRerunRequestCodec.TryDeserialize(
-                record.RerunParameters,
-                out request,
-                out _))
-        {
+        var request = await _history.GetRerunRequestAsync(record.Id);
+        if (request is null)
             request = BuildLegacyRerun(record);
-        }
 
         if (request is null)
         {
@@ -174,7 +169,11 @@ public sealed partial class HistoryPage : Page
             return;
         }
 
-        App.RequestNavigation("converter", request);
+        App.RequestNavigation(
+            string.Equals(request.Surface, "compressor", StringComparison.OrdinalIgnoreCase)
+                ? "compressor"
+                : "converter",
+            request);
     }
 
     private static ConversionRerunRequest? BuildLegacyRerun(HistoryRecord record)

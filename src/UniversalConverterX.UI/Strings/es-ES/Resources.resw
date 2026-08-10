@@ -1572,6 +1572,9 @@
   <data name="Code_2937013F2181810606B2" xml:space="preserve">
     <value>update</value>
   </data>
+  <data name="Code_2954E89B18FB2B2A022B" xml:space="preserve">
+    <value>No saved Compressor settings are available yet.</value>
+  </data>
   <data name="Code_29BF641B9C366F47AEF9" xml:space="preserve">
     <value>Ready to enhance {0} clip(s). {1}</value>
   </data>
@@ -1667,6 +1670,9 @@
   </data>
   <data name="Code_3316348DBADFB7B11C7C" xml:space="preserve">
     <value>read</value>
+  </data>
+  <data name="Code_340204D63878B49898EC" xml:space="preserve">
+    <value>No saved Converter settings are available yet.</value>
   </data>
   <data name="Code_340ED481EB3551E7830F" xml:space="preserve">
     <value>Command blocked</value>
@@ -1796,6 +1802,9 @@
   </data>
   <data name="Code_4197D07C959CDF2DE5CF" xml:space="preserve">
     <value>Drop files here, or pick them</value>
+  </data>
+  <data name="Code_419A38803E2FD7AFCD1E" xml:space="preserve">
+    <value>Could not restore the last Compressor settings: {0}</value>
   </data>
   <data name="Code_41B11E01AF6891CF9C5C" xml:space="preserve">
     <value>Separating {0}</value>
@@ -1955,6 +1964,9 @@
   </data>
   <data name="Code_54E8875A138C19DFF92E" xml:space="preserve">
     <value>Ready to compress {0} file(s) using {1} ({2}). Output: {3}.</value>
+  </data>
+  <data name="Code_54EE00BAE27B3871DC3D" xml:space="preserve">
+    <value>Could not restore the last Converter settings: {0}</value>
   </data>
   <data name="Code_5547A47D8BA83BBF7374" xml:space="preserve">
     <value>Drop into editing queue</value>
@@ -3003,6 +3015,9 @@ SHA-256: {0}</value>
   <data name="Code_D353A99EB4556847CEEB" xml:space="preserve">
     <value>Cancelled</value>
   </data>
+  <data name="Code_D477288CDBEAF216F729" xml:space="preserve">
+    <value>Restored {0} file(s) with the saved Compressor settings.</value>
+  </data>
   <data name="Code_D4A98EFED13A831A07E2" xml:space="preserve">
     <value>Drop into slideshow</value>
   </data>
@@ -3086,6 +3101,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_DBEBCFE15E9DEE26347E" xml:space="preserve">
     <value>Plugins folder</value>
+  </data>
+  <data name="Code_DCBD3394CF6B9585856B" xml:space="preserve">
+    <value>The saved Compressor source file is no longer available.</value>
   </data>
   <data name="Code_DCE6EEC2AE766463C220" xml:space="preserve">
     <value>Showing {0} matches for "{1}".</value>
@@ -3448,6 +3466,9 @@ SHA-256: {0}</value>
   <data name="ColorizeVideoPage_StatusText.Text" xml:space="preserve">
     <value>Open a black-and-white image or video to begin.</value>
   </data>
+  <data name="CompressorPage_ApplyLastUsedButton.Content" xml:space="preserve">
+    <value>Apply last used</value>
+  </data>
   <data name="CompressorPage_CancelButton.Content" xml:space="preserve">
     <value>Cancelar</value>
   </data>
@@ -3678,6 +3699,9 @@ SHA-256: {0}</value>
   </data>
   <data name="ConverterPage_AdvancedFfmpegExpander.Header" xml:space="preserve">
     <value>Comando FFmpeg avanzado</value>
+  </data>
+  <data name="ConverterPage_ApplyLastUsedButton.Content" xml:space="preserve">
+    <value>Apply last used</value>
   </data>
   <data name="ConverterPage_AudioSelector.Header" xml:space="preserve">
     <value>Audio</value>

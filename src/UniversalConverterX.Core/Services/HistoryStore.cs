@@ -163,7 +163,8 @@ public sealed class HistoryStore : IDisposable
     /// the "Apply last used settings" action on the convert/compress pages.
     /// </summary>
     public async Task<ConversionRerunRequest?> GetLastUsedRerunAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? surface = null)
     {
         // Query is ordered id DESC (most recent first); take the first row that
         // still has usable re-run parameters.
@@ -172,7 +173,9 @@ public sealed class HistoryStore : IDisposable
         foreach (var entry in recent)
         {
             var rerun = TryReadRerun(entry);
-            if (rerun is not null)
+            if (rerun is not null
+                && (string.IsNullOrWhiteSpace(surface)
+                    || string.Equals(rerun.Surface, surface, StringComparison.OrdinalIgnoreCase)))
                 return rerun;
         }
 

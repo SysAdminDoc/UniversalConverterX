@@ -12,6 +12,7 @@ public sealed class ConversionRerunRequestTests
     {
         var request = new ConversionRerunRequest
         {
+            Surface = "compressor",
             SourcePaths = [@"C:\Media\café source.mov"],
             OutputFormat = ".mp4",
             OutputDirectory = @"C:\Output Folder",
@@ -28,6 +29,11 @@ public sealed class ConversionRerunRequestTests
                 FfmpegArgumentOverride = ["materialized", "paths", "must", "not", "persist"],
                 Video = new VideoOptions { Crf = 18, PixelFormat = "yuv420p10le" },
             },
+            PageSettings = new Dictionary<string, string?>
+            {
+                ["preset"] = "__target__",
+                ["targetMegabytes"] = "25",
+            },
         };
 
         var json = ConversionRerunRequestCodec.Serialize(request);
@@ -36,7 +42,9 @@ public sealed class ConversionRerunRequestTests
         parsed.Should().BeTrue(error);
         restored.Should().NotBeNull();
         restored!.SourcePaths.Should().Equal(@"C:\Media\café source.mov");
+        restored.Surface.Should().Be("compressor");
         restored.OutputFormat.Should().Be(".mp4");
+        restored.PageSettings["preset"].Should().Be("__target__");
         restored.Options.Should().BeEquivalentTo(request.Options, options => options
             .Excluding(item => item.FfmpegArgumentOverride));
         restored.Options.FfmpegArgumentOverride.Should().BeNull();

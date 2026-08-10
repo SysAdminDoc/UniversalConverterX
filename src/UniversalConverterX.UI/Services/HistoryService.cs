@@ -120,6 +120,10 @@ public interface IHistoryService
     Task LogAsync(HistoryRecord record);
     Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500);
     Task<HistoryRecord?> GetAsync(long id);
+    Task<ConversionRerunRequest?> GetRerunRequestAsync(long id, CancellationToken cancellationToken = default);
+    Task<ConversionRerunRequest?> GetLastUsedRerunAsync(
+        CancellationToken cancellationToken = default,
+        string? surface = null);
     Task<HistorySummary> SummarizeAsync(string? search = null);
     Task<int> ExportAsync(string path, string? search = null);
     Task DeleteAsync(long id);
@@ -198,6 +202,22 @@ public sealed class HistoryService : IHistoryService, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         var entry = await _store.GetAsync(id).ConfigureAwait(false);
         return entry is null ? null : HistoryRecord.FromEntry(entry);
+    }
+
+    public async Task<ConversionRerunRequest?> GetRerunRequestAsync(
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return await _store.GetRerunRequestAsync(id, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<ConversionRerunRequest?> GetLastUsedRerunAsync(
+        CancellationToken cancellationToken = default,
+        string? surface = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return await _store.GetLastUsedRerunAsync(cancellationToken, surface).ConfigureAwait(false);
     }
 
     public async Task<HistorySummary> SummarizeAsync(string? search = null)

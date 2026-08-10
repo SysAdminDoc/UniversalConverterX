@@ -127,6 +127,25 @@ public sealed partial class ConverterPage : Page
             ApplyFileIntakeRequest(intake);
     }
 
+    private async void ApplyLastUsed_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var request = await _history.GetLastUsedRerunAsync(surface: "converter");
+            if (request is null)
+            {
+                StatusText.Text = AppLocalizer.Get("No saved Converter settings are available yet.");
+                return;
+            }
+
+            ApplyRerunRequest(request);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = AppLocalizer.Format($"Could not restore the last Converter settings: {ex.Message}");
+        }
+    }
+
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         _thumbnailCts.Cancel();

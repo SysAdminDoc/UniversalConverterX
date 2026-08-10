@@ -193,16 +193,22 @@
                         </MenuFlyout>
                     </SplitButton.Flyout>
                 </SplitButton>
-                <Button x:Uid="ConverterPage_ConvertAction" x:Name="ConvertButton"
-                        HorizontalAlignment="Right"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Click="ConvertButton_Click" IsEnabled="False"
-                        AutomationProperties.AutomationId="ConvertButton">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock x:Uid="ConverterPage_Item_001_2" Text="Convert"/>
-                        <FontIcon Glyph="&#xE72A;" FontSize="16"/>
-                    </StackPanel>
-                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button x:Uid="ConverterPage_ApplyLastUsedButton"
+                            Content="Apply last used"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="ApplyLastUsed_Click"
+                            AutomationProperties.AutomationId="ConverterApplyLastUsedButton"/>
+                    <Button x:Uid="ConverterPage_ConvertAction" x:Name="ConvertButton"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="ConvertButton_Click" IsEnabled="False"
+                            AutomationProperties.AutomationId="ConvertButton">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock x:Uid="ConverterPage_Item_001_2" Text="Convert"/>
+                            <FontIcon Glyph="&#xE72A;" FontSize="16"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Grid>
 
