@@ -111,8 +111,8 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 
 ### Requirements
 
-- Windows 10 21H2+ or Windows 11
-- .NET 10 Runtime
+- Windows 10 21H2 (build 19044)+ or Windows 11
+- Published UI and CLI artifacts are self-contained; the installer also stages framework-dependent shell/proxy hosts, so those hosts need a compatible .NET 10 runtime. Source builds require the .NET 10 SDK, and the installer build checks for .NET 10.0.9 or newer
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
 - eBook/comic sidecars install their pinned Python dependencies during the sidecar build; comic MOBI output additionally needs Calibre, and UCX refuses protected Kindle/KFX inputs because it does not include DeDRM
 - DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
@@ -130,7 +130,27 @@ Explorer and file-association launches send every selected path to a single
 running Converter window. Packaged builds also register `ucx:` routes such as
 `ucx:converter` and `ucx:history`; completion notifications reopen History.
 
-The release also includes an intentionally unsigned MSIX for managed sideload environments that choose to apply their own disposable local sideload key. The portable ZIP needs no certificate and is the artifact used by WinGet.
+The release also includes intentionally unsigned MSI and MSIX packages for managed environments that apply their own signing or disposable local sideload key. The portable ZIP needs no certificate and is the artifact used by WinGet; no artifact is presented as signed unless a downstream release process signs it.
+
+### Supported platform and release matrix
+
+The supported desktop floor is Windows 10 21H2 (build 19044) or Windows 11.
+The project publishes both x64 and ARM64 app binaries, but the current frozen
+sidecar catalog is x64-only unless a manifest explicitly advertises another
+architecture. UCX reports those availability limits instead of claiming that
+an ARM64 app has native ARM64 sidecars.
+
+| Surface | OS / architecture | Runtime and package behavior | Sidecars and migration | Signing / install behavior |
+|---|---|---|---|---|
+| Source build and tests | Windows 10 21H2+ or Windows 11; x64 test host, ARM64 publish supported | .NET 10 SDK, Python 3.12, Windows SDK; no release package | Source manifests cover 212 engines; v2 compatibility validation runs before launch | Developer build; no signing implied |
+| Portable ZIP / WinGet | Windows 10 21H2+ or Windows 11; `win-x64` | Self-contained .NET 10 UI/CLI; framework-dependent shell/proxy hosts use the installed .NET 10 runtime | Readiness manifest reports bundled, on-demand, or unavailable engines; old v1 extension manifests are quarantined and require reinstall | Unsigned archive; WinGet consumes the portable archive and needs no certificate |
+| MSIX | Windows 10 21H2+ or Windows 11; `x64` | Self-contained WinUI 3 / Windows App SDK 2.2 UI; shell/proxy hosts follow their publish settings | Same v2 manifest and readiness rules; current bundled sidecars are x64 | Intentionally unsigned source artifact; managed sideloading supplies the signing policy/key |
+| MSI | Windows 10 21H2+ or Windows 11; `x64` | Self-contained WinUI 3 / CLI; shell/proxy hosts use the installed .NET 10 runtime | Same v2 manifest and readiness rules; current bundled sidecars are x64 | Unsigned build output; downstream distribution must sign it if required |
+| ARM64 publish | Windows 10 21H2+ or Windows 11; `win-arm64` | Self-contained app and shell binaries; no ARM64 package claim | Current sidecar manifests advertise `win-x64`, so native ARM64 sidecar availability is not claimed | Unpackaged developer/release output; signing is external |
+
+Every extension is checked against schema, host version, architecture,
+capabilities, and migration metadata during discovery and immediately before
+execution. A failure is actionable and keeps the extension quarantined.
 
 ## CLI Usage
 
@@ -264,7 +284,7 @@ UniversalConverterX/
 
 - .NET 10 SDK
 - Python 3.12 (the sidecar, packaging, and dependency gates)
-- Windows 10 version 1809 or newer for the WinUI project; Windows SDK and WinUI build tools restore from NuGet
+- Windows 10 21H2 (build 19044) or newer for the WinUI project; Windows SDK and WinUI build tools restore from NuGet
 
 ### Build
 
@@ -284,8 +304,8 @@ to be an explicit, reviewed lock-file update.
 ### Test
 
 `-Target Test` is the whole release contract in one fail-fast command. It runs
-17 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax
-sweep, 212-sidecar contract, sidecar and shared-library unit tests,
+20 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax
+sweep, documentation/platform consistency, 212-sidecar contract, sidecar and shared-library unit tests,
 localization parity, static UIA coverage, release-manifest tests, sidecar
 dependency manifests, NuGet vulnerability and deprecation audits, allowlist
 expiry, the runtime UI sweep, staged-artifact verification, and SBOM
@@ -528,7 +548,10 @@ MIT License - see LICENSE file for details.
 
 ## Contributing
 
-Contributions are welcome! Please read CONTRIBUTING.md for guidelines.
+Contributions are welcome. Keep changes focused, add or update headless tests
+for behavior changes, and run the relevant release gates before opening a pull
+request. The repository intentionally keeps contribution guidance in this
+README so a missing local guide cannot make the project instructions stale.
 
 ## Acknowledgments
 

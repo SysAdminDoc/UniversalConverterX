@@ -140,7 +140,7 @@ function Invoke-UiSmoke {
     $smokeArguments = @{
         ExePath = Join-Path $PSScriptRoot (
             'src\UniversalConverterX.UI\bin\x64\' + $Configuration +
-            '\net10.0-windows10.0.19041.0\UniversalConverterX.exe')
+            '\net10.0-windows10.0.22621.0\UniversalConverterX.exe')
     }
     if (-not [string]::IsNullOrWhiteSpace($UiSmokeLauncher)) {
         $smokeArguments.Launcher = $UiSmokeLauncher

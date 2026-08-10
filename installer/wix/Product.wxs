@@ -43,8 +43,8 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
                   AllowSameVersionUpgrades="yes" />
 
-    <!-- Win10 1809 minimum (matches WindowsAppSDK 1.7 floor). -->
-    <Launch Condition="VersionNT &gt;= 603" Message="UniversalConverter X requires Windows 10 (1809) or later." />
+    <!-- Windows 10 21H2 minimum; WindowsBuildNumber distinguishes it from earlier Windows 10 releases. -->
+    <Launch Condition="VersionNT64 &gt;= 1000 AND WindowsBuildNumber &gt;= 19044" Message="UniversalConverter X requires 64-bit Windows 10 21H2 (build 19044) or later." />
 
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" CompressionLevel="high" />
 

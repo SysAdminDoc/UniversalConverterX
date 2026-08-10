@@ -100,6 +100,7 @@ function Invoke-PythonScript {
 }
 
 $sidecarContractDir = Join-Path $repoRoot 'tests\sidecar_contract'
+$documentationContract = Join-Path $repoRoot 'tests\documentation_contract\check_contract.py'
 $syntaxTest = Join-Path $sidecarContractDir 'test_python_source_syntax.py'
 $localizationTest = Join-Path $sidecarContractDir 'test_localization_resources.py'
 $allowlist = Join-Path $repoRoot 'tools\gates\allowlist.json'
@@ -139,6 +140,10 @@ $gates = @(
 
     New-Gate -Id 'python-syntax' -Description 'Every tracked *.py parses' -Action {
         Invoke-Pytest -Arguments @($syntaxTest)
+    }
+
+    New-Gate -Id 'documentation-contract' -Description 'Active documentation, platform matrix, release metadata, and local-link consistency' -Action {
+        Invoke-PythonScript -Arguments @($documentationContract)
     }
 
     New-Gate -Id 'sidecar-contract' -Description '212-sidecar NDJSON contract, security floors, ORT matrix' -Action {
@@ -198,7 +203,7 @@ $gates = @(
         $smokeArguments = @{
             ExePath = Join-Path $repoRoot (
                 'src\UniversalConverterX.UI\bin\x64\' + $Configuration +
-                '\net10.0-windows10.0.19041.0\UniversalConverterX.exe')
+                '\net10.0-windows10.0.22621.0\UniversalConverterX.exe')
         }
         if (-not [string]::IsNullOrWhiteSpace($UiSmokeLauncher)) {
             $smokeArguments.Launcher = $UiSmokeLauncher

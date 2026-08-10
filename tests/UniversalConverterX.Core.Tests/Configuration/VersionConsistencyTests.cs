@@ -48,7 +48,7 @@ public class VersionConsistencyTests
         version.Should().NotBeNull();
         version!.Should().BeGreaterThanOrEqualTo(new Version(2, 0));
         SingleElementValue(project, "TargetFramework")
-            .Should().StartWith("net10.0-windows10.0.19041.0");
+          .Should().StartWith("net10.0-windows10.0.22621.0");
         SingleElementValue(project, "WindowsAppSDKSelfContained").Should().Be("true");
     }
 

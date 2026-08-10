@@ -37,7 +37,7 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ([string]::IsNullOrWhiteSpace($ExePath)) {
     $ExePath = Join-Path $repoRoot (
         'src\UniversalConverterX.UI\bin\x64\Release\' +
-        'net10.0-windows10.0.19041.0\UniversalConverterX.exe')
+        'net10.0-windows10.0.22621.0\UniversalConverterX.exe')
 }
 if (-not (Test-Path -LiteralPath $ExePath -PathType Leaf)) {
     throw "UI build output not found: $ExePath. Build the x64 Release UI first."

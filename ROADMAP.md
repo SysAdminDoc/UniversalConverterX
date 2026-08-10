@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 166 — Enforce documentation and supported-platform truth
-  Why: README links missing CONTRIBUTING guidance and conflicts with project/MSIX/WiX/runtime floors; stale changelog/roadmap state has repeatedly survived releases.
-  Evidence: `README.md:112-113,258-259,441`; `src/UniversalConverterX.UI/UniversalConverterX.UI.csproj`; `installer/msix/Package.appxmanifest`; `installer/wix/Product.wxs`; version-consistency tests.
-  Touches: README contribution/platform sections, manifests, installer checks, changelog/roadmap validation.
-  Acceptance: one tested matrix states OS, architecture, package type, runtime, sidecar availability, migration, and unsigned-install behavior; the missing CONTRIBUTING link is removed or replaced in README, and broken local links, duplicate Unreleased headings, completed roadmap rows, and conflicting version/floor claims fail the release gate.
-  Complexity: S
-
 - [ ] P2 — Item 168 — Migrate the Core test suite from xunit 2.x to xunit.v3
   Why: NuGet marks xunit 2.9.3 and its four transitive packages Legacy because xunit.v3 supersedes them; the deprecation is currently suppressed in `tools/gates/allowlist.json` and that suppression expires 2027-01-29.
   Evidence: `dotnet list package --deprecated` via `tools/gates/dependency_gate.py`; `tests/UniversalConverterX.Core.Tests/UniversalConverterX.Core.Tests.csproj`; xunit v3 migration guidance.
