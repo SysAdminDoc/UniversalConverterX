@@ -454,7 +454,6 @@
             <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                 <Setter Property="Background" Value="{StaticResource SurfaceDangerBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource AccentRedBrush}"/>
-                <Setter Property="BorderBrush" Value="#7f1d1d"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
