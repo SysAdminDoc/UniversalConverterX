@@ -148,10 +148,38 @@ public sealed partial class SettingsWindow : Window
 
     private async void OpenPluginsFolder_Click(object sender, RoutedEventArgs e)
     {
-        Directory.CreateDirectory(_pluginTrustService.PluginDirectory);
-        var folder = await StorageFolder.GetFolderFromPathAsync(_pluginTrustService.PluginDirectory);
-        if (!await Launcher.LaunchFolderAsync(folder))
-            await ShowMessageAsync(AppLocalizer.Get("Plugins folder"), _pluginTrustService.PluginDirectory);
+        var pluginDirectory = _pluginTrustService.PluginDirectory;
+        try
+        {
+            Directory.CreateDirectory(pluginDirectory);
+            var folder = await StorageFolder.GetFolderFromPathAsync(pluginDirectory);
+            if (!await Launcher.LaunchFolderAsync(folder))
+                await ShowPluginsFolderFallbackAsync(pluginDirectory);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Opening plugins folder failed: {ex.GetType().Name}: {ex.Message}");
+            await ShowPluginsFolderFallbackAsync(pluginDirectory);
+        }
+    }
+
+    private async Task ShowPluginsFolderFallbackAsync(string pluginDirectory)
+    {
+        try
+        {
+            await ShowMessageAsync(AppLocalizer.Get("Plugins folder"), pluginDirectory);
+        }
+        catch (Exception ex)
+        {
+            // A locked-down profile can also reject a dialog's XamlRoot while
+            // the window is closing. Keep the async-void click handler safe and
+            // leave a visible in-window diagnostic as the last fallback.
+            Debug.WriteLine($"Showing plugins folder fallback failed: {ex.GetType().Name}: {ex.Message}");
+            ShowUpdateStatus(
+                AppLocalizer.Get("Plugins folder unavailable"),
+                pluginDirectory,
+                InfoBarSeverity.Error);
+        }
     }
 
     private void LoadSettings()
