@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 183 — Potrace emits `-b` without its required backend name — PDF/DXF/GeoJSON/XFig output is dead on arrival
-  Category: correctness
-  Where: `src/UniversalConverterX.Core/Converters/PotraceConverter.cs:136-147` (`GetBackendFlag`), `:66-77`/`:130-133` (`BuildArguments`).
-  Problem: `GetBackendFlag` returns the bare string `"-b"` for pdf/dxf/geojson/fig, but potrace's `-b/--backend` requires a name (`-b pdf`). The next token added is a tracing option (e.g. `-z`), which potrace then parses as the backend name → "unrecognized backend" and immediate failure. Every potrace conversion to pdf/dxf/geojson/fig fails; dxf/geojson/fig have no other converter, so those routes are entirely broken.
-  Evidence: args become `["-b","-z",...]`; reachable via `GetBestConverter("png","dxf")` (only potrace claims dxf).
-  Fix: return two tokens, e.g. `["-b","pdf"]`/`["-b","dxf"]`/`["-b","geojson"]`/`["-b","xfig"]`.
-  Acceptance: `png→dxf` with potrace installed produces a non-empty DXF; unit test asserts `BuildArguments` contains adjacent `"-b","dxf"`.
-  Confidence: Verified. Effort: S
-
 - [ ] P2 — Item 184 — `heif-enc -t` emitted without the required thumbnail-size argument
   Category: correctness
   Where: `src/UniversalConverterX.Core/Converters/LibHeifConverter.cs:116-126`.

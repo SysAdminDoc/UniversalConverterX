@@ -69,9 +69,7 @@ public partial class PotraceConverter : BaseConverterStrategy
         var outputExt = job.OutputExtension.ToLowerInvariant();
 
         // Output format backend
-        var backend = GetBackendFlag(outputExt);
-        if (!string.IsNullOrEmpty(backend))
-            args.Add(backend);
+        args.AddRange(GetBackendArguments(outputExt));
 
         // Tracing algorithm options
         args.AddRange(GetTracingOptions(options));
@@ -133,17 +131,17 @@ public partial class PotraceConverter : BaseConverterStrategy
         return [.. args];
     }
 
-    private static string GetBackendFlag(string outputExt) => outputExt switch
+    private static string[] GetBackendArguments(string outputExt) => outputExt switch
     {
-        "svg" => "-s",
-        "eps" => "-e",
-        "ps" => "-p",
-        "pdf" => "-b", // PDF backend
-        "dxf" => "-b", // DXF backend
-        "geojson" => "-b", // GeoJSON backend
-        "pgm" => "-g",
-        "fig" => "-b", // XFig backend
-        _ => "-s" // Default to SVG
+        "svg" => ["-s"],
+        "eps" => ["-e"],
+        "ps" => ["-p"],
+        "pdf" => ["-b", "pdf"],
+        "dxf" => ["-b", "dxf"],
+        "geojson" => ["-b", "geojson"],
+        "pgm" => ["-g"],
+        "fig" => ["-b", "xfig"],
+        _ => ["-s"]
     };
 
     private static string[] GetTracingOptions(ConversionOptions options)
