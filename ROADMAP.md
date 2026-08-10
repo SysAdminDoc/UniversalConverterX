@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 161 — Establish accessible status, keyboard, contrast, and reflow primitives
-  Why: the UI has three live regions, no accelerator/access-key infrastructure, no adaptive states or high-contrast resources, 54 wide fixed widths, and subtle text below 4.5:1 contrast.
-  Evidence: `App.xaml`; `Views/**/*.xaml`; Microsoft accessibility checklist/text/layout guidance; WCAG 2.2 status messages.
-  Touches: shared XAML resources/components, shell/pages, Item 124 runtime tests.
-  Acceptance: progress/success/error changes are announced without focus theft; core actions have documented accelerators; all pages pass keyboard, Narrator, high-contrast, 4.5:1 text, 225% scale, and narrow-window reflow checks.
-  Complexity: XL
-
 - [ ] P1 — Item 162 — Implement or remove every persisted setting
   Why: accent, minimize-to-tray, start-minimized, and completion-sound values are loaded/saved but have no runtime consumers, undermining settings trust.
   Evidence: `SettingsWindow.xaml.cs`; `ConverterXOptions.cs`; repository-wide consumer scan.

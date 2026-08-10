@@ -1,8 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.Views.Pages;
+using Windows.System;
 
 namespace UniversalConverterX.UI.Views;
 
@@ -81,6 +84,9 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ConfigureKeyboardAccelerators();
+        ContentFrame.Navigated += ContentFrame_Navigated;
+        AccessibilityPrimitives.ApplyLiveRegions(ShellRoot);
         SystemBackdropMaterialService.TryApplyMica(NavigationBackdropHost);
         NavSearchBox.ItemsSource = _searchSuggestions;
 
@@ -122,6 +128,101 @@ public sealed partial class MainWindow : Window
 
         App.Register(this);
         Activated += MainWindow_Activated;
+    }
+
+    /// <summary>
+    /// Shell accelerators are intentionally few and stable so keyboard users
+    /// can reach the primary workflows without memorizing page-specific keys.
+    /// Ctrl+K opens search; Ctrl+1, Ctrl+2, and Ctrl+J reach Home, Converter,
+    /// and Job Center respectively.
+    /// </summary>
+    private void ConfigureKeyboardAccelerators()
+    {
+        var search = new KeyboardAccelerator
+        {
+            Key = VirtualKey.K,
+            Modifiers = VirtualKeyModifiers.Control,
+        };
+        search.Invoked += FocusSearch_Invoked;
+        ShellRoot.KeyboardAccelerators.Add(search);
+
+        var home = new KeyboardAccelerator
+        {
+            Key = VirtualKey.Number1,
+            Modifiers = VirtualKeyModifiers.Control,
+        };
+        home.Invoked += NavigateHome_Invoked;
+        ShellRoot.KeyboardAccelerators.Add(home);
+
+        var converter = new KeyboardAccelerator
+        {
+            Key = VirtualKey.Number2,
+            Modifiers = VirtualKeyModifiers.Control,
+        };
+        converter.Invoked += NavigateConverter_Invoked;
+        ShellRoot.KeyboardAccelerators.Add(converter);
+
+        var jobs = new KeyboardAccelerator
+        {
+            Key = VirtualKey.J,
+            Modifiers = VirtualKeyModifiers.Control,
+        };
+        jobs.Invoked += NavigateJobs_Invoked;
+        ShellRoot.KeyboardAccelerators.Add(jobs);
+    }
+
+    private void ContentFrame_Navigated(object sender, NavigationEventArgs args)
+    {
+        AccessibilityPrimitives.ApplyLiveRegions(args.Content as DependencyObject);
+    }
+
+    private void ShellRoot_SizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        var isNarrow = args.NewSize.Width > 0
+            && args.NewSize.Width < AccessibilityPrimitives.NarrowWindowWidth;
+        var navigationWidth = isNarrow ? 48d : 216d;
+
+        NavigationSurfaceFallback.Width = navigationWidth;
+        NavigationBackdropHost.Width = navigationWidth;
+        NavigationDivider.Margin = new Thickness(navigationWidth - 1, 0, 0, 0);
+
+        if (isNarrow)
+        {
+            MainNav.PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+            MainNav.IsPaneOpen = false;
+        }
+        else
+        {
+            MainNav.PaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+            MainNav.IsPaneOpen = true;
+        }
+    }
+
+    private void FocusSearch_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        MainNav.PaneDisplayMode = NavigationViewPaneDisplayMode.Left;
+        MainNav.IsPaneOpen = true;
+        NavSearchBox.Visibility = Visibility.Visible;
+        NavSearchBox.Focus(FocusState.Keyboard);
+        args.Handled = true;
+    }
+
+    private void NavigateHome_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        RequestNavigation("home");
+        args.Handled = true;
+    }
+
+    private void NavigateConverter_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        RequestNavigation("converter");
+        args.Handled = true;
+    }
+
+    private void NavigateJobs_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        RequestNavigation("job-center");
+        args.Handled = true;
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)

@@ -8,9 +8,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid x:Name="ShellRoot"
+          Background="{StaticResource BackgroundBrush}"
+          SizeChanged="ShellRoot_SizeChanged">
         <!-- Solid theme fallback remains visible when compositor materials are unavailable. -->
-        <Border Width="216"
+        <Border x:Name="NavigationSurfaceFallback"
+                Width="216"
                 HorizontalAlignment="Left"
                 Background="{StaticResource NavigationSurfaceBrush}"/>
         <controls:SystemBackdropElement x:Name="NavigationBackdropHost"
@@ -18,7 +21,8 @@
                                         HorizontalAlignment="Left"
                                         Opacity="0.28"
                                         IsHitTestVisible="False"/>
-        <Border Width="1"
+        <Border x:Name="NavigationDivider"
+                Width="1"
                 Margin="215,0,0,0"
                 HorizontalAlignment="Left"
                 Background="{StaticResource DividerBrush}"
@@ -28,6 +32,7 @@
                         IsSettingsVisible="True"
                         PaneDisplayMode="Left"
                         OpenPaneLength="216"
+                        CompactPaneLength="48"
                         IsTitleBarAutoPaddingEnabled="False"
                         SelectionChanged="MainNav_SelectionChanged"
                         Background="Transparent">

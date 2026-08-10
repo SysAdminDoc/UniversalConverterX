@@ -3,6 +3,7 @@
     x:Class="UniversalConverterX.UI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:accessibility="using:UniversalConverterX.UI.Services"
     RequestedTheme="Dark">
     <Application.Resources>
         <ResourceDictionary>
@@ -52,7 +53,7 @@
                     <Color x:Key="BrandTextPrimary">#f3f7fc</Color>
                     <Color x:Key="BrandTextSecondary">#afbbcb</Color>
                     <Color x:Key="BrandTextMuted">#8290a3</Color>
-                    <Color x:Key="BrandTextSubtle">#637187</Color>
+                    <Color x:Key="BrandTextSubtle">#8290a3</Color>
                     <Color x:Key="BrandTextInverse">#07111f</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Light">
@@ -87,9 +88,47 @@
                     <!-- Text -->
                     <Color x:Key="BrandTextPrimary">#172335</Color>
                     <Color x:Key="BrandTextSecondary">#40516a</Color>
-                    <Color x:Key="BrandTextMuted">#62738a</Color>
-                    <Color x:Key="BrandTextSubtle">#8693a5</Color>
+                    <Color x:Key="BrandTextMuted">#526177</Color>
+                    <Color x:Key="BrandTextSubtle">#526177</Color>
                     <Color x:Key="BrandTextInverse">#f7faff</Color>
+                </ResourceDictionary>
+                <!--
+                     High-contrast fallback: preserve the semantic resource
+                     names used by every page while removing tonal surfaces and
+                     low-contrast accents. System high-contrast settings can
+                     still override control templates and focus visuals.
+                     -->
+                <ResourceDictionary x:Key="HighContrast">
+                    <Color x:Key="BrandBackground">#000000</Color>
+                    <Color x:Key="BrandNavigation">#000000</Color>
+                    <Color x:Key="BrandSurface">#000000</Color>
+                    <Color x:Key="BrandSurfaceRaised">#000000</Color>
+                    <Color x:Key="BrandSurfaceMuted">#000000</Color>
+                    <Color x:Key="BrandSurfaceLight">#000000</Color>
+                    <Color x:Key="BrandSurfaceSoft">#000000</Color>
+                    <Color x:Key="BrandSurfaceWarm">#000000</Color>
+                    <Color x:Key="BrandSurfaceDanger">#000000</Color>
+                    <Color x:Key="BrandSurfaceInfo">#000000</Color>
+                    <Color x:Key="BrandAccentPrimarySoft">#000000</Color>
+                    <Color x:Key="BrandHeroStart">#000000</Color>
+                    <Color x:Key="BrandHeroEnd">#000000</Color>
+                    <Color x:Key="BrandBorder">#ffffff</Color>
+                    <Color x:Key="BrandBorderStrong">#ffffff</Color>
+                    <Color x:Key="BrandDivider">#ffffff</Color>
+                    <Color x:Key="BrandAccentPrimary">#ffff00</Color>
+                    <Color x:Key="BrandAccentPrimaryHover">#ffffff</Color>
+                    <Color x:Key="BrandAccentPrimaryPressed">#00ffff</Color>
+                    <Color x:Key="BrandAccentBlue">#00ffff</Color>
+                    <Color x:Key="BrandAccentCyan">#00ffff</Color>
+                    <Color x:Key="BrandAccentGreen">#00ff00</Color>
+                    <Color x:Key="BrandAccentOrange">#ffff00</Color>
+                    <Color x:Key="BrandAccentYellow">#ffff00</Color>
+                    <Color x:Key="BrandAccentRed">#ff8080</Color>
+                    <Color x:Key="BrandTextPrimary">#ffffff</Color>
+                    <Color x:Key="BrandTextSecondary">#ffffff</Color>
+                    <Color x:Key="BrandTextMuted">#ffffff</Color>
+                    <Color x:Key="BrandTextSubtle">#ffffff</Color>
+                    <Color x:Key="BrandTextInverse">#000000</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
@@ -228,6 +267,15 @@
                 <Setter Property="LineHeight" Value="18"/>
             </Style>
 
+            <!-- StatusTextStyle is the shared polite live-region primitive for
+                 progress, success, warning, and error copy. It never receives
+                 focus; status changes are announced in place by UI Automation. -->
+            <Style x:Key="StatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MutedTextStyle}">
+                <Setter Property="AutomationProperties.LiveSetting" Value="Polite"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+
             <!-- LabelTextStyle: compact section labels (settings expanders, tile titles) -->
             <Style x:Key="LabelTextStyle" TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
@@ -329,11 +377,13 @@
             <Style x:Key="PageLayoutStyle" TargetType="Grid">
                 <Setter Property="Padding" Value="32,22,32,28"/>
                 <Setter Property="RowSpacing" Value="16"/>
+                <Setter Property="accessibility:AccessibilityPrimitives.ResponsiveLayoutEnabled" Value="True"/>
             </Style>
 
             <Style x:Key="PageStackLayoutStyle" TargetType="StackPanel">
                 <Setter Property="Padding" Value="32,22,32,28"/>
                 <Setter Property="Spacing" Value="16"/>
+                <Setter Property="accessibility:AccessibilityPrimitives.ResponsiveLayoutEnabled" Value="True"/>
             </Style>
 
             <!-- ════════════════════════════════════════════════════════════════
@@ -358,6 +408,8 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource TextInverseBrush}"/>
             </Style>
 
             <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
@@ -374,6 +426,8 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource TextInverseBrush}"/>
             </Style>
 
             <!-- Ghost: text-only inline action. Used when a secondary action
@@ -392,6 +446,8 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource TextInverseBrush}"/>
             </Style>
 
             <!-- Danger: destructive actions (Stop, Delete, Cancel-job). -->
@@ -409,6 +465,8 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource TextInverseBrush}"/>
             </Style>
 
             <!-- IconButton: 32×32 circular icon-only button (close, remove, options) -->
@@ -425,6 +483,8 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource TextInverseBrush}"/>
             </Style>
 
             <!-- ════════════════════════════════════════════════════════════════
