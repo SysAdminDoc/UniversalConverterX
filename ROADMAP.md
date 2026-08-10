@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 137 — Promote existing ClipForge RIFE into the managed workflow contract
-  Why: `rife-ncnn-vulkan` already works in legacy ClipForge, but it is not governed by the main catalog, queue, artifact, and fallback contracts.
-  Evidence: `tools/clipforge/clipforge.py:163-164,935-1010`; Video2X/RIFE precedent.
-  Touches: managed sidecar operation/preset, workflow catalog, artifact manifest, Video Enhancer UI.
-  Acceptance: a catalog-visible job interpolates to a target FPS through the app-scoped queue with a pinned runtime, GPU readiness reason, cancel/retry, and source-preserving output validation.
-  Complexity: M
-
 - [ ] P2 — Item 163 — Virtualize Toolbox, Presets, and History
   Why: nested grids and fully materialized lists scale poorly at 459 presets and the retained-history ceiling.
   Evidence: `ToolboxPage.xaml`; `PresetsPage.xaml`; `HistoryPage.xaml`.

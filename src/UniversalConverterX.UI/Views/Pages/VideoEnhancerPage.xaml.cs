@@ -9,6 +9,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Services;
+using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -18,6 +21,8 @@ namespace UniversalConverterX.UI.Views.Pages;
 
 public sealed partial class VideoEnhancerPage : Page
 {
+    private const string QueueKey = "video-enhancer";
+    private const string QueuePageName = "Video Enhancer";
     private static readonly string[] VideoExtensions =
     [
         ".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".wmv", ".ts", ".mts", ".m4v"
@@ -25,6 +30,9 @@ public sealed partial class VideoEnhancerPage : Page
 
     private readonly ISidecarRunner _runner;
     private readonly ISidecarHealthService _healthService;
+    private readonly IBatchQueueStore _queueStore;
+    private readonly IAppJobCoordinator _jobCoordinator;
+    private readonly IHistoryService _history;
     private readonly ObservableCollection<VeFileItem> _files = [];
     private readonly ObservableCollection<VeFinishedItem> _finished = [];
     private readonly List<VeModel> _models = [];
@@ -33,6 +41,8 @@ public sealed partial class VideoEnhancerPage : Page
     private bool _seedVr2ActionRunning;
     private bool _anime4KReady;
     private bool _anime4KActionRunning;
+    private bool _rifeReady;
+    private bool _restoringQueue;
 
     private bool _isReady;
 
@@ -42,13 +52,18 @@ public sealed partial class VideoEnhancerPage : Page
         _isReady = true;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _healthService = App.Services.GetRequiredService<ISidecarHealthService>();
+        _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
+        _jobCoordinator = App.Services.GetRequiredService<IAppJobCoordinator>();
+        _history = App.Services.GetRequiredService<IHistoryService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         ShowWindowsVideoScalerStatus();
+        RestorePersistedQueue();
         UpdateUi();
         _ = LoadModelsAsync();
         _ = RefreshSeedVr2ModelStatusAsync();
         _ = RefreshAnime4KStatusAsync();
+        _ = RefreshRifeStatusAsync();
     }
 
     private void ShowWindowsVideoScalerStatus()
@@ -120,24 +135,31 @@ public sealed partial class VideoEnhancerPage : Page
     private void Engine_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (RealEsrganModelPanel is null || SeedVr2ModelPanel is null || Anime4KModelPanel is null ||
+            RifeModelPanel is null ||
             RealEsrganQualityPanel is null || SeedVr2QualityPanel is null ||
-            Anime4KQualityPanel is null || RunButton is null)
+            Anime4KQualityPanel is null || RifeQualityPanel is null || RunButton is null)
             return;
         var seedVr2 = IsSeedVr2Selected();
         var anime4K = IsAnime4KSelected();
-        RealEsrganModelPanel.Visibility = seedVr2 || anime4K ? Visibility.Collapsed : Visibility.Visible;
+        var rife = IsRifeSelected();
+        RealEsrganModelPanel.Visibility = seedVr2 || anime4K || rife ? Visibility.Collapsed : Visibility.Visible;
         SeedVr2ModelPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
         Anime4KModelPanel.Visibility = anime4K ? Visibility.Visible : Visibility.Collapsed;
-        RealEsrganQualityPanel.Visibility = seedVr2 || anime4K ? Visibility.Collapsed : Visibility.Visible;
+        RifeModelPanel.Visibility = rife ? Visibility.Visible : Visibility.Collapsed;
+        RealEsrganQualityPanel.Visibility = seedVr2 || anime4K || rife ? Visibility.Collapsed : Visibility.Visible;
         SeedVr2QualityPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
         Anime4KQualityPanel.Visibility = anime4K ? Visibility.Visible : Visibility.Collapsed;
+        RifeQualityPanel.Visibility = rife ? Visibility.Visible : Visibility.Collapsed;
         RunButton.Content = seedVr2
             ? AppLocalizer.Get("Restore with SeedVR2")
             : anime4K
                 ? AppLocalizer.Get("Upscale with Anime4K")
-                : AppLocalizer.Get("Upscale Video");
+                : rife
+                    ? AppLocalizer.Get("Interpolate Video")
+                    : AppLocalizer.Get("Upscale Video");
         var summary = BuildPlanSummary();
         foreach (var file in _files) file.PlanSummary = summary;
+        PersistQueue();
         UpdateUi();
     }
 
@@ -308,6 +330,44 @@ public sealed partial class VideoEnhancerPage : Page
         await RefreshAnime4KStatusAsync();
     }
 
+    private async Task RefreshRifeStatusAsync()
+    {
+        _rifeReady = false;
+        if (_runner.Locate("clipforge") is null)
+        {
+            RifeStatusText.Text = AppLocalizer.Get("ClipForge sidecar is not installed in this build.");
+            UpdateUi();
+            return;
+        }
+
+        RifeStatusText.Text = AppLocalizer.Get("Checking pinned RIFE runtime and Vulkan readiness...");
+        UpdateUi();
+        try
+        {
+            var statusPreset = new UiPreset(
+                "RIFE runtime status",
+                "AI/Video",
+                VideoExtensions,
+                "{dir}/{stem}",
+                "mp4",
+                "clipforge",
+                PresetInvocationMode.PerFile,
+                ["rife-status"],
+                "built-in:rife-status");
+            var report = await _healthService.EvaluateAsync(statusPreset);
+            _rifeReady = report.CanRun
+                && report.Requirements.Any(requirement =>
+                    requirement.Name.Contains("RIFE", StringComparison.OrdinalIgnoreCase)
+                    && requirement.Status == "Ready");
+            RifeStatusText.Text = AppLocalizer.Format($"{report.Summary}. {report.Detail}");
+        }
+        catch (Exception exception)
+        {
+            RifeStatusText.Text = AppLocalizer.Format($"RIFE readiness check failed: {exception.Message}");
+        }
+        UpdateUi();
+    }
+
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
@@ -380,6 +440,7 @@ public sealed partial class VideoEnhancerPage : Page
         if (!VideoExtensions.Contains(info.Extension, StringComparer.OrdinalIgnoreCase)) return false;
         _files.Add(new VeFileItem
         {
+            Id = Guid.NewGuid().ToString("N"),
             Path = path,
             FileName = info.Name,
             SourceSummary = $"{FormatSize(info.Length)} - {info.Extension.TrimStart('.').ToUpperInvariant()}",
@@ -387,8 +448,155 @@ public sealed partial class VideoEnhancerPage : Page
             Progress = 0,
             StatusText = "Queued",
         });
+        PersistQueue();
         if (updateUi) UpdateUi();
         return true;
+    }
+
+    private void RestorePersistedQueue()
+    {
+        var queue = _queueStore.Load(QueueKey);
+        if (queue is null || queue.Jobs.Count == 0)
+            return;
+
+        _restoringQueue = true;
+        try
+        {
+            if (queue.Settings.TryGetValue("engine", out var engine)
+                && !string.IsNullOrWhiteSpace(engine))
+            {
+                for (var i = 0; i < EngineCombo.Items.Count; i++)
+                {
+                    if (EngineCombo.Items[i] is ComboBoxItem { Tag: string tag }
+                        && tag.Equals(engine, StringComparison.OrdinalIgnoreCase))
+                    {
+                        EngineCombo.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (queue.Settings.TryGetValue("targetFps", out var targetFps)
+                && int.TryParse(targetFps, NumberStyles.Integer, CultureInfo.InvariantCulture, out var fps))
+            {
+                for (var i = 0; i < TargetFpsCombo.Items.Count; i++)
+                {
+                    if (TargetFpsCombo.Items[i] is ComboBoxItem { Tag: string tag }
+                        && tag.Equals(fps.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
+                    {
+                        TargetFpsCombo.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            foreach (var job in queue.Jobs)
+            {
+                if (string.IsNullOrWhiteSpace(job.SourcePath)
+                    || _files.Any(file => file.Path.Equals(job.SourcePath, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                FileInfo? sourceInfo = null;
+                try
+                {
+                    if (File.Exists(job.SourcePath))
+                        sourceInfo = new FileInfo(job.SourcePath);
+                }
+                catch (IOException) { }
+                var extension = Path.GetExtension(job.SourcePath);
+                _files.Add(new VeFileItem
+                {
+                    Id = string.IsNullOrWhiteSpace(job.Id) ? Guid.NewGuid().ToString("N") : job.Id,
+                    Path = job.SourcePath,
+                    FileName = Path.GetFileName(job.SourcePath),
+                    SourceSummary = sourceInfo is null
+                        ? "Source file is missing"
+                        : $"{FormatSize(sourceInfo.Length)} - {extension.TrimStart('.').ToUpperInvariant()}",
+                    PlanSummary = BuildPlanSummary(),
+                    OutputPath = job.OutputPath,
+                    Engine = job.Engine,
+                    ErrorMessage = job.ErrorMessage,
+                    Provenance = job.Provenance,
+                    PersistedArgs = [.. job.Args],
+                    StatusText = RestoreStatus(job.Status),
+                });
+            }
+        }
+        finally
+        {
+            _restoringQueue = false;
+        }
+
+        if (_files.Count > 0)
+            StatusText.Text = AppLocalizer.Format($"Restored {_files.Count} video enhancement job(s) from the previous session.");
+    }
+
+    private void PersistQueue()
+    {
+        if (_restoringQueue)
+            return;
+
+        var activeJobs = _files
+            .Where(file => !file.StatusText.Equals("Done", StringComparison.OrdinalIgnoreCase))
+            .Select(file => new PersistedBatchJob
+            {
+                Id = string.IsNullOrWhiteSpace(file.Id) ? Guid.NewGuid().ToString("N") : file.Id,
+                SourcePath = file.Path,
+                OutputPath = file.OutputPath,
+                Engine = string.IsNullOrWhiteSpace(file.Engine) ? SelectedEngine() : file.Engine,
+                Action = IsRifeSelected() ? "interpolate" : "enhance",
+                Preset = BuildPlanSummary(),
+                Args = file.PersistedArgs,
+                Status = NormalizePersistedStatus(file.StatusText),
+                ErrorMessage = file.ErrorMessage,
+                Provenance = file.Provenance,
+            })
+            .ToList();
+
+        if (activeJobs.Count == 0)
+        {
+            _queueStore.Clear(QueueKey);
+            _jobCoordinator.NotifyJobsChanged();
+            return;
+        }
+
+        _queueStore.Save(new PersistedBatchQueue
+        {
+            QueueKey = QueueKey,
+            PageName = QueuePageName,
+            Settings = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["engine"] = SelectedEngine(),
+                ["targetFps"] = SelectedInt(TargetFpsCombo, 60).ToString(CultureInfo.InvariantCulture),
+            },
+            Jobs = activeJobs,
+        });
+        _jobCoordinator.NotifyJobsChanged();
+    }
+
+    private static string RestoreStatus(string? status) => status?.ToLowerInvariant() switch
+    {
+        "interrupted" or "running" or "converting" or "cancelling" => "Interrupted - ready to retry",
+        "failed" => "Failed - ready to retry",
+        "cancelled" => "Cancelled - ready to retry",
+        "skipped" => "Skipped",
+        _ => "Queued",
+    };
+
+    private static string NormalizePersistedStatus(string? status)
+    {
+        if (status?.StartsWith("Interrupted", StringComparison.OrdinalIgnoreCase) == true)
+            return "Interrupted";
+        if (status?.StartsWith("Failed", StringComparison.OrdinalIgnoreCase) == true)
+            return "Failed";
+        if (status?.StartsWith("Cancelled", StringComparison.OrdinalIgnoreCase) == true)
+            return "Cancelled";
+        if (status?.StartsWith("Skipped", StringComparison.OrdinalIgnoreCase) == true)
+            return "Skipped";
+        if (status?.Equals("Enhancing", StringComparison.OrdinalIgnoreCase) == true
+            || status?.Equals("Interpolating", StringComparison.OrdinalIgnoreCase) == true
+            || status?.EndsWith("%", StringComparison.Ordinal) == true)
+            return "Running";
+        return "Queued";
     }
 
     private void RemoveQueued_Click(object sender, RoutedEventArgs e)
@@ -397,6 +605,7 @@ public sealed partial class VideoEnhancerPage : Page
         if (sender is Button button && button.Tag is VeFileItem item)
         {
             _files.Remove(item);
+            PersistQueue();
             UpdateUi();
         }
     }
@@ -409,6 +618,7 @@ public sealed partial class VideoEnhancerPage : Page
                 $"Remove {_files.Count} queued clip(s)? Finished upscales stay available."))
             return;
         _files.Clear();
+        PersistQueue();
         UpdateUi();
     }
 
@@ -423,6 +633,7 @@ public sealed partial class VideoEnhancerPage : Page
         if (!_isReady) return;
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
+        PersistQueue();
         UpdateStatusText();
     }
 
@@ -441,6 +652,7 @@ public sealed partial class VideoEnhancerPage : Page
         CrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
+        PersistQueue();
     }
 
     private void Anime4KCrf_Changed(object sender, RangeBaseValueChangedEventArgs e)
@@ -458,6 +670,7 @@ public sealed partial class VideoEnhancerPage : Page
         Anime4KCrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
+        PersistQueue();
     }
 
     private async void Run_Click(object sender, RoutedEventArgs e)
@@ -465,8 +678,9 @@ public sealed partial class VideoEnhancerPage : Page
         if (_files.Count == 0 || _cts is not null) return;
         var seedVr2 = IsSeedVr2Selected();
         var anime4K = IsAnime4KSelected();
+        var rife = IsRifeSelected();
         VeModel? model = (ModelCombo.SelectedItem as ComboBoxItem)?.Tag as VeModel;
-        if (!seedVr2 && !anime4K && model is null)
+        if (!seedVr2 && !anime4K && !rife && model is null)
         {
             StatusText.Text = AppLocalizer.Get("Pick a model first.");
             return;
@@ -481,8 +695,14 @@ public sealed partial class VideoEnhancerPage : Page
             StatusText.Text = AppLocalizer.Get("Install mpv and download the Anime4K shader pack before upscaling.");
             return;
         }
+        if (rife && !_rifeReady)
+        {
+            StatusText.Text = AppLocalizer.Get("Install the pinned RIFE runtime and a Vulkan-capable driver before interpolation.");
+            return;
+        }
         var scale = SelectedInt(ScaleCombo, 2);
         var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
+        var targetFps = SelectedInt(TargetFpsCombo, 60);
         var crf = anime4K ? (int)Anime4KCrfSlider.Value : (int)CrfSlider.Value;
         var anime4KProfile = SelectedTag(Anime4KProfileCombo, "a");
 
@@ -493,13 +713,18 @@ public sealed partial class VideoEnhancerPage : Page
         RunButton.IsEnabled = false;
         ClearButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
+        var handles = jobs
+            .Select(item => new AppJobHandle(QueueKey, item.Id))
+            .ToList();
+        foreach (var handle in handles)
+            _jobCoordinator.RegisterCancellation(handle, _cts.Cancel);
 
         try
         {
             foreach (var item in jobs)
             {
                 if (_cts.IsCancellationRequested) break;
-                var outputPath = BuildOutputPath(item.Path, seedVr2, anime4K, scale, resolution, anime4KProfile);
+                var outputPath = BuildOutputPath(item.Path, seedVr2, anime4K, rife, scale, resolution, anime4KProfile, targetFps);
                 var args = seedVr2
                     ? new List<string>
                     {
@@ -519,6 +744,14 @@ public sealed partial class VideoEnhancerPage : Page
                         "--scale", "2",
                         "--crf", crf.ToString(CultureInfo.InvariantCulture),
                     }
+                    : rife
+                    ? new List<string>
+                    {
+                        "rife",
+                        "--input", item.Path,
+                        "--output", outputPath,
+                        "--target-fps", targetFps.ToString(CultureInfo.InvariantCulture),
+                    }
                     : new List<string>
                     {
                         "upscale-video",
@@ -529,12 +762,21 @@ public sealed partial class VideoEnhancerPage : Page
                         "--crf",    crf.ToString(CultureInfo.InvariantCulture),
                     };
 
+                var itemHandle = new AppJobHandle(QueueKey, item.Id);
+                item.Engine = seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : rife ? "clipforge" : "realesrgan";
+                item.OutputPath = outputPath;
+                item.PersistedArgs = [.. args];
+                item.ErrorMessage = null;
                 item.Progress = 0;
-                item.StatusText = seedVr2 ? "Restoring" : anime4K ? "Anime4K" : "Upscaling";
+                item.StatusText = seedVr2 ? "Restoring" : anime4K ? "Anime4K" : rife ? "Interpolating" : "Upscaling";
+                _jobCoordinator.UpdateStatus(itemHandle, "Running");
+                PersistQueue();
                 StatusText.Text = seedVr2
                     ? AppLocalizer.Format($"Restoring {item.FileName} with SeedVR2 at {resolution}p... ({completed + failed + 1}/{jobs.Count})")
                     : anime4K
                     ? AppLocalizer.Format($"Upscaling {item.FileName} with Anime4K Mode {anime4KProfile.ToUpperInvariant()}... ({completed + failed + 1}/{jobs.Count})")
+                    : rife
+                    ? AppLocalizer.Format($"Interpolating {item.FileName} to {targetFps} FPS with RIFE... ({completed + failed + 1}/{jobs.Count})")
                     : AppLocalizer.Format($"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
@@ -546,17 +788,33 @@ public sealed partial class VideoEnhancerPage : Page
                 }));
                 var log = new Progress<SidecarLog>(_ => { });
 
+                var jobStartedAt = DateTime.UtcNow;
                 SidecarResult result;
                 try
                 {
                     // Video upscale is slow per minute — generous watchdog timeout.
-                    var sidecar = seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : "realesrgan";
+                    var sidecar = seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : rife ? "clipforge" : "realesrgan";
                     result = await _runner.RunAsync(sidecar, args, progress, log, _cts.Token,
-                        silenceTimeout: seedVr2 ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(60));
+                        silenceTimeout: seedVr2 || rife ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(60));
                 }
                 catch (OperationCanceledException)
                 {
                     result = new SidecarResult(false, null, null, "cancelled", "Cancelled by user.", 130);
+                }
+
+                if (result.Success && !IsValidSourcePreservingOutput(item.Path, result.OutputPath ?? outputPath))
+                {
+                    result = new SidecarResult(
+                        false,
+                        result.OutputPath,
+                        result.SizeBytes,
+                        "output_validation_failed",
+                        "The output was not a non-empty file distinct from the source.",
+                        result.ExitCode)
+                    {
+                        Provenance = result.Provenance,
+                        Capability = result.Capability,
+                    };
                 }
 
                 if (result.Success)
@@ -564,28 +822,66 @@ public sealed partial class VideoEnhancerPage : Page
                     completed++;
                     item.Progress = 100;
                     item.StatusText = "Done";
+                    item.OutputPath = result.OutputPath ?? outputPath;
+                    item.ErrorMessage = null;
+                    _jobCoordinator.UpdateStatus(itemHandle, "Completed");
                 }
                 else
                 {
                     failed++;
                     item.StatusText = result.ErrorCode == "cancelled" ? "Cancelled" : "Failed";
+                    item.ErrorMessage = result.ErrorMessage;
+                    _jobCoordinator.UpdateStatus(
+                        itemHandle,
+                        result.ErrorCode == "cancelled" ? "Cancelled" : "Failed",
+                        result.ErrorMessage);
                 }
+                item.Provenance = result.Provenance is null
+                    ? null
+                    : JobProvenanceCodec.Serialize(result.Provenance);
 
                 AddFinishedItem(item, result, outputPath);
+                PersistQueue();
+                if (result.ErrorCode != "cancelled")
+                {
+                    long? sourceBytes = null;
+                    try { sourceBytes = new FileInfo(item.Path).Length; } catch { }
+                    _ = _history.LogAsync(new HistoryRecord
+                    {
+                        Timestamp = jobStartedAt,
+                        Engine = item.Engine,
+                        Action = rife ? "interpolate" : "enhance",
+                        SourcePath = item.Path,
+                        OutputPath = result.Success ? result.OutputPath ?? outputPath : null,
+                        SourceBytes = sourceBytes,
+                        OutputBytes = result.Success ? result.SizeBytes : null,
+                        DurationSeconds = Math.Max(0, (DateTime.UtcNow - jobStartedAt).TotalSeconds),
+                        Success = result.Success,
+                        ErrorCode = result.ErrorCode,
+                        ErrorMessage = result.ErrorMessage,
+                        Profile = BuildPlanSummary(),
+                        Provenance = result.Provenance is null
+                            ? null
+                            : JobProvenanceCodec.Serialize(result.Provenance),
+                    });
+                }
                 if (result.ErrorCode == "cancelled") break;
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? AppLocalizer.Format($"Cancelled — {completed} upscaled, {failed} failed.")
-                : AppLocalizer.Format($"Done — {completed} upscaled, {failed} failed.");
+                ? AppLocalizer.Format($"Cancelled — {completed} completed, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} completed, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
         }
         finally
         {
+            foreach (var handle in handles)
+                _jobCoordinator.UnregisterCancellation(handle);
             _cts?.Dispose();
             _cts = null;
+            PersistQueue();
             UpdateUi(updateStatus: false);
         }
     }
@@ -619,10 +915,39 @@ public sealed partial class VideoEnhancerPage : Page
             FileName = result.Success ? Path.GetFileName(outputPath) : item.FileName,
             Details = details,
             OutputPath = result.OutputPath ?? outputPath,
+            SourcePath = item.Path,
             Success = result.Success,
             Glyph = result.Success ? "\uE73E" : "\uE711",
             AccentBrush = result.Success ? successBrush : errorBrush,
         });
+    }
+
+    private void RetryFinished_Click(object sender, RoutedEventArgs e)
+    {
+        if (_cts is not null || sender is not Button { Tag: VeFinishedItem finished } || finished.Success)
+            return;
+
+        var queued = _files.FirstOrDefault(file =>
+            file.Path.Equals(finished.SourcePath, StringComparison.OrdinalIgnoreCase));
+        if (queued is null)
+        {
+            AddFile(finished.SourcePath);
+            queued = _files.FirstOrDefault(file =>
+                file.Path.Equals(finished.SourcePath, StringComparison.OrdinalIgnoreCase));
+        }
+        if (queued is null)
+        {
+            StatusText.Text = AppLocalizer.Get("The source file is no longer available for retry.");
+            return;
+        }
+
+        queued.StatusText = "Queued";
+        queued.ErrorMessage = null;
+        queued.Progress = 0;
+        _finished.Remove(finished);
+        PersistQueue();
+        QueuePivot.SelectedIndex = 0;
+        UpdateUi();
     }
 
     private void UpdateUi(bool updateStatus = true)
@@ -631,10 +956,13 @@ public sealed partial class VideoEnhancerPage : Page
         var hasFinished = _finished.Count > 0;
         var seedVr2 = IsSeedVr2Selected();
         var anime4K = IsAnime4KSelected();
+        var rife = IsRifeSelected();
         var hasModel = seedVr2
             ? _seedVr2ModelReady && _runner.Locate("seedvr2") is not null
             : anime4K
             ? _anime4KReady && _runner.Locate("anime-upscale") is not null
+            : rife
+            ? _rifeReady && _runner.Locate("clipforge") is not null
             : ModelCombo?.SelectedItem is not null;
         EmptyState.Visibility = hasFiles ? Visibility.Collapsed : Visibility.Visible;
         FileList.Visibility = hasFiles ? Visibility.Visible : Visibility.Collapsed;
@@ -652,7 +980,9 @@ public sealed partial class VideoEnhancerPage : Page
     {
         StatusText.Text = _files.Count == 0
             ? AppLocalizer.Get("Drop video clips to start an enhancement queue.")
-            : AppLocalizer.Format($"Ready to enhance {_files.Count} clip(s). {BuildPlanSummary()}");
+            : IsRifeSelected()
+                ? AppLocalizer.Format($"Ready to interpolate {_files.Count} clip(s). {BuildPlanSummary()}")
+                : AppLocalizer.Format($"Ready to enhance {_files.Count} clip(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()
@@ -669,6 +999,11 @@ public sealed partial class VideoEnhancerPage : Page
             var animeCrf = Anime4KCrfSlider is null ? 18 : (int)Anime4KCrfSlider.Value;
             return $"Anime4K Mode {profile} · 2× · mpv GLSL · CRF {animeCrf}";
         }
+        if (IsRifeSelected())
+        {
+            var targetFps = SelectedInt(TargetFpsCombo, 60);
+            return $"RIFE {RifeModelLabel()} · {targetFps} FPS · Vulkan";
+        }
         var model = (ModelCombo?.SelectedItem as ComboBoxItem)?.Tag is VeModel m ? m.Name : "no model";
         var scale = SelectedInt(ScaleCombo, 2);
         var crf = CrfSlider is null ? 20 : (int)CrfSlider.Value;
@@ -676,7 +1011,8 @@ public sealed partial class VideoEnhancerPage : Page
     }
 
     private static string BuildOutputPath(
-        string inputPath, bool seedVr2, bool anime4K, int scale, int resolution, string anime4KProfile)
+        string inputPath, bool seedVr2, bool anime4K, bool rife, int scale, int resolution,
+        string anime4KProfile, int targetFps)
     {
         var dir = Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory;
         var name = Path.GetFileNameWithoutExtension(inputPath);
@@ -684,6 +1020,8 @@ public sealed partial class VideoEnhancerPage : Page
             return EnsureUniquePath(Path.Combine(dir, $"{name}_seedvr2_{resolution}p.mp4"));
         if (anime4K)
             return EnsureUniquePath(Path.Combine(dir, $"{name}_anime4k_{anime4KProfile}_x2.mp4"));
+        if (rife)
+            return EnsureUniquePath(Path.Combine(dir, $"{name}_rife_{targetFps}fps.mp4"));
         var ext = Path.GetExtension(inputPath);
         if (string.IsNullOrEmpty(ext)) ext = ".mp4";
         return EnsureUniquePath(Path.Combine(dir, $"{name}_x{scale}{ext}"));
@@ -703,6 +1041,22 @@ public sealed partial class VideoEnhancerPage : Page
         return Path.Combine(dir, $"{name}-{Guid.NewGuid():N}{ext}");
     }
 
+    private static bool IsValidSourcePreservingOutput(string sourcePath, string outputPath)
+    {
+        try
+        {
+            var source = Path.GetFullPath(sourcePath);
+            var output = Path.GetFullPath(outputPath);
+            return !string.Equals(source, output, StringComparison.OrdinalIgnoreCase)
+                && File.Exists(output)
+                && new FileInfo(output).Length > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static int SelectedInt(ComboBox combo, int fallback)
     {
         if (combo.SelectedItem is ComboBoxItem item &&
@@ -719,6 +1073,14 @@ public sealed partial class VideoEnhancerPage : Page
 
     private bool IsAnime4KSelected() =>
         EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } && tag == "anime4k";
+
+    private bool IsRifeSelected() =>
+        EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } && tag == "rife";
+
+    private string SelectedEngine() =>
+        EngineCombo?.SelectedItem is ComboBoxItem { Tag: string tag } ? tag : "realesrgan";
+
+    private static string RifeModelLabel() => "rife-v4.6";
 
     private static void OpenContainingFolder(string? path)
     {
@@ -753,9 +1115,15 @@ public sealed class VeFileItem : INotifyPropertyChanged
     private string _statusText = "";
     private string _planSummary = "";
     public event PropertyChangedEventHandler? PropertyChanged;
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Path { get; set; } = "";
     public string FileName { get; set; } = "";
     public string SourceSummary { get; set; } = "";
+    public string? OutputPath { get; set; }
+    public string Engine { get; set; } = "";
+    public string? ErrorMessage { get; set; }
+    public string? Provenance { get; set; }
+    public List<string> PersistedArgs { get; set; } = [];
     public double Progress { get => _progress; set => Set(ref _progress, value); }
     public string StatusText { get => _statusText; set => Set(ref _statusText, value); }
     public string PlanSummary { get => _planSummary; set => Set(ref _planSummary, value); }
@@ -772,8 +1140,10 @@ public sealed class VeFinishedItem
     public string FileName { get; set; } = "";
     public string Details { get; set; } = "";
     public string OutputPath { get; set; } = "";
+    public string SourcePath { get; set; } = "";
     public bool Success { get; set; }
     public string Glyph { get; set; } = "";
     public Brush? AccentBrush { get; set; }
     public bool CanOpenFolder => !string.IsNullOrWhiteSpace(OutputPath);
+    public bool CanRetry => !Success && !string.IsNullOrWhiteSpace(SourcePath);
 }

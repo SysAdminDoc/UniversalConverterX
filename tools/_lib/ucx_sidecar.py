@@ -143,6 +143,8 @@ def probe_media(ffprobe: str, source: str | Path, timeout: int = 30) -> dict | N
             capture_output=True,
             text=True,
             timeout=timeout,
+            creationflags=(getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                           if sys.platform == "win32" else 0),
         )
         if result.returncode != 0:
             return None
@@ -176,6 +178,8 @@ def run_ffmpeg(
         encoding="utf-8",
         errors="replace",
         bufsize=1,
+        creationflags=(getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                       if sys.platform == "win32" else 0),
     )
     started = time.monotonic()
     last_percent = -1.0

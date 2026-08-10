@@ -18,6 +18,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Job Center search now exposes the durable queue's filename, engine, status, and error filtering, while History adds an “Open copy” action that restores a fresh settings job without reusing or mutating the original history row.
 - MP4/MOV stream-copy now probes source audio, video, and subtitle names and writes them back as QuickTime `udta` track names; both containers are covered by an FFprobe-verified remux regression.
 - Added local EPUB↔KEPUB interchange, protected Kindle/KFX refusal with an explicit no-DeDRM message, and governed CBZ/CBR/CBT/CB7 comic output profiles for Kobo/Kindle EPUB or MOBI (Calibre is required only for MOBI).
+- Added ClipForge RIFE frame interpolation as a managed Vulkan sidecar operation and 60-FPS catalog preset. Video Enhancer now exposes target-FPS selection, pinned rife-v4.6 readiness diagnostics, durable queue recovery, cancel/retry, source-preserving output validation, and provenance-backed history.
 
 ### Fixed
 

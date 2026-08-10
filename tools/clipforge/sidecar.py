@@ -8,6 +8,8 @@ Supported ops:
   rotate    Rotate/flip video via -vf transpose / hflip / vflip.
   loudnorm  EBU R128 loudness normalisation via -af loudnorm.
   rewrap    Change container without re-encoding (-c copy stream copy).
+  rife      Interpolate frames to a higher target FPS with the pinned Vulkan runtime.
+  rife-status  Report managed RIFE and Vulkan readiness metadata.
 
 Contract: see ../README.md (sidecar contract) and ../../README.md (parent).
 """
@@ -18,8 +20,10 @@ import json
 import os
 import math
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -52,6 +56,313 @@ def find_ffprobe() -> str | None:
 
 def probe(ffprobe: str, path: str) -> dict | None:
     return probe_media(ffprobe, path)
+
+
+_RIFE_EXECUTABLE = "rife-ncnn-vulkan"
+_RIFE_MODEL = "rife-v4.6"
+_RIFE_MAX_FPS = 240.0
+_RIFE_PERCENT_RE = re.compile(r"(?<!\d)(\d+(?:\.\d+)?)\s*%")
+
+
+def find_rife() -> str | None:
+    """Find the managed RIFE ncnn-vulkan runtime.
+
+    The host prepends its managed ``tools/bin`` directory to PATH for every
+    sidecar launch.  The explicit environment override and sidecar-local
+    fallbacks keep the operation usable from the CLI and preserve the legacy
+    ClipForge layout without allowing an arbitrary command string.
+    """
+    candidates = [
+        os.environ.get("UCX_RIFE_PATH"),
+        os.environ.get("RIFE_NCNN_PATH"),
+        shutil.which(_RIFE_EXECUTABLE),
+        shutil.which(f"{_RIFE_EXECUTABLE}.exe"),
+    ]
+    here = Path(__file__).resolve().parent
+    candidates.extend([
+        str(here / f"{_RIFE_EXECUTABLE}.exe"),
+        str(here / _RIFE_EXECUTABLE),
+        str(here / "bin" / f"{_RIFE_EXECUTABLE}.exe"),
+        str(here / "bin" / _RIFE_EXECUTABLE),
+        str(here.parent / "_bin" / f"{_RIFE_EXECUTABLE}.exe"),
+        str(here.parent / "_bin" / _RIFE_EXECUTABLE),
+    ])
+    managed_bin = os.environ.get("UCX_TOOLS_BIN")
+    if managed_bin:
+        candidates.extend([
+            str(Path(managed_bin) / f"{_RIFE_EXECUTABLE}.exe"),
+            str(Path(managed_bin) / _RIFE_EXECUTABLE),
+        ])
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file():
+            return str(Path(candidate).resolve())
+    return None
+
+
+def _stream_fps(info: dict) -> float | None:
+    streams = info.get("streams", []) if isinstance(info, dict) else []
+    video = next((item for item in streams
+                  if isinstance(item, dict) and item.get("codec_type") == "video"), None)
+    if not isinstance(video, dict):
+        return None
+    for key in ("avg_frame_rate", "r_frame_rate"):
+        value = video.get(key)
+        if not isinstance(value, str) or not value or value == "0/0":
+            continue
+        try:
+            if "/" in value:
+                numerator, denominator = value.split("/", 1)
+                rate = float(numerator) / float(denominator)
+            else:
+                rate = float(value)
+        except (ValueError, ZeroDivisionError):
+            continue
+        if math.isfinite(rate) and rate > 0:
+            return rate
+    return None
+
+
+def _concat_file_line(path: Path) -> str:
+    # concat's safe=0 mode accepts absolute paths.  Keep the line quoted even
+    # for ordinary paths so spaces and apostrophes cannot change the command.
+    escaped = str(path.resolve()).replace("\\", "/").replace("'", "'\\''")
+    return f"file '{escaped}'"
+
+
+def _rife_runtime_status(rife: str) -> dict[str, object]:
+    path = Path(rife)
+    return {
+        "runtime": _RIFE_EXECUTABLE,
+        "runtime_version": _RIFE_MODEL,
+        "model": _RIFE_MODEL,
+        "path": str(path),
+        "managed": bool(os.environ.get("UCX_TOOLS_BIN")) or path.parent.name in {"bin", "_bin"},
+        "gpu": "vulkan",
+    }
+
+
+def op_rife_status(_args: argparse.Namespace) -> int:
+    rife = find_rife()
+    if not rife:
+        return fail(
+            "missing_rife",
+            "The pinned RIFE ncnn-vulkan runtime was not found. Install the managed "
+            "runtime as rife-ncnn-vulkan.exe in UCX tools/bin, ClipForge/bin, or the sidecar directory.",
+        )
+    emit("capability", name="rife", status="ready", **_rife_runtime_status(rife))
+    emit("complete", output=rife, size_bytes=Path(rife).stat().st_size,
+         source_preserving=True, gpu="vulkan", model=_RIFE_MODEL)
+    return 0
+
+
+def op_rife(args: argparse.Namespace) -> int:
+    """Interpolate a video to a higher target frame rate through RIFE.
+
+    Frames and the final encode are staged beside the requested destination.
+    The source is never used as an output target, and its size/mtime are
+    checked again before the staged artifact is atomically promoted.
+    """
+    ffmpeg = find_ffmpeg()
+    ffprobe = find_ffprobe()
+    rife = find_rife()
+    if not ffmpeg:
+        return fail("missing_ffmpeg", "FFmpeg not found. Install the managed FFmpeg runtime first.")
+    if not ffprobe:
+        return fail("missing_ffprobe", "FFprobe not found. Install the managed FFmpeg runtime first.")
+    if not rife:
+        return fail(
+            "missing_rife",
+            "The pinned RIFE ncnn-vulkan runtime was not found. Install rife-ncnn-vulkan.exe in the managed UCX tools folder.",
+        )
+
+    source = Path(args.input)
+    output = Path(args.output)
+    if not source.is_file():
+        return fail("missing_input", f"Input file does not exist: {source}")
+    try:
+        source_resolved = source.resolve()
+        output_resolved = output.resolve()
+    except OSError as exc:
+        return fail("invalid_path", f"Could not resolve the source or destination path: {exc}")
+    if source_resolved == output_resolved:
+        return fail("output_same_as_input", "RIFE output must be a different path from the source file.")
+    if not math.isfinite(args.target_fps) or not 1.0 <= args.target_fps <= _RIFE_MAX_FPS:
+        return fail("invalid_target_fps", f"Target FPS must be between 1 and {_RIFE_MAX_FPS:g}.")
+
+    try:
+        source_stat = source.stat()
+    except OSError as exc:
+        return fail("input_unreadable", f"Could not inspect the input file: {exc}")
+
+    info = probe(ffprobe, str(source))
+    if not info:
+        return fail("probe_failed", "Could not read input video metadata.")
+    source_fps = _stream_fps(info)
+    if source_fps is None:
+        return fail("probe_failed", "Could not determine the source video frame rate.")
+    duration = float(info.get("format", {}).get("duration", 0) or 0)
+    if not math.isfinite(duration) or duration <= 0:
+        return fail("probe_failed", "Could not determine the source video duration.")
+    if args.target_fps + 0.001 < source_fps:
+        return fail(
+            "target_below_source",
+            f"Target FPS ({args.target_fps:g}) must be at least the source FPS ({source_fps:g}).",
+        )
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    ratio = args.target_fps / source_fps
+    workspace = Path(tempfile.mkdtemp(prefix=".ucx-rife-", dir=str(output.parent)))
+    staged_output: Path | None = None
+    rife_process: subprocess.Popen[str] | None = None
+    try:
+        frames_dir = workspace / "frames"
+        interpolated_dir = workspace / "interpolated"
+        frames_dir.mkdir()
+        interpolated_dir.mkdir()
+        extract_pattern = str(frames_dir / "frame_%08d.png")
+
+        emit("capability", name="rife", status="ready", **_rife_runtime_status(rife))
+        emit("log", level="info", message=(
+            f"RIFE {_RIFE_MODEL}: {source_fps:g} -> {args.target_fps:g} FPS "
+            f"(managed Vulkan runtime {Path(rife).name})"))
+        emit("progress", percent=0, stage="extracting source frames", eta_seconds=None)
+        extract_cmd = [
+            ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+            "-i", str(source), "-vsync", "0", "-q:v", "2", extract_pattern,
+        ]
+        rc = run_ffmpeg(extract_cmd, duration, "extracting source frames",
+                        start_percent=0, end_percent=20)
+        if rc != 0:
+            return fail("ffmpeg_failed", f"FFmpeg exited with code {rc} while extracting frames.")
+        source_frames = sorted(path for path in frames_dir.iterdir()
+                               if path.is_file() and path.suffix.lower() == ".png")
+        if not source_frames:
+            return fail("no_frames", "FFmpeg produced no source frames for RIFE.")
+
+        expected_frames = max(2, math.ceil(len(source_frames) * ratio))
+        emit("log", level="info", message=f"Interpolating {len(source_frames)} -> {expected_frames} frames.")
+        emit("progress", percent=20, stage="RIFE Vulkan interpolation", eta_seconds=None)
+        hidden_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if sys.platform == "win32" else 0
+        rife_cmd = [
+            rife, "-i", str(frames_dir), "-o", str(interpolated_dir),
+            "-m", args.model, "-n", str(expected_frames),
+        ]
+        rife_process = subprocess.Popen(
+            rife_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+            creationflags=hidden_flags,
+        )
+        assert rife_process.stdout is not None
+        try:
+            for raw_line in rife_process.stdout:
+                line = raw_line.strip()
+                if not line:
+                    continue
+                match = _RIFE_PERCENT_RE.search(line)
+                if match:
+                    local = max(0.0, min(100.0, float(match.group(1))))
+                    emit("progress", percent=round(20 + local * 0.6, 1),
+                         stage="RIFE Vulkan interpolation", eta_seconds=None)
+                else:
+                    emit("log", level="debug", message=line[:4096])
+        finally:
+            rife_process.stdout.close()
+            rife_process.wait()
+        if rife_process.returncode != 0:
+            return fail("rife_failed", f"RIFE exited with code {rife_process.returncode}.")
+
+        interpolated_frames = sorted(
+            path for path in interpolated_dir.iterdir()
+            if path.is_file() and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"})
+        if not interpolated_frames:
+            return fail("rife_no_frames", "RIFE completed without producing interpolated frames.")
+        emit("log", level="info", message=f"RIFE produced {len(interpolated_frames)} frames.")
+
+        concat_list = workspace / "frames.ffconcat"
+        concat_list.write_text(
+            "ffconcat version 1.0\n" + "\n".join(_concat_file_line(path) for path in interpolated_frames) + "\n",
+            encoding="utf-8",
+        )
+        fd, staged_name = tempfile.mkstemp(
+            prefix=f".{output.name}.", suffix=".part", dir=str(output.parent))
+        os.close(fd)
+        staged_output = Path(staged_name)
+        reassemble_cmd = [
+            ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+            "-f", "concat", "-safe", "0", "-i", str(concat_list),
+            "-i", str(source), "-map", "0:v:0", "-map", "1:a?",
+            "-r", f"{args.target_fps:g}", "-c:v", args.codec,
+            "-crf", str(args.crf), "-preset", args.preset,
+            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", f"{args.audio_bitrate}k",
+            "-map_metadata", "1", "-movflags", "+faststart", "-shortest", str(staged_output),
+        ]
+        emit("progress", percent=80, stage="reassembling source-preserving video", eta_seconds=None)
+        rc = run_ffmpeg(reassemble_cmd, duration, "reassembling source-preserving video",
+                        start_percent=80, end_percent=98)
+        if rc != 0:
+            return fail("ffmpeg_failed", f"FFmpeg exited with code {rc} while reassembling the video.")
+        if not staged_output.is_file() or staged_output.stat().st_size <= 0:
+            return fail("output_missing", "RIFE did not produce a non-empty staged output.")
+
+        output_info = probe(ffprobe, str(staged_output))
+        output_fps = _stream_fps(output_info or {})
+        if output_fps is None or abs(output_fps - args.target_fps) > 0.5:
+            return fail(
+                "output_validation_failed",
+                f"Output FPS validation failed: expected {args.target_fps:g}, got "
+                f"{output_fps:g}" if output_fps is not None else
+                f"Output FPS validation failed: expected {args.target_fps:g}, but the staged file has no video rate.",
+            )
+
+        current_stat = source.stat()
+        if current_stat.st_size != source_stat.st_size or current_stat.st_mtime_ns != source_stat.st_mtime_ns:
+            return fail("source_changed", "The source file changed while RIFE was running; staged output was discarded.")
+        os.replace(staged_output, output)
+        staged_output = None
+        size_bytes = output.stat().st_size
+        emit("progress", percent=100, stage="RIFE output validated", eta_seconds=0)
+        emit(
+            "complete",
+            output=str(output),
+            size_bytes=size_bytes,
+            source=str(source),
+            source_fps=source_fps,
+            target_fps=args.target_fps,
+            frames_in=len(source_frames),
+            frames_out=len(interpolated_frames),
+            runtime=_RIFE_EXECUTABLE,
+            runtime_version=_RIFE_MODEL,
+            model=args.model,
+            gpu="vulkan",
+            source_preserving=True,
+            artifact_manifest={
+                "source": str(source),
+                "output": str(output),
+                "source_preserved": True,
+                "target_fps": args.target_fps,
+            },
+        )
+        return 0
+    except KeyboardInterrupt:
+        if rife_process is not None:
+            try:
+                if rife_process.poll() is None:
+                    rife_process.kill()
+            except OSError:
+                pass
+        raise
+    finally:
+        if staged_output is not None:
+            try:
+                staged_output.unlink(missing_ok=True)
+            except OSError:
+                pass
+        shutil.rmtree(workspace, ignore_errors=True)
 
 
 def op_trim(args: argparse.Namespace) -> int:
@@ -916,6 +1227,25 @@ def build_parser() -> argparse.ArgumentParser:
     crop.add_argument("--crf", type=int, default=18)
     crop.add_argument("--preset", default="medium")
 
+    # ── RIFE frame interpolation ────────────────────────────────────────────
+    rife_status = sub.add_parser(
+        "rife-status",
+        help="Check the pinned managed RIFE ncnn-vulkan runtime")
+
+    rife = sub.add_parser(
+        "rife",
+        help="Interpolate a video to a higher target frame rate with RIFE Vulkan")
+    rife.add_argument("--input", required=True)
+    rife.add_argument("--output", required=True)
+    rife.add_argument("--target-fps", type=float, required=True,
+                      help="Target frame rate, from 1 through 240 FPS")
+    rife.add_argument("--model", choices=[_RIFE_MODEL], default=_RIFE_MODEL,
+                      help="Pinned RIFE model (default: rife-v4.6)")
+    rife.add_argument("--codec", choices=["libx264", "libx265"], default="libx264")
+    rife.add_argument("--crf", type=int, choices=range(0, 52), default=18)
+    rife.add_argument("--preset", default="medium")
+    rife.add_argument("--audio-bitrate", type=int, default=192)
+
     crop_meta = sub.add_parser(
         "crop-meta",
         help="Set H.264/H.265 display-crop metadata without re-encoding")
@@ -1261,6 +1591,10 @@ def main(argv: list[str] | None = None) -> int:
             return op_trim(args)
         if args.op == "crop":
             return op_crop(args)
+        if args.op == "rife-status":
+            return op_rife_status(args)
+        if args.op == "rife":
+            return op_rife(args)
         if args.op == "crop-meta":
             return op_crop_meta(args)
         if args.op == "aspect-override":

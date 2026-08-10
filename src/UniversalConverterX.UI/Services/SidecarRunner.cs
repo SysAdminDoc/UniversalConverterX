@@ -391,6 +391,26 @@ public sealed class SidecarRunner : ISidecarRunner
                                 if (root.TryGetProperty("message", out var em) && em.ValueKind == JsonValueKind.String)
                                     errorMessage = em.GetString();
                                 break;
+
+                            case "capability":
+                                if (root.TryGetProperty("name", out var capabilityName)
+                                    && capabilityName.ValueKind == JsonValueKind.String
+                                    && string.Equals(capabilityName.GetString(), "rife", StringComparison.OrdinalIgnoreCase)
+                                    && root.TryGetProperty("status", out var capabilityStatus)
+                                    && capabilityStatus.ValueKind == JsonValueKind.String
+                                    && string.Equals(capabilityStatus.GetString(), "ready", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    var selected = root.TryGetProperty("runtime", out var runtime)
+                                        && runtime.ValueKind == JsonValueKind.String
+                                        ? runtime.GetString()
+                                        : "rife-ncnn-vulkan";
+                                    capability = new CapabilityDecision(
+                                        Requested: "vulkan",
+                                        Selected: selected ?? "rife-ncnn-vulkan",
+                                        FellBack: false,
+                                        Reason: null);
+                                }
+                                break;
                         }
                     }
                     catch (JsonException)

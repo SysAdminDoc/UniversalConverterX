@@ -81,10 +81,17 @@
                         <TextBlock Text="{Binding Details}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding OutputPath}" Style="{StaticResource MutedTextStyle}" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-                    <Button x:Uid="VideoEnhancerPage_Item_003" Grid.Column="2" Content="Open folder"
-                            Style="{StaticResource SecondaryButtonStyle}" Padding="14,8"
-                            Click="OpenFinishedFolder_Click" Tag="{Binding OutputPath}"
-                            IsEnabled="{Binding CanOpenFolder}"/>
+                    <StackPanel Grid.Column="2" Spacing="6">
+                        <Button x:Uid="VideoEnhancerPage_Item_003" Content="Open folder"
+                                Style="{StaticResource SecondaryButtonStyle}" Padding="14,8"
+                                Click="OpenFinishedFolder_Click" Tag="{Binding OutputPath}"
+                                IsEnabled="{Binding CanOpenFolder}"/>
+                        <Button x:Uid="VideoEnhancerPage_RetryButton" Content="Retry"
+                                Style="{StaticResource GhostButtonStyle}" Padding="14,8"
+                                Click="RetryFinished_Click" Tag="{Binding}"
+                                IsEnabled="{Binding CanRetry}"
+                                AutomationProperties.Name="Retry video job"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -105,7 +112,7 @@
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="VideoEnhancerPage_Item_004" Text="Video Enhancer"
                            Style="{StaticResource PageTitleTextStyle}"/>
-                <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore and upscale video with Real-ESRGAN, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine."
+                <TextBlock x:Uid="VideoEnhancerPage_Item_005" Text="Restore, upscale, or interpolate video with Real-ESRGAN, RIFE Vulkan, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine."
                            Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720"/>
@@ -148,7 +155,7 @@
                                 <TextBlock x:Uid="VideoEnhancerPage_Item_009" Text="Drop video files here"
                                            Style="{StaticResource SubtitleTextStyle}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock x:Uid="VideoEnhancerPage_Item_010" Text="Choose an engine, then queue clips for local restoration. Anime4K needs optional mpv and shaders; SeedVR2 requires its CUDA model pack."
+                                <TextBlock x:Uid="VideoEnhancerPage_Item_010" Text="Choose an engine, then queue clips for local restoration or frame interpolation. RIFE needs its pinned Vulkan runtime; Anime4K needs optional mpv and shaders; SeedVR2 requires its CUDA model pack."
                                            Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center" TextWrapping="Wrap"
                                            TextAlignment="Center" MaxWidth="420"/>
@@ -194,6 +201,7 @@
                             <ComboBoxItem x:Uid="VideoEnhancerPage_Item_016" Content="Real-ESRGAN (portable)" Tag="realesrgan"/>
                             <ComboBoxItem x:Uid="VideoEnhancerPage_Item_017" Content="SeedVR2 3B FP8 (CUDA, optional)" Tag="seedvr2"/>
                             <ComboBoxItem x:Uid="VideoEnhancerPage_Anime4KEngine" Content="Anime4K GLSL (mpv, optional)" Tag="anime4k"/>
+                            <ComboBoxItem x:Uid="VideoEnhancerPage_RifeEngine" Content="RIFE frame interpolation (Vulkan)" Tag="rife"/>
                         </ComboBox>
                         <StackPanel x:Name="RealEsrganModelPanel" Spacing="8">
                             <ComboBox x:Uid="VideoEnhancerPage_ModelCombo" x:Name="ModelCombo" Header="Model"
@@ -247,6 +255,18 @@
                                     AutomationProperties.AutomationId="DownloadAnime4KShadersButton"/>
                             <TextBlock x:Uid="VideoEnhancerPage_Anime4KStatus" x:Name="Anime4KStatus"
                                        Text="Checking mpv and local shader pack..."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                        <StackPanel x:Name="RifeModelPanel" Visibility="Collapsed" Spacing="8">
+                            <TextBlock x:Uid="VideoEnhancerPage_RifeRuntimeTitle" Text="RIFE ncnn-vulkan runtime"
+                                       Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock x:Uid="VideoEnhancerPage_RifeRuntimeDescription" Text="Pinned rife-v4.6 model through the managed Vulkan runtime. The source remains untouched and the output is promoted only after frame-rate validation."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Uid="VideoEnhancerPage_RifeStatusText" x:Name="RifeStatusText"
+                                       Text="Checking pinned RIFE runtime and Vulkan readiness..."
                                        Style="{StaticResource MutedTextStyle}"
                                        TextWrapping="Wrap"
                                        AutomationProperties.LiveSetting="Polite"/>
@@ -316,6 +336,19 @@
                                        Text="CRF 18 (high quality)"
                                        Style="{StaticResource MutedTextStyle}"
                                        HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel x:Name="RifeQualityPanel" Visibility="Collapsed" Spacing="8">
+                            <ComboBox x:Uid="VideoEnhancerPage_RifeTargetFpsCombo" x:Name="TargetFpsCombo"
+                                      Header="Target frame rate" SelectedIndex="0"
+                                      HorizontalAlignment="Stretch"
+                                      SelectionChanged="Settings_Changed"
+                                      AutomationProperties.AutomationId="RifeTargetFpsCombo">
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_RifeTargetFps60" Content="60 FPS (recommended)" Tag="60"/>
+                                <ComboBoxItem x:Uid="VideoEnhancerPage_RifeTargetFps120" Content="120 FPS" Tag="120"/>
+                            </ComboBox>
+                            <TextBlock x:Uid="VideoEnhancerPage_RifeQualityNote" Text="RIFE raises the frame rate without replacing the source. The managed Vulkan readiness check and output artifact validation run before each queued clip."
+                                       Style="{StaticResource MutedTextStyle}"
+                                       TextWrapping="Wrap"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

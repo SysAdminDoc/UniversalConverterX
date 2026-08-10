@@ -234,6 +234,7 @@ public class ToolManager : IToolManager
             ["ghostscript"] = new(OperatingSystem.IsWindows() ? "gswin64c" : "gs", "Ghostscript", "--version", "PDF and PostScript processing"),
             ["yt-dlp"] = new("yt-dlp", "yt-dlp", "--version", "Downloader extractor and update channel"),
             ["deno"] = new("deno", "Deno", "--version", "JavaScript runtime for full YouTube extraction"),
+            ["rife-ncnn-vulkan"] = new("rife-ncnn-vulkan", "RIFE ncnn-vulkan", "-h", "Pinned Vulkan frame-interpolation runtime"),
         };
     }
 

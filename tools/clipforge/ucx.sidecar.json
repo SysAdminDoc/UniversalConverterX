@@ -1,6 +1,26 @@
 {
   "engine": "clipforge",
+  "gpu": "vulkan",
   "tools": [
-    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    },
+    {
+      "id": "ffprobe",
+      "executable": "ffprobe",
+      "display": "FFprobe",
+      "managed": true,
+      "whenArgContains": "rife"
+    },
+    {
+      "id": "rife-ncnn-vulkan",
+      "executable": "rife-ncnn-vulkan",
+      "display": "RIFE ncnn-vulkan (pinned rife-v4.6 runtime)",
+      "managed": true,
+      "whenArgContains": "rife"
+    }
   ]
 }

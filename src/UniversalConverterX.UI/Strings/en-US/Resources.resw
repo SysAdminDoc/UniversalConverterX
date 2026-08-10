@@ -1704,6 +1704,9 @@
   <data name="Code_3627C6C969D960F490CE" xml:space="preserve">
     <value>Drop portrait photos to start a restoration queue.</value>
   </data>
+  <data name="Code_362EE7B20A439B06757F" xml:space="preserve">
+    <value>Restored {0} video enhancement job(s) from the previous session.</value>
+  </data>
   <data name="Code_365DE584D8AA0EC0EA96" xml:space="preserve">
     <value>{0} - {1}</value>
   </data>
@@ -1743,6 +1746,9 @@
   <data name="Code_3AA69D5A1FA8A6767FC2" xml:space="preserve">
     <value>Blu-ray ISO saved to {0}; its BDMV folder is retained beside the image.</value>
   </data>
+  <data name="Code_3ACEBA9ADE5D4D4241B7" xml:space="preserve">
+    <value>Checking pinned RIFE runtime and Vulkan readiness...</value>
+  </data>
   <data name="Code_3B0B917FCDCDAFF4F45B" xml:space="preserve">
     <value>Packed -&gt; {0} ({1})</value>
   </data>
@@ -1763,6 +1769,9 @@
   </data>
   <data name="Code_3CB7A7F2BB0C94F30972" xml:space="preserve">
     <value>Inspected {0} of {1} files.</value>
+  </data>
+  <data name="Code_3D02C374474603C96A02" xml:space="preserve">
+    <value>Ready to interpolate {0} clip(s). {1}</value>
   </data>
   <data name="Code_3D2301D732A7A5967D5C" xml:space="preserve">
     <value>Failed to load</value>
@@ -1916,6 +1925,9 @@
   </data>
   <data name="Code_4E351F2EFF971EC2690A" xml:space="preserve">
     <value>Shader pack installed; checking mpv...</value>
+  </data>
+  <data name="Code_4E3DA17CAE5F62089D51" xml:space="preserve">
+    <value>RIFE readiness check failed: {0}</value>
   </data>
   <data name="Code_4E9A93669648EEACCDE2" xml:space="preserve">
     <value>Transcribing...</value>
@@ -2072,6 +2084,9 @@
   </data>
   <data name="Code_5E6AEB0262943AD709FC" xml:space="preserve">
     <value>Explorer integration could not be {0}. Windows returned exit code {1}.</value>
+  </data>
+  <data name="Code_5E7EE1008DE2F89325F0" xml:space="preserve">
+    <value>The source file is no longer available for retry.</value>
   </data>
   <data name="Code_5F40C97DDBB44122BE07" xml:space="preserve">
     <value>Drop into convert queue</value>
@@ -2270,6 +2285,9 @@
   </data>
   <data name="Code_7A660E23A223AE7A6CB7" xml:space="preserve">
     <value>Already running...</value>
+  </data>
+  <data name="Code_7A8FB88AAEC2B4EA3829" xml:space="preserve">
+    <value>Install the pinned RIFE runtime and a Vulkan-capable driver before interpolation.</value>
   </data>
   <data name="Code_7B26131098BB18B289EC" xml:space="preserve">
     <value>Cancelling...</value>
@@ -2613,6 +2631,9 @@
   <data name="Code_A3034154355B8BBA7F5D" xml:space="preserve">
     <value>Ready to transform {0} file(s) as {1} ({2}). Output: {3}.</value>
   </data>
+  <data name="Code_A3FAD6AE5E79C739F958" xml:space="preserve">
+    <value>Interpolating {0} to {1} FPS with RIFE... ({2}/{3})</value>
+  </data>
   <data name="Code_A42007F3484AEBC05704" xml:space="preserve">
     <value>Add DVD-Video titles</value>
   </data>
@@ -2660,6 +2681,9 @@
   </data>
   <data name="Code_A7EFE28A21DED45B5A1A" xml:space="preserve">
     <value>Explorer integration was not changed: {0}</value>
+  </data>
+  <data name="Code_A83CD41335E27B4E9DD7" xml:space="preserve">
+    <value>Interpolate Video</value>
   </data>
   <data name="Code_A8B1E30C21A44A7A5DE7" xml:space="preserve">
     <value>{0} active · {1} settling/running · {2} recent files remembered</value>
@@ -2766,8 +2790,14 @@
   <data name="Code_B446139F4FE915AC3669" xml:space="preserve">
     <value>Chapter Editor is not installed. Build it with tools/chaptermark/build.ps1.</value>
   </data>
+  <data name="Code_B4EF84203FC17C5A8E56" xml:space="preserve">
+    <value>Done — {0} completed, {1} failed.</value>
+  </data>
   <data name="Code_B55E4D33A701CECAE430" xml:space="preserve">
     <value>Local-first conversion, compression, editing, downloading, automation, and media tools for Windows.</value>
+  </data>
+  <data name="Code_B58E55FF52D21A11370A" xml:space="preserve">
+    <value>Cancelled — {0} completed, {1} failed.</value>
   </data>
   <data name="Code_B59E339BDA20D18F5027" xml:space="preserve">
     <value>Downloading pinned SeedVR2 pack...</value>
@@ -3365,6 +3395,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_F23F0F12A240CEF72BD9" xml:space="preserve">
     <value>Cut {0} → {1} ({2}, {3}).</value>
+  </data>
+  <data name="Code_F291671B0CA1CEEB07F8" xml:space="preserve">
+    <value>ClipForge sidecar is not installed in this build.</value>
   </data>
   <data name="Code_F358D59CD5D9094ADE5F" xml:space="preserve">
     <value>{0, 30))}, {1, 30)} fps, CRF {2, 20)}. Output: {3}.</value>
@@ -7932,13 +7965,13 @@ libx264
     <value>Video Enhancer</value>
   </data>
   <data name="VideoEnhancerPage_Item_005.Text" xml:space="preserve">
-    <value>Restore and upscale video with Real-ESRGAN, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine.</value>
+    <value>Restore, upscale, or interpolate video with Real-ESRGAN, RIFE Vulkan, Anime4K GLSL, or the optional CUDA-only SeedVR2 diffusion engine.</value>
   </data>
   <data name="VideoEnhancerPage_Item_009.Text" xml:space="preserve">
     <value>Drop video files here</value>
   </data>
   <data name="VideoEnhancerPage_Item_010.Text" xml:space="preserve">
-    <value>Choose an engine, then queue clips for local restoration. Anime4K needs optional mpv and shaders; SeedVR2 requires its CUDA model pack.</value>
+    <value>Choose an engine, then queue clips for local restoration or frame interpolation. RIFE needs its pinned Vulkan runtime; Anime4K needs optional mpv and shaders; SeedVR2 requires its CUDA model pack.</value>
   </data>
   <data name="VideoEnhancerPage_Item_013.Text" xml:space="preserve">
     <value>No upscaled videos yet</value>
@@ -7996,6 +8029,36 @@ libx264
   </data>
   <data name="VideoEnhancerPage_QueueSummaryText.Text" xml:space="preserve">
     <value>0 queued / 0 finished</value>
+  </data>
+  <data name="VideoEnhancerPage_RetryButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Retry video job</value>
+  </data>
+  <data name="VideoEnhancerPage_RetryButton.Content" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeEngine.Content" xml:space="preserve">
+    <value>RIFE frame interpolation (Vulkan)</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeQualityNote.Text" xml:space="preserve">
+    <value>RIFE raises the frame rate without replacing the source. The managed Vulkan readiness check and output artifact validation run before each queued clip.</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeRuntimeDescription.Text" xml:space="preserve">
+    <value>Pinned rife-v4.6 model through the managed Vulkan runtime. The source remains untouched and the output is promoted only after frame-rate validation.</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeRuntimeTitle.Text" xml:space="preserve">
+    <value>RIFE ncnn-vulkan runtime</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeStatusText.Text" xml:space="preserve">
+    <value>Checking pinned RIFE runtime and Vulkan readiness...</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeTargetFps120.Content" xml:space="preserve">
+    <value>120 FPS</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeTargetFps60.Content" xml:space="preserve">
+    <value>60 FPS (recommended)</value>
+  </data>
+  <data name="VideoEnhancerPage_RifeTargetFpsCombo.Header" xml:space="preserve">
+    <value>Target frame rate</value>
   </data>
   <data name="VideoEnhancerPage_RunButton.Content" xml:space="preserve">
     <value>Enhance Video</value>
