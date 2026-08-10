@@ -930,3 +930,66 @@ Major scope expansion: from a context-menu file converter into a full all-in-one
 - Added: Right-click context menu integration via SharpShell.
 - Added: CLI (`ucx`) with convert / list / info / config / tools commands.
 - Added: WinUI 3 desktop UI with drag-and-drop and batch progress.
+
+## Roadmap archive — 2026-08-10 — ROADMAP.md
+
+<details>
+<summary>Original roadmap snapshot</summary>
+
+```markdown
+# UniversalConverterX — Product Roadmap
+
+**Status:** v2.36.0 · 212 sidecar engines · 459 preset files · 53 UI pages
+**Last updated:** 2026-07-29
+
+Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
+Shipped work is recorded in [`CHANGELOG.md`](CHANGELOG.md).
+
+**Design charter:** Offline-first. No cloud fallback. No accounts. No telemetry. Windows 10 21H2+. Preserve user files and metadata; expose the same trusted engine behavior through UI, CLI, REST, and PowerShell.
+
+---
+
+## Legend
+
+| Tier | Meaning |
+|------|---------|
+| **P0 / Now** | Release-blocking security, data-safety, activation, or artifact-integrity work |
+| **P1 / Next** | Next reliability, accessibility, testing, and workflow-foundation work |
+| **P2 / Later** | Product depth, performance, compatibility, and upgrade work after P1 foundations |
+| **P3 / Later** | Lower-urgency specialist capability or consolidation |
+| **UC** | Under Consideration; evidence or upstream capability is not yet sufficient |
+
+---
+
+## Under Consideration
+
+---
+
+## Research-Driven Additions
+
+_2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs continue at Item 147. Evidence is in [`RESEARCH.md`](RESEARCH.md)._
+
+### P1 — Reliability, trust, accessibility, and test foundations
+
+### P2 — Product depth, performance, and compatibility
+
+### P2/P3 — Governed local AI capability
+
+### P3 — Specialist capability and consolidation
+
+---
+
+## Audit Findings — 2026-08-02
+
+_Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: `build.ps1 -Target Test` = 17/17 gates pass, 0 failures. Findings below are verified reachable unless marked Needs-repro. IDs continue the existing `Item NNN` scheme. Each entry is self-contained — the implementer needs no audit context._
+
+### P1 — correctness, data-safety, security
+
+### P2 — reliability, correctness edges, security hardening, performance
+
+### P3 — debt, polish, lower-value correctness
+
+### Refinement to an existing item (not a duplicate)
+```
+
+</details>
