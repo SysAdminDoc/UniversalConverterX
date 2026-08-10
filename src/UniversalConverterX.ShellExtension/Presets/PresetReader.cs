@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using UniversalConverterX.Core.Utilities;
 using System.Runtime.Versioning;
 
@@ -42,6 +44,17 @@ public sealed record ShellPreset(
 [SupportedOSPlatform("windows")]
 public static class PresetReader
 {
+    internal const int MaxPresetFiles = 512;
+    private static readonly TimeSpan MaxLoadDuration = TimeSpan.FromMilliseconds(100);
+    private static readonly object CacheGate = new();
+    private static CacheEntry? _cache;
+
+    private sealed record DirectoryStamp(string Path, DateTime LastWriteTimeUtc, int FileCount);
+
+    private sealed record CacheEntry(
+        IReadOnlyList<DirectoryStamp> Directories,
+        IReadOnlyList<ShellPreset> Presets);
+
     public static IReadOnlyList<string> ResolvePresetDirs()
     {
         var dirs = new List<string>();
@@ -91,25 +104,95 @@ public static class PresetReader
         return dirs;
     }
 
-    public static IReadOnlyList<ShellPreset> LoadAll()
+    public static IReadOnlyList<ShellPreset> LoadAll() => LoadAll(ResolvePresetDirs());
+
+    internal static IReadOnlyList<ShellPreset> LoadAll(IReadOnlyList<string> directories)
+    {
+        var normalizedDirectories = directories
+            .Where(Directory.Exists)
+            .Select(Path.GetFullPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var stamps = CaptureDirectoryStamps(normalizedDirectories);
+
+        lock (CacheGate)
+        {
+            if (_cache is not null && StampsMatch(_cache.Directories, stamps))
+                return _cache.Presets;
+
+            var presets = LoadUncached(normalizedDirectories);
+            _cache = new CacheEntry(stamps, presets);
+            return presets;
+        }
+    }
+
+    private static IReadOnlyList<DirectoryStamp> CaptureDirectoryStamps(
+        IReadOnlyList<string> directories)
+    {
+        var stamps = new List<DirectoryStamp>(directories.Count);
+        foreach (var directory in directories)
+        {
+            var fileCount = 0;
+            try
+            {
+                fileCount = Directory.EnumerateFiles(
+                        directory,
+                        "*.preset.xml",
+                        SearchOption.TopDirectoryOnly)
+                    .Count();
+            }
+            catch { }
+
+            DateTime lastWriteTime;
+            try { lastWriteTime = Directory.GetLastWriteTimeUtc(directory); }
+            catch { lastWriteTime = DateTime.MinValue; }
+            stamps.Add(new DirectoryStamp(directory, lastWriteTime, fileCount));
+        }
+        return stamps;
+    }
+
+    private static bool StampsMatch(
+        IReadOnlyList<DirectoryStamp> left,
+        IReadOnlyList<DirectoryStamp> right)
+    {
+        if (left.Count != right.Count)
+            return false;
+        for (var index = 0; index < left.Count; index++)
+        {
+            if (!string.Equals(left[index].Path, right[index].Path, StringComparison.OrdinalIgnoreCase)
+                || left[index].LastWriteTimeUtc != right[index].LastWriteTimeUtc
+                || left[index].FileCount != right[index].FileCount)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static IReadOnlyList<ShellPreset> LoadUncached(IReadOnlyList<string> directories)
     {
         // Case-insensitive so a user override at the same "Convert to MP4" name
         // shadows the installer-provided version regardless of capitalization.
         var byName = new Dictionary<string, ShellPreset>(StringComparer.OrdinalIgnoreCase);
-        foreach (var dir in ResolvePresetDirs())
+        var stopwatch = Stopwatch.StartNew();
+        var filesRead = 0;
+        foreach (var dir in directories)
         {
             string[] files;
             try { files = Directory.GetFiles(dir, "*.preset.xml"); }
             catch { continue; }
 
-            foreach (var path in files)
+            foreach (var path in files.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
             {
+                if (filesRead >= MaxPresetFiles || stopwatch.Elapsed >= MaxLoadDuration)
+                    return new ReadOnlyCollection<ShellPreset>(byName.Values.ToList());
+                filesRead++;
                 var p = TryLoad(path);
                 if (p is null) continue;
                 if (!byName.ContainsKey(p.Name)) byName[p.Name] = p;
             }
         }
-        return byName.Values.ToList();
+        return new ReadOnlyCollection<ShellPreset>(byName.Values.ToList());
     }
 
     public static ShellPreset? TryLoad(string path) => TryLoad(path, out _);

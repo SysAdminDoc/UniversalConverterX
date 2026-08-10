@@ -186,6 +186,12 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
         _commands = BuildSubmenu(selectionPaths);
     }
 
+    private ConvertSubCommandEnumerator(IEnumerable<IExplorerCommand> commands, int index)
+    {
+        _commands = [.. commands];
+        _index = index;
+    }
+
     private static List<IExplorerCommand> BuildSubmenu(IReadOnlyList<string> selection)
     {
         var commands = new List<IExplorerCommand>();
@@ -257,7 +263,7 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 
     public int Clone(out IEnumExplorerCommand? ppenum)
     {
-        ppenum = new ConvertSubCommandEnumerator(ConverterExplorerCommand.LastSelectionPaths);
+        ppenum = new ConvertSubCommandEnumerator(_commands, _index);
         return HResult.S_OK;
     }
 }

@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 189 — Explorer context menu parses 459 preset XML files synchronously on the shell thread every right-click
-  Category: perf
-  Where: `src/UniversalConverterX.ShellExtension/ExplorerCommand.cs:177,192,237` → `Presets/PresetReader.cs:92-151`; `ShellExtensionRegistrar.cs:166` (apartment-threaded COM).
-  Problem: `EnumSubCommands`→`BuildSubmenu`→`PresetReader.LoadAll()` runs `XmlReader.Create`+`XDocument.Load` on every `*.preset.xml` (the repo ships 459 files / ~1.7 MB) with no cache/memoization/size cap, and `Clone()` rebuilds the whole submenu a second time. This runs on the Explorer UI thread; a cold-cache right-click stalls Explorer and Windows' slow-handler watchdog may drop the menu.
-  Evidence: `LoadAll` enumerates up to four directories per invocation; no cache; `Clone` at `:235-239` re-runs it.
-  Fix: a process-static cache keyed on directory mtime, plus a hard file-count/time budget; build the submenu once and reuse for `Clone`.
-  Acceptance: right-clicking a file with 459 presets present builds the menu in < 50 ms after warm-up and does not re-parse on `Clone`; add a benchmark/guard test.
-  Confidence: Verified (structure), Likely (stall magnitude). Effort: M
-
 - [ ] P2 — Item 190 — Shell extension holds cross-instance mutable static selection state
   Category: correctness
   Where: `src/UniversalConverterX.ShellExtension/ExplorerCommand.cs:21,56,91,209,237` (`static List<string> LastSelectionPaths`).
