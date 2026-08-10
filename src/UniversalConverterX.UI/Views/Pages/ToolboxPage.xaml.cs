@@ -385,7 +385,7 @@ public sealed partial class ToolboxPage : Page
         OtherTools.Add(new ToolboxTile("presets:coordfmt", "Coordinate Format", "GPS DD / DMS / UTM / MGRS / Geohash / Plus Codes batch convert", "\uE707", blue, "Ready", green, false, "pyproj + mgrs"));
         AudioTools.Add(new ToolboxTile("presets:demucs", "Audio Stem Separation", "Demucs htdemucs_ft 4-stem (vocals / drums / bass / other)", "\uE767", red, "Ready", green, false, "Demucs"));
         DocumentTools.Add(new ToolboxTile("presets:docconvert", "Document Convert", "DOCX / ODT / RTF / HTML / TXT / PDF via LibreOffice headless", "\uE8A5", blue, "Ready", green, false, "LibreOffice"));
-        DocumentTools.Add(new ToolboxTile("presets:ebookconvert", "eBook Convert", "EPUB / MOBI / AZW3 / PDF / FB2 / LRF mutual conversion", "\uE82D", blue, "Ready", green, false, "Calibre"));
+        DocumentTools.Add(new ToolboxTile("presets:ebookconvert", "eBook Convert", "EPUB / KEPUB / MOBI / AZW3 / PDF / FB2 / LRF mutual conversion; protected Kindle inputs are rejected", "\uE82D", blue, "Ready", green, false, "Calibre + local KEPUB transformer"));
         AudioTools.Add(new ToolboxTile("presets:edge-tts", "Microsoft Edge TTS", "Text -> speech via Microsoft Edge TTS voices (free)", "\uE767", blue, "Ready", green, false, "edge-tts"));
         DocumentTools.Add(new ToolboxTile("presets:fontconvert", "Font Format Convert", "TTF / OTF / WOFF / WOFF2 / EOT / TTC mutual conversion", "\uE8D2", blue, "Ready", green, false, "fontTools"));
         VideoTools.Add(new ToolboxTile("presets:framesnap", "Video Frame Extract", "Frames every N seconds / N frames / scene cuts -> JPG / PNG / WebP", "\uE91B", blue, "Ready", green, false, "FFmpeg"));
@@ -507,7 +507,7 @@ public sealed partial class ToolboxPage : Page
         DocumentTools.Add(new ToolboxTile("presets:diagram", "Diagrams", "Mermaid / PlantUML / Graphviz / Visio / draw.io / Excalidraw -> SVG / PNG / PDF", "\uE9B6", blue, "Ready", green, false, "mermaid-cli + plantuml + dot"));
         DocumentTools.Add(new ToolboxTile("presets:notebooks", "Jupyter Notebooks", "ipynb <-> py / md / Rmd / qmd / html / pdf / slides", "\uE7C3", green, "Ready", green, false, "nbconvert + jupytext"));
         DocumentTools.Add(new ToolboxTile("presets:helpkit", "Compiled Help (CHM)", "CHM extraction + CHM -> single PDF", "\uE897", blue, "Ready", green, false, "7z + weasyprint"));
-        DocumentTools.Add(new ToolboxTile("presets:comic", "Comic Books", "CBZ / CBR / CBT / CB7 mutual conversion + CBZ -> PDF / EPUB", "\uE82D", orange, "Ready", green, false, "rarfile + img2pdf + EbookLib"));
+        DocumentTools.Add(new ToolboxTile("presets:comic", "Comic Books", "CBZ / CBR / CBT / CB7 mutual conversion + PDF / generic EPUB + Kobo/Kindle device-profiled EPUB/MOBI", "\uE82D", orange, "Ready", green, false, "rarfile + img2pdf + Pillow + EbookLib + Calibre for MOBI"));
         AudioTools.Add(new ToolboxTile("presets:playlist", "Playlists", "M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S / iTunes XML mutual conversion", "\uEC4F", blue, "Ready", green, false, "stdlib"));
         OtherTools.Add(new ToolboxTile("presets:tlskit", "TLS Certificates", "X.509 PEM / DER / PKCS#7 / PKCS#12 conversion + cert metadata probe", "\uE72E", blue, "Ready", green, false, "cryptography"));
         OtherTools.Add(new ToolboxTile("presets:sshkit", "SSH Keys", "OpenSSH / PEM PKCS#8 / PuTTY .ppk / RFC 4716 conversion", "\uE72E", blue, "Ready", green, false, "cryptography + puttygen"));

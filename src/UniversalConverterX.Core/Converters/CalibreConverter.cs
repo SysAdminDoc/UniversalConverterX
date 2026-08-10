@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Security;
 
 namespace UniversalConverterX.Core.Converters;
 
@@ -122,6 +123,18 @@ public class CalibreConverter : BaseConverterStrategy
         args.AddRange(options.CustomArguments);
 
         return [.. args];
+    }
+
+    public override ValidationResult ValidateJob(ConversionJob job)
+    {
+        var baseResult = base.ValidateJob(job);
+        if (!baseResult.IsValid)
+            return baseResult;
+
+        var protection = KindleProtectionDetector.Detect(job.InputPath);
+        return protection is null
+            ? ValidationResult.Success
+            : ValidationResult.Fail(protection);
     }
 
     private static void AddFormatSpecificOptions(List<string> args, string outputExt, ConversionOptions options)

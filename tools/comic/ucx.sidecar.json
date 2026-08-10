@@ -1,3 +1,12 @@
 {
-  "engine": "comic"
+  "engine": "comic",
+  "tools": [
+    {
+      "id": "calibre",
+      "executable": "ebook-convert",
+      "display": "Calibre",
+      "managed": true,
+      "whenArgContains": "mobi"
+    }
+  ]
 }

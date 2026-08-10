@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Preset xmlns="https://universalconverterx.io/preset/v1">
+    <Name>Comic -> Kindle MOBI (device profile)</Name>
+    <Folder>Comics</Folder>
+    <InputTypes>
+        <Extension>cbz</Extension>
+        <Extension>cbr</Extension>
+        <Extension>cbt</Extension>
+        <Extension>cb7</Extension>
+    </InputTypes>
+    <OutputFileNameTemplate>{dir}/{stem}.kindle</OutputFileNameTemplate>
+    <OutputExtension>mobi</OutputExtension>
+    <Engine>comic</Engine>
+    <InvocationMode>batch-output-dir</InvocationMode>
+    <Args>
+        <Arg>to-device</Arg>
+        <Arg>--format</Arg>
+        <Arg>mobi</Arg>
+        <Arg>--profile</Arg>
+        <Arg>kindle</Arg>
+    </Args>
+</Preset>

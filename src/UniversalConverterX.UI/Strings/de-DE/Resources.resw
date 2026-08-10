@@ -1581,6 +1581,9 @@
   <data name="Code_2954E89B18FB2B2A022B" xml:space="preserve">
     <value>No saved Compressor settings are available yet.</value>
   </data>
+  <data name="Code_298AC479A45B7FE7585E" xml:space="preserve">
+    <value>Protected Kindle input rejected. UCX does not include DeDRM; provide a DRM-free export.</value>
+  </data>
   <data name="Code_29BF641B9C366F47AEF9" xml:space="preserve">
     <value>Ready to enhance {0} clip(s). {1}</value>
   </data>
@@ -4455,6 +4458,9 @@ SHA-256: {0}</value>
   </data>
   <data name="EbookConverterPage_Item_001.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Aus der Warteschlange entfernen</value>
+  </data>
+  <data name="EbookConverterPage_Item_001_2.Content" xml:space="preserve">
+    <value>KEPUB (Kobo)</value>
   </data>
   <data name="EbookConverterPage_Item_002.Text" xml:space="preserve">
     <value>EBOOK CONVERTER</value>

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,12 +29,13 @@ public sealed partial class EbookConverterPage : Page
     [
         ".epub", ".mobi", ".azw", ".azw3", ".azw4", ".pdf", ".fb2",
         ".lit", ".lrf", ".pdb", ".rtf", ".txt", ".html", ".htm", ".htmlz",
-        ".docx", ".odt", ".cbz", ".cbr",
+        ".docx", ".odt", ".cbz", ".cbr", ".kepub",
     ];
 
     private readonly ISidecarRunner _runner;
     private readonly IHistoryService _history;
     private readonly ObservableCollection<EbookFileItem> _files = [];
+    private readonly ConcurrentDictionary<string, string> _outputsByInput = new(StringComparer.OrdinalIgnoreCase);
     private string? _outputDir;
 
     public EbookConverterPage()
@@ -96,6 +98,7 @@ public sealed partial class EbookConverterPage : Page
         ConvertButton.IsEnabled = false;
         WorkProgress.Value = 0;
         LogText.Text = "";
+        _outputsByInput.Clear();
         foreach (var f in _files) f.StatusText = "Pending";
 
         var fmt = (FormatCombo.SelectedItem as ComboBoxItem)?.Tag as string ?? "epub";
@@ -141,7 +144,14 @@ public sealed partial class EbookConverterPage : Page
             {
                 if (evName != "ebook") return;
                 if (!root.TryGetProperty("input", out var ip)) return;
-                var match = _files.FirstOrDefault(f => f.Path == ip.GetString());
+                var inputPath = ip.GetString();
+                if (root.TryGetProperty("output", out var op)
+                    && !string.IsNullOrWhiteSpace(inputPath)
+                    && !string.IsNullOrWhiteSpace(op.GetString()))
+                {
+                    _outputsByInput[inputPath!] = op.GetString()!;
+                }
+                var match = _files.FirstOrDefault(f => f.Path == inputPath);
                 if (match is not null) match.StatusText = "Done";
             }));
 
@@ -149,6 +159,8 @@ public sealed partial class EbookConverterPage : Page
             StatusText.Text = AppLocalizer.Get("ebookconvert sidecar not built. Run pwsh tools/ebookconvert/build.ps1.");
         else if (result.ErrorCode == "missing_calibre")
             StatusText.Text = AppLocalizer.Get("Calibre not found. Install from calibre-ebook.com and try again.");
+        else if (result.ErrorCode == "protected_input")
+            StatusText.Text = AppLocalizer.Get("Protected Kindle input rejected. UCX does not include DeDRM; provide a DRM-free export.");
         else if (result.Success)
         {
             StatusText.Text = AppLocalizer.Format($"Done -- {_files.Count} eBook(s) -> .{fmt}.");
@@ -161,8 +173,13 @@ public sealed partial class EbookConverterPage : Page
                     Engine = "ebookconvert",
                     Action = "convert",
                     SourcePath = f.Path,
-                    OutputPath = System.IO.Path.Combine(outDir,
-                        System.IO.Path.GetFileNameWithoutExtension(f.Path) + "." + fmt),
+                    OutputPath = _outputsByInput.TryGetValue(f.Path, out var actualOutput)
+                        ? actualOutput
+                        : System.IO.Path.Combine(outDir,
+                            System.IO.Path.GetFileNameWithoutExtension(f.Path)
+                            + (fmt.Equals("kepub", StringComparison.OrdinalIgnoreCase)
+                                ? ".kepub.epub"
+                                : "." + fmt)),
                     SourceBytes = TryFileSize(f.Path),
                     DurationSeconds = (DateTime.UtcNow - startedAt).TotalSeconds / Math.Max(1, _files.Count),
                     Success = true,

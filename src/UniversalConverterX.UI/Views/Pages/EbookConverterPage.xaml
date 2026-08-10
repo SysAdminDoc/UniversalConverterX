@@ -120,6 +120,7 @@
                     <ComboBoxItem x:Uid="EbookConverterPage_Item_019" Content="LRF" Tag="lrf"/>
                     <ComboBoxItem x:Uid="EbookConverterPage_Item_020" Content="PDB" Tag="pdb"/>
                     <ComboBoxItem x:Uid="EbookConverterPage_Item_021" Content="CBZ" Tag="cbz"/>
+                    <ComboBoxItem x:Uid="EbookConverterPage_Item_001_2" Content="KEPUB (Kobo)" Tag="kepub"/>
                 </ComboBox>
                 <TextBox x:Uid="EbookConverterPage_OutputDirBox" Grid.Column="1"
                          x:Name="OutputDirBox"
@@ -173,7 +174,7 @@
                     <TextBlock x:Uid="EbookConverterPage_Item_027" Text="Add eBooks"
                                Style="{StaticResource SubtitleTextStyle}"
                                HorizontalAlignment="Center"/>
-                    <TextBlock x:Uid="EbookConverterPage_Item_028" Text="EPUB, MOBI, AZW3, PDF, FB2, DOCX, HTML, RTF, TXT. Pick a target format and run."
+                    <TextBlock x:Uid="EbookConverterPage_Item_028" Text="EPUB, KEPUB, MOBI, AZW3, PDF, FB2, DOCX, HTML, RTF, TXT. Pick a target format and run."
                                Style="{StaticResource MutedTextStyle}"
                                HorizontalAlignment="Center"
                                TextAlignment="Center" TextWrapping="Wrap"

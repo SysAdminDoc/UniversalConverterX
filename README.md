@@ -44,7 +44,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 | **Video** | Offline AI Tags · Auto Highlight · Av1an Per-Scene Parallel Encode · Trusted VapourSynth Scripts · Auto Reframe (AI) · Auto Crop (AI) · Watermark Editor · Frame Snapshot · Scene Detection · Timeline Preview · Track Manager |
 | **AI** | Reviewed ComfyUI Workflows · Background Remover · Subtitle Remover · Auto Subtitle · Vocal Remover · Voice Changer · Text-to-Speech · Speech-to-Text · Photo Restoration · Lip Reading |
 | **Audio** | Audio Converter · Audio Compressor · IAMF Immersive Audio · Spatial Audio (Ambisonics / binaural / 5.1 / 7.1) · Noise Remover (AI) |
-| **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre) · Unified image + searchable PDF/A OCR |
+| **Documents** | Document Converter (LibreOffice) · Archive Tool (7-Zip) · PDF Tools (pikepdf) · Subtitle Converter (pysubs2) · Font Converter (fonttools) · eBook Converter (Calibre + EPUB↔KEPUB) · Comic device profiles (CBZ/CBR -> EPUB/MOBI) · Unified image + searchable PDF/A OCR |
 | **Disc** | Data CD/DVD/Blu-ray imaging and burn · DVD-Video authoring · single-title BDMV authoring · DVD Rip · Commercial Detection · DVD Copy (planned) |
 | **Other** | Format Inspector · Content Credentials · Pkl Preset Compiler · Chapter Marks · Watch Folders · History · VMAF Quality |
 
@@ -112,6 +112,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 - Windows 10 21H2+ or Windows 11
 - .NET 10 Runtime
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
+- eBook/comic sidecars install their pinned Python dependencies during the sidecar build; comic MOBI output additionally needs Calibre, and UCX refuses protected Kindle/KFX inputs because it does not include DeDRM
 - DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
 - Gain-map presets require the opt-in pinned runtime (`gainmap download-runtime --accept-licenses`); the manifest records third-party licenses, immutable URLs, sizes, and SHA-256 hashes
 - Dia2 and Chatterbox are opt-in GPU tools. Install their reviewed model bundles with `ucx invoke-engine dia2tts --args-json '["install-model","--accept-license"]'` and `ucx invoke-engine chatterboxtts --args-json '["install-model","--accept-license"]'`. Dia2 uses Apache-2.0 code/weights plus the CC-BY-4.0 Mimi codec weights; Chatterbox and its PerTh watermarker are MIT.

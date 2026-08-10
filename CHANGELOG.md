@@ -17,6 +17,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Hardware encoder choices now stay disabled until the configured FFmpeg build exposes a matching encoder. Missing-tool, driver, and VRAM requirements are explained inline; hardware initialization failures retry per job on CPU while preserving scale/deinterlace settings and recording the actual encoder and fallback reason in history provenance.
 - Job Center search now exposes the durable queue's filename, engine, status, and error filtering, while History adds an “Open copy” action that restores a fresh settings job without reusing or mutating the original history row.
 - MP4/MOV stream-copy now probes source audio, video, and subtitle names and writes them back as QuickTime `udta` track names; both containers are covered by an FFprobe-verified remux regression.
+- Added local EPUB↔KEPUB interchange, protected Kindle/KFX refusal with an explicit no-DeDRM message, and governed CBZ/CBR/CBT/CB7 comic output profiles for Kobo/Kindle EPUB or MOBI (Calibre is required only for MOBI).
 
 ### Fixed
 

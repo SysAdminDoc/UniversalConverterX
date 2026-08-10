@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 136 — Add KEPUB interchange and a governed KCC comic pipeline
-  Why: KFX input already exists; remaining value is EPUB↔KEPUB plus device-profiled comic output with explicit protected-input rejection.
-  Evidence: `CalibreConverter.cs`; `tools/ebookconvert/sidecar.py`; Calibre/KCC documentation.
-  Touches: ebook/comic sidecars, presets, readiness catalog.
-  Acceptance: EPUB↔KEPUB and CBZ/CBR→device-profiled EPUB/MOBI pass fixtures; protected KFX/Kindle inputs fail with a clear no-DeDRM message.
-  Complexity: M
-
 - [ ] P2 — Item 137 — Promote existing ClipForge RIFE into the managed workflow contract
   Why: `rife-ncnn-vulkan` already works in legacy ClipForge, but it is not governed by the main catalog, queue, artifact, and fallback contracts.
   Evidence: `tools/clipforge/clipforge.py:163-164,935-1010`; Video2X/RIFE precedent.
