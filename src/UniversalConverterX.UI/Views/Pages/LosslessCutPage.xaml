@@ -103,7 +103,10 @@
                                     PointerReleased="Overlay_PointerReleased">
                                 <Rectangle x:Name="SelectionBand" Height="76"
                                            Fill="{StaticResource AccentGreenBrush}" Opacity="0.28"/>
-                                <Rectangle x:Name="Playhead" Width="2" Height="76" Fill="White"/>
+                                <Rectangle x:Name="Playhead" Width="2" Height="76"
+                                           Fill="{StaticResource AccentRedBrush}"
+                                           Stroke="{StaticResource TextInverseBrush}"
+                                           StrokeThickness="1"/>
                             </Canvas>
                         </Grid>
 
