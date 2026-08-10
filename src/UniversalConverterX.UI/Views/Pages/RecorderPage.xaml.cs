@@ -570,10 +570,17 @@ public sealed partial class RecorderPage : Page
 
         try
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{folder}\"")
-            {
-                UseShellExecute = true,
-            });
+            var startInfo = Directory.Exists(path)
+                ? new ProcessStartInfo
+                {
+                    FileName = folder,
+                    UseShellExecute = true,
+                }
+                : new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"")
+                {
+                    UseShellExecute = true,
+                };
+            Process.Start(startInfo);
         }
         catch
         {
