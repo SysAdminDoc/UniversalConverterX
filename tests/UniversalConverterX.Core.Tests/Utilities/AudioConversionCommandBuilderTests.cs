@@ -99,6 +99,39 @@ public sealed class AudioConversionCommandBuilderTests
         action.Should().Throw<ArgumentException>();
     }
 
+    [Theory]
+    [InlineData(44_100)]
+    [InlineData(96_000)]
+    public void Build_ShouldRejectUnsupportedOpusSampleRates(int sampleRate)
+    {
+        var action = () => AudioConversionCommandBuilder.Build(
+            ["input.wav"],
+            new AudioConversionOptions
+            {
+                Format = "opus",
+                OutputDirectory = Path.GetTempPath(),
+                SampleRate = sampleRate,
+            });
+
+        action.Should().Throw<ArgumentOutOfRangeException>()
+            .WithMessage("*Opus HD at 96000 Hz is not enabled.*");
+    }
+
+    [Fact]
+    public void Build_ShouldAllowTheBundledOpusEncoderSampleRate()
+    {
+        var arguments = AudioConversionCommandBuilder.Build(
+            ["input.wav"],
+            new AudioConversionOptions
+            {
+                Format = "opus",
+                OutputDirectory = Path.GetTempPath(),
+                SampleRate = 48_000,
+            });
+
+        arguments.Should().ContainInOrder("--sample-rate", "48000");
+    }
+
     [Fact]
     public void Build_ShouldMakeManagedVorbisUseBoundedBitrateMode()
     {

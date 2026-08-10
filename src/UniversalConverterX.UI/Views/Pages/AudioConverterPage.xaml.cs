@@ -479,6 +479,8 @@ public sealed partial class AudioConverterPage : Page
         var supportsVariableBitrate = VariableBitrateFormats.Contains(format);
         var managedVorbis = format == "vorbis" && VorbisManagedToggle?.IsOn == true;
 
+        UpdateOpusSampleRateOptions(format);
+
         QualityCard.Visibility = lossy ? Visibility.Visible : Visibility.Collapsed;
         VbrToggle.IsEnabled = supportsVariableBitrate && !managedVorbis;
         if (!supportsVariableBitrate)
@@ -493,6 +495,16 @@ public sealed partial class AudioConverterPage : Page
         OpusPanel.Visibility = format == "opus" ? Visibility.Visible : Visibility.Collapsed;
         FdkPanel.Visibility = format == "fdk-aac" ? Visibility.Visible : Visibility.Collapsed;
         VorbisPanel.Visibility = format == "vorbis" ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void UpdateOpusSampleRateOptions(string format)
+    {
+        var isOpus = format == "opus";
+        SampleRate44100Item.Visibility = isOpus ? Visibility.Collapsed : Visibility.Visible;
+        SampleRate96000Item.Visibility = isOpus ? Visibility.Collapsed : Visibility.Visible;
+
+        if (isOpus && SelectedTag(SampleRateCombo, "") is "44100" or "96000")
+            SampleRateCombo.SelectedIndex = 0;
     }
 
     private void UpdateUi(bool updateStatus = true)

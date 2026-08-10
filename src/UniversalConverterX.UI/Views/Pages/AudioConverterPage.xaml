@@ -208,9 +208,9 @@
                                       AutomationProperties.AutomationId="AudioConverterSampleRateCombo"
                                       SelectionChanged="Setting_Changed">
                                 <ComboBoxItem x:Uid="AudioConverterPage_Item_040" Content="Auto (preserve)" Tag="" IsSelected="True"/>
-                                <ComboBoxItem x:Uid="AudioConverterPage_Item_041" Content="44.1 kHz" Tag="44100"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_041" x:Name="SampleRate44100Item" Content="44.1 kHz" Tag="44100"/>
                                 <ComboBoxItem x:Uid="AudioConverterPage_Item_042" Content="48 kHz" Tag="48000"/>
-                                <ComboBoxItem x:Uid="AudioConverterPage_Item_043" Content="96 kHz" Tag="96000"/>
+                                <ComboBoxItem x:Uid="AudioConverterPage_Item_043" x:Name="SampleRate96000Item" Content="96 kHz" Tag="96000"/>
                             </ComboBox>
                             <ComboBox x:Uid="AudioConverterPage_ChannelsCombo" x:Name="ChannelsCombo" Header="Channels"
                                       AutomationProperties.AutomationId="AudioConverterChannelsCombo"

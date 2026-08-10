@@ -41,6 +41,23 @@ class AudioProArgumentTests(unittest.TestCase):
         self.assertInSequence(["-b:a", "160k", "-minrate", "64k", "-maxrate", "160k"], command)
         self.assertTrue(str(command[-1]).endswith(".ogg"))
 
+    def test_opus_rejects_rates_outside_bundled_encoder(self) -> None:
+        for sample_rate in ("44100", "96000"):
+            with self.subTest(sample_rate=sample_rate), tempfile.TemporaryDirectory() as temp:
+                temp_path = Path(temp)
+                source = temp_path / "source.wav"
+                source.write_bytes(b"input")
+                args = AUDIOPRO.build_parser().parse_args([
+                    "convert", "--format", "opus", "--sample-rate", sample_rate,
+                    "--output-dir", str(temp_path / "output"), "--input", str(source),
+                ])
+                with patch.object(AUDIOPRO, "_find_ffmpeg", return_value="ffmpeg"), \
+                     patch.object(AUDIOPRO.subprocess, "run") as run:
+                    result = AUDIOPRO.op_convert(args)
+
+                self.assertEqual(1, result)
+                run.assert_not_called()
+
     def test_existing_output_gets_unique_name(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             temp_path = Path(temp)

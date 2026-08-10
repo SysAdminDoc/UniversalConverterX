@@ -109,6 +109,11 @@ TARGETS = {
     "au":       ("pcm_s16be", ".au", []),
 }
 
+# The bundled FFmpeg/libopus encoder is RFC 6716-only. Opus HD's 96-kHz
+# extension requires a separate qext-enabled build and is not exposed by the
+# normal libopus FFmpeg wrapper.
+OPUS_SAMPLE_RATES = frozenset((8000, 12000, 16000, 24000, 48000))
+
 
 def _unique_output_path(path: Path) -> Path:
     """Return a non-existing sibling path without overwriting prior output."""
@@ -189,6 +194,17 @@ def op_convert(args: argparse.Namespace) -> int:
     if opus_frame_duration is not None and opus_frame_duration not in (2.5, 5, 10, 20, 40, 60):
         return fail("bad_arg",
                     f"--opus-frame-duration must be 2.5/5/10/20/40/60 ms, got {opus_frame_duration}.")
+    if codec == "libopus" and args.sample_rate:
+        try:
+            sample_rate = int(args.sample_rate)
+        except (TypeError, ValueError):
+            return fail("bad_arg", f"--sample-rate must be an integer, got '{args.sample_rate}'.")
+        if sample_rate not in OPUS_SAMPLE_RATES:
+            return fail(
+                "unsupported_sample_rate",
+                "The bundled Opus encoder supports only 8000, 12000, 16000, 24000, or 48000 Hz. "
+                "Opus HD at 96000 Hz is not enabled.",
+            )
 
     # ROADMAP Item 90 — higher-order ambisonics. Opus mapping family 2 packs an
     # ACN/SN3D ambisonic stream; the layout is only valid for full-sphere

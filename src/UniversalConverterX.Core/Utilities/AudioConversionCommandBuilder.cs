@@ -56,6 +56,9 @@ public static partial class AudioConversionCommandBuilder
         ["off", "acn-sn3d"],
         StringComparer.Ordinal);
 
+    private static readonly IReadOnlySet<int> OpusSampleRates = new HashSet<int>
+        { 8_000, 12_000, 16_000, 24_000, 48_000 };
+
     public static IReadOnlyList<string> Build(
         IReadOnlyList<string> inputFiles,
         AudioConversionOptions options)
@@ -97,6 +100,13 @@ public static partial class AudioConversionCommandBuilder
         {
             if (sampleRate is < 8_000 or > 384_000)
                 throw new ArgumentOutOfRangeException(nameof(options), "Sample rate must be between 8000 and 384000 Hz.");
+            if (format == "opus" && !OpusSampleRates.Contains(sampleRate))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(options),
+                    "The bundled Opus encoder supports only 8000, 12000, 16000, 24000, or 48000 Hz. " +
+                    "Opus HD at 96000 Hz is not enabled.");
+            }
             arguments.Add("--sample-rate");
             arguments.Add(sampleRate.ToString(CultureInfo.InvariantCulture));
         }
