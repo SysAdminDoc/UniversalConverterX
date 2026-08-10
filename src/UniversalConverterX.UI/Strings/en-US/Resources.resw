@@ -3541,6 +3541,9 @@ SHA-256: {0}</value>
   <data name="CompressorPage_D3D12DeinterlaceToggle.Content" xml:space="preserve">
     <value>Deinterlace with D3D12 (guarded)</value>
   </data>
+  <data name="CompressorPage_HardwareCapabilityStatus.Text" xml:space="preserve">
+    <value>Checking configured FFmpeg encoder support...</value>
+  </data>
   <data name="CompressorPage_Item_001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Remove from queue</value>
   </data>
@@ -3795,6 +3798,9 @@ SHA-256: {0}</value>
   </data>
   <data name="ConverterPage_FrameRateSelector.Header" xml:space="preserve">
     <value>Frame rate</value>
+  </data>
+  <data name="ConverterPage_HardwareCapabilityStatus.Text" xml:space="preserve">
+    <value>Checking configured FFmpeg encoder support...</value>
   </data>
   <data name="ConverterPage_HighSpeedToggle.Header" xml:space="preserve">
     <value>High speed conversion</value>

@@ -237,11 +237,17 @@
                                   SelectionChanged="HwAccel_SelectionChanged"
                             AutomationProperties.AutomationId="HwAccelCombo">
                             <ComboBoxItem x:Uid="CompressorPage_Item_016" Content="Software (CPU)" Tag="none" IsSelected="True"/>
-                            <ComboBoxItem x:Uid="CompressorPage_Item_017" Content="NVIDIA NVENC" Tag="nvenc"/>
-                            <ComboBoxItem x:Uid="CompressorPage_Item_018" Content="AMD AMF" Tag="amf"/>
-                            <ComboBoxItem x:Uid="CompressorPage_Item_019" Content="Intel QSV" Tag="qsv"/>
-                            <ComboBoxItem x:Uid="CompressorPage_Item_020" Content="D3D12 (Windows)" Tag="d3d12"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_017" Content="NVIDIA NVENC" Tag="nvenc" IsEnabled="False"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_018" Content="AMD AMF" Tag="amf" IsEnabled="False"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_019" Content="Intel QSV" Tag="qsv" IsEnabled="False"/>
+                            <ComboBoxItem x:Uid="CompressorPage_Item_020" Content="D3D12 (Windows)" Tag="d3d12" IsEnabled="False"/>
                         </ComboBox>
+                        <TextBlock x:Uid="CompressorPage_HardwareCapabilityStatus"
+                                   x:Name="HwAccelStatusText"
+                                   Text="Checking configured FFmpeg encoder support..."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="12"/>
                         <TextBlock x:Uid="CompressorPage_Item_021" Text="GPU encoding is faster but may produce larger files at the same CRF."
                                    Style="{StaticResource MutedTextStyle}"
                                    TextWrapping="Wrap"

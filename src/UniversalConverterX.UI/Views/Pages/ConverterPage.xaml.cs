@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -16,6 +17,7 @@ using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.UI.Services;
@@ -105,6 +107,7 @@ public sealed partial class ConverterPage : Page
         _history = App.Services.GetRequiredService<IHistoryService>();
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         _sidecarRunner = App.Services.GetRequiredService<ISidecarRunner>();
+        _ = RefreshHardwareCapabilitiesAsync();
 
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finishedFiles;
@@ -1759,11 +1762,57 @@ public sealed partial class ConverterPage : Page
                 ErrorMessage = result.ErrorMessage,
                 Profile = queued.OutputFormat,
                 RerunParameters = ConversionRerunRequestCodec.Serialize(rerun),
+                Provenance = BuildConversionProvenance(queued.Job, result),
             });
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"History logging failed: {ex}");
+        }
+    }
+
+    private string? BuildConversionProvenance(ConversionJob job, ConversionResult result)
+    {
+        if (!string.Equals(result.ConverterUsed, "ffmpeg", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var converter = new FFmpegConverter(_appOptions.ToolsBasePath);
+            var executablePath = converter.ResolveExecutablePath();
+            var errorCode = result switch
+            {
+                { WasCancelled: true } => "cancelled",
+                { WasSkipped: true } => "skipped",
+                { ExitCode: not 0 } => $"exit_{result.ExitCode}",
+                _ => null,
+            };
+            var provenance = new JobProvenance
+            {
+                StartedUtc = job.StartedAt ?? job.CreatedAt,
+                DurationSeconds = result.Duration.TotalSeconds,
+                Engine = "ffmpeg",
+                RedactedArgs = result.CommandLine is null
+                    ? []
+                    : [ArgumentRedactor.RedactMessage(result.CommandLine)],
+                Executable = ExecutableIdentity.Capture(
+                    "ffmpeg",
+                    executablePath,
+                    typeof(FFmpegConverter).Assembly.GetName().Version?.ToString(3)),
+                Input = FileIdentity.Capture(job.InputPath),
+                Output = FileIdentity.Capture(result.OutputPath ?? job.OutputPath),
+                Capability = result.Capability,
+                ProductVersion = typeof(ConverterPage).Assembly.GetName().Version?.ToString(3),
+                ExitCode = result.ExitCode,
+                Succeeded = result.Success,
+                ErrorCode = errorCode,
+            };
+            return JobProvenanceCodec.Serialize(provenance);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Conversion provenance capture failed: {ex}");
+            return null;
         }
     }
 
@@ -1839,6 +1888,7 @@ public sealed partial class ConverterPage : Page
         options.UseHardwareAcceleration = HighSpeedToggle.IsOn
             && _appOptions.EnableHardwareAcceleration;
         options.HardwareAccel = _appOptions.DefaultHardwareAcceleration;
+        options.AllowHardwareFallback = true;
         options.PreserveMetadata = _appOptions.PreserveMetadataByDefault;
         options.OutputDirectory = _outputDirectory;
         options.Video.Width = _outputWidth;
@@ -1868,6 +1918,71 @@ public sealed partial class ConverterPage : Page
         options.Audio.Bitrate = int.TryParse(parts.ElementAtOrDefault(1), out var bitrate) ? bitrate : null;
         options.Audio.Channels = int.TryParse(parts.ElementAtOrDefault(2), out var channels) ? channels : null;
     }
+
+    private async Task RefreshHardwareCapabilitiesAsync()
+    {
+        var ffmpeg = new FFmpegConverter(_appOptions.ToolsBasePath);
+        var executablePath = ffmpeg.ResolveExecutablePath();
+        IReadOnlySet<string> encoderNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (executablePath is not null)
+        {
+            try
+            {
+                encoderNames = await Task.Run(
+                    () => FfmpegEncoderProbe.ProbeEncoderNames(executablePath));
+            }
+            catch
+            {
+                // Leave the toggle disabled when probing the configured tool fails.
+            }
+        }
+
+        DispatcherQueue.TryEnqueue(() => ApplyHardwareCapabilities(executablePath, encoderNames));
+    }
+
+    private void ApplyHardwareCapabilities(
+        string? executablePath,
+        IReadOnlySet<string> encoderNames)
+    {
+        var requested = HardwareProbeTag(_appOptions.DefaultHardwareAcceleration);
+        var supported = executablePath is not null
+            && (_appOptions.DefaultHardwareAcceleration == HardwareAcceleration.Auto
+                ? FfmpegEncoderProbe.SupportsAcceleration("auto", encoderNames)
+                : requested is not null
+                    && FfmpegEncoderProbe.SupportsAcceleration(requested, encoderNames));
+        var enabled = _appOptions.EnableHardwareAcceleration
+            && _appOptions.DefaultHardwareAcceleration != HardwareAcceleration.None
+            && supported;
+
+        HighSpeedToggle.IsEnabled = enabled;
+        if (!enabled)
+            HighSpeedToggle.IsOn = false;
+
+        var explanation = !_appOptions.EnableHardwareAcceleration
+            ? "Hardware acceleration is disabled in Settings. Software encoding remains available."
+            : _appOptions.DefaultHardwareAcceleration == HardwareAcceleration.None
+                ? "Software routing is selected in Settings."
+                : executablePath is null
+                    ? "Unavailable: the configured FFmpeg executable was not found. Install/download FFmpeg in Settings > Tools."
+                    : !supported
+                        ? FfmpegEncoderProbe.DescribeUnavailable(
+                            requested ?? "auto", true, encoderNames)
+                        : "A compatible FFmpeg encoder was probed. Runtime driver/VRAM failures fall back to CPU and are recorded in history.";
+        ConverterHardwareCapabilityText.Text = explanation;
+        ToolTipService.SetToolTip(HighSpeedToggle, explanation);
+        AutomationProperties.SetHelpText(HighSpeedToggle, explanation);
+    }
+
+    private static string? HardwareProbeTag(HardwareAcceleration acceleration) => acceleration switch
+    {
+        HardwareAcceleration.Nvenc or HardwareAcceleration.Cuda => "nvenc",
+        HardwareAcceleration.Amf => "amf",
+        HardwareAcceleration.Qsv => "qsv",
+        HardwareAcceleration.Vaapi => "vaapi",
+        HardwareAcceleration.VideoToolbox => "videotoolbox",
+        HardwareAcceleration.Vulkan => "vulkan",
+        _ => null,
+    };
 
     private void RestoreOutputProfile(IReadOnlyDictionary<string, string?> settings)
     {

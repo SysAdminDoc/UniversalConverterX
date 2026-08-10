@@ -18,6 +18,7 @@ public class FfmpegEncoderProbeTests
          V....D av1_amf              AMD AMF AV1 encoder (codec av1)
          V....D hevc_qsv             Intel Quick Sync Video HEVC encoder (codec hevc)
          V....D av1_qsv              Intel Quick Sync Video AV1 encoder (codec av1)
+         V....D h264_d3d12va         D3D12VA H.264 encoder (codec h264)
          A....D aac                  AAC (Advanced Audio Coding)
         """;
 
@@ -51,6 +52,32 @@ public class FfmpegEncoderProbeTests
 
         hw.Should().Contain(e => e.Vendor == HardwareAcceleration.Amf);
         hw.Should().Contain(e => e.Vendor == HardwareAcceleration.Qsv);
+    }
+
+    [Theory]
+    [InlineData("nvenc", true)]
+    [InlineData("amf", true)]
+    [InlineData("qsv", true)]
+    [InlineData("d3d12", true)]
+    [InlineData("vaapi", false)]
+    public void SupportsAcceleration_UsesOnlyProbedEncoderNames(
+        string acceleration,
+        bool expected)
+    {
+        FfmpegEncoderProbe.SupportsAcceleration(
+                acceleration,
+                FfmpegEncoderProbe.ParseEncoderNames(EncodersOutput))
+            .Should().Be(expected);
+    }
+
+    [Fact]
+    public void DescribeUnavailable_ExplainsToolDriverAndVramRequirements()
+    {
+        var message = FfmpegEncoderProbe.DescribeUnavailable("nvenc", true, []);
+
+        message.Should().Contain("FFmpeg");
+        message.Should().Contain("GPU driver");
+        message.Should().Contain("VRAM");
     }
 
     [Fact]

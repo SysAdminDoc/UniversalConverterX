@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 130b — Offer capability-gated hardware encoders and safe fallback
-  Why: runtime detection exists, but UI selection must show why a device/preset is unavailable and snapshot the actual encoder/fallback used.
-  Evidence: `FfmpegEncoderProbe`; HandBrake preset gating; FileFlows fallback; VidCoder 12.23; FFmpeg 8.1 D3D12/Vulkan capabilities.
-  Touches: Converter/Compressor encoder UI, job preflight/provenance, diagnostics.
-  Acceptance: only probed encoders appear enabled; disabled choices explain driver/tool/VRAM requirements; a tested per-job software fallback preserves requested scale/deinterlace and is recorded in history.
-  Complexity: S
-
 - [ ] P2 — Item 132b — Wire queue search and clone into queue/History UI
   Why: tested Core primitives exist, while professional queues make warnings, prior jobs, and copied settings searchable.
   Evidence: `BatchQueueOperations.Search`/`CloneAsNew`; MKVToolNix v100.

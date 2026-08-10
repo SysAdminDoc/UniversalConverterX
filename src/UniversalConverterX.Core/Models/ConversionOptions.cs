@@ -33,6 +33,13 @@ public class ConversionOptions
     public HardwareAcceleration HardwareAccel { get; set; } = HardwareAcceleration.Auto;
 
     /// <summary>
+    /// Retry a failed hardware encode with the equivalent software encoder.
+    /// Scale, frame rate, stream selection, and other visible output options
+    /// remain unchanged. The actual decision is recorded on the result.
+    /// </summary>
+    public bool AllowHardwareFallback { get; set; } = true;
+
+    /// <summary>
     /// Force a specific converter
     /// </summary>
     public string? ForceConverter { get; set; }

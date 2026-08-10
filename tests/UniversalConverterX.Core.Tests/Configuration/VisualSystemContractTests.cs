@@ -117,6 +117,34 @@ public class VisualSystemContractTests
     }
 
     [Fact]
+    public void HardwareControls_ShouldBeProbeGatedAndPersistCapabilityDecisions()
+    {
+        var repoRoot = FindRepoRoot();
+        var pagesRoot = Path.Combine(repoRoot, "src", "UniversalConverterX.UI", "Views", "Pages");
+        var compressorXaml = File.ReadAllText(Path.Combine(pagesRoot, "CompressorPage.xaml"));
+        var compressorCode = File.ReadAllText(Path.Combine(pagesRoot, "CompressorPage.xaml.cs"));
+        var converterCode = File.ReadAllText(Path.Combine(pagesRoot, "ConverterPage.xaml.cs"));
+        var runnerCode = File.ReadAllText(Path.Combine(
+            repoRoot, "src", "UniversalConverterX.UI", "Services", "SidecarRunner.cs"));
+        var converterCore = File.ReadAllText(Path.Combine(
+            repoRoot, "src", "UniversalConverterX.Core", "Converters", "FFmpegConverter.cs"));
+
+        compressorXaml.Should().Contain("Tag=\"nvenc\" IsEnabled=\"False\"");
+        compressorXaml.Should().Contain("Tag=\"amf\" IsEnabled=\"False\"");
+        compressorXaml.Should().Contain("Tag=\"qsv\" IsEnabled=\"False\"");
+        compressorXaml.Should().Contain("Tag=\"d3d12\" IsEnabled=\"False\"");
+        compressorCode.Should().Contain("ProbeEncoderNames");
+        compressorCode.Should().Contain("SupportsAcceleration");
+        compressorCode.Should().Contain("DescribeUnavailable");
+        converterCode.Should().Contain("AllowHardwareFallback = true");
+        converterCode.Should().Contain("BuildConversionProvenance");
+        runnerCode.Should().Contain("ObserveCapabilityLog");
+        runnerCode.Should().Contain("Capability = capability");
+        converterCore.Should().Contain("ShouldFallbackToSoftware");
+        converterCore.Should().Contain("SoftwareCodecFor");
+    }
+
+    [Fact]
     public void MainShell_ShouldKeepThePrimaryNavigationAsQuietAsTheApprovedMockup()
     {
         var repoRoot = FindRepoRoot();

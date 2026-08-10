@@ -46,6 +46,154 @@ public class FFmpegConverterTests
     }
 
     [Theory]
+    [InlineData("h264_nvenc", true)]
+    [InlineData("hevc_amf", true)]
+    [InlineData("av1_qsv", true)]
+    [InlineData("h264_d3d12va", true)]
+    [InlineData("libx264", false)]
+    public void IsHardwareEncoder_RecognizesVendorEncoders(string codec, bool expected)
+    {
+        FFmpegConverter.IsHardwareEncoder(codec).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("h264_nvenc", "libx264")]
+    [InlineData("hevc_qsv", "libx265")]
+    [InlineData("av1_amf", "libsvtav1")]
+    [InlineData("vp9_qsv", "libvpx-vp9")]
+    [InlineData("libx264", "libx264")]
+    public void SoftwareCodecFor_MapsHardwareCodecToEquivalentCpuCodec(
+        string codec,
+        string expected)
+    {
+        FFmpegConverter.SoftwareCodecFor(codec).Should().Be(expected);
+    }
+
+    [Fact]
+    public void ShouldFallbackToSoftware_OnlyForHardwareDiagnostics()
+    {
+        var job = CreateTestJob("input.mp4", "output.mp4");
+        job.Options.UseHardwareAcceleration = true;
+        job.Options.HardwareAccel = HardwareAcceleration.Nvenc;
+        var hardwareFailure = ConversionResult.Failed(
+            job,
+            "Error while opening encoder h264_nvenc",
+            TimeSpan.FromSeconds(1),
+            exitCode: 1,
+            standardError: "Cannot load nvcuda.dll",
+            commandLine: "ffmpeg -hwaccel cuda -c:v h264_nvenc output.mp4");
+
+        FFmpegConverter.ShouldFallbackToSoftware(job, hardwareFailure).Should().BeTrue();
+
+        var ordinaryFailure = ConversionResult.Failed(
+            job,
+            "Invalid data found when processing input",
+            TimeSpan.FromSeconds(1),
+            exitCode: 1,
+            standardError: "Invalid data found when processing input",
+            commandLine: "ffmpeg -i input.mp4 output.mp4");
+        FFmpegConverter.ShouldFallbackToSoftware(job, ordinaryFailure).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ShouldFallbackToSoftware_RespectsOptOut()
+    {
+        var job = CreateTestJob("input.mp4", "output.mp4");
+        job.Options.AllowHardwareFallback = false;
+        job.Options.HardwareAccel = HardwareAcceleration.Nvenc;
+        var result = ConversionResult.Failed(
+            job,
+            "Unknown encoder 'h264_nvenc'",
+            TimeSpan.FromSeconds(1),
+            exitCode: 1,
+            commandLine: "ffmpeg -c:v h264_nvenc output.mp4");
+
+        FFmpegConverter.ShouldFallbackToSoftware(job, result).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ConvertAsync_HardwareFailureRetriesCpuAndPreservesVisibleScale()
+    {
+        var root = Directory.CreateTempSubdirectory("ucx-ffmpeg-fallback-");
+        try
+        {
+            var tools = Path.Combine(root.FullName, "tools");
+            Directory.CreateDirectory(Path.Combine(tools, "bin"));
+            File.WriteAllBytes(Path.Combine(tools, "bin", "ffmpeg.exe"), [0]);
+            var input = Path.Combine(root.FullName, "input.mp4");
+            var output = Path.Combine(root.FullName, "output.mp4");
+            File.WriteAllBytes(input, [1, 2, 3]);
+
+            var converter = new FailingHardwareFfmpegConverter(tools);
+            var job = new ConversionJob
+            {
+                InputPath = input,
+                OutputPath = output,
+                Options = new ConversionOptions
+                {
+                    UseHardwareAcceleration = true,
+                    HardwareAccel = HardwareAcceleration.Nvenc,
+                    Video = new VideoOptions { Width = 1280, Height = 720 },
+                },
+            };
+
+            var result = await converter.ConvertAsync(job);
+
+            result.Success.Should().BeTrue();
+            result.Capability.Should().BeEquivalentTo(new CapabilityDecision(
+                "Nvenc", "libx264", true,
+                "Error while opening encoder h264_nvenc | Cannot load nvcuda.dll"));
+            converter.Commands.Should().HaveCount(2);
+            string.Join(" ", converter.Commands[0]).Should().Contain("h264_nvenc");
+            string.Join(" ", converter.Commands[1]).Should().Contain("libx264");
+            string.Join(" ", converter.Commands[1]).Should().Contain("1280x720");
+            job.Options.UseHardwareAcceleration.Should().BeTrue();
+            job.Options.HardwareAccel.Should().Be(HardwareAcceleration.Nvenc);
+            File.Exists(output).Should().BeTrue();
+        }
+        finally
+        {
+            try { root.Delete(recursive: true); } catch { }
+        }
+    }
+
+    private sealed class FailingHardwareFfmpegConverter : FFmpegConverter
+    {
+        public FailingHardwareFfmpegConverter(string toolsBasePath)
+            : base(toolsBasePath) { }
+
+        public List<string[]> Commands { get; } = [];
+
+        protected override Task<ProcessResult> ExecuteProcessAsync(
+            string executable,
+            string[] arguments,
+            ConversionJob job,
+            IProgress<ConversionProgress>? progress,
+            List<string> warnings,
+            CancellationToken cancellationToken)
+        {
+            Commands.Add([.. arguments]);
+            if (Commands.Count == 1)
+            {
+                return Task.FromResult(new ProcessResult
+                {
+                    Success = false,
+                    ExitCode = 1,
+                    ErrorMessage = "Error while opening encoder h264_nvenc",
+                    StandardError = "Cannot load nvcuda.dll",
+                });
+            }
+
+            File.WriteAllBytes(job.OutputPath, [4, 5, 6]);
+            return Task.FromResult(new ProcessResult
+            {
+                Success = true,
+                ExitCode = 0,
+            });
+        }
+    }
+
+    [Theory]
     [InlineData("mp4", "mp3", true)]
     [InlineData("mp4", "mkv", true)]
     [InlineData("wav", "mp3", true)]

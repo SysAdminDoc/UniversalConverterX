@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Localization;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Utilities;
 
 namespace UniversalConverterX.Core.Converters;
@@ -254,8 +255,76 @@ public partial class FFmpegConverter : BaseConverterStrategy
         IProgress<ConversionProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        var capability = CaptureCapability(job);
+        var result = await ConvertOnceAsync(job, progress, cancellationToken);
+
+        if (!capability.RequestedHardware)
+            return AttachCapability(result, capability, fellBack: false, reason: null);
+
+        if (!ShouldFallbackToSoftware(job, result))
+            return AttachCapability(result, capability, fellBack: false, reason: null);
+
+        var diagnostic = ArgumentRedactor.RedactMessage(
+            string.Join(
+                " | ",
+                new[] { result.ErrorMessage, result.StandardError, result.StandardOutput }
+                    .Where(value => !string.IsNullOrWhiteSpace(value)))
+            .Trim());
+        if (string.IsNullOrWhiteSpace(diagnostic))
+            diagnostic = "The hardware encoder failed to initialize.";
+        if (!TryDeletePartialOutput(job.OutputPath))
+        {
+            return AttachCapability(
+                result,
+                capability,
+                fellBack: false,
+                reason: $"Hardware encoding failed ({diagnostic}), and the partial output could not be replaced.");
+        }
+
+        var originalUseHardware = job.Options.UseHardwareAcceleration;
+        var originalHardwareAcceleration = job.Options.HardwareAccel;
+        var originalVideoCodec = job.Options.Video.Codec;
+        try
+        {
+            // Keep the visible job request intact after the retry. History and
+            // rerun parameters should continue to show what the user asked for,
+            // while Capability records what actually produced this output.
+            job.Options.UseHardwareAcceleration = false;
+            job.Options.HardwareAccel = HardwareAcceleration.None;
+            if (IsHardwareEncoder(originalVideoCodec))
+                job.Options.Video.Codec = SoftwareCodecFor(originalVideoCodec) ?? "libx264";
+
+            var fallback = await ConvertOnceAsync(job, progress, cancellationToken);
+            return AttachCapability(
+                fallback,
+                capability,
+                fellBack: true,
+                reason: diagnostic);
+        }
+        finally
+        {
+            job.Options.UseHardwareAcceleration = originalUseHardware;
+            job.Options.HardwareAccel = originalHardwareAcceleration;
+            job.Options.Video.Codec = originalVideoCodec;
+        }
+    }
+
+    private async Task<ConversionResult> ConvertOnceAsync(
+        ConversionJob job,
+        IProgress<ConversionProgress>? progress,
+        CancellationToken cancellationToken)
+    {
         if (!ShouldRunNativeTwoPass(job))
             return await base.ConvertAsync(job, progress, cancellationToken);
+
+        return await ConvertTwoPassAsync(job, progress, cancellationToken);
+    }
+
+    private async Task<ConversionResult> ConvertTwoPassAsync(
+        ConversionJob job,
+        IProgress<ConversionProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
 
         var stopwatch = Stopwatch.StartNew();
         var warnings = new List<string>();
@@ -382,6 +451,151 @@ public partial class FFmpegConverter : BaseConverterStrategy
             return ConversionResult.Failed(job, ex.Message, stopwatch.Elapsed);
         }
     }
+
+    internal static bool IsHardwareEncoder(string? codec)
+    {
+        if (string.IsNullOrWhiteSpace(codec))
+            return false;
+
+        var lowered = codec.ToLowerInvariant();
+        return lowered.EndsWith("_nvenc", StringComparison.Ordinal)
+            || lowered.EndsWith("_amf", StringComparison.Ordinal)
+            || lowered.EndsWith("_qsv", StringComparison.Ordinal)
+            || lowered.EndsWith("_vaapi", StringComparison.Ordinal)
+            || lowered.EndsWith("_videotoolbox", StringComparison.Ordinal)
+            || lowered.EndsWith("_vulkan", StringComparison.Ordinal)
+            || lowered.EndsWith("_d3d12va", StringComparison.Ordinal);
+    }
+
+    internal static string? SoftwareCodecFor(string? codec)
+    {
+        if (!IsHardwareEncoder(codec))
+            return codec;
+
+        var name = codec!.ToLowerInvariant();
+        if (name.StartsWith("h264_", StringComparison.Ordinal))
+            return "libx264";
+        if (name.StartsWith("hevc_", StringComparison.Ordinal))
+            return "libx265";
+        if (name.StartsWith("av1_", StringComparison.Ordinal))
+            return "libsvtav1";
+        if (name.StartsWith("vp9_", StringComparison.Ordinal))
+            return "libvpx-vp9";
+        return null;
+    }
+
+    private static CapabilityRequest CaptureCapability(ConversionJob job)
+    {
+        var requestedEncoder = ResolveRequestedVideoEncoder(job);
+        var explicitHardwareEncoder = IsHardwareEncoder(job.Options.Video.Codec);
+        var requestedHardware = IsVideoFormatForCapability(job.OutputExtension)
+            && !job.Options.StreamCopy
+            && job.Options.FfmpegArgumentOverride is not { Count: > 0 }
+            && (explicitHardwareEncoder
+                || (job.Options.UseHardwareAcceleration
+                    && job.Options.HardwareAccel != HardwareAcceleration.None));
+
+        var requested = explicitHardwareEncoder
+            && (!job.Options.UseHardwareAcceleration
+                || job.Options.HardwareAccel == HardwareAcceleration.None)
+            ? "explicit hardware encoder"
+            : job.Options.HardwareAccel.ToString();
+        if (!requestedHardware)
+            requested = "software";
+
+        return new CapabilityRequest(requested, requestedEncoder, requestedHardware);
+    }
+
+    private static string ResolveRequestedVideoEncoder(ConversionJob job)
+    {
+        if (!IsVideoFormatForCapability(job.OutputExtension))
+            return "software";
+        if (!string.IsNullOrWhiteSpace(job.Options.Video.Codec))
+            return job.Options.Video.Codec!;
+        return job.Options.Quality == QualityPreset.Lossless
+            ? "libx264"
+            : GetDefaultVideoCodec(job.Options.HardwareAccel);
+    }
+
+    private static bool IsVideoFormatForCapability(string extension) => extension.ToLowerInvariant() switch
+    {
+        "mp4" or "mkv" or "avi" or "mov" or "wmv" or "flv" or "webm" or
+        "m4v" or "mpg" or "mpeg" or "3gp" or "ts" or "ogv" or "gif" => true,
+        _ => false,
+    };
+
+    internal static bool ShouldFallbackToSoftware(ConversionJob job, ConversionResult result)
+    {
+        if (!job.Options.AllowHardwareFallback
+            || result.Success
+            || result.WasCancelled
+            || result.WasSkipped
+            || result.CommandLine is null)
+        {
+            return false;
+        }
+
+        var diagnostic = string.Join(
+            "\n",
+            new[] { result.ErrorMessage, result.StandardError, result.StandardOutput }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+        if (string.IsNullOrWhiteSpace(diagnostic))
+            return false;
+
+        // Only retry failures that point at hardware initialization or the
+        // selected hardware encoder. Codec/format mistakes and missing input
+        // files must remain visible instead of being hidden by a CPU retry.
+        var hardwareMarkers = new[]
+        {
+            "unknown encoder", "error while opening encoder", "no capable devices",
+            "cannot load", "device setup failed", "failed to initialize",
+            "failed to initialise", "hardware", "hwaccel", "d3d12", "nvenc",
+            "amf", "qsv", "vaapi", "videotoolbox", "vulkan",
+        };
+        return hardwareMarkers.Any(marker =>
+            diagnostic.Contains(marker, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool TryDeletePartialOutput(string outputPath)
+    {
+        if (!File.Exists(outputPath))
+            return true;
+
+        try
+        {
+            File.Delete(outputPath);
+            return !File.Exists(outputPath);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static ConversionResult AttachCapability(
+        ConversionResult result,
+        CapabilityRequest request,
+        bool fellBack,
+        string? reason)
+    {
+        if (result.CommandLine is null && !fellBack)
+            return result;
+
+        var selected = fellBack
+            ? SoftwareCodecFor(request.Encoder) ?? "software"
+            : request.Encoder;
+        result.Capability = new CapabilityDecision(
+            request.Requested,
+            selected,
+            fellBack,
+            reason);
+        return result;
+    }
+
+    private sealed record CapabilityRequest(
+        string Requested,
+        string Encoder,
+        bool RequestedHardware);
 
     private static void CleanupPassLogs(string passLogPrefix)
     {

@@ -28,6 +28,13 @@ public sealed record SidecarResult(
     /// Null only for results produced before the engine was even launched.
     /// </summary>
     public JobProvenance? Provenance { get; init; }
+
+    /// <summary>
+    /// The requested and actual encoder/backend reported by the sidecar. Kept
+    /// beside the serialized provenance so pages can show the decision without
+    /// reparsing the history payload.
+    /// </summary>
+    public CapabilityDecision? Capability { get; init; }
 }
 
 public interface ISidecarRunner
@@ -111,6 +118,7 @@ public sealed class SidecarRunner : ISidecarRunner
         var startedUtc = DateTime.UtcNow;
         var stopwatch = Stopwatch.StartNew();
         var progressTracker = new JobProgressTracker();
+        var capability = InferCapability(argumentVector);
 
         var exe = Locate(toolName);
         if (exe is null)
@@ -357,10 +365,17 @@ public sealed class SidecarRunner : ISidecarRunner
                             }
 
                             case "log":
-                                log?.Report(new SidecarLog(
-                                    Level: root.TryGetProperty("level", out var lv) && lv.ValueKind == JsonValueKind.String ? lv.GetString() ?? "info" : "info",
-                                    Message: root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String ? m.GetString() ?? "" : ""));
+                            {
+                                var level = root.TryGetProperty("level", out var lv) && lv.ValueKind == JsonValueKind.String
+                                    ? lv.GetString() ?? "info"
+                                    : "info";
+                                var message = root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String
+                                    ? m.GetString() ?? ""
+                                    : "";
+                                capability = ObserveCapabilityLog(capability, message);
+                                log?.Report(new SidecarLog(level, message));
                                 break;
+                            }
 
                             case "complete":
                                 if (root.TryGetProperty("output", out var o) && o.ValueKind == JsonValueKind.String)
@@ -571,6 +586,15 @@ public sealed class SidecarRunner : ISidecarRunner
             ? new OutputProbeSummary(finalSize, null, null, null, null)
             : null;
 
+        if (capability is { Selected: "pending" })
+        {
+            capability = capability with
+            {
+                Selected = "unknown",
+                Reason = "The sidecar did not report which encoder it selected.",
+            };
+        }
+
         return new SidecarResult(
             Success: success,
             OutputPath: finalOutput,
@@ -589,7 +613,9 @@ public sealed class SidecarRunner : ISidecarRunner
                 outputProbe,
                 exitCode,
                 success,
-                success ? null : (errorCode ?? "exit_nonzero")),
+                success ? null : (errorCode ?? "exit_nonzero"),
+                capability),
+            Capability = capability,
         };
     }
 
@@ -608,7 +634,8 @@ public sealed class SidecarRunner : ISidecarRunner
         OutputProbeSummary? outputProbe,
         int exitCode,
         bool success,
-        string? errorCode)
+        string? errorCode,
+        CapabilityDecision? capability)
     {
         var inputPath = ExtractInputPathFromArgs(args);
         return new JobProvenance
@@ -623,12 +650,90 @@ public sealed class SidecarRunner : ISidecarRunner
                 ResolveExecutableVersion(executablePath)),
             Input = FileIdentity.Capture(inputPath),
             Output = FileIdentity.Capture(outputPath),
+            Capability = capability,
             OutputProbe = outputProbe,
             ProductVersion = typeof(SidecarRunner).Assembly.GetName().Version?.ToString(3),
             ExitCode = exitCode,
             Succeeded = success,
             ErrorCode = errorCode,
         };
+    }
+
+    private static CapabilityDecision? InferCapability(IReadOnlyList<string> args)
+    {
+        var encoder = GetArgumentValue(args, "--encoder");
+        if (!string.IsNullOrWhiteSpace(encoder))
+            return new CapabilityDecision("software", encoder, false, null);
+
+        var accelerator = GetArgumentValue(args, "--hwaccel");
+        if (string.IsNullOrWhiteSpace(accelerator))
+            return null;
+        if (accelerator.Equals("none", StringComparison.OrdinalIgnoreCase))
+            return new CapabilityDecision("software", "software", false, null);
+
+        return new CapabilityDecision(accelerator, "pending", false, null);
+    }
+
+    private static CapabilityDecision? ObserveCapabilityLog(
+        CapabilityDecision? current,
+        string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return current;
+
+        if (message.StartsWith("Hardware accelerator:", StringComparison.OrdinalIgnoreCase)
+            && message.Contains("-> encoder:", StringComparison.OrdinalIgnoreCase))
+        {
+            var separator = message.IndexOf("-> encoder:", StringComparison.OrdinalIgnoreCase);
+            var requested = message["Hardware accelerator:".Length..separator].Trim();
+            var selected = message[(separator + "-> encoder:".Length)..].Trim();
+            return new CapabilityDecision(
+                current?.Requested ?? requested,
+                selected,
+                false,
+                null);
+        }
+
+        if (message.StartsWith("D3D12 zero-copy enabled:", StringComparison.OrdinalIgnoreCase)
+            && message.Contains("->", StringComparison.Ordinal))
+        {
+            var selected = message[(message.LastIndexOf("->", StringComparison.Ordinal) + 2)..].Trim();
+            return new CapabilityDecision(
+                current?.Requested ?? "d3d12",
+                selected,
+                false,
+                null);
+        }
+
+        const string fallbackMarker = "falling back to software ";
+        var fallbackIndex = message.IndexOf(fallbackMarker, StringComparison.OrdinalIgnoreCase);
+        if (fallbackIndex >= 0)
+        {
+            var selected = message[(fallbackIndex + fallbackMarker.Length)..]
+                .Trim()
+                .TrimEnd('.');
+            return new CapabilityDecision(
+                current?.Requested ?? "hardware",
+                string.IsNullOrWhiteSpace(selected) ? "software" : selected,
+                true,
+                ArgumentRedactor.RedactMessage(message));
+        }
+
+        return current;
+    }
+
+    private static string? GetArgumentValue(IReadOnlyList<string> args, string option)
+    {
+        for (var index = 0; index < args.Count; index++)
+        {
+            var argument = args[index];
+            if (argument.Equals(option, StringComparison.OrdinalIgnoreCase))
+                return index + 1 < args.Count ? args[index + 1] : null;
+            if (argument.StartsWith(option + "=", StringComparison.OrdinalIgnoreCase))
+                return argument[(option.Length + 1)..];
+        }
+
+        return null;
     }
 
     private static string? ResolveExecutableVersion(string? executablePath)

@@ -606,6 +606,12 @@
                                       IsOn="True"
                                       IsEnabled="False"
                                       AutomationProperties.AutomationId="HighSpeedToggle"/>
+                        <TextBlock x:Uid="ConverterPage_HardwareCapabilityStatus"
+                                   x:Name="ConverterHardwareCapabilityText"
+                                   Text="Checking configured FFmpeg encoder support..."
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="12"/>
                         <ToggleSwitch x:Uid="ConverterPage_EditFfmpegCommandToggle" x:Name="EditFfmpegCommandToggle"
                                       Header="Edit before run"
                                       OffContent="Read-only"

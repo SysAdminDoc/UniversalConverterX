@@ -79,6 +79,14 @@ public class ConversionResult
     public IReadOnlyList<string> Warnings { get; init; } = [];
 
     /// <summary>
+    /// The requested and actually selected encoder/backend. When hardware
+    /// initialization fails and the job is retried on CPU, <see cref="CapabilityDecision.FellBack"/>
+    /// is true and <see cref="CapabilityDecision.Reason"/> preserves the
+    /// runtime diagnostic for history and support bundles.
+    /// </summary>
+    public CapabilityDecision? Capability { get; set; }
+
+    /// <summary>
     /// Compression ratio (input size / output size)
     /// </summary>
     public double? CompressionRatio => Job.InputFileSize > 0 && OutputSize > 0 

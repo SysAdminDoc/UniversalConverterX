@@ -6,11 +6,13 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Configuration;
+using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.ViewModels;
@@ -47,6 +49,7 @@ public sealed partial class CompressorPage : Page
         };
 
     private readonly ISidecarRunner _runner;
+    private readonly ConverterXOptions _appOptions;
     private readonly ISidecarHealthService _health;
     private readonly IBatchQueueStore _queueStore;
     private readonly IAppJobCoordinator _jobCoordinator;
@@ -61,6 +64,9 @@ public sealed partial class CompressorPage : Page
     public CompressorPage()
     {
         InitializeComponent();
+        _appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
+            .Value;
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
         _health = App.Services.GetRequiredService<ISidecarHealthService>();
         _queueStore = App.Services.GetRequiredService<IBatchQueueStore>();
@@ -70,6 +76,7 @@ public sealed partial class CompressorPage : Page
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
         ApplyConfiguredHardwareAcceleration();
+        _ = RefreshHardwareCapabilitiesAsync();
         UpdatePresetSummaries();
         RestorePersistedQueue();
         UpdateUi();
@@ -508,13 +515,10 @@ public sealed partial class CompressorPage : Page
 
     private void ApplyConfiguredHardwareAcceleration()
     {
-        var options = App.Services
-            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
-            .Value;
-        var tag = !options.EnableHardwareAcceleration
-            || options.DefaultHardwareAcceleration == HardwareAcceleration.None
+        var tag = !_appOptions.EnableHardwareAcceleration
+            || _appOptions.DefaultHardwareAcceleration == HardwareAcceleration.None
                 ? "none"
-                : options.DefaultHardwareAcceleration switch
+                : _appOptions.DefaultHardwareAcceleration switch
                 {
                     HardwareAcceleration.Nvenc or HardwareAcceleration.Cuda => "nvenc",
                     HardwareAcceleration.Qsv => "qsv",
@@ -528,6 +532,88 @@ public sealed partial class CompressorPage : Page
                 item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
         if (match is not null)
             HwAccelCombo.SelectedItem = match;
+    }
+
+    private async Task RefreshHardwareCapabilitiesAsync()
+    {
+        var ffmpeg = new FFmpegConverter(_appOptions.ToolsBasePath);
+        var executablePath = ffmpeg.ResolveExecutablePath();
+        IReadOnlySet<string> encoderNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (executablePath is not null)
+        {
+            try
+            {
+                encoderNames = await Task.Run(
+                    () => FfmpegEncoderProbe.ProbeEncoderNames(executablePath));
+            }
+            catch
+            {
+                // The controls stay disabled when the local probe cannot run.
+            }
+        }
+
+        DispatcherQueue.TryEnqueue(() => ApplyHardwareCapabilities(executablePath, encoderNames));
+    }
+
+    private void ApplyHardwareCapabilities(
+        string? executablePath,
+        IReadOnlySet<string> encoderNames)
+    {
+        if (HwAccelCombo is null)
+            return;
+
+        foreach (var item in HwAccelCombo.Items.OfType<ComboBoxItem>())
+        {
+            var tag = item.Tag?.ToString() ?? "none";
+            var enabled = tag.Equals("none", StringComparison.OrdinalIgnoreCase)
+                || executablePath is not null
+                    && FfmpegEncoderProbe.SupportsAcceleration(tag, encoderNames);
+            item.IsEnabled = enabled;
+
+            var explanation = tag.Equals("none", StringComparison.OrdinalIgnoreCase)
+                ? "Always available: encodes on the CPU and preserves the requested output settings."
+                : enabled
+                    ? $"Detected encoder(s): {string.Join(", ", MatchingEncoderNames(tag, encoderNames).Take(4))}. "
+                        + "A driver or VRAM failure still falls back to software and is recorded in history."
+                    : FfmpegEncoderProbe.DescribeUnavailable(tag, executablePath is not null, encoderNames);
+            ToolTipService.SetToolTip(item, explanation);
+            AutomationProperties.SetHelpText(item, explanation);
+        }
+
+        var selected = HwAccelCombo.SelectedItem as ComboBoxItem;
+        if (selected is not null && !selected.IsEnabled)
+            SelectTaggedItem(HwAccelCombo, "none");
+
+        HwAccelStatusText.Text = executablePath is null
+            ? "Software only: the configured FFmpeg executable was not found."
+            : encoderNames.Count == 0
+                ? "Software only: this FFmpeg build exposes no supported hardware encoders."
+                : $"Detected {encoderNames.Count} FFmpeg encoder(s). Hardware choices are enabled only when probed; runtime driver/VRAM failures fall back to CPU and are saved in history.";
+        UpdateD3D12Options();
+        UpdateStatusText();
+        if (!_restoringQueue)
+            PersistQueue();
+    }
+
+    private static IEnumerable<string> MatchingEncoderNames(
+        string acceleration,
+        IEnumerable<string> encoderNames)
+    {
+        string[] suffixes = acceleration.ToLowerInvariant() switch
+        {
+            "nvenc" => new[] { "_nvenc" },
+            "amf" => new[] { "_amf" },
+            "qsv" => new[] { "_qsv" },
+            "d3d12" => new[] { "_d3d12va" },
+            "vaapi" => new[] { "_vaapi" },
+            "videotoolbox" => new[] { "_videotoolbox" },
+            "vulkan" => new[] { "_vulkan" },
+            _ => Array.Empty<string>(),
+        };
+        return encoderNames
+            .Where(name => suffixes.Any(suffix =>
+                name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase);
     }
 
     private void RestorePersistedQueue()
@@ -868,6 +954,9 @@ public sealed partial class CompressorPage : Page
                         Profile = preset,
                         RerunParameters = ConversionRerunRequestCodec.Serialize(
                             BuildRerunRequest(item.Path, outputPath)),
+                        Provenance = result.Provenance is null
+                            ? null
+                            : JobProvenanceCodec.Serialize(result.Provenance),
                     });
                 }
 
