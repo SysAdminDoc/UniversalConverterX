@@ -153,18 +153,29 @@ function Invoke-UcxNdjson {
                 Write-Verbose "non-JSON: $line"
                 continue
             }
-            switch ($ev.event) {
+            if ($null -eq $ev) {
+                Write-Verbose 'Ignoring a null NDJSON event.'
+                continue
+            }
+
+            $eventName = if ($ev.PSObject.Properties['event']) { [string]$ev.event } else { '' }
+            switch ($eventName) {
                 'progress' {
                     $stage = if ($ev.PSObject.Properties['stage']) { $ev.stage } else { '' }
-                    Write-Progress -Activity $Activity -Status $stage -PercentComplete ([int]$ev.percent)
+                    $percent = if ($ev.PSObject.Properties['percent']) { [int]$ev.percent } else { 0 }
+                    Write-Progress -Activity $Activity -Status $stage -PercentComplete $percent
                 }
                 'log'      {
-                    if ($ev.level -eq 'error')      { Write-Warning $ev.message }
-                    elseif ($ev.level -eq 'warn')   { Write-Warning $ev.message }
-                    else                            { Write-Verbose $ev.message }
+                    $level = if ($ev.PSObject.Properties['level']) { [string]$ev.level } else { '' }
+                    $message = if ($ev.PSObject.Properties['message']) { [string]$ev.message } else { '' }
+                    if ($level -eq 'error')      { Write-Warning $message }
+                    elseif ($level -eq 'warn')   { Write-Warning $message }
+                    else                         { Write-Verbose $message }
                 }
                 'error'    {
-                    Write-Error "UCX error [$($ev.code)]: $($ev.message)"
+                    $code = if ($ev.PSObject.Properties['code']) { [string]$ev.code } else { 'unknown' }
+                    $message = if ($ev.PSObject.Properties['message']) { [string]$ev.message } else { '' }
+                    Write-Error "UCX error [$code]: $message"
                 }
                 default    { $ev }   # surface other events to the pipeline
             }
@@ -340,8 +351,8 @@ function Compress-MediaFile {
 
         $argList = @('--input', (Resolve-Path $Path).Path, '--output', $Output)
         if ($Preset)     { $argList += @('--preset',  $Preset) }
-        if ($Crf)        { $argList += @('--crf',     $Crf) }
-        if ($TargetMb)   { $argList += @('--target-mb', $TargetMb) }
+        if ($PSBoundParameters.ContainsKey('Crf'))      { $argList += @('--crf',     $Crf) }
+        if ($PSBoundParameters.ContainsKey('TargetMb')) { $argList += @('--target-mb', $TargetMb) }
         if ($Codec)      { $argList += @('--codec',   $Codec) }
         if ($Resolution) { $argList += @('--resolution', $Resolution) }
         if ($HwAccel)    { $argList += @('--hwaccel', $HwAccel) }
