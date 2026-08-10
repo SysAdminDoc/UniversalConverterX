@@ -18,8 +18,8 @@ namespace UniversalConverterX.ShellExtension;
 [ClassInterface(ClassInterfaceType.None)]
 public partial class ConverterExplorerCommand : IExplorerCommand
 {
-    /// <summary>Cached snapshot of selection paths between GetState / EnumSubCommands.</summary>
-    internal static List<string> LastSelectionPaths { get; private set; } = [];
+    /// <summary>Selection snapshot owned by this COM command instance.</summary>
+    private IReadOnlyList<string> _selectionPaths = [];
 
     public int GetTitle(IShellItemArray? psiItemArray, out string? ppszName)
     {
@@ -52,19 +52,27 @@ public partial class ConverterExplorerCommand : IExplorerCommand
         var options = ShellSettings.Load();
         if (!options.ShellIntegrationEnabled || options.ShellExtension?.Enabled == false)
         {
+            _selectionPaths = [];
             pCmdState = 2; // ECS_HIDDEN
             return HResult.S_OK;
         }
-        if (psiItemArray is null) { pCmdState = 2; return HResult.S_OK; }
+        if (psiItemArray is null)
+        {
+            _selectionPaths = [];
+            pCmdState = 2;
+            return HResult.S_OK;
+        }
 
         try
         {
-            // Cache the selection so EnumSubCommands can filter presets.
-            LastSelectionPaths = ReadShellItemPaths(psiItemArray);
-            if (LastSelectionPaths.Count == 0) pCmdState = 2; // ECS_HIDDEN
+            // Snapshot the selection on this command instance so a second
+            // Explorer command cannot replace the paths before enumeration.
+            _selectionPaths = [.. ReadShellItemPaths(psiItemArray)];
+            if (_selectionPaths.Count == 0) pCmdState = 2; // ECS_HIDDEN
         }
         catch
         {
+            _selectionPaths = [];
             pCmdState = 2;
         }
         return HResult.S_OK;
@@ -97,7 +105,7 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 
     public int EnumSubCommands(out IEnumExplorerCommand? ppEnum)
     {
-        ppEnum = new ConvertSubCommandEnumerator(LastSelectionPaths);
+        ppEnum = new ConvertSubCommandEnumerator(_selectionPaths);
         return HResult.S_OK;
     }
 
@@ -238,7 +246,7 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
             commands.Add(new PresetSubCommand(p, selection));
 
         if (commands.Count > 0) commands.Add(new SeparatorCommand());
-        commands.Add(new OpenAppCommand());
+        commands.Add(new OpenAppCommand(selection));
         return commands;
     }
 
@@ -285,7 +293,7 @@ public partial class PresetSubCommand : IExplorerCommand
     public PresetSubCommand(ShellPreset preset, IReadOnlyList<string> selection)
     {
         _preset = preset;
-        _selection = selection;
+        _selection = [.. selection];
         _canonicalName = StableGuidFromName(preset.Name);
     }
 
@@ -421,6 +429,13 @@ public partial class SeparatorCommand : IExplorerCommand
 [ClassInterface(ClassInterfaceType.None)]
 public partial class OpenAppCommand : IExplorerCommand
 {
+    private readonly IReadOnlyList<string> _selection;
+
+    public OpenAppCommand(IReadOnlyList<string> selection)
+    {
+        _selection = [.. selection];
+    }
+
     public int GetTitle(IShellItemArray? _, out string? n) { n = "More options..."; return HResult.S_OK; }
 
     public int GetIcon(IShellItemArray? _, out string? i)
@@ -447,7 +462,7 @@ public partial class OpenAppCommand : IExplorerCommand
             if (!File.Exists(exe)) return HResult.E_FAIL;
 
             var paths = psiItemArray is null
-                ? ConverterExplorerCommand.LastSelectionPaths
+                ? _selection
                 : ConverterExplorerCommand.ReadShellItemPaths(psiItemArray);
 
             var psi = new ProcessStartInfo { FileName = exe, UseShellExecute = false };

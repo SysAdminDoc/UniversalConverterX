@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 190 — Shell extension holds cross-instance mutable static selection state
-  Category: correctness
-  Where: `src/UniversalConverterX.ShellExtension/ExplorerCommand.cs:21,56,91,209,237` (`static List<string> LastSelectionPaths`).
-  Problem: `LastSelectionPaths` is a static list written by `GetState` on one COM object and read by `EnumSubCommands`/`Clone` on another; Explorer creates a command object per menu and may run `GetState` for a second selection between the first menu's `GetState` and its `EnumSubCommands`. The submenu — and each `PresetSubCommand._selection` captured at `:209` — can then belong to a different selection than the menu shown, i.e. converting the wrong files. It is also an unsynchronized `List<string>` touched from different threads.
-  Evidence: static field mutated per-instance; captured into per-command selection.
-  Fix: carry the selection per command instance (no static), captured atomically in `GetState`.
-  Acceptance: two overlapping selections produce menus whose actions each operate on their own file set; add a unit test around the state capture.
-  Confidence: Likely. Effort: S
-
 - [ ] P2 — Item 191 — REST `/convert` has no concurrency cap; per-job containment does not bound the aggregate
   Category: security (DoS)
   Where: `src/UniversalConverterX.Console/Commands/ServeCommand.cs:188,360-410,442-453`; `src/UniversalConverterX.Core/Security/ProcessContainment.cs:30-33`.
