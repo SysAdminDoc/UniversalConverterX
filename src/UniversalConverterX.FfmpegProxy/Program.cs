@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 
@@ -34,7 +35,8 @@ internal static class Program
                 ".",
                 pipeName!,
                 PipeDirection.InOut,
-                PipeOptions.Asynchronous);
+                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly,
+                TokenImpersonationLevel.None);
             await pipe.ConnectAsync(30_000, CancellationToken.None).ConfigureAwait(false);
 
             using var reader = new StreamReader(pipe, new UTF8Encoding(false), leaveOpen: true);
