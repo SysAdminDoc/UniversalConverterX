@@ -303,32 +303,41 @@ public sealed partial class DownloaderPage : Page
         AddUrlButton.IsEnabled = SplitUrls(UrlBox.Text).Any();
     }
 
-    private void Paste_Click(object sender, RoutedEventArgs e)
+    private async void Paste_Click(object sender, RoutedEventArgs e)
     {
-        var pkg = Clipboard.GetContent();
-        if (!pkg.Contains(StandardDataFormats.Text))
-            return;
-
-        _ = pkg.GetTextAsync().AsTask().ContinueWith(t =>
+        try
         {
-            DispatcherQueue.TryEnqueue(() =>
+            var pkg = Clipboard.GetContent();
+            if (!pkg.Contains(StandardDataFormats.Text))
             {
-                if (string.IsNullOrWhiteSpace(t.Result))
-                    return;
+                StatusText.Text = AppLocalizer.Get("Clipboard does not contain text.");
+                return;
+            }
 
-                var text = t.Result.Trim();
-                var urls = SplitUrls(text).ToList();
-                if (urls.Count > 1)
-                {
-                    AddUrls(urls);
-                    UrlBox.Text = "";
-                }
-                else
-                {
-                    UrlBox.Text = text;
-                }
-            });
-        });
+            var text = await pkg.GetTextAsync();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                StatusText.Text = AppLocalizer.Get("Clipboard text is empty.");
+                return;
+            }
+
+            text = text.Trim();
+            var urls = SplitUrls(text).ToList();
+            if (urls.Count > 1)
+            {
+                AddUrls(urls);
+                UrlBox.Text = "";
+            }
+            else
+            {
+                UrlBox.Text = text;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = AppLocalizer.Get("Clipboard could not be read. Try again.");
+            Debug.WriteLine($"Downloader clipboard read failed: {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
     private void AddUrl_Click(object sender, RoutedEventArgs e)
