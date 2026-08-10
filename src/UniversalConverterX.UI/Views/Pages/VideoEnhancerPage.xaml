@@ -122,6 +122,11 @@
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="VideoEnhancerPageButton01"/>
+                <Button x:Uid="VideoEnhancerPage_PreviewSampleButton" x:Name="PreviewSampleButton"
+                        Content="Preview sample"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="PreviewSample_Click"
+                    AutomationProperties.AutomationId="VideoEnhancerPreviewSampleButton"/>
                 <Button x:Uid="VideoEnhancerPage_RunButton" x:Name="RunButton"
                         Content="Enhance Video"
                         Style="{StaticResource PrimaryButtonStyle}"

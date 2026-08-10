@@ -139,6 +139,10 @@
                         Style="{StaticResource SecondaryButtonStyle}"
                         Click="ApplyLastUsed_Click"
                         AutomationProperties.AutomationId="CompressorApplyLastUsedButton"/>
+                <Button x:Uid="CompressorPage_PreviewSampleButton" x:Name="PreviewSampleButton" Content="Preview sample"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="PreviewSample_Click"
+                        AutomationProperties.AutomationId="CompressorPreviewSampleButton"/>
                 <Button x:Uid="CompressorPage_CompressorPageButton01" Content="Add Files" Style="{StaticResource SecondaryButtonStyle}"
                         Click="Browse_Click"
                     AutomationProperties.AutomationId="CompressorPageButton01"/>

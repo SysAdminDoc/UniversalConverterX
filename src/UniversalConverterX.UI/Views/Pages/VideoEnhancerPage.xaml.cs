@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.Utilities;
@@ -43,6 +44,7 @@ public sealed partial class VideoEnhancerPage : Page
     private bool _anime4KActionRunning;
     private bool _rifeReady;
     private bool _restoringQueue;
+    private string? _pendingModelName;
 
     private bool _isReady;
 
@@ -64,6 +66,34 @@ public sealed partial class VideoEnhancerPage : Page
         _ = RefreshSeedVr2ModelStatusAsync();
         _ = RefreshAnime4KStatusAsync();
         _ = RefreshRifeStatusAsync();
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (e.Parameter is VideoEnhancerRerunRequest request)
+            ApplyRerunRequest(request);
+    }
+
+    private void ApplyRerunRequest(VideoEnhancerRerunRequest request)
+    {
+        var settings = request.PageSettings ?? new Dictionary<string, string?>();
+        _pendingModelName = settings.GetValueOrDefault("model");
+        SelectTaggedItem(EngineCombo, settings.GetValueOrDefault("engine"));
+        SelectTaggedItem(ScaleCombo, settings.GetValueOrDefault("scale"));
+        SelectTaggedItem(Anime4KProfileCombo, settings.GetValueOrDefault("anime4kProfile"));
+        SelectTaggedItem(SeedVr2ResolutionCombo, settings.GetValueOrDefault("resolution"));
+        SelectTaggedItem(TargetFpsCombo, settings.GetValueOrDefault("targetFps"));
+        if (double.TryParse(settings.GetValueOrDefault("crf"), NumberStyles.Float, CultureInfo.InvariantCulture, out var crf))
+            CrfSlider.Value = crf;
+        if (double.TryParse(settings.GetValueOrDefault("anime4kCrf"), NumberStyles.Float, CultureInfo.InvariantCulture, out var animeCrf))
+            Anime4KCrfSlider.Value = animeCrf;
+        foreach (var sourcePath in request.SourcePaths.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (File.Exists(sourcePath) && !_files.Any(file => file.Path.Equals(sourcePath, StringComparison.OrdinalIgnoreCase)))
+                AddFile(sourcePath, updateUi: false);
+        }
+        UpdateUi();
     }
 
     private void ShowWindowsVideoScalerStatus()
@@ -124,6 +154,16 @@ public sealed partial class VideoEnhancerPage : Page
                     defaultIdx = i;
             }
             ModelCombo.SelectedIndex = defaultIdx >= 0 ? defaultIdx : 0;
+            if (!string.IsNullOrWhiteSpace(_pendingModelName))
+            {
+                var pending = ModelCombo.Items
+                    .OfType<ComboBoxItem>()
+                    .FirstOrDefault(item => item.Tag is VeModel model
+                        && string.Equals(model.Name, _pendingModelName, StringComparison.OrdinalIgnoreCase));
+                if (pending is not null)
+                    ModelCombo.SelectedItem = pending;
+                _pendingModelName = null;
+            }
             ModelCombo.IsEnabled = true;
             ModelHintText.Text = AppLocalizer.Format($"{_models.Count} model(s) discovered. realesr-animevideov3 is fastest for video.");
         }
@@ -637,6 +677,58 @@ public sealed partial class VideoEnhancerPage : Page
         UpdateStatusText();
     }
 
+    private void PreviewSample_Click(object sender, RoutedEventArgs e)
+    {
+        if (_files.Count == 0)
+        {
+            StatusText.Text = AppLocalizer.Get("Add a video before rendering a representative sample.");
+            return;
+        }
+
+        var seedVr2 = IsSeedVr2Selected();
+        var anime4K = IsAnime4KSelected();
+        var rife = IsRifeSelected();
+        var model = (ModelCombo.SelectedItem as ComboBoxItem)?.Tag as VeModel;
+        if (!seedVr2 && !anime4K && !rife && model is null)
+        {
+            StatusText.Text = AppLocalizer.Get("Pick a model first.");
+            return;
+        }
+
+        var item = _files[0];
+        var scale = SelectedInt(ScaleCombo, 2);
+        var resolution = SelectedInt(SeedVr2ResolutionCombo, 720);
+        var targetFps = SelectedInt(TargetFpsCombo, 60);
+        var animeProfile = SelectedTag(Anime4KProfileCombo, "a");
+        var outputPath = BuildOutputPath(
+            item.Path, seedVr2, anime4K, rife, scale, resolution, animeProfile, targetFps);
+        var arguments = BuildInvocationArguments(item.Path, outputPath, model);
+        App.RequestNavigation("vmaf", new RepresentativePreviewRequest(
+            Surface: "video-enhancer",
+            SourcePath: item.Path,
+            Engine: rife ? "clipforge" : seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : "realesrgan",
+            Arguments: arguments,
+            Promotion: new RepresentativePreviewPromotion(
+                Surface: "video-enhancer",
+                SourcePath: item.Path,
+                OutputDirectory: Path.GetDirectoryName(outputPath),
+                OutputFormat: Path.GetExtension(outputPath).TrimStart('.'),
+                PageSettings: BuildEnhancerSettings(model))));
+    }
+
+    private Dictionary<string, string?> BuildEnhancerSettings(VeModel? model) =>
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["engine"] = SelectedEngine(),
+            ["model"] = model?.Name,
+            ["scale"] = SelectedInt(ScaleCombo, 2).ToString(CultureInfo.InvariantCulture),
+            ["crf"] = ((int)CrfSlider.Value).ToString(CultureInfo.InvariantCulture),
+            ["anime4kProfile"] = SelectedTag(Anime4KProfileCombo, "a"),
+            ["anime4kCrf"] = ((int)Anime4KCrfSlider.Value).ToString(CultureInfo.InvariantCulture),
+            ["resolution"] = SelectedInt(SeedVr2ResolutionCombo, 720).ToString(CultureInfo.InvariantCulture),
+            ["targetFps"] = SelectedInt(TargetFpsCombo, 60).ToString(CultureInfo.InvariantCulture),
+        };
+
     private void Crf_Changed(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (CrfLabel is null) return;
@@ -725,42 +817,7 @@ public sealed partial class VideoEnhancerPage : Page
             {
                 if (_cts.IsCancellationRequested) break;
                 var outputPath = BuildOutputPath(item.Path, seedVr2, anime4K, rife, scale, resolution, anime4KProfile, targetFps);
-                var args = seedVr2
-                    ? new List<string>
-                    {
-                        "restore",
-                        "--input", item.Path,
-                        "--output", outputPath,
-                        "--resolution", resolution.ToString(CultureInfo.InvariantCulture),
-                    }
-                    : anime4K
-                    ? new List<string>
-                    {
-                        "video",
-                        "--backend", "anime4k",
-                        "--profile", anime4KProfile,
-                        "--input", item.Path,
-                        "--output", outputPath,
-                        "--scale", "2",
-                        "--crf", crf.ToString(CultureInfo.InvariantCulture),
-                    }
-                    : rife
-                    ? new List<string>
-                    {
-                        "rife",
-                        "--input", item.Path,
-                        "--output", outputPath,
-                        "--target-fps", targetFps.ToString(CultureInfo.InvariantCulture),
-                    }
-                    : new List<string>
-                    {
-                        "upscale-video",
-                        "--input",  item.Path,
-                        "--output", outputPath,
-                        "--model",  model!.Name,
-                        "--scale",  scale.ToString(CultureInfo.InvariantCulture),
-                        "--crf",    crf.ToString(CultureInfo.InvariantCulture),
-                    };
+                var args = BuildInvocationArguments(item.Path, outputPath, model);
 
                 var itemHandle = new AppJobHandle(QueueKey, item.Id);
                 item.Engine = seedVr2 ? "seedvr2" : anime4K ? "anime-upscale" : rife ? "clipforge" : "realesrgan";
@@ -969,6 +1026,7 @@ public sealed partial class VideoEnhancerPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
         RunButton.IsEnabled = hasFiles && hasModel && _cts is null;
+        PreviewSampleButton.IsEnabled = hasFiles && hasModel && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
         QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
@@ -1063,6 +1121,68 @@ public sealed partial class VideoEnhancerPage : Page
             int.TryParse(item.Tag?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var v))
             return v;
         return fallback;
+    }
+
+    private static void SelectTaggedItem(ComboBox combo, string? tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag)) return;
+        var match = combo.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => string.Equals(
+                item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        if (match is not null)
+            combo.SelectedItem = match;
+    }
+
+    private List<string> BuildInvocationArguments(string inputPath, string outputPath, VeModel? model)
+    {
+        if (IsSeedVr2Selected())
+        {
+            return
+            [
+                "restore",
+                "--input", inputPath,
+                "--output", outputPath,
+                "--resolution", SelectedInt(SeedVr2ResolutionCombo, 720).ToString(CultureInfo.InvariantCulture),
+            ];
+        }
+
+        if (IsAnime4KSelected())
+        {
+            return
+            [
+                "video",
+                "--backend", "anime4k",
+                "--profile", SelectedTag(Anime4KProfileCombo, "a"),
+                "--input", inputPath,
+                "--output", outputPath,
+                "--scale", "2",
+                "--crf", ((int)Anime4KCrfSlider.Value).ToString(CultureInfo.InvariantCulture),
+            ];
+        }
+
+        if (IsRifeSelected())
+        {
+            return
+            [
+                "rife",
+                "--input", inputPath,
+                "--output", outputPath,
+                "--target-fps", SelectedInt(TargetFpsCombo, 60).ToString(CultureInfo.InvariantCulture),
+            ];
+        }
+
+        if (model is null)
+            throw new InvalidOperationException("A Real-ESRGAN model is required.");
+        return
+        [
+            "upscale-video",
+            "--input", inputPath,
+            "--output", outputPath,
+            "--model", model.Name,
+            "--scale", SelectedInt(ScaleCombo, 2).ToString(CultureInfo.InvariantCulture),
+            "--crf", ((int)CrfSlider.Value).ToString(CultureInfo.InvariantCulture),
+        ];
     }
 
     private static string SelectedTag(ComboBox combo, string fallback) =>

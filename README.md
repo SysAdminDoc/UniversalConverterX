@@ -19,11 +19,11 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 ## Modules
 
 - **Converter** — 1000+ formats via FFmpeg, ImageMagick, Pandoc, libvips, libjxl, libheif, Inkscape, Calibre, Assimp, Ghostscript, LibreOffice, resvg, Potrace.
-- **Compressor** — web/archive profiles, cap-safe social size targets, custom maximum-size two-pass encoding, VMAF-targeted smart compression with verified quality scores, and a guarded D3D12 zero-copy path that probes the real driver before use and falls back without losing requested scaling or deinterlacing.
+- **Compressor** — web/archive profiles, cap-safe social size targets, custom maximum-size two-pass encoding, VMAF-targeted smart compression with verified quality scores, bounded representative previews with linked VMAF comparison and full-run size/time estimates, and a guarded D3D12 zero-copy path that probes the real driver before use and falls back without losing requested scaling or deinterlacing.
 - **APV camera masters** — detect RFC 9924 raw APV and convert locally to H.265 10-bit, ProRes 422 HQ, or H.264 with the bundled FFmpeg build.
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
-- **Video Enhancer** — portable Real-ESRGAN export, managed RIFE Vulkan frame interpolation, optional Anime4K v4 GLSL chains through mpv, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
+- **Video Enhancer** — portable Real-ESRGAN export, managed RIFE Vulkan frame interpolation, optional Anime4K v4 GLSL chains through mpv, bounded representative previews with synchronized source/output comparison and VMAF estimates, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
 - **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.3 and libavif 1.4.2 runtimes.
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
@@ -36,6 +36,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 - **Automation** — shared CLI/REST/PowerShell engine catalog plus safe metadata-based conditional preset planning.
 - **Toolbox** — 40+ specialized tools across Image, Video, AI, Audio, Documents, Disc, and Other categories.
 - **Large-list performance** — Toolbox tiles, preset cards, and History rows use virtualized containers; History pages its retained rows on demand and preset filtering is debounced for responsive catalog browsing.
+- **Representative video previews** — Compressor and Video Enhancer can render a bounded sample with the exact full-job settings, compare source/output side by side in VMAF, estimate full-run size/time, and promote those settings back into the queue.
 
 ## Toolbox highlights
 

@@ -99,6 +99,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
@@ -126,7 +127,107 @@
                         <TextBlock x:Uid="VmafAnalysisPage_StatBelow70" x:Name="StatBelow70" Text="--" Style="{StaticResource TitleTextStyle}" FontSize="28"/>
                     </StackPanel>
                 </Grid>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <Border x:Name="SampleComparisonPanel" Grid.Row="1"
+                        Visibility="Collapsed"
+                        Background="{StaticResource SurfaceLightBrush}"
+                        CornerRadius="10"
+                        Padding="12">
+                    <Grid RowSpacing="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="VmafAnalysisPage_SampleComparisonTitle"
+                                       Text="Representative sample comparison"
+                                       Style="{StaticResource PanelTitleTextStyle}"
+                                       VerticalAlignment="Center"/>
+                            <NumberBox x:Uid="VmafAnalysisPage_SampleStartBox"
+                                       x:Name="SampleStartBox"
+                                       Grid.Column="1"
+                                       Header="Start (s)"
+                                       Value="0"
+                                       Minimum="0"
+                                       Maximum="86400"
+                                       SmallChange="1"
+                                       SpinButtonPlacementMode="Inline"
+                                       Width="118"
+                                       AutomationProperties.AutomationId="VmafSampleStartBox"/>
+                            <NumberBox x:Uid="VmafAnalysisPage_SampleDurationBox"
+                                       x:Name="SampleDurationBox"
+                                       Grid.Column="2"
+                                       Header="Length (s)"
+                                       Value="10"
+                                       Minimum="3"
+                                       Maximum="15"
+                                       SmallChange="1"
+                                       SpinButtonPlacementMode="Inline"
+                                       Width="118"
+                                       AutomationProperties.AutomationId="VmafSampleDurationBox"/>
+                            <Button x:Uid="VmafAnalysisPage_RenderSampleButton"
+                                    x:Name="RenderSampleButton"
+                                    Grid.Column="3"
+                                    Content="Render sample"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Click="RenderSample_Click"
+                                    AutomationProperties.AutomationId="VmafRenderSampleButton"/>
+                        </Grid>
+                        <Grid Grid.Row="1" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Uid="VmafAnalysisPage_SampleSourceLabel"
+                                           Text="Source segment"
+                                           Style="{StaticResource MutedTextStyle}"/>
+                                <MediaPlayerElement x:Name="ReferencePlayer"
+                                                    AreTransportControlsEnabled="True"
+                                                    AutoPlay="False"
+                                                    MinHeight="220"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock x:Uid="VmafAnalysisPage_SampleOutputLabel"
+                                           Text="Rendered output"
+                                           Style="{StaticResource MutedTextStyle}"/>
+                                <MediaPlayerElement x:Name="DistortedPlayer"
+                                                    AreTransportControlsEnabled="True"
+                                                    AutoPlay="False"
+                                                    MinHeight="220"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="2" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="3">
+                                <TextBlock x:Uid="VmafAnalysisPage_SampleEstimateLabel"
+                                           Text="Estimate"
+                                           Style="{StaticResource MutedTextStyle}"/>
+                                <TextBlock x:Name="SampleEstimateText"
+                                           Style="{StaticResource SubtleTextStyle}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <Button x:Uid="VmafAnalysisPage_UseSettingsButton"
+                                    x:Name="UseSettingsButton"
+                                    Grid.Column="1"
+                                    Content="Use these settings for the full job"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Click="UseSettings_Click"
+                                    Visibility="Collapsed"
+                                    AutomationProperties.AutomationId="VmafUseSettingsButton"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                     <TextBlock x:Name="LogText"
                                Style="{StaticResource MutedTextStyle}"
                                FontFamily="Consolas, Cascadia Mono, monospace"

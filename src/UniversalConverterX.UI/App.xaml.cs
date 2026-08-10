@@ -72,6 +72,7 @@ public partial class App : Application
         services.AddSingleton<IFfmpegCommandReviewService, FfmpegCommandReviewService>();
         services.AddSingleton<IPluginTrustService, PluginTrustService>();
         services.AddSingleton<ISidecarRunner, SidecarRunner>();
+        services.AddSingleton<IRepresentativePreviewService, RepresentativePreviewService>();
         services.AddSingleton<IHistoryService, HistoryService>();
         services.AddSingleton<IPostQueueActionService, PostQueueActionService>();
         services.AddSingleton<IWatchFolderService, WatchFolderService>();

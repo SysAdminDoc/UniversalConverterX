@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 164 — Add representative sample render and synchronized comparison
-  Why: users need evidence before committing to expensive compression/restoration settings, and UCX already computes VMAF.
-  Evidence: Movavi sample conversion; Topaz/Apple preview; StaxRip issue 702; `VmafAnalysisPage`.
-  Touches: Compressor/Enhancer job builder, preview cache, `VmafAnalysisPage`.
-  Acceptance: users render a bounded representative segment, compare source/output with linked seek or split view, see estimated size/time plus VMAF summary, and promote the exact settings into a full job.
-  Complexity: M
-
 - [ ] P2 — Item 165 — Version plugin and sidecar host-compatibility manifests
   Why: plugin schema validates trust but not minimum/maximum host or capability contracts, while built-in sidecar manifests omit schema and engine versions.
   Evidence: `PluginTrustService.CurrentSchemaVersion`; `tools/*/ucx.sidecar.json`; FileFlows plugin/server compatibility.

@@ -1248,6 +1248,9 @@
   <data name="Code_04936686297694FFEA04" xml:space="preserve">
     <value>Keyframes: {0}. Re-encode mode cuts on any frame.</value>
   </data>
+  <data name="Code_04D0C574982DB9C8C6E9" xml:space="preserve">
+    <value>Representative sample rendering was cancelled.</value>
+  </data>
   <data name="Code_04FC5167489FC34AE9ED" xml:space="preserve">
     <value>yt-dlp: {0}.</value>
   </data>
@@ -1337,6 +1340,9 @@
   </data>
   <data name="Code_0F3F35C866DCF3EBDC0A" xml:space="preserve">
     <value>Plugin unavailable</value>
+  </data>
+  <data name="Code_0FB57CCF66815D2FB6FE" xml:space="preserve">
+    <value>Rendering a representative sample with the selected settings...</value>
   </data>
   <data name="Code_0FD2ECC37D765C7B19D3" xml:space="preserve">
     <value>Add to audio conversion queue</value>
@@ -1532,6 +1538,9 @@
   </data>
   <data name="Code_242019F21AB4274761FD" xml:space="preserve">
     <value>Parakeet sidecar is not installed in this build.</value>
+  </data>
+  <data name="Code_24C3E043E55DDCC84667" xml:space="preserve">
+    <value>No estimate is available until a sample renders successfully.</value>
   </data>
   <data name="Code_24D2C67C71417CE2AD21" xml:space="preserve">
     <value>Done - {0}</value>
@@ -2073,6 +2082,9 @@
   <data name="Code_5C99A8C401BA7DF8B427" xml:space="preserve">
     <value>Cancelled. {0} files completed.</value>
   </data>
+  <data name="Code_5CC1FA38FFFE13651BCB" xml:space="preserve">
+    <value>Estimate unavailable for this sample.</value>
+  </data>
   <data name="Code_5D681D2CCE303FF6EE9F" xml:space="preserve">
     <value>Showing {0} of {1} most recent of {2} total.</value>
   </data>
@@ -2105,6 +2117,9 @@
   </data>
   <data name="Code_608969163FD2DDFB7071" xml:space="preserve">
     <value>This downloads the pinned U2Net Human Seg ONNX model (Apache-2.0, 168 MB). UCX verifies its exact size and SHA-256 before installing it. Background removal remains offline after installation.</value>
+  </data>
+  <data name="Code_60DFD7E3F2556D41DAD6" xml:space="preserve">
+    <value>Preparing representative sample...</value>
   </data>
   <data name="Code_61BF23EA797D8D7E5AC9" xml:space="preserve">
     <value>Unpacking {0}...</value>
@@ -2204,6 +2219,9 @@
   </data>
   <data name="Code_6F6C955A81EDF91E5A7E" xml:space="preserve">
     <value>Preview ready. Review the cues, then export.</value>
+  </data>
+  <data name="Code_6F9E9A7940C1861E5955" xml:space="preserve">
+    <value>Sample {0:F1}s / {1}. Full source {2}: estimated {3}, about {4} to render.{5}</value>
   </data>
   <data name="Code_701E8DFC6F972A3F8077" xml:space="preserve">
     <value>Anime4K is not ready.</value>
@@ -2588,6 +2606,9 @@
   </data>
   <data name="Code_9D5994412CC2F951075E" xml:space="preserve">
     <value>Disc operation failed: {0}</value>
+  </data>
+  <data name="Code_9D59AA851D0F5A244B1E" xml:space="preserve">
+    <value>unknown time</value>
   </data>
   <data name="Code_9E7C930321BD8764F27F" xml:space="preserve">
     <value>No .rnnn models found</value>
@@ -3436,11 +3457,17 @@ SHA-256: {0}</value>
   <data name="Code_F57042F0DA4D0ED5BA9A" xml:space="preserve">
     <value>docconvert sidecar not built. Run pwsh tools/docconvert/build.ps1.</value>
   </data>
+  <data name="Code_F5D2F93BCB21EAE3627E" xml:space="preserve">
+    <value>unknown size</value>
+  </data>
   <data name="Code_F634B210942BD68C1EA9" xml:space="preserve">
     <value>Downloading and verifying model…</value>
   </data>
   <data name="Code_F787F5BD60578A69C44B" xml:space="preserve">
     <value>Re-trust</value>
+  </data>
+  <data name="Code_F79B28D2C42B09189D0E" xml:space="preserve">
+    <value> Cached preview.</value>
   </data>
   <data name="Code_F7A77C246D7FD370BCB3" xml:space="preserve">
     <value>ISO image saved to {0}.</value>
@@ -3459,6 +3486,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_F97DCC6155B65F869811" xml:space="preserve">
     <value>No source selected.</value>
+  </data>
+  <data name="Code_F9C864C34E518AA205AE" xml:space="preserve">
+    <value>Representative sample failed: {0}</value>
   </data>
   <data name="Code_FA1BE1D4F7F19AFCA6DE" xml:space="preserve">
     <value>Add images to create a slideshow video.</value>
@@ -3489,6 +3519,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_FD3DFAB4961A490F3CCD" xml:space="preserve">
     <value>{0} - Restored</value>
+  </data>
+  <data name="Code_FE0945CA394B4BA10373" xml:space="preserve">
+    <value>Add a video before rendering a representative sample.</value>
   </data>
   <data name="Code_FE239133CE8BBB3A7AB4" xml:space="preserve">
     <value>Same as source folder</value>
@@ -3741,6 +3774,9 @@ SHA-256: {0}</value>
   </data>
   <data name="CompressorPage_PresetWeb.Content" xml:space="preserve">
     <value>Web-Upload (1080p, CRF 23)</value>
+  </data>
+  <data name="CompressorPage_PreviewSampleButton.Content" xml:space="preserve">
+    <value>Preview sample</value>
   </data>
   <data name="CompressorPage_ProgressBar.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Fortschritt</value>
@@ -8023,6 +8059,9 @@ SHA-256: {0}</value>
   <data name="VideoEnhancerPage_ModelCombo.PlaceholderText" xml:space="preserve">
     <value>Entdecken...</value>
   </data>
+  <data name="VideoEnhancerPage_PreviewSampleButton.Content" xml:space="preserve">
+    <value>Preview sample</value>
+  </data>
   <data name="VideoEnhancerPage_QueueSummaryText.Text" xml:space="preserve">
     <value>0 Schlange stehend / 0 fertig</value>
   </data>
@@ -8242,8 +8281,29 @@ SHA-256: {0}</value>
   <data name="VmafAnalysisPage_ReferenceLabel.Text" xml:space="preserve">
     <value>(wählen Sie den Original-Masterclip)</value>
   </data>
+  <data name="VmafAnalysisPage_RenderSampleButton.Content" xml:space="preserve">
+    <value>Render sample</value>
+  </data>
   <data name="VmafAnalysisPage_RunButton.Content" xml:space="preserve">
     <value>VMAF ausführen</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleComparisonTitle.Text" xml:space="preserve">
+    <value>Representative sample comparison</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleDurationBox.Header" xml:space="preserve">
+    <value>Length (s)</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleEstimateLabel.Text" xml:space="preserve">
+    <value>Estimate</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleOutputLabel.Text" xml:space="preserve">
+    <value>Rendered output</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleSourceLabel.Text" xml:space="preserve">
+    <value>Source segment</value>
+  </data>
+  <data name="VmafAnalysisPage_SampleStartBox.Header" xml:space="preserve">
+    <value>Start (s)</value>
   </data>
   <data name="VmafAnalysisPage_StatBelow70.Text" xml:space="preserve">
     <value>--</value>
@@ -8259,6 +8319,9 @@ SHA-256: {0}</value>
   </data>
   <data name="VmafAnalysisPage_StatusText.Text" xml:space="preserve">
     <value>Wählen Sie eine Referenz + verzerrten Clip, um zu starten.</value>
+  </data>
+  <data name="VmafAnalysisPage_UseSettingsButton.Content" xml:space="preserve">
+    <value>Use these settings for the full job</value>
   </data>
   <data name="VmafAnalysisPage_VmafAnalysisPageButton01.Content" xml:space="preserve">
     <value>Durchsuchen...</value>

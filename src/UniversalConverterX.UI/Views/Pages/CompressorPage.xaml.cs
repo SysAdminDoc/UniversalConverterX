@@ -791,21 +791,7 @@ public sealed partial class CompressorPage : Page
         }
 
         var preset = SelectedPresetTag();
-        var workflow = new CompressorWorkflowViewModel
-        {
-            Mode = smartQualityMode
-                ? CompressionWorkflowMode.Vmaf
-                : IsTargetSizeMode
-                    ? CompressionWorkflowMode.TargetSize
-                    : CompressionWorkflowMode.Standard,
-            Preset = preset,
-            HardwareAcceleration = SelectedHwAccel(),
-            D3D12Deinterlace = D3D12DeinterlaceToggle?.IsChecked == true,
-            TargetPreset = SelectedTargetPresetTag(),
-            TargetMegabytes = SelectedTargetLimitMb(),
-            VmafEncoder = SelectedVmafEncoder(),
-            VmafTarget = SelectedVmafTarget(),
-        };
+        var workflow = BuildWorkflow();
         var engine = workflow.Engine;
         var jobs = _files.ToList();
         var completed = 0;
@@ -1006,6 +992,49 @@ public sealed partial class CompressorPage : Page
         }
     }
 
+    private void PreviewSample_Click(object sender, RoutedEventArgs e)
+    {
+        if (_files.Count == 0)
+        {
+            StatusText.Text = AppLocalizer.Get("Add a video before rendering a representative sample.");
+            return;
+        }
+
+        var item = _files[0];
+        var workflow = BuildWorkflow();
+        var outputPath = BuildOutputPath(item.Path, workflow.Mode == CompressionWorkflowMode.Vmaf);
+        var invocation = workflow.BuildInvocation(item.Path, outputPath);
+        var rerun = BuildRerunRequest(item.Path, outputPath);
+        App.RequestNavigation("vmaf", new RepresentativePreviewRequest(
+            Surface: "compressor",
+            SourcePath: item.Path,
+            Engine: invocation.Engine,
+            Arguments: invocation.Arguments,
+            Promotion: new RepresentativePreviewPromotion(
+                Surface: "compressor",
+                SourcePath: item.Path,
+                OutputDirectory: rerun.OutputDirectory,
+                OutputFormat: rerun.OutputFormat,
+                PageSettings: new Dictionary<string, string?>(rerun.PageSettings,
+                    StringComparer.OrdinalIgnoreCase))));
+    }
+
+    private CompressorWorkflowViewModel BuildWorkflow() => new()
+    {
+        Mode = IsVmafTargetMode
+            ? CompressionWorkflowMode.Vmaf
+            : IsTargetSizeMode
+                ? CompressionWorkflowMode.TargetSize
+                : CompressionWorkflowMode.Standard,
+        Preset = SelectedPresetTag(),
+        HardwareAcceleration = SelectedHwAccel(),
+        D3D12Deinterlace = D3D12DeinterlaceToggle?.IsChecked == true,
+        TargetPreset = SelectedTargetPresetTag(),
+        TargetMegabytes = SelectedTargetLimitMb(),
+        VmafEncoder = SelectedVmafEncoder(),
+        VmafTarget = SelectedVmafTarget(),
+    };
+
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
         if (_cts is { IsCancellationRequested: false })
@@ -1082,6 +1111,7 @@ public sealed partial class CompressorPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
         CompressButton.IsEnabled = hasFiles && _cts is null;
+        PreviewSampleButton.IsEnabled = hasFiles && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         UpdateTotals();
         UpdateStatusText();

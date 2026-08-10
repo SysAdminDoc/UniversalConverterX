@@ -6,6 +6,28 @@ namespace UniversalConverterX.Core.Tests.Utilities;
 public class OutputSizeEstimatorTests
 {
     [Fact]
+    public void RepresentativePreviewEstimate_ScalesOutputAndRenderTime()
+    {
+        var estimate = new RepresentativePreviewEstimate(
+            SampleDurationSeconds: 10,
+            SampleOutputBytes: 2_000,
+            FullDurationSeconds: 60,
+            RenderSeconds: 5);
+
+        estimate.EstimatedOutputBytes.Should().Be(12_000);
+        estimate.EstimatedRenderSeconds.Should().Be(30);
+    }
+
+    [Fact]
+    public void RepresentativePreviewEstimate_UnknownDurationReturnsNoEstimate()
+    {
+        var estimate = new RepresentativePreviewEstimate(0, 2_000, 60, 5);
+
+        estimate.EstimatedOutputBytes.Should().BeNull();
+        estimate.EstimatedRenderSeconds.Should().BeNull();
+    }
+
+    [Fact]
     public void ForLosslessCopy_Returns_InputPlusSmallOverhead()
     {
         var inputBytes = 100L * 1024 * 1024; // 100 MiB
