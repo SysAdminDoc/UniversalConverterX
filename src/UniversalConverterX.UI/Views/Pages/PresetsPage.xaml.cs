@@ -369,8 +369,10 @@ public sealed partial class PresetsPage : Page
 
             card.StatusText = AppLocalizer.Get("Running...");
             var startedAt = DateTime.UtcNow;
-            using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
-            var result = await _executor.RunAsync(preset, inputs, outDir, cancellationToken: cts.Token);
+            // Presets can legitimately take hours on large AI batches. Let the
+            // runner's silence watchdog handle genuinely stuck sidecars rather
+            // than turning a long but healthy run into a misleading user cancel.
+            var result = await _executor.RunAsync(preset, inputs, outDir, cancellationToken: CancellationToken.None);
             card.StatusText = result.Success ? AppLocalizer.Get("Done") : AppLocalizer.Format($"Failed ({result.ErrorCode})");
 
             StatusText.Text = result.Success
