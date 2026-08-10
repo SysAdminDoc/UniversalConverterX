@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 132b — Wire queue search and clone into queue/History UI
-  Why: tested Core primitives exist, while professional queues make warnings, prior jobs, and copied settings searchable.
-  Evidence: `BatchQueueOperations.Search`/`CloneAsNew`; MKVToolNix v100.
-  Touches: queue and History UI.
-  Acceptance: search filters filename/engine/status/error, and “open copy as new settings” creates a fresh job without mutating the original.
-  Complexity: S
-
 - [ ] P2 — Item 133 — Preserve MP4/MOV `udta` track names on remux
   Why: named-track fidelity remains incomplete and MKVToolNix v100 now imports these names.
   Evidence: MKVToolNix v100; Item 155 fixture matrix.

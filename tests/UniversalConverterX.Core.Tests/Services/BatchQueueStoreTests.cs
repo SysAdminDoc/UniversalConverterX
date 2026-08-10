@@ -194,6 +194,10 @@ public sealed class BatchQueueStoreTests : IDisposable
             .Which.SourcePath.Should().EndWith("holiday.mov");
         BatchQueueOperations.Search(jobs, "ghostscript").Should().ContainSingle();
         BatchQueueOperations.Search(jobs, "timeout").Should().ContainSingle();
+        BatchQueueOperations.Search(jobs, "failed").Should().ContainSingle()
+            .Which.Engine.Should().Be("ghostscript");
+        BatchQueueOperations.Search(jobs, "completed").Should().ContainSingle()
+            .Which.Engine.Should().Be("audiopro");
         BatchQueueOperations.Search(jobs, "").Should().HaveCount(3);      // blank matches all
         BatchQueueOperations.Search(jobs, "nomatch").Should().BeEmpty();
     }

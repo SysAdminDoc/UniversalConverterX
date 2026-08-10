@@ -2862,6 +2862,9 @@
   <data name="Code_BD2CEF5AA382119BCF9D" xml:space="preserve">
     <value>Tesseract not found. Install from UB-Mannheim's release page.</value>
   </data>
+  <data name="Code_BDFDF670D50D8E4F35C9" xml:space="preserve">
+    <value>Cannot open a copy because the source is missing: {0}</value>
+  </data>
   <data name="Code_BE4B350F47AA1FD3AA9F" xml:space="preserve">
     <value>No supported audio/video files found in that folder.</value>
   </data>
@@ -5229,6 +5232,12 @@ SHA-256: {0}</value>
   </data>
   <data name="HistoryPage_Item_020.Text" xml:space="preserve">
     <value>Ejecute una conversión o compresión y aparecerá aquí.</value>
+  </data>
+  <data name="HistoryPage_OpenCopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Open a fresh job with these settings</value>
+  </data>
+  <data name="HistoryPage_OpenCopyButton.Content" xml:space="preserve">
+    <value>Open copy</value>
   </data>
   <data name="HistoryPage_SearchBox.PlaceholderText" xml:space="preserve">
     <value>Filtrar por motor, acción, ruta de archivo, preestablecido...</value>

@@ -397,7 +397,11 @@ public sealed class HistoryStore : IDisposable
                  OR output_path LIKE {parameter} ESCAPE '\'
                  OR profile LIKE {parameter} ESCAPE '\'
                  OR error_code LIKE {parameter} ESCAPE '\'
-                 OR error_message LIKE {parameter} ESCAPE '\')
+                 OR error_message LIKE {parameter} ESCAPE '\'
+                 OR CASE WHEN success = 1
+                         THEN 'succeeded success completed ok'
+                         ELSE 'failed failure error'
+                    END LIKE {parameter} ESCAPE '\')
                 """);
         }
 

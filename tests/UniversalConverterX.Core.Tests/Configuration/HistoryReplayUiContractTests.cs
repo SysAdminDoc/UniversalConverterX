@@ -16,6 +16,10 @@ public sealed class HistoryReplayUiContractTests
         historyCode.Should().Contain("This legacy row has no usable source/output settings to restore.");
         historyXaml.Should().Contain("Click=\"Rerun_Click\"");
         historyXaml.Should().Contain("Content=\"Re-run\"");
+        historyXaml.Should().Contain("Click=\"OpenCopy_Click\"");
+        historyXaml.Should().Contain("Content=\"Open copy\"");
+        historyCode.Should().Contain("BatchQueueOperations.CloneAsNew");
+        historyCode.Should().Contain("OutputPath = null");
         historyCode.Should().NotContain("ConvertButton_Click");
     }
 

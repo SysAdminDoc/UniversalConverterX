@@ -2862,6 +2862,9 @@
   <data name="Code_BD2CEF5AA382119BCF9D" xml:space="preserve">
     <value>Tesseract not found. Install from UB-Mannheim's release page.</value>
   </data>
+  <data name="Code_BDFDF670D50D8E4F35C9" xml:space="preserve">
+    <value>Cannot open a copy because the source is missing: {0}</value>
+  </data>
   <data name="Code_BE4B350F47AA1FD3AA9F" xml:space="preserve">
     <value>No supported audio/video files found in that folder.</value>
   </data>
@@ -5210,7 +5213,7 @@ SHA-256: {0}</value>
     <value>History</value>
   </data>
   <data name="HistoryPage_Item_006.Text" xml:space="preserve">
-    <value>Persistent SQLite log of every job. Search, re-run, or forget any entry.</value>
+    <value>Persistent SQLite log of every job. Search, re-run, open a copy, or forget any entry.</value>
   </data>
   <data name="HistoryPage_Item_010.Text" xml:space="preserve">
     <value>Total jobs</value>
@@ -5230,8 +5233,14 @@ SHA-256: {0}</value>
   <data name="HistoryPage_Item_020.Text" xml:space="preserve">
     <value>Run a conversion or compression and it will appear here.</value>
   </data>
+  <data name="HistoryPage_OpenCopyButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Open a fresh job with these settings</value>
+  </data>
+  <data name="HistoryPage_OpenCopyButton.Content" xml:space="preserve">
+    <value>Open copy</value>
+  </data>
   <data name="HistoryPage_SearchBox.PlaceholderText" xml:space="preserve">
-    <value>Filter by engine, action, file path, preset...</value>
+    <value>Filter by engine, status, action, file path, preset, or error...</value>
   </data>
   <data name="HistoryPage_StatFail.Text" xml:space="preserve">
     <value>0</value>

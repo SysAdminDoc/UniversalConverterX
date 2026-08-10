@@ -22,6 +22,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <FontIcon Glyph="&#xE73E;" FontSize="20"
                               Foreground="{StaticResource AccentGreenBrush}"
@@ -57,13 +58,19 @@
                             ToolTipService.ToolTip="Reveal output in Explorer"
                             Click="Reveal_Click"
                             Tag="{x:Bind OutputPath}"/>
-                    <Button x:Uid="HistoryPage_Item_003" Grid.Column="3"
+                    <Button x:Uid="HistoryPage_OpenCopyButton" Grid.Column="3"
+                            Content="Open copy"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            ToolTipService.ToolTip="Open a fresh job with these settings"
+                            Click="OpenCopy_Click"
+                            Tag="{x:Bind Id}"/>
+                    <Button x:Uid="HistoryPage_Item_003" Grid.Column="4"
                             Content="Re-run"
                             Style="{StaticResource SecondaryButtonStyle}"
                             ToolTipService.ToolTip="Re-run with the same parameters"
                             Click="Rerun_Click"
                             Tag="{x:Bind Id}"/>
-                    <Button x:Uid="HistoryPage_Item_004" Grid.Column="4"
+                    <Button x:Uid="HistoryPage_Item_004" Grid.Column="5"
                             Style="{StaticResource IconButtonStyle}"
                             AutomationProperties.Name="Forget this entry" ToolTipService.ToolTip="Forget this entry"
                             Click="Delete_Click"
@@ -93,7 +100,7 @@
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="HistoryPage_Item_005" Text="History"
                            Style="{StaticResource PageTitleTextStyle}"/>
-                <TextBlock x:Uid="HistoryPage_Item_006" Text="Persistent SQLite log of every job. Search, re-run, or forget any entry."
+                <TextBlock x:Uid="HistoryPage_Item_006" Text="Persistent SQLite log of every job. Search, re-run, open a copy, or forget any entry."
                            Style="{StaticResource PageDescriptionTextStyle}"
                            TextWrapping="Wrap"
                            MaxWidth="720"/>
@@ -154,7 +161,7 @@
 
         <AutoSuggestBox x:Uid="HistoryPage_SearchBox" Grid.Row="2"
                         x:Name="SearchBox"
-                        PlaceholderText="Filter by engine, action, file path, preset..."
+                        PlaceholderText="Filter by engine, status, action, file path, preset, or error..."
                         QueryIcon="Find"
                         Padding="12,8"
                         TextChanged="Search_TextChanged"

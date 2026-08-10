@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -152,9 +153,7 @@ public sealed partial class HistoryPage : Page
             return;
         }
 
-        var request = await _history.GetRerunRequestAsync(record.Id);
-        if (request is null)
-            request = BuildLegacyRerun(record);
+        var request = await LoadRerunRequestAsync(record);
 
         if (request is null)
         {
@@ -174,6 +173,66 @@ public sealed partial class HistoryPage : Page
                 ? "compressor"
                 : "converter",
             request);
+    }
+
+    private async void OpenCopy_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not long id) return;
+        var record = await _history.GetAsync(id);
+        if (record is null)
+        {
+            StatusText.Text = AppLocalizer.Get("That history row no longer exists.");
+            return;
+        }
+
+        var request = await LoadRerunRequestAsync(record);
+        if (request is null)
+        {
+            StatusText.Text = AppLocalizer.Get("This legacy row has no usable source/output settings to restore.");
+            return;
+        }
+
+        var missing = request.SourcePaths.FirstOrDefault(path => !File.Exists(path));
+        if (missing is not null)
+        {
+            StatusText.Text = AppLocalizer.Format($"Cannot open a copy because the source is missing: {Path.GetFileName(missing)}");
+            return;
+        }
+
+        // Keep the history row immutable. CloneAsNew supplies the same
+        // non-destructive semantics as the durable queue, while the page
+        // receives a request with no old output path so it creates a fresh
+        // queue item instead of reusing the completed job's destination.
+        var source = new PersistedBatchJob
+        {
+            Id = record.Id.ToString(CultureInfo.InvariantCulture),
+            SourcePath = record.SourcePath,
+            OutputPath = record.OutputPath,
+            Engine = record.Engine,
+            Action = record.Action,
+            Preset = record.Profile,
+            Status = record.Success ? "Completed" : "Failed",
+            ErrorMessage = record.ErrorMessage,
+            Provenance = record.Provenance,
+        };
+        var clone = BatchQueueOperations.CloneAsNew(source);
+        var copyRequest = request with
+        {
+            SourcePaths = [clone.SourcePath],
+            OutputPath = null,
+        };
+
+        App.RequestNavigation(
+            string.Equals(copyRequest.Surface, "compressor", StringComparison.OrdinalIgnoreCase)
+                ? "compressor"
+                : "converter",
+            copyRequest);
+    }
+
+    private async Task<ConversionRerunRequest?> LoadRerunRequestAsync(HistoryRecord record)
+    {
+        var request = await _history.GetRerunRequestAsync(record.Id);
+        return request ?? BuildLegacyRerun(record);
     }
 
     private static ConversionRerunRequest? BuildLegacyRerun(HistoryRecord record)

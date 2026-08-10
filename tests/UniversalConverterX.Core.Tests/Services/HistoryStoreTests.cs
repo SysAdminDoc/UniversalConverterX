@@ -65,6 +65,11 @@ public sealed class HistoryStoreTests : IDisposable
         var failureSearch = await store.QueryAsync("heicshift Invalid image");
         failureSearch.Should().ContainSingle().Which.Id.Should().Be(secondId);
 
+        (await store.QueryAsync("succeeded")).Should().ContainSingle()
+            .Which.Id.Should().Be(firstId);
+        (await store.QueryAsync("failed")).Should().ContainSingle()
+            .Which.Id.Should().Be(secondId);
+
         (await store.QueryAsync("%")).Should().BeEmpty("wildcards are literal search text");
 
         (await store.SummarizeAsync("café mp4")).Should().Be(new ConversionHistorySummary(

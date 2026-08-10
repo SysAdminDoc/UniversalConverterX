@@ -15,6 +15,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - History rows and the Converter/Compressor pages can now apply saved settings without starting a job, with surface-filtered latest replay, Compressor profile persistence, and legacy-row fallback diagnostics.
 - Converter preflight now probes named and language-tagged audio/subtitle streams and exposes keep/drop controls. Explicit per-kind selections flow into FFmpeg job snapshots and durable queue recovery, while the default preserves every track.
 - Hardware encoder choices now stay disabled until the configured FFmpeg build exposes a matching encoder. Missing-tool, driver, and VRAM requirements are explained inline; hardware initialization failures retry per job on CPU while preserving scale/deinterlace settings and recording the actual encoder and fallback reason in history provenance.
+- Job Center search now exposes the durable queue's filename, engine, status, and error filtering, while History adds an “Open copy” action that restores a fresh settings job without reusing or mutating the original history row.
 
 ### Fixed
 
