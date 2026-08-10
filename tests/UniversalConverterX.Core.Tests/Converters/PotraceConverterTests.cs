@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentAssertions;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Models;
@@ -29,5 +30,34 @@ public class PotraceConverterTests
         var backendIndex = Array.IndexOf(args, "-b");
         backendIndex.Should().BeGreaterOrEqualTo(0);
         args[backendIndex + 1].Should().Be(backendName);
+    }
+
+    [Fact]
+    public void ConfigureProcessStartInfo_ImageMagickFallbackUsesShippedPolicy()
+    {
+        var converter = new TestablePotraceConverter(
+            Path.Combine(Path.GetTempPath(), "ucx-test-tools"));
+        var startInfo = converter.CreateStartInfo(
+            "magick.exe",
+            new ConversionJob
+            {
+                InputPath = "input.png",
+                OutputPath = "output.dxf",
+            });
+
+        var policyDirectory = startInfo.Environment["MAGICK_CONFIGURE_PATH"];
+        policyDirectory.Should().NotBeNullOrWhiteSpace();
+        File.Exists(Path.Combine(policyDirectory!, "policy.xml")).Should().BeTrue();
+    }
+
+    private sealed class TestablePotraceConverter(string toolsBasePath)
+        : PotraceConverter(toolsBasePath)
+    {
+        public ProcessStartInfo CreateStartInfo(string executable, ConversionJob job)
+        {
+            var startInfo = new ProcessStartInfo { FileName = executable };
+            ConfigureProcessStartInfo(startInfo, job);
+            return startInfo;
+        }
     }
 }

@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 187 — Potrace's ImageMagick preprocessing fallback runs `magick` without the hardened policy
-  Category: security
-  Where: `src/UniversalConverterX.Core/Converters/PotraceConverter.cs:353-401` (`ConvertWithImageMagickPreprocessAsync`) vs `src/UniversalConverterX.Core/Converters/ImageMagickConverter.cs:161-172`; policy at `src/UniversalConverterX.Core/Security/ImageMagick/policy.xml`.
-  Problem: the hardened `policy.xml` (blocks MVG/MSL/URL coders and `@file` indirect reads, caps decompression-bomb resources) is applied via `MAGICK_CONFIGURE_PATH` only in `ImageMagickConverter.ConfigureProcessStartInfo`. Potrace's fallback calls `ExecuteProcessAsync(magickPath, …)` through Potrace's own (no-op) `ConfigureProcessStartInfo`, so a crafted "PNG" that is actually MVG/MSL (ImageMagick sniffs by content) is processed with protections off. Reachable when a raster→(dxf/geojson/fig or forced-potrace) job runs and `mkbitmap` is absent but `magick` is present.
-  Evidence: only `ImageMagickConverter` sets `MAGICK_CONFIGURE_PATH`; the potrace fallback does not.
-  Fix: extract the env setup into a shared helper and set `MAGICK_CONFIGURE_PATH` on the fallback `ProcessStartInfo` too.
-  Acceptance: a test asserts the fallback `ProcessStartInfo.Environment` contains `MAGICK_CONFIGURE_PATH`; an MVG-as-png fixture fails with "not authorized".
-  Confidence: Likely (policy bypass verified; exploit depth depends on the installed ImageMagick build). Effort: S
-
 - [ ] P2 — Item 188 — Concurrent LibreOffice jobs share one user profile — parallel batches fail or no-op
   Category: reliability
   Where: `src/UniversalConverterX.Core/Converters/LibreOfficeConverter.cs:134-161`; `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:409-443`.

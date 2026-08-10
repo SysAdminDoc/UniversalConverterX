@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
+using UniversalConverterX.Core.Security;
 
 namespace UniversalConverterX.Core.Converters;
 
@@ -516,5 +518,11 @@ public partial class PotraceConverter : BaseConverterStrategy
         }
 
         return null;
+    }
+
+    protected override void ConfigureProcessStartInfo(ProcessStartInfo startInfo, ConversionJob job)
+    {
+        if (ImageMagickSecurityPolicy.IsMagickExecutable(startInfo.FileName))
+            ImageMagickSecurityPolicy.ConfigureProcessStartInfo(startInfo);
     }
 }
