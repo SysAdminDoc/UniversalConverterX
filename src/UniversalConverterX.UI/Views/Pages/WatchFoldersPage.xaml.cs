@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -9,6 +10,7 @@ namespace UniversalConverterX.UI.Views.Pages;
 public sealed partial class WatchFoldersPage : Page
 {
     private readonly IWatchFolderService _service;
+    private bool _subscriptionsAttached;
 
     public WatchFoldersPage()
     {
@@ -16,10 +18,35 @@ public sealed partial class WatchFoldersPage : Page
         _service = App.Services.GetRequiredService<IWatchFolderService>();
         ProfilesList.ItemsSource = _service.Profiles;
         EventList.ItemsSource = _service.Recent;
-        _service.Profiles.CollectionChanged += (_, _) => UpdateUi();
-        _service.Recent.CollectionChanged += (_, _) => UpdateUi();
+        Loaded += WatchFoldersPage_Loaded;
+        Unloaded += WatchFoldersPage_Unloaded;
         UpdateUi();
     }
+
+    private void WatchFoldersPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_subscriptionsAttached)
+            return;
+
+        _service.Profiles.CollectionChanged += Profiles_CollectionChanged;
+        _service.Recent.CollectionChanged += Recent_CollectionChanged;
+        _subscriptionsAttached = true;
+        UpdateUi();
+    }
+
+    private void WatchFoldersPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (!_subscriptionsAttached)
+            return;
+
+        _service.Profiles.CollectionChanged -= Profiles_CollectionChanged;
+        _service.Recent.CollectionChanged -= Recent_CollectionChanged;
+        _subscriptionsAttached = false;
+    }
+
+    private void Profiles_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateUi();
+
+    private void Recent_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateUi();
 
     private void UpdateUi()
     {
