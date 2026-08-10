@@ -23,7 +23,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 - **APV camera masters** — detect RFC 9924 raw APV and convert locally to H.265 10-bit, ProRes 422 HQ, or H.264 with the bundled FFmpeg build.
 - **Preservation and production** — curated FFV1+FLAC archival, ProRes 422, and DNxHR HQ workflows with family filters in the preset browser.
 - **Video Editor** — trim, crop, rotate, upscale, filter, audio adjust, batch.
-- **Video Enhancer** — portable Real-ESRGAN export, managed RIFE Vulkan frame interpolation, optional Anime4K v4 GLSL chains through mpv, bounded representative previews with synchronized source/output comparison and VMAF estimates, a local Windows App SDK 2.2 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
+- **Video Enhancer** — portable Real-ESRGAN export, managed RIFE Vulkan frame interpolation, optional Anime4K v4 GLSL chains through mpv, bounded representative previews with synchronized source/output comparison and VMAF estimates, a local Windows App SDK 2.3.1 VideoScaler capability check, and optional SeedVR2 3B FP8 diffusion restoration for CUDA GPUs.
 - **UltraHDR gain maps** — preserve ISO 21496-1 metadata during JPEG round-trips, convert UltraHDR JPEG to gain-map AVIF, or create AVIF gain maps from SDR/HDR image pairs through pinned libvips 8.18.3 and libavif 1.4.2 runtimes.
 - **Content Credentials** — inspect and validate embedded C2PA provenance offline through optional c2patool 0.27+, with remote manifests, OCSP, trust-list downloads, and signing disabled.
 - **IAMF immersive audio** — create stereo or scalable stereo/5.1 IAMF masters, preserve IAMF stream groups in MP4, and render 48 kHz WAV/FLAC through bundled FFmpeg 8.1.2.
@@ -112,7 +112,7 @@ validation. Pkl remains an optional external tool and is never downloaded by UCX
 ### Requirements
 
 - Windows 10 21H2 (build 19044)+ or Windows 11
-- Published UI and CLI artifacts are self-contained; the installer also stages framework-dependent shell/proxy hosts, so those hosts need a compatible .NET 10 runtime. Source builds require the .NET 10 SDK, and the installer build checks for .NET 10.0.9 or newer
+- Published UI and CLI artifacts are self-contained; the installer also stages framework-dependent shell/proxy hosts, so those hosts need a compatible .NET 10 runtime. Source builds require the .NET 10 SDK, and the installer build checks for .NET 10.0.10 or newer
 - Additional converter tools as needed (the Windows installer includes FFmpeg 8.1.2)
 - eBook/comic sidecars install their pinned Python dependencies during the sidecar build; comic MOBI output additionally needs Calibre, and UCX refuses protected Kindle/KFX inputs because it does not include DeDRM
 - DVD-Video authoring requires `dvdauthor` on `PATH` or configured through `UCX_DVDAUTHOR`; data CD/DVD imaging and burning use Windows IMAPI2 without it
@@ -144,7 +144,7 @@ an ARM64 app has native ARM64 sidecars.
 |---|---|---|---|---|
 | Source build and tests | Windows 10 21H2+ or Windows 11; x64 test host, ARM64 publish supported | .NET 10 SDK, Python 3.12, Windows SDK; no release package | Source manifests cover 212 engines; v2 compatibility validation runs before launch | Developer build; no signing implied |
 | Portable ZIP / WinGet | Windows 10 21H2+ or Windows 11; `win-x64` | Self-contained .NET 10 UI/CLI; framework-dependent shell/proxy hosts use the installed .NET 10 runtime | Readiness manifest reports bundled, on-demand, or unavailable engines; old v1 extension manifests are quarantined and require reinstall | Unsigned archive; WinGet consumes the portable archive and needs no certificate |
-| MSIX | Windows 10 21H2+ or Windows 11; `x64` | Self-contained WinUI 3 / Windows App SDK 2.2 UI; shell/proxy hosts follow their publish settings | Same v2 manifest and readiness rules; current bundled sidecars are x64 | Intentionally unsigned source artifact; managed sideloading supplies the signing policy/key |
+| MSIX | Windows 10 21H2+ or Windows 11; `x64` | Self-contained WinUI 3 / Windows App SDK 2.3.1 UI; shell/proxy hosts follow their publish settings | Same v2 manifest and readiness rules; current bundled sidecars are x64 | Intentionally unsigned source artifact; managed sideloading supplies the signing policy/key |
 | MSI | Windows 10 21H2+ or Windows 11; `x64` | Self-contained WinUI 3 / CLI; shell/proxy hosts use the installed .NET 10 runtime | Same v2 manifest and readiness rules; current bundled sidecars are x64 | Unsigned build output; downstream distribution must sign it if required |
 | ARM64 publish | Windows 10 21H2+ or Windows 11; `win-arm64` | Self-contained app and shell binaries; no ARM64 package claim | Current sidecar manifests advertise `win-x64`, so native ARM64 sidecar availability is not claimed | Unpackaged developer/release output; signing is external |
 

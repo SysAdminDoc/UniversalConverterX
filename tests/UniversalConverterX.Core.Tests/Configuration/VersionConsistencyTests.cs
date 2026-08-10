@@ -44,12 +44,61 @@ public class VersionConsistencyTests
             .ContainSingle()
             .Which;
 
-        Version.TryParse(package.Attribute("Version")?.Value, out var version).Should().BeTrue();
+        package.Attribute("Version")?.Value.Should().Be("$(WindowsAppSdkPackageVersion)");
+        var rootProps = XDocument.Load(Path.Combine(repoRoot, "Directory.Build.props"));
+        var packageVersion = SingleElementValue(rootProps, "WindowsAppSdkPackageVersion");
+        Version.TryParse(packageVersion, out var version).Should().BeTrue();
         version.Should().NotBeNull();
         version!.Should().BeGreaterThanOrEqualTo(new Version(2, 0));
         SingleElementValue(project, "TargetFramework")
           .Should().StartWith("net10.0-windows10.0.22621.0");
         SingleElementValue(project, "WindowsAppSDKSelfContained").Should().Be("true");
+    }
+
+    [Fact]
+    public void PlatformPackagePins_ShouldBeCentralizedAndServiced()
+    {
+        var repoRoot = FindRepoRoot();
+        var rootProps = XDocument.Load(Path.Combine(repoRoot, "Directory.Build.props"));
+        var dotnetVersion = SingleElementValue(rootProps, "DotnetServicingPackageVersion");
+        var windowsAppSdkVersion = SingleElementValue(rootProps, "WindowsAppSdkPackageVersion");
+
+        dotnetVersion.Should().Be("10.0.10");
+        windowsAppSdkVersion.Should().Be("2.3.1");
+
+        var servicedReferenceCount = 0;
+        var windowsAppSdkReferenceCount = 0;
+        var projectRoots = new[] { "src", "tests" };
+        foreach (var projectRoot in projectRoots)
+        {
+            foreach (var projectPath in Directory.EnumerateFiles(
+                         Path.Combine(repoRoot, projectRoot),
+                         "*.csproj",
+                         SearchOption.AllDirectories))
+            {
+                var project = XDocument.Load(projectPath);
+                var relativePath = Path.GetRelativePath(repoRoot, projectPath);
+                foreach (var package in project.Descendants("PackageReference"))
+                {
+                    var packageName = package.Attribute("Include")?.Value;
+                    var packageVersion = package.Attribute("Version")?.Value;
+                    if (string.Equals(packageName, "Microsoft.WindowsAppSDK", StringComparison.Ordinal))
+                    {
+                        windowsAppSdkReferenceCount++;
+                        packageVersion.Should().Be("$(WindowsAppSdkPackageVersion)", relativePath);
+                    }
+
+                    if (IsDotnetServicingPackage(packageName))
+                    {
+                        servicedReferenceCount++;
+                        packageVersion.Should().Be("$(DotnetServicingPackageVersion)", relativePath);
+                    }
+                }
+            }
+        }
+
+        servicedReferenceCount.Should().BeGreaterThan(0);
+        windowsAppSdkReferenceCount.Should().Be(2);
     }
 
     private static string FindRepoRoot()
@@ -69,6 +118,18 @@ public class VersionConsistencyTests
         }
 
         throw new DirectoryNotFoundException("Could not locate the repository root.");
+    }
+
+    private static bool IsDotnetServicingPackage(string? packageName)
+    {
+        return packageName is not null &&
+               (packageName.StartsWith("Microsoft.Extensions.", StringComparison.Ordinal) ||
+                string.Equals(packageName, "Microsoft.Data.Sqlite.Core", StringComparison.Ordinal) ||
+                string.Equals(packageName, "System.Drawing.Common", StringComparison.Ordinal) ||
+                string.Equals(
+                    packageName,
+                    "System.Security.Cryptography.ProtectedData",
+                    StringComparison.Ordinal));
     }
 
     private static string SingleElementValue(XDocument document, string elementName)

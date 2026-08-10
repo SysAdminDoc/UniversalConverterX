@@ -18,12 +18,12 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(DotnetServicingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="$(DotnetServicingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(DotnetServicingPackageVersion)" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="$(DotnetServicingPackageVersion)" />
     <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="3.0.3" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.10" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(DotnetServicingPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

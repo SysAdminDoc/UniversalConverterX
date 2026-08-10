@@ -9,9 +9,12 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <!-- Resolve the newest installed servicing patch for framework-dependent
-         and self-contained outputs. The installer script enforces 10.0.9+. -->
+         and self-contained outputs. Package/runtime floors are kept here so
+         project files, tests, and installer checks share one servicing pin. -->
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>LatestPatch</RollForward>
+    <DotnetServicingPackageVersion>10.0.10</DotnetServicingPackageVersion>
+    <WindowsAppSdkPackageVersion>2.3.1</WindowsAppSdkPackageVersion>
     <!-- Restore is reproducible: packages.lock.json is committed and the
          release gate restores with RestoreLockedMode so a transitive bump
          cannot enter a build unnoticed. -->

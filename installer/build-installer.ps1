@@ -20,7 +20,9 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir = Split-Path -Parent $scriptDir
 $publishDir = Join-Path $rootDir "publish"
 $outputDir = Join-Path $rootDir "installer\output"
-$minimumDotnetRuntime = [Version]'10.0.9'
+$buildProps = [xml](Get-Content -LiteralPath (Join-Path $rootDir 'Directory.Build.props'))
+$minimumDotnetRuntime = [Version]$buildProps.SelectSingleNode(
+    '/Project/PropertyGroup/DotnetServicingPackageVersion').InnerText
 $parsedVersion = [Version]$Version
 $semanticVersion = $parsedVersion.ToString(3)
 $msixVersion = $parsedVersion.ToString(4)
@@ -34,7 +36,7 @@ $latestDotnetRuntime = $installedDotnetRuntimes |
     Sort-Object -Descending |
     Select-Object -First 1
 if ($null -eq $latestDotnetRuntime -or $latestDotnetRuntime -lt $minimumDotnetRuntime) {
-    throw "UniversalConverterX installer builds require .NET runtime 10.0.9 or newer. Install the current .NET 10 SDK/runtime before publishing."
+    throw "UniversalConverterX installer builds require .NET runtime $minimumDotnetRuntime or newer. Install the current .NET 10 SDK/runtime before publishing."
 }
 
 # Colors for output

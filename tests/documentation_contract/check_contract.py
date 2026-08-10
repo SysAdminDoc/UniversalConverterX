@@ -76,6 +76,10 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
     for name in ("AssemblyVersion", "FileVersion"):
         if element_value(props, name) != f"{version}.0":
             errors.append(f"Directory.Build.props {name} must be {version}.0")
+    if element_value(props, "DotnetServicingPackageVersion") != "10.0.10":
+        errors.append("Directory.Build.props must pin .NET servicing packages to 10.0.10")
+    if element_value(props, "WindowsAppSdkPackageVersion") != "2.3.1":
+        errors.append("Directory.Build.props must pin Windows App SDK to 2.3.1")
 
     readme = read("README.md")
     changelog = read("CHANGELOG.md")
@@ -104,6 +108,8 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
         "212",
         "reinstall",
         "unsigned",
+        ".NET 10.0.10",
+        "Windows App SDK 2.3.1",
     )
     for fragment in required_readme_fragments:
         if fragment not in readme:

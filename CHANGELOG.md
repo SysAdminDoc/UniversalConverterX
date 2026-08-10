@@ -27,6 +27,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 ### Changed
 
 - Migrated the 2,648-test Core suite to xUnit.net v3 with the standalone executable project model and v3 Visual Studio adapter; removed the five xUnit v2 deprecation suppressions from the dependency allowlist.
+- Centralized the .NET servicing package pin at 10.0.10 and the Windows App SDK pin at 2.3.1 across the product, VideoScaler smoke, lockfiles, installer runtime floor, documentation, and release consistency gates.
 
 ### Fixed
 

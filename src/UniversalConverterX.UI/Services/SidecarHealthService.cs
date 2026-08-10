@@ -68,7 +68,7 @@ public sealed class SidecarHealthService : ISidecarHealthService
                     engine,
                     "platform-capability",
                     "Windows AI Video Super Resolution",
-                    "Windows App SDK 2.2 reports VideoScaler ready for frame-level acceleration.",
+                    "Windows App SDK 2.3.1 reports VideoScaler ready for frame-level acceleration.",
                     "Real-ESRGAN remains the file-export backend until a representative quality benchmark qualifies Windows AI VSR for general video, not only conversational footage.",
                     null,
                     null),

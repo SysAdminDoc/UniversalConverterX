@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 167 — Service .NET packages and validate Windows App SDK 2.3.1
-  Why: UCX repeats Microsoft 10.0.9 versions across projects while .NET 10.0.10 is a security servicing release, and Windows App SDK 2.3.1 supersedes the 2.2.0 UI/runtime smoke dependency.
-  Evidence: project package references; .NET 10.0.10 release notes; Windows App SDK downloads; live 2026-07-29 outdated-package audit.
-  Touches: central package-version props, Core/Console/UI/Shell/tests, installer runtime checks, Items 124 and 152.
-  Acceptance: Microsoft 10.0.x packages resolve centrally to 10.0.10; UI and VideoScaler use 2.3.1; restore/build/Core tests/runtime page smoke/publish/portable/MSI/MSIX checks pass with no unsupported-OS or activation regression.
-  Complexity: M
-
 ### P2/P3 — Governed local AI capability
 
 - [ ] P3 — Item 141 — Finish governed offline speaker diarization output
