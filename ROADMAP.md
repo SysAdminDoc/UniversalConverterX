@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 188 — Concurrent LibreOffice jobs share one user profile — parallel batches fail or no-op
-  Category: reliability
-  Where: `src/UniversalConverterX.Core/Converters/LibreOfficeConverter.cs:134-161`; `src/UniversalConverterX.Core/Services/ConversionOrchestrator.cs:409-443`.
-  Problem: no `-env:UserInstallation=…` anywhere in the repo (grep confirmed). `ConvertBatchAsync` runs up to 4 jobs in parallel; two simultaneous `soffice --headless --convert-to` instances contend on the profile lock — the second connects to the first or fails, often exiting 0 without converting. Same failure if the user has desktop LibreOffice open. Combined with Item 169, a no-output run can be papered over with a stale file.
-  Evidence: `Parallel.ForEachAsync(degree ≤ 4)` over one soffice binary + default profile; no per-job profile isolation.
-  Fix: override `ConfigureProcessStartInfo` to add `-env:UserInstallation=file:///<per-job-temp>` and clean it up.
-  Acceptance: a batch of 4 docx→pdf in parallel succeeds 4/4 repeatedly, and works while a desktop soffice instance is open.
-  Confidence: Likely (well-documented LibreOffice behavior). Effort: S
-
 - [ ] P2 — Item 189 — Explorer context menu parses 459 preset XML files synchronously on the shell thread every right-click
   Category: perf
   Where: `src/UniversalConverterX.ShellExtension/ExplorerCommand.cs:177,192,237` → `Presets/PresetReader.cs:92-151`; `ShellExtensionRegistrar.cs:166` (apartment-threaded COM).

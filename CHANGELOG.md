@@ -40,6 +40,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.
 - Fixed FFmpeg progress arguments so `-progress pipe:1 -stats_period 0.1` is placed in global position for single-pass and two-pass commands.
 - Fixed Potrace's ImageMagick preprocessing fallback to use the same shipped hardened security policy as direct ImageMagick conversions.
+- Fixed concurrent LibreOffice conversions by assigning each job a temporary `UserInstallation` profile and removing it after the process exits.
 - LibreOffice conversions now render into a per-job temporary directory and promote only a fresh, non-input artifact to the requested destination. Collision-resolved outputs cannot overwrite sibling files, and stale same-stem files no longer turn an exit-code-zero run into a false success.
 - `ucx serve` now prints a fresh bearer token per startup and requires it for every route except `/healthz`. Exact loopback Host validation, browser Origin/Sec-Fetch rejection, and `application/json` enforcement prevent cross-origin or rebinding-triggered conversion requests; internal errors no longer echo exception details.
 - Watch-folder Convert jobs now resolve collisions to a unique sibling before suppression or sidecar launch and refuse any residual input/output identity match, preserving the source in unattended same-extension workflows.

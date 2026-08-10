@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
@@ -211,6 +212,17 @@ public class LibreOfficeConverter : BaseConverterStrategy
         args.Add(job.InputPath);
 
         return [.. args];
+    }
+
+    protected override void ConfigureProcessStartInfo(ProcessStartInfo startInfo, ConversionJob job)
+    {
+        if (!_stagingDirectories.TryGetValue(job, out var stagingDirectory))
+            return;
+
+        var profileDirectory = Path.Combine(stagingDirectory, "profile");
+        Directory.CreateDirectory(profileDirectory);
+        var profileUri = new Uri(profileDirectory + Path.DirectorySeparatorChar).AbsoluteUri;
+        startInfo.ArgumentList.Insert(0, $"-env:UserInstallation={profileUri}");
     }
 
     private static string GetOutputFilter(string inputExt, string outputExt)

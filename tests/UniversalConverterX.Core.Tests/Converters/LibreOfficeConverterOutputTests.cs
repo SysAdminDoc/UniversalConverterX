@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentAssertions;
 using UniversalConverterX.Core.Converters;
 using UniversalConverterX.Core.Models;
@@ -143,6 +144,12 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
         result.Success.Should().BeTrue(result.ErrorMessage ?? result.StandardError ?? "conversion failed without diagnostics");
         File.ReadAllText(existingSibling).Should().Be("keep me");
         File.ReadAllText(requestedOutput).Trim().Should().Be("converted");
+
+        var profileArgument = converter.CapturedStartArguments
+            .Should().ContainSingle(argument =>
+                argument.StartsWith("-env:UserInstallation=file:", StringComparison.Ordinal));
+        var profileUri = new Uri(profileArgument.Subject["-env:UserInstallation=".Length..]);
+        Directory.Exists(profileUri.LocalPath).Should().BeFalse();
     }
 
     public void Dispose()
@@ -161,6 +168,10 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
     private sealed class StagingProbeLibreOfficeConverter(string toolsBasePath)
         : LibreOfficeConverter(toolsBasePath)
     {
+        private string? _stagedOutput;
+
+        public IReadOnlyList<string> CapturedStartArguments { get; private set; } = [];
+
         protected override string GetExecutablePath() =>
             Environment.GetEnvironmentVariable("ComSpec")
             ?? throw new InvalidOperationException("cmd.exe is required for this test");
@@ -174,10 +185,30 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
             var stagedOutput = Path.Combine(
                 libreOfficeArguments[outDirIndex + 1],
                 Path.GetFileNameWithoutExtension(job.InputPath) + ".pdf");
+            _stagedOutput = stagedOutput;
 
-            // The test temp path is space-free, which avoids cmd.exe's special
-            // /c quoting rules while still exercising the real staged outdir.
             return ["/c", $"echo converted>{stagedOutput}"];
+        }
+
+        protected override Task<ProcessResult> ExecuteProcessAsync(
+            string executable,
+            string[] arguments,
+            ConversionJob job,
+            IProgress<ConversionProgress>? progress,
+            List<string> warnings,
+            CancellationToken cancellationToken)
+        {
+            var startInfo = new ProcessStartInfo { FileName = executable };
+            foreach (var argument in arguments)
+                startInfo.ArgumentList.Add(argument);
+            ConfigureProcessStartInfo(startInfo, job);
+            CapturedStartArguments = [.. startInfo.ArgumentList];
+
+            if (_stagedOutput is null)
+                throw new InvalidOperationException("The staged output was not prepared.");
+            File.WriteAllText(_stagedOutput, "converted");
+
+            return Task.FromResult(new ProcessResult { Success = true, ExitCode = 0 });
         }
     }
 }
