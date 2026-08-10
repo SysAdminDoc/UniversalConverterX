@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 191 — REST `/convert` has no concurrency cap; per-job containment does not bound the aggregate
-  Category: security (DoS)
-  Where: `src/UniversalConverterX.Console/Commands/ServeCommand.cs:188,360-410,442-453`; `src/UniversalConverterX.Core/Security/ProcessContainment.cs:30-33`.
-  Problem: `JobManager.Start` spawns a process per request; `SweepFinished` only evicts jobs finished > 1 h ago, so a burst removes nothing. Each job gets its own job object with `MaxProcesses:128` and `MaxMemoryBytes: 90% of RAM` — a PER-JOB ceiling, so N concurrent jobs each get 90% of RAM and 128 processes. With Item 170 (no auth), one web page can wedge the machine.
-  Evidence: unconditional per-request `Start`; per-job (not aggregate) limits.
-  Fix: a global semaphore + queue-depth limit returning 429 when exceeded; an aggregate resource budget across live jobs.
-  Acceptance: issuing 100 rapid `/convert` requests caps concurrent processes at the configured limit and returns 429 beyond queue depth.
-  Confidence: Verified. Effort: S
-
 - [ ] P2 — Item 192 — REST accept loop leaks a `Task.Delay` and a CTS registration per request
   Category: reliability
   Where: `src/UniversalConverterX.Console/Commands/ServeCommand.cs:85-90`.

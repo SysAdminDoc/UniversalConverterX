@@ -72,7 +72,10 @@ public sealed class AutomationSurfaceParityTests
         server.Should().Contain("PrometheusTextExporter.Render(");
         server.Should().Contain("SidecarCatalog.Resolve(engine)");
         server.Should().Contain("ResolveNativeConverter(args)");
-        server.Should().Contain("jobs.Start(engine, exe, launchArgs)");
+        server.Should().Contain("jobs.StartAsync(engine, exe, launchArgs)");
+        server.Should().Contain("\"server_busy\"");
+        server.Should().Contain("max_queue_depth = jobs.MaxQueueDepth");
+        server.Should().Contain("new JobManager(options.MaxParallelConversions)");
         server.Should().Contain("OutputCollisionPolicy.TryProtectArguments");
         presetRunner.Should().Contain("OutputCollisionPolicy.TryProtectArguments");
         presetRunner.Should().Contain("OutputCollisionPolicy.TryResolvePath");

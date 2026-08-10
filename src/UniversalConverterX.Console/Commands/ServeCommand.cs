@@ -79,10 +79,10 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         AnsiConsole.MarkupLineInterpolated($"[green]ucx serve[/] listening on [cyan]{prefix}[/]");
         var security = ServeRequestSecurity.Create(host, settings.Port);
         System.Console.WriteLine($"Bearer token: {security.Token}");
+        var options = CliConfiguration.Get(context);
         AnsiConsole.MarkupLine("Press Ctrl+C to stop.");
 
-        var jobs = new JobManager();
-        var options = CliConfiguration.Get(context);
+        var jobs = new JobManager(options.MaxParallelConversions);
         using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         System.Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopCts.Cancel(); };
 
@@ -264,8 +264,24 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                     await WriteJson(resp, 404, new { error = "sidecar_not_found", engine });
                     return;
                 }
-                var id = jobs.Start(engine, exe, launchArgs);
-                await WriteJson(resp, 202, new { job_id = id });
+                var start = await jobs.StartAsync(engine, exe, launchArgs);
+                if (!start.Accepted)
+                {
+                    await WriteJson(
+                        resp,
+                        start.Status == JobStartStatus.Stopping ? 503 : 429,
+                        new
+                        {
+                            error = start.Status == JobStartStatus.Stopping
+                                ? "server_stopping"
+                                : "server_busy",
+                            max_concurrent = jobs.MaxConcurrentJobs,
+                            max_queue_depth = jobs.MaxQueueDepth,
+                        });
+                    return;
+                }
+
+                await WriteJson(resp, 202, new { job_id = start.Id });
             }
             else if (path.StartsWith("/jobs/") && req.HttpMethod == "GET")
             {
@@ -534,65 +550,214 @@ internal sealed class ServeRequestSecurity
 
 internal readonly record struct ServeRequestRejection(int StatusCode, string ErrorCode);
 
+internal enum JobStartStatus
+{
+    Started,
+    Busy,
+    Stopping,
+}
+
+internal readonly record struct JobStartResult(string? Id, JobStartStatus Status)
+{
+    public bool Accepted => Status == JobStartStatus.Started && Id is not null;
+}
+
+/// <summary>
+/// Bounds the aggregate number of live sidecar trees and queued requests. A
+/// request reserves a slot before waiting for the running semaphore, so a
+/// burst cannot create an unbounded backlog of tasks or processes.
+/// </summary>
+internal sealed class JobAdmissionController
+{
+    private readonly object _lock = new();
+    private readonly SemaphoreSlim _runningSlots;
+    private readonly CancellationTokenSource _stopCts = new();
+    private readonly int _maxAdmitted;
+    private int _admitted;
+
+    public JobAdmissionController(int maxConcurrentJobs, int maxQueueDepth)
+    {
+        MaxConcurrentJobs = Math.Max(1, maxConcurrentJobs);
+        MaxQueueDepth = Math.Max(0, maxQueueDepth);
+        _maxAdmitted = MaxConcurrentJobs + MaxQueueDepth;
+        _runningSlots = new SemaphoreSlim(MaxConcurrentJobs, MaxConcurrentJobs);
+    }
+
+    public int MaxConcurrentJobs { get; }
+    public int MaxQueueDepth { get; }
+    public bool IsStopping => _stopCts.IsCancellationRequested;
+
+    public async Task<JobAdmissionLease?> TryAcquireAsync()
+    {
+        lock (_lock)
+        {
+            if (IsStopping || _admitted >= _maxAdmitted)
+                return null;
+            _admitted++;
+        }
+
+        try
+        {
+            await _runningSlots.WaitAsync(_stopCts.Token).ConfigureAwait(false);
+            return new JobAdmissionLease(this);
+        }
+        catch (OperationCanceledException) when (IsStopping)
+        {
+            ReleaseReservation();
+            return null;
+        }
+        catch
+        {
+            ReleaseReservation();
+            throw;
+        }
+    }
+
+    public void Stop() => _stopCts.Cancel();
+
+    private void ReleaseReservation()
+    {
+        lock (_lock)
+        {
+            if (_admitted > 0)
+                _admitted--;
+        }
+    }
+
+    private void Release(JobAdmissionLease lease)
+    {
+        if (Interlocked.Exchange(ref lease.Released, 1) != 0)
+            return;
+        _runningSlots.Release();
+        ReleaseReservation();
+    }
+
+    internal sealed class JobAdmissionLease : IDisposable
+    {
+        private readonly JobAdmissionController _owner;
+
+        internal JobAdmissionLease(JobAdmissionController owner) => _owner = owner;
+
+        internal int Released;
+
+        public void Dispose() => _owner.Release(this);
+    }
+}
+
 internal sealed class JobManager
 {
     private static readonly TimeSpan FinishedTtl = TimeSpan.FromHours(1);
+    private const int MaxConfiguredConcurrentJobs = 32;
 
     private readonly ConcurrentDictionary<string, JobRecord> _jobs = new();
     private readonly ConcurrentDictionary<string, EngineJobCounters> _metrics = new(StringComparer.Ordinal);
+    private readonly JobAdmissionController _admission;
+    private readonly ProcessContainmentLimits _containmentLimits;
+
+    public JobManager(int configuredMaxConcurrentJobs, int? configuredQueueDepth = null)
+    {
+        var maxConcurrent = Math.Clamp(
+            configuredMaxConcurrentJobs,
+            1,
+            MaxConfiguredConcurrentJobs);
+        var queueDepth = configuredQueueDepth ?? Math.Max(1, maxConcurrent * 2);
+        _admission = new JobAdmissionController(maxConcurrent, queueDepth);
+
+        var defaults = ProcessContainmentLimits.Default;
+        _containmentLimits = defaults with
+        {
+            // Each live tree receives a fixed share so the sum of all admitted
+            // trees stays within the machine-wide default containment budget.
+            MaxProcesses = defaults.MaxProcesses > 0
+                ? Math.Max(1, defaults.MaxProcesses / maxConcurrent)
+                : 0,
+            MaxMemoryBytes = defaults.MaxMemoryBytes > 0
+                ? Math.Max(1, defaults.MaxMemoryBytes / maxConcurrent)
+                : 0,
+        };
+    }
+
+    public int MaxConcurrentJobs => _admission.MaxConcurrentJobs;
+    public int MaxQueueDepth => _admission.MaxQueueDepth;
+    internal ProcessContainmentLimits ContainmentLimits => _containmentLimits;
 
     public DateTime StartedUtc { get; } = DateTime.UtcNow;
 
-    public string Start(string engine, string exe, IList<string> args)
+    public async Task<JobStartResult> StartAsync(string engine, string exe, IList<string> args)
     {
-        // Sweep first so a long-running serve session can't hold every finished
-        // job forever (each carries up to MaxRetainedEvents lines).
-        SweepFinished();
-
-        var id = Guid.NewGuid().ToString("N");
-        var psi = new ProcessStartInfo
+        var lease = await _admission.TryAcquireAsync().ConfigureAwait(false);
+        if (lease is null)
         {
-            FileName = exe,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8,
-        };
-        foreach (var a in args) psi.ArgumentList.Add(a);
+            return new(
+                null,
+                _admission.IsStopping ? JobStartStatus.Stopping : JobStartStatus.Busy);
+        }
 
-        // The REST surface launches the same 212 untrusted engines the UI does,
-        // so it gets the same containment: a private scratch root that is
-        // deleted with the job, and a job object so a headless server crash
-        // cannot leave an encoder running.
-        SidecarWorkspace? workspace = null;
         try
         {
-            workspace = SidecarWorkspace.Create();
-            workspace.ApplyTo(psi.EnvironmentVariables);
-        }
-        catch (Exception exception) when (
-            exception is IOException or UnauthorizedAccessException)
-        {
-            workspace = null;
-        }
+            // Sweep first so a long-running serve session can't hold every finished
+            // job forever (each carries up to MaxRetainedEvents lines).
+            SweepFinished();
 
-        var proc = new Process { StartInfo = psi };
-        var metricEngine = engine.Trim().ToLowerInvariant();
-        var counters = _metrics.GetOrAdd(metricEngine, static _ => new EngineJobCounters());
-        var rec = new JobRecord(
-            id,
-            engine,
-            proc,
-            exitCode => counters.MarkCompleted(exitCode),
-            ProcessContainment.Create(ProcessContainmentLimits.Default),
-            workspace);
-        rec.Start();
-        counters.MarkStarted();
-        _jobs[id] = rec;
-        return id;
+            var id = Guid.NewGuid().ToString("N");
+            var psi = new ProcessStartInfo
+            {
+                FileName = exe,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
+            };
+            foreach (var a in args) psi.ArgumentList.Add(a);
+
+            // The REST surface launches the same 212 untrusted engines the UI does,
+            // so it gets the same containment: a private scratch root that is
+            // deleted with the job, and a job object so a headless server crash
+            // cannot leave an encoder running.
+            SidecarWorkspace? workspace = null;
+            try
+            {
+                workspace = SidecarWorkspace.Create();
+                workspace.ApplyTo(psi.EnvironmentVariables);
+            }
+            catch (Exception exception) when (
+                exception is IOException or UnauthorizedAccessException)
+            {
+                workspace = null;
+            }
+
+            var proc = new Process { StartInfo = psi };
+            var metricEngine = engine.Trim().ToLowerInvariant();
+            var counters = _metrics.GetOrAdd(metricEngine, static _ => new EngineJobCounters());
+            var rec = new JobRecord(
+                id,
+                engine,
+                proc,
+                exitCode => counters.MarkCompleted(exitCode),
+                ProcessContainment.Create(_containmentLimits),
+                workspace,
+                lease.Dispose);
+            try
+            {
+                rec.Start();
+                counters.MarkStarted();
+                _jobs[id] = rec;
+                return new(id, JobStartStatus.Started);
+            }
+            catch
+            {
+                rec.Dispose();
+                throw;
+            }
+        }
+        catch
+        {
+            lease.Dispose();
+            throw;
+        }
     }
 
     public bool TryGet(string id, out JobRecord rec) => _jobs.TryGetValue(id, out rec!);
@@ -617,6 +782,7 @@ internal sealed class JobManager
 
     public void KillAll()
     {
+        _admission.Stop();
         foreach (var r in _jobs.Values)
         {
             try { if (r.IsRunning) r.Kill(); } catch { }
@@ -682,6 +848,8 @@ internal sealed class JobRecord : IDisposable
     private readonly object _lock = new();
     private volatile bool _hasExited;
     private readonly Action<int?>? _onExited;
+    private readonly Action? _onReleased;
+    private int _released;
 
     public string Id { get; }
     public string Engine { get; }
@@ -705,7 +873,8 @@ internal sealed class JobRecord : IDisposable
         Process proc,
         Action<int?>? onExited = null,
         ProcessContainment? containment = null,
-        SidecarWorkspace? workspace = null)
+        SidecarWorkspace? workspace = null,
+        Action? onReleased = null)
     {
         Id = id;
         Engine = engine;
@@ -713,6 +882,7 @@ internal sealed class JobRecord : IDisposable
         _onExited = onExited;
         _containment = containment;
         _workspace = workspace;
+        _onReleased = onReleased;
     }
 
     public int EventCount { get { lock (_lock) return _totalEvents; } }
@@ -739,7 +909,8 @@ internal sealed class JobRecord : IDisposable
             catch { ExitCode = -1; }
             FinishedUtc = DateTime.UtcNow;
             _hasExited = true;
-            _onExited?.Invoke(ExitCode);
+            try { _onExited?.Invoke(ExitCode); }
+            finally { ReleaseAdmission(); }
         };
         _proc.EnableRaisingEvents = true;
         _proc.Start();
@@ -799,5 +970,12 @@ internal sealed class JobRecord : IDisposable
         try { _containment?.Dispose(); } catch { }
         try { _proc.Dispose(); } catch { }
         try { _workspace?.Dispose(); } catch { }
+        ReleaseAdmission();
+    }
+
+    private void ReleaseAdmission()
+    {
+        if (Interlocked.Exchange(ref _released, 1) == 0)
+            _onReleased?.Invoke();
     }
 }
