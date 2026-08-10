@@ -85,15 +85,34 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         var jobs = new JobManager(options.MaxParallelConversions);
         using var stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         System.Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopCts.Cancel(); };
+        using var stopRegistration = stopCts.Token.Register(() =>
+        {
+            try { listener.Stop(); } catch { }
+        });
 
         try
         {
             while (!stopCts.IsCancellationRequested)
             {
-                var ctxTask = listener.GetContextAsync();
-                var doneTask = await Task.WhenAny(ctxTask, Task.Delay(Timeout.Infinite, stopCts.Token));
-                if (doneTask != ctxTask) break;
-                var ctx = ctxTask.Result;
+                HttpListenerContext ctx;
+                try
+                {
+                    ctx = await listener.GetContextAsync();
+                }
+                catch (HttpListenerException) when (stopCts.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (ObjectDisposedException) when (stopCts.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                if (stopCts.IsCancellationRequested)
+                {
+                    try { ctx.Response.Close(); } catch { }
+                    break;
+                }
                 _ = Task.Run(() => Handle(ctx, jobs, security, options));
             }
         }

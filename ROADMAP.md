@@ -55,15 +55,6 @@ _Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: 
 
 ### P2 — reliability, correctness edges, security hardening, performance
 
-- [ ] P2 — Item 192 — REST accept loop leaks a `Task.Delay` and a CTS registration per request
-  Category: reliability
-  Where: `src/UniversalConverterX.Console/Commands/ServeCommand.cs:85-90`.
-  Problem: each loop iteration creates `Task.Delay(Timeout.Infinite, stopCts.Token)` and, when `GetContextAsync` wins the `WhenAny`, never cancels/disposes it — leaving a permanent `CancellationTokenRegistration` on `stopCts` and a live Task. Memory and the CTS callback list grow linearly with total requests served, degrading a long-running headless server.
-  Evidence: a fresh infinite-delay task per iteration, never released until shutdown.
-  Fix: register the loop against the token once (or call `listener.Stop()` from the cancellation callback to unblock `GetContextAsync`).
-  Acceptance: serving N requests leaves the `stopCts` registration count and Task count flat; add a leak assertion or manual profile.
-  Confidence: Verified. Effort: S
-
 - [ ] P2 — Item 193 — CLI `--tools-path` accepts unexpanded `%VAR%` and materializes it as a literal directory
   Category: correctness
   Where: `src/UniversalConverterX.Console/Commands/ToolsCommand.cs:25-27,170-177`; `ConvertCommand.cs:75-77,179`; `ConfigCommand.cs:102-108`; sink `src/UniversalConverterX.Core/Services/ToolDownloader.cs:53-54`.
