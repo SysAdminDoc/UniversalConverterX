@@ -409,25 +409,27 @@ public sealed partial class SettingsWindow : Window
 
     private async void DownloadAllTools_Click(object sender, RoutedEventArgs e)
     {
-        if (_toolDownloader == null)
-        {
-            await ShowMessageAsync(AppLocalizer.Get("Tool Download"),
-                AppLocalizer.Get("Tool downloading is not available. Please install tools manually."));
-            return;
-        }
-
-        var missingTools = _tools.Where(t => !t.IsInstalled).Select(t => t.Id).ToList();
-        if (missingTools.Count == 0)
-        {
-            await ShowMessageAsync(AppLocalizer.Get("All Tools Installed"), AppLocalizer.Get("All converter tools are already installed."));
-            return;
-        }
-
-        DownloadAllToolsButton.IsEnabled = false;
-        DownloadAllToolsButton.Content = AppLocalizer.Get("Downloading...");
-
+        var buttonWasDisabled = false;
         try
         {
+            if (_toolDownloader == null)
+            {
+                await ShowMessageAsync(AppLocalizer.Get("Tool Download"),
+                    AppLocalizer.Get("Tool downloading is not available. Please install tools manually."));
+                return;
+            }
+
+            var missingTools = _tools.Where(t => !t.IsInstalled).Select(t => t.Id).ToList();
+            if (missingTools.Count == 0)
+            {
+                await ShowMessageAsync(AppLocalizer.Get("All Tools Installed"), AppLocalizer.Get("All converter tools are already installed."));
+                return;
+            }
+
+            DownloadAllToolsButton.IsEnabled = false;
+            DownloadAllToolsButton.Content = AppLocalizer.Get("Downloading...");
+            buttonWasDisabled = true;
+
             var progress = new Progress<BatchDownloadProgress>(p =>
             {
                 DispatcherQueue.TryEnqueue(() =>
@@ -454,10 +456,36 @@ public sealed partial class SettingsWindow : Window
 
             LoadTools();
         }
+        catch (Exception ex)
+        {
+            await ShowToolDownloadFailureAsync(ex);
+        }
         finally
         {
-            DownloadAllToolsButton.IsEnabled = true;
-            DownloadAllToolsButton.Content = AppLocalizer.Get("Install missing tools");
+            if (buttonWasDisabled)
+            {
+                DownloadAllToolsButton.IsEnabled = true;
+                DownloadAllToolsButton.Content = AppLocalizer.Get("Install missing tools");
+            }
+        }
+    }
+
+    private async Task ShowToolDownloadFailureAsync(Exception ex)
+    {
+        Debug.WriteLine($"Bulk tool download failed: {ex.GetType().Name}: {ex.Message}");
+        try
+        {
+            await ShowMessageAsync(
+                AppLocalizer.Get("Tool download failed"),
+                AppLocalizer.Format($"The missing tools could not be installed: {ex.Message}"));
+        }
+        catch (Exception dialogException)
+        {
+            Debug.WriteLine($"Showing bulk tool download failure failed: {dialogException.GetType().Name}: {dialogException.Message}");
+            ShowUpdateStatus(
+                AppLocalizer.Get("Tool download failed"),
+                AppLocalizer.Get("The missing tools could not be installed. Check disk space, permissions, and network access."),
+                InfoBarSeverity.Error);
         }
     }
 
