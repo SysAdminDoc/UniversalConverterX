@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
@@ -30,6 +32,8 @@ public sealed partial class DownloaderPage : Page
     private CancellationTokenSource? _cts;
     private bool _runtimeOpInFlight;
     private readonly string _outputDir;
+    private readonly string? _outputDirectoryWarning;
+    private readonly bool _outputDirectoryAvailable;
 
     public DownloaderPage()
     {
@@ -39,22 +43,17 @@ public sealed partial class DownloaderPage : Page
         _health = App.Services.GetRequiredService<ISidecarHealthService>();
         _toolManager = App.Services.GetRequiredService<IToolManager>();
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
-        _outputDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            "Downloads", "UniversalConverterX");
-        // Locked-down profiles, redirected Downloads folders on read-only NAS,
-        // and group-policy-restricted UserProfile paths can all reject this
-        // creation. Don't crash the app — fall back to %TEMP% so the user can
-        // still queue downloads.
-        try { Directory.CreateDirectory(_outputDir); }
-        catch
-        {
-            _outputDir = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Downloads");
-            try { Directory.CreateDirectory(_outputDir); } catch { /* nothing more to do */ }
-        }
+        var options = App.Services.GetRequiredService<IOptions<ConverterXOptions>>().Value;
+        var output = ResolveOutputDirectory(options.DefaultOutputDirectory);
+        _outputDir = output.Path;
+        _outputDirectoryWarning = output.Warning;
+        _outputDirectoryAvailable = output.Available;
 
         QueueList.ItemsSource = _queue;
         FinishedList.ItemsSource = _finished;
+        OutputDirectoryText.Text = BuildOutputDirectoryStatus();
+        if (_outputDirectoryWarning is not null)
+            StatusText.Text = _outputDirectoryWarning;
         UpdateUi();
         // Probe the cookie store on first paint so the user sees real status
         // instead of the placeholder "Checking..." string. Background-fired so
@@ -447,6 +446,23 @@ public sealed partial class DownloaderPage : Page
         if (pending.Count == 0)
             return;
 
+        if (!_outputDirectoryAvailable)
+        {
+            StatusText.Text = _outputDirectoryWarning ??
+                AppLocalizer.Get("Download output directory is unavailable. Choose a writable location in Settings.");
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(_outputDir);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = AppLocalizer.Format($"Download output directory is unavailable: {ex.Message}");
+            return;
+        }
+
         _cts = new CancellationTokenSource();
         DownloadButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
@@ -612,6 +628,64 @@ public sealed partial class DownloaderPage : Page
             args.AddRange(["--sponsorblock", "remove"]);
 
         return args;
+    }
+
+    private string BuildOutputDirectoryStatus()
+    {
+        var location = AppLocalizer.Format($"Downloads will be saved to: {_outputDir}");
+        return _outputDirectoryWarning is null
+            ? location
+            : AppLocalizer.Format($"{_outputDirectoryWarning} {location}");
+    }
+
+    private static (string Path, string? Warning, bool Available) ResolveOutputDirectory(
+        string? configuredDirectory)
+    {
+        var candidates = new List<(string Path, string Label)>();
+        if (!string.IsNullOrWhiteSpace(configuredDirectory))
+            candidates.Add((configuredDirectory.Trim(), "the configured default output directory"));
+
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!string.IsNullOrWhiteSpace(userProfile))
+        {
+            candidates.Add((
+                Path.Combine(userProfile, "Downloads", "UniversalConverterX"),
+                "the Downloads output directory"));
+        }
+
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "UniversalConverterX-Downloads");
+        candidates.Add((tempDirectory, "the temporary output directory"));
+
+        var failures = new List<string>();
+        for (var index = 0; index < candidates.Count; index++)
+        {
+            var candidate = candidates[index];
+            try
+            {
+                var fullPath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(candidate.Path));
+                Directory.CreateDirectory(fullPath);
+                if (!Directory.Exists(fullPath))
+                {
+                    failures.Add($"Could not create {candidate.Label}.");
+                    continue;
+                }
+
+                string? warning = failures.Count == 0 && index == 0
+                    ? null
+                    : AppLocalizer.Format($"{string.Join(" ", failures)} Using {candidate.Label}: {fullPath}.");
+                return (fullPath, warning, true);
+            }
+            catch (Exception ex)
+            {
+                failures.Add(AppLocalizer.Format($"{candidate.Label} unavailable: {ex.Message}."));
+            }
+        }
+
+        var fallback = candidates.LastOrDefault().Path;
+        var unavailable = string.IsNullOrWhiteSpace(fallback)
+            ? AppLocalizer.Get("No writable download output directory is available.")
+            : AppLocalizer.Format($"No writable download output directory is available. Last tried: {fallback}.");
+        return (fallback ?? tempDirectory, unavailable, false);
     }
 
     private void AddFinishedItem(DownloadJobItem job, SidecarResult result)

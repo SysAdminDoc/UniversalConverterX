@@ -45,6 +45,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Fixed Watch Folders page collection subscriptions to attach on load and detach on unload, preventing stale page instances from being retained by the singleton service.
 - Fixed preset runs being cancelled after one hour and misreported as user cancellations; long AI batches now rely on the sidecar silence watchdog, which reports stuck engines distinctly.
 - Fixed Recorder cancellation cleanup by deleting hard-killed partial MP4 outputs and clearly reporting the path when a locked file cannot be removed; cancelled artifacts are never published as finished recordings.
+- Fixed Downloader output selection to honor the configured default directory, report the effective Downloads/TEMP fallback in the Activity header, and refuse to start when no writable destination exists.
 - Fixed Potrace PDF, DXF, GeoJSON, and XFig argument construction so each `-b` option is followed by its required backend name.
 - Fixed libheif encoding for small requested widths by removing the incomplete `heif-enc -t` thumbnail flag; image width is no longer misinterpreted as a thumbnail request.
 - Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.

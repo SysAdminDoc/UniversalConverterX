@@ -326,11 +326,17 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                        <TextBlock x:Uid="DownloaderPage_Item_038" Text="Activity" Style="{StaticResource PanelTitleTextStyle}"/>
-                        <TextBlock x:Name="QueueSummaryText"
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock x:Uid="DownloaderPage_Item_038" Text="Activity" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <TextBlock x:Name="QueueSummaryText"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <TextBlock x:Name="OutputDirectoryText"
                                    Style="{StaticResource MutedTextStyle}"
-                                   VerticalAlignment="Bottom"/>
+                                   TextWrapping="Wrap"
+                                   TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
                     <Button x:Uid="DownloaderPage_DownloaderPageButton01" Grid.Column="1" Content="Open Output Folder"
                             Style="{StaticResource SecondaryButtonStyle}"
