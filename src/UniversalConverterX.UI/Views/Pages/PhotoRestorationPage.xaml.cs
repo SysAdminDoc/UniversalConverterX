@@ -44,7 +44,7 @@ public sealed partial class PhotoRestorationPage : Page
 
     private async Task LoadModelsAsync()
     {
-        ModelCombo.PlaceholderText = "Discovering...";
+        ModelCombo.PlaceholderText = AppLocalizer.Get("Discovering...");
         ModelCombo.IsEnabled = false;
         _models.Clear();
         ModelCombo.Items.Clear();
@@ -68,16 +68,16 @@ public sealed partial class PhotoRestorationPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            ModelHintText.Text = "Build the gfpgan sidecar first: pwsh tools/gfpgan/build.ps1";
-            ModelCombo.PlaceholderText = "Sidecar not built";
+            ModelHintText.Text = AppLocalizer.Get("Build the gfpgan sidecar first: pwsh tools/gfpgan/build.ps1");
+            ModelCombo.PlaceholderText = AppLocalizer.Get("Sidecar not built");
             return;
         }
 
         _models.AddRange(harvested);
         if (_models.Count == 0)
         {
-            ModelCombo.PlaceholderText = "No models found";
-            ModelHintText.Text = "Drop GFPGANv1.4.pth into tools/gfpgan/models/. Source: github.com/TencentARC/GFPGAN/releases (Apache 2.0).";
+            ModelCombo.PlaceholderText = AppLocalizer.Get("No models found");
+            ModelHintText.Text = AppLocalizer.Get("Drop GFPGANv1.4.pth into tools/gfpgan/models/. Source: github.com/TencentARC/GFPGAN/releases (Apache 2.0).");
         }
         else
         {
@@ -85,7 +85,7 @@ public sealed partial class PhotoRestorationPage : Page
                 ModelCombo.Items.Add(new ComboBoxItem { Content = m.Name, Tag = m });
             ModelCombo.SelectedIndex = 0;
             ModelCombo.IsEnabled = true;
-            ModelHintText.Text = $"{_models.Count} model(s) discovered.";
+            ModelHintText.Text = AppLocalizer.Format($"{_models.Count} model(s) discovered.");
         }
         UpdateUi();
     }
@@ -95,7 +95,7 @@ public sealed partial class PhotoRestorationPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into restoration queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into restoration queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -151,8 +151,8 @@ public sealed partial class PhotoRestorationPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported images found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported images found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -229,7 +229,7 @@ public sealed partial class PhotoRestorationPage : Page
             <= 0.75 => "strong",
             _ => "aggressive",
         };
-        WeightLabel.Text = $"{v:F2} ({hint})";
+        WeightLabel.Text = AppLocalizer.Format($"{v:F2} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
     }
@@ -239,7 +239,7 @@ public sealed partial class PhotoRestorationPage : Page
         if (_files.Count == 0 || _cts is not null) return;
         if (ModelCombo.SelectedItem is not ComboBoxItem { Tag: PrModel model })
         {
-            StatusText.Text = "Pick a GFPGAN model first.";
+            StatusText.Text = AppLocalizer.Get("Pick a GFPGAN model first.");
             return;
         }
         var upscale = SelectedInt(UpscaleCombo, 2);
@@ -273,7 +273,7 @@ public sealed partial class PhotoRestorationPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Restoring";
-                StatusText.Text = $"Restoring {item.FileName}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Restoring {item.FileName}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -311,8 +311,8 @@ public sealed partial class PhotoRestorationPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} restored, {failed} failed."
-                : $"Done — {completed} restored, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} restored, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} restored, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -331,7 +331,7 @@ public sealed partial class PhotoRestorationPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -372,7 +372,7 @@ public sealed partial class PhotoRestorationPage : Page
         RunButton.IsEnabled = hasFiles && hasModel && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
         if (updateStatus && _cts is null) UpdateStatusText();
     }
@@ -380,8 +380,8 @@ public sealed partial class PhotoRestorationPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop portrait photos to start a restoration queue."
-            : $"Ready to restore {_files.Count} photo(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop portrait photos to start a restoration queue.")
+            : AppLocalizer.Format($"Ready to restore {_files.Count} photo(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

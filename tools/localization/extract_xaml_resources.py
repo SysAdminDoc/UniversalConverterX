@@ -7,6 +7,7 @@ English fallback visible in source control.
 from __future__ import annotations
 
 import html
+import hashlib
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -119,6 +120,160 @@ def load_resw(path: Path) -> dict[str, str]:
     }
 
 
+def csharp_files() -> list[Path]:
+    return sorted(
+        path for path in (UI_ROOT / "").rglob("*.cs")
+        if not any(part in {"bin", "obj"} for part in path.parts)
+    )
+
+
+def parse_csharp_string(text: str, index: int):
+    """Return (end, token, interpolated) for a C# string at index."""
+    start = index
+    if text.startswith('$@"', index) or text.startswith('@$"', index):
+        quote = index + 2
+        interpolated = True
+        verbatim = True
+    elif text.startswith('$"', index):
+        quote = index + 1
+        interpolated = True
+        verbatim = False
+    elif text.startswith('@"', index):
+        quote = index + 1
+        interpolated = False
+        verbatim = True
+    elif text.startswith('"', index):
+        quote = index
+        interpolated = False
+        verbatim = False
+    else:
+        return None
+
+    cursor = quote + 1
+    brace_depth = 0
+    while cursor < len(text):
+        character = text[cursor]
+        if verbatim:
+            if character == '"':
+                if cursor + 1 < len(text) and text[cursor + 1] == '"':
+                    cursor += 2
+                    continue
+                if brace_depth == 0:
+                    return cursor + 1, text[start:cursor + 1], interpolated
+        else:
+            if character == '\\':
+                cursor += 2
+                continue
+            if interpolated and character == '{' and not text.startswith('{{', cursor):
+                brace_depth += 1
+            elif interpolated and character == '}' and brace_depth > 0 and not text.startswith('}}', cursor):
+                brace_depth -= 1
+            elif character == '"' and brace_depth == 0:
+                return cursor + 1, text[start:cursor + 1], interpolated
+        cursor += 1
+    return None
+
+
+def decode_csharp_string(token: str) -> str:
+    if token.startswith('$@') or token.startswith('@'):
+        body = token[token.index('"') + 1:-1]
+        return body.replace('""', '"')
+    body = token[token.index('"') + 1:-1]
+    escapes = {
+        '\\n': '\n', '\\r': '\r', '\\t': '\t', '\\b': '\b',
+        '\\f': '\f', '\\v': '\v', '\\\\': '\\', '\\"': '"',
+    }
+    for source, value in escapes.items():
+        body = body.replace(source, value)
+    body = re.sub(
+        r"\\u([0-9A-Fa-f]{4})",
+        lambda match: chr(int(match.group(1), 16)),
+        body,
+    )
+    return body
+
+
+def interpolation_format(body: str) -> str:
+    """Replace C# interpolation holes with positional format placeholders."""
+    output: list[str] = []
+    cursor = 0
+    argument = 0
+    while cursor < len(body):
+        if body.startswith('{{', cursor) or body.startswith('}}', cursor):
+            output.append(body[cursor:cursor + 2])
+            cursor += 2
+            continue
+        if body[cursor] != '{':
+            output.append(body[cursor])
+            cursor += 1
+            continue
+
+        end = cursor + 1
+        depth = 1
+        while end < len(body) and depth:
+            if body[end] == '{':
+                depth += 1
+            elif body[end] == '}':
+                depth -= 1
+            end += 1
+        if depth:
+            return body
+
+        expression = body[cursor + 1:end - 1].strip()
+        suffix = ""
+        for marker in (',', ':'):
+            position = expression.find(marker)
+            if position >= 0:
+                suffix = expression[position:]
+                break
+        output.append(f"{{{argument}{suffix}}}")
+        argument += 1
+        cursor = end
+    return "".join(output)
+
+
+def code_resource_key(value: str) -> str:
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest().upper()
+    return f"Code_{digest[:20]}"
+
+
+def discover_code_resources() -> dict[str, str]:
+    discovered: dict[str, str] = {}
+    call_pattern = re.compile(r"\bAppLocalizer\.(Get|Format)\s*\(")
+    for path in csharp_files():
+        text = path.read_text(encoding="utf-8-sig")
+        for match in call_pattern.finditer(text):
+            cursor = match.end()
+            while cursor < len(text) and text[cursor].isspace():
+                cursor += 1
+            parsed = parse_csharp_string(text, cursor)
+            if not parsed:
+                continue
+            end, token, interpolated = parsed
+            value = decode_csharp_string(token)
+            if match.group(1) == "Format" and interpolated:
+                value = interpolation_format(value)
+            elif match.group(1) == "Get" and interpolated:
+                # Interpolated Get is not a supported resource call; it is
+                # still safer to omit it than to create a value with embedded
+                # runtime data.
+                continue
+            if not value:
+                continue
+
+            # Two-argument calls retain their semantic key. The code-resource
+            # hash is used only by the concise one-argument overloads.
+            after = text[end:]
+            if match.group(1) == "Get" and re.match(r"\s*,", after):
+                continue
+            key = code_resource_key(value)
+            previous = discovered.get(key)
+            if previous is not None and previous != value:
+                raise ValueError(f"Resource {key} has conflicting values")
+            discovered[key] = value
+    return discovered
+
+
 def write_resw(path: Path, values: dict[str, str]) -> None:
     root = ET.Element("root")
     headers = (
@@ -224,6 +379,7 @@ def transform() -> tuple[int, int]:
     }
     english.update(discovered)
     english.update(CODE_RESOURCES)
+    english.update(discover_code_resources())
     write_resw(english_path, english)
 
     for locale in LOCALES[1:]:

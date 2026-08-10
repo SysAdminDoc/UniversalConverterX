@@ -40,7 +40,7 @@ public sealed partial class AutoHighlightPage : Page
 
         _viewModel.LoadVideo(file.Path);
         AnalysisProgress.Value = 0;
-        StatusText.Text = $"Loaded: {Path.GetFileName(_viewModel.SourcePath)}";
+        StatusText.Text = AppLocalizer.Format($"Loaded: {Path.GetFileName(_viewModel.SourcePath)}");
         UpdateUi();
     }
 
@@ -51,7 +51,7 @@ public sealed partial class AutoHighlightPage : Page
 
         _viewModel.Highlights.Clear();
         AnalysisProgress.Value = 0;
-        StatusText.Text = "Analyzing scene changes and motion energy...";
+        StatusText.Text = AppLocalizer.Get("Analyzing scene changes and motion energy...");
         SetBusy(true);
 
         var args = _viewModel.BuildAnalyzeArguments(
@@ -97,7 +97,7 @@ public sealed partial class AutoHighlightPage : Page
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
-        StatusText.Text = "Cancelling...";
+        StatusText.Text = AppLocalizer.Get("Cancelling...");
         _activeRun?.Cancel();
     }
 
@@ -151,7 +151,9 @@ public sealed partial class AutoHighlightPage : Page
 
         SetBusy(true);
         AnalysisProgress.Value = 0;
-        StatusText.Text = kind == HighlightExportKind.Reel ? "Rendering highlight reel..." : "Exporting timeline...";
+        StatusText.Text = kind == HighlightExportKind.Reel
+            ? AppLocalizer.Get("Rendering highlight reel...")
+            : AppLocalizer.Get("Exporting timeline...");
         _activeRun = new CancellationTokenSource(TimeSpan.FromHours(2));
         var progress = new Progress<SidecarProgress>(update =>
             DispatcherQueue.TryEnqueue(() => AnalysisProgress.Value = update.Percent));
@@ -168,8 +170,8 @@ public sealed partial class AutoHighlightPage : Page
         }
 
         StatusText.Text = result.Success
-            ? $"Exported {selected.Count} highlight(s) to {Path.GetFileName(file.Path)}."
-            : $"Export failed: {result.ErrorMessage ?? result.ErrorCode}";
+            ? AppLocalizer.Format($"Exported {selected.Count} highlight(s) to {Path.GetFileName(file.Path)}.")
+            : AppLocalizer.Format($"Export failed: {result.ErrorMessage ?? result.ErrorCode}");
     }
 
     private void SetBusy(bool busy)

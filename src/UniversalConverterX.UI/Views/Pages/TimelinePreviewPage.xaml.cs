@@ -61,7 +61,7 @@ public sealed partial class TimelinePreviewPage : Page
         if (f is null) return;
 
         _currentPath = f.Path;
-        StatusText.Text = $"Loaded: {Path.GetFileName(_currentPath)}";
+        StatusText.Text = AppLocalizer.Format($"Loaded: {Path.GetFileName(_currentPath)}");
         GenerateButton.IsEnabled = true;
     }
 
@@ -109,11 +109,11 @@ public sealed partial class TimelinePreviewPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             GenProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage} -- {p.Percent:F0}%";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage} -- {p.Percent:F0}%");
         }));
         var log = new Progress<SidecarLog>(_ => { });
 
-        StatusText.Text = "Generating timeline...";
+        StatusText.Text = AppLocalizer.Get("Generating timeline...");
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(15));
         var result = await _runner.RunAsync(
             "clipforge", args, progress, log, cts.Token,
@@ -144,11 +144,11 @@ public sealed partial class TimelinePreviewPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            StatusText.Text = "clipforge sidecar not built. Run pwsh tools/clipforge/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("clipforge sidecar not built. Run pwsh tools/clipforge/build.ps1.");
         }
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {_thumbs.Count} thumbnail(s).";
+            StatusText.Text = AppLocalizer.Format($"Done -- {_thumbs.Count} thumbnail(s).");
             GenProgress.Value = 100;
             if (_durationSeconds > 0)
             {
@@ -161,7 +161,7 @@ public sealed partial class TimelinePreviewPage : Page
         }
         else
         {
-            StatusText.Text = $"Generation failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Generation failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         GenerateButton.IsEnabled = true;
     }
@@ -179,7 +179,7 @@ public sealed partial class TimelinePreviewPage : Page
 
     private void UpdateSeekLabel(double seconds)
     {
-        SeekLabel.Text = $"{Format(seconds)} / {Format(_durationSeconds)}";
+        SeekLabel.Text = AppLocalizer.Format($"{Format(seconds)} / {Format(_durationSeconds)}");
     }
 
     private static string Format(double seconds)

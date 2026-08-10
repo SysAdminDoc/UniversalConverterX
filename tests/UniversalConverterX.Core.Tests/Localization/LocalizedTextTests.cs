@@ -39,4 +39,20 @@ public sealed class LocalizedTextTests : IDisposable
 
         loaded.Language.Should().Be("pl-PL");
     }
+
+    [Theory]
+    [InlineData("Ready", "［Ŕēȧḋŷ··］")]
+    [InlineData("Value {0}", "［Ṿȧŀūē {0}··］")]
+    public void PseudoLocalization_ExpandsCopyButPreservesPlaceholders(
+        string value,
+        string expected)
+    {
+        PseudoLocalization.Transform(value).Should().Be(expected);
+    }
+
+    [Fact]
+    public void PseudoLocalization_LeavesEmptyValuesEmptyContent()
+    {
+        PseudoLocalization.Transform(string.Empty).Should().Be("" /* no visible copy */);
+    }
 }

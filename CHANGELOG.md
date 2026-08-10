@@ -8,6 +8,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 - Added an app-scoped durable Job Center over the shared queue store. Converter and Compressor queues now restore across navigation and restart, recover in-flight jobs as interrupted, expose centralized cancel/retry/skip actions, and publish preflight blocker-versus-warning diagnostics.
 - Routed Console and Explorer preset loading through the Core `PresetDocument` validator, with shared diagnostics and compatibility coverage for valid, future-schema, XXE, traversal, invocation-mode, and rooted-output fixtures.
+- Runtime status, error, dialog, and formatted summary copy now uses deterministic resource-backed localization across the UI code-behind, with pseudo-locale support and static resource-coverage checks.
 
 ### Fixed
 

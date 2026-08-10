@@ -99,7 +99,7 @@ public sealed partial class FontConverterPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             ConvertButton.IsEnabled = true;
             return;
         }
@@ -116,11 +116,11 @@ public sealed partial class FontConverterPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage} -- {p.Percent:F0}%";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage} -- {p.Percent:F0}%");
         }));
 
         var startedAt = DateTime.UtcNow;
-        StatusText.Text = "Converting...";
+        StatusText.Text = AppLocalizer.Get("Converting...");
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
         var result = await _runner.RunAsync(
             "fontconvert", args, progress, null, cts.Token,
@@ -137,10 +137,10 @@ public sealed partial class FontConverterPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "fontconvert sidecar not built. Run pwsh tools/fontconvert/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("fontconvert sidecar not built. Run pwsh tools/fontconvert/build.ps1.");
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {_files.Count} font(s) -> .{fmt}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {_files.Count} font(s) -> .{fmt}.");
             WorkProgress.Value = 100;
             foreach (var f in _files)
             {
@@ -161,7 +161,7 @@ public sealed partial class FontConverterPage : Page
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
             foreach (var f in _files.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }

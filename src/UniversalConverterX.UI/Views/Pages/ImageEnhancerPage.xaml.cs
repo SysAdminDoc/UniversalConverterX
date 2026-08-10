@@ -43,7 +43,7 @@ public sealed partial class ImageEnhancerPage : Page
 
     private async Task LoadModelsAsync()
     {
-        ModelCombo.PlaceholderText = "Discovering...";
+        ModelCombo.PlaceholderText = AppLocalizer.Get("Discovering...");
         ModelCombo.IsEnabled = false;
         _models.Clear();
         ModelCombo.Items.Clear();
@@ -67,16 +67,16 @@ public sealed partial class ImageEnhancerPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            ModelHintText.Text = "Build the realesrgan sidecar first: pwsh tools/realesrgan/build.ps1";
-            ModelCombo.PlaceholderText = "Sidecar not built";
+            ModelHintText.Text = AppLocalizer.Get("Build the realesrgan sidecar first: pwsh tools/realesrgan/build.ps1");
+            ModelCombo.PlaceholderText = AppLocalizer.Get("Sidecar not built");
             return;
         }
 
         _models.AddRange(harvested);
         if (_models.Count == 0)
         {
-            ModelCombo.PlaceholderText = "No models found";
-            ModelHintText.Text = "Run pwsh tools/realesrgan/build.ps1 to fetch the upstream model set, or drop *.bin/*.param files into tools/realesrgan/bin/models/.";
+            ModelCombo.PlaceholderText = AppLocalizer.Get("No models found");
+            ModelHintText.Text = AppLocalizer.Get("Run pwsh tools/realesrgan/build.ps1 to fetch the upstream model set, or drop *.bin/*.param files into tools/realesrgan/bin/models/.");
         }
         else
         {
@@ -88,7 +88,7 @@ public sealed partial class ImageEnhancerPage : Page
                 });
             ModelCombo.SelectedIndex = 0;
             ModelCombo.IsEnabled = true;
-            ModelHintText.Text = $"{_models.Count} model(s) discovered.";
+            ModelHintText.Text = AppLocalizer.Format($"{_models.Count} model(s) discovered.");
         }
         UpdateUi();
     }
@@ -98,7 +98,7 @@ public sealed partial class ImageEnhancerPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into upscale queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into upscale queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -154,8 +154,8 @@ public sealed partial class ImageEnhancerPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported images found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported images found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -226,7 +226,7 @@ public sealed partial class ImageEnhancerPage : Page
         if (_files.Count == 0 || _cts is not null) return;
         if (ModelCombo.SelectedItem is not ComboBoxItem { Tag: UpModel model })
         {
-            StatusText.Text = "Pick a model first.";
+            StatusText.Text = AppLocalizer.Get("Pick a model first.");
             return;
         }
         var scale = SelectedInt(ScaleCombo, 4);
@@ -260,7 +260,7 @@ public sealed partial class ImageEnhancerPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Upscaling";
-                StatusText.Text = $"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -299,8 +299,8 @@ public sealed partial class ImageEnhancerPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} upscaled, {failed} failed."
-                : $"Done — {completed} upscaled, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} upscaled, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} upscaled, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -319,7 +319,7 @@ public sealed partial class ImageEnhancerPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -360,7 +360,7 @@ public sealed partial class ImageEnhancerPage : Page
         RunButton.IsEnabled = hasFiles && hasModel && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
         if (updateStatus && _cts is null) UpdateStatusText();
     }
@@ -368,8 +368,8 @@ public sealed partial class ImageEnhancerPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop images to start an upscale queue."
-            : $"Ready to upscale {_files.Count} image(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop images to start an upscale queue.")
+            : AppLocalizer.Format($"Ready to upscale {_files.Count} image(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

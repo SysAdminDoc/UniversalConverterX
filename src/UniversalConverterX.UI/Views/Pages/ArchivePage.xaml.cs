@@ -52,9 +52,11 @@ public sealed partial class ArchivePage : Page
         _packMode = ModePivot.SelectedIndex == 0;
         _items.Clear();
         EmptyHint.Text = _packMode
-            ? "Pack mode: drop the items you want to archive."
-            : "Unpack mode: drop or pick an archive to extract.";
-        GoButton.Content = _packMode ? "Pack" : "Unpack";
+            ? AppLocalizer.Get("Pack mode: drop the items you want to archive.")
+            : AppLocalizer.Get("Unpack mode: drop or pick an archive to extract.");
+        GoButton.Content = _packMode
+            ? AppLocalizer.Get("Pack")
+            : AppLocalizer.Get("Unpack");
         ListButton.IsEnabled = !_packMode && _unpackInput is not null;
         UpdateUi();
     }
@@ -63,7 +65,9 @@ public sealed partial class ArchivePage : Page
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
         e.DragUIOverride.IsCaptionVisible = true;
-        e.DragUIOverride.Caption = _packMode ? "Add to pack queue" : "Use as archive source";
+        e.DragUIOverride.Caption = _packMode
+            ? AppLocalizer.Get("Add to pack queue")
+            : AppLocalizer.Get("Use as archive source");
     }
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
@@ -202,11 +206,11 @@ public sealed partial class ArchivePage : Page
         var startedAt = DateTime.UtcNow;
         var totalSrc = _items.Sum(i => i.Size ?? 0);
 
-        StatusText.Text = $"Packing {_items.Count} item(s) -> {System.IO.Path.GetFileName(_packOutput)}...";
+        StatusText.Text = AppLocalizer.Format($"Packing {_items.Count} item(s) -> {System.IO.Path.GetFileName(_packOutput)}...");
         var result = await RunSidecarAsync(args);
         if (result.Success)
         {
-            StatusText.Text = $"Packed -> {System.IO.Path.GetFileName(_packOutput)} ({ArchiveItem.FormatBytes(result.SizeBytes ?? 0)})";
+            StatusText.Text = AppLocalizer.Format($"Packed -> {System.IO.Path.GetFileName(_packOutput)} ({ArchiveItem.FormatBytes(result.SizeBytes ?? 0)})");
             _ = _history.LogAsync(new HistoryRecord
             {
                 Timestamp = startedAt,
@@ -223,7 +227,7 @@ public sealed partial class ArchivePage : Page
         }
         else
         {
-            StatusText.Text = $"Pack failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Pack failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         GoButton.IsEnabled = true;
     }
@@ -243,11 +247,11 @@ public sealed partial class ArchivePage : Page
         };
 
         var startedAt = DateTime.UtcNow;
-        StatusText.Text = $"Unpacking {System.IO.Path.GetFileName(_unpackInput)}...";
+        StatusText.Text = AppLocalizer.Format($"Unpacking {System.IO.Path.GetFileName(_unpackInput)}...");
         var result = await RunSidecarAsync(args);
         if (result.Success)
         {
-            StatusText.Text = $"Unpacked to {_unpackOutputDir}";
+            StatusText.Text = AppLocalizer.Format($"Unpacked to {_unpackOutputDir}");
             _ = _history.LogAsync(new HistoryRecord
             {
                 Timestamp = startedAt,
@@ -264,7 +268,7 @@ public sealed partial class ArchivePage : Page
         }
         else
         {
-            StatusText.Text = $"Unpack failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Unpack failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         GoButton.IsEnabled = true;
     }
@@ -275,7 +279,7 @@ public sealed partial class ArchivePage : Page
         ListButton.IsEnabled = false;
         _items.Clear();
         UpdateUi();
-        StatusText.Text = $"Listing contents of {System.IO.Path.GetFileName(_unpackInput)}...";
+        StatusText.Text = AppLocalizer.Format($"Listing contents of {System.IO.Path.GetFileName(_unpackInput)}...");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
         var result = await _runner.RunAsync(
@@ -295,13 +299,13 @@ public sealed partial class ArchivePage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "archive sidecar not built. Run pwsh tools/archive/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("archive sidecar not built. Run pwsh tools/archive/build.ps1.");
         else if (result.ErrorCode == "missing_7zip")
-            StatusText.Text = "7-Zip not found. Install from 7-zip.org and try again.";
+            StatusText.Text = AppLocalizer.Get("7-Zip not found. Install from 7-zip.org and try again.");
         else if (result.Success)
-            StatusText.Text = $"Listed {_items.Count} entries.";
+            StatusText.Text = AppLocalizer.Format($"Listed {_items.Count} entries.");
         else
-            StatusText.Text = $"List failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"List failed: {result.ErrorMessage ?? result.ErrorCode}");
         ListButton.IsEnabled = true;
         UpdateUi();
     }

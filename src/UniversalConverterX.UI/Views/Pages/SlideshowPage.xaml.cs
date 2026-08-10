@@ -61,7 +61,7 @@ public sealed partial class SlideshowPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into slideshow";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into slideshow");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -184,7 +184,7 @@ public sealed partial class SlideshowPage : Page
     {
         if (!Directory.Exists(path))
         {
-            StatusText.Text = $"Folder not found: {path}";
+            StatusText.Text = AppLocalizer.Format($"Folder not found: {path}");
             return;
         }
 
@@ -197,12 +197,12 @@ public sealed partial class SlideshowPage : Page
         }
         catch (UnauthorizedAccessException)
         {
-            StatusText.Text = "Permission denied for that folder.";
+            StatusText.Text = AppLocalizer.Get("Permission denied for that folder.");
             return;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
             return;
         }
 
@@ -217,9 +217,9 @@ public sealed partial class SlideshowPage : Page
 
         StatusText.Text = added switch
         {
-            0 => "No supported images were added from that folder.",
-            _ when truncated => $"Added {added} images from {path} (capped at {FolderAddCap}).",
-            _ => $"Added {added} images from {path}.",
+            0 => AppLocalizer.Get("No supported images were added from that folder."),
+            _ when truncated => AppLocalizer.Format($"Added {added} images from {path} (capped at {FolderAddCap})."),
+            _ => AppLocalizer.Format($"Added {added} images from {path}."),
         };
         RefreshPlanSummaries();
         UpdateUi(updateStatus: false);
@@ -314,7 +314,7 @@ public sealed partial class SlideshowPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             return;
         }
 
@@ -339,10 +339,10 @@ public sealed partial class SlideshowPage : Page
                 var percent = Math.Clamp(p.Percent, 0, 100);
                 ProgressBar.Value = percent;
                 ProgressStage.Text = string.IsNullOrWhiteSpace(p.Stage)
-                    ? $"{percent:F1}%"
-                    : $"{percent:F1}% - {p.Stage}";
+                    ? AppLocalizer.Format($"{percent:F1}%")
+                    : AppLocalizer.Format($"{percent:F1}% - {p.Stage}");
                 ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                    ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                    ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                     : "";
                 foreach (var slide in jobs)
                 {
@@ -379,22 +379,25 @@ public sealed partial class SlideshowPage : Page
                 slide.Progress = 100;
                 slide.StatusText = "Done";
             }
-            ProgressTitle.Text = "Slideshow created";
+            ProgressTitle.Text = AppLocalizer.Get("Slideshow created");
             ProgressBar.Value = 100;
             ProgressStage.Text = result.OutputPath is null
-                ? "Video saved"
-                : $"Saved {Path.GetFileName(result.OutputPath)}";
+                ? AppLocalizer.Get("Video saved")
+                : AppLocalizer.Format($"Saved {Path.GetFileName(result.OutputPath)}");
         }
         else
         {
             foreach (var slide in jobs)
                 slide.StatusText = result.ErrorCode == "cancelled" ? "Cancelled" : "Failed";
-            ProgressTitle.Text = result.ErrorCode == "cancelled" ? "Cancelled" : "Render failed";
-            ProgressStage.Text = result.ErrorMessage ?? "The slideshow sidecar failed.";
+            ProgressTitle.Text = result.ErrorCode == "cancelled"
+                ? AppLocalizer.Get("Cancelled")
+                : AppLocalizer.Get("Render failed");
+            ProgressStage.Text = result.ErrorMessage
+                ?? AppLocalizer.Get("The slideshow sidecar failed.");
         }
 
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         UpdateUi();
     }
 
@@ -446,7 +449,7 @@ public sealed partial class SlideshowPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -457,10 +460,10 @@ public sealed partial class SlideshowPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -486,12 +489,12 @@ public sealed partial class SlideshowPage : Page
         if (StatusText is null) return;
         if (_slides.Count == 0)
         {
-            StatusText.Text = "Add images to create a slideshow video.";
+            StatusText.Text = AppLocalizer.Get("Add images to create a slideshow video.");
             return;
         }
 
         var music = string.IsNullOrWhiteSpace(_musicPath) ? "no music" : "music";
-        StatusText.Text = $"Ready to create one {SelectedFormat().ToUpperInvariant()} from {_slides.Count} image(s). {BuildPlanSummary()} - {music}.";
+        StatusText.Text = AppLocalizer.Format($"Ready to create one {SelectedFormat().ToUpperInvariant()} from {_slides.Count} image(s). {BuildPlanSummary()} - {music}.");
     }
 
     private string BuildPlanSummary()

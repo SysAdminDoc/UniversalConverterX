@@ -30,7 +30,7 @@ public sealed partial class PlaceholderPage : Page
 
         if (!string.IsNullOrWhiteSpace(info.PoweredBy))
         {
-            PoweredByText.Text = $"Planned engine: {info.PoweredBy}";
+            PoweredByText.Text = AppLocalizer.Format($"Planned engine: {info.PoweredBy}");
             PoweredByBox.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
     }

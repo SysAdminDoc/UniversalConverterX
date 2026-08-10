@@ -49,10 +49,14 @@ public sealed partial class PdfToolsPage : Page
 
         // Output may be a folder (split) or a file (everything else, except info).
         OutputBrowseButton.Visibility = op == "info" ? Visibility.Collapsed : Visibility.Visible;
-        OutputBrowseButton.Content    = op == "split" ? "Pick folder..." : "Save as...";
+        OutputBrowseButton.Content = op == "split"
+            ? AppLocalizer.Get("Pick folder...")
+            : AppLocalizer.Get("Save as...");
         OutputBox.Visibility          = op == "info" ? Visibility.Collapsed : Visibility.Visible;
 
-        PagesBox.PlaceholderText = op == "split" ? "blank = one PDF per page" : "1,3-5,7";
+        PagesBox.PlaceholderText = op == "split"
+            ? AppLocalizer.Get("blank = one PDF per page")
+            : AppLocalizer.Get("1,3-5,7");
     }
 
     private async void PickMultiInput_Click(object sender, RoutedEventArgs e)
@@ -192,7 +196,7 @@ public sealed partial class PdfToolsPage : Page
 
         RunButton.IsEnabled = false;
         WorkProgress.Value = 0;
-        ResultsText.Text = "Working...";
+        ResultsText.Text = AppLocalizer.Get("Working...");
         LogText.Text = "";
 
         var sb = new StringBuilder();
@@ -237,10 +241,10 @@ public sealed partial class PdfToolsPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "pdftools sidecar not built. Run pwsh tools/pdftools/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("pdftools sidecar not built. Run pwsh tools/pdftools/build.ps1.");
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {op} complete.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {op} complete.");
             WorkProgress.Value = 100;
             if (op != "info" && _singleInput is not null && _output is not null)
             {
@@ -260,7 +264,7 @@ public sealed partial class PdfToolsPage : Page
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         RunButton.IsEnabled = true;
     }

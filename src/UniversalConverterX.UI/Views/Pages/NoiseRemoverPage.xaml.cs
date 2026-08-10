@@ -49,7 +49,7 @@ public sealed partial class NoiseRemoverPage : Page
 
     private async Task LoadModelsAsync()
     {
-        ModelCombo.PlaceholderText = "Discovering...";
+        ModelCombo.PlaceholderText = AppLocalizer.Get("Discovering...");
         ModelCombo.IsEnabled = false;
         _models.Clear();
         ModelCombo.Items.Clear();
@@ -76,35 +76,35 @@ public sealed partial class NoiseRemoverPage : Page
 
             if (result.ErrorCode == "sidecar_not_found")
             {
-                ModelHintText.Text = "Build the rnnoise sidecar first: pwsh tools/rnnoise/build.ps1";
-                ModelCombo.PlaceholderText = "Sidecar not built";
+                ModelHintText.Text = AppLocalizer.Get("Build the rnnoise sidecar first: pwsh tools/rnnoise/build.ps1");
+                ModelCombo.PlaceholderText = AppLocalizer.Get("Sidecar not built");
                 StatusText.Text = ModelHintText.Text;
                 return;
             }
         }
         catch (OperationCanceledException)
         {
-            ModelHintText.Text = "Model discovery timed out.";
+            ModelHintText.Text = AppLocalizer.Get("Model discovery timed out.");
             return;
         }
 
         _models.AddRange(harvested);
         if (_models.Count == 0)
         {
-            ModelCombo.PlaceholderText = "No .rnnn models found";
-            ModelHintText.Text = "Drop a .rnnn model under tools/rnnoise/models/ — cb.rnnn from github.com/GregorR/rnnoise-models is a solid default.";
+            ModelCombo.PlaceholderText = AppLocalizer.Get("No .rnnn models found");
+            ModelHintText.Text = AppLocalizer.Get("Drop a .rnnn model under tools/rnnoise/models/ — cb.rnnn from github.com/GregorR/rnnoise-models is a solid default.");
         }
         else
         {
             foreach (var m in _models)
                 ModelCombo.Items.Add(new ComboBoxItem
                 {
-                    Content = $"{m.Name} ({m.Location})",
+                    Content = AppLocalizer.Format($"{m.Name} ({m.Location})"),
                     Tag = m,
                 });
             ModelCombo.SelectedIndex = 0;
             ModelCombo.IsEnabled = true;
-            ModelHintText.Text = $"{_models.Count} model(s) discovered. Drop additional .rnnn files into tools/rnnoise/models/ to add more.";
+            ModelHintText.Text = AppLocalizer.Format($"{_models.Count} model(s) discovered. Drop additional .rnnn files into tools/rnnoise/models/ to add more.");
         }
         UpdateUi();
     }
@@ -119,7 +119,7 @@ public sealed partial class NoiseRemoverPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into denoise queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into denoise queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -184,8 +184,8 @@ public sealed partial class NoiseRemoverPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported audio/video files found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported audio/video files found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -256,7 +256,7 @@ public sealed partial class NoiseRemoverPage : Page
         if (_files.Count == 0 || _cts is not null) return;
         if (ModelCombo.SelectedItem is not ComboBoxItem { Tag: ModelEntry model })
         {
-            StatusText.Text = "No RNNoise model selected.";
+            StatusText.Text = AppLocalizer.Get("No RNNoise model selected.");
             return;
         }
 
@@ -290,7 +290,7 @@ public sealed partial class NoiseRemoverPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Denoising";
-                StatusText.Text = $"Denoising {item.FileName}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Denoising {item.FileName}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -329,8 +329,8 @@ public sealed partial class NoiseRemoverPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} denoised, {failed} failed."
-                : $"Done — {completed} denoised, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} denoised, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} denoised, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -349,7 +349,7 @@ public sealed partial class NoiseRemoverPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -403,7 +403,7 @@ public sealed partial class NoiseRemoverPage : Page
         ClearButton.IsEnabled  = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
 
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
 
         if (updateStatus && _cts is null)
@@ -415,11 +415,11 @@ public sealed partial class NoiseRemoverPage : Page
         if (_files.Count == 0)
         {
             StatusText.Text = ModelCombo?.SelectedItem is null
-                ? "Drop an .rnnn model into tools/rnnoise/models/, then add files."
-                : "Drop audio or video files to start a denoise queue.";
+                ? AppLocalizer.Get("Drop an .rnnn model into tools/rnnoise/models/, then add files.")
+                : AppLocalizer.Get("Drop audio or video files to start a denoise queue.");
             return;
         }
-        StatusText.Text = $"Ready to denoise {_files.Count} file(s). {BuildPlanSummary()}";
+        StatusText.Text = AppLocalizer.Format($"Ready to denoise {_files.Count} file(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

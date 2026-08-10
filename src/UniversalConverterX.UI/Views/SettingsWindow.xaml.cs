@@ -88,10 +88,10 @@ public sealed partial class SettingsWindow : Window
                 Sha256Display = plugin.Sha256 is null ? "No trusted digest" : "SHA-256 " + plugin.Sha256[..16] + "…",
                 ActionText = plugin.TrustState switch
                 {
-                    PluginTrustState.Trusted => "Revoke",
-                    PluginTrustState.Changed => "Re-trust",
-                    PluginTrustState.Untrusted => "Trust",
-                    _ => "Invalid",
+                    PluginTrustState.Trusted => AppLocalizer.Get("Revoke"),
+                    PluginTrustState.Changed => AppLocalizer.Get("Re-trust"),
+                    PluginTrustState.Untrusted => AppLocalizer.Get("Trust"),
+                    _ => AppLocalizer.Get("Invalid"),
                 },
                 CanChangeTrust = plugin.CanTrust || plugin.IsTrusted,
             });
@@ -109,7 +109,7 @@ public sealed partial class SettingsWindow : Window
             .FirstOrDefault(item => item.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase));
         if (plugin is null)
         {
-            await ShowMessageAsync("Plugin unavailable", "The plugin was removed before its trust state could be changed.");
+            await ShowMessageAsync(AppLocalizer.Get("Plugin unavailable"), AppLocalizer.Get("The plugin was removed before its trust state could be changed."));
             await LoadPluginsAsync();
             return;
         }
@@ -117,12 +117,16 @@ public sealed partial class SettingsWindow : Window
         var revoke = plugin.IsTrusted;
         var dialog = new ContentDialog
         {
-            Title = revoke ? $"Revoke trust for {plugin.Name}?" : $"Trust {plugin.Name}?",
+            Title = revoke
+                ? AppLocalizer.Format($"Revoke trust for {plugin.Name}?")
+                : AppLocalizer.Format($"Trust {plugin.Name}?"),
             Content = revoke
-                ? "The plugin will disappear from Presets and Toolbox and cannot execute until trusted again."
-                : $"Third-party plugins run with your user permissions. Review the publisher and files before approving.\n\nSHA-256: {plugin.Sha256}",
-            PrimaryButtonText = revoke ? "Revoke" : "Trust this hash",
-            CloseButtonText = "Cancel",
+                ? AppLocalizer.Get("The plugin will disappear from Presets and Toolbox and cannot execute until trusted again.")
+                : AppLocalizer.Format($"Third-party plugins run with your user permissions. Review the publisher and files before approving.\n\nSHA-256: {plugin.Sha256}"),
+            PrimaryButtonText = revoke
+                ? AppLocalizer.Get("Revoke")
+                : AppLocalizer.Get("Trust this hash"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot,
         };
@@ -136,7 +140,9 @@ public sealed partial class SettingsWindow : Window
             : _pluginTrustService.Trust(plugin.Id));
         _presetCache.Invalidate();
         await LoadPluginsAsync();
-        await ShowMessageAsync(result.Success ? "Plugin trust updated" : "Plugin trust failed", result.Message);
+        await ShowMessageAsync(
+            result.Success ? AppLocalizer.Get("Plugin trust updated") : AppLocalizer.Get("Plugin trust failed"),
+            result.Message);
     }
 
     private async void OpenPluginsFolder_Click(object sender, RoutedEventArgs e)
@@ -144,7 +150,7 @@ public sealed partial class SettingsWindow : Window
         Directory.CreateDirectory(_pluginTrustService.PluginDirectory);
         var folder = await StorageFolder.GetFolderFromPathAsync(_pluginTrustService.PluginDirectory);
         if (!await Launcher.LaunchFolderAsync(folder))
-            await ShowMessageAsync("Plugins folder", _pluginTrustService.PluginDirectory);
+            await ShowMessageAsync(AppLocalizer.Get("Plugins folder"), _pluginTrustService.PluginDirectory);
     }
 
     private void LoadSettings()
@@ -198,7 +204,7 @@ public sealed partial class SettingsWindow : Window
 
         // Version
         var version = typeof(SettingsWindow).Assembly.GetName().Version;
-        VersionText.Text = $"Version {version?.Major ?? 1}.{version?.Minor ?? 0}.{version?.Build ?? 0}";
+        VersionText.Text = AppLocalizer.Format($"Version {version?.Major ?? 1}.{version?.Minor ?? 0}.{version?.Build ?? 0}");
 
         _isDirty = false;
         UpdateDirtyState();
@@ -221,14 +227,14 @@ public sealed partial class SettingsWindow : Window
                 && assessment.HasRequirement
                 && !assessment.MeetsMinimum;
             var statusText = !tool.IsInstalled
-                ? $"Not installed • {tool.Description}"
+                ? AppLocalizer.Format($"Not installed • {tool.Description}")
                 : hasVersionWarning
                     ? assessment.IsExplicitlyRejected
-                        ? $"Security update required: {assessment.DetectedVersion} is blocked"
+                        ? AppLocalizer.Format($"Security update required: {assessment.DetectedVersion} is blocked")
                         : assessment.VersionKnown
-                        ? $"Security update required: {assessment.DetectedVersion} < {assessment.Requirement!.MinimumVersion}"
-                        : $"Version unverified; requires {assessment.Requirement!.MinimumVersion}+"
-                    : $"Installed • {tool.Description}";
+                        ? AppLocalizer.Format($"Security update required: {assessment.DetectedVersion} < {assessment.Requirement!.MinimumVersion}")
+                        : AppLocalizer.Format($"Version unverified; requires {assessment.Requirement!.MinimumVersion}+")
+                    : AppLocalizer.Format($"Installed • {tool.Description}");
 
             _tools.Add(new ToolViewModel
             {
@@ -241,7 +247,9 @@ public sealed partial class SettingsWindow : Window
                     ? (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"]
                     : (SolidColorBrush)Application.Current.Resources["AccentOrangeBrush"],
                 StatusText = statusText,
-                ActionText = tool.IsInstalled ? "Update" : "Install"
+                ActionText = tool.IsInstalled
+                    ? AppLocalizer.Get("Update")
+                    : AppLocalizer.Get("Install")
             });
         }
     }
@@ -321,8 +329,8 @@ public sealed partial class SettingsWindow : Window
 
         if (_toolDownloader == null)
         {
-            await ShowMessageAsync("Tool Download",
-                "Tool downloading is not available. Please install tools manually.");
+            await ShowMessageAsync(AppLocalizer.Get("Tool Download"),
+                AppLocalizer.Get("Tool downloading is not available. Please install tools manually."));
             return;
         }
 
@@ -330,15 +338,15 @@ public sealed partial class SettingsWindow : Window
         if (toolVm == null) return;
 
         button.IsEnabled = false;
-        toolVm.ActionText = "Downloading...";
-        toolVm.StatusText = "Downloading...";
+        toolVm.ActionText = AppLocalizer.Get("Downloading...");
+        toolVm.StatusText = AppLocalizer.Get("Downloading...");
         try
         {
             var progress = new Progress<DownloadProgress>(p =>
             {
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    toolVm.StatusText = $"Downloading... {p.Percent:F0}%";
+                    toolVm.StatusText = AppLocalizer.Format($"Downloading... {p.Percent:F0}%");
                 });
             });
 
@@ -350,19 +358,19 @@ public sealed partial class SettingsWindow : Window
                 toolVm.Version = result.Version ?? "";
                 toolVm.StatusGlyph = "\uE73E";
                 toolVm.StatusColor = (SolidColorBrush)Application.Current.Resources["AccentGreenBrush"];
-                toolVm.StatusText = "Installed successfully!";
-                toolVm.ActionText = "Update";
+                toolVm.StatusText = AppLocalizer.Get("Installed successfully!");
+                toolVm.ActionText = AppLocalizer.Get("Update");
             }
             else
             {
-                toolVm.StatusText = $"Failed: {result.ErrorMessage}";
-                toolVm.ActionText = "Retry";
+                toolVm.StatusText = AppLocalizer.Format($"Failed: {result.ErrorMessage}");
+                toolVm.ActionText = AppLocalizer.Get("Retry");
             }
         }
         catch (Exception ex)
         {
-            toolVm.StatusText = $"Error: {ex.Message}";
-            toolVm.ActionText = "Retry";
+            toolVm.StatusText = AppLocalizer.Format($"Error: {ex.Message}");
+            toolVm.ActionText = AppLocalizer.Get("Retry");
         }
         finally
         {
@@ -374,20 +382,20 @@ public sealed partial class SettingsWindow : Window
     {
         if (_toolDownloader == null)
         {
-            await ShowMessageAsync("Tool Download",
-                "Tool downloading is not available. Please install tools manually.");
+            await ShowMessageAsync(AppLocalizer.Get("Tool Download"),
+                AppLocalizer.Get("Tool downloading is not available. Please install tools manually."));
             return;
         }
 
         var missingTools = _tools.Where(t => !t.IsInstalled).Select(t => t.Id).ToList();
         if (missingTools.Count == 0)
         {
-            await ShowMessageAsync("All Tools Installed", "All converter tools are already installed.");
+            await ShowMessageAsync(AppLocalizer.Get("All Tools Installed"), AppLocalizer.Get("All converter tools are already installed."));
             return;
         }
 
         DownloadAllToolsButton.IsEnabled = false;
-        DownloadAllToolsButton.Content = "Downloading...";
+        DownloadAllToolsButton.Content = AppLocalizer.Get("Downloading...");
 
         try
         {
@@ -396,12 +404,12 @@ public sealed partial class SettingsWindow : Window
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     DownloadAllToolsButton.Content =
-                        $"Downloading {p.CurrentTool} ({p.ToolsCompleted + 1}/{p.TotalTools})...";
+                        AppLocalizer.Format($"Downloading {p.CurrentTool} ({p.ToolsCompleted + 1}/{p.TotalTools})...");
 
                     var tool = _tools.FirstOrDefault(t => t.Id == p.CurrentTool);
                     if (tool != null)
                     {
-                        tool.StatusText = $"Downloading... {p.CurrentProgress.Percent:F0}%";
+                        tool.StatusText = AppLocalizer.Format($"Downloading... {p.CurrentProgress.Percent:F0}%");
                     }
                 });
             });
@@ -411,16 +419,16 @@ public sealed partial class SettingsWindow : Window
             var succeeded = results.Count(r => r.Success);
             var failed = results.Count(r => !r.Success);
 
-            await ShowMessageAsync("Download Complete",
-                $"Downloaded {succeeded} tools successfully.\n" +
-                (failed > 0 ? $"{failed} tools failed to download." : ""));
+            await ShowMessageAsync(
+                AppLocalizer.Get("Download Complete"),
+                AppLocalizer.Format($"Downloaded {succeeded} tools successfully.\n{(failed > 0 ? $"{failed} tools failed to download." : "")}"));
 
             LoadTools();
         }
         finally
         {
             DownloadAllToolsButton.IsEnabled = true;
-            DownloadAllToolsButton.Content = "Install missing tools";
+            DownloadAllToolsButton.Content = AppLocalizer.Get("Install missing tools");
         }
     }
 
@@ -466,16 +474,14 @@ public sealed partial class SettingsWindow : Window
 
     private async void RegisterShell_Click(object sender, RoutedEventArgs e)
     {
-        await ShowMessageAsync("Shell Integration",
-            "Explorer registration is handled by the installer or an elevated registration command. " +
-            "This settings page saves your context-menu preferences, but it will not silently modify system shell entries.");
+        await ShowMessageAsync(AppLocalizer.Get("Shell Integration"),
+            AppLocalizer.Get("Explorer registration is handled by the installer or an elevated registration command. This settings page saves your context-menu preferences, but it will not silently modify system shell entries."));
     }
 
     private async void UnregisterShell_Click(object sender, RoutedEventArgs e)
     {
-        await ShowMessageAsync("Shell Integration",
-            "Use the installer or elevated shell-extension registration command to remove Explorer integration. " +
-            "Saved preferences can be changed here before the next registration.");
+        await ShowMessageAsync(AppLocalizer.Get("Shell Integration"),
+            AppLocalizer.Get("Use the installer or elevated shell-extension registration command to remove Explorer integration. Saved preferences can be changed here before the next registration."));
     }
 
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -506,7 +512,7 @@ public sealed partial class SettingsWindow : Window
     private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         CheckUpdatesButton.IsEnabled = false;
-        CheckUpdatesButton.Content = "Checking...";
+        CheckUpdatesButton.Content = AppLocalizer.Get("Checking...");
         OpenReleaseButton.Visibility = Visibility.Collapsed;
         _availableReleaseUrl = null;
 
@@ -587,7 +593,7 @@ public sealed partial class SettingsWindow : Window
         finally
         {
             CheckUpdatesButton.IsEnabled = true;
-            CheckUpdatesButton.Content = "Check again";
+            CheckUpdatesButton.Content = AppLocalizer.Get("Check again");
         }
     }
 
@@ -599,8 +605,8 @@ public sealed partial class SettingsWindow : Window
         if (!await Launcher.LaunchUriAsync(new Uri(url)))
         {
             await ShowMessageAsync(
-                "Releases",
-                "Open the releases page manually:\n" + url);
+                AppLocalizer.Get("Releases"),
+                AppLocalizer.Format($"Open the releases page manually:\n{url}"));
         }
     }
 
@@ -616,10 +622,10 @@ public sealed partial class SettingsWindow : Window
     {
         var dialog = new ContentDialog
         {
-            Title = "Reset Settings",
-            Content = "Reset preferences to their default values? Your files and installed tools are not changed.",
-            PrimaryButtonText = "Reset",
-            CloseButtonText = "Cancel",
+            Title = AppLocalizer.Get("Reset Settings"),
+            Content = AppLocalizer.Get("Reset preferences to their default values? Your files and installed tools are not changed."),
+            PrimaryButtonText = AppLocalizer.Get("Reset"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot
         };
@@ -650,10 +656,10 @@ public sealed partial class SettingsWindow : Window
     {
         var dialog = new ContentDialog
         {
-            Title = "Discard unsaved changes?",
-            Content = "You have changed settings that have not been saved.",
-            PrimaryButtonText = "Discard",
-            CloseButtonText = "Keep editing",
+            Title = AppLocalizer.Get("Discard unsaved changes?"),
+            Content = AppLocalizer.Get("You have changed settings that have not been saved."),
+            PrimaryButtonText = AppLocalizer.Get("Discard"),
+            CloseButtonText = AppLocalizer.Get("Keep editing"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot
         };
@@ -672,7 +678,7 @@ public sealed partial class SettingsWindow : Window
         // Save all settings
         SaveSettings();
 
-        await ShowMessageAsync("Settings Saved", "Your settings have been saved successfully.");
+        await ShowMessageAsync(AppLocalizer.Get("Settings Saved"), AppLocalizer.Get("Your settings have been saved successfully."));
         Close();
     }
 
@@ -798,7 +804,7 @@ public sealed partial class SettingsWindow : Window
         PostConversionArchiveTextBox.IsEnabled = isMove;
         BrowsePostConversionArchiveButton.IsEnabled = isMove;
         if (isMove && string.IsNullOrWhiteSpace(PostConversionArchiveTextBox.Text))
-            PostConversionArchiveTextBox.PlaceholderText = "_converted-sources";
+            PostConversionArchiveTextBox.PlaceholderText = AppLocalizer.Get("_converted-sources");
     }
 
     private void UpdateQueueCompletionScriptState()
@@ -824,13 +830,15 @@ public sealed partial class SettingsWindow : Window
         if (UnsavedStatusText is not null)
         {
             UnsavedStatusText.Text = _isDirty
-                ? "Unsaved changes"
-                : "No unsaved changes";
+                ? AppLocalizer.Get("Unsaved changes")
+                : AppLocalizer.Get("No unsaved changes");
             UnsavedStatusText.Foreground = (SolidColorBrush)Application.Current.Resources[
                 _isDirty ? "AccentOrangeBrush" : "TextMutedBrush"];
         }
         if (CancelButton is not null)
-            CancelButton.Content = _isDirty ? "Cancel" : "Close";
+            CancelButton.Content = _isDirty
+                ? AppLocalizer.Get("Cancel")
+                : AppLocalizer.Get("Close");
     }
 
     private static void ApplyDangerPrimary(ContentDialog dialog)
@@ -848,7 +856,7 @@ public sealed partial class SettingsWindow : Window
         {
             Title = title,
             Content = message,
-            CloseButtonText = "OK",
+            CloseButtonText = AppLocalizer.Get("OK"),
             XamlRoot = Content.XamlRoot
         };
 

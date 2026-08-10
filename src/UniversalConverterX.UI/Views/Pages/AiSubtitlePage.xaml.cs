@@ -45,7 +45,7 @@ public sealed partial class AiSubtitlePage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop a video or audio file";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop a video or audio file");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -81,7 +81,7 @@ public sealed partial class AiSubtitlePage : Page
     {
         if (!AcceptedExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
         {
-            StatusText.Text = $"Unsupported extension {Path.GetExtension(path)}";
+            StatusText.Text = AppLocalizer.Format($"Unsupported extension {Path.GetExtension(path)}");
             return;
         }
 
@@ -92,8 +92,8 @@ public sealed partial class AiSubtitlePage : Page
         EditorPanel.Visibility = Visibility.Collapsed;
         DropZonePanel.Visibility = Visibility.Visible;
         DropZoneLabel.Text = Path.GetFileName(path);
-        ProgressLabel.Text = "Choose transcription and translation settings, then generate a preview.";
-        StatusText.Text = "Ready.";
+        ProgressLabel.Text = AppLocalizer.Get("Choose transcription and translation settings, then generate a preview.");
+        StatusText.Text = AppLocalizer.Get("Ready.");
         OpenOutputButton.IsEnabled = false;
         UpdateRunEnabled();
     }
@@ -138,12 +138,12 @@ public sealed partial class AiSubtitlePage : Page
 
         if (translate && language == "auto")
         {
-            StatusText.Text = "Choose the source language before translation so the local model pair is deterministic.";
+            StatusText.Text = AppLocalizer.Get("Choose the source language before translation so the local model pair is deterministic.");
             return;
         }
         if (translate && language.Equals(targetLanguage, StringComparison.OrdinalIgnoreCase))
         {
-            StatusText.Text = "Source and translation target languages must differ.";
+            StatusText.Text = AppLocalizer.Get("Source and translation target languages must differ.");
             return;
         }
 
@@ -160,8 +160,8 @@ public sealed partial class AiSubtitlePage : Page
         ProgressBar.Visibility = Visibility.Visible;
         ProgressBar.Value = 0;
         OpenOutputButton.IsEnabled = false;
-        ProgressLabel.Text = $"Transcribing with {backend}, {model} model...";
-        StatusText.Text = "Transcribing...";
+        ProgressLabel.Text = AppLocalizer.Format($"Transcribing with {backend}, {model} model...");
+        StatusText.Text = AppLocalizer.Get("Transcribing...");
 
         try
         {
@@ -178,8 +178,8 @@ public sealed partial class AiSubtitlePage : Page
                 {
                     ProgressBar.Value = progress.Percent * (translate ? 0.7 : 1.0);
                     ProgressLabel.Text = string.IsNullOrEmpty(progress.Stage)
-                        ? $"Transcribing - {progress.Percent:F0}%"
-                        : $"{progress.Percent:F0}% - {progress.Stage}";
+                        ? AppLocalizer.Format($"Transcribing - {progress.Percent:F0}%")
+                        : AppLocalizer.Format($"{progress.Percent:F0}% - {progress.Stage}");
                 }));
 
             var transcription = await _runner.RunAsync(
@@ -191,7 +191,7 @@ public sealed partial class AiSubtitlePage : Page
             if (!transcription.Success)
             {
                 StatusText.Text = transcription.ErrorMessage
-                    ?? $"Transcription failed ({transcription.ErrorCode}).";
+                    ?? AppLocalizer.Format($"Transcription failed ({transcription.ErrorCode}).");
                 return;
             }
 
@@ -199,14 +199,14 @@ public sealed partial class AiSubtitlePage : Page
             _previewLanguageSuffix = null;
             if (translate)
             {
-                StatusText.Text = "Translating captions locally...";
-                ProgressLabel.Text = $"Translating {language} to {targetLanguage}...";
+                StatusText.Text = AppLocalizer.Get("Translating captions locally...");
+                ProgressLabel.Text = AppLocalizer.Format($"Translating {language} to {targetLanguage}...");
                 var translationDirectory = Path.Combine(workDirectory, "translated");
                 var translationProgress = new Progress<SidecarProgress>(progress =>
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         ProgressBar.Value = 70 + progress.Percent * 0.3;
-                        ProgressLabel.Text = $"Translating - {progress.Percent:F0}% - {progress.Stage}";
+                        ProgressLabel.Text = AppLocalizer.Format($"Translating - {progress.Percent:F0}% - {progress.Stage}");
                     }));
                 var translation = await _runner.RunAsync(
                     "translatekit",
@@ -226,7 +226,7 @@ public sealed partial class AiSubtitlePage : Page
                 if (!translation.Success)
                 {
                     StatusText.Text = translation.ErrorMessage
-                        ?? $"Translation failed ({translation.ErrorCode}).";
+                        ?? AppLocalizer.Format($"Translation failed ({translation.ErrorCode}).");
                     return;
                 }
 
@@ -238,7 +238,7 @@ public sealed partial class AiSubtitlePage : Page
 
             if (!File.Exists(previewPath))
             {
-                StatusText.Text = "The pipeline completed without producing a subtitle preview.";
+                StatusText.Text = AppLocalizer.Get("The pipeline completed without producing a subtitle preview.");
                 return;
             }
 
@@ -257,20 +257,20 @@ public sealed partial class AiSubtitlePage : Page
             }
 
             CueSummaryText.Text = translate
-                ? $"{_cues.Count} cues translated {language} -> {targetLanguage}. Edit text or timing before export."
-                : $"{_cues.Count} cues. Edit text or timing before export.";
+                ? AppLocalizer.Format($"{_cues.Count} cues translated {language} -> {targetLanguage}. Edit text or timing before export.")
+                : AppLocalizer.Format($"{_cues.Count} cues. Edit text or timing before export.");
             DropZonePanel.Visibility = Visibility.Collapsed;
             EditorPanel.Visibility = Visibility.Visible;
             ProgressBar.Value = 100;
-            StatusText.Text = "Preview ready. Review the cues, then export.";
+            StatusText.Text = AppLocalizer.Get("Preview ready. Review the cues, then export.");
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Subtitle pipeline cancelled.";
+            StatusText.Text = AppLocalizer.Get("Subtitle pipeline cancelled.");
         }
         catch (Exception exception)
         {
-            StatusText.Text = $"Subtitle pipeline failed: {exception.Message}";
+            StatusText.Text = AppLocalizer.Format($"Subtitle pipeline failed: {exception.Message}");
         }
         finally
         {
@@ -295,7 +295,7 @@ public sealed partial class AiSubtitlePage : Page
         }
         catch (Exception exception)
         {
-            StatusText.Text = $"Fix the preview before export: {exception.Message}";
+            StatusText.Text = AppLocalizer.Format($"Fix the preview before export: {exception.Message}");
             return;
         }
 
@@ -310,7 +310,7 @@ public sealed partial class AiSubtitlePage : Page
 
         _cts = new CancellationTokenSource();
         UpdateRunEnabled();
-        StatusText.Text = "Exporting edited preview...";
+        StatusText.Text = AppLocalizer.Get("Exporting edited preview...");
         try
         {
             await File.WriteAllTextAsync(
@@ -322,7 +322,7 @@ public sealed partial class AiSubtitlePage : Page
 
             if (BurnInCheck.IsChecked == true && IsVideoFile(_selectedPath))
             {
-                StatusText.Text = "Burning edited captions into video...";
+                StatusText.Text = AppLocalizer.Get("Burning edited captions into video...");
                 var burnedPath = EnsureUniquePath(Path.Combine(
                     sourceDirectory,
                     $"{sourceStem}{languageSuffix}_subtitled{Path.GetExtension(_selectedPath)}"));
@@ -333,32 +333,32 @@ public sealed partial class AiSubtitlePage : Page
                     _cts.Token);
                 if (!burn.Success)
                 {
-                    StatusText.Text = $"Caption file exported, but burn-in failed: {burn.Error}";
+                    StatusText.Text = AppLocalizer.Format($"Caption file exported, but burn-in failed: {burn.Error}");
                     OpenOutputButton.IsEnabled = true;
                     return;
                 }
 
                 _lastOutputPath = burnedPath;
-                StatusText.Text = $"Done - {Path.GetFileName(burnedPath)}; {Path.GetFileName(subtitlePath)} kept alongside.";
+                StatusText.Text = AppLocalizer.Format($"Done - {Path.GetFileName(burnedPath)}; {Path.GetFileName(subtitlePath)} kept alongside.");
             }
             else if (BurnInCheck.IsChecked == true)
             {
-                StatusText.Text = $"Done - {Path.GetFileName(subtitlePath)}. Burn-in requires a video source.";
+                StatusText.Text = AppLocalizer.Format($"Done - {Path.GetFileName(subtitlePath)}. Burn-in requires a video source.");
             }
             else
             {
-                StatusText.Text = $"Done - {Path.GetFileName(subtitlePath)}";
+                StatusText.Text = AppLocalizer.Format($"Done - {Path.GetFileName(subtitlePath)}");
             }
 
             OpenOutputButton.IsEnabled = true;
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Export cancelled.";
+            StatusText.Text = AppLocalizer.Get("Export cancelled.");
         }
         catch (Exception exception)
         {
-            StatusText.Text = $"Export failed: {exception.Message}";
+            StatusText.Text = AppLocalizer.Format($"Export failed: {exception.Message}");
         }
         finally
         {
@@ -496,7 +496,7 @@ public sealed partial class AiSubtitlePage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 

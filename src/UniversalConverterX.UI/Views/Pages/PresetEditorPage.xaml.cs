@@ -27,7 +27,7 @@ public sealed partial class PresetEditorPage : Page
         InitializeComponent();
         _presetCache = App.Services.GetRequiredService<IUiPresetCache>();
         InvocationModeCombo.SelectedIndex = 0;
-        SaveLocationText.Text = $"Custom presets are stored in {UiPresetLoader.UserPresetDirectory}";
+        SaveLocationText.Text = AppLocalizer.Format($"Custom presets are stored in {UiPresetLoader.UserPresetDirectory}");
         _loading = false;
         UpdatePreview();
     }
@@ -40,8 +40,8 @@ public sealed partial class PresetEditorPage : Page
 
         if (request.Mode == PresetEditorMode.Create)
         {
-            PageTitle.Text = "Create preset";
-            PageSubtitle.Text = "Build a reusable custom preset stored under your Windows profile.";
+            PageTitle.Text = AppLocalizer.Get("Create preset");
+            PageSubtitle.Text = AppLocalizer.Get("Build a reusable custom preset stored under your Windows profile.");
             return;
         }
 
@@ -73,14 +73,14 @@ public sealed partial class PresetEditorPage : Page
         if (request.Mode == PresetEditorMode.Edit)
         {
             _existingPath = request.SourcePath;
-            PageTitle.Text = "Edit custom preset";
-            PageSubtitle.Text = "Changes replace this local preset after schema validation.";
+            PageTitle.Text = AppLocalizer.Get("Edit custom preset");
+            PageSubtitle.Text = AppLocalizer.Get("Changes replace this local preset after schema validation.");
         }
         else
         {
             NameBox.Text = NextCopyName(loaded.Preset.Name);
-            PageTitle.Text = "Duplicate preset";
-            PageSubtitle.Text = "The built-in source stays unchanged; this copy is saved as a custom preset.";
+            PageTitle.Text = AppLocalizer.Get("Duplicate preset");
+            PageSubtitle.Text = AppLocalizer.Get("The built-in source stays unchanged; this copy is saved as a custom preset.");
         }
         _loading = false;
         UpdatePreview();
@@ -141,8 +141,9 @@ public sealed partial class PresetEditorPage : Page
 
             _presetCache.Invalidate();
             ValidationInfo.Severity = InfoBarSeverity.Success;
-            ValidationInfo.Title = "Preset saved";
-            ValidationInfo.Message = result.SavedPath ?? "The custom preset was saved.";
+            ValidationInfo.Title = AppLocalizer.Get("Preset saved");
+            ValidationInfo.Message = result.SavedPath
+                ?? AppLocalizer.Get("The custom preset was saved.");
             ValidationInfo.IsOpen = true;
             await Task.Delay(250);
             if (Frame.CanGoBack)
@@ -212,7 +213,7 @@ public sealed partial class PresetEditorPage : Page
         var output = string.IsNullOrWhiteSpace(preset.OutputExtension)
             ? preset.OutputFileNameTemplate
             : $"{preset.OutputFileNameTemplate}.{preset.OutputExtension.TrimStart('.')}";
-        PreviewText.Text = $"{preset.Name.Trim()} | {preset.Engine.Trim()} | {inputs} | {preset.InvocationMode} | {output}";
+        PreviewText.Text = AppLocalizer.Format($"{preset.Name.Trim()} | {preset.Engine.Trim()} | {inputs} | {preset.InvocationMode} | {output}");
         ValidationInfo.IsOpen = false;
     }
 
@@ -227,7 +228,7 @@ public sealed partial class PresetEditorPage : Page
     private void ShowError(string message)
     {
         ValidationInfo.Severity = InfoBarSeverity.Error;
-        ValidationInfo.Title = "Preset could not be saved";
+        ValidationInfo.Title = AppLocalizer.Get("Preset could not be saved");
         ValidationInfo.Message = message;
         ValidationInfo.IsOpen = true;
     }

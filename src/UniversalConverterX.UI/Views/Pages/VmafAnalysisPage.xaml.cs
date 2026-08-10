@@ -77,14 +77,14 @@ public sealed partial class VmafAnalysisPage : Page
         // confirming the final score at full resolution.
         if (ProxyToggle.IsOn)
         {
-            StatusText.Text = "Generating 480p proxies...";
+            StatusText.Text = AppLocalizer.Get("Generating 480p proxies...");
             var proxyReference = await GenerateProxyAsync(_reference, "reference", cts.Token);
             var proxyDistorted = proxyReference is null
                 ? null
                 : await GenerateProxyAsync(_distorted, "distorted", cts.Token);
             if (proxyReference is null || proxyDistorted is null)
             {
-                StatusText.Text = "Could not generate proxies; run without the fast pass or check the clipforge engine.";
+                StatusText.Text = AppLocalizer.Get("Could not generate proxies; run without the fast pass or check the clipforge engine.");
                 RunButton.IsEnabled = true;
                 return;
             }
@@ -94,8 +94,8 @@ public sealed partial class VmafAnalysisPage : Page
         }
 
         StatusText.Text = proxied
-            ? "Running approximate VMAF on 480p proxies..."
-            : "Running VMAF -- this may take a few minutes for long clips.";
+            ? AppLocalizer.Get("Running approximate VMAF on 480p proxies...")
+            : AppLocalizer.Get("Running VMAF -- this may take a few minutes for long clips.");
 
         var args = new List<string>
         {
@@ -125,14 +125,14 @@ public sealed partial class VmafAnalysisPage : Page
                 if (root.TryGetProperty("min", out var mn))
                     StatMin.Text = mn.GetDouble().ToString("F2", CultureInfo.InvariantCulture);
                 if (root.TryGetProperty("below_70_percent", out var b70))
-                    StatBelow70.Text = $"{b70.GetDouble():F1}%";
+                    StatBelow70.Text = AppLocalizer.Format($"{b70.GetDouble():F1}%");
             }));
 
         StatusText.Text = result.Success
             ? proxied
-                ? "Approximate VMAF complete (480p proxies). Re-run without the fast pass to confirm the full-resolution score."
-                : "VMAF complete. Higher mean = closer to reference (90+ is excellent, 70- is visibly degraded)."
-            : $"VMAF failed: {result.ErrorMessage ?? result.ErrorCode}";
+                ? AppLocalizer.Get("Approximate VMAF complete (480p proxies). Re-run without the fast pass to confirm the full-resolution score.")
+                : AppLocalizer.Get("VMAF complete. Higher mean = closer to reference (90+ is excellent, 70- is visibly degraded).")
+            : AppLocalizer.Format($"VMAF failed: {result.ErrorMessage ?? result.ErrorCode}");
         VmafProgress.Value = result.Success ? 100 : 0;
         RunButton.IsEnabled = true;
     }
@@ -162,10 +162,10 @@ public sealed partial class VmafAnalysisPage : Page
 
     private void ResetStats()
     {
-        StatMean.Text = "--";
-        StatHarmonic.Text = "--";
-        StatMin.Text = "--";
-        StatBelow70.Text = "--";
+        StatMean.Text = AppLocalizer.Get("--");
+        StatHarmonic.Text = AppLocalizer.Get("--");
+        StatMin.Text = AppLocalizer.Get("--");
+        StatBelow70.Text = AppLocalizer.Get("--");
         LogText.Text = "";
         VmafProgress.Value = 0;
     }

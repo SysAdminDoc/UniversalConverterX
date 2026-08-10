@@ -59,7 +59,7 @@ public sealed partial class ImageConverterPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into convert queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into convert queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -122,8 +122,8 @@ public sealed partial class ImageConverterPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported images found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported images found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -277,7 +277,7 @@ public sealed partial class ImageConverterPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Converting";
-                StatusText.Text = $"Converting {item.FileName}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Converting {item.FileName}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -314,8 +314,8 @@ public sealed partial class ImageConverterPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} converted, {failed} failed."
-                : $"Done — {completed} converted, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} converted, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} converted, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -334,7 +334,7 @@ public sealed partial class ImageConverterPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -387,7 +387,7 @@ public sealed partial class ImageConverterPage : Page
         ClearButton.IsEnabled  = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
 
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
 
         if (updateStatus && _cts is null) UpdateStatusText();
@@ -396,8 +396,8 @@ public sealed partial class ImageConverterPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop images to start a conversion queue."
-            : $"Ready to convert {_files.Count} image(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop images to start a conversion queue.")
+            : AppLocalizer.Format($"Ready to convert {_files.Count} image(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

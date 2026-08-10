@@ -36,7 +36,7 @@ public sealed partial class VideoSummarizerPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Summarize";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Summarize");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -113,13 +113,15 @@ public sealed partial class VideoSummarizerPage : Page
         CancelButton.IsEnabled = true;
         SummaryProgress.Visibility = Visibility.Visible;
         SummaryProgress.Value = 0;
-        StatusText.Text = _viewModel.IsTranscript ? "Summarizing transcript…" : "Transcribing and summarizing…";
+        StatusText.Text = _viewModel.IsTranscript
+            ? AppLocalizer.Get("Summarizing transcript…")
+            : AppLocalizer.Get("Transcribing and summarizing…");
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             SummaryProgress.Value = Math.Clamp(p.Percent, 0, 100);
             if (!string.IsNullOrWhiteSpace(p.Stage))
-                StatusText.Text = $"{p.Percent:F0}% — {p.Stage}";
+                StatusText.Text = AppLocalizer.Format($"{p.Percent:F0}% — {p.Stage}");
         }));
 
         SidecarResult result;
@@ -153,8 +155,8 @@ public sealed partial class VideoSummarizerPage : Page
             if (request.HighlightReelOutput is not null && File.Exists(request.HighlightReelOutput))
                 extras.Add($"highlight reel: {Path.GetFileName(request.HighlightReelOutput)}");
             StatusText.Text = extras.Count > 0
-                ? "Summary ready — " + string.Join("; ", extras) + "."
-                : "Summary ready.";
+                ? AppLocalizer.Get("Summary ready — ") + string.Join(AppLocalizer.Get("; "), extras) + AppLocalizer.Get(".")
+                : AppLocalizer.Get("Summary ready.");
         }
         else
         {
@@ -164,7 +166,7 @@ public sealed partial class VideoSummarizerPage : Page
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
-        StatusText.Text = "Cancelling…";
+        StatusText.Text = AppLocalizer.Get("Cancelling…");
         _cts?.Cancel();
     }
 
@@ -177,7 +179,7 @@ public sealed partial class VideoSummarizerPage : Page
         var data = new DataPackage();
         data.SetText(ResultBox.Text);
         Clipboard.SetContent(data);
-        StatusText.Text = "Summary copied to clipboard.";
+        StatusText.Text = AppLocalizer.Get("Summary copied to clipboard.");
     }
 
     private async void Save_Click(object sender, RoutedEventArgs e)
@@ -197,7 +199,7 @@ public sealed partial class VideoSummarizerPage : Page
         if (file is not null)
         {
             await FileIO.WriteTextAsync(file, ResultBox.Text);
-            StatusText.Text = $"Saved to {file.Name}.";
+            StatusText.Text = AppLocalizer.Format($"Saved to {file.Name}.");
         }
     }
 

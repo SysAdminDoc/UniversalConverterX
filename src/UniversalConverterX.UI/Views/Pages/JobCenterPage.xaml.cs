@@ -55,8 +55,8 @@ public sealed partial class JobCenterPage : Page
         EmptyState.Visibility = jobs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         JobsList.Visibility = jobs.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         StatusText.Text = string.IsNullOrWhiteSpace(_searchTerm)
-            ? $"Showing {jobs.Count} durable job(s)."
-            : $"Showing {jobs.Count} job(s) matching \"{_searchTerm}\".";
+            ? AppLocalizer.Format($"Showing {jobs.Count} durable job(s).")
+            : AppLocalizer.Format($"Showing {jobs.Count} job(s) matching \"{_searchTerm}\".");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -65,8 +65,8 @@ public sealed partial class JobCenterPage : Page
             return;
 
         StatusText.Text = _coordinator.Cancel(handle)
-            ? "Cancellation requested."
-            : "That job could not be cancelled from its current state.";
+            ? AppLocalizer.Get("Cancellation requested.")
+            : AppLocalizer.Get("That job could not be cancelled from its current state.");
         RefreshJobs();
     }
 
@@ -77,7 +77,7 @@ public sealed partial class JobCenterPage : Page
 
         if (!_coordinator.Retry(handle))
         {
-            StatusText.Text = "That job is not ready to retry.";
+            StatusText.Text = AppLocalizer.Get("That job is not ready to retry.");
             RefreshJobs();
             return;
         }
@@ -91,8 +91,8 @@ public sealed partial class JobCenterPage : Page
             return;
 
         StatusText.Text = _coordinator.Skip(handle)
-            ? "Job skipped."
-            : "That job could not be skipped from its current state.";
+            ? AppLocalizer.Get("Job skipped.")
+            : AppLocalizer.Get("That job could not be skipped from its current state.");
         RefreshJobs();
     }
 

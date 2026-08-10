@@ -75,7 +75,7 @@ public sealed partial class CompressorPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into compression queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into compression queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -181,7 +181,7 @@ public sealed partial class CompressorPage : Page
     {
         if (!Directory.Exists(path))
         {
-            StatusText.Text = $"Folder not found: {path}";
+            StatusText.Text = AppLocalizer.Format($"Folder not found: {path}");
             return;
         }
 
@@ -193,12 +193,12 @@ public sealed partial class CompressorPage : Page
         }
         catch (UnauthorizedAccessException)
         {
-            StatusText.Text = "Permission denied for that folder.";
+            StatusText.Text = AppLocalizer.Get("Permission denied for that folder.");
             return;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
             return;
         }
 
@@ -212,11 +212,11 @@ public sealed partial class CompressorPage : Page
         }
 
         if (added == 0)
-            StatusText.Text = "No supported video files were added from that folder.";
+            StatusText.Text = AppLocalizer.Get("No supported video files were added from that folder.");
         else if (truncated)
-            StatusText.Text = $"Added {added} videos from {path} (capped at {FolderAddCap}).";
+            StatusText.Text = AppLocalizer.Format($"Added {added} videos from {path} (capped at {FolderAddCap}).");
         else
-            StatusText.Text = $"Added {added} videos from {path}.";
+            StatusText.Text = AppLocalizer.Format($"Added {added} videos from {path}.");
         UpdateUi();
     }
 
@@ -436,7 +436,7 @@ public sealed partial class CompressorPage : Page
             }
 
             if (_files.Count > 0)
-                StatusText.Text = $"Restored {_files.Count} compression job(s) from the previous session.";
+                StatusText.Text = AppLocalizer.Format($"Restored {_files.Count} compression job(s) from the previous session.");
         }
         finally
         {
@@ -527,7 +527,7 @@ public sealed partial class CompressorPage : Page
         {
             CompressButton.IsEnabled = false;
             ClearButton.IsEnabled = false;
-            StatusText.Text = "Checking ab-av1 smart-compression requirements...";
+            StatusText.Text = AppLocalizer.Get("Checking ab-av1 smart-compression requirements...");
             SidecarHealthReport report;
             try
             {
@@ -536,18 +536,18 @@ public sealed partial class CompressorPage : Page
             catch (Exception ex)
             {
                 UpdateUi();
-                VmafHealthText.Text = $"Health check failed: {ex.Message}";
-                StatusText.Text = "Smart compression is unavailable because its requirements could not be checked.";
+                VmafHealthText.Text = AppLocalizer.Format($"Health check failed: {ex.Message}");
+                StatusText.Text = AppLocalizer.Get("Smart compression is unavailable because its requirements could not be checked.");
                 return;
             }
 
             VmafHealthText.Text = report.CanRun
-                ? $"{report.Summary}. {report.Detail}"
+                ? AppLocalizer.Format($"{report.Summary}. {report.Detail}")
                 : report.Detail;
             if (!report.CanRun)
             {
                 UpdateUi();
-                StatusText.Text = $"Smart compression unavailable — {report.Summary}. {report.Detail}";
+                StatusText.Text = AppLocalizer.Format($"Smart compression unavailable — {report.Summary}. {report.Detail}");
                 return;
             }
         }
@@ -558,7 +558,7 @@ public sealed partial class CompressorPage : Page
             catch (Exception ex)
             {
                 UpdateUi();
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -613,8 +613,8 @@ public sealed partial class CompressorPage : Page
                 item.StatusText = "Compressing";
                 item.ErrorMessage = null;
                 item.Progress = 0;
-                ProgressTitle.Text = $"Compressing {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Compressing {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {jobs.Count}");
                 PersistQueue();
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
@@ -623,9 +623,9 @@ public sealed partial class CompressorPage : Page
                     item.StatusText = $"{p.Percent:F0}%";
                     var overall = ((completed + failed) * 100.0 + p.Percent) / jobs.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
-                    ProgressStage.Text = $"{p.Percent:F1}% - {p.Stage}";
+                    ProgressStage.Text = AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -740,11 +740,13 @@ public sealed partial class CompressorPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         UpdateTotals(resultBytes);
         UpdateUi();
@@ -755,7 +757,7 @@ public sealed partial class CompressorPage : Page
             {
                 Source = pending.Path,
                 Status = QueueCompletionItemStatus.Cancelled,
-                Message = "Not started because the queue was cancelled.",
+                Message = AppLocalizer.Get("Not started because the queue was cancelled."),
             });
         }
         if (completionItems.Count > 0)
@@ -781,7 +783,7 @@ public sealed partial class CompressorPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -801,10 +803,10 @@ public sealed partial class CompressorPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -863,15 +865,15 @@ public sealed partial class CompressorPage : Page
         ResultSizeText.Text = FormatSize(resultBytes);
         SavingsText.Text = sourceBytes > 0 && resultBytes > 0
             ? SavingsLabel(sourceBytes, resultBytes)
-            : "Savings appear after compression.";
+            : AppLocalizer.Get("Savings appear after compression.");
     }
 
     private void UpdateStatusText()
     {
         var output = _outputDirectory ?? "same folder as each source";
         StatusText.Text = _files.Count == 0
-            ? "Add videos to start a compression queue."
-            : $"Ready to compress {_files.Count} videos using {SelectedPresetLabel()}. Output: {output}.";
+            ? AppLocalizer.Get("Add videos to start a compression queue.")
+            : AppLocalizer.Format($"Ready to compress {_files.Count} videos using {SelectedPresetLabel()}. Output: {output}.");
     }
 
     private void UpdatePresetSummaries()

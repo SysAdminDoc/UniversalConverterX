@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 160 — Localize imperative runtime copy and add pseudo-localization
-  Why: XAML resource parity is strong, but 54 C# files contain 493 direct user-visible assignments and only four `AppLocalizer` calls.
-  Evidence: `src/UniversalConverterX.UI/Views/**/*.xaml.cs`; Microsoft globalization guidance; File Converter/Shutter localization history.
-  Touches: `.resw` files, `AppLocalizer`, code-string extraction/formatting contract, locale tests.
-  Acceptance: no user-visible status/error/dialog literal remains in code outside a narrow documented allowlist; formatted/plural values use resources; pseudo-locale UI automation finds clipping, missing keys, or fallback English.
-  Complexity: L
-
 - [ ] P1 — Item 161 — Establish accessible status, keyboard, contrast, and reflow primitives
   Why: the UI has three live regions, no accelerator/access-key infrastructure, no adaptive states or high-contrast resources, 54 wide fixed widths, and subtle text below 4.5:1 contrast.
   Evidence: `App.xaml`; `Views/**/*.xaml`; Microsoft accessibility checklist/text/layout guidance; WCAG 2.2 status messages.

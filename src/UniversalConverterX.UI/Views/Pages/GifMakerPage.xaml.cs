@@ -44,7 +44,7 @@ public sealed partial class GifMakerPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into GIF queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into GIF queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -112,8 +112,8 @@ public sealed partial class GifMakerPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported videos found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported videos found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -232,7 +232,7 @@ public sealed partial class GifMakerPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Rendering";
-                StatusText.Text = $"Rendering {item.FileName}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Rendering {item.FileName}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -271,8 +271,8 @@ public sealed partial class GifMakerPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} rendered, {failed} failed."
-                : $"Done — {completed} rendered, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} rendered, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} rendered, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -291,7 +291,7 @@ public sealed partial class GifMakerPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -344,7 +344,7 @@ public sealed partial class GifMakerPage : Page
         ClearButton.IsEnabled  = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
 
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
 
         if (updateStatus && _cts is null)
@@ -354,8 +354,8 @@ public sealed partial class GifMakerPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop video files to start a GIF render queue."
-            : $"Ready to render {_files.Count} GIF(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop video files to start a GIF render queue.")
+            : AppLocalizer.Format($"Ready to render {_files.Count} GIF(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

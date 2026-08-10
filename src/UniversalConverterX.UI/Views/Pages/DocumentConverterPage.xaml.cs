@@ -67,7 +67,7 @@ public sealed partial class DocumentConverterPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop documents here";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop documents here");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -159,7 +159,7 @@ public sealed partial class DocumentConverterPage : Page
         var format = (FormatCombo.SelectedItem as string) ?? FormatCombo.Text?.Trim();
         if (string.IsNullOrEmpty(format))
         {
-            StatusText.Text = "Pick a target format first.";
+            StatusText.Text = AppLocalizer.Get("Pick a target format first.");
             ConvertButton.IsEnabled = true;
             return;
         }
@@ -170,7 +170,7 @@ public sealed partial class DocumentConverterPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             ConvertButton.IsEnabled = true;
             return;
         }
@@ -187,14 +187,14 @@ public sealed partial class DocumentConverterPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage} -- {p.Percent:F0}%";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage} -- {p.Percent:F0}%");
         }));
         var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
         {
             LogText.Text += $"[{l.Level}] {l.Message}\n";
         }));
 
-        StatusText.Text = "Converting...";
+        StatusText.Text = AppLocalizer.Get("Converting...");
         var startedAt = DateTime.UtcNow;
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
         var result = await _runner.RunAsync(
@@ -210,15 +210,15 @@ public sealed partial class DocumentConverterPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            StatusText.Text = "docconvert sidecar not built. Run pwsh tools/docconvert/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("docconvert sidecar not built. Run pwsh tools/docconvert/build.ps1.");
         }
         else if (result.ErrorCode == "missing_libreoffice")
         {
-            StatusText.Text = "LibreOffice not found. Install it from libreoffice.org and try again.";
+            StatusText.Text = AppLocalizer.Get("LibreOffice not found. Install it from libreoffice.org and try again.");
         }
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {_files.Count} document(s) converted to .{format}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {_files.Count} document(s) converted to .{format}.");
             WorkProgress.Value = 100;
             foreach (var f in _files)
             {
@@ -241,7 +241,7 @@ public sealed partial class DocumentConverterPage : Page
         }
         else
         {
-            StatusText.Text = $"Conversion failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Conversion failed: {result.ErrorMessage ?? result.ErrorCode}");
             foreach (var f in _files.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }

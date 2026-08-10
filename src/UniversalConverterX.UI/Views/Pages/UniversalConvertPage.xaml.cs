@@ -93,7 +93,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = "Inspect for matching presets";
+            e.DragUIOverride.Caption = AppLocalizer.Get("Inspect for matching presets");
             e.DragUIOverride.IsCaptionVisible = true;
             e.DragUIOverride.IsContentVisible = true;
         }
@@ -123,8 +123,8 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
     {
         _selectedFiles.Clear();
         SelectedFilesText.Text = "";
-        DropHint.Text = "Drop files here, or pick them";
-        StatusText.Text = "Drop files above to see matching presets.";
+        DropHint.Text = AppLocalizer.Get("Drop files here, or pick them");
+        StatusText.Text = AppLocalizer.Get("Drop files above to see matching presets.");
         FilterVisibility = Visibility.Collapsed;
         NoMatchesState.Visibility = Visibility.Collapsed;
         MatchScroll.Visibility = Visibility.Visible;
@@ -141,14 +141,14 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         if (_selectedFiles.Count == 0)
         {
             Clear_Click(this, new RoutedEventArgs());
-            StatusText.Text = "No readable files were selected.";
+            StatusText.Text = AppLocalizer.Get("No readable files were selected.");
             return;
         }
         var first = Path.GetFileName(_selectedFiles[0]);
         SelectedFilesText.Text = _selectedFiles.Count == 1
             ? first
-            : $"{first} +{_selectedFiles.Count - 1} more";
-        DropHint.Text = $"{_selectedFiles.Count} file(s) selected";
+            : AppLocalizer.Format($"{first} +{_selectedFiles.Count - 1} more");
+        DropHint.Text = AppLocalizer.Format($"{_selectedFiles.Count} file(s) selected");
 
         // Compute extension list (lowercase, no dot).
         var exts = _selectedFiles.Select(p => Path.GetExtension(p).TrimStart('.').ToLowerInvariant())
@@ -196,8 +196,8 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         if (distinctExts.Count > 6) extSummary += "...";
         if (string.IsNullOrWhiteSpace(extSummary)) extSummary = "extensionless files";
         StatusText.Text = matches.Count == 0
-            ? $"No presets accept {extSummary}. Try installing/wiring a sidecar for this format."
-            : $"Found {matches.Count} preset(s) that accept {extSummary}.";
+            ? AppLocalizer.Format($"No presets accept {extSummary}. Try installing/wiring a sidecar for this format.")
+            : AppLocalizer.Format($"Found {matches.Count} preset(s) that accept {extSummary}.");
     }
 
     private async void Search_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -238,13 +238,13 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         var preset = card.Preset;
         if (card.AcceptedInputs.Count == 0)
         {
-            card.StatusText = "No accepted inputs.";
+            card.StatusText = AppLocalizer.Get("No accepted inputs.");
             return;
         }
 
         if (!_running.Add(preset.Name))
         {
-            card.StatusText = "Already running...";
+            card.StatusText = AppLocalizer.Get("Already running...");
             return;
         }
 
@@ -267,15 +267,15 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
                 outDir = folder.Path;
             }
 
-            card.StatusText = "Running...";
+            card.StatusText = AppLocalizer.Get("Running...");
             var startedAt = DateTime.UtcNow;
             using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
             var result = await _executor.RunAsync(preset, inputs, outDir, cancellationToken: cts.Token);
-            card.StatusText = result.Success ? "Done" : $"Failed ({result.ErrorCode})";
+            card.StatusText = result.Success ? AppLocalizer.Get("Done") : AppLocalizer.Format($"Failed ({result.ErrorCode})");
 
             StatusText.Text = result.Success
-                ? $"{preset.Name} -- {inputs.Count} input(s), exit {result.ExitCode}."
-                : $"{preset.Name} -- {result.ErrorCode}: {result.ErrorMessage ?? ""}";
+                ? AppLocalizer.Format($"{preset.Name} -- {inputs.Count} input(s), exit {result.ExitCode}.")
+                : AppLocalizer.Format($"{preset.Name} -- {result.ErrorCode}: {result.ErrorMessage ?? "Unknown error"}");
 
             if (inputs.Count > 0)
             {
@@ -306,7 +306,7 @@ public sealed partial class UniversalConvertPage : Page, INotifyPropertyChanged
         catch (Exception ex)
         {
             Debug.WriteLine($"UniversalConvert: {ex}");
-            card.StatusText = $"Failed ({ex.GetType().Name})";
+            card.StatusText = AppLocalizer.Format($"Failed ({ex.GetType().Name})");
         }
         finally
         {

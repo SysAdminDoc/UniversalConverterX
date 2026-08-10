@@ -49,7 +49,7 @@ public sealed partial class SceneDetectPage : Page
         var f = await picker.PickSingleFileAsync();
         if (f is null) return;
         _currentPath = f.Path;
-        StatusText.Text = $"Loaded: {Path.GetFileName(_currentPath)}";
+        StatusText.Text = AppLocalizer.Format($"Loaded: {Path.GetFileName(_currentPath)}");
         DetectButton.IsEnabled = true;
         _scenes.Clear();
         ExportCsvButton.IsEnabled = false;
@@ -66,7 +66,7 @@ public sealed partial class SceneDetectPage : Page
         ExportCsvButton.IsEnabled = false;
         ExportEdlButton.IsEnabled = false;
         DetectProgress.Value = 0;
-        StatusText.Text = "Detecting scenes...";
+        StatusText.Text = AppLocalizer.Get("Detecting scenes...");
         UpdateUi();
 
         var detector = (DetectorCombo.SelectedItem as ComboBoxItem)?.Tag as string ?? "content";
@@ -107,13 +107,13 @@ public sealed partial class SceneDetectPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            StatusText.Text = "scenedetect sidecar not built. Run pwsh tools/scenedetect/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("scenedetect sidecar not built. Run pwsh tools/scenedetect/build.ps1.");
         }
         else
         {
             StatusText.Text = result.Success
-                ? $"Done -- {_scenes.Count} scene(s) detected."
-                : $"Detection failed: {result.ErrorMessage ?? result.ErrorCode}";
+                ? AppLocalizer.Format($"Done -- {_scenes.Count} scene(s) detected.")
+                : AppLocalizer.Format($"Detection failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         DetectButton.IsEnabled = true;
         ExportCsvButton.IsEnabled = _scenes.Count > 0;
@@ -159,11 +159,11 @@ public sealed partial class SceneDetectPage : Page
             "--min-scene-len", ((int)MinLenBox.Value).ToString(CultureInfo.InvariantCulture),
             csv ? "--output-csv" : "--output-edl", f.Path,
         };
-        StatusText.Text = $"Exporting {(csv ? "CSV" : "EDL")}...";
+        StatusText.Text = AppLocalizer.Format($"Exporting {(csv ? "CSV" : "EDL")}...");
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
         var result = await _runner.RunAsync("scenedetect", args, null, null, cts.Token);
         StatusText.Text = result.Success
-            ? $"Exported -> {Path.GetFileName(f.Path)}"
-            : $"Export failed: {result.ErrorMessage ?? result.ErrorCode}";
+            ? AppLocalizer.Format($"Exported -> {Path.GetFileName(f.Path)}")
+            : AppLocalizer.Format($"Export failed: {result.ErrorMessage ?? result.ErrorCode}");
     }
 }

@@ -58,7 +58,7 @@ public sealed partial class BackgroundRemoverPage : Page
         if (_runner.Locate("alphacut") is null)
         {
             _modelReady = false;
-            ModelStatus.Text = "Background-removal engine is not built.";
+            ModelStatus.Text = AppLocalizer.Get("Background-removal engine is not built.");
             DownloadModelButton.IsEnabled = false;
             UpdateUi();
             return;
@@ -74,9 +74,11 @@ public sealed partial class BackgroundRemoverPage : Page
             });
         _modelReady = ready;
         ModelStatus.Text = ready
-            ? "Pinned U2Net Human Seg model verified. Inference is offline."
-            : "Model not installed. Review the Apache-2.0 terms before downloading the pinned 168 MB asset.";
-        DownloadModelButton.Content = ready ? "Re-verify model" : "Download verified model (168 MB)";
+            ? AppLocalizer.Get("Pinned U2Net Human Seg model verified. Inference is offline.")
+            : AppLocalizer.Get("Model not installed. Review the Apache-2.0 terms before downloading the pinned 168 MB asset.");
+        DownloadModelButton.Content = ready
+            ? AppLocalizer.Get("Re-verify model")
+            : AppLocalizer.Get("Download verified model (168 MB)");
         DownloadModelButton.IsEnabled = !_modelBusy;
         UpdateUi();
     }
@@ -91,12 +93,10 @@ public sealed partial class BackgroundRemoverPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Download the background-removal model?",
-                Content = "This downloads the pinned U2Net Human Seg ONNX model (Apache-2.0, 168 MB). "
-                          + "UCX verifies its exact size and SHA-256 before installing it. "
-                          + "Background removal remains offline after installation.",
-                PrimaryButtonText = "Accept & download",
-                CloseButtonText = "Cancel",
+                Title = AppLocalizer.Get("Download the background-removal model?"),
+                Content = AppLocalizer.Get("This downloads the pinned U2Net Human Seg ONNX model (Apache-2.0, 168 MB). UCX verifies its exact size and SHA-256 before installing it. Background removal remains offline after installation."),
+                PrimaryButtonText = AppLocalizer.Get("Accept & download"),
+                CloseButtonText = AppLocalizer.Get("Cancel"),
                 DefaultButton = ContentDialogButton.Close,
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -105,17 +105,17 @@ public sealed partial class BackgroundRemoverPage : Page
 
         _modelBusy = true;
         DownloadModelButton.IsEnabled = false;
-        ModelStatus.Text = "Downloading and verifying model…";
+        ModelStatus.Text = AppLocalizer.Get("Downloading and verifying model…");
         UpdateUi();
         try
         {
             var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
-                ModelStatus.Text = $"Downloading model… {p.Percent:F0}% ({p.Stage})"));
+                ModelStatus.Text = AppLocalizer.Format($"Downloading model… {p.Percent:F0}% ({p.Stage})")));
             var result = await _runner.RunAsync(
                 "alphacut", ["--download-model", "u2net_human_seg", "--accept-license"],
                 progress, ct: CancellationToken.None, silenceTimeout: TimeSpan.FromHours(1));
             if (!result.Success)
-                ModelStatus.Text = $"Download failed: {result.ErrorMessage ?? result.ErrorCode}.";
+                ModelStatus.Text = AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? result.ErrorCode}.");
         }
         finally
         {
@@ -127,7 +127,7 @@ public sealed partial class BackgroundRemoverPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into background removal queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into background removal queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -272,8 +272,8 @@ public sealed partial class BackgroundRemoverPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No supported files were added from that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported files were added from that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -349,7 +349,7 @@ public sealed partial class BackgroundRemoverPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -395,8 +395,8 @@ public sealed partial class BackgroundRemoverPage : Page
 
                 item.StatusText = "Processing";
                 item.Progress = 0;
-                ProgressTitle.Text = $"Processing {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Processing {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {jobs.Count}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -404,9 +404,9 @@ public sealed partial class BackgroundRemoverPage : Page
                     item.StatusText = $"{p.Percent:F0}%";
                     var overall = ((completed + failed) * 100.0 + p.Percent) / jobs.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
-                    ProgressStage.Text = $"{p.Percent:F1}% - {p.Stage}";
+                    ProgressStage.Text = AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -447,11 +447,13 @@ public sealed partial class BackgroundRemoverPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         UpdateUi();
     }
@@ -465,7 +467,7 @@ public sealed partial class BackgroundRemoverPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -485,10 +487,10 @@ public sealed partial class BackgroundRemoverPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -530,8 +532,8 @@ public sealed partial class BackgroundRemoverPage : Page
     {
         var output = _outputDirectory ?? "same folder as each source";
         StatusText.Text = _files.Count == 0
-            ? "Add video or image files to start a background removal queue."
-            : $"Ready to process {_files.Count} file(s) using {SelectedModelLabel()}. Output: {output}.";
+            ? AppLocalizer.Get("Add video or image files to start a background removal queue.")
+            : AppLocalizer.Format($"Ready to process {_files.Count} file(s) using {SelectedModelLabel()}. Output: {output}.");
     }
 
     private void UpdateModelSummaries()

@@ -73,8 +73,8 @@ public sealed partial class DownloaderPage : Page
             RuntimeHealthTitleText.Text = report.Summary;
             RuntimeHealthDetailText.Text = string.Join("  ", new[]
             {
-                downloader is null ? null : $"yt-dlp: {downloader.Status}.",
-                deno is null ? null : $"Deno: {deno.Status}. {(deno.Status == "Ready" ? deno.Detail : deno.Remediation)}",
+                downloader is null ? null : AppLocalizer.Format($"yt-dlp: {downloader.Status}."),
+                deno is null ? null : AppLocalizer.Format($"Deno: {deno.Status}. {(deno.Status == "Ready" ? deno.Detail : deno.Remediation)}"),
                 report.Requirements.Any(r => r.Kind == "sidecar" && r.Status == "Missing")
                     ? report.Detail
                     : null,
@@ -82,7 +82,7 @@ public sealed partial class DownloaderPage : Page
         }
         catch (Exception ex)
         {
-            RuntimeHealthTitleText.Text = "Downloader health unavailable";
+            RuntimeHealthTitleText.Text = AppLocalizer.Get("Downloader health unavailable");
             RuntimeHealthDetailText.Text = ex.Message;
         }
         finally
@@ -98,7 +98,7 @@ public sealed partial class DownloaderPage : Page
 
         _runtimeOpInFlight = true;
         RuntimeToolsButton.IsEnabled = false;
-        RuntimeToolsButton.Content = "Installing...";
+        RuntimeToolsButton.Content = AppLocalizer.Get("Installing...");
         try
         {
             var results = new List<ToolDownloadResult>();
@@ -112,23 +112,23 @@ public sealed partial class DownloaderPage : Page
                     var percent = update.TotalBytes > 0
                         ? update.BytesDownloaded * 100.0 / update.TotalBytes
                         : 0;
-                    RuntimeHealthTitleText.Text = $"Installing {tool}";
-                    RuntimeHealthDetailText.Text = $"{ordinal}/{tools.Length} · {percent:F0}%";
+                    RuntimeHealthTitleText.Text = AppLocalizer.Format($"Installing {tool}");
+                    RuntimeHealthDetailText.Text = AppLocalizer.Format($"{ordinal}/{tools.Length} · {percent:F0}%");
                 });
                 results.Add(await _toolManager.DownloadToolAsync(tool, progress));
             }
             var failed = results.Where(result => !result.Success).ToList();
             if (failed.Count > 0)
             {
-                RuntimeHealthTitleText.Text = "Runtime update incomplete";
+                RuntimeHealthTitleText.Text = AppLocalizer.Get("Runtime update incomplete");
                 RuntimeHealthDetailText.Text = string.Join("  ", failed.Select(result =>
-                    $"{result.ToolName}: {result.ErrorMessage}"));
+                    AppLocalizer.Format($"{result.ToolName}: {result.ErrorMessage}")));
             }
         }
         finally
         {
             _runtimeOpInFlight = false;
-            RuntimeToolsButton.Content = "Install / update runtimes";
+            RuntimeToolsButton.Content = AppLocalizer.Get("Install / update runtimes");
             await RefreshRuntimeHealthAsync();
         }
     }
@@ -250,21 +250,21 @@ public sealed partial class DownloaderPage : Page
         {
             // Sidecar didn't emit a cookie_status — likely missing streamkeep
             // package or build. Show the action message if we have one.
-            CookieStatusText.Text = "Cookie store unavailable. " +
-                                    "Build the streamkeep sidecar (`pwsh tools/streamkeep/build.ps1`).";
+            CookieStatusText.Text = AppLocalizer.Get(
+                "Cookie store unavailable. Build the streamkeep sidecar (`pwsh tools/streamkeep/build.ps1`).");
             CookieClearButton.IsEnabled = false;
         }
         else if (present == true)
         {
             var enc = encrypted == true ? "encrypted at rest (DPAPI)" : "plaintext (legacy)";
             var age = FormatCookieAge(ageSeconds);
-            CookieStatusText.Text = $"Cookies imported · {enc} · {age}";
+            CookieStatusText.Text = AppLocalizer.Format($"Cookies imported · {enc} · {age}");
             CookieClearButton.IsEnabled = true;
         }
         else
         {
-            CookieStatusText.Text = "No cookies imported. " +
-                                    "Sites that need login (premium, age-gated, region-locked) won't work.";
+            CookieStatusText.Text = AppLocalizer.Get(
+                "No cookies imported. Sites that need login (premium, age-gated, region-locked) won't work.");
             CookieClearButton.IsEnabled = false;
         }
 
@@ -353,8 +353,8 @@ public sealed partial class DownloaderPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No new URLs were added."
-            : $"Added {added} download jobs.";
+            ? AppLocalizer.Get("No new URLs were added.")
+            : AppLocalizer.Format($"Added {added} download jobs.");
         UpdateUi();
     }
 
@@ -442,7 +442,7 @@ public sealed partial class DownloaderPage : Page
         DownloadButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
         ClearQueueButton.IsEnabled = false;
-        StatusText.Text = $"Downloading {pending.Count} queued jobs...";
+        StatusText.Text = AppLocalizer.Format($"Downloading {pending.Count} queued jobs...");
 
         var completed = 0;
         var failed = 0;
@@ -542,7 +542,7 @@ public sealed partial class DownloaderPage : Page
             _cts = null;
         }
 
-        StatusText.Text = $"Downloads finished: {completed} succeeded, {failed} failed.";
+        StatusText.Text = AppLocalizer.Format($"Downloads finished: {completed} succeeded, {failed} failed.");
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         CancelButton.IsEnabled = false;
         UpdateUi();
@@ -553,7 +553,7 @@ public sealed partial class DownloaderPage : Page
             {
                 Source = unstarted.Url,
                 Status = QueueCompletionItemStatus.Cancelled,
-                Message = "Not started because the queue was cancelled.",
+                Message = AppLocalizer.Get("Not started because the queue was cancelled."),
             });
         }
         if (completionItems.Count > 0)
@@ -574,7 +574,7 @@ public sealed partial class DownloaderPage : Page
     {
         _cts?.Cancel();
         CancelButton.IsEnabled = false;
-        StatusText.Text = "Cancelling active download...";
+        StatusText.Text = AppLocalizer.Get("Cancelling active download...");
     }
 
     private List<string> BuildArgs(DownloadJobItem job)
@@ -639,13 +639,13 @@ public sealed partial class DownloaderPage : Page
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
 
         var pending = _queue.Count(j => !j.IsComplete);
-        QueueSummaryText.Text = $"{pending} pending / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{pending} pending / {_finished.Count} finished");
         DownloadButton.IsEnabled = pending > 0 && _cts is null;
         ClearQueueButton.IsEnabled = hasQueued && _cts is null;
         AddUrlButton.IsEnabled = SplitUrls(UrlBox.Text).Any();
 
         if (_cts is null && string.IsNullOrWhiteSpace(StatusText.Text))
-            StatusText.Text = "Queue URLs to download video, audio, and subtitles locally.";
+            StatusText.Text = AppLocalizer.Get("Queue URLs to download video, audio, and subtitles locally.");
     }
 
     private static IEnumerable<string> SplitUrls(string? text)

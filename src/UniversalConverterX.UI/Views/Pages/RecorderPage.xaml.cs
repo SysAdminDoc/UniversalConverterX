@@ -73,7 +73,7 @@ public sealed partial class RecorderPage : Page
             // Folder picker can return a path the app no longer has rights to
             // (network share dropped, drive ejected). Surface the error and
             // fall back to the prior directory so the next Start succeeds.
-            OutputDirectoryBox.Text = $"(unavailable: {ex.Message})";
+            OutputDirectoryBox.Text = AppLocalizer.Format($"(unavailable: {ex.Message})");
             return;
         }
         OutputDirectoryBox.Text = _outputDirectory;
@@ -148,7 +148,7 @@ public sealed partial class RecorderPage : Page
             WebcamDeviceCombo.SelectedIndex = 0;
 
         AudioDeviceCombo.Items.Clear();
-        AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = "None (no microphone)", Tag = "" });
+        AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = AppLocalizer.Get("None (no microphone)"), Tag = "" });
         foreach (var dev in audioDevices)
             AudioDeviceCombo.Items.Add(new ComboBoxItem { Content = dev, Tag = dev });
         AudioDeviceCombo.SelectedIndex = 0;
@@ -156,7 +156,7 @@ public sealed partial class RecorderPage : Page
         // System-audio combo: pre-fill any audio devices that look like loopback
         // sources (Stereo Mix / What U Hear / virtual-audio-capturer / Wave Out).
         SystemAudioCombo.Items.Clear();
-        SystemAudioCombo.Items.Add(new ComboBoxItem { Content = "Auto (Stereo Mix / virtual)", Tag = "" });
+        SystemAudioCombo.Items.Add(new ComboBoxItem { Content = AppLocalizer.Get("Auto (Stereo Mix / virtual)"), Tag = "" });
         foreach (var dev in audioDevices)
         {
             var lower = dev.ToLowerInvariant();
@@ -282,14 +282,14 @@ public sealed partial class RecorderPage : Page
         try { Directory.CreateDirectory(_outputDirectory); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             return;
         }
         _cts = new CancellationTokenSource();
         RecordButton.IsEnabled = false;
         ClearQueueButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
-        StatusText.Text = $"Recording {pending.Count} queued sessions...";
+        StatusText.Text = AppLocalizer.Format($"Recording {pending.Count} queued sessions...");
 
         var completed = 0;
         var failed = 0;
@@ -308,7 +308,7 @@ public sealed partial class RecorderPage : Page
 
                 job.Progress = 0;
                 job.StatusText = "Starting";
-                StatusText.Text = $"Recording {job.Title}";
+                StatusText.Text = AppLocalizer.Format($"Recording {job.Title}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -357,7 +357,7 @@ public sealed partial class RecorderPage : Page
         }
 
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
-        StatusText.Text = $"{completed} recordings completed, {failed} failed.";
+        StatusText.Text = AppLocalizer.Format($"{completed} recordings completed, {failed} failed.");
         UpdateUi(updateStatus: false);
     }
 
@@ -482,8 +482,8 @@ public sealed partial class RecorderPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
 
-        QueueSummaryText.Text = $"{pending} pending / {_finished.Count} finished";
-        CurrentSetupText.Text = $"{FormatDuration(SelectedInt(DurationCombo, 30))}, {SelectedInt(FrameRateCombo, 30)} fps, CRF {SelectedInt(QualityCombo, 20)}. Output: {_outputDirectory}.";
+        QueueSummaryText.Text = AppLocalizer.Format($"{pending} pending / {_finished.Count} finished");
+        CurrentSetupText.Text = AppLocalizer.Format($"{FormatDuration(SelectedInt(DurationCombo, 30))}, {SelectedInt(FrameRateCombo, 30)} fps, CRF {SelectedInt(QualityCombo, 20)}. Output: {_outputDirectory}.");
         RecordButton.IsEnabled = _cts is null;
         ClearQueueButton.IsEnabled = hasQueued && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
@@ -491,8 +491,8 @@ public sealed partial class RecorderPage : Page
         if (updateStatus && _cts is null)
         {
             StatusText.Text = pending == 0
-                ? "Add a recording session, or click Record All to capture the current setup."
-                : $"Ready to record {pending} queued sessions.";
+                ? AppLocalizer.Get("Add a recording session, or click Record All to capture the current setup.")
+                : AppLocalizer.Format($"Ready to record {pending} queued sessions.");
         }
     }
 

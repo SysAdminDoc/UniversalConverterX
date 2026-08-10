@@ -55,7 +55,7 @@ public sealed partial class SpeechToTextPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop audio or video into queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop audio or video into queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -169,8 +169,8 @@ public sealed partial class SpeechToTextPage : Page
         }
 
         StatusLabel.Text = added == 0
-            ? "No supported files found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported files found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -274,14 +274,14 @@ public sealed partial class SpeechToTextPage : Page
         {
             _parakeetModelReady = false;
             DownloadParakeetModelButton.IsEnabled = false;
-            ParakeetModelStatus.Text = "Parakeet sidecar is not installed in this build.";
+            ParakeetModelStatus.Text = AppLocalizer.Get("Parakeet sidecar is not installed in this build.");
             UpdateUi();
             return;
         }
         _modelActionRunning = true;
         _parakeetModelReady = false;
         DownloadParakeetModelButton.IsEnabled = false;
-        ParakeetModelStatus.Text = "Checking local model pack...";
+        ParakeetModelStatus.Text = AppLocalizer.Get("Checking local model pack...");
         UpdateUi();
         try
         {
@@ -292,10 +292,10 @@ public sealed partial class SpeechToTextPage : Page
                 silenceTimeout: TimeSpan.FromSeconds(30));
             _parakeetModelReady = result.Success;
             ParakeetModelStatus.Text = result.Success
-                ? "Model ready — pinned local snapshot found."
+                ? AppLocalizer.Get("Model ready — pinned local snapshot found.")
                 : result.ErrorCode == "sidecar_not_found"
-                    ? "Parakeet sidecar is not installed in this build."
-                    : "Model not installed. Review the license and download it when ready.";
+                    ? AppLocalizer.Get("Parakeet sidecar is not installed in this build.")
+                    : AppLocalizer.Get("Model not installed. Review the license and download it when ready.");
         }
         finally
         {
@@ -312,12 +312,10 @@ public sealed partial class SpeechToTextPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Download NVIDIA Parakeet TDT v3?",
-            Content = "This downloads the pinned approximately 2.5 GB model pack from Hugging Face. " +
-                      "The model is governed by CC-BY-4.0. Downloading confirms that you accept that license. " +
-                      "UCX will not download or update this model during transcription.",
-            PrimaryButtonText = "Accept & download",
-            CloseButtonText = "Cancel",
+            Title = AppLocalizer.Get("Download NVIDIA Parakeet TDT v3?"),
+            Content = AppLocalizer.Get("This downloads the pinned approximately 2.5 GB model pack from Hugging Face. The model is governed by CC-BY-4.0. Downloading confirms that you accept that license. UCX will not download or update this model during transcription."),
+            PrimaryButtonText = AppLocalizer.Get("Accept & download"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close,
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary)
@@ -326,15 +324,15 @@ public sealed partial class SpeechToTextPage : Page
         _modelActionRunning = true;
         _parakeetModelReady = false;
         DownloadParakeetModelButton.IsEnabled = false;
-        ParakeetModelStatus.Text = "Downloading pinned model pack...";
+        ParakeetModelStatus.Text = AppLocalizer.Get("Downloading pinned model pack...");
         UpdateUi();
         try
         {
             var progress = new Progress<SidecarProgress>(value =>
                 DispatcherQueue.TryEnqueue(() =>
                     ParakeetModelStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
-                        ? $"Downloading... {value.Percent:F0}%"
-                        : $"{value.Stage} ({value.Percent:F0}%)"));
+                        ? AppLocalizer.Format($"Downloading... {value.Percent:F0}%")
+                        : AppLocalizer.Format($"{value.Stage} ({value.Percent:F0}%)")));
             var result = await _runner.RunAsync(
                 "parakeet-stt",
                 ["download-model", "--accept-license"],
@@ -343,8 +341,8 @@ public sealed partial class SpeechToTextPage : Page
                 silenceTimeout: TimeSpan.FromHours(2));
             _parakeetModelReady = result.Success;
             ParakeetModelStatus.Text = result.Success
-                ? "Model ready — pinned local snapshot installed."
-                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+                ? AppLocalizer.Get("Model ready — pinned local snapshot installed.")
+                : AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? "Unknown error"}");
         }
         finally
         {
@@ -371,7 +369,7 @@ public sealed partial class SpeechToTextPage : Page
         var batchSize = SafeBatchSize(BatchSizeBox?.Value);
         if (backend == "parakeet-stt" && !_parakeetModelReady)
         {
-            StatusLabel.Text = "Download the Parakeet model pack before transcription.";
+            StatusLabel.Text = AppLocalizer.Get("Download the Parakeet model pack before transcription.");
             return;
         }
 
@@ -452,7 +450,7 @@ public sealed partial class SpeechToTextPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Transcribing";
-                StatusLabel.Text = $"Transcribing {item.FileName}... ({completed + failed + 1}/{jobs.Count})";
+                StatusLabel.Text = AppLocalizer.Format($"Transcribing {item.FileName}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progressHandler = new Progress<SidecarProgress>(p =>
                     DispatcherQueue.TryEnqueue(() =>
@@ -530,7 +528,7 @@ public sealed partial class SpeechToTextPage : Page
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
         _cts?.Cancel();
-        StatusLabel.Text = "Cancelling...";
+        StatusLabel.Text = AppLocalizer.Get("Cancelling...");
         CancelButton.IsEnabled = false;
     }
 
@@ -617,7 +615,7 @@ public sealed partial class SpeechToTextPage : Page
         CancelButton.IsEnabled = _cts is not null;
 
         if (!hasFiles)
-            StatusLabel.Text = "Add audio or video files to transcribe.";
+            StatusLabel.Text = AppLocalizer.Get("Add audio or video files to transcribe.");
 
         UpdateWaveformPreview();
     }

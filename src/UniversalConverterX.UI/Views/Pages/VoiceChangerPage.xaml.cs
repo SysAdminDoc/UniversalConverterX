@@ -61,7 +61,7 @@ public sealed partial class VoiceChangerPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into voice transform queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into voice transform queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -154,7 +154,7 @@ public sealed partial class VoiceChangerPage : Page
     {
         if (!Directory.Exists(path))
         {
-            StatusText.Text = $"Folder not found: {path}";
+            StatusText.Text = AppLocalizer.Format($"Folder not found: {path}");
             return;
         }
 
@@ -167,12 +167,12 @@ public sealed partial class VoiceChangerPage : Page
         }
         catch (UnauthorizedAccessException)
         {
-            StatusText.Text = "Permission denied for that folder.";
+            StatusText.Text = AppLocalizer.Get("Permission denied for that folder.");
             return;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
             return;
         }
 
@@ -187,9 +187,9 @@ public sealed partial class VoiceChangerPage : Page
 
         StatusText.Text = added switch
         {
-            0 => "No supported audio or video files were added from that folder.",
-            _ when truncated => $"Added {added} files from {path} (capped at {FolderAddCap}).",
-            _ => $"Added {added} files from {path}.",
+            0 => AppLocalizer.Get("No supported audio or video files were added from that folder."),
+            _ when truncated => AppLocalizer.Format($"Added {added} files from {path} (capped at {FolderAddCap})."),
+            _ => AppLocalizer.Format($"Added {added} files from {path}."),
         };
         UpdateUi();
     }
@@ -269,7 +269,7 @@ public sealed partial class VoiceChangerPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -294,8 +294,8 @@ public sealed partial class VoiceChangerPage : Page
 
                 item.StatusText = "Transforming";
                 item.Progress = 0;
-                ProgressTitle.Text = $"Transforming {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Transforming {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {jobs.Count}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -304,10 +304,10 @@ public sealed partial class VoiceChangerPage : Page
                     var overall = ((completed + failed) * 100.0 + p.Percent) / jobs.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
                     ProgressStage.Text = string.IsNullOrWhiteSpace(p.Stage)
-                        ? $"{p.Percent:F1}%"
-                        : $"{p.Percent:F1}% - {p.Stage}";
+                        ? AppLocalizer.Format($"{p.Percent:F1}%")
+                        : AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -345,11 +345,13 @@ public sealed partial class VoiceChangerPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         UpdateUi();
     }
 
@@ -377,7 +379,7 @@ public sealed partial class VoiceChangerPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -389,10 +391,10 @@ public sealed partial class VoiceChangerPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -411,8 +413,8 @@ public sealed partial class VoiceChangerPage : Page
         if (StatusText is null) return;
         var output = _outputDirectory ?? "same folder as each source";
         StatusText.Text = _files.Count == 0
-            ? "Add audio or video files to transform voice tone."
-            : $"Ready to transform {_files.Count} file(s) as {SelectedStyleLabel()} ({SelectedFormatLabel()}). Output: {output}.";
+            ? AppLocalizer.Get("Add audio or video files to transform voice tone.")
+            : AppLocalizer.Format($"Ready to transform {_files.Count} file(s) as {SelectedStyleLabel()} ({SelectedFormatLabel()}). Output: {output}.");
     }
 
     private void UpdateStyleSummary()
@@ -420,11 +422,11 @@ public sealed partial class VoiceChangerPage : Page
         if (StyleSummary is null) return;
         StyleSummary.Text = SelectedStyle() switch
         {
-            "neutral" => "Cleans rumble/noise and levels speech without a character shift.",
-            "lower" => "Adds a deeper contour with low-mid weight and pitch-safe duration recovery.",
-            "higher" => "Brightens speech and lifts the pitch contour while keeping timing stable.",
-            "robotic" => "Adds modulation, short echo, and bit-depth texture for synthetic narration.",
-            "whisper" => "Narrows bandwidth and compresses dynamics for a soft whispered voice bed.",
+            "neutral" => AppLocalizer.Get("Cleans rumble/noise and levels speech without a character shift."),
+            "lower" => AppLocalizer.Get("Adds a deeper contour with low-mid weight and pitch-safe duration recovery."),
+            "higher" => AppLocalizer.Get("Brightens speech and lifts the pitch contour while keeping timing stable."),
+            "robotic" => AppLocalizer.Get("Adds modulation, short echo, and bit-depth texture for synthetic narration."),
+            "whisper" => AppLocalizer.Get("Narrows bandwidth and compresses dynamics for a soft whispered voice bed."),
             _ => "",
         };
     }

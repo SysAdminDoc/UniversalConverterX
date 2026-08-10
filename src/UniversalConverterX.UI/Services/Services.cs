@@ -74,7 +74,7 @@ public class DialogService : IDialogService
         {
             Title = title,
             Content = message,
-            CloseButtonText = "OK",
+            CloseButtonText = AppLocalizer.Get("OK"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = RequireXamlRoot(),
         };
@@ -87,8 +87,8 @@ public class DialogService : IDialogService
         {
             Title = title,
             Content = message,
-            PrimaryButtonText = "Yes",
-            CloseButtonText = "No",
+            PrimaryButtonText = AppLocalizer.Get("Yes"),
+            CloseButtonText = AppLocalizer.Get("No"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = RequireXamlRoot(),
         };
@@ -106,8 +106,8 @@ public class DialogService : IDialogService
         {
             Title = title,
             Content = stack,
-            PrimaryButtonText = "OK",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = AppLocalizer.Get("OK"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = RequireXamlRoot(),
         };

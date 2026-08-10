@@ -76,12 +76,12 @@ public sealed partial class DiscBurnPage : Page
         EmptyState.Visibility = _sources.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         SourceList.Visibility = _sources.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         StatusText.Text = _sources.Count == 0
-            ? "No source selected."
+            ? AppLocalizer.Get("No source selected.")
             : IsDvdVideo
-                ? $"Ready to author {_sources.Count} DVD-Video title(s)."
+                ? AppLocalizer.Format($"Ready to author {_sources.Count} DVD-Video title(s).")
                 : IsBluRay
-                    ? $"Ready to author {_sources[0].Name} as a Blu-ray title."
-                : $"Ready to image {_sources[0].Path}.";
+                    ? AppLocalizer.Format($"Ready to author {_sources[0].Name} as a Blu-ray title.")
+                : AppLocalizer.Format($"Ready to image {_sources[0].Path}.");
         UpdateEnabled();
     }
 
@@ -89,8 +89,8 @@ public sealed partial class DiscBurnPage : Page
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
         e.DragUIOverride.Caption = IsDvdVideo
-            ? "Add DVD-Video titles"
-            : IsBluRay ? "Use as the Blu-ray title" : "Use as data-disc source";
+            ? AppLocalizer.Get("Add DVD-Video titles")
+            : IsBluRay ? AppLocalizer.Get("Use as the Blu-ray title") : AppLocalizer.Get("Use as data-disc source");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -117,13 +117,13 @@ public sealed partial class DiscBurnPage : Page
         MediaCombo.Visibility = IsVideoDisc ? Visibility.Collapsed : Visibility.Visible;
         StandardCombo.Visibility = IsDvdVideo ? Visibility.Visible : Visibility.Collapsed;
         EmptyTitle.Text = IsDvdVideo
-            ? "Choose one or more video titles"
-            : IsBluRay ? "Choose one video title" : "Choose a folder for the disc";
+            ? AppLocalizer.Get("Choose one or more video titles")
+            : IsBluRay ? AppLocalizer.Get("Choose one video title") : AppLocalizer.Get("Choose a folder for the disc");
         EmptyHint.Text = IsDvdVideo
-            ? "Videos are transcoded to DVD MPEG-2 and authored into a VIDEO_TS structure."
+            ? AppLocalizer.Get("Videos are transcoded to DVD MPEG-2 and authored into a VIDEO_TS structure.")
             : IsBluRay
-                ? "The title is transcoded to H.264 and AC-3, then authored into a persistent, inspectable BDMV folder."
-                : "Its files and subfolders will become the data-disc contents.";
+                ? AppLocalizer.Get("The title is transcoded to H.264 and AC-3, then authored into a persistent, inspectable BDMV folder.")
+                : AppLocalizer.Get("Its files and subfolders will become the data-disc contents.");
         _outputPath = null;
         OutputBox.Text = "";
         SetSources([]);
@@ -138,8 +138,12 @@ public sealed partial class DiscBurnPage : Page
         OutputBox.Visibility = needsOutput ? Visibility.Visible : Visibility.Collapsed;
         ChooseOutputButton.Visibility = needsOutput ? Visibility.Visible : Visibility.Collapsed;
         DriveCombo.Visibility = IsBurn ? Visibility.Visible : Visibility.Collapsed;
-        OutputBox.Header = IsBluRay && IsBurn ? "Persistent BDMV folder" : "ISO image";
-        StartButton.Content = IsBurn ? "Burn disc" : "Create ISO";
+        OutputBox.Header = IsBluRay && IsBurn
+            ? AppLocalizer.Get("Persistent BDMV folder")
+            : AppLocalizer.Get("ISO image");
+        StartButton.Content = IsBurn
+            ? AppLocalizer.Get("Burn disc")
+            : AppLocalizer.Get("Create ISO");
         UpdateEnabled();
     }
 
@@ -179,7 +183,7 @@ public sealed partial class DiscBurnPage : Page
         _recorders.Clear();
         if (_runner.Locate("discburn") is null)
         {
-            StatusText.Text = "The discburn sidecar was not found.";
+            StatusText.Text = AppLocalizer.Get("The discburn sidecar was not found.");
             return;
         }
         var found = new List<DiscRecorder>();
@@ -199,9 +203,9 @@ public sealed partial class DiscBurnPage : Page
         if (_recorders.Count > 0)
             DriveCombo.SelectedIndex = 0;
         else if (!result.Success)
-            StatusText.Text = $"Optical recorder discovery failed: {result.ErrorMessage}";
+            StatusText.Text = AppLocalizer.Format($"Optical recorder discovery failed: {result.ErrorMessage}");
         else
-            StatusText.Text = "No physical recorder found. ISO image creation remains available.";
+            StatusText.Text = AppLocalizer.Get("No physical recorder found. ISO image creation remains available.");
         UpdateEnabled();
     }
 
@@ -258,7 +262,7 @@ public sealed partial class DiscBurnPage : Page
         var progress = new Progress<SidecarProgress>(value => DispatcherQueue.TryEnqueue(() =>
         {
             OperationProgress.Value = Math.Clamp(value.Percent, 0, 100);
-            StatusText.Text = $"{value.Stage} — {value.Percent:F0}%";
+            StatusText.Text = AppLocalizer.Format($"{value.Stage} — {value.Percent:F0}%");
         }));
 
         SidecarResult result;
@@ -279,11 +283,11 @@ public sealed partial class DiscBurnPage : Page
         }
         StatusText.Text = result.Success
             ? IsBurn
-                ? IsBluRay ? $"Blu-ray burn completed; BDMV retained at {_outputPath}." : "Disc burn completed."
+                ? IsBluRay ? AppLocalizer.Format($"Blu-ray burn completed; BDMV retained at {_outputPath}.") : AppLocalizer.Get("Disc burn completed.")
                 : IsBluRay
-                    ? $"Blu-ray ISO saved to {_outputPath}; its BDMV folder is retained beside the image."
-                    : $"ISO image saved to {_outputPath}."
-            : result.ErrorCode == "cancelled" ? "Disc operation cancelled." : $"Disc operation failed: {result.ErrorMessage}";
+                    ? AppLocalizer.Format($"Blu-ray ISO saved to {_outputPath}; its BDMV folder is retained beside the image.")
+                    : AppLocalizer.Format($"ISO image saved to {_outputPath}.")
+            : result.ErrorCode == "cancelled" ? AppLocalizer.Get("Disc operation cancelled.") : AppLocalizer.Format($"Disc operation failed: {result.ErrorMessage}");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => _cts?.Cancel();

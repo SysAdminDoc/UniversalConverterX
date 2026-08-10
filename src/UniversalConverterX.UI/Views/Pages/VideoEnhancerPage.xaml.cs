@@ -55,14 +55,14 @@ public sealed partial class VideoEnhancerPage : Page
     {
         var capability = _healthService.EvaluateWindowsVideoScaler();
         WindowsVsrStatusText.Text = capability.Status == "Ready"
-            ? "Available for qualified frame pipelines"
-            : "Unavailable on this system — choose Real-ESRGAN, Anime4K, or SeedVR2";
-        WindowsVsrDetailText.Text = $"{capability.Detail} {capability.Remediation}".Trim();
+            ? AppLocalizer.Get("Available for qualified frame pipelines")
+            : AppLocalizer.Get("Unavailable on this system — choose Real-ESRGAN, Anime4K, or SeedVR2");
+        WindowsVsrDetailText.Text = AppLocalizer.Format($"{capability.Detail} {capability.Remediation}").Trim();
     }
 
     private async Task LoadModelsAsync()
     {
-        ModelCombo.PlaceholderText = "Discovering...";
+        ModelCombo.PlaceholderText = AppLocalizer.Get("Discovering...");
         ModelCombo.IsEnabled = false;
         _models.Clear();
         ModelCombo.Items.Clear();
@@ -86,8 +86,8 @@ public sealed partial class VideoEnhancerPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            ModelHintText.Text = "Build the realesrgan sidecar first: pwsh tools/realesrgan/build.ps1";
-            ModelCombo.PlaceholderText = "Sidecar not built";
+            ModelHintText.Text = AppLocalizer.Get("Build the realesrgan sidecar first: pwsh tools/realesrgan/build.ps1");
+            ModelCombo.PlaceholderText = AppLocalizer.Get("Sidecar not built");
             UpdateUi();
             return;
         }
@@ -95,8 +95,8 @@ public sealed partial class VideoEnhancerPage : Page
         _models.AddRange(harvested);
         if (_models.Count == 0)
         {
-            ModelCombo.PlaceholderText = "No models found";
-            ModelHintText.Text = "Run pwsh tools/realesrgan/build.ps1 to fetch the upstream model set.";
+            ModelCombo.PlaceholderText = AppLocalizer.Get("No models found");
+            ModelHintText.Text = AppLocalizer.Get("Run pwsh tools/realesrgan/build.ps1 to fetch the upstream model set.");
         }
         else
         {
@@ -110,7 +110,7 @@ public sealed partial class VideoEnhancerPage : Page
             }
             ModelCombo.SelectedIndex = defaultIdx >= 0 ? defaultIdx : 0;
             ModelCombo.IsEnabled = true;
-            ModelHintText.Text = $"{_models.Count} model(s) discovered. realesr-animevideov3 is fastest for video.";
+            ModelHintText.Text = AppLocalizer.Format($"{_models.Count} model(s) discovered. realesr-animevideov3 is fastest for video.");
         }
         UpdateUi();
     }
@@ -131,7 +131,11 @@ public sealed partial class VideoEnhancerPage : Page
         RealEsrganQualityPanel.Visibility = seedVr2 || anime4K ? Visibility.Collapsed : Visibility.Visible;
         SeedVr2QualityPanel.Visibility = seedVr2 ? Visibility.Visible : Visibility.Collapsed;
         Anime4KQualityPanel.Visibility = anime4K ? Visibility.Visible : Visibility.Collapsed;
-        RunButton.Content = seedVr2 ? "Restore with SeedVR2" : anime4K ? "Upscale with Anime4K" : "Upscale Video";
+        RunButton.Content = seedVr2
+            ? AppLocalizer.Get("Restore with SeedVR2")
+            : anime4K
+                ? AppLocalizer.Get("Upscale with Anime4K")
+                : AppLocalizer.Get("Upscale Video");
         var summary = BuildPlanSummary();
         foreach (var file in _files) file.PlanSummary = summary;
         UpdateUi();
@@ -144,7 +148,7 @@ public sealed partial class VideoEnhancerPage : Page
         {
             _seedVr2ModelReady = false;
             DownloadSeedVr2ModelButton.IsEnabled = false;
-            SeedVr2ModelStatus.Text = "SeedVR2 sidecar is not installed in this build.";
+            SeedVr2ModelStatus.Text = AppLocalizer.Get("SeedVR2 sidecar is not installed in this build.");
             UpdateUi();
             return;
         }
@@ -152,7 +156,7 @@ public sealed partial class VideoEnhancerPage : Page
         _seedVr2ActionRunning = true;
         _seedVr2ModelReady = false;
         DownloadSeedVr2ModelButton.IsEnabled = false;
-        SeedVr2ModelStatus.Text = "Checking local model pack...";
+        SeedVr2ModelStatus.Text = AppLocalizer.Get("Checking local model pack...");
         UpdateUi();
         try
         {
@@ -163,10 +167,10 @@ public sealed partial class VideoEnhancerPage : Page
                 silenceTimeout: TimeSpan.FromMinutes(2));
             _seedVr2ModelReady = result.Success;
             SeedVr2ModelStatus.Text = result.Success
-                ? "Model ready — pinned local pack found."
+                ? AppLocalizer.Get("Model ready — pinned local pack found.")
                 : result.ErrorCode == "sidecar_not_found"
-                    ? "SeedVR2 sidecar is not installed in this build."
-                    : "Model not installed. Review the license and download it when ready.";
+                    ? AppLocalizer.Get("SeedVR2 sidecar is not installed in this build.")
+                    : AppLocalizer.Get("Model not installed. Review the license and download it when ready.");
         }
         finally
         {
@@ -183,12 +187,10 @@ public sealed partial class VideoEnhancerPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Download the SeedVR2 restoration pack?",
-            Content = "This downloads pinned, SHA-256 verified Apache-2.0 runtime and model snapshots " +
-                      "(approximately 3.9 GB). SeedVR2 requires an NVIDIA CUDA GPU with at least 10 GB VRAM; " +
-                      "12 GB or more is recommended. UCX never downloads or updates this pack during restoration.",
-            PrimaryButtonText = "Accept & download",
-            CloseButtonText = "Cancel",
+            Title = AppLocalizer.Get("Download the SeedVR2 restoration pack?"),
+            Content = AppLocalizer.Get("This downloads pinned, SHA-256 verified Apache-2.0 runtime and model snapshots (approximately 3.9 GB). SeedVR2 requires an NVIDIA CUDA GPU with at least 10 GB VRAM; 12 GB or more is recommended. UCX never downloads or updates this pack during restoration."),
+            PrimaryButtonText = AppLocalizer.Get("Accept & download"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close,
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
@@ -196,15 +198,15 @@ public sealed partial class VideoEnhancerPage : Page
         _seedVr2ActionRunning = true;
         _seedVr2ModelReady = false;
         DownloadSeedVr2ModelButton.IsEnabled = false;
-        SeedVr2ModelStatus.Text = "Downloading pinned SeedVR2 pack...";
+        SeedVr2ModelStatus.Text = AppLocalizer.Get("Downloading pinned SeedVR2 pack...");
         UpdateUi();
         try
         {
             var progress = new Progress<SidecarProgress>(value =>
                 DispatcherQueue.TryEnqueue(() =>
                     SeedVr2ModelStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
-                        ? $"Downloading... {value.Percent:F0}%"
-                        : $"{value.Stage} ({value.Percent:F0}%)"));
+                        ? AppLocalizer.Format($"Downloading... {value.Percent:F0}%")
+                        : AppLocalizer.Format($"{value.Stage} ({value.Percent:F0}%)")));
             var result = await _runner.RunAsync(
                 "seedvr2",
                 ["download-model", "--accept-license"],
@@ -213,8 +215,8 @@ public sealed partial class VideoEnhancerPage : Page
                 silenceTimeout: TimeSpan.FromHours(4));
             _seedVr2ModelReady = result.Success;
             SeedVr2ModelStatus.Text = result.Success
-                ? "Model ready — pinned local pack installed."
-                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+                ? AppLocalizer.Get("Model ready — pinned local pack installed.")
+                : AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? AppLocalizer.Get("Unknown error")}");
         }
         finally
         {
@@ -231,7 +233,7 @@ public sealed partial class VideoEnhancerPage : Page
         {
             _anime4KReady = false;
             DownloadAnime4KShadersButton.IsEnabled = false;
-            Anime4KStatus.Text = "Anime4K sidecar is not installed in this build.";
+            Anime4KStatus.Text = AppLocalizer.Get("Anime4K sidecar is not installed in this build.");
             UpdateUi();
             return;
         }
@@ -239,7 +241,7 @@ public sealed partial class VideoEnhancerPage : Page
         _anime4KActionRunning = true;
         _anime4KReady = false;
         DownloadAnime4KShadersButton.IsEnabled = false;
-        Anime4KStatus.Text = "Checking mpv and local shader pack...";
+        Anime4KStatus.Text = AppLocalizer.Get("Checking mpv and local shader pack...");
         UpdateUi();
         try
         {
@@ -250,8 +252,8 @@ public sealed partial class VideoEnhancerPage : Page
                 silenceTimeout: TimeSpan.FromMinutes(2));
             _anime4KReady = result.Success;
             Anime4KStatus.Text = result.Success
-                ? "Ready — mpv and the pinned Anime4K v4.0.1 shaders are available."
-                : result.ErrorMessage ?? "Anime4K is not ready.";
+                ? AppLocalizer.Get("Ready — mpv and the pinned Anime4K v4.0.1 shaders are available.")
+                : result.ErrorMessage ?? AppLocalizer.Get("Anime4K is not ready.");
         }
         finally
         {
@@ -268,12 +270,10 @@ public sealed partial class VideoEnhancerPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Download the Anime4K shader pack?",
-            Content = "This downloads the pinned, SHA-256 verified Anime4K v4.0.1 GLSL shader pack " +
-                      "(MIT license, approximately 0.8 MB). Export remains local and also requires mpv " +
-                      "on PATH, beside the sidecar, or in tools/_bin.",
-            PrimaryButtonText = "Accept & download",
-            CloseButtonText = "Cancel",
+            Title = AppLocalizer.Get("Download the Anime4K shader pack?"),
+            Content = AppLocalizer.Get("This downloads the pinned, SHA-256 verified Anime4K v4.0.1 GLSL shader pack (MIT license, approximately 0.8 MB). Export remains local and also requires mpv on PATH, beside the sidecar, or in tools/_bin."),
+            PrimaryButtonText = AppLocalizer.Get("Accept & download"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close,
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
@@ -281,15 +281,15 @@ public sealed partial class VideoEnhancerPage : Page
         _anime4KActionRunning = true;
         _anime4KReady = false;
         DownloadAnime4KShadersButton.IsEnabled = false;
-        Anime4KStatus.Text = "Downloading pinned Anime4K shaders...";
+        Anime4KStatus.Text = AppLocalizer.Get("Downloading pinned Anime4K shaders...");
         UpdateUi();
         try
         {
             var progress = new Progress<SidecarProgress>(value =>
                 DispatcherQueue.TryEnqueue(() =>
                     Anime4KStatus.Text = string.IsNullOrWhiteSpace(value.Stage)
-                        ? $"Downloading... {value.Percent:F0}%"
-                        : $"{value.Stage} ({value.Percent:F0}%)"));
+                        ? AppLocalizer.Format($"Downloading... {value.Percent:F0}%")
+                        : AppLocalizer.Format($"{value.Stage} ({value.Percent:F0}%)")));
             var result = await _runner.RunAsync(
                 "anime-upscale",
                 ["download-shaders", "--accept-license"],
@@ -297,8 +297,8 @@ public sealed partial class VideoEnhancerPage : Page
                 ct: CancellationToken.None,
                 silenceTimeout: TimeSpan.FromMinutes(5));
             Anime4KStatus.Text = result.Success
-                ? "Shader pack installed; checking mpv..."
-                : $"Download failed: {result.ErrorMessage ?? "Unknown error"}";
+                ? AppLocalizer.Get("Shader pack installed; checking mpv...")
+                : AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? "Unknown error"}");
         }
         finally
         {
@@ -311,7 +311,7 @@ public sealed partial class VideoEnhancerPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into upscale queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into upscale queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -367,8 +367,8 @@ public sealed partial class VideoEnhancerPage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported videos found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported videos found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -438,7 +438,7 @@ public sealed partial class VideoEnhancerPage : Page
             <= 30 => "compressed",
             _ => "very compressed",
         };
-        CrfLabel.Text = $"CRF {crf} ({hint})";
+        CrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
     }
@@ -455,7 +455,7 @@ public sealed partial class VideoEnhancerPage : Page
             <= 30 => "compressed",
             _ => "very compressed",
         };
-        Anime4KCrfLabel.Text = $"CRF {crf} ({hint})";
+        Anime4KCrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
     }
@@ -468,17 +468,17 @@ public sealed partial class VideoEnhancerPage : Page
         VeModel? model = (ModelCombo.SelectedItem as ComboBoxItem)?.Tag as VeModel;
         if (!seedVr2 && !anime4K && model is null)
         {
-            StatusText.Text = "Pick a model first.";
+            StatusText.Text = AppLocalizer.Get("Pick a model first.");
             return;
         }
         if (seedVr2 && !_seedVr2ModelReady)
         {
-            StatusText.Text = "Download the SeedVR2 model pack before restoration.";
+            StatusText.Text = AppLocalizer.Get("Download the SeedVR2 model pack before restoration.");
             return;
         }
         if (anime4K && !_anime4KReady)
         {
-            StatusText.Text = "Install mpv and download the Anime4K shader pack before upscaling.";
+            StatusText.Text = AppLocalizer.Get("Install mpv and download the Anime4K shader pack before upscaling.");
             return;
         }
         var scale = SelectedInt(ScaleCombo, 2);
@@ -532,10 +532,10 @@ public sealed partial class VideoEnhancerPage : Page
                 item.Progress = 0;
                 item.StatusText = seedVr2 ? "Restoring" : anime4K ? "Anime4K" : "Upscaling";
                 StatusText.Text = seedVr2
-                    ? $"Restoring {item.FileName} with SeedVR2 at {resolution}p... ({completed + failed + 1}/{jobs.Count})"
+                    ? AppLocalizer.Format($"Restoring {item.FileName} with SeedVR2 at {resolution}p... ({completed + failed + 1}/{jobs.Count})")
                     : anime4K
-                    ? $"Upscaling {item.FileName} with Anime4K Mode {anime4KProfile.ToUpperInvariant()}... ({completed + failed + 1}/{jobs.Count})"
-                    : $"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})";
+                    ? AppLocalizer.Format($"Upscaling {item.FileName} with Anime4K Mode {anime4KProfile.ToUpperInvariant()}... ({completed + failed + 1}/{jobs.Count})")
+                    : AppLocalizer.Format($"Upscaling {item.FileName} \u00d7{scale}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -576,8 +576,8 @@ public sealed partial class VideoEnhancerPage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} upscaled, {failed} failed."
-                : $"Done — {completed} upscaled, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} upscaled, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} upscaled, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -596,7 +596,7 @@ public sealed partial class VideoEnhancerPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -643,7 +643,7 @@ public sealed partial class VideoEnhancerPage : Page
         RunButton.IsEnabled = hasFiles && hasModel && _cts is null;
         ClearButton.IsEnabled = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
         if (updateStatus && _cts is null) UpdateStatusText();
     }
@@ -651,8 +651,8 @@ public sealed partial class VideoEnhancerPage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop video clips to start an enhancement queue."
-            : $"Ready to enhance {_files.Count} clip(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop video clips to start an enhancement queue.")
+            : AppLocalizer.Format($"Ready to enhance {_files.Count} clip(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

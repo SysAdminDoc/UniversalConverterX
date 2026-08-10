@@ -105,7 +105,7 @@ public sealed partial class EbookConverterPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            LogText.Text = $"Output folder unavailable: {ex.Message}";
+            LogText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             ConvertButton.IsEnabled = true;
             return;
         }
@@ -125,7 +125,7 @@ public sealed partial class EbookConverterPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage}";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage}");
         }));
         var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
         {
@@ -133,7 +133,7 @@ public sealed partial class EbookConverterPage : Page
         }));
 
         var startedAt = DateTime.UtcNow;
-        StatusText.Text = "Converting...";
+        StatusText.Text = AppLocalizer.Get("Converting...");
         using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
         var result = await _runner.RunAsync(
             "ebookconvert", args, progress, log, cts.Token,
@@ -146,12 +146,12 @@ public sealed partial class EbookConverterPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "ebookconvert sidecar not built. Run pwsh tools/ebookconvert/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("ebookconvert sidecar not built. Run pwsh tools/ebookconvert/build.ps1.");
         else if (result.ErrorCode == "missing_calibre")
-            StatusText.Text = "Calibre not found. Install from calibre-ebook.com and try again.";
+            StatusText.Text = AppLocalizer.Get("Calibre not found. Install from calibre-ebook.com and try again.");
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {_files.Count} eBook(s) -> .{fmt}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {_files.Count} eBook(s) -> .{fmt}.");
             WorkProgress.Value = 100;
             foreach (var f in _files)
             {
@@ -172,7 +172,7 @@ public sealed partial class EbookConverterPage : Page
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
             foreach (var f in _files.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }

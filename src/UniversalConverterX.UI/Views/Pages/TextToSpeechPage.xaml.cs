@@ -31,8 +31,8 @@ public sealed partial class TextToSpeechPage : Page
 
     private async Task LoadVoicesAsync()
     {
-        StatusText.Text = "Loading voice catalog...";
-        VoiceCombo.PlaceholderText = "Loading...";
+        StatusText.Text = AppLocalizer.Get("Loading voice catalog...");
+        VoiceCombo.PlaceholderText = AppLocalizer.Get("Loading...");
         VoiceCombo.IsEnabled = false;
         _allVoices.Clear();
 
@@ -61,22 +61,22 @@ public sealed partial class TextToSpeechPage : Page
 
             if (!result.Success)
             {
-                StatusText.Text = $"Could not load voices: {result.ErrorMessage ?? result.ErrorCode ?? "unknown"}";
-                VoiceCombo.PlaceholderText = "Failed to load";
+                StatusText.Text = AppLocalizer.Format($"Could not load voices: {result.ErrorMessage ?? result.ErrorCode ?? AppLocalizer.Get("unknown")}");
+                VoiceCombo.PlaceholderText = AppLocalizer.Get("Failed to load");
                 return;
             }
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Voice catalog timed out — check network and try Refresh Voices.";
-            VoiceCombo.PlaceholderText = "Timed out";
+            StatusText.Text = AppLocalizer.Get("Voice catalog timed out — check network and try Refresh Voices.");
+            VoiceCombo.PlaceholderText = AppLocalizer.Get("Timed out");
             return;
         }
 
         _allVoices.AddRange(harvested.OrderBy(v => v.Locale).ThenBy(v => v.ShortName));
         ApplyLocaleFilter();
         VoiceCombo.IsEnabled = true;
-        StatusText.Text = $"Loaded {_allVoices.Count} voice(s).";
+        StatusText.Text = AppLocalizer.Format($"Loaded {_allVoices.Count} voice(s).");
     }
 
     private void ApplyLocaleFilter()
@@ -98,12 +98,12 @@ public sealed partial class TextToSpeechPage : Page
         if (filtered.Count > 0)
         {
             VoiceCombo.SelectedIndex = 0;
-            VoiceMetaText.Text = $"{filtered.Count} voice(s) for the selected locale.";
+            VoiceMetaText.Text = AppLocalizer.Format($"{filtered.Count} voice(s) for the selected locale.");
         }
         else
         {
-            VoiceCombo.PlaceholderText = "No voices for this locale";
-            VoiceMetaText.Text = "Try a broader locale or 'all locales'.";
+            VoiceCombo.PlaceholderText = AppLocalizer.Get("No voices for this locale");
+            VoiceMetaText.Text = AppLocalizer.Get("Try a broader locale or 'all locales'.");
         }
     }
 
@@ -124,7 +124,7 @@ public sealed partial class TextToSpeechPage : Page
     private void VoiceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (VoiceCombo.SelectedItem is ComboBoxItem item && item.Tag is VoiceEntry v)
-            VoiceMetaText.Text = $"{v.Locale} · {v.Gender} · {v.ShortName}";
+            VoiceMetaText.Text = AppLocalizer.Format($"{v.Locale} · {v.Gender} · {v.ShortName}");
         UpdateGenerateEnabled();
     }
 
@@ -139,7 +139,7 @@ public sealed partial class TextToSpeechPage : Page
     private void ScriptBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (CharCountLabel is null) return;
-        CharCountLabel.Text = $"{ScriptBox.Text.Length:N0} characters";
+        CharCountLabel.Text = AppLocalizer.Format($"{ScriptBox.Text.Length:N0} characters");
         UpdateGenerateEnabled();
     }
 
@@ -157,7 +157,7 @@ public sealed partial class TextToSpeechPage : Page
         if (_outputPath is not null && Path.GetExtension(_outputPath) != SelectedFormatExt())
         {
             _outputPath = null;
-            OutputPathText.Text = "Output: <pick a save location>";
+            OutputPathText.Text = AppLocalizer.Get("Output: <pick a save location>");
         }
         UpdateGenerateEnabled();
     }
@@ -173,13 +173,13 @@ public sealed partial class TextToSpeechPage : Page
             <= 25  => "slightly fast",
             _      => "fast",
         };
-        RateLabel.Text = $"{(v >= 0 ? "+" : "")}{v}% ({mood})";
+        RateLabel.Text = AppLocalizer.Format($"{(v >= 0 ? "+" : "")}{v}% ({mood})");
     }
 
     private void UpdatePitchLabel()
     {
         var v = (int)PitchSlider.Value;
-        PitchLabel.Text = $"{(v >= 0 ? "+" : "")}{v} Hz";
+        PitchLabel.Text = AppLocalizer.Format($"{(v >= 0 ? "+" : "")}{v} Hz");
     }
 
     // ── Output path picker ───────────────────────────────────────────────────
@@ -201,7 +201,7 @@ public sealed partial class TextToSpeechPage : Page
         if (file is null) return;
 
         _outputPath = file.Path;
-        OutputPathText.Text = $"Output: {_outputPath}";
+        OutputPathText.Text = AppLocalizer.Format($"Output: {_outputPath}");
         UpdateGenerateEnabled();
     }
 
@@ -221,13 +221,13 @@ public sealed partial class TextToSpeechPage : Page
         var text = ScriptBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(text))
         {
-            StatusText.Text = "Script is empty.";
+            StatusText.Text = AppLocalizer.Get("Script is empty.");
             return;
         }
 
         if (VoiceCombo.SelectedItem is not ComboBoxItem { Tag: VoiceEntry voice })
         {
-            StatusText.Text = "Pick a voice first.";
+            StatusText.Text = AppLocalizer.Get("Pick a voice first.");
             return;
         }
 
@@ -249,13 +249,13 @@ public sealed partial class TextToSpeechPage : Page
                 try { Directory.CreateDirectory(dir); }
                 catch (Exception ex)
                 {
-                    StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                    StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                     return;
                 }
             }
             output = EnsureUniquePath(Path.Combine(dir, $"voiceover_{DateTime.Now:yyyyMMdd_HHmmss}{ext}"));
             _outputPath = output;
-            OutputPathText.Text = $"Output: {_outputPath}";
+            OutputPathText.Text = AppLocalizer.Format($"Output: {_outputPath}");
         }
 
         var rate = (int)RateSlider.Value;
@@ -277,7 +277,7 @@ public sealed partial class TextToSpeechPage : Page
         OpenOutputButton.IsEnabled = false;
         ProgressBar.Visibility = Visibility.Visible;
         ProgressBar.Value = 0;
-        StatusText.Text = $"Synthesising '{voice.ShortName}'...";
+        StatusText.Text = AppLocalizer.Format($"Synthesising '{voice.ShortName}'...");
 
         SidecarResult result;
         try
@@ -286,7 +286,7 @@ public sealed partial class TextToSpeechPage : Page
             {
                 ProgressBar.Value = p.Percent;
                 if (!string.IsNullOrEmpty(p.Stage))
-                    StatusText.Text = $"{p.Percent:F0}% — {p.Stage}";
+                    StatusText.Text = AppLocalizer.Format($"{p.Percent:F0}% — {p.Stage}");
             }));
             var log = new Progress<SidecarLog>(_ => { });
             result = await _runner.RunAsync(
@@ -311,11 +311,12 @@ public sealed partial class TextToSpeechPage : Page
             _lastFinishedPath = result.OutputPath ?? output;
             OpenOutputButton.IsEnabled = true;
             var size = result.SizeBytes ?? (File.Exists(_lastFinishedPath) ? new FileInfo(_lastFinishedPath).Length : 0);
-            StatusText.Text = $"Done — {Path.GetFileName(_lastFinishedPath)} ({FormatSize(size)})";
+            StatusText.Text = AppLocalizer.Format($"Done — {Path.GetFileName(_lastFinishedPath)} ({FormatSize(size)})");
         }
         else
         {
-            StatusText.Text = result.ErrorMessage ?? $"Failed (code {result.ErrorCode}).";
+            StatusText.Text = result.ErrorMessage
+                ?? AppLocalizer.Format($"Failed (code {result.ErrorCode}).");
         }
     }
 
@@ -325,7 +326,7 @@ public sealed partial class TextToSpeechPage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 

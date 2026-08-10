@@ -149,10 +149,10 @@ public sealed partial class PresetsPage : Page
         var dirs = UiPresetLoader.ResolvePresetDirs();
         // GetFileName returns empty for trailing-slash paths — fall back to the
         // last directory segment so the status line never shows ", , ,".
-        StatusText.Text = $"Loaded {_all.Count} preset(s) from "
-                        + string.Join(", ", dirs.Select(d =>
-                              Path.GetFileName(d.TrimEnd(Path.DirectorySeparatorChar,
-                                                        Path.AltDirectorySeparatorChar))));
+        var directoryNames = string.Join(", ", dirs.Select(d =>
+            Path.GetFileName(d.TrimEnd(Path.DirectorySeparatorChar,
+                                       Path.AltDirectorySeparatorChar))));
+        StatusText.Text = AppLocalizer.Format($"Loaded {_all.Count} preset(s) from {directoryNames}");
     }
 
     private async Task RefreshHealthAsync()
@@ -166,7 +166,7 @@ public sealed partial class PresetsPage : Page
             if (!_healthByEngine.TryGetValue(card.Preset.Engine, out var report))
             {
                 card.CanRun = false;
-                card.StatusText = "Health unavailable";
+                card.StatusText = AppLocalizer.Get("Health unavailable");
                 card.HealthDetail = "Dependency health could not be evaluated.";
                 continue;
             }
@@ -221,8 +221,8 @@ public sealed partial class PresetsPage : Page
 
         if (visibleReports.Count == 0)
         {
-            HealthPanelTitle.Text = "Preset health";
-            HealthPanelSummary.Text = "No visible preset engines to check.";
+            HealthPanelTitle.Text = AppLocalizer.Get("Preset health");
+            HealthPanelSummary.Text = AppLocalizer.Get("No visible preset engines to check.");
             HealthPanelDetails.Text = "";
             return;
         }
@@ -232,14 +232,14 @@ public sealed partial class PresetsPage : Page
             .Where(r => r.CanRun && r.Requirements.Any(req => req.Status == "Warning"))
             .ToList();
         HealthPanelTitle.Text = blocked.Count == 0
-            ? "Preset health: ready"
-            : $"Preset health: {blocked.Count} blocked engine(s)";
-        HealthPanelSummary.Text = $"{visibleReports.Count} engine(s) visible - {blocked.Count} blocked - {warnings.Count} warning(s)";
+            ? AppLocalizer.Get("Preset health: ready")
+            : AppLocalizer.Format($"Preset health: {blocked.Count} blocked engine(s)");
+        HealthPanelSummary.Text = AppLocalizer.Format($"{visibleReports.Count} engine(s) visible - {blocked.Count} blocked - {warnings.Count} warning(s)");
         HealthPanelDetails.Text = blocked.Count > 0
-            ? string.Join("  |  ", blocked.Take(4).Select(r => $"{r.Engine}: {r.Detail}"))
+            ? string.Join(AppLocalizer.Get("  |  "), blocked.Take(4).Select(r => AppLocalizer.Format($"{r.Engine}: {r.Detail}")))
             : warnings.Count > 0
-                ? string.Join("  |  ", warnings.Take(4).Select(r => $"{r.Engine}: {r.Detail}"))
-                : "All visible preset engines have their sidecar binary and required external tools available.";
+                ? string.Join(AppLocalizer.Get("  |  "), warnings.Take(4).Select(r => AppLocalizer.Format($"{r.Engine}: {r.Detail}")))
+                : AppLocalizer.Get("All visible preset engines have their sidecar binary and required external tools available.");
     }
 
     private async void Reload_Click(object sender, RoutedEventArgs e) => await ReloadAsync();
@@ -316,7 +316,7 @@ public sealed partial class PresetsPage : Page
         UpdateHealthPanel();
         if (!health.CanRun)
         {
-            StatusText.Text = $"{preset.Name} blocked: {health.Detail}";
+            StatusText.Text = AppLocalizer.Format($"{preset.Name} blocked: {health.Detail}");
             return;
         }
 
@@ -324,7 +324,7 @@ public sealed partial class PresetsPage : Page
         // first invocation is still in flight used to spawn parallel sidecars.
         if (!_running.Add(preset.Name))
         {
-            card.StatusText = "Already running...";
+            card.StatusText = AppLocalizer.Get("Already running...");
             return;
         }
 
@@ -357,15 +357,15 @@ public sealed partial class PresetsPage : Page
                 outDir = folder.Path;
             }
 
-            card.StatusText = "Running...";
+            card.StatusText = AppLocalizer.Get("Running...");
             var startedAt = DateTime.UtcNow;
             using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
             var result = await _executor.RunAsync(preset, inputs, outDir, cancellationToken: cts.Token);
-            card.StatusText = result.Success ? "Done" : $"Failed ({result.ErrorCode})";
+            card.StatusText = result.Success ? AppLocalizer.Get("Done") : AppLocalizer.Format($"Failed ({result.ErrorCode})");
 
             StatusText.Text = result.Success
-                ? $"{preset.Name} -- {inputs.Count} input(s), exit {result.ExitCode}."
-                : $"{preset.Name} -- {result.ErrorCode}: {result.ErrorMessage ?? ""}";
+                ? AppLocalizer.Format($"{preset.Name} -- {inputs.Count} input(s), exit {result.ExitCode}.")
+                : AppLocalizer.Format($"{preset.Name} -- {result.ErrorCode}: {result.ErrorMessage ?? "Unknown error"}");
 
             // Always log the attempt — distinguishing success from failure in
             // the History dashboard is exactly what the user needs to debug a
@@ -396,7 +396,7 @@ public sealed partial class PresetsPage : Page
         catch (Exception ex)
         {
             Debug.WriteLine($"PresetRun: {ex}");
-            card.StatusText = $"Failed ({ex.GetType().Name})";
+            card.StatusText = AppLocalizer.Format($"Failed ({ex.GetType().Name})");
         }
         finally
         {

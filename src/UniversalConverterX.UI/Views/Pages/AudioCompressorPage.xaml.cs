@@ -69,7 +69,7 @@ public sealed partial class AudioCompressorPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into compression queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into compression queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -171,7 +171,7 @@ public sealed partial class AudioCompressorPage : Page
     {
         if (!Directory.Exists(path))
         {
-            StatusText.Text = $"Folder not found: {path}";
+            StatusText.Text = AppLocalizer.Format($"Folder not found: {path}");
             return;
         }
 
@@ -184,12 +184,12 @@ public sealed partial class AudioCompressorPage : Page
         }
         catch (UnauthorizedAccessException)
         {
-            StatusText.Text = "Permission denied for that folder.";
+            StatusText.Text = AppLocalizer.Get("Permission denied for that folder.");
             return;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
             return;
         }
 
@@ -204,9 +204,9 @@ public sealed partial class AudioCompressorPage : Page
 
         StatusText.Text = added switch
         {
-            0 => "No supported audio files were added from that folder.",
-            _ when truncated => $"Added {added} files from {path} (capped at {FolderAddCap}).",
-            _ => $"Added {added} files from {path}.",
+            0 => AppLocalizer.Get("No supported audio files were added from that folder."),
+            _ when truncated => AppLocalizer.Format($"Added {added} files from {path} (capped at {FolderAddCap})."),
+            _ => AppLocalizer.Format($"Added {added} files from {path}."),
         };
         UpdateUi();
     }
@@ -304,7 +304,7 @@ public sealed partial class AudioCompressorPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -332,8 +332,8 @@ public sealed partial class AudioCompressorPage : Page
 
                 item.StatusText = "Compressing";
                 item.Progress = 0;
-                ProgressTitle.Text = $"Compressing {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Compressing {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {jobs.Count}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -341,9 +341,9 @@ public sealed partial class AudioCompressorPage : Page
                     item.StatusText = $"{p.Percent:F0}%";
                     var overall = ((completed + failed) * 100.0 + p.Percent) / jobs.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
-                    ProgressStage.Text = $"{p.Percent:F1}% - {p.Stage}";
+                    ProgressStage.Text = AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -381,11 +381,13 @@ public sealed partial class AudioCompressorPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         UpdateUi();
     }
 
@@ -434,7 +436,7 @@ public sealed partial class AudioCompressorPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -446,10 +448,10 @@ public sealed partial class AudioCompressorPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -469,8 +471,8 @@ public sealed partial class AudioCompressorPage : Page
         var encode = SelectedEncodeTag();
         var encodeNote = string.IsNullOrEmpty(encode) ? "preserve codec" : $"encode to {encode.ToUpperInvariant()}";
         StatusText.Text = _files.Count == 0
-            ? "Add audio (or video) files to start a compression queue."
-            : $"Ready to compress {_files.Count} file(s) using {SelectedPresetLabel()} ({encodeNote}). Output: {output}.";
+            ? AppLocalizer.Get("Add audio (or video) files to start a compression queue.")
+            : AppLocalizer.Format($"Ready to compress {_files.Count} file(s) using {SelectedPresetLabel()} ({encodeNote}). Output: {output}.");
     }
 
     private void UpdatePresetSummary()
@@ -480,7 +482,7 @@ public sealed partial class AudioCompressorPage : Page
         {
             PresetSummary.Text = string.Format(
                 CultureInfo.InvariantCulture,
-                "Threshold {0:F1} dB · Ratio {1:F1}:1 · Attack {2:F1} ms · Release {3:F1} ms · Makeup {4:F1} dB",
+                AppLocalizer.Get("Threshold {0:F1} dB · Ratio {1:F1}:1 · Attack {2:F1} ms · Release {3:F1} ms · Makeup {4:F1} dB"),
                 ThresholdSlider?.Value ?? -20,
                 RatioSlider?.Value ?? 3,
                 AttackSlider?.Value ?? 10,
@@ -493,11 +495,11 @@ public sealed partial class AudioCompressorPage : Page
             // know what they're picking before they hit Compress.
             PresetSummary.Text = SelectedPresetTag() switch
             {
-                "light"     => "Threshold -18 dB · Ratio 2:1 · Attack 20 ms · Release 250 ms · Makeup +2 dB",
-                "medium"    => "Threshold -20 dB · Ratio 3:1 · Attack 10 ms · Release 200 ms · Makeup +4 dB",
-                "heavy"     => "Threshold -24 dB · Ratio 6:1 · Attack 5 ms · Release 150 ms · Makeup +6 dB",
-                "podcast"   => "Threshold -22 dB · Ratio 4:1 · Attack 8 ms · Release 180 ms · Makeup +5 dB",
-                "broadcast" => "Threshold -18 dB · Ratio 8:1 · Attack 3 ms · Release 120 ms · Makeup +4 dB",
+                "light"     => AppLocalizer.Get("Threshold -18 dB · Ratio 2:1 · Attack 20 ms · Release 250 ms · Makeup +2 dB"),
+                "medium"    => AppLocalizer.Get("Threshold -20 dB · Ratio 3:1 · Attack 10 ms · Release 200 ms · Makeup +4 dB"),
+                "heavy"     => AppLocalizer.Get("Threshold -24 dB · Ratio 6:1 · Attack 5 ms · Release 150 ms · Makeup +6 dB"),
+                "podcast"   => AppLocalizer.Get("Threshold -22 dB · Ratio 4:1 · Attack 8 ms · Release 180 ms · Makeup +5 dB"),
+                "broadcast" => AppLocalizer.Get("Threshold -18 dB · Ratio 8:1 · Attack 3 ms · Release 120 ms · Makeup +4 dB"),
                 _ => "",
             };
         }

@@ -28,7 +28,7 @@ public sealed partial class WatchFoldersPage : Page
         RecentEmptyState.Visibility = _service.Recent.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         EventScroll.Visibility = _service.Recent.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         var status = _service.Status;
-        WatchStatusText.Text = $"{status.ActiveProfiles} active · {status.InFlightFiles} settling/running · {status.RememberedFiles} recent files remembered";
+        WatchStatusText.Text = AppLocalizer.Format($"{status.ActiveProfiles} active · {status.InFlightFiles} settling/running · {status.RememberedFiles} recent files remembered");
     }
 
     private void ProfileToggled(object sender, RoutedEventArgs e)
@@ -70,9 +70,9 @@ public sealed partial class WatchFoldersPage : Page
 
     private async Task<WatchProfile?> ShowProfileDialogAsync(WatchProfile? source)
     {
-        var nameBox = new TextBox { Header = "Display name", Text = source?.Name ?? "Watch" };
-        var pathBox = new TextBox { Header = "Folder to monitor", Text = source?.Path ?? "", IsReadOnly = true };
-        var browseBtn = new Button { Content = "Browse", Style = (Style)Application.Current.Resources["SecondaryButtonStyle"] };
+        var nameBox = new TextBox { Header = AppLocalizer.Get("Display name"), Text = source?.Name ?? AppLocalizer.Get("Watch") };
+        var pathBox = new TextBox { Header = AppLocalizer.Get("Folder to monitor"), Text = source?.Path ?? "", IsReadOnly = true };
+        var browseBtn = new Button { Content = AppLocalizer.Get("Browse"), Style = (Style)Application.Current.Resources["SecondaryButtonStyle"] };
         browseBtn.Click += async (_, __) =>
         {
             var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.VideosLibrary };
@@ -93,16 +93,16 @@ public sealed partial class WatchFoldersPage : Page
 
         var filterBox = new TextBox
         {
-            Header = "File filters",
-            PlaceholderText = "*.mp4;*.mkv;*.mov",
+            Header = AppLocalizer.Get("File filters"),
+            PlaceholderText = AppLocalizer.Get("*.mp4;*.mkv;*.mov"),
             Text = source?.Filter ?? "*.mp4;*.mkv;*.mov;*.avi;*.webm;*.m4v"
         };
 
-        var actionCombo = new ComboBox { Header = "Action", SelectedIndex = source?.Action == WatchAction.Convert ? 1 : 0 };
-        actionCombo.Items.Add(new ComboBoxItem { Content = "Compress (videocrush)", Tag = "compress" });
-        actionCombo.Items.Add(new ComboBoxItem { Content = "Convert / rewrap (clipforge)", Tag = "convert" });
+        var actionCombo = new ComboBox { Header = AppLocalizer.Get("Action"), SelectedIndex = source?.Action == WatchAction.Convert ? 1 : 0 };
+        actionCombo.Items.Add(new ComboBoxItem { Content = AppLocalizer.Get("Compress (videocrush)"), Tag = "compress" });
+        actionCombo.Items.Add(new ComboBoxItem { Content = AppLocalizer.Get("Convert / rewrap (clipforge)"), Tag = "convert" });
 
-        var presetCombo = new ComboBox { Header = "Compress preset" };
+        var presetCombo = new ComboBox { Header = AppLocalizer.Get("Compress preset") };
         var compressPresets = new[]
         {
             ("web-1080p",  "Web 1080p"),
@@ -119,16 +119,16 @@ public sealed partial class WatchFoldersPage : Page
 
         var formatBox = new TextBox
         {
-            Header = "Convert target extension",
-            PlaceholderText = "mp4",
+            Header = AppLocalizer.Get("Convert target extension"),
+            PlaceholderText = AppLocalizer.Get("mp4"),
             Text = source?.TargetFormat ?? "mp4"
         };
 
         var outputBox = new TextBox
         {
-            Header = "Output folder (optional)",
+            Header = AppLocalizer.Get("Output folder (optional)"),
             Text = source?.OutputDir ?? "",
-            PlaceholderText = "Same as source folder"
+            PlaceholderText = AppLocalizer.Get("Same as source folder")
         };
 
         void OnActionChanged(object? _, SelectionChangedEventArgs __)
@@ -145,7 +145,7 @@ public sealed partial class WatchFoldersPage : Page
             Style = (Style)Application.Current.Resources["InfoBannerStyle"],
             Child = new TextBlock
             {
-                Text = "UCX waits for files to settle before processing and cancels active work when a watch is disabled.",
+                Text = AppLocalizer.Get("UCX waits for files to settle before processing and cancels active work when a watch is disabled."),
                 TextWrapping = TextWrapping.Wrap,
                 Style = (Style)Application.Current.Resources["MutedTextStyle"],
             }
@@ -163,9 +163,11 @@ public sealed partial class WatchFoldersPage : Page
 
         var dialog = new ContentDialog
         {
-            Title = source is null ? "New watch profile" : "Edit watch profile",
-            PrimaryButtonText = "Save",
-            CloseButtonText = "Cancel",
+            Title = source is null
+                ? AppLocalizer.Get("New watch profile")
+                : AppLocalizer.Get("Edit watch profile"),
+            PrimaryButtonText = AppLocalizer.Get("Save"),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             Content = stack,
             XamlRoot = this.XamlRoot,

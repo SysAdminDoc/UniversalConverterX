@@ -136,7 +136,7 @@ public sealed partial class TrackManagerPage : Page
     {
         if (_currentPath is null) return;
         _tracks.Clear();
-        StatusText.Text = "Reading streams...";
+        StatusText.Text = AppLocalizer.Get("Reading streams...");
         UpdateUi();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
@@ -163,15 +163,15 @@ public sealed partial class TrackManagerPage : Page
 
         if (result.ErrorCode == "sidecar_not_found")
         {
-            StatusText.Text = "clipforge sidecar not built. Run pwsh tools/clipforge/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("clipforge sidecar not built. Run pwsh tools/clipforge/build.ps1.");
         }
         else if (result.Success)
         {
-            StatusText.Text = $"Loaded {_tracks.Count} stream(s). Remove streams or set audio delays, then Apply.";
+            StatusText.Text = AppLocalizer.Format($"Loaded {_tracks.Count} stream(s). Remove streams or set audio delays, then Apply.");
         }
         else
         {
-            StatusText.Text = $"Failed to read tracks: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed to read tracks: {result.ErrorMessage ?? result.ErrorCode}");
         }
         UpdateUi();
     }
@@ -197,12 +197,12 @@ public sealed partial class TrackManagerPage : Page
             .ToDictionary(t => t.StreamIndex, t => (int)Math.Round(t.DelayMilliseconds));
         if (drop.Count == 0 && delays.Count == 0)
         {
-            StatusText.Text = "No changes selected. Remove a stream or set an audio delay, then Apply.";
+            StatusText.Text = AppLocalizer.Get("No changes selected. Remove a stream or set an audio delay, then Apply.");
             return;
         }
         if (drop.Count >= _tracks.Count)
         {
-            StatusText.Text = "Refusing to strip every stream -- leave at least one.";
+            StatusText.Text = AppLocalizer.Get("Refusing to strip every stream -- leave at least one.");
             return;
         }
 
@@ -219,7 +219,7 @@ public sealed partial class TrackManagerPage : Page
         var output = await picker.PickSaveFileAsync();
         if (output is null) return;
 
-        StatusText.Text = $"Applying {drop.Count} removal(s) and {delays.Count} audio delay(s) -- copy mux, no re-encode.";
+        StatusText.Text = AppLocalizer.Format($"Applying {drop.Count} removal(s) and {delays.Count} audio delay(s) -- copy mux, no re-encode.");
         WorkProgress.Value = 0;
         ApplyButton.IsEnabled = false;
 
@@ -240,8 +240,8 @@ public sealed partial class TrackManagerPage : Page
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(20));
         var result = await _runner.RunAsync("clipforge", args, progress, null, cts.Token);
         StatusText.Text = result.Success
-            ? $"Saved -> {Path.GetFileName(output.Path)}"
-            : $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            ? AppLocalizer.Format($"Saved -> {Path.GetFileName(output.Path)}")
+            : AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
         ApplyButton.IsEnabled = true;
     }
 
@@ -281,7 +281,7 @@ public sealed partial class TrackManagerPage : Page
         var output = await picker.PickSaveFileAsync();
         if (output is null) return;
 
-        StatusText.Text = $"Exporting subtitle stream #{streamIndex} -> {output.Name}";
+        StatusText.Text = AppLocalizer.Format($"Exporting subtitle stream #{streamIndex} -> {output.Name}");
         WorkProgress.Value = 0;
         btn.IsEnabled = false;
 
@@ -299,8 +299,8 @@ public sealed partial class TrackManagerPage : Page
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
         var result = await _runner.RunAsync("clipforge", args, progress, null, cts.Token);
         StatusText.Text = result.Success
-            ? $"Saved -> {Path.GetFileName(output.Path)}"
-            : $"Export failed: {result.ErrorMessage ?? result.ErrorCode}";
+            ? AppLocalizer.Format($"Saved -> {Path.GetFileName(output.Path)}")
+            : AppLocalizer.Format($"Export failed: {result.ErrorMessage ?? result.ErrorCode}");
         btn.IsEnabled = true;
     }
 
@@ -322,22 +322,22 @@ public sealed partial class TrackManagerPage : Page
         if (extra is null) return;
 
         // Quick metadata prompt: ask for ISO-639 lang (free-form; default empty).
-        var langBox = new TextBox { Header = "Language code (ISO-639, optional)",
-                                    PlaceholderText = "eng / jpn / fra / ..." };
-        var titleBox = new TextBox { Header = "Track title (optional)" };
+        var langBox = new TextBox { Header = AppLocalizer.Get("Language code (ISO-639, optional)"),
+                                    PlaceholderText = AppLocalizer.Get("eng / jpn / fra / ...") };
+        var titleBox = new TextBox { Header = AppLocalizer.Get("Track title (optional)") };
         var stack = new StackPanel { Spacing = 12, Width = 380 };
         stack.Children.Add(new TextBlock
         {
-            Text = $"Attach: {extra.Name}",
+            Text = AppLocalizer.Format($"Attach: {extra.Name}"),
             Style = (Style)Application.Current.Resources["LabelTextStyle"],
         });
         stack.Children.Add(langBox);
         stack.Children.Add(titleBox);
         var dlg = new ContentDialog
         {
-            Title = "Add track",
-            PrimaryButtonText = "Save as...",
-            CloseButtonText = "Cancel",
+            Title = AppLocalizer.Get("Add track"),
+            PrimaryButtonText = AppLocalizer.Get("Save as..."),
+            CloseButtonText = AppLocalizer.Get("Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             Content = stack,
             XamlRoot = this.XamlRoot,
@@ -368,7 +368,7 @@ public sealed partial class TrackManagerPage : Page
         if (!string.IsNullOrWhiteSpace(titleBox.Text))
             args.AddRange(["--title", titleBox.Text.Trim()]);
 
-        StatusText.Text = $"Attaching {Path.GetFileName(extra.Path)} -- copy mux, no re-encode.";
+        StatusText.Text = AppLocalizer.Format($"Attaching {Path.GetFileName(extra.Path)} -- copy mux, no re-encode.");
         WorkProgress.Value = 0;
         AddTrackButton.IsEnabled = false;
 
@@ -379,8 +379,8 @@ public sealed partial class TrackManagerPage : Page
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(20));
         var result = await _runner.RunAsync("clipforge", args, progress, null, cts.Token);
         StatusText.Text = result.Success
-            ? $"Saved -> {Path.GetFileName(output.Path)}. Open the new file to see the new track."
-            : $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            ? AppLocalizer.Format($"Saved -> {Path.GetFileName(output.Path)}. Open the new file to see the new track.")
+            : AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
         AddTrackButton.IsEnabled = true;
     }
 }

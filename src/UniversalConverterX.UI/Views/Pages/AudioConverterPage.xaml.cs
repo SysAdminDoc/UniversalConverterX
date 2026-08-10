@@ -76,7 +76,7 @@ public sealed partial class AudioConverterPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Add to audio conversion queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Add to audio conversion queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -159,7 +159,7 @@ public sealed partial class AudioConverterPage : Page
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
         }
 
         if (updateUi)
@@ -289,7 +289,7 @@ public sealed partial class AudioConverterPage : Page
             <= 6 => "balanced",
             _ => "smallest files",
         };
-        VbrQualityValue.Text = $"{quality} — {description}";
+        VbrQualityValue.Text = AppLocalizer.Format($"{quality} — {description}");
         UpdateStatusText();
     }
 
@@ -306,7 +306,7 @@ public sealed partial class AudioConverterPage : Page
         }
         catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
         {
-            StatusText.Text = $"Invalid conversion setup: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Invalid conversion setup: {ex.Message}");
             return;
         }
 
@@ -327,7 +327,7 @@ public sealed partial class AudioConverterPage : Page
                 var startedAt = DateTime.UtcNow;
                 item.Progress = 0;
                 item.StatusText = "Converting";
-                StatusText.Text = $"Converting {item.FileName} ({index + 1}/{jobs.Count})...";
+                StatusText.Text = AppLocalizer.Format($"Converting {item.FileName} ({index + 1}/{jobs.Count})...");
 
                 var progress = new Progress<SidecarProgress>(value => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -413,8 +413,8 @@ public sealed partial class AudioConverterPage : Page
         }
 
         StatusText.Text = _files.Any(item => item.StatusText == "Cancelled")
-            ? $"Cancelled — {completed} converted, {failed} failed or cancelled."
-            : $"Done — {completed} converted, {failed} failed.";
+            ? AppLocalizer.Format($"Cancelled — {completed} converted, {failed} failed or cancelled.")
+            : AppLocalizer.Format($"Done — {completed} converted, {failed} failed.");
         UpdateUi(updateStatus: false);
     }
 
@@ -424,7 +424,7 @@ public sealed partial class AudioConverterPage : Page
             return;
         _cts.Cancel();
         CancelButton.IsEnabled = false;
-        StatusText.Text = "Cancelling...";
+        StatusText.Text = AppLocalizer.Get("Cancelling...");
     }
 
     private void OpenOutput_Click(object sender, RoutedEventArgs e)
@@ -612,8 +612,8 @@ public sealed partial class AudioConverterPage : Page
         if (StatusText is null)
             return;
         StatusText.Text = _files.Count == 0
-            ? "Add audio files to start a conversion queue."
-            : $"Ready to convert {_files.Count} file(s) · {BuildPlanSummary()} · {_outputDirectory}";
+            ? AppLocalizer.Get("Add audio files to start a conversion queue.")
+            : AppLocalizer.Format($"Ready to convert {_files.Count} file(s) · {BuildPlanSummary()} · {_outputDirectory}");
     }
 
     private string BuildPlanSummary()

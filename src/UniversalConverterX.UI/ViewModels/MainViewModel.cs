@@ -151,7 +151,7 @@ public partial class MainViewModel : ObservableObject
                     break;
 
                 CurrentFileName = job.InputFileName;
-                StatusMessage = $"Converting {CompletedCount + 1} of {jobs.Count}";
+                StatusMessage = AppLocalizer.Format($"Converting {CompletedCount + 1} of {jobs.Count}");
 
                 var progress = new Progress<ConversionProgress>(p =>
                 {
@@ -168,14 +168,14 @@ public partial class MainViewModel : ObservableObject
             }
 
             StatusMessage = FailedCount == 0
-                ? $"Completed! {CompletedCount} files converted."
-                : $"Completed with {FailedCount} errors. {CompletedCount} succeeded.";
+                ? AppLocalizer.Format($"Completed! {CompletedCount} files converted.")
+                : AppLocalizer.Format($"Completed with {FailedCount} errors. {CompletedCount} succeeded.");
             
             OverallProgress = 100;
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = $"Cancelled. {CompletedCount} files completed.";
+            StatusMessage = AppLocalizer.Format($"Cancelled. {CompletedCount} files completed.");
         }
         finally
         {

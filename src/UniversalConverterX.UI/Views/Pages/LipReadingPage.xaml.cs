@@ -41,7 +41,7 @@ public sealed partial class LipReadingPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into transcription queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into transcription queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -170,8 +170,8 @@ public sealed partial class LipReadingPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No supported video files found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported video files found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -309,8 +309,8 @@ public sealed partial class LipReadingPage : Page
 
                 item.StatusText = "Processing";
                 item.Progress = 0;
-                ProgressTitle.Text = $"Transcribing {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {jobs.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Transcribing {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {jobs.Count}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -318,9 +318,9 @@ public sealed partial class LipReadingPage : Page
                     item.StatusText = $"{p.Percent:F0}%";
                     var overall = ((completed + failed) * 100.0 + p.Percent) / jobs.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
-                    ProgressStage.Text = $"{p.Percent:F1}% - {p.Stage}";
+                    ProgressStage.Text = AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -359,11 +359,13 @@ public sealed partial class LipReadingPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
         UpdateUi();
     }
@@ -377,7 +379,7 @@ public sealed partial class LipReadingPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -397,10 +399,10 @@ public sealed partial class LipReadingPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -442,8 +444,8 @@ public sealed partial class LipReadingPage : Page
     {
         var output = _outputDirectory ?? "same folder as each source";
         StatusText.Text = _files.Count == 0
-            ? "Add video files to start a transcription queue."
-            : $"Ready to transcribe {_files.Count} file(s) using {SelectedBackendLabel()}. Output: {output}.";
+            ? AppLocalizer.Get("Add video files to start a transcription queue.")
+            : AppLocalizer.Format($"Ready to transcribe {_files.Count} file(s) using {SelectedBackendLabel()}. Output: {output}.");
     }
 
     private string SelectedBackendTag()

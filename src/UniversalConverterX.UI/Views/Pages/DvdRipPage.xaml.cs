@@ -47,7 +47,7 @@ public sealed partial class DvdRipPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Scan VIDEO_TS";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Scan VIDEO_TS");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -67,13 +67,13 @@ public sealed partial class DvdRipPage : Page
             return;
         if (_runner.Locate("dvdrip") is null)
         {
-            StatusText.Text = "The dvdrip engine was not found. Build it with tools/dvdrip/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("The dvdrip engine was not found. Build it with tools/dvdrip/build.ps1.");
             return;
         }
 
         _titles.Clear();
         _videoTsPath = path;
-        StatusText.Text = $"Scanning {path}…";
+        StatusText.Text = AppLocalizer.Format($"Scanning {path}…");
 
         var found = new List<DvdTitle>();
         string? errorMessage = null;
@@ -115,13 +115,14 @@ public sealed partial class DvdRipPage : Page
 
         if (!result.Success && _titles.Count == 0)
         {
-            StatusText.Text = errorMessage ?? "No ripable titles were found. Point at a VIDEO_TS folder.";
+            StatusText.Text = errorMessage
+                ?? AppLocalizer.Get("No ripable titles were found. Point at a VIDEO_TS folder.");
             return;
         }
 
         StatusText.Text = hasTitles
-            ? $"Found {_titles.Count(t => t.Readable)} ripable title(s). Select one, choose an output, then rip."
-            : "No readable titles — this disc may be CSS-protected, which is not supported.";
+            ? AppLocalizer.Format($"Found {_titles.Count(t => t.Readable)} ripable title(s). Select one, choose an output, then rip.")
+            : AppLocalizer.Get("No readable titles — this disc may be CSS-protected, which is not supported.");
     }
 
     // ── Selection + output ───────────────────────────────────────────────────
@@ -198,12 +199,12 @@ public sealed partial class DvdRipPage : Page
         CancelButton.IsEnabled = true;
         RipProgress.Visibility = Visibility.Visible;
         RipProgress.Value = 0;
-        StatusText.Text = $"Ripping Title {title.Index}…";
+        StatusText.Text = AppLocalizer.Format($"Ripping Title {title.Index}…");
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             RipProgress.Value = Math.Clamp(p.Percent, 0, 100);
-            StatusText.Text = $"Ripping Title {title.Index}… {p.Percent:F0}% — {p.Stage}";
+            StatusText.Text = AppLocalizer.Format($"Ripping Title {title.Index}… {p.Percent:F0}% — {p.Stage}");
         }));
 
         SidecarResult result;
@@ -224,10 +225,10 @@ public sealed partial class DvdRipPage : Page
         }
 
         StatusText.Text = result.Success
-            ? $"Saved Title {title.Index} to {output}."
+            ? AppLocalizer.Format($"Saved Title {title.Index} to {output}.")
             : result.ErrorCode == "cancelled"
-                ? "Rip cancelled."
-                : $"Rip failed: {result.ErrorMessage}";
+                ? AppLocalizer.Get("Rip cancelled.")
+                : AppLocalizer.Format($"Rip failed: {result.ErrorMessage}");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => _cts?.Cancel();

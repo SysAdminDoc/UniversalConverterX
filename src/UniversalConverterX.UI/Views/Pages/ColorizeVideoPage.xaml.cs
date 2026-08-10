@@ -38,7 +38,7 @@ public sealed partial class ColorizeVideoPage : Page
     {
         if (_runner.Locate("colorize") is null)
         {
-            ModelStatus.Text = "colorize engine not built (tools/colorize/build.ps1).";
+            ModelStatus.Text = AppLocalizer.Get("colorize engine not built (tools/colorize/build.ps1).");
             DownloadModelButton.IsEnabled = false;
             _viewModel.ModelReady = false;
             UpdateColorizeEnabled();
@@ -55,10 +55,12 @@ public sealed partial class ColorizeVideoPage : Page
             });
         _viewModel.ModelReady = ready;
         ModelStatus.Text = ready
-            ? "Model ready — colourisation runs offline on the CPU."
-            : "Model not downloaded. The colourisation weights (BSD-2-Clause) are ~123 MB.";
+            ? AppLocalizer.Get("Model ready — colourisation runs offline on the CPU.")
+            : AppLocalizer.Get("Model not downloaded. The colourisation weights (BSD-2-Clause) are ~123 MB.");
         DownloadModelButton.IsEnabled = !_viewModel.IsBusy;
-        DownloadModelButton.Content = ready ? "Re-verify model" : "Download model (123 MB)";
+        DownloadModelButton.Content = ready
+            ? AppLocalizer.Get("Re-verify model")
+            : AppLocalizer.Get("Download model (123 MB)");
         UpdateColorizeEnabled();
     }
 
@@ -71,12 +73,10 @@ public sealed partial class ColorizeVideoPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Download the colourisation model?",
-                Content = "This downloads the SHA-256 verified Colorful Image Colorization model "
-                          + "(BSD-2-Clause, ~123 MB) into the local model cache. It runs on the CPU — "
-                          + "no GPU required — and is never downloaded again during colourisation.",
-                PrimaryButtonText = "Accept & download",
-                CloseButtonText = "Cancel",
+                Title = AppLocalizer.Get("Download the colourisation model?"),
+                Content = AppLocalizer.Get("This downloads the SHA-256 verified Colorful Image Colorization model (BSD-2-Clause, ~123 MB) into the local model cache. It runs on the CPU — no GPU required — and is never downloaded again during colourisation."),
+                PrimaryButtonText = AppLocalizer.Get("Accept & download"),
+                CloseButtonText = AppLocalizer.Get("Cancel"),
                 DefaultButton = ContentDialogButton.Close,
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
@@ -85,18 +85,17 @@ public sealed partial class ColorizeVideoPage : Page
         _viewModel.IsBusy = true;
         DownloadModelButton.IsEnabled = false;
         ColorizeButton.IsEnabled = false;
-        ModelStatus.Text = "Downloading model…";
+        ModelStatus.Text = AppLocalizer.Get("Downloading model…");
         try
         {
             var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
-                ModelStatus.Text = $"Downloading model… {p.Percent:F0}% ({p.Stage})"));
+                ModelStatus.Text = AppLocalizer.Format($"Downloading model… {p.Percent:F0}% ({p.Stage})")));
             var result = await _runner.RunAsync(
                 "colorize", ["download-model", "--accept-license"],
                 progress, ct: CancellationToken.None,
                 silenceTimeout: TimeSpan.FromHours(1));
             if (!result.Success)
-                ModelStatus.Text = $"Download failed: {result.ErrorMessage ?? result.ErrorCode}. "
-                    + "Set UCX_COLORIZE_MODEL_URL to a mirror if the source is unavailable.";
+                ModelStatus.Text = AppLocalizer.Format($"Download failed: {result.ErrorMessage ?? result.ErrorCode}. Set UCX_COLORIZE_MODEL_URL to a mirror if the source is unavailable.");
         }
         finally
         {
@@ -120,7 +119,7 @@ public sealed partial class ColorizeVideoPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Colorize";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Colorize");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -188,12 +187,14 @@ public sealed partial class ColorizeVideoPage : Page
         CancelButton.IsEnabled = true;
         ColorizeProgress.Visibility = Visibility.Visible;
         ColorizeProgress.Value = 0;
-        StatusText.Text = _viewModel.IsVideo ? "Colourising video…" : "Colourising image…";
+        StatusText.Text = _viewModel.IsVideo
+            ? AppLocalizer.Get("Colourising video…")
+            : AppLocalizer.Get("Colourising image…");
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             ColorizeProgress.Value = Math.Clamp(p.Percent, 0, 100);
-            StatusText.Text = $"Colourising… {p.Percent:F0}% — {p.Stage}";
+            StatusText.Text = AppLocalizer.Format($"Colourising… {p.Percent:F0}% — {p.Stage}");
         }));
 
         SidecarResult result;
@@ -220,7 +221,7 @@ public sealed partial class ColorizeVideoPage : Page
 
         if (result.Success)
         {
-            StatusText.Text = $"Saved colourised {(_viewModel.IsVideo ? "video" : "image")} to {output}.";
+            StatusText.Text = AppLocalizer.Format($"Saved colourised {(_viewModel.IsVideo ? "video" : "image")} to {output}.");
             if (!_viewModel.IsVideo && File.Exists(output))
                 PreviewImage.Source = new BitmapImage(new Uri(output));
         }

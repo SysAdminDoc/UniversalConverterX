@@ -45,7 +45,7 @@ public sealed partial class AutoReframePage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into reframe queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into reframe queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -108,8 +108,8 @@ public sealed partial class AutoReframePage : Page
             if (AddFile(file, updateUi: false)) added++;
         }
         StatusText.Text = added == 0
-            ? "No supported videos found in that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No supported videos found in that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -189,7 +189,7 @@ public sealed partial class AutoReframePage : Page
             <= 30 => "compressed",
             _     => "very compressed",
         };
-        CrfLabel.Text = $"CRF {crf} ({hint})";
+        CrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
         var summary = BuildPlanSummary();
         foreach (var f in _files) f.PlanSummary = summary;
     }
@@ -232,7 +232,7 @@ public sealed partial class AutoReframePage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Reframing";
-                StatusText.Text = $"Reframing {item.FileName} → {aspect}... ({completed + failed + 1}/{jobs.Count})";
+                StatusText.Text = AppLocalizer.Format($"Reframing {item.FileName} → {aspect}... ({completed + failed + 1}/{jobs.Count})");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -271,8 +271,8 @@ public sealed partial class AutoReframePage : Page
             }
 
             StatusText.Text = _cts.IsCancellationRequested
-                ? $"Cancelled — {completed} reframed, {failed} failed."
-                : $"Done — {completed} reframed, {failed} failed.";
+                ? AppLocalizer.Format($"Cancelled — {completed} reframed, {failed} failed.")
+                : AppLocalizer.Format($"Done — {completed} reframed, {failed} failed.");
 
             if (_finished.Count > 0)
                 QueuePivot.SelectedIndex = 1;
@@ -291,7 +291,7 @@ public sealed partial class AutoReframePage : Page
         {
             _cts.Cancel();
             CancelButton.IsEnabled = false;
-            StatusText.Text = "Cancelling...";
+            StatusText.Text = AppLocalizer.Get("Cancelling...");
         }
     }
 
@@ -344,7 +344,7 @@ public sealed partial class AutoReframePage : Page
         ClearButton.IsEnabled  = hasFiles && _cts is null;
         CancelButton.IsEnabled = _cts is not null;
 
-        QueueSummaryText.Text = $"{_files.Count} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{_files.Count} queued / {_finished.Count} finished");
         CurrentSetupText.Text = BuildPlanSummary();
 
         if (updateStatus && _cts is null)
@@ -354,8 +354,8 @@ public sealed partial class AutoReframePage : Page
     private void UpdateStatusText()
     {
         StatusText.Text = _files.Count == 0
-            ? "Drop horizontal video to start a reframe queue."
-            : $"Ready to reframe {_files.Count} clip(s). {BuildPlanSummary()}";
+            ? AppLocalizer.Get("Drop horizontal video to start a reframe queue.")
+            : AppLocalizer.Format($"Ready to reframe {_files.Count} clip(s). {BuildPlanSummary()}");
     }
 
     private string BuildPlanSummary()

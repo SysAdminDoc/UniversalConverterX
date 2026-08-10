@@ -62,7 +62,7 @@ public sealed partial class ProgressWindow : Window
                 Status = ConversionItemStatus.Pending,
                 StatusIcon = "\uE768", // Clock
                 StatusColor = BrushResource("TextMutedBrush"),
-                StatusMessage = "Waiting",
+                StatusMessage = AppLocalizer.Get("Waiting"),
                 ShowProgress = Visibility.Collapsed,
                 ShowStatus = Visibility.Visible
             });
@@ -78,8 +78,8 @@ public sealed partial class ProgressWindow : Window
         _isCompleted = false;
         _cancelledCount = 0;
 
-        TitleText.Text = $"Converting to {_targetFormat.ToUpperInvariant()}";
-        StatusText.Text = "Starting queue...";
+        TitleText.Text = AppLocalizer.Format($"Converting to {_targetFormat.ToUpperInvariant()}");
+        StatusText.Text = AppLocalizer.Get("Starting queue...");
 
         try
         {
@@ -105,11 +105,11 @@ public sealed partial class ProgressWindow : Window
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Conversion cancelled";
+            StatusText.Text = AppLocalizer.Get("Conversion cancelled");
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Error: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Error: {ex.Message}");
         }
         finally
         {
@@ -122,7 +122,7 @@ public sealed partial class ProgressWindow : Window
         item.Status = ConversionItemStatus.Converting;
         item.StatusIcon = "\uE896"; // Sync
         item.StatusColor = BrushResource("AccentBlueBrush");
-        item.StatusMessage = "Converting";
+        item.StatusMessage = AppLocalizer.Get("Converting");
         item.ShowProgress = Visibility.Visible;
         item.IsIndeterminate = true;
 
@@ -171,7 +171,7 @@ public sealed partial class ProgressWindow : Window
                 item.Status = ConversionItemStatus.Completed;
                 item.StatusIcon = "\uE73E"; // Checkmark
                 item.StatusColor = BrushResource("AccentGreenBrush");
-                item.StatusMessage = "Completed";
+                item.StatusMessage = AppLocalizer.Get("Completed");
                 item.Progress = 100;
                 item.TimeInfo = FormatTimeSpan(elapsed);
                 
@@ -188,7 +188,8 @@ public sealed partial class ProgressWindow : Window
                 item.Status = ConversionItemStatus.Failed;
                 item.StatusIcon = "\uE711"; // Error
                 item.StatusColor = BrushResource("AccentRedBrush");
-                item.StatusMessage = result.ErrorMessage ?? "Failed";
+                item.StatusMessage = result.ErrorMessage
+                    ?? AppLocalizer.Get("Failed");
                 item.ShowProgress = Visibility.Collapsed;
 
                 _failedCount++;
@@ -199,7 +200,7 @@ public sealed partial class ProgressWindow : Window
             item.Status = ConversionItemStatus.Cancelled;
             item.StatusIcon = "\uE711"; // Error
             item.StatusColor = BrushResource("AccentOrangeBrush");
-            item.StatusMessage = "Cancelled";
+            item.StatusMessage = AppLocalizer.Get("Cancelled");
             item.ShowProgress = Visibility.Collapsed;
             _cancelledCount++;
             throw;
@@ -222,7 +223,7 @@ public sealed partial class ProgressWindow : Window
         var processed = _completedCount + _failedCount + _cancelledCount;
         var percent = total > 0 ? (double)processed / total * 100 : 0;
 
-        OverallProgressText.Text = $"{processed} of {total} files";
+        OverallProgressText.Text = AppLocalizer.Format($"{processed} of {total} files");
         OverallProgressBar.Value = percent;
 
         if (processed > 0 && processed < total)
@@ -230,7 +231,7 @@ public sealed partial class ProgressWindow : Window
             var elapsed = DateTime.Now - _startTime;
             var avgTime = elapsed.TotalSeconds / processed;
             var remaining = TimeSpan.FromSeconds(avgTime * (total - processed));
-            EtaText.Text = $"~{FormatTimeSpan(remaining)} remaining";
+            EtaText.Text = AppLocalizer.Format($"~{FormatTimeSpan(remaining)} remaining");
         }
         else
         {
@@ -247,25 +248,25 @@ public sealed partial class ProgressWindow : Window
         
         if (wasCancelled)
         {
-            TitleText.Text = "Conversion cancelled";
+            TitleText.Text = AppLocalizer.Get("Conversion cancelled");
             StatusText.Text = _completedCount > 0
                 ? $"Converted {_completedCount} file(s), cancelled {_cancelledCount} in {FormatTimeSpan(elapsed)}"
-                : $"Cancelled {_cancelledCount} file(s)";
+                : AppLocalizer.Format($"Cancelled {_cancelledCount} file(s)");
         }
         else if (_failedCount == 0)
         {
-            TitleText.Text = "Conversion complete";
-            StatusText.Text = $"Converted {_completedCount} file(s) in {FormatTimeSpan(elapsed)}";
+            TitleText.Text = AppLocalizer.Get("Conversion complete");
+            StatusText.Text = AppLocalizer.Format($"Converted {_completedCount} file(s) in {FormatTimeSpan(elapsed)}");
         }
         else if (_completedCount == 0)
         {
-            TitleText.Text = "Conversion failed";
-            StatusText.Text = $"Failed to convert {_failedCount} file(s)";
+            TitleText.Text = AppLocalizer.Get("Conversion failed");
+            StatusText.Text = AppLocalizer.Format($"Failed to convert {_failedCount} file(s)");
         }
         else
         {
-            TitleText.Text = "Conversion complete";
-            StatusText.Text = $"Converted {_completedCount} file(s), {_failedCount} failed in {FormatTimeSpan(elapsed)}";
+            TitleText.Text = AppLocalizer.Get("Conversion complete");
+            StatusText.Text = AppLocalizer.Format($"Converted {_completedCount} file(s), {_failedCount} failed in {FormatTimeSpan(elapsed)}");
         }
 
         // Update buttons
@@ -298,7 +299,7 @@ public sealed partial class ProgressWindow : Window
             item.Status = ConversionItemStatus.Cancelled;
             item.StatusIcon = "\uE711"; // Error
             item.StatusColor = BrushResource("AccentOrangeBrush");
-            item.StatusMessage = "Cancelled";
+            item.StatusMessage = AppLocalizer.Get("Cancelled");
             item.ShowProgress = Visibility.Collapsed;
             _cancelledCount++;
         }
@@ -312,8 +313,12 @@ public sealed partial class ProgressWindow : Window
             return;
 
         _isPaused = !_isPaused;
-        PauseButton.Content = _isPaused ? "Resume" : "Pause";
-        StatusText.Text = _isPaused ? "Paused" : "Converting";
+        PauseButton.Content = _isPaused
+            ? AppLocalizer.Get("Resume")
+            : AppLocalizer.Get("Pause");
+        StatusText.Text = _isPaused
+            ? AppLocalizer.Get("Paused")
+            : AppLocalizer.Get("Converting");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -324,7 +329,7 @@ public sealed partial class ProgressWindow : Window
         PauseButton.IsEnabled = false;
         CancelButton.IsEnabled = false;
         _cts?.Cancel();
-        StatusText.Text = "Cancelling...";
+        StatusText.Text = AppLocalizer.Get("Cancelling...");
     }
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)

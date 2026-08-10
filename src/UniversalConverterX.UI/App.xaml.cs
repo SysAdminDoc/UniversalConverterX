@@ -89,10 +89,17 @@ public partial class App : Application
     {
         var supported = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "en-US", "de-DE", "fr-FR", "es-ES", "pl-PL", "zh-Hans",
+            "en-US", "de-DE", "fr-FR", "es-ES", "pl-PL", "zh-Hans", "qps-ploc",
         };
-        if (!string.IsNullOrWhiteSpace(language) && supported.Contains(language))
+        if (string.Equals(Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"), "1", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "qps-ploc";
+        }
+        else if (!string.IsNullOrWhiteSpace(language) && supported.Contains(language))
+        {
             Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language;
+        }
     }
 
     protected override void OnLaunched(

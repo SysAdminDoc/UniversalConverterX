@@ -64,6 +64,60 @@ class LocalizationResourceTests(unittest.TestCase):
                     set(placeholders.findall(value)),
                     f"{locale}: {key}")
 
+    def test_code_localizer_calls_have_stable_resource_entries(self) -> None:
+        english = extractor.load_resw(
+            extractor.STRINGS_ROOT / "en-US" / "Resources.resw")
+        discovered = extractor.discover_code_resources()
+        self.assertGreater(len(discovered), 300)
+        missing = sorted(key for key in discovered if key not in english)
+        self.assertFalse(missing, "Missing code resources: " + ", ".join(missing[:20]))
+        for key, value in discovered.items():
+            self.assertEqual(value, english[key], key)
+
+    def test_nonempty_imperative_display_assignments_use_localizer(self) -> None:
+        """Keep runtime copy on the resource path; empty clears are intentional."""
+        # Item-list StatusText/StatusMessage values are a deliberately narrow
+        # legacy allowlist: Converter and Compressor persist and compare those
+        # stable state tokens during queue recovery. They must be split into a
+        # typed state plus a display value before they can be translated safely.
+        # This contract therefore targets direct UI/control assignments, while
+        # the queue-state migration remains a separate architectural change.
+        display_property = re.compile(
+            r"\b(?:Text|Content|Header|Title|Message|PlaceholderText|Caption|"
+            r"OffContent|OnContent|ToolTip|PrimaryButtonText|SecondaryButtonText|"
+            r"CloseButtonText|CancelButtonText|OpenButtonText)\s*=\s*(\$?\"|@\")"
+        )
+        violations: list[str] = []
+        for path in extractor.csharp_files():
+            lines = path.read_text(encoding="utf-8-sig").splitlines()
+            for line_number, line in enumerate(lines, start=1):
+                match = display_property.search(line)
+                if not match or "AppLocalizer." in line:
+                    continue
+                quote = match.group(1)
+                start = match.end()
+                if quote == '@"':
+                    end = line.find('"', start)
+                else:
+                    end = start
+                    escaped = False
+                    while end < len(line):
+                        character = line[end]
+                        if character == '"' and not escaped:
+                            break
+                        escaped = character == '\\' and not escaped
+                        if character != '\\':
+                            escaped = False
+                        end += 1
+                value = line[start:end]
+                if value:
+                    violations.append(f"{path.relative_to(ROOT)}:{line_number}: {line.strip()}")
+        self.assertFalse(
+            violations,
+            "Nonempty display literals must use AppLocalizer (empty clears are the only allowlist):\n"
+            + "\n".join(violations[:30]),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -123,7 +123,7 @@ public sealed partial class ConverterPage : Page
     {
         if (!PathSafety.TryNormalizeExtension(request.OutputFormat, out var outputFormat))
         {
-            StatusText.Text = "The saved re-run output format is invalid.";
+            StatusText.Text = AppLocalizer.Get("The saved re-run output format is invalid.");
             return;
         }
 
@@ -132,7 +132,7 @@ public sealed partial class ConverterPage : Page
                  || !_selectedFormat.Equals(outputFormat, StringComparison.OrdinalIgnoreCase))
                 || !PathsEqual(_outputDirectory, request.OutputDirectory)))
         {
-            StatusText.Text = "The current queue uses different settings and was preserved. Finish or clear it before restoring this history row.";
+            StatusText.Text = AppLocalizer.Get("The current queue uses different settings and was preserved. Finish or clear it before restoring this history row.");
             return;
         }
 
@@ -144,13 +144,13 @@ public sealed partial class ConverterPage : Page
                     outputFormat));
             if (!supported)
             {
-                StatusText.Text = $"The Converter cannot restore the saved {outputFormat.ToUpperInvariant()} route.";
+                StatusText.Text = AppLocalizer.Format($"The Converter cannot restore the saved {outputFormat.ToUpperInvariant()} route.");
                 return;
             }
 
             var restoredItem = new ComboBoxItem
             {
-                Content = $"{outputFormat.ToUpperInvariant()} - Restored",
+                Content = AppLocalizer.Format($"{outputFormat.ToUpperInvariant()} - Restored"),
                 Tag = outputFormat,
             };
             FormatSelector.Items.Add(restoredItem);
@@ -193,8 +193,8 @@ public sealed partial class ConverterPage : Page
         PersistQueue();
         UpdateUI();
         StatusText.Text = restored > 0
-            ? $"Restored {restored} file(s) with the saved {outputFormat.ToUpperInvariant()} settings."
-            : "The saved source file is no longer available.";
+            ? AppLocalizer.Format($"Restored {restored} file(s) with the saved {outputFormat.ToUpperInvariant()} settings.")
+            : AppLocalizer.Get("The saved source file is no longer available.");
     }
 
     private void ApplyFileIntakeRequest(FileIntakeRequest request)
@@ -215,9 +215,9 @@ public sealed partial class ConverterPage : Page
         UpdateUI();
         StatusText.Text = added switch
         {
-            0 => "Those items were already queued or could not be read.",
-            1 => "Added 1 item.",
-            _ => $"Added {added} items.",
+            0 => AppLocalizer.Get("Those items were already queued or could not be read."),
+            1 => AppLocalizer.Get("Added 1 item."),
+            _ => AppLocalizer.Format($"Added {added} items."),
         };
     }
 
@@ -242,7 +242,7 @@ public sealed partial class ConverterPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into conversion queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into conversion queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -394,7 +394,7 @@ public sealed partial class ConverterPage : Page
     {
         if (!Directory.Exists(path))
         {
-            StatusText.Text = $"Folder not found: {path}";
+            StatusText.Text = AppLocalizer.Format($"Folder not found: {path}");
             return;
         }
 
@@ -402,12 +402,12 @@ public sealed partial class ConverterPage : Page
         try { entries = Directory.EnumerateFiles(path); }
         catch (UnauthorizedAccessException)
         {
-            StatusText.Text = "Permission denied for that folder.";
+            StatusText.Text = AppLocalizer.Get("Permission denied for that folder.");
             return;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not read folder: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not read folder: {ex.Message}");
             return;
         }
 
@@ -424,11 +424,11 @@ public sealed partial class ConverterPage : Page
 
         var addedWord = added == 1 ? "file" : "files";
         if (added == 0)
-            StatusText.Text = "No new files were added from that folder.";
+            StatusText.Text = AppLocalizer.Get("No new files were added from that folder.");
         else if (truncated)
-            StatusText.Text = $"Added {added} {addedWord} from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).";
+            StatusText.Text = AppLocalizer.Format($"Added {added} {addedWord} from {path} (capped at {FolderAddCap} — pick a smaller folder for the rest).");
         else
-            StatusText.Text = $"Added {added} {addedWord} from {path}.";
+            StatusText.Text = AppLocalizer.Format($"Added {added} {addedWord} from {path}.");
         PersistQueue();
         UpdateUI();
     }
@@ -508,9 +508,9 @@ public sealed partial class ConverterPage : Page
         file.WarningSummary = string.Join(" • ", warnings.Select(item => item.Message));
         file.WarningBadgeText = warnings.Count switch
         {
-            0 => "Ready",
+            0 => AppLocalizer.Get("Ready"),
             1 => warnings[0].Message,
-            _ => $"{warnings.Count} warnings",
+            _ => AppLocalizer.Format($"{warnings.Count} warnings"),
         };
         file.WarningCount = warnings.Count;
         file.HasBlockingWarning = warnings.Any(item =>
@@ -678,10 +678,10 @@ public sealed partial class ConverterPage : Page
 
     private void UpdateQueueSortHeaders()
     {
-        QueueSortFileButton.Content = SortHeader("File", QueueSortColumn.File);
-        QueueSortFormatButton.Content = SortHeader("Format", QueueSortColumn.Format);
-        QueueSortSizeButton.Content = SortHeader("Size", QueueSortColumn.Size);
-        QueueSortWarningsButton.Content = SortHeader("Status", QueueSortColumn.Warnings);
+        QueueSortFileButton.Content = SortHeader(AppLocalizer.Get("File"), QueueSortColumn.File);
+        QueueSortFormatButton.Content = SortHeader(AppLocalizer.Get("Format"), QueueSortColumn.Format);
+        QueueSortSizeButton.Content = SortHeader(AppLocalizer.Get("Size"), QueueSortColumn.Size);
+        QueueSortWarningsButton.Content = SortHeader(AppLocalizer.Get("Status"), QueueSortColumn.Warnings);
     }
 
     private string SortHeader(string label, QueueSortColumn column) =>
@@ -894,7 +894,7 @@ public sealed partial class ConverterPage : Page
             }
 
             if (restored > 0)
-                StatusText.Text = $"Restored {restored} queued conversion(s) from the previous session.";
+                StatusText.Text = AppLocalizer.Format($"Restored {restored} queued conversion(s) from the previous session.");
         }
         finally
         {
@@ -976,7 +976,7 @@ public sealed partial class ConverterPage : Page
             return;
 
         SelectFormat(recommended);
-        StatusText.Text = $"Applied the recommended {recommended.ToUpperInvariant()} output profile.";
+        StatusText.Text = AppLocalizer.Format($"Applied the recommended {recommended.ToUpperInvariant()} output profile.");
     }
 
     private void ProfileShortcut_Click(object sender, RoutedEventArgs e)
@@ -984,7 +984,7 @@ public sealed partial class ConverterPage : Page
         if (sender is Button { Tag: string format })
         {
             SelectFormat(format);
-            StatusText.Text = $"Output profile set to {format.ToUpperInvariant()}.";
+            StatusText.Text = AppLocalizer.Format($"Output profile set to {format.ToUpperInvariant()}.");
         }
     }
 
@@ -1009,8 +1009,8 @@ public sealed partial class ConverterPage : Page
         SmartMatchButton.IsEnabled = hasFiles && RecommendFormatTag() is not null;
         var fileWord = _files.Count == 1 ? "file" : "files";
         QueueSummaryText.Text = warningFiles > 0
-            ? $"{_files.Count} {fileWord} / {warningFiles} {(warningFiles == 1 ? "needs" : "need")} review"
-            : $"{_files.Count} {fileWord}";
+            ? AppLocalizer.Format($"{_files.Count} {fileWord} / {warningFiles} {(warningFiles == 1 ? "needs" : "need")} review")
+            : AppLocalizer.Format($"{_files.Count} {fileWord}");
         UpdateQueueSelectionActions();
         RecommendationText.Text = BuildRecommendationText();
         UpdateFooterStatus();
@@ -1021,16 +1021,16 @@ public sealed partial class ConverterPage : Page
     private void UpdateFooterStatus()
     {
         var output = _outputDirectory ?? "same folder as each source";
-        FooterStatusText.Text = $"Output: {output}";
+        FooterStatusText.Text = AppLocalizer.Format($"Output: {output}");
 
         if (_files.Count == 0)
-            StatusText.Text = "Add files to start a conversion queue.";
+            StatusText.Text = AppLocalizer.Get("Add files to start a conversion queue.");
         else if (string.IsNullOrEmpty(_selectedFormat))
-            StatusText.Text = "Choose an output profile before starting.";
+            StatusText.Text = AppLocalizer.Get("Choose an output profile before starting.");
         else if (_files.Any(file => file.HasBlockingWarning))
-            StatusText.Text = "Resolve the blocked file routes shown in the queue before converting.";
+            StatusText.Text = AppLocalizer.Get("Resolve the blocked file routes shown in the queue before converting.");
         else
-            StatusText.Text = $"Ready to convert {_files.Count} files to {_selectedFormat.ToUpperInvariant()}.";
+            StatusText.Text = AppLocalizer.Format($"Ready to convert {_files.Count} files to {_selectedFormat.ToUpperInvariant()}.");
     }
 
     private string BuildRecommendationText()
@@ -1124,7 +1124,7 @@ public sealed partial class ConverterPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -1132,10 +1132,10 @@ public sealed partial class ConverterPage : Page
         _cancellationTokenSource = new CancellationTokenSource();
         ConvertButton.IsEnabled = false;
         ProgressOverlay.Visibility = Visibility.Visible;
-        ProgressTitle.Text = "Converting...";
+        ProgressTitle.Text = AppLocalizer.Get("Converting...");
         ConversionProgress.Value = 0;
         ConversionProgress.IsIndeterminate = false;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
 
         var queuedJobs = _files
             .Where(f => !f.StatusText.Equals("Done", StringComparison.OrdinalIgnoreCase))
@@ -1203,7 +1203,7 @@ public sealed partial class ConverterPage : Page
                         queued.File.StatusText = "Converting";
                         queued.File.Progress = 0;
                         queued.File.ErrorMessage = null;
-                        ProgressStatus.Text = $"Converting {queued.Job.InputFileName}...";
+                        ProgressStatus.Text = AppLocalizer.Format($"Converting {queued.Job.InputFileName}...");
                         UpdateProgressDetails(queuedJobs.Count, completed + failed);
                         PersistQueue();
                     });
@@ -1226,7 +1226,7 @@ public sealed partial class ConverterPage : Page
                             queued.File.StatusText = $"{p.Percent:F0}%";
 
                             if (p.EstimatedTimeRemaining.HasValue)
-                                ProgressDetails.Text = $"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}";
+                                ProgressDetails.Text = AppLocalizer.Format($"{completed + failed + 1} of {queuedJobs.Count} - ETA {p.EstimatedTimeRemaining.Value:mm\\:ss}");
                         });
                     });
 
@@ -1283,7 +1283,7 @@ public sealed partial class ConverterPage : Page
                     {
                         Source = queued.Job.InputPath,
                         Status = QueueCompletionItemStatus.Cancelled,
-                        Message = "Conversion cancelled by user.",
+                        Message = AppLocalizer.Get("Conversion cancelled by user."),
                     });
                     DispatcherQueue.TryEnqueue(() =>
                     {
@@ -1333,7 +1333,7 @@ public sealed partial class ConverterPage : Page
                 if (!outcome.WasCancelled)
                     ConversionProgress.Value = 100;
                 ConversionProgress.IsIndeterminate = false;
-                CancelButton.Content = "Close";
+                CancelButton.Content = AppLocalizer.Get("Close");
                 QueuePivot.SelectedIndex = _finishedFiles.Count > 0 ? 1 : 0;
                 if (completed > 0 && OpenOutputAfterConversionCheckBox.IsChecked == true)
                 {
@@ -1373,7 +1373,7 @@ public sealed partial class ConverterPage : Page
 
     private void UpdateProgressDetails(int total, int current)
     {
-        ProgressDetails.Text = $"{current + 1} of {total}";
+        ProgressDetails.Text = AppLocalizer.Format($"{current + 1} of {total}");
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -1385,7 +1385,7 @@ public sealed partial class ConverterPage : Page
         else
         {
             ProgressOverlay.Visibility = Visibility.Collapsed;
-            CancelButton.Content = "Cancel";
+            CancelButton.Content = AppLocalizer.Get("Cancel");
         }
     }
 
@@ -1760,7 +1760,9 @@ public sealed partial class ConverterPage : Page
         FfmpegCommandInfoBar.Severity = valid
             ? InfoBarSeverity.Informational
             : InfoBarSeverity.Error;
-        FfmpegCommandInfoBar.Title = valid ? "Command preview" : "Command blocked";
+        FfmpegCommandInfoBar.Title = valid
+            ? AppLocalizer.Get("Command preview")
+            : AppLocalizer.Get("Command blocked");
         FfmpegCommandInfoBar.Message = message;
     }
 

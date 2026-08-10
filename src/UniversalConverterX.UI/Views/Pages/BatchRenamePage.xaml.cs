@@ -309,10 +309,10 @@ public sealed partial class BatchRenamePage : Page
             && !string.Equals(r.NewName, Path.GetFileName(r.OriginalPath), StringComparison.Ordinal));
         var blocked = Rows.Count(r => r.Error is not null);
         StatusText.Text = !has
-            ? "Add files to begin."
+            ? AppLocalizer.Get("Add files to begin.")
             : blocked > 0
-                ? $"{Rows.Count} loaded · {rename} pending · {blocked} blocked by errors/conflicts"
-                : $"{Rows.Count} loaded · {rename} pending rename";
+                ? AppLocalizer.Format($"{Rows.Count} loaded · {rename} pending · {blocked} blocked by errors/conflicts")
+                : AppLocalizer.Format($"{Rows.Count} loaded · {rename} pending rename");
         ApplyButton.IsEnabled = rename > 0 && ConflictBadge.Visibility == Visibility.Collapsed;
     }
 
@@ -350,8 +350,8 @@ public sealed partial class BatchRenamePage : Page
             }
 
             StatusText.Text = plan.Problems.Count > 0
-                ? $"Nothing renamed — {plan.Problems[0].Reason}"
-                : "Nothing to rename.";
+                ? AppLocalizer.Format($"Nothing renamed — {plan.Problems[0].Reason}")
+                : AppLocalizer.Get("Nothing to rename.");
             UpdateUi();
             return;
         }
@@ -369,14 +369,14 @@ public sealed partial class BatchRenamePage : Page
             }
 
             _undoJournal = BatchRenameJournal.Load(journalPath);
-            StatusText.Text = $"Renamed {result.RenamedCount} · undo available";
+            StatusText.Text = AppLocalizer.Format($"Renamed {result.RenamedCount} · undo available");
         }
         else
         {
             _undoJournal = null;
             StatusText.Text = result.RolledBack
-                ? $"Nothing renamed — rolled back after {Path.GetFileName(result.FailedFrom)} failed: {result.Error}"
-                : $"Rename failed on {Path.GetFileName(result.FailedFrom)} and could not be fully rolled back: {result.Error}";
+                ? AppLocalizer.Format($"Nothing renamed — rolled back after {Path.GetFileName(result.FailedFrom)} failed: {result.Error}")
+                : AppLocalizer.Format($"Rename failed on {Path.GetFileName(result.FailedFrom)} and could not be fully rolled back: {result.Error}");
         }
 
         RecomputePreview();
@@ -395,8 +395,8 @@ public sealed partial class BatchRenamePage : Page
         _undoJournal = null;
         TryDeleteJournal();
         StatusText.Text = undone
-            ? "Rename undone — every file is back under its original name."
-            : "Undo was incomplete; some files could not be moved back.";
+            ? AppLocalizer.Get("Rename undone — every file is back under its original name.")
+            : AppLocalizer.Get("Undo was incomplete; some files could not be moved back.");
         ReloadRowsFromDisk();
     }
 
@@ -466,8 +466,8 @@ public sealed partial class BatchRenamePage : Page
         _undoJournal = journal;
         UndoButton.IsEnabled = true;
         StatusText.Text = journal.Completed
-            ? $"A previous rename of {journal.Applied.Count} file(s) can still be undone."
-            : $"A previous rename was interrupted after {journal.Applied.Count} file(s). Undo to restore the original names.";
+            ? AppLocalizer.Format($"A previous rename of {journal.Applied.Count} file(s) can still be undone.")
+            : AppLocalizer.Format($"A previous rename was interrupted after {journal.Applied.Count} file(s). Undo to restore the original names.");
     }
 
     public sealed class RenameRow : INotifyPropertyChanged

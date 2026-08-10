@@ -46,7 +46,7 @@ public sealed partial class OcrPage : Page
 
     private async void ReloadLangs_Click(object sender, RoutedEventArgs e)
     {
-        StatusText.Text = "Querying installed languages...";
+        StatusText.Text = AppLocalizer.Get("Querying installed languages...");
         var langs = new List<string>();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         var result = await _runner.RunAsync(
@@ -59,9 +59,9 @@ public sealed partial class OcrPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "ocr sidecar not built. Run pwsh tools/ocr/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("ocr sidecar not built. Run pwsh tools/ocr/build.ps1.");
         else if (result.ErrorCode == "missing_tesseract")
-            StatusText.Text = "Tesseract not found. Install from UB-Mannheim's release page.";
+            StatusText.Text = AppLocalizer.Get("Tesseract not found. Install from UB-Mannheim's release page.");
         else if (result.Success)
         {
             var current = (LangCombo.SelectedItem as string) ?? LangCombo.Text;
@@ -73,11 +73,11 @@ public sealed partial class OcrPage : Page
                 LangCombo.SelectedItem = LangCombo.Items.Contains(current ?? "") ? current : "eng";
                 if (LangCombo.SelectedIndex < 0) LangCombo.SelectedIndex = 0;
             }
-            StatusText.Text = $"Discovered {langs.Count} language pack(s).";
+            StatusText.Text = AppLocalizer.Format($"Discovered {langs.Count} language pack(s).");
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
     }
 
@@ -144,7 +144,7 @@ public sealed partial class OcrPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             RecognizeButton.IsEnabled = true;
             return;
         }
@@ -163,11 +163,11 @@ public sealed partial class OcrPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage}";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage}");
         }));
 
         var startedAt = DateTime.UtcNow;
-        StatusText.Text = "Running OCR...";
+        StatusText.Text = AppLocalizer.Get("Running OCR...");
         using var cts = new CancellationTokenSource(TimeSpan.FromHours(1));
         var result = await _runner.RunAsync(
             "ocr", args, progress, null, cts.Token,
@@ -180,12 +180,12 @@ public sealed partial class OcrPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "ocr sidecar not built. Run pwsh tools/ocr/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("ocr sidecar not built. Run pwsh tools/ocr/build.ps1.");
         else if (result.ErrorCode == "missing_tesseract")
-            StatusText.Text = "Tesseract not found. Install from UB-Mannheim's release page.";
+            StatusText.Text = AppLocalizer.Get("Tesseract not found. Install from UB-Mannheim's release page.");
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- OCR'd {_files.Count} image(s) -> .{fmt}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- OCR'd {_files.Count} image(s) -> .{fmt}.");
             WorkProgress.Value = 100;
             foreach (var f in _files)
             {
@@ -206,7 +206,7 @@ public sealed partial class OcrPage : Page
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
             foreach (var f in _files.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }

@@ -51,8 +51,8 @@ public sealed partial class HistoryPage : Page
         StatSaved.Text = HistoryRecord.FormatBytes(summary.SpaceSavedBytes);
 
         StatusText.Text = string.IsNullOrEmpty(_searchTerm)
-            ? $"Showing {rows.Count} most recent of {summary.TotalJobs} total."
-            : $"Showing {rows.Count} matches for \"{_searchTerm}\".";
+            ? AppLocalizer.Format($"Showing {rows.Count} most recent of {summary.TotalJobs} total.")
+            : AppLocalizer.Format($"Showing {rows.Count} matches for \"{_searchTerm}\".");
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadAsync();
@@ -75,11 +75,11 @@ public sealed partial class HistoryPage : Page
         try
         {
             var count = await _history.ExportAsync(file.Path, _searchTerm);
-            StatusText.Text = $"Exported {count} history row(s) to {Path.GetFileName(file.Path)}.";
+            StatusText.Text = AppLocalizer.Format($"Exported {count} history row(s) to {Path.GetFileName(file.Path)}.");
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Report export failed: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Report export failed: {ex.Message}");
         }
     }
 
@@ -148,7 +148,7 @@ public sealed partial class HistoryPage : Page
         var record = await _history.GetAsync(id);
         if (record is null)
         {
-            StatusText.Text = "That history row no longer exists.";
+            StatusText.Text = AppLocalizer.Get("That history row no longer exists.");
             return;
         }
 
@@ -163,14 +163,14 @@ public sealed partial class HistoryPage : Page
 
         if (request is null)
         {
-            StatusText.Text = "This legacy row has no usable source/output settings to restore.";
+            StatusText.Text = AppLocalizer.Get("This legacy row has no usable source/output settings to restore.");
             return;
         }
 
         var missing = request.SourcePaths.FirstOrDefault(path => !File.Exists(path));
         if (missing is not null)
         {
-            StatusText.Text = $"Cannot re-run because the source is missing: {Path.GetFileName(missing)}";
+            StatusText.Text = AppLocalizer.Format($"Cannot re-run because the source is missing: {Path.GetFileName(missing)}");
             return;
         }
 

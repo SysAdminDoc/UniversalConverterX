@@ -29,15 +29,15 @@ public sealed partial class FormatInspectorPage : Page
         _ffprobePath = FindFfprobe();
         FileList.ItemsSource = _files;
         ToolStatusText.Text = _ffprobePath is null
-            ? "Native signature detection is available. Install FFprobe or set FFPROBE_PATH for video/audio streams and codec metadata."
-            : $"Native signature detection and FFprobe stream analysis are available. FFprobe: {_ffprobePath}";
+            ? AppLocalizer.Get("Native signature detection is available. Install FFprobe or set FFPROBE_PATH for video/audio streams and codec metadata.")
+            : AppLocalizer.Format($"Native signature detection and FFprobe stream analysis are available. FFprobe: {_ffprobePath}");
         UpdateUi();
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop files to inspect";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop files to inspect");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -119,8 +119,8 @@ public sealed partial class FormatInspectorPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No new files were added from that folder."
-            : $"Added {added} files from {path}.";
+            ? AppLocalizer.Get("No new files were added from that folder.")
+            : AppLocalizer.Format($"Added {added} files from {path}.");
         UpdateUi();
     }
 
@@ -138,7 +138,7 @@ public sealed partial class FormatInspectorPage : Page
             Path = path,
             FileName = info.Name,
             SourceSummary = $"{FormatSize(info.Length)} - {info.Extension.TrimStart('.').ToUpperInvariant()}",
-            DetailText = "Not inspected",
+            DetailText = AppLocalizer.Get("Not inspected"),
             StatusText = "Queued",
             Progress = 0,
         });
@@ -160,7 +160,7 @@ public sealed partial class FormatInspectorPage : Page
         _isInspecting = true;
         InspectButton.IsEnabled = false;
         ClearButton.IsEnabled = false;
-        StatusText.Text = $"Inspecting {_files.Count} files...";
+        StatusText.Text = AppLocalizer.Format($"Inspecting {_files.Count} files...");
 
         var completed = 0;
         foreach (var item in _files)
@@ -178,7 +178,7 @@ public sealed partial class FormatInspectorPage : Page
             {
                 item.Progress = 100;
                 item.StatusText = "Failed";
-                item.DetailText = "Inspection failed";
+                item.DetailText = AppLocalizer.Get("Inspection failed");
                 item.Report = $"Inspection failed: {ex.Message}";
             }
 
@@ -187,7 +187,7 @@ public sealed partial class FormatInspectorPage : Page
         }
 
         _isInspecting = false;
-        StatusText.Text = $"Inspected {completed} of {_files.Count} files.";
+        StatusText.Text = AppLocalizer.Format($"Inspected {completed} of {_files.Count} files.");
         UpdateUi(updateStatus: false);
     }
 
@@ -229,7 +229,7 @@ public sealed partial class FormatInspectorPage : Page
         item.Category = detected.Category.ToString();
         item.MimeType = detected.MimeType;
         item.Signature = detected.Description ?? "Extension fallback";
-        item.DetailText = $"{item.Category} - {item.Extension}";
+        item.DetailText = AppLocalizer.Format($"{item.Category} - {item.Extension}");
         item.Report = report.ToString();
         item.Summary = $"{detected.Description ?? detected.Extension.ToUpperInvariant()} - {detected.MimeType}";
     }
@@ -371,7 +371,7 @@ public sealed partial class FormatInspectorPage : Page
             ? item.SourceSummary
             : item.Summary;
         ReportDetails.Text = string.IsNullOrWhiteSpace(item.Report)
-            ? "Click Inspect All to generate a full report."
+            ? AppLocalizer.Get("Click Inspect All to generate a full report.")
             : item.Report;
     }
 
@@ -395,8 +395,8 @@ public sealed partial class FormatInspectorPage : Page
 
         if (updateStatus && !_isInspecting)
             StatusText.Text = hasFiles
-                ? $"Ready to inspect {_files.Count} files."
-                : "Add files to inspect format signatures, streams, and conversion targets.";
+                ? AppLocalizer.Format($"Ready to inspect {_files.Count} files.")
+                : AppLocalizer.Get("Add files to inspect format signatures, streams, and conversion targets.");
     }
 
     private static void AppendDuration(StringBuilder report, JsonElement element)

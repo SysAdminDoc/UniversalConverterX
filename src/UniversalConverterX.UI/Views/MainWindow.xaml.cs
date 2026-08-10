@@ -226,7 +226,7 @@ public sealed partial class MainWindow : Window
         var dialog = new ContentDialog
         {
             XamlRoot = ContentFrame.XamlRoot,
-            Title = "UniversalConverter X",
+            Title = AppLocalizer.Get("UniversalConverter X"),
             Content = new StackPanel
             {
                 Spacing = 8,
@@ -234,18 +234,18 @@ public sealed partial class MainWindow : Window
                 {
                     new TextBlock
                     {
-                        Text = $"Version {version}",
+                        Text = AppLocalizer.Format($"Version {version}"),
                         Style = (Style)Application.Current.Resources["LabelTextStyle"],
                     },
                     new TextBlock
                     {
-                        Text = "Local-first conversion, compression, editing, downloading, automation, and media tools for Windows.",
+                        Text = AppLocalizer.Get("Local-first conversion, compression, editing, downloading, automation, and media tools for Windows."),
                         TextWrapping = TextWrapping.Wrap,
                         Style = (Style)Application.Current.Resources["MutedTextStyle"],
                     },
                 },
             },
-            CloseButtonText = "Close",
+            CloseButtonText = AppLocalizer.Get("Close"),
             DefaultButton = ContentDialogButton.Close,
         };
 

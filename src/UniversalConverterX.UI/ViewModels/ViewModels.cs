@@ -272,7 +272,8 @@ public partial class ProgressViewModel : ObservableObject
         if (conversionProgress.IsIndeterminate)
         {
             IsIndeterminate = true;
-            StatusMessage = conversionProgress.StatusMessage ?? "Processing...";
+            StatusMessage = conversionProgress.StatusMessage
+                ?? AppLocalizer.Get("Processing...");
         }
         else
         {
@@ -296,17 +297,19 @@ public partial class ProgressViewModel : ObservableObject
         Progress = 100;
         IsIndeterminate = false;
 
-        Title = failed == 0 ? "Complete!" : "Completed with errors";
+        Title = failed == 0
+            ? AppLocalizer.Get("Complete!")
+            : AppLocalizer.Get("Completed with errors");
         StatusMessage = failed == 0
-            ? $"{succeeded} file(s) converted successfully"
-            : $"{succeeded} succeeded, {failed} failed";
+            ? AppLocalizer.Format($"{succeeded} file(s) converted successfully")
+            : AppLocalizer.Format($"{succeeded} succeeded, {failed} failed");
     }
 
     public void MarkCancelled(int completed)
     {
         IsCancelled = true;
         CompletedCount = completed;
-        Title = "Cancelled";
-        StatusMessage = $"{completed} file(s) completed before cancellation";
+        Title = AppLocalizer.Get("Cancelled");
+        StatusMessage = AppLocalizer.Format($"{completed} file(s) completed before cancellation");
     }
 }

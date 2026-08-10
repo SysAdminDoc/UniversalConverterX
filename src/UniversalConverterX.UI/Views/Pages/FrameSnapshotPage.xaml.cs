@@ -53,7 +53,7 @@ public sealed partial class FrameSnapshotPage : Page
         OutputDirectoryBox.Text = _outputDirectory;
         FfmpegStatusText.Text = _ffmpegPath is null
             ? "FFmpeg was not found. Add ffmpeg.exe to PATH or UCX tools/bin to enable snapshot extraction."
-            : $"Ready: {_ffmpegPath}";
+            : AppLocalizer.Format($"Ready: {_ffmpegPath}");
 
         UpdatePlanSummary();
         UpdateUi();
@@ -62,7 +62,7 @@ public sealed partial class FrameSnapshotPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop videos for frame snapshots";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop videos for frame snapshots");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -153,7 +153,7 @@ public sealed partial class FrameSnapshotPage : Page
         try { Directory.CreateDirectory(_outputDirectory); }
         catch (Exception ex)
         {
-            OutputDirectoryBox.Text = $"(unavailable: {ex.Message})";
+            OutputDirectoryBox.Text = AppLocalizer.Format($"(unavailable: {ex.Message})");
             return;
         }
         OutputDirectoryBox.Text = _outputDirectory;
@@ -163,7 +163,7 @@ public sealed partial class FrameSnapshotPage : Page
     private void SameAsSource_Click(object sender, RoutedEventArgs e)
     {
         _outputDirectory = null;
-        OutputDirectoryBox.Text = "Same folder as each source";
+        OutputDirectoryBox.Text = AppLocalizer.Get("Same folder as each source");
         UpdateUi();
     }
 
@@ -180,8 +180,8 @@ public sealed partial class FrameSnapshotPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No supported video files were added from that folder."
-            : $"Added {added} videos from {path}.";
+            ? AppLocalizer.Get("No supported video files were added from that folder.")
+            : AppLocalizer.Format($"Added {added} videos from {path}.");
         UpdateUi(updateStatus: false);
     }
 
@@ -272,7 +272,7 @@ public sealed partial class FrameSnapshotPage : Page
         var plan = ReadPlan();
         if (plan is null)
         {
-            StatusText.Text = "Use numeric start, interval, and frame count values before extracting.";
+            StatusText.Text = AppLocalizer.Get("Use numeric start, interval, and frame count values before extracting.");
             return;
         }
 
@@ -281,7 +281,7 @@ public sealed partial class FrameSnapshotPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -305,7 +305,7 @@ public sealed partial class FrameSnapshotPage : Page
                 // ROADMAP Item 60 — keep the active job visible in long queues.
                 try { QueueList.ScrollIntoView(job); } catch { /* virtualization race; ignore */ }
 
-                StatusText.Text = $"Extracting snapshots from {job.FileName}...";
+                StatusText.Text = AppLocalizer.Format($"Extracting snapshots from {job.FileName}...");
                 var result = await ExtractJobAsync(job, plan.Value, _cts.Token);
 
                 if (result.Success)
@@ -334,7 +334,7 @@ public sealed partial class FrameSnapshotPage : Page
         }
 
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
-        StatusText.Text = $"{completed} videos completed, {failed} failed.";
+        StatusText.Text = AppLocalizer.Format($"{completed} videos completed, {failed} failed.");
         UpdateUi(updateStatus: false);
     }
 
@@ -497,7 +497,9 @@ public sealed partial class FrameSnapshotPage : Page
 
         _finished.Insert(0, new FrameSnapshotFinishedItem
         {
-            Title = result.Success ? job.FileName : $"{job.FileName} failed",
+            Title = result.Success
+                ? job.FileName
+                : AppLocalizer.Format($"{job.FileName} failed"),
             Details = details,
             OutputPath = result.OutputPath,
             Success = result.Success,
@@ -519,7 +521,7 @@ public sealed partial class FrameSnapshotPage : Page
         FinishedEmptyState.Visibility = hasFinished ? Visibility.Collapsed : Visibility.Visible;
         FinishedList.Visibility = hasFinished ? Visibility.Visible : Visibility.Collapsed;
 
-        QueueSummaryText.Text = $"{pending} queued / {_finished.Count} finished";
+        QueueSummaryText.Text = AppLocalizer.Format($"{pending} queued / {_finished.Count} finished");
         ExtractButton.IsEnabled = hasQueued && hasFfmpeg && !isBusy;
         ClearQueueButton.IsEnabled = hasQueued && !isBusy;
         CancelButton.IsEnabled = isBusy;
@@ -528,10 +530,10 @@ public sealed partial class FrameSnapshotPage : Page
         if (updateStatus && !isBusy)
         {
             StatusText.Text = !hasFfmpeg
-                ? "Install FFmpeg or add ffmpeg.exe to PATH to enable extraction."
+                ? AppLocalizer.Get("Install FFmpeg or add ffmpeg.exe to PATH to enable extraction.")
                 : pending == 0
-                    ? "Add videos to export frame snapshots."
-                    : $"Ready to export {pending} videos with {CurrentPlanLabel()}.";
+                    ? AppLocalizer.Get("Add videos to export frame snapshots.")
+                    : AppLocalizer.Format($"Ready to export {pending} videos with {CurrentPlanLabel()}.");
         }
     }
 
@@ -539,8 +541,8 @@ public sealed partial class FrameSnapshotPage : Page
     {
         var plan = ReadPlan();
         PlanSummaryText.Text = plan is null
-            ? "Plan is incomplete. Use numeric start, interval, and frame count values."
-            : $"{plan.Value.Count} frame(s) per video starting at {plan.Value.StartSeconds:0.###}s, every {plan.Value.IntervalSeconds:0.###}s, exported as {plan.Value.Format.ToUpperInvariant()}.";
+            ? AppLocalizer.Get("Plan is incomplete. Use numeric start, interval, and frame count values.")
+            : AppLocalizer.Format($"{plan.Value.Count} frame(s) per video starting at {plan.Value.StartSeconds:0.###}s, every {plan.Value.IntervalSeconds:0.###}s, exported as {plan.Value.Format.ToUpperInvariant()}.");
     }
 
     private SnapshotPlan? ReadPlan()

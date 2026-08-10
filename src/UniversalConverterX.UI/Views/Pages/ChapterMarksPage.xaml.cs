@@ -70,7 +70,9 @@ public sealed partial class ChapterMarksPage : Page
     private async Task LoadRowsAsync(string operation, string input, bool replaceMediaStatus)
     {
         SetBusy(true);
-        StatusText.Text = operation == "read" ? "Reading exact chapter timestamps..." : "Importing chapter list...";
+        StatusText.Text = operation == "read"
+            ? AppLocalizer.Get("Reading exact chapter timestamps...")
+            : AppLocalizer.Get("Importing chapter list...");
         var harvested = new List<ChapterRow>();
         SidecarResult result;
         try
@@ -94,8 +96,8 @@ public sealed partial class ChapterMarksPage : Page
         if (!result.Success)
         {
             StatusText.Text = result.ErrorCode == "sidecar_not_found"
-                ? "Chapter Editor is not installed. Build it with tools/chaptermark/build.ps1."
-                : $"Chapter {operation} failed: {result.ErrorMessage ?? result.ErrorCode}";
+                ? AppLocalizer.Get("Chapter Editor is not installed. Build it with tools/chaptermark/build.ps1.")
+                : AppLocalizer.Format($"Chapter {operation} failed: {result.ErrorMessage ?? result.ErrorCode}");
             return;
         }
 
@@ -106,14 +108,14 @@ public sealed partial class ChapterMarksPage : Page
         if (replaceMediaStatus)
         {
             StatusText.Text = harvested.Count == 0
-                ? "No chapters in this media. Add or import markers, then save a new copy."
-                : $"Loaded {harvested.Count} chapter(s) with exact PTS. Edit any field, then save a new copy.";
+                ? AppLocalizer.Get("No chapters in this media. Add or import markers, then save a new copy.")
+                : AppLocalizer.Format($"Loaded {harvested.Count} chapter(s) with exact PTS. Edit any field, then save a new copy.");
         }
         else
         {
             StatusText.Text = _currentPath is null
-                ? $"Imported {harvested.Count} chapter(s). Open media before saving the chapter table."
-                : $"Imported {harvested.Count} chapter(s). Save media to apply them without re-encoding.";
+                ? AppLocalizer.Format($"Imported {harvested.Count} chapter(s). Open media before saving the chapter table.")
+                : AppLocalizer.Format($"Imported {harvested.Count} chapter(s). Save media to apply them without re-encoding.");
         }
         UpdateUi();
     }
@@ -134,11 +136,11 @@ public sealed partial class ChapterMarksPage : Page
         {
             StartText = lastEnd.ToString("0.#########", CultureInfo.InvariantCulture),
             EndText = "",
-            Title = $"Chapter {_rows.Count + 1}",
+            Title = AppLocalizer.Format($"Chapter {_rows.Count + 1}"),
         });
         StatusText.Text = _currentPath is null
-            ? "Chapter added. Open media before saving."
-            : "Chapter added.";
+            ? AppLocalizer.Get("Chapter added. Open media before saving.")
+            : AppLocalizer.Get("Chapter added.");
         UpdateUi();
     }
 
@@ -148,8 +150,8 @@ public sealed partial class ChapterMarksPage : Page
         {
             _rows.Remove(row);
             StatusText.Text = _rows.Count == 0
-                ? "All chapters removed. Saving now will clear the media's chapter table."
-                : "Chapter removed.";
+                ? AppLocalizer.Get("All chapters removed. Saving now will clear the media's chapter table.")
+                : AppLocalizer.Get("Chapter removed.");
             UpdateUi();
         }
     }
@@ -183,16 +185,16 @@ public sealed partial class ChapterMarksPage : Page
         try
         {
             StatusText.Text = extension.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
-                ? "Muxing exact chapters with MKVToolNix (stream copy)..."
-                : "Muxing exact chapters with FFmpeg (stream copy)...";
+                ? AppLocalizer.Get("Muxing exact chapters with MKVToolNix (stream copy)...")
+                : AppLocalizer.Get("Muxing exact chapters with FFmpeg (stream copy)...");
             using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(30));
             var result = await _runner.RunAsync(
                 "chaptermark",
                 ["write", "--input", _currentPath, "--output", output.Path, "--chapters-json", jsonPath],
                 ct: cts.Token);
             StatusText.Text = result.Success
-                ? $"Saved {_rows.Count} chapter(s) to {Path.GetFileName(output.Path)}; exact PTS verification passed."
-                : $"Save failed: {result.ErrorMessage ?? result.ErrorCode}";
+                ? AppLocalizer.Format($"Saved {_rows.Count} chapter(s) to {Path.GetFileName(output.Path)}; exact PTS verification passed.")
+                : AppLocalizer.Format($"Save failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         finally
         {
@@ -230,15 +232,15 @@ public sealed partial class ChapterMarksPage : Page
         SetBusy(true);
         try
         {
-            StatusText.Text = "Exporting chapter list...";
+            StatusText.Text = AppLocalizer.Get("Exporting chapter list...");
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var result = await _runner.RunAsync(
                 "chaptermark",
                 ["export", "--chapters-json", jsonPath, "--output", output.Path],
                 ct: cts.Token);
             StatusText.Text = result.Success
-                ? $"Exported {_rows.Count} chapter(s) to {Path.GetFileName(output.Path)}."
-                : $"Export failed: {result.ErrorMessage ?? result.ErrorCode}";
+                ? AppLocalizer.Format($"Exported {_rows.Count} chapter(s) to {Path.GetFileName(output.Path)}.")
+                : AppLocalizer.Format($"Export failed: {result.ErrorMessage ?? result.ErrorCode}");
         }
         finally
         {

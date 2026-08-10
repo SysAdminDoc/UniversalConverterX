@@ -58,7 +58,7 @@ public sealed partial class HomePage : Page
             var appUpdate = cache.Application;
             if (appUpdate?.UpdateAvailable == true)
             {
-                UpdateBanner.Title = $"UniversalConverter X {appUpdate.LatestVersion ?? "update"} available";
+                UpdateBanner.Title = AppLocalizer.Format($"UniversalConverter X {appUpdate.LatestVersion ?? AppLocalizer.Get("update")} available");
                 UpdateBanner.Severity = appUpdate.CompatibilityWarnings.Count > 0
                     ? InfoBarSeverity.Warning
                     : InfoBarSeverity.Informational;
@@ -83,7 +83,7 @@ public sealed partial class HomePage : Page
                 pending.Select(t => string.IsNullOrEmpty(t.LatestVersion)
                     ? t.DisplayName
                     : $"{t.DisplayName} {t.LatestVersion}"));
-            UpdateBanner.Message = $"New release available for: {names}.";
+            UpdateBanner.Message = AppLocalizer.Format($"New release available for: {names}.");
             _primaryUpdateUrl = pending.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.ReleaseUrl))?.ReleaseUrl;
             UpdateBannerActionButton.IsEnabled = !string.IsNullOrWhiteSpace(_primaryUpdateUrl);
             UpdateBanner.IsOpen = true;
@@ -255,7 +255,7 @@ public sealed partial class HomePage : Page
             return;
 
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Add to the conversion queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Add to the conversion queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
         FileIntakeSurface.Background =
@@ -317,7 +317,7 @@ public sealed partial class HomePage : Page
         }
         catch
         {
-            DiagnosticsStatusText.Text = "Couldn't open the log folder. Check %LocalAppData%\\UniversalConverterX\\logs.";
+            DiagnosticsStatusText.Text = AppLocalizer.Get("Couldn't open the log folder. Check %LocalAppData%\\UniversalConverterX\\logs.");
         }
     }
 
@@ -328,7 +328,7 @@ public sealed partial class HomePage : Page
             var logger = App.Services?.GetService<IStructuredLogger>();
             if (logger is null)
             {
-                DiagnosticsStatusText.Text = "Logger unavailable; bundle export skipped.";
+                DiagnosticsStatusText.Text = AppLocalizer.Get("Logger unavailable; bundle export skipped.");
                 return;
             }
             logger.Info("diagnostics", "user-initiated crash bundle export");
@@ -338,10 +338,10 @@ public sealed partial class HomePage : Page
                 sidecarHealth: sidecarHealth);
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
-                DiagnosticsStatusText.Text = "Bundle export failed (disk full or permission denied).";
+                DiagnosticsStatusText.Text = AppLocalizer.Get("Bundle export failed (disk full or permission denied).");
                 return;
             }
-            DiagnosticsStatusText.Text = $"Bundle saved: {path}";
+            DiagnosticsStatusText.Text = AppLocalizer.Format($"Bundle saved: {path}");
             Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
@@ -351,7 +351,7 @@ public sealed partial class HomePage : Page
         }
         catch (Exception ex)
         {
-            DiagnosticsStatusText.Text = $"Bundle export error: {ex.GetType().Name}.";
+            DiagnosticsStatusText.Text = AppLocalizer.Format($"Bundle export error: {ex.GetType().Name}.");
         }
     }
 
@@ -414,7 +414,7 @@ public sealed class HomeRecentActivityItem
             : record.OutputPath;
         var title = Path.GetFileName(displayPath);
         if (string.IsNullOrWhiteSpace(title))
-            title = string.IsNullOrWhiteSpace(record.Action) ? "Conversion job" : record.Action;
+            title = string.IsNullOrWhiteSpace(record.Action) ? AppLocalizer.Get("Conversion job") : record.Action;
 
         return new HomeRecentActivityItem
         {
@@ -422,7 +422,7 @@ public sealed class HomeRecentActivityItem
             Subtitle = string.Join(" · ", new[] { record.Engine, record.Action }
                 .Where(value => !string.IsNullOrWhiteSpace(value))),
             Timestamp = record.Timestamp.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
-            StatusText = success ? "Completed" : "Needs attention",
+            StatusText = success ? AppLocalizer.Get("Completed") : AppLocalizer.Get("Needs attention"),
             Glyph = success ? "\uE73E" : "\uE783",
             StatusBrush = (Brush)Application.Current.Resources[
                 success ? "AccentGreenBrush" : "AccentRedBrush"],

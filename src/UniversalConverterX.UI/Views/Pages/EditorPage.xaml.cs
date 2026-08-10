@@ -50,7 +50,7 @@ public sealed partial class EditorPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Drop into editing queue";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Drop into editing queue");
         e.DragUIOverride.IsCaptionVisible = true;
         e.DragUIOverride.IsGlyphVisible = true;
     }
@@ -165,8 +165,8 @@ public sealed partial class EditorPage : Page
         }
 
         StatusText.Text = added == 0
-            ? "No supported video files were added from that folder."
-            : $"Added {added} videos from {path}.";
+            ? AppLocalizer.Get("No supported video files were added from that folder.")
+            : AppLocalizer.Format($"Added {added} videos from {path}.");
         UpdateUi();
     }
 
@@ -329,7 +329,7 @@ public sealed partial class EditorPage : Page
             try { Directory.CreateDirectory(_outputDirectory); }
             catch (Exception ex)
             {
-                StatusText.Text = $"Output folder unavailable: {ex.Message}";
+                StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
                 return;
             }
         }
@@ -356,8 +356,8 @@ public sealed partial class EditorPage : Page
 
                 item.Progress = 0;
                 item.StatusText = "Exporting";
-                ProgressTitle.Text = $"Exporting {item.FileName}";
-                ProgressStage.Text = $"{completed + failed + 1} of {pending.Count}";
+                ProgressTitle.Text = AppLocalizer.Format($"Exporting {item.FileName}");
+                ProgressStage.Text = AppLocalizer.Format($"{completed + failed + 1} of {pending.Count}");
 
                 var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 {
@@ -365,9 +365,9 @@ public sealed partial class EditorPage : Page
                     item.StatusText = $"{p.Percent:F1}% - {p.Stage}";
                     var overall = ((completed + failed) * 100.0 + p.Percent) / pending.Count;
                     ProgressBar.Value = Math.Clamp(overall, 0, 100);
-                    ProgressStage.Text = $"{p.Percent:F1}% - {p.Stage}";
+                    ProgressStage.Text = AppLocalizer.Format($"{p.Percent:F1}% - {p.Stage}");
                     ProgressEta.Text = p.EtaSeconds is int eta and >= 0
-                        ? $"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}"
+                        ? AppLocalizer.Format($"ETA {TimeSpan.FromSeconds(eta):mm\\:ss}")
                         : "";
                 }));
                 var log = new Progress<SidecarLog>(l => DispatcherQueue.TryEnqueue(() =>
@@ -421,13 +421,15 @@ public sealed partial class EditorPage : Page
             _cts = null;
         }
 
-        ProgressTitle.Text = failed == 0 ? "Done" : "Completed with errors";
+        ProgressTitle.Text = failed == 0
+            ? AppLocalizer.Get("Done")
+            : AppLocalizer.Get("Completed with errors");
         ProgressBar.Value = failed == 0 ? 100 : ProgressBar.Value;
-        ProgressStage.Text = $"{completed} succeeded, {failed} failed";
+        ProgressStage.Text = AppLocalizer.Format($"{completed} succeeded, {failed} failed");
         ProgressEta.Text = "";
-        CancelButton.Content = "Close";
+        CancelButton.Content = AppLocalizer.Get("Close");
         QueuePivot.SelectedIndex = _finished.Count > 0 ? 1 : 0;
-        StatusText.Text = $"{completed} edits exported, {failed} failed.";
+        StatusText.Text = AppLocalizer.Format($"{completed} edits exported, {failed} failed.");
         UpdateUi(updateStatus: false);
     }
 
@@ -440,7 +442,7 @@ public sealed partial class EditorPage : Page
         }
 
         ProgressOverlay.Visibility = Visibility.Collapsed;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
     }
 
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
@@ -460,10 +462,10 @@ public sealed partial class EditorPage : Page
     private void ShowOverlay(string title)
     {
         ProgressTitle.Text = title;
-        ProgressStage.Text = "Starting...";
+        ProgressStage.Text = AppLocalizer.Get("Starting...");
         ProgressEta.Text = "";
         ProgressBar.Value = 0;
-        CancelButton.Content = "Cancel";
+        CancelButton.Content = AppLocalizer.Get("Cancel");
         ProgressOverlay.Visibility = Visibility.Visible;
     }
 
@@ -480,14 +482,14 @@ public sealed partial class EditorPage : Page
             if (cropValues.Any(value => !int.TryParse(value?.Trim(), out var parsed) || parsed < 0)
                 || cropValues.All(value => int.TryParse(value?.Trim(), out var parsed) && parsed == 0))
             {
-                StatusText.Text = "Lossless crop edges must be non-negative integers, with at least one value above zero.";
+                StatusText.Text = AppLocalizer.Get("Lossless crop edges must be non-negative integers, with at least one value above zero.");
                 options = default;
                 return false;
             }
         }
         else if (operation == "aspect-override" && !IsValidAspectRatio(AspectRatioBox.Text))
         {
-            StatusText.Text = "Display ratio must use positive values such as 16:9 or 4/3.";
+            StatusText.Text = AppLocalizer.Get("Display ratio must use positive values such as 16:9 or 4/3.");
             options = default;
             return false;
         }
@@ -508,7 +510,7 @@ public sealed partial class EditorPage : Page
         {
             if (!TryParseSeconds(endText, out var parsedEnd))
             {
-                StatusText.Text = "Invalid end time. Enter seconds, for example 12.5.";
+                StatusText.Text = AppLocalizer.Get("Invalid end time. Enter seconds, for example 12.5.");
                 options = default;
                 return false;
             }
@@ -517,7 +519,7 @@ public sealed partial class EditorPage : Page
 
         if (endSec is double end && end <= startSec)
         {
-            StatusText.Text = "End time must be greater than start.";
+            StatusText.Text = AppLocalizer.Get("End time must be greater than start.");
             options = default;
             return false;
         }
@@ -772,16 +774,16 @@ public sealed partial class EditorPage : Page
         ClearButton.IsEnabled = hasFiles && _cts is null;
         UpdateUndoRedoButtons();
 
-        QueueCountText.Text = $"{_files.Count} clips queued";
+        QueueCountText.Text = AppLocalizer.Format($"{_files.Count} clips queued");
         OperationText.Text = BuildOperationSummary();
-        OutputText.Text = $"Output: {(_outputDirectory ?? "same as source")}";
+        OutputText.Text = AppLocalizer.Format($"Output: {(_outputDirectory ?? AppLocalizer.Get("same as source"))}");
 
         if (updateStatus && _cts is null)
         {
             var output = _outputDirectory ?? "same folder as each source";
             StatusText.Text = hasFiles
-                ? $"Ready to export {_files.Count} clips. {BuildOperationSummary()} Output: {output}."
-                : "Add videos to build an edit queue.";
+                ? AppLocalizer.Format($"Ready to export {_files.Count} clips. {BuildOperationSummary()} Output: {output}.")
+                : AppLocalizer.Get("Add videos to build an edit queue.");
         }
     }
 
@@ -832,7 +834,7 @@ public sealed partial class EditorPage : Page
             <= 35 => "compressed",
             _ => "very compressed",
         };
-        CrfLabel.Text = $"CRF {crf} ({hint})";
+        CrfLabel.Text = AppLocalizer.Format($"CRF {crf} ({hint})");
     }
 
     private string BuildOutputPath(string inputPath)

@@ -116,7 +116,7 @@ public sealed partial class SubtitleConverterPage : Page
         try { Directory.CreateDirectory(outDir); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Output folder unavailable: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Output folder unavailable: {ex.Message}");
             ConvertButton.IsEnabled = true;
             return;
         }
@@ -136,7 +136,7 @@ public sealed partial class SubtitleConverterPage : Page
 
         if (subFiles.Count == 0)
         {
-            StatusText.Text = $"Done -- {ccFiles.Count} caption source(s) -> .{fmt}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {ccFiles.Count} caption source(s) -> .{fmt}.");
             WorkProgress.Value = 100;
             ConvertButton.IsEnabled = true;
             return;
@@ -164,11 +164,11 @@ public sealed partial class SubtitleConverterPage : Page
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             WorkProgress.Value = p.Percent;
-            StatusText.Text = $"{p.Stage} -- {p.Percent:F0}%";
+            StatusText.Text = AppLocalizer.Format($"{p.Stage} -- {p.Percent:F0}%");
         }));
 
         var startedAt = DateTime.UtcNow;
-        StatusText.Text = "Converting...";
+        StatusText.Text = AppLocalizer.Get("Converting...");
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(15));
         var result = await _runner.RunAsync(
             "subconvert", args, progress, null, cts.Token,
@@ -185,10 +185,10 @@ public sealed partial class SubtitleConverterPage : Page
             }));
 
         if (result.ErrorCode == "sidecar_not_found")
-            StatusText.Text = "subconvert sidecar not built. Run pwsh tools/subconvert/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("subconvert sidecar not built. Run pwsh tools/subconvert/build.ps1.");
         else if (result.Success)
         {
-            StatusText.Text = $"Done -- {subFiles.Count} subtitle(s) -> .{fmt}.";
+            StatusText.Text = AppLocalizer.Format($"Done -- {subFiles.Count} subtitle(s) -> .{fmt}.");
             WorkProgress.Value = 100;
             foreach (var f in subFiles)
             {
@@ -209,7 +209,7 @@ public sealed partial class SubtitleConverterPage : Page
         }
         else
         {
-            StatusText.Text = $"Failed: {result.ErrorMessage ?? result.ErrorCode}";
+            StatusText.Text = AppLocalizer.Format($"Failed: {result.ErrorMessage ?? result.ErrorCode}");
             foreach (var f in subFiles.Where(f => f.StatusText == "Pending"))
                 f.StatusText = "Failed";
         }

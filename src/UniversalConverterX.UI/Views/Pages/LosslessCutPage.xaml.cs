@@ -65,7 +65,7 @@ public sealed partial class LosslessCutPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Open for lossless cutting";
+        e.DragUIOverride.Caption = AppLocalizer.Get("Open for lossless cutting");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -93,11 +93,11 @@ public sealed partial class LosslessCutPage : Page
         _thumbs.Clear();
         _keyframes = [];
         PreviewImage.Source = null;
-        StatusText.Text = $"Analysing {Path.GetFileName(path)}…";
+        StatusText.Text = AppLocalizer.Format($"Analysing {Path.GetFileName(path)}…");
 
         if (_runner.Locate("clipforge") is null)
         {
-            StatusText.Text = "The clipforge engine was not found. Build it with tools/clipforge/build.ps1.";
+            StatusText.Text = AppLocalizer.Get("The clipforge engine was not found. Build it with tools/clipforge/build.ps1.");
             return;
         }
 
@@ -107,7 +107,7 @@ public sealed partial class LosslessCutPage : Page
         try { Directory.CreateDirectory(outputDirectory); }
         catch (Exception ex)
         {
-            StatusText.Text = $"Could not create the analysis cache: {ex.Message}";
+            StatusText.Text = AppLocalizer.Format($"Could not create the analysis cache: {ex.Message}");
             return;
         }
 
@@ -144,7 +144,7 @@ public sealed partial class LosslessCutPage : Page
 
         if (!timeline.Success || duration <= 0)
         {
-            StatusText.Text = "Could not read the video timeline. Is it a valid media file?";
+            StatusText.Text = AppLocalizer.Get("Could not read the video timeline. Is it a valid media file?");
             return;
         }
 
@@ -196,8 +196,8 @@ public sealed partial class LosslessCutPage : Page
         UpdateSelectionSummary();
         UpdateExportEnabled();
         StatusText.Text =
-            $"{Path.GetFileName(path)} · {FormatTime(duration)} · {_keyframes.Count} keyframes. " +
-            "Scrub, set In/Out, then export.";
+            AppLocalizer.Format($"{Path.GetFileName(path)} · {FormatTime(duration)} · {_keyframes.Count} keyframes. ") +
+            AppLocalizer.Get("Scrub, set In/Out, then export.");
     }
 
     // ── Scrubbing ───────────────────────────────────────────────────────────────
@@ -308,24 +308,24 @@ public sealed partial class LosslessCutPage : Page
     {
         if (_duration <= 0)
         {
-            SelectionSummary.Text = "Whole clip";
+            SelectionSummary.Text = AppLocalizer.Get("Whole clip");
             return;
         }
         var span = Math.Max(0, _outPoint - _inPoint);
         var mode = LosslessToggle.IsOn ? "keyframe-snapped, stream copy" : "frame-exact, re-encode";
-        SelectionSummary.Text = $"Cut {FormatTime(_inPoint)} → {FormatTime(_outPoint)} ({FormatTime(span)}, {mode}).";
+        SelectionSummary.Text = AppLocalizer.Format($"Cut {FormatTime(_inPoint)} → {FormatTime(_outPoint)} ({FormatTime(span)}, {mode}).");
     }
 
     private void UpdateKeyframeHint()
     {
         if (_keyframes.Count == 0)
         {
-            KeyframeHint.Text = "Keyframes: —";
+            KeyframeHint.Text = AppLocalizer.Get("Keyframes: —");
             return;
         }
         KeyframeHint.Text = LosslessToggle.IsOn
-            ? $"Keyframes: {_keyframes.Count}. In/Out snap to the nearest keyframe so the copy is exact."
-            : $"Keyframes: {_keyframes.Count}. Re-encode mode cuts on any frame.";
+            ? AppLocalizer.Format($"Keyframes: {_keyframes.Count}. In/Out snap to the nearest keyframe so the copy is exact.")
+            : AppLocalizer.Format($"Keyframes: {_keyframes.Count}. Re-encode mode cuts on any frame.");
     }
 
     // ── Timeline overlay geometry ────────────────────────────────────────────────
@@ -446,7 +446,7 @@ public sealed partial class LosslessCutPage : Page
         var output = _outputPath ?? DefaultOutputPath();
         if (string.Equals(Path.GetFullPath(output), Path.GetFullPath(_sourcePath), StringComparison.OrdinalIgnoreCase))
         {
-            StatusText.Text = "Choose an output file that is different from the source.";
+            StatusText.Text = AppLocalizer.Get("Choose an output file that is different from the source.");
             return;
         }
 
@@ -466,12 +466,12 @@ public sealed partial class LosslessCutPage : Page
         CancelButton.IsEnabled = true;
         ExportProgress.Visibility = Visibility.Visible;
         ExportProgress.Value = 0;
-        StatusText.Text = "Exporting cut…";
+        StatusText.Text = AppLocalizer.Get("Exporting cut…");
 
         var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
         {
             ExportProgress.Value = Math.Clamp(p.Percent, 0, 100);
-            StatusText.Text = $"Exporting cut… {p.Percent:F0}% — {p.Stage}";
+            StatusText.Text = AppLocalizer.Format($"Exporting cut… {p.Percent:F0}% — {p.Stage}");
         }));
 
         SidecarResult result;
@@ -492,10 +492,10 @@ public sealed partial class LosslessCutPage : Page
         }
 
         StatusText.Text = result.Success
-            ? $"Saved cut to {output}."
+            ? AppLocalizer.Format($"Saved cut to {output}.")
             : result.ErrorCode == "cancelled"
-                ? "Export cancelled."
-                : $"Export failed: {result.ErrorMessage}";
+                ? AppLocalizer.Get("Export cancelled.")
+                : AppLocalizer.Format($"Export failed: {result.ErrorMessage}");
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => _cts?.Cancel();
