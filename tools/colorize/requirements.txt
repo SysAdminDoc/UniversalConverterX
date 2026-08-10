@@ -1,3 +1,4 @@
 opencv-python-headless>=4.11
 numpy>=1.26,<2
 av>=17.0.0,<18
+onnxruntime>=1.25.1,<2

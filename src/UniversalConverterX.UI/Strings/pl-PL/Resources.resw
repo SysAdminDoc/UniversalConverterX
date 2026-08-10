@@ -1203,6 +1203,9 @@
   <data name="ChapterMarksPage_SourceLabel.Text" xml:space="preserve">
     <value>Nie wczytano pliku.</value>
   </data>
+  <data name="Code_000E5506EEB9E750D4A1" xml:space="preserve">
+    <value>DDColor temporal model not downloaded. The Apache-2.0 ONNX pack is ~113 MB.</value>
+  </data>
   <data name="Code_0072F9B01AEBEDAE7020" xml:space="preserve">
     <value>Ready to reframe {0} clip(s). {1}</value>
   </data>
@@ -1866,6 +1869,9 @@
   <data name="Code_4427329922B4B15CFCE4" xml:space="preserve">
     <value>Unavailable on this system — choose Real-ESRGAN, Anime4K, or SeedVR2</value>
   </data>
+  <data name="Code_45B4DE1D9C10F89FA863" xml:space="preserve">
+    <value>This downloads the revision- and SHA-256-pinned DDColor ONNX pack (Apache-2.0, ~113 MB) into the local model cache. Video mode propagates chroma through optical flow and resets on scene cuts to reduce flicker. The pack is never downloaded during colourisation.</value>
+  </data>
   <data name="Code_464DC53F47E90F9EBF6F" xml:space="preserve">
     <value>Showing {0} most recent of {1} total.</value>
   </data>
@@ -2189,6 +2195,9 @@
   </data>
   <data name="Code_684BF93DFDDDFB9299A1" xml:space="preserve">
     <value>Slideshow created</value>
+  </data>
+  <data name="Code_68BE0AEEA56A87CAC69C" xml:space="preserve">
+    <value>Download the DDColor temporal model?</value>
   </data>
   <data name="Code_69194CFE6C47EC0094E7" xml:space="preserve">
     <value>{0} model(s) discovered. realesr-animevideov3 is fastest for video.</value>
@@ -2937,6 +2946,9 @@
   <data name="Code_BB0393D9CE5EA9C29640" xml:space="preserve">
     <value>VMAF complete. Higher mean = closer to reference (90+ is excellent, 70- is visibly degraded).</value>
   </data>
+  <data name="Code_BB641AB8EB02B573CF37" xml:space="preserve">
+    <value>DDColor temporal model ready — optical-flow stabilisation runs offline.</value>
+  </data>
   <data name="Code_BC265DC085306B7DB96F" xml:space="preserve">
     <value>Language code (ISO-639, optional)</value>
   </data>
@@ -3092,6 +3104,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_CECE6CCE1FEF9BD36A9A" xml:space="preserve">
     <value>Recording {0} queued sessions...</value>
+  </data>
+  <data name="Code_CF3A03B0D0B341D45590" xml:space="preserve">
+    <value>Download DDColor model (113 MB)</value>
   </data>
   <data name="Code_CFBB4D38D4A4E28D981A" xml:space="preserve">
     <value>Tracks · {0}</value>
@@ -3441,6 +3456,9 @@ SHA-256: {0}</value>
   <data name="Code_F1641CF84E99A8474980" xml:space="preserve">
     <value>Ready to convert {0} image(s). {1}</value>
   </data>
+  <data name="Code_F1847741C3C92FF05481" xml:space="preserve">
+    <value>DDColor temporal tier is disabled by policy (UCX_DISABLE_DDCOLOR).</value>
+  </data>
   <data name="Code_F1A79304AC48A0319249" xml:space="preserve">
     <value>Attach: {0}</value>
   </data>
@@ -3565,6 +3583,9 @@ SHA-256: {0}</value>
   <data name="ColorizeVideoPage_CancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="ColorizeVideoPage_ClassicTier.Content" xml:space="preserve">
+    <value>Classic CPU (portable default)</value>
+  </data>
   <data name="ColorizeVideoPage_ColorizeButton.Content" xml:space="preserve">
     <value>Colorize</value>
   </data>
@@ -3576,6 +3597,9 @@ SHA-256: {0}</value>
   </data>
   <data name="ColorizeVideoPage_ColorizeOpenEmptyButton.Content" xml:space="preserve">
     <value>Open image or video…</value>
+  </data>
+  <data name="ColorizeVideoPage_DDColorTier.Content" xml:space="preserve">
+    <value>DDColor temporal (ONNX · 113 MB)</value>
   </data>
   <data name="ColorizeVideoPage_DownloadModelButton.Content" xml:space="preserve">
     <value>Download model (123 MB)</value>

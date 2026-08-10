@@ -6,7 +6,8 @@
   "capabilities": [
     "ndjson",
     "tool:ffmpeg",
-    "tool:ffprobe"
+    "tool:ffprobe",
+    "temporal-colorization"
   ],
   "architectures": [
     "win-x64"

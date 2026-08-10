@@ -71,14 +71,25 @@ public sealed class ColorizeWorkflowViewModel : ObservableObject
         return Path.Combine(directory, $"{stem}_color{(IsVideo ? ".mp4" : ".png")}");
     }
 
-    public WorkflowInvocation BuildInvocation()
+    public WorkflowInvocation BuildInvocation(string tier = "classic")
     {
         if (SourcePath is null || !ModelReady)
             throw new InvalidOperationException("A source and verified model are required.");
+        if (tier is not ("classic" or "ddcolor-temporal"))
+            throw new ArgumentOutOfRangeException(nameof(tier));
         var output = OutputPath ?? DefaultOutputPath();
+        var arguments = new List<string>
+        {
+            IsVideo ? "video" : "image", "--input", SourcePath, "--output", output,
+        };
+        if (tier != "classic")
+        {
+            arguments.Add("--tier");
+            arguments.Add(tier);
+        }
         return new WorkflowInvocation(
             "colorize",
-            [IsVideo ? "video" : "image", "--input", SourcePath, "--output", output],
+            arguments,
             output);
     }
 

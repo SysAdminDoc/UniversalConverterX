@@ -78,6 +78,12 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel Spacing="10">
                             <TextBlock x:Uid="ColorizeVideoPage_Item_007" Text="Model" Style="{StaticResource PanelTitleTextStyle}"/>
+                            <ComboBox x:Uid="ColorizeVideoPage_TierCombo" x:Name="TierCombo"
+                                      SelectionChanged="Tier_Changed"
+                                      AutomationProperties.AutomationId="ColorizeTierCombo">
+                                <ComboBoxItem x:Uid="ColorizeVideoPage_ClassicTier" Content="Classic CPU (portable default)" Tag="classic" IsSelected="True"/>
+                                <ComboBoxItem x:Uid="ColorizeVideoPage_DDColorTier" Content="DDColor temporal (ONNX · 113 MB)" Tag="ddcolor-temporal"/>
+                            </ComboBox>
                             <TextBlock x:Uid="ColorizeVideoPage_ModelStatus" x:Name="ModelStatus" Text="Checking…"
                                        Style="{StaticResource MutedTextStyle}" TextWrapping="Wrap"/>
                             <Button x:Uid="ColorizeVideoPage_DownloadModelButton" x:Name="DownloadModelButton" Content="Download model (123 MB)"

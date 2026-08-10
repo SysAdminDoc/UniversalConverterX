@@ -82,6 +82,17 @@ public sealed class WorkflowViewModelTests
     }
 
     [Fact]
+    public void Colorize_BuildsTheOptInDdcolorTemporalTier()
+    {
+        var model = new ColorizeWorkflowViewModel { ModelReady = true };
+        model.TryLoadSource(@"C:\media\mono.mov").Should().BeTrue();
+
+        model.BuildInvocation("ddcolor-temporal").Arguments.Should().Equal(
+            "video", "--input", @"C:\media\mono.mov", "--output", @"C:\media\mono_color.mp4",
+            "--tier", "ddcolor-temporal");
+    }
+
+    [Fact]
     public void AutoHighlight_BuildsInvariantAnalysisAndSelectedRenderPayload()
     {
         var model = new AutoHighlightWorkflowViewModel();

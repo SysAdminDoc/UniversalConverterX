@@ -24,11 +24,13 @@ public sealed partial class ColorizeVideoPage : Page
     private readonly ISidecarRunner _runner;
     private readonly ColorizeWorkflowViewModel _viewModel = new();
     private CancellationTokenSource? _cts;
+    private bool _initialized;
 
     public ColorizeVideoPage()
     {
         InitializeComponent();
         _runner = App.Services.GetRequiredService<ISidecarRunner>();
+        _initialized = true;
         _ = RefreshModelStatusAsync();
     }
 
@@ -36,6 +38,7 @@ public sealed partial class ColorizeVideoPage : Page
 
     private async Task RefreshModelStatusAsync()
     {
+        var tier = SelectedTier();
         if (_runner.Locate("colorize") is null)
         {
             ModelStatus.Text = AppLocalizer.Get("colorize engine not built (tools/colorize/build.ps1).");
@@ -46,35 +49,57 @@ public sealed partial class ColorizeVideoPage : Page
         }
 
         var ready = false;
+        var disabled = false;
         await _runner.RunAsync(
-            "colorize", ["check-model"],
+            "colorize", ["check-model", "--tier", tier],
             onRawEvent: (name, payload) =>
             {
                 if (name == "model_status" && payload.TryGetProperty("ready", out var r))
                     ready = r.ValueKind == JsonValueKind.True;
+                if (name == "model_status" && payload.TryGetProperty("disabled", out var d))
+                    disabled = d.ValueKind == JsonValueKind.True;
             });
         _viewModel.ModelReady = ready;
         ModelStatus.Text = ready
-            ? AppLocalizer.Get("Model ready — colourisation runs offline on the CPU.")
-            : AppLocalizer.Get("Model not downloaded. The colourisation weights (BSD-2-Clause) are ~123 MB.");
-        DownloadModelButton.IsEnabled = !_viewModel.IsBusy;
+            ? tier == "ddcolor-temporal"
+                ? AppLocalizer.Get("DDColor temporal model ready — optical-flow stabilisation runs offline.")
+                : AppLocalizer.Get("Model ready — colourisation runs offline on the CPU.")
+            : disabled
+                ? AppLocalizer.Get("DDColor temporal tier is disabled by policy (UCX_DISABLE_DDCOLOR).")
+                : tier == "ddcolor-temporal"
+                ? AppLocalizer.Get("DDColor temporal model not downloaded. The Apache-2.0 ONNX pack is ~113 MB.")
+                : AppLocalizer.Get("Model not downloaded. The colourisation weights (BSD-2-Clause) are ~123 MB.");
+        DownloadModelButton.IsEnabled = !_viewModel.IsBusy && !disabled;
         DownloadModelButton.Content = ready
             ? AppLocalizer.Get("Re-verify model")
-            : AppLocalizer.Get("Download model (123 MB)");
+            : tier == "ddcolor-temporal"
+                ? AppLocalizer.Get("Download DDColor model (113 MB)")
+                : AppLocalizer.Get("Download model (123 MB)");
         UpdateColorizeEnabled();
+    }
+
+    private async void Tier_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_initialized || TierCombo is null || _viewModel.IsBusy) return;
+        await RefreshModelStatusAsync();
     }
 
     private async void DownloadModel_Click(object sender, RoutedEventArgs e)
     {
         if (_viewModel.IsBusy || _runner.Locate("colorize") is null) return;
 
+        var tier = SelectedTier();
         if (!_viewModel.ModelReady)
         {
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = AppLocalizer.Get("Download the colourisation model?"),
-                Content = AppLocalizer.Get("This downloads the SHA-256 verified Colorful Image Colorization model (BSD-2-Clause, ~123 MB) into the local model cache. It runs on the CPU — no GPU required — and is never downloaded again during colourisation."),
+                Title = tier == "ddcolor-temporal"
+                    ? AppLocalizer.Get("Download the DDColor temporal model?")
+                    : AppLocalizer.Get("Download the colourisation model?"),
+                Content = tier == "ddcolor-temporal"
+                    ? AppLocalizer.Get("This downloads the revision- and SHA-256-pinned DDColor ONNX pack (Apache-2.0, ~113 MB) into the local model cache. Video mode propagates chroma through optical flow and resets on scene cuts to reduce flicker. The pack is never downloaded during colourisation.")
+                    : AppLocalizer.Get("This downloads the SHA-256 verified Colorful Image Colorization model (BSD-2-Clause, ~123 MB) into the local model cache. It runs on the CPU — no GPU required — and is never downloaded again during colourisation."),
                 PrimaryButtonText = AppLocalizer.Get("Accept & download"),
                 CloseButtonText = AppLocalizer.Get("Cancel"),
                 DefaultButton = ContentDialogButton.Close,
@@ -91,7 +116,7 @@ public sealed partial class ColorizeVideoPage : Page
             var progress = new Progress<SidecarProgress>(p => DispatcherQueue.TryEnqueue(() =>
                 ModelStatus.Text = AppLocalizer.Format($"Downloading model… {p.Percent:F0}% ({p.Stage})")));
             var result = await _runner.RunAsync(
-                "colorize", ["download-model", "--accept-license"],
+                "colorize", ["download-model", "--tier", tier, "--accept-license"],
                 progress, ct: CancellationToken.None,
                 silenceTimeout: TimeSpan.FromHours(1));
             if (!result.Success)
@@ -178,7 +203,7 @@ public sealed partial class ColorizeVideoPage : Page
     {
         if (!_viewModel.CanColorize) return;
 
-        var request = _viewModel.BuildInvocation();
+        var request = _viewModel.BuildInvocation(SelectedTier());
         var output = request.OutputPath;
         _viewModel.IsBusy = true;
         _cts = new CancellationTokenSource();
@@ -232,4 +257,7 @@ public sealed partial class ColorizeVideoPage : Page
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => _cts?.Cancel();
+
+    private string SelectedTier() =>
+        (TierCombo.SelectedItem as ComboBoxItem)?.Tag as string ?? "classic";
 }

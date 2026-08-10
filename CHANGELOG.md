@@ -6,6 +6,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
+- Added an opt-in DDColor temporal colorization tier. A revision- and SHA-256-pinned Apache-2.0 ONNX pack is downloaded only after consent, video frames use optical-flow chroma propagation with scene-cut resets, `UCX_DISABLE_DDCOLOR=1` provides a kill switch, and the portable BSD-2-Clause CPU tier remains the default and fallback.
 - Added governed offline speaker diarization to faster-whisper Speech-to-Text. Speaker labels are opt-in and remain disabled until the user accepts the upstream model terms and installs the revision-pinned, SHA-256-verified pyannote 3.1 pack; SRT, VTT, TXT, JSON, and NDJSON output preserve labels, while inference fails closed without the local pack and network/telemetry access is disabled.
 - Added an app-scoped durable Job Center over the shared queue store. Converter and Compressor queues now restore across navigation and restart, recover in-flight jobs as interrupted, expose centralized cancel/retry/skip actions, and publish preflight blocker-versus-warning diagnostics.
 - Routed Console and Explorer preset loading through the Core `PresetDocument` validator, with shared diagnostics and compatibility coverage for valid, future-schema, XXE, traversal, invocation-mode, and rooted-output fixtures.

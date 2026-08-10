@@ -43,13 +43,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2/P3 — Governed local AI capability
 
-- [ ] P3 — Item 143 — Add DDColor/ColorMNet temporal colorization tier
-  Why: the existing Zhang CPU model is fast but temporally weaker; these local models offer a quality tier without removing the portable fallback.
-  Evidence: `tools/colorize`; `vs-deoldify`.
-  Touches: colorize sidecar, pinned model packs, capability UI, temporal fixtures.
-  Acceptance: DDColor/ColorMNet is consented, revision/hash pinned, kill-switchable, and measurably reduces frame-to-frame color flicker while retaining the portable CPU default/fallback.
-  Complexity: L
-
 ### P3 — Specialist capability and consolidation
 
 - [ ] P3 — Item 144 — Support bounded live/dynamic DASH recording

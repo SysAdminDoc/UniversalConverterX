@@ -1,8 +1,10 @@
 """Offline B&W -> colour sidecar (CPU, OpenCV DNN).
 
 Colourises grayscale photos and video using Richard Zhang's Colorful Image
-Colorization model (BSD-2-Clause) through OpenCV's DNN module. Runs entirely
-on the CPU -- no GPU or PyTorch required -- so it works on any machine.
+Colorization model (BSD-2-Clause) through OpenCV's DNN module. The optional
+DDColor tier uses an Apache-2.0 ONNX model and optical-flow chroma propagation
+to reduce frame-to-frame flicker; the portable classic tier remains the
+default. Both tiers run locally and the classic tier needs no GPU or PyTorch.
 
 The model weights are NOT bundled. `download-model` is the only networked
 operation and requires explicit `--accept-license`; it fetches SHA-256 pinned
@@ -10,8 +12,8 @@ files into the shared model cache. Inference (`image` / `video`) never
 downloads and fails cleanly when the model pack is absent.
 
 Operations:
-  download-model   Fetch + verify the colourisation model (consent required).
-  check-model      Report whether the verified model pack is present.
+  download-model   Fetch + verify the selected colourisation model (consent required).
+  check-model      Report whether the selected verified model pack is present.
   image            Colourise a single image.
   video            Colourise a video frame-by-frame (audio preserved).
 """
@@ -30,12 +32,27 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_lib"))
 from ucx_sidecar import emit, find_ffmpeg, find_ffprobe, probe_media
+from ucx_assets import enforce_offline
 import hw_decode
 
 
 PACK_SLUG = "colorize"
 MARKER_NAME = ".ucx-pack.json"
 MODEL_LICENSE = "BSD-2-Clause (richzhang/colorization)"
+DDCOLOR_TIER = "ddcolor-temporal"
+DDCOLOR_LICENSE = "Apache-2.0 (DDColor)"
+DDCOLOR_REPOSITORY = "wavespeed/image-colorizer"
+DDCOLOR_REVISION = "1859b31ce0a54ba3afdf7d55bbe1a151c981b29f"
+DDCOLOR_SOURCE_REVISION = "piddnad/DDColor"
+DDCOLOR_WEIGHTS = "ddcolor-fp16.onnx"
+DDCOLOR_WEIGHTS_SIZE = 113225654
+DDCOLOR_WEIGHTS_SHA256 = "40ff5091157701a76f05f630b40ce1de7de8d15f1abfa8c403947e4e4ebab73c"
+DDCOLOR_WEIGHTS_URL = (
+    "https://huggingface.co/wavespeed/image-colorizer/resolve/"
+    f"{DDCOLOR_REVISION}/{DDCOLOR_WEIGHTS}"
+)
+DDCOLOR_MARKER = ".ucx-ddcolor-pack.json"
+DDCOLOR_DEFAULT_TEMPORAL_STRENGTH = 0.65
 
 # Small definition files live on GitHub (stable). The 123 MB weights host is
 # overridable via UCX_COLORIZE_MODEL_URL so a mirror or a pre-placed file can
@@ -70,11 +87,12 @@ def fail(code: str, message: str) -> int:
     return 1
 
 
-def model_dir() -> Path:
+def model_dir(tier: str = "classic") -> Path:
     base = os.environ.get("UCX_MODEL_DIR")
+    suffix = Path(DDCOLOR_TIER) if tier == DDCOLOR_TIER else Path()
     if base:
-        return Path(base) / PACK_SLUG
-    return Path(__file__).resolve().parent / "_models"
+        return Path(base) / PACK_SLUG / suffix
+    return Path(__file__).resolve().parent / "_models" / suffix
 
 
 def sha256_file(path: Path) -> str:
@@ -85,25 +103,56 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def model_ready(root: Path) -> bool:
-    marker = root / MARKER_NAME
+def model_ready(root: Path, assets: list[tuple[str, str, int, str]] = MODEL_ASSETS,
+                marker_name: str = MARKER_NAME) -> bool:
+    marker = root / marker_name
     if not marker.is_file():
         return False
-    for name, _url, size, _sha in MODEL_ASSETS:
+    for name, _url, size, sha in assets:
         path = root / name
-        if not path.is_file() or path.stat().st_size != size:
+        if (not path.is_file()
+                or path.stat().st_size != size
+                or sha256_file(path) != sha):
             return False
     return True
 
 
+def ddcolor_model_ready(root: Path) -> bool:
+    return model_ready(
+        root,
+        [(DDCOLOR_WEIGHTS, DDCOLOR_WEIGHTS_URL, DDCOLOR_WEIGHTS_SIZE, DDCOLOR_WEIGHTS_SHA256)],
+        DDCOLOR_MARKER,
+    )
+
+
 # ── model management ────────────────────────────────────────────────────────
 
-def op_check_model(_: argparse.Namespace) -> int:
-    root = model_dir()
-    ready = model_ready(root)
-    emit("model_status", ready=ready, path=str(root),
-         license=MODEL_LICENSE,
-         download_bytes=TOTAL_DOWNLOAD_BYTES)
+def _tier_assets(tier: str) -> tuple[list[tuple[str, str, int, str]], str, str, int, str]:
+    if tier == DDCOLOR_TIER:
+        return (
+            [(DDCOLOR_WEIGHTS, DDCOLOR_WEIGHTS_URL, DDCOLOR_WEIGHTS_SIZE, DDCOLOR_WEIGHTS_SHA256)],
+            DDCOLOR_MARKER,
+            DDCOLOR_LICENSE,
+            DDCOLOR_WEIGHTS_SIZE,
+            "DDColor temporal",
+        )
+    return MODEL_ASSETS, MARKER_NAME, MODEL_LICENSE, TOTAL_DOWNLOAD_BYTES, "classic CPU"
+
+
+def tier_disabled(tier: str) -> bool:
+    return tier == DDCOLOR_TIER and os.environ.get("UCX_DISABLE_DDCOLOR", "").lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def op_check_model(args: argparse.Namespace) -> int:
+    tier = getattr(args, "tier", "classic")
+    assets, marker, license_name, download_bytes, display = _tier_assets(tier)
+    root = model_dir(tier)
+    ready = model_ready(root, assets, marker)
+    emit("model_status", ready=ready, path=str(root), tier=tier,
+         license=license_name, download_bytes=download_bytes,
+         display=display, disabled=tier_disabled(tier))
     emit("complete", output=str(root), size_bytes=0, count=1 if ready else 0)
     return 0
 
@@ -143,19 +192,21 @@ def _download(url: str, destination: Path, expected_sha: str, expected_size: int
 
 
 def op_download_model(args: argparse.Namespace) -> int:
+    tier = getattr(args, "tier", "classic")
+    assets, marker_name, license_name, download_bytes, display = _tier_assets(tier)
     if not args.accept_license:
         return fail("license_not_accepted",
-                    f"The colourisation model is licensed {MODEL_LICENSE}. "
+                    f"The {display} model is licensed {license_name}. "
                     "Re-run with --accept-license to download it.")
-    root = model_dir()
+    root = model_dir(tier)
     root.mkdir(parents=True, exist_ok=True)
 
-    if model_ready(root):
+    if model_ready(root, assets, marker_name):
         emit("log", level="info", message="Model already present and verified.")
-        emit("complete", output=str(root), size_bytes=0, count=len(MODEL_ASSETS))
+        emit("complete", output=str(root), size_bytes=0, count=len(assets))
         return 0
 
-    for name, url, size, sha in MODEL_ASSETS:
+    for name, url, size, sha in assets:
         dest = root / name
         if dest.is_file() and dest.stat().st_size == size and sha256_file(dest) == sha:
             continue
@@ -165,13 +216,19 @@ def op_download_model(args: argparse.Namespace) -> int:
                         f"Could not download {name}. Set UCX_COLORIZE_MODEL_URL to a "
                         "mirror, or place the file manually in the model directory.")
 
-    marker = root / MARKER_NAME
+    marker = root / marker_name
     marker.write_text(json.dumps({
         "pack": PACK_SLUG,
-        "license": MODEL_LICENSE,
-        "assets": [name for name, *_ in MODEL_ASSETS],
+        "tier": tier,
+        "license": license_name,
+        "repository": DDCOLOR_REPOSITORY if tier == DDCOLOR_TIER else "richzhang/colorization",
+        "revision": DDCOLOR_REVISION if tier == DDCOLOR_TIER else "caffe",
+        "assets": [
+            {"name": name, "sizeBytes": size, "sha256": sha}
+            for name, _url, size, sha in assets
+        ],
     }, indent=2), encoding="utf-8")
-    emit("complete", output=str(root), size_bytes=TOTAL_DOWNLOAD_BYTES, count=len(MODEL_ASSETS))
+    emit("complete", output=str(root), size_bytes=download_bytes, count=len(assets))
     return 0
 
 
@@ -186,6 +243,120 @@ def _load_net(root: Path):
     net.getLayer(net.getLayerId("class8_ab")).blobs = [pts]
     net.getLayer(net.getLayerId("conv8_313_rh")).blobs = [np.full([1, 313], 2.606, np.float32)]
     return net
+
+
+def _compose_lab(l_channel, ab, cv2, np):
+    lab = np.concatenate((l_channel[:, :, None], ab), axis=2)
+    bgr = cv2.cvtColor(lab.astype(np.float32), cv2.COLOR_LAB2BGR)
+    return np.clip(bgr * 255.0, 0, 255).round().astype(np.uint8)
+
+
+def temporal_blend_ab(current_ab, previous_ab, strength: float, scene_delta: float,
+                      scene_cut_threshold: float = 0.25):
+    """Blend aligned chroma while resetting on a scene cut.
+
+    This small, deterministic policy is also used by the video path's
+    optical-flow alignment. It keeps scene changes from carrying stale colour
+    into the next shot and provides a measurable temporal-stability knob.
+    """
+    import numpy as np  # noqa: PLC0415
+
+    if previous_ab is None or scene_delta >= scene_cut_threshold:
+        return current_ab.copy()
+    strength = max(0.0, min(float(strength), 0.85))
+    confidence = 1.0 - min(max(float(scene_delta), 0.0) / scene_cut_threshold, 1.0)
+    alpha = strength * confidence
+    return current_ab * (1.0 - alpha) + previous_ab * alpha
+
+
+def chroma_flicker_score(chroma_frames) -> float:
+    """Return mean adjacent-frame chroma change for regression fixtures."""
+    import numpy as np  # noqa: PLC0415
+
+    frames = [np.asarray(frame, dtype=np.float32) for frame in chroma_frames]
+    if len(frames) < 2:
+        return 0.0
+    return float(np.mean([
+        np.mean(np.abs(current - previous))
+        for previous, current in zip(frames, frames[1:])
+    ]))
+
+
+class DDColorizer:
+    """Local DDColor ONNX inference with optional temporal chroma propagation."""
+
+    input_size = 256
+
+    def __init__(self, root: Path):
+        import onnxruntime as ort  # noqa: PLC0415
+
+        options = ort.SessionOptions()
+        # The pinned fp16 artifact contains a graph pattern that older ORT
+        # builds incorrectly fuse. Disabling graph rewrites is deterministic
+        # and still allows the CPU/CUDA execution provider to optimize kernels.
+        options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+        available = ort.get_available_providers()
+        providers = [
+            provider for provider in ("CUDAExecutionProvider", "CPUExecutionProvider")
+            if provider in available
+        ]
+        if not providers:
+            raise RuntimeError("ONNX Runtime has no CPU or CUDA execution provider")
+        self.session = ort.InferenceSession(
+            str(root / DDCOLOR_WEIGHTS), sess_options=options, providers=providers)
+        inputs = self.session.get_inputs()
+        outputs = self.session.get_outputs()
+        if len(inputs) != 1 or len(outputs) != 1:
+            raise RuntimeError("DDColor model contract must have one input and one output")
+        self.input_name = inputs[0].name
+        self.output_name = outputs[0].name
+
+    def predict(self, frame):
+        import cv2  # noqa: PLC0415
+        import numpy as np  # noqa: PLC0415
+
+        height, width = frame.shape[:2]
+        image = frame.astype(np.float32) / 255.0
+        original_l = cv2.cvtColor(image, cv2.COLOR_BGR2Lab)[:, :, 0]
+        resized = cv2.resize(image, (self.input_size, self.input_size))
+        resized_l = cv2.cvtColor(resized, cv2.COLOR_BGR2Lab)[:, :, :1]
+        gray_lab = np.concatenate((resized_l, np.zeros_like(resized_l), np.zeros_like(resized_l)), axis=-1)
+        gray_rgb = cv2.cvtColor(gray_lab, cv2.COLOR_LAB2RGB)
+        input_tensor = np.ascontiguousarray(gray_rgb.transpose((2, 0, 1))[None], dtype=np.float32)
+        output_ab = self.session.run(
+            [self.output_name], {self.input_name: input_tensor})[0][0]
+        if output_ab.ndim != 3 or output_ab.shape[0] != 2:
+            raise RuntimeError(f"Unexpected DDColor output shape: {output_ab.shape}")
+        ab = cv2.resize(
+            output_ab.transpose((1, 2, 0)), (width, height), interpolation=cv2.INTER_LINEAR)
+        return _compose_lab(original_l, ab, cv2, np), original_l, ab
+
+    def colorize_video_frame(self, frame, strength: float, previous_gray=None, previous_ab=None):
+        import cv2  # noqa: PLC0415
+        import numpy as np  # noqa: PLC0415
+
+        output, gray, current_ab = self.predict(frame)
+        if previous_gray is None or previous_ab is None or strength <= 0:
+            return output, gray, current_ab
+
+        current_gray = gray.astype(np.float32)
+        old_gray = previous_gray.astype(np.float32)
+        scene_delta = float(np.mean(np.abs(current_gray - old_gray)) / 100.0)
+        if scene_delta >= 0.25:
+            return output, gray, current_ab
+
+        flow = cv2.calcOpticalFlowFarneback(
+            current_gray, old_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        height, width = current_gray.shape
+        grid_x, grid_y = np.meshgrid(
+            np.arange(width, dtype=np.float32), np.arange(height, dtype=np.float32))
+        previous_x = grid_x + flow[:, :, 0]
+        previous_y = grid_y + flow[:, :, 1]
+        warped_previous = cv2.remap(
+            previous_ab.astype(np.float32), previous_x, previous_y,
+            cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        blended_ab = temporal_blend_ab(current_ab, warped_previous, strength, scene_delta)
+        return _compose_lab(gray, blended_ab, cv2, np), gray, blended_ab
 
 
 def _colorize_bgr(net, frame):
@@ -206,10 +377,14 @@ def _colorize_bgr(net, frame):
 
 
 def op_image(args: argparse.Namespace) -> int:
-    root = model_dir()
-    if not model_ready(root):
+    tier = getattr(args, "tier", "classic")
+    root = model_dir(tier)
+    ready = ddcolor_model_ready(root) if tier == DDCOLOR_TIER else model_ready(root)
+    if tier_disabled(tier):
+        return fail("tier_disabled", "The DDColor temporal tier is disabled by UCX_DISABLE_DDCOLOR.")
+    if not ready:
         return fail("model_missing",
-                    "Colourisation model not found. Run `download-model --accept-license` first.")
+                    f"{tier} colourisation model not found. Run `download-model --tier {tier} --accept-license` first.")
     try:
         import cv2  # noqa: PLC0415
     except ImportError:
@@ -226,8 +401,11 @@ def op_image(args: argparse.Namespace) -> int:
         return fail("bad_image", f"Could not read image: {src.name}")
 
     emit("progress", percent=0, stage="colourising", eta_seconds=None)
-    net = _load_net(root)
-    result = _colorize_bgr(net, frame)
+    enforce_offline()
+    if tier == DDCOLOR_TIER:
+        result, _gray, _ab = DDColorizer(root).predict(frame)
+    else:
+        result = _colorize_bgr(_load_net(root), frame)
     if not cv2.imwrite(str(out_path), result):
         return fail("write_failed", f"Could not write output: {out_path}")
 
@@ -239,10 +417,14 @@ def op_image(args: argparse.Namespace) -> int:
 
 
 def op_video(args: argparse.Namespace) -> int:
-    root = model_dir()
-    if not model_ready(root):
+    tier = getattr(args, "tier", "classic")
+    root = model_dir(tier)
+    ready = ddcolor_model_ready(root) if tier == DDCOLOR_TIER else model_ready(root)
+    if tier_disabled(tier):
+        return fail("tier_disabled", "The DDColor temporal tier is disabled by UCX_DISABLE_DDCOLOR.")
+    if not ready:
         return fail("model_missing",
-                    "Colourisation model not found. Run `download-model --accept-license` first.")
+                    f"{tier} colourisation model not found. Run `download-model --tier {tier} --accept-license` first.")
     ffmpeg = find_ffmpeg(Path(__file__).resolve().parent)
     ffprobe = find_ffprobe(Path(__file__).resolve().parent)
     if not ffmpeg:
@@ -278,7 +460,9 @@ def op_video(args: argparse.Namespace) -> int:
         total_frames = 0
     has_audio = any(s.get("codec_type") == "audio" for s in (info or {}).get("streams", []))
 
-    net = _load_net(root)
+    enforce_offline()
+    ddcolorizer = DDColorizer(root) if tier == DDCOLOR_TIER else None
+    net = None if ddcolorizer is not None else _load_net(root)
     capture = cv2.VideoCapture(str(src))
     if not capture.isOpened():
         return fail("decode_failed", "Could not open the video for decoding.")
@@ -313,11 +497,19 @@ def op_video(args: argparse.Namespace) -> int:
         ),
     )
     index = 0
+    previous_gray = None
+    previous_ab = None
+    temporal_strength = 0.0 if getattr(args, "no_temporal", False) else args.temporal_strength
     try:
         for _decoded_index, frame in hw_decode.frames_or_opencv(
             src, cv2, allow_hw=allow_hw
         ):
-            process.stdin.write(_colorize_bgr(net, frame).tobytes())
+            if ddcolorizer is not None:
+                colorized, previous_gray, previous_ab = ddcolorizer.colorize_video_frame(
+                    frame, temporal_strength, previous_gray, previous_ab)
+            else:
+                colorized = _colorize_bgr(net, frame)
+            process.stdin.write(colorized.tobytes())
             index += 1
             if total_frames:
                 emit("progress", percent=round(index / total_frames * 100, 1),
@@ -348,22 +540,32 @@ def op_video(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="colorize-sidecar",
-        description="Offline B&W -> colour via OpenCV DNN (CPU).")
+        description="Offline B&W -> colour with a portable CPU tier or DDColor temporal tier.")
     sub = p.add_subparsers(dest="op", required=True)
 
     dm = sub.add_parser("download-model", help="Download the colourisation model (consent required)")
+    dm.add_argument("--tier", choices=("classic", DDCOLOR_TIER), default="classic")
     dm.add_argument("--accept-license", action="store_true", dest="accept_license",
-                    help=f"Accept the model licence ({MODEL_LICENSE}).")
+                    help="Accept the selected model licence.")
 
-    sub.add_parser("check-model", help="Report whether the verified model is present")
+    cm = sub.add_parser("check-model", help="Report whether the verified model is present")
+    cm.add_argument("--tier", choices=("classic", DDCOLOR_TIER), default="classic")
 
     im = sub.add_parser("image", help="Colourise a single image")
+    im.add_argument("--tier", choices=("classic", DDCOLOR_TIER), default="classic")
     im.add_argument("--input", required=True)
     im.add_argument("--output", required=True)
 
     vid = sub.add_parser("video", help="Colourise a video frame-by-frame")
+    vid.add_argument("--tier", choices=("classic", DDCOLOR_TIER), default="classic")
     vid.add_argument("--input", required=True)
     vid.add_argument("--output", required=True)
+    vid.add_argument(
+        "--temporal-strength", type=float, default=DDCOLOR_DEFAULT_TEMPORAL_STRENGTH,
+        help="DDColor chroma propagation strength (0 disables temporal blending).")
+    vid.add_argument(
+        "--no-temporal", action="store_true",
+        help="Disable DDColor optical-flow propagation for this run (kill switch).")
     vid.add_argument(
         "--hw-decode",
         action="store_true",

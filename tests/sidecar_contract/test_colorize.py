@@ -36,6 +36,34 @@ def _run(func, args) -> tuple[int, list[dict]]:
 
 
 class ColorizeTests(unittest.TestCase):
+    def test_ddcolor_temporal_tier_is_opt_in_and_kill_switchable(self) -> None:
+        default = SIDECAR.build_parser().parse_args(
+            ["video", "--input", "in.mp4", "--output", "out.mp4"])
+        temporal = SIDECAR.build_parser().parse_args(
+            ["video", "--tier", "ddcolor-temporal", "--input", "in.mp4",
+             "--output", "out.mp4", "--no-temporal"])
+        self.assertEqual("classic", default.tier)
+        self.assertEqual("ddcolor-temporal", temporal.tier)
+        self.assertTrue(temporal.no_temporal)
+        self.assertEqual(SIDECAR.DDCOLOR_WEIGHTS_SIZE, 113225654)
+        self.assertEqual(len(SIDECAR.DDCOLOR_WEIGHTS_SHA256), 64)
+
+    def test_temporal_blending_reduces_chroma_flicker(self) -> None:
+        import numpy as np
+
+        base = np.full((4, 4, 2), 128.0, dtype=np.float32)
+        raw = [base + (12.0 if index % 2 else -12.0) for index in range(8)]
+        stabilized = []
+        previous = None
+        for frame in raw:
+            previous = SIDECAR.temporal_blend_ab(frame, previous, 0.65, 0.0)
+            stabilized.append(previous)
+
+        self.assertLess(
+            SIDECAR.chroma_flicker_score(stabilized),
+            SIDECAR.chroma_flicker_score(raw),
+        )
+
     def test_video_hardware_decode_is_opt_in(self) -> None:
         default = SIDECAR.build_parser().parse_args(
             ["video", "--input", "in.mp4", "--output", "out.mp4"])
