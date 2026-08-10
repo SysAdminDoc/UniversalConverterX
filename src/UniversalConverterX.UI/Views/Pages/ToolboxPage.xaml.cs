@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using UniversalConverterX.Core.Security;
 using UniversalConverterX.Core.Utilities;
@@ -573,9 +574,9 @@ public sealed partial class ToolboxPage : Page
         DocumentTools.Add(new ToolboxTile("presets:fontsubset", "Webfont Subsetter", "Shrink TTF/OTF/WOFF -> WOFF2 to only used glyphs", "\uE8D2", blue, "Ready", green, false, "fontTools.subset"));
     }
 
-    private void Tile_Click(object sender, ItemClickEventArgs e)
+    private void Tile_Tapped(object sender, TappedRoutedEventArgs e)
     {
-        if (e.ClickedItem is ToolboxTile tile)
+        if (sender is FrameworkElement { DataContext: ToolboxTile tile })
         {
             if (tile.StatusBadge is "Ready" or "Bundled")
             {

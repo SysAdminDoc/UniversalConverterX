@@ -164,6 +164,10 @@ $gates = @(
         Invoke-PythonScript -Arguments @((Join-Path $repoRoot 'tests\uia_contract\check_uia.py'))
     }
 
+    New-Gate -Id 'virtualization-contract' -Description 'Virtualized catalog surfaces and bounded UI performance budgets' -Action {
+        Invoke-PythonScript -Arguments @((Join-Path $repoRoot 'tests\uia_contract\check_virtualization.py'))
+    }
+
     New-Gate -Id 'release-manifest' -Description 'Release manifest, WiX payload, and readiness staging tests' -Action {
         Invoke-Pytest -Arguments @((Join-Path $repoRoot 'tests\release_manifest'))
     }

@@ -204,7 +204,7 @@ public sealed partial class PresetsPage : Page
                         card.Preset.Engine,
                         card.Preset.InputTypes,
                         card.Preset.OutputExtension)),
-                    limit: Math.Min(candidates.Count, 100))
+                    limit: Math.Min(candidates.Count, VirtualizationBudgets.PresetSearchResultLimit))
                 .Select(match => candidates[match.Id]);
         }
         _displayed.Clear();
@@ -285,7 +285,12 @@ public sealed partial class PresetsPage : Page
         _searchDebounce?.Dispose();
         var cts = new CancellationTokenSource();
         _searchDebounce = cts;
-        try { await Task.Delay(TimeSpan.FromMilliseconds(120), cts.Token); }
+        try
+        {
+            await Task.Delay(
+                TimeSpan.FromMilliseconds(VirtualizationBudgets.PresetSearchDebounceMilliseconds),
+                cts.Token);
+        }
         catch (OperationCanceledException) { return; }
         if (cts.IsCancellationRequested) return;
         ApplyFilter();

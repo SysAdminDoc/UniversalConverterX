@@ -275,6 +275,29 @@ public sealed class HistoryStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task QueryAsync_ShouldSupportStableOffsetPages()
+    {
+        using var store = CreateStore(retentionMaxRows: 10);
+        for (var index = 0; index < 5; index++)
+        {
+            await store.AddAsync(new ConversionHistoryEntry
+            {
+                Engine = $"engine-{index}",
+                Action = "convert",
+                SourcePath = $"input-{index}.dat",
+                Success = true,
+            });
+        }
+
+        var firstPage = await store.QueryAsync(limit: 2, offset: 0);
+        var secondPage = await store.QueryAsync(limit: 2, offset: 2);
+
+        firstPage.Select(entry => entry.Engine).Should().Equal("engine-4", "engine-3");
+        secondPage.Select(entry => entry.Engine).Should().Equal("engine-2", "engine-1");
+        (await store.QueryAsync(limit: 2, offset: 20)).Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task GetLastUsedRerunAsync_CanFilterByDestinationSurface()
     {
         using var store = CreateStore();

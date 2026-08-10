@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 163 — Virtualize Toolbox, Presets, and History
-  Why: nested grids and fully materialized lists scale poorly at 459 presets and the retained-history ceiling.
-  Evidence: `ToolboxPage.xaml`; `PresetsPage.xaml`; `HistoryPage.xaml`.
-  Touches: list/repeater layouts, incremental data sources, search debounce, performance tests.
-  Acceptance: only visible containers are realized; scrolling/filtering 459 presets and 500 history rows remains responsive; cold-navigation and memory budgets are recorded in tests.
-  Complexity: M
-
 - [ ] P2 — Item 164 — Add representative sample render and synchronized comparison
   Why: users need evidence before committing to expensive compression/restoration settings, and UCX already computes VMAF.
   Evidence: Movavi sample conversion; Topaz/Apple preview; StaxRip issue 702; `VmafAnalysisPage`.

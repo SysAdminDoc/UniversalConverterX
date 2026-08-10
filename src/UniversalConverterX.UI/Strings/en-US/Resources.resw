@@ -1260,6 +1260,9 @@
   <data name="Code_05C8FDD9F7A92978AA56" xml:space="preserve">
     <value>No RNNoise model selected.</value>
   </data>
+  <data name="Code_06752500E67223CA8184" xml:space="preserve">
+    <value>Showing {0} of {1} matches for "{2}".</value>
+  </data>
   <data name="Code_06E6E6D12412B32B909F" xml:space="preserve">
     <value>No cookies imported. Sites that need login (premium, age-gated, region-locked) won't work.</value>
   </data>
@@ -2069,6 +2072,9 @@
   </data>
   <data name="Code_5C99A8C401BA7DF8B427" xml:space="preserve">
     <value>Cancelled. {0} files completed.</value>
+  </data>
+  <data name="Code_5D681D2CCE303FF6EE9F" xml:space="preserve">
+    <value>Showing {0} of {1} most recent of {2} total.</value>
   </data>
   <data name="Code_5DA2BACBA76540982953" xml:space="preserve">
     <value>Discovering...</value>

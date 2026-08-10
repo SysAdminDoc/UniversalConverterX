@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,12 @@ namespace UniversalConverterX.UI.Views.Pages;
 public sealed partial class HistoryPage : Page
 {
     private readonly IHistoryService _history;
+    private readonly ObservableCollection<HistoryRecord> _rows = [];
     private string? _searchTerm;
+    private int _matchingTotal;
+    private int _nextOffset;
+    private bool _hasMore;
+    private bool _isLoading;
 
     /// <summary>
     /// Bumped on every load request so a slow earlier query (e.g. "a") can't
@@ -26,34 +32,112 @@ public sealed partial class HistoryPage : Page
     /// 200 ms feels instant but absorbs typical typing bursts.
     /// </summary>
     private CancellationTokenSource? _searchDebounce;
-    private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(
+        VirtualizationBudgets.HistorySearchDebounceMilliseconds);
 
     public HistoryPage()
     {
         InitializeComponent();
         _history = App.Services.GetRequiredService<IHistoryService>();
+        ItemsList.ItemsSource = _rows;
         _ = LoadAsync();
     }
 
     private async Task LoadAsync()
     {
         var epoch = Interlocked.Increment(ref _loadEpoch);
-        var rows    = await _history.QueryAsync(_searchTerm, limit: 500);
-        var summary = await _history.SummarizeAsync(_searchTerm);
-        if (epoch != Volatile.Read(ref _loadEpoch)) return; // a newer query landed
+        _isLoading = true;
+        _nextOffset = 0;
+        _matchingTotal = 0;
+        _hasMore = false;
+        _rows.Clear();
 
-        ItemsList.ItemsSource = rows;
-        EmptyState.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        ListScroll.Visibility = rows.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        try
+        {
+            var pageTask = _history.QueryAsync(
+                _searchTerm,
+                limit: VirtualizationBudgets.HistoryPageSize,
+                offset: 0);
+            var summaryTask = _history.SummarizeAsync(_searchTerm);
+            await Task.WhenAll(pageTask, summaryTask);
+            var page = await pageTask;
+            var summary = await summaryTask;
+            if (epoch != Volatile.Read(ref _loadEpoch)) return; // a newer query landed
 
+            _matchingTotal = summary.TotalJobs;
+            AppendPage(page);
+            UpdateSummary(summary);
+        }
+        finally
+        {
+            if (epoch == Volatile.Read(ref _loadEpoch))
+                _isLoading = false;
+        }
+    }
+
+    private async void ListScroll_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+    {
+        if (e.IsIntermediate || sender is not ScrollViewer scrollViewer)
+            return;
+
+        var remaining = scrollViewer.ExtentHeight
+                        - (scrollViewer.VerticalOffset + scrollViewer.ViewportHeight);
+        if (remaining <= 640)
+            await LoadNextPageAsync();
+    }
+
+    private async Task LoadNextPageAsync()
+    {
+        if (_isLoading || !_hasMore)
+            return;
+
+        var epoch = Volatile.Read(ref _loadEpoch);
+        _isLoading = true;
+        try
+        {
+            var page = await _history.QueryAsync(
+                _searchTerm,
+                limit: VirtualizationBudgets.HistoryPageSize,
+                offset: _nextOffset);
+            if (epoch != Volatile.Read(ref _loadEpoch)) return;
+
+            AppendPage(page);
+            UpdateStatus();
+        }
+        finally
+        {
+            if (epoch == Volatile.Read(ref _loadEpoch))
+                _isLoading = false;
+        }
+    }
+
+    private void AppendPage(IReadOnlyList<HistoryRecord> page)
+    {
+        foreach (var row in page)
+            _rows.Add(row);
+
+        _nextOffset = _rows.Count;
+        _hasMore = page.Count == VirtualizationBudgets.HistoryPageSize
+                   && _nextOffset < Math.Min(_matchingTotal, VirtualizationBudgets.HistoryMaxRows);
+        EmptyState.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ListScroll.Visibility = _rows.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void UpdateSummary(HistorySummary summary)
+    {
         StatTotal.Text = summary.TotalJobs.ToString();
-        StatOk.Text    = summary.Succeeded.ToString();
-        StatFail.Text  = summary.Failed.ToString();
+        StatOk.Text = summary.Succeeded.ToString();
+        StatFail.Text = summary.Failed.ToString();
         StatSaved.Text = HistoryRecord.FormatBytes(summary.SpaceSavedBytes);
+        UpdateStatus();
+    }
 
+    private void UpdateStatus()
+    {
+        var cappedTotal = Math.Min(_matchingTotal, VirtualizationBudgets.HistoryMaxRows);
         StatusText.Text = string.IsNullOrEmpty(_searchTerm)
-            ? AppLocalizer.Format($"Showing {rows.Count} most recent of {summary.TotalJobs} total.")
-            : AppLocalizer.Format($"Showing {rows.Count} matches for \"{_searchTerm}\".");
+            ? AppLocalizer.Format($"Showing {_rows.Count} of {cappedTotal} most recent of {_matchingTotal} total.")
+            : AppLocalizer.Format($"Showing {_rows.Count} of {cappedTotal} matches for \"{_searchTerm}\".");
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadAsync();

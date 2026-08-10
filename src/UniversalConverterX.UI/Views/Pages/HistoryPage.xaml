@@ -186,9 +186,15 @@
                                TextWrapping="Wrap"
                                MaxWidth="280"/>
                 </StackPanel>
-                <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl x:Name="ItemsList"
-                                  ItemTemplate="{StaticResource HistoryRowTemplate}"/>
+                <ScrollViewer x:Name="ListScroll"
+                              VerticalScrollBarVisibility="Auto"
+                              ViewChanged="ListScroll_ViewChanged">
+                    <ItemsRepeater x:Name="ItemsList"
+                                   ItemTemplate="{StaticResource HistoryRowTemplate}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Spacing="10"/>
+                        </ItemsRepeater.Layout>
+                    </ItemsRepeater>
                 </ScrollViewer>
             </Grid>
         </Border>

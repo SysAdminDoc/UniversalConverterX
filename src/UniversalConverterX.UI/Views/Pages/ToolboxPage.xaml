@@ -14,6 +14,8 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
                     CornerRadius="12"
+                    IsTapEnabled="True"
+                    Tapped="Tile_Tapped"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding ToolTipText}">
                 <Grid RowSpacing="10">
@@ -69,58 +71,122 @@
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_011" Text="Image" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="ImageGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="ImageGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_012" Text="Video" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="VideoGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="VideoGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_013" Text="AI Tools" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="AiGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="AiGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_014" Text="Audio" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="AudioGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="AudioGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_015" Text="Documents" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="DocumentGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="DocumentGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_016" Text="Disc" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="DiscGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="DiscGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel Spacing="12">
                 <TextBlock x:Uid="ToolboxPage_Item_017" Text="Other" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="OtherGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="OtherGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
 
             <StackPanel x:Name="PluginSection" Spacing="12" Visibility="Collapsed">
                 <TextBlock x:Uid="ToolboxPage_Item_018" Text="Trusted Plugins" Style="{StaticResource SectionHeaderTextStyle}"/>
-                <GridView x:Name="PluginGrid" SelectionMode="None" IsItemClickEnabled="True"
-                          UseSystemFocusVisuals="True"
-                          ItemClick="Tile_Click" ItemTemplate="{StaticResource ToolboxTileTemplate}"/>
+                <ItemsRepeater x:Name="PluginGrid"
+                               ItemTemplate="{StaticResource ToolboxTileTemplate}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout Orientation="Horizontal"
+                                            MinItemWidth="216"
+                                            MinItemHeight="172"
+                                            MinColumnSpacing="10"
+                                            MinRowSpacing="10"
+                                            ItemsStretch="Fill"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

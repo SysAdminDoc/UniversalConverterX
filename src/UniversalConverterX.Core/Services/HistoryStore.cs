@@ -129,11 +129,12 @@ public sealed class HistoryStore : IDisposable
     public Task<IReadOnlyList<ConversionHistoryEntry>> QueryAsync(
         string? search = null,
         int? limit = 500,
+        int offset = 0,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return Task.Run<IReadOnlyList<ConversionHistoryEntry>>(
-            () => Query(search, limit),
+            () => Query(search, limit, offset),
             cancellationToken);
     }
 
@@ -168,7 +169,7 @@ public sealed class HistoryStore : IDisposable
     {
         // Query is ordered id DESC (most recent first); take the first row that
         // still has usable re-run parameters.
-        var recent = await QueryAsync(search: null, limit: 100, cancellationToken)
+        var recent = await QueryAsync(search: null, limit: 100, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         foreach (var entry in recent)
         {
@@ -262,9 +263,10 @@ public sealed class HistoryStore : IDisposable
         _writeLock.Dispose();
     }
 
-    private IReadOnlyList<ConversionHistoryEntry> Query(string? search, int? limit)
+    private IReadOnlyList<ConversionHistoryEntry> Query(string? search, int? limit, int offset)
     {
         var rowLimit = Math.Clamp(limit ?? 500, 1, 10_000);
+        var rowOffset = Math.Clamp(offset, 0, 1_000_000);
         var entries = new List<ConversionHistoryEntry>();
         using var connection = Open();
         using var command = connection.CreateCommand();
@@ -277,9 +279,10 @@ public sealed class HistoryStore : IDisposable
             FROM history
             {where}
             ORDER BY id DESC
-            LIMIT @lim;
+            LIMIT @lim OFFSET @offset;
             """;
         command.Parameters.AddWithValue("@lim", rowLimit);
+        command.Parameters.AddWithValue("@offset", rowOffset);
 
         using var reader = command.ExecuteReader();
         while (reader.Read())

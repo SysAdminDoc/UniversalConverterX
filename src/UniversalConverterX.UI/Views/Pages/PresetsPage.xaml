@@ -202,8 +202,12 @@
                            TextWrapping="Wrap"/>
             </StackPanel>
             <ScrollViewer x:Name="PresetScroll" VerticalScrollBarVisibility="Auto">
-                <ItemsControl x:Name="PresetList"
-                              ItemTemplate="{StaticResource PresetCardTemplate}"/>
+                <ItemsRepeater x:Name="PresetList"
+                               ItemTemplate="{StaticResource PresetCardTemplate}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="12"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
             </ScrollViewer>
         </Grid>
 

@@ -35,6 +35,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 - **Recorder** — screen, webcam, system audio, microphone.
 - **Automation** — shared CLI/REST/PowerShell engine catalog plus safe metadata-based conditional preset planning.
 - **Toolbox** — 40+ specialized tools across Image, Video, AI, Audio, Documents, Disc, and Other categories.
+- **Large-list performance** — Toolbox tiles, preset cards, and History rows use virtualized containers; History pages its retained rows on demand and preset filtering is debounced for responsive catalog browsing.
 
 ## Toolbox highlights
 

@@ -118,7 +118,10 @@ public interface IHistoryService
 {
     ObservableCollection<HistoryRecord> Recent { get; }
     Task LogAsync(HistoryRecord record);
-    Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500);
+    Task<IReadOnlyList<HistoryRecord>> QueryAsync(
+        string? search = null,
+        int? limit = 500,
+        int offset = 0);
     Task<HistoryRecord?> GetAsync(long id);
     Task<ConversionRerunRequest?> GetRerunRequestAsync(long id, CancellationToken cancellationToken = default);
     Task<ConversionRerunRequest?> GetLastUsedRerunAsync(
@@ -190,10 +193,13 @@ public sealed class HistoryService : IHistoryService, IDisposable
         });
     }
 
-    public async Task<IReadOnlyList<HistoryRecord>> QueryAsync(string? search = null, int? limit = 500)
+    public async Task<IReadOnlyList<HistoryRecord>> QueryAsync(
+        string? search = null,
+        int? limit = 500,
+        int offset = 0)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        var entries = await _store.QueryAsync(search, limit).ConfigureAwait(false);
+        var entries = await _store.QueryAsync(search, limit, offset).ConfigureAwait(false);
         return entries.Select(HistoryRecord.FromEntry).ToList();
     }
 
