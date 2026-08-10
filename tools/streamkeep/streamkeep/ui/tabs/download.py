@@ -444,6 +444,28 @@ def build_download_tab(win):
     crop_lay.addLayout(crop_row)
     controls_lay.addWidget(crop_block, 1, 0)
 
+    # Dynamic DASH needs an explicit finite recording window. Keep this
+    # control hidden for ordinary VOD/HLS sources and reveal it only after a
+    # dynamic MPD has been parsed.
+    record_block, record_lay = make_field_block(
+        "Dynamic DASH Record Limit",
+        "Required for dynamic MPDs. Zero means the recording is unbounded.",
+    )
+    win.dynamic_record_block = record_block
+    win.dynamic_record_block.setVisible(False)
+    win.live_record_limit_spin = QSpinBox()
+    win.live_record_limit_spin.setRange(0, 24 * 60)
+    win.live_record_limit_spin.setSpecialValueText("Until stopped")
+    win.live_record_limit_spin.setSuffix(" min")
+    win.live_record_limit_spin.setToolTip(
+        "Dynamic DASH recordings must have a positive duration."
+    )
+    win.live_record_limit_spin.valueChanged.connect(
+        lambda _value: win._on_dynamic_record_limit_changed()
+    )
+    record_lay.addWidget(win.live_record_limit_spin)
+    controls_lay.addWidget(record_block, 2, 0, 1, 2)
+
     output_block, output_lay = make_field_block(
         "Output Folder", "Downloads are saved exactly where you point the app."
     )

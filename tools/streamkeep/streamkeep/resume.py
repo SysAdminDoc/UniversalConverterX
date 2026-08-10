@@ -105,11 +105,23 @@ def _sanitize_resume_payload(data, output_dir):
         "ytdlp_source": _sanitize_text(data.get("ytdlp_source", "")),
         "ytdlp_format": _sanitize_text(data.get("ytdlp_format", ""), max_len=128),
         "quality_name": _sanitize_text(data.get("quality_name", ""), max_len=128),
+        "dynamic_manifest": bool(data.get("dynamic_manifest", False)),
+        "recording_duration_secs": _sanitize_nonnegative_float(
+            data.get("recording_duration_secs", 0)
+        ),
         "segments": _sanitize_segments(data.get("segments", [])),
         "completed": _sanitize_completed(data.get("completed", [])),
         "output_dir": _normalize_output_dir(output_dir),
         "expected_outfile": _sanitize_text(data.get("expected_outfile", "")),
     }
+
+
+def _sanitize_nonnegative_float(value):
+    try:
+        parsed = float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+    return parsed if math.isfinite(parsed) and parsed >= 0 else 0.0
 
 
 def save_resume_state(state):

@@ -26,6 +26,17 @@ from .paths import _CREATE_NO_WINDOW
 from . import db as _db
 
 
+def _positive_int(value):
+    """Argparse type for finite recording bounds."""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError("must be an integer") from exc
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed
+
+
 def _print_progress(text):
     """Overwrite the current console line with *text*."""
     cols = os.get_terminal_size(fallback=(80, 24)).columns
@@ -75,6 +86,12 @@ def _run_download(args):
     _print_line(f"URL:     {args.url}")
     _print_line(f"Output:  {output_dir}")
     _print_line(f"Quality: {quality_pref}")
+    if args.record_seconds or args.record_segments:
+        bound = (
+            f"{args.record_seconds}s" if args.record_seconds
+            else f"{args.record_segments} segment(s)"
+        )
+        _print_line(f"Record:  {bound}")
     _print_line("")
 
     state = {"phase": "fetch", "info": None, "exit_code": 0, "fw": None, "dw": None}
@@ -109,8 +126,32 @@ def _run_download(args):
         segments = []
         if qi.format_type == "hls" and qi.url:
             segments = parse_hls_playlist(qi.url)
+        is_dynamic = bool(
+            getattr(info, "is_dynamic", False) or getattr(qi, "is_dynamic", False)
+        )
+        record_seconds = int(args.record_seconds or 0)
+        if args.record_segments:
+            segment_duration = float(getattr(qi, "segment_duration_secs", 0) or 0)
+            if segment_duration <= 0:
+                _print_line(
+                    "Error: --record-segments needs a DASH segment duration; "
+                    "use --record-seconds instead. No output was written."
+                )
+                state["exit_code"] = 2
+                app.quit()
+                return
+            record_seconds = max(1, int(round(segment_duration * args.record_segments)))
+        if is_dynamic and record_seconds <= 0:
+            _print_line(
+                "Error: dynamic DASH requires --record-seconds or "
+                "--record-segments. No output was written."
+            )
+            state["exit_code"] = 2
+            app.quit()
+            return
+        requested_duration = record_seconds or float(info.total_secs or 0)
         if not segments:
-            segments = [(0, info.title or "stream", 0, info.total_secs)]
+            segments = [(0, info.title or "stream", 0, requested_duration)]
 
         # Start download
         dw = DownloadWorker(qi.url, segments, output_dir, qi.format_type)
@@ -119,6 +160,8 @@ def _run_download(args):
         dw.ytdlp_format = qi.ytdlp_format
         if args.rate_limit:
             dw.rate_limit = args.rate_limit
+        dw.dynamic_manifest = is_dynamic
+        dw.recording_duration_secs = record_seconds
         state["dw"] = dw  # prevent GC while event loop runs
 
         dw.progress.connect(lambda si, pct, txt: _print_progress(
@@ -240,6 +283,14 @@ def build_parser():
                     help="Output directory (default: config or ~/Videos/StreamKeep)")
     dl.add_argument("--rate-limit", default="",
                     help="Bandwidth limit (e.g. 5M, 500K)")
+    dl.add_argument(
+        "--record-seconds", type=_positive_int, default=0,
+        help="Finite recording bound for dynamic DASH (also limits VOD input)",
+    )
+    dl.add_argument(
+        "--record-segments", type=_positive_int, default=0,
+        help="Finite dynamic DASH bound expressed as a segment count",
+    )
 
     # -- server --
     srv = sub.add_parser("server", help="Start REST API / web remote UI")
@@ -286,6 +337,10 @@ def run_cli(argv=None):
             args.output = ""
         if not hasattr(args, "rate_limit"):
             args.rate_limit = ""
+        if not hasattr(args, "record_seconds"):
+            args.record_seconds = 0
+        if not hasattr(args, "record_segments"):
+            args.record_segments = 0
 
     if args.command in ("download", "dl"):
         _run_download(args)

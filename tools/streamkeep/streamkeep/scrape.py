@@ -14,6 +14,7 @@ import urllib.parse
 from . import CURL_UA
 from .http import curl, http_interrupted, http_probe, run_capture_interruptible
 from .models import QualityInfo, StreamInfo
+from .utils import fmt_duration
 
 
 # Module-level flag so we only probe the Playwright browser install once.
@@ -351,6 +352,44 @@ def scrape_media_links(page_url, log_fn=None, max_links=100):
     return found
 
 
+def _dash_stream_info(url, title, channel, qualities):
+    """Build StreamInfo metadata from the parser's per-quality DASH fields."""
+    dynamic = any(bool(getattr(q, "is_dynamic", False)) for q in qualities)
+    total_secs = max(
+        (float(getattr(q, "manifest_duration_secs", 0) or 0) for q in qualities),
+        default=0.0,
+    )
+    segment_duration = max(
+        (float(getattr(q, "segment_duration_secs", 0) or 0) for q in qualities),
+        default=0.0,
+    )
+    minimum_update_period = max(
+        (float(getattr(q, "minimum_update_period_secs", 0) or 0) for q in qualities),
+        default=0.0,
+    )
+    time_shift_buffer_depth = max(
+        (float(getattr(q, "time_shift_buffer_depth_secs", 0) or 0) for q in qualities),
+        default=0.0,
+    )
+    duration = "Live (bounded recording)" if dynamic else (
+        fmt_duration(total_secs) if total_secs > 0 else ""
+    )
+    return StreamInfo(
+        platform="Direct",
+        url=url,
+        title=title,
+        channel=channel,
+        qualities=qualities,
+        total_secs=total_secs,
+        duration_str=duration,
+        is_live=dynamic,
+        is_dynamic=dynamic,
+        segment_duration_secs=segment_duration,
+        minimum_update_period_secs=minimum_update_period,
+        time_shift_buffer_depth_secs=time_shift_buffer_depth,
+    )
+
+
 def detect_direct_media(url, log_fn=None):
     """Sniff a URL via HEAD request. Returns StreamInfo if it's a direct
     media file, else None."""
@@ -392,14 +431,12 @@ def detect_direct_media(url, log_fn=None):
                 log_fn(f"DASH manifest detected: {url}")
             qualities = parse_mpd(url, log_fn=log_fn)
             if qualities:
-                info = StreamInfo(
-                    platform="Direct",
-                    url=url,
-                    title=parsed.path.split("/")[-1],
-                    channel=infer_channel(parsed),
-                    qualities=qualities,
+                return _dash_stream_info(
+                    url,
+                    parsed.path.split("/")[-1],
+                    infer_channel(parsed),
+                    qualities,
                 )
-                return info
         fmt = "hls" if ext == ".m3u8" else "mp4"
         if log_fn:
             log_fn(f"Direct media URL detected by extension: {ext}")
@@ -425,12 +462,11 @@ def detect_direct_media(url, log_fn=None):
                     log_fn(f"DASH manifest detected after probe redirect: {final_url}")
                 qualities = parse_mpd(final_url, log_fn=log_fn)
                 if qualities:
-                    return StreamInfo(
-                        platform="Direct",
-                        url=final_url,
-                        title=os.path.basename(final_parsed.path) or parsed.path.split("/")[-1],
-                        channel=infer_channel(final_parsed) or infer_channel(parsed),
-                        qualities=qualities,
+                    return _dash_stream_info(
+                        final_url,
+                        os.path.basename(final_parsed.path) or parsed.path.split("/")[-1],
+                        infer_channel(final_parsed) or infer_channel(parsed),
+                        qualities,
                     )
             fmt = "hls" if final_ext == ".m3u8" else "mp4"
             if log_fn:

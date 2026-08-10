@@ -45,13 +45,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P3 — Specialist capability and consolidation
 
-- [ ] P3 — Item 144 — Support bounded live/dynamic DASH recording
-  Why: Streamkeep logs dynamic MPD as unsupported, so live downloads fail without recording semantics.
-  Evidence: `tools/streamkeep/streamkeep/dash.py:55`.
-  Touches: DASH parser/downloader, CLI/UI recording controls, fixtures.
-  Acceptance: a dynamic MPD records a user-bounded duration/segment window with discontinuity recovery, or fails before writing with a precise unsupported-feature reason.
-  Complexity: M
-
 - [ ] P3 — Item 146 — Complete shared sidecar discovery and emit consolidation
   Why: the shared protocol/runtime exists, but local `find_ffmpeg` and emit implementations still create drift across 212 engines.
   Evidence: `tools/_lib/ucx_sidecar.py`; remaining per-sidecar helper definitions.

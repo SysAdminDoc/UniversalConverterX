@@ -1335,6 +1335,8 @@ class StreamKeep(QMainWindow):
                 summary_parts.append(self.stream_info.duration_str)
             if self.stream_info.is_live:
                 summary_parts.append("Live capture")
+            if getattr(self.stream_info, "is_dynamic", False):
+                summary_parts.append("Bounded DASH")
             body = " | ".join(summary_parts) if summary_parts else "Metadata loaded and ready for download."
         elif url:
             ext = Extractor.detect(url)
@@ -1360,6 +1362,9 @@ class StreamKeep(QMainWindow):
         if total_segments:
             selection_value = f"{checked_segments}/{total_segments}"
             selection_sub = "segments selected"
+        elif self.stream_info and getattr(self.stream_info, "is_dynamic", False):
+            selection_value = "Bounded"
+            selection_sub = "set a positive record limit"
         elif self.stream_info and self.stream_info.total_secs <= 0:
             selection_value = "Live"
             selection_sub = "capture runs until you stop it"
@@ -3033,6 +3038,10 @@ class StreamKeep(QMainWindow):
             worker.audio_url = refreshed_audio or ""
             worker.ytdlp_source = state.ytdlp_source or ""
             worker.ytdlp_format = state.ytdlp_format or ""
+            worker.dynamic_manifest = bool(getattr(state, "dynamic_manifest", False))
+            worker.recording_duration_secs = float(
+                getattr(state, "recording_duration_secs", 0) or 0
+            )
             worker.cookies_browser = YtDlpExtractor.cookies_browser
             worker.rate_limit = YtDlpExtractor.rate_limit
             worker.proxy = YtDlpExtractor.proxy
@@ -3400,6 +3409,10 @@ class StreamKeep(QMainWindow):
         self._segment_progress = []
         self.info_label.setVisible(False)
         self.stream_info = None
+        if hasattr(self, "dynamic_record_block"):
+            self.dynamic_record_block.setVisible(False)
+        if hasattr(self, "live_record_limit_spin"):
+            self.live_record_limit_spin.setValue(0)
         if not vod_source:
             self.vod_widget.setVisible(False)
             self._vod_checks = []
@@ -3442,6 +3455,17 @@ class StreamKeep(QMainWindow):
         self.fetch_btn.setText("Fetch")
         self._update_badge(info.platform)
 
+        # Direct DASH parsing annotates each quality so older extractor paths
+        # can still populate StreamInfo without a second MPD request.
+        info.is_dynamic = bool(
+            getattr(info, "is_dynamic", False)
+            or any(getattr(q, "is_dynamic", False) for q in (info.qualities or []))
+        )
+        if info.is_dynamic:
+            info.is_live = True
+            if hasattr(self, "dynamic_record_block"):
+                self.dynamic_record_block.setVisible(True)
+
         # Populate qualities
         self.quality_combo.blockSignals(True)
         self.quality_combo.clear()
@@ -3473,6 +3497,8 @@ class StreamKeep(QMainWindow):
                 pass
         if info.segment_count:
             parts.append(f"Segments: {info.segment_count}")
+        if info.is_dynamic:
+            parts.append("Dynamic DASH: bounded recording required")
         self.info_label.setText("  |  ".join(parts))
         self.info_label.setVisible(True)
 
@@ -3527,6 +3553,11 @@ class StreamKeep(QMainWindow):
                 ):
                     self._set_status("Download skipped — duplicate detected.", "idle")
                     return
+        elif info.is_dynamic:
+            self._set_status(
+                "Dynamic DASH source ready. Set a positive record limit before downloading.",
+                "warning",
+            )
         elif info.is_live or info.total_secs <= 0:
             self._set_status("Live source ready. Start recording and stop it when you have enough footage.", "success")
         else:
@@ -3988,6 +4019,21 @@ class StreamKeep(QMainWindow):
 
     # ── Segment Management ────────────────────────────────────────────
 
+    def _dynamic_record_limit_secs(self):
+        """Return the current UI duration bound for a dynamic DASH source."""
+        spin = getattr(self, "live_record_limit_spin", None)
+        if spin is None:
+            return 0
+        try:
+            return max(0, int(spin.value()) * 60)
+        except (AttributeError, TypeError, ValueError):
+            return 0
+
+    def _on_dynamic_record_limit_changed(self):
+        if getattr(self, "stream_info", None) and getattr(self.stream_info, "is_dynamic", False):
+            self._build_segments(self.stream_info.total_secs)
+            self._refresh_download_summary()
+
     def _get_segment_secs(self):
         idx = self.segment_combo.currentIndex()
         return self._segment_options[idx][1]
@@ -4052,8 +4098,12 @@ class StreamKeep(QMainWindow):
             return f"Part {idx + 1}"
 
     def _build_segments(self, total_secs):
+        dynamic_limit = self._dynamic_record_limit_secs()
         if total_secs <= 0:
-            segments = [(0, 0)]
+            if getattr(self.stream_info, "is_dynamic", False) and dynamic_limit > 0:
+                segments = [(0, dynamic_limit)]
+            else:
+                segments = [(0, 0)]
             seg_secs = 0
         else:
             seg_secs = self._get_segment_secs()
@@ -4092,7 +4142,10 @@ class StreamKeep(QMainWindow):
             self.table.setItem(i, 1, item)
 
             if total_secs <= 0:
-                range_text = "Starts now - runs until stopped"
+                if getattr(self.stream_info, "is_dynamic", False) and dynamic_limit > 0:
+                    range_text = f"Live edge - up to {int(dynamic_limit // 60)}m"
+                else:
+                    range_text = "Starts now - runs until stopped"
             else:
                 s_str = f"{int(start//3600):02d}:{int((start%3600)//60):02d}:{int(start%60):02d}"
                 e_str = f"{int(end//3600):02d}:{int((end%3600)//60):02d}:{int(end%60):02d}"
@@ -4185,6 +4238,8 @@ class StreamKeep(QMainWindow):
             return False
         total_secs = self.stream_info.total_secs
         is_live_capture = bool(self.stream_info.is_live or total_secs <= 0)
+        dynamic_manifest = bool(getattr(self.stream_info, "is_dynamic", False))
+        dynamic_limit_secs = self._dynamic_record_limit_secs()
 
         q_data = self.quality_combo.currentData()
         audio_url = ""
@@ -4203,6 +4258,10 @@ class StreamKeep(QMainWindow):
             self._log("[ERROR] No quality selected")
             self._set_status("Pick a quality before starting the download.", "warning")
             return False
+
+        dynamic_manifest = dynamic_manifest or bool(
+            getattr(q_data, "is_dynamic", False) if q_data else False
+        )
 
         # Per-download overrides (F18)
         from .tabs.download import get_adv_overrides, _reset_adv_overrides
@@ -4231,6 +4290,15 @@ class StreamKeep(QMainWindow):
             self._set_status("Time range end must be after start.", "warning")
             return False
 
+        if dynamic_manifest and not crop_end and dynamic_limit_secs <= 0:
+            message = (
+                "Dynamic DASH requires a positive record limit or an end time "
+                "before downloading."
+            )
+            self._log(f"[DASH] {message} No output was written.")
+            self._set_status(message, "warning")
+            return False
+
         seg_secs = self._get_segment_secs()
         single_segment = (is_live_capture or fmt_type in ("mp4", "ytdlp_direct")
                           or seg_secs == 0 or total_secs <= seg_secs)
@@ -4239,7 +4307,11 @@ class StreamKeep(QMainWindow):
             if cb.isChecked():
                 if single_segment:
                     seg_start = crop_start or 0
-                    seg_dur = (crop_end or (0 if is_live_capture else int(total_secs))) - seg_start
+                    if dynamic_manifest:
+                        bound_end = crop_end or (seg_start + dynamic_limit_secs)
+                    else:
+                        bound_end = crop_end or (0 if is_live_capture else int(total_secs))
+                    seg_dur = bound_end - seg_start
                     segments.append((0, title_safe, seg_start, max(0, seg_dur)))
                     break
                 else:
@@ -4292,7 +4364,13 @@ class StreamKeep(QMainWindow):
         self.overall_progress.setVisible(True)
         self.overall_progress.setValue(0)
         self.overall_progress.setMaximum(len(segments))
-        if is_live_capture:
+        if dynamic_manifest:
+            limit_label = self._fmt_crop_time(segments[0][3])
+            self._set_status(
+                f"Bounded dynamic DASH capture started ({limit_label}) to {_path_label(out_dir)}.",
+                "working",
+            )
+        elif is_live_capture:
             self._set_status(
                 f"Live capture started. Recording to {_path_label(out_dir)} until you stop it.",
                 "working",
@@ -4313,6 +4391,8 @@ class StreamKeep(QMainWindow):
         self.download_worker.audio_url = audio_url
         self.download_worker.ytdlp_source = ytdlp_source
         self.download_worker.ytdlp_format = ytdlp_format
+        self.download_worker.dynamic_manifest = dynamic_manifest
+        self.download_worker.recording_duration_secs = dynamic_limit_secs
         self.download_worker.cookies_browser = YtDlpExtractor.cookies_browser
         self.download_worker.rate_limit = _dl_overrides.get("rate_limit") or YtDlpExtractor.rate_limit
         self.download_worker.proxy = YtDlpExtractor.proxy
@@ -4443,14 +4523,17 @@ class StreamKeep(QMainWindow):
 
     def _on_dl_error(self, idx, err):
         self._download_had_errors = True
-        if idx < len(self._segment_progress):
+        if 0 <= idx < len(self._segment_progress):
             self._segment_progress[idx].setStyleSheet(
                 f"QProgressBar::chunk {{ background-color: {CAT['red']}; border-radius: 6px; }}"
             )
         fail_item = QTableWidgetItem("FAILED")
         fail_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.table.setItem(idx, 4, fail_item)
-        self._set_status(f"Segment {idx + 1} failed: {err}", "error")
+        if 0 <= idx < self.table.rowCount():
+            self.table.setItem(idx, 4, fail_item)
+            self._set_status(f"Segment {idx + 1} failed: {err}", "error")
+        else:
+            self._set_status(str(err), "error")
 
     def _on_all_done(self):
         self.download_btn.setEnabled(True)
@@ -6237,6 +6320,7 @@ class StreamKeep(QMainWindow):
         segments = [(0, "live_recording", 0, 0)]
         worker = DownloadWorker(q.url, segments, out_dir, q.format_type)
         worker.audio_url = q.audio_url
+        worker.dynamic_manifest = bool(getattr(q, "is_dynamic", False))
         worker.parallel_connections = self._parallel_connections
         # Live auto-split: when enabled, long live captures are chunked.
         if self._chunk_long_captures:

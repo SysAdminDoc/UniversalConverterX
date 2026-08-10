@@ -47,6 +47,11 @@ class DownloadWorker(QThread):
         # recording is written as `<label>_part%03d.mp4` chunks instead of
         # one monolithic 40+ GB file.
         self.chunk_length_secs = 0
+        # Dynamic DASH manifests must be bounded by the caller. The worker
+        # owns the final guard so API, CLI, UI, and monitor callers all fail
+        # before ffmpeg opens an output file when the bound is missing.
+        self.dynamic_manifest = False
+        self.recording_duration_secs = 0
         self._cancel = False
         self._proc = None
         self._proc_lock = __import__("threading").Lock()
@@ -73,6 +78,8 @@ class DownloadWorker(QThread):
             state.audio_url = self.audio_url or ""
             state.ytdlp_source = self.ytdlp_source or ""
             state.ytdlp_format = self.ytdlp_format or ""
+            state.dynamic_manifest = bool(self.dynamic_manifest)
+            state.recording_duration_secs = float(self.recording_duration_secs or 0)
             state.output_dir = self.output_dir
             state.segments = [list(s) for s in self.segments]
             save_resume_state(state)
@@ -194,7 +201,46 @@ class DownloadWorker(QThread):
         merge_completed(self._resume_state, seg_idx)
         save_resume_state(self._resume_state)
 
+    def _dash_input_options(self):
+        """Return ffmpeg HTTP/DASH recovery options for dynamic MPDs."""
+        if not self.dynamic_manifest:
+            return []
+        # These are input/protocol options. They let ffmpeg refresh a live
+        # MPD and recover a transient segment/network discontinuity while the
+        # explicit -t bound keeps the recording finite.
+        return [
+            "-reconnect", "1",
+            "-reconnect_streamed", "1",
+            "-reconnect_on_network_error", "1",
+            "-reconnect_on_http_error", "4xx,5xx",
+            "-reconnect_delay_max", "10",
+            "-reconnect_max_retries", "8",
+            "-rw_timeout", "15000000",
+            "-err_detect", "ignore_err",
+            "-fflags", "+discardcorrupt+genpts",
+        ]
+
     def run(self):
+        if self.dynamic_manifest:
+            # A positive duration may be supplied directly by callers that
+            # construct a one-segment live job. Keep that convenience while
+            # still rejecting every unbounded segment before touching disk.
+            if self.recording_duration_secs > 0 and self.segments:
+                if all(float(segment[3] or 0) <= 0 for segment in self.segments):
+                    first = self.segments[0]
+                    self.segments = [
+                        (first[0], first[1], first[2], self.recording_duration_secs),
+                    ]
+            if (not self.segments
+                    or any(float(segment[3] or 0) <= 0 for segment in self.segments)):
+                message = (
+                    "Dynamic DASH recording requires a positive duration or "
+                    "segment window; no output was written."
+                )
+                self.log.emit(f"[DASH] {message}")
+                self.error.emit(0, message)
+                return
+
         for seg_idx, label, start, duration in self.segments:
             if self._cancel:
                 self.log.emit("Download cancelled.")
@@ -381,6 +427,7 @@ class DownloadWorker(QThread):
                 else:
                     cmd = [
                         "ffmpeg", "-hide_banner", "-loglevel", "info",
+                        *self._dash_input_options(),
                         "-ss", str(start), "-i", self.playlist_url,
                         "-ss", str(start), "-i", self.audio_url,
                         "-map", "0:v:0", "-map", "1:a:0",
@@ -397,6 +444,7 @@ class DownloadWorker(QThread):
             else:
                 cmd = [
                     "ffmpeg", "-hide_banner", "-loglevel", "info",
+                    *self._dash_input_options(),
                     "-ss", str(start), "-i", self.playlist_url, "-c", "copy",
                 ]
                 if not is_live_capture:
@@ -506,6 +554,11 @@ class DownloadWorker(QThread):
                                 pass
                         last_error = "\n".join(output_lines[-5:]) or f"ffmpeg exit {self._proc.returncode}"
                         self.log.emit(f"[FAIL attempt {attempt + 1}/{attempts}] {label}")
+                        if self.dynamic_manifest and attempt + 1 < attempts:
+                            self.log.emit(
+                                f"[DASH] Retrying after a segment/discontinuity error "
+                                f"({attempt + 1}/{attempts - 1})."
+                            )
                         if is_live_capture:
                             break
 

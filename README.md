@@ -31,7 +31,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 - **Offline neural speech** — generate two-speaker English dialogue with Dia2 1B or a consented, PerTh-watermarked voice clone with Chatterbox Turbo. Both use pinned local assets with exact hashes and separate CUDA runtimes; inference cannot access the network.
 - **Reviewed ComfyUI workflows** — submit an Export (API) graph to an already running loopback ComfyUI server, wait for its exact prompt ID, and atomically export local artifacts without installing nodes or models.
 - **Lossless display metadata** — H.264/H.265 edge-crop metadata and packet-preserving aspect-ratio overrides in the Editor and ClipForge presets.
-- **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs.
+- **Downloader** — 1000+ sites: YouTube, Twitch, Kick, Rumble, Vimeo, X, Facebook, podcasts, direct URLs; direct dynamic DASH streams support bounded recording with segment-window limits and reconnect recovery.
 - **Recorder** — screen, webcam, system audio, microphone.
 - **Automation** — shared CLI/REST/PowerShell engine catalog plus safe metadata-based conditional preset planning.
 - **Toolbox** — 40+ specialized tools across Image, Video, AI, Audio, Documents, Disc, and Other categories.

@@ -13,6 +13,11 @@ class QualityInfo:
     audio_url: str = ""             # If set, video is video-only and needs audio merge
     ytdlp_source: str = ""          # Original page URL for ytdlp_direct downloads
     ytdlp_format: str = ""          # Format spec (e.g. "137+140")
+    is_dynamic: bool = False         # Dynamic/live DASH MPD
+    segment_duration_secs: float = 0.0  # First/nominal DASH segment duration
+    minimum_update_period_secs: float = 0.0  # DASH MPD refresh interval
+    time_shift_buffer_depth_secs: float = 0.0  # Available live DVR window
+    manifest_duration_secs: float = 0.0  # Static MPD mediaPresentationDuration
 
 
 @dataclass
@@ -26,6 +31,10 @@ class StreamInfo:
     duration_str: str = ""
     start_time: str = ""
     is_live: bool = False
+    is_dynamic: bool = False         # Dynamic/live DASH MPD
+    segment_duration_secs: float = 0.0
+    minimum_update_period_secs: float = 0.0
+    time_shift_buffer_depth_secs: float = 0.0
     is_master: bool = False
     segment_count: int = 0
     thumbnail_url: str = ""
@@ -147,6 +156,8 @@ class ResumeState:
     ytdlp_source: str = ""
     ytdlp_format: str = ""
     quality_name: str = ""
+    dynamic_manifest: bool = False
+    recording_duration_secs: float = 0.0
     # Per-segment state. `segments` stores the original tuples as lists so
     # JSON round-trips cleanly. `completed` is a set-as-list of seg_idx ints.
     segments: list = field(default_factory=list)     # list[[idx, label, start, duration]]

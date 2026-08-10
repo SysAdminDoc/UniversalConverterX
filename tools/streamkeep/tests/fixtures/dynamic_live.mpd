@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+     type="dynamic"
+     minimumUpdatePeriod="PT2S"
+     timeShiftBufferDepth="PT30S"
+     suggestedPresentationDelay="PT4S"
+     profiles="urn:mpeg:dash:profile:isoff-live:2011">
+  <Period id="live" start="PT0S">
+    <AdaptationSet id="video" contentType="video" mimeType="video/mp4">
+      <SegmentTemplate timescale="1000"
+                       media="video/$RepresentationID$/$Number$.m4s"
+                       initialization="video/$RepresentationID$/init.mp4">
+        <SegmentTimeline>
+          <S t="0" d="2000" r="-1" />
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation id="720" bandwidth="1500000" width="1280" height="720" />
+      <Representation id="480" bandwidth="800000" width="854" height="480" />
+    </AdaptationSet>
+    <AdaptationSet id="audio" contentType="audio" mimeType="audio/mp4">
+      <SegmentTemplate timescale="48000" duration="96000"
+                       media="audio/$RepresentationID$/$Number$.m4s"
+                       initialization="audio/$RepresentationID$/init.mp4" />
+      <Representation id="aac" bandwidth="128000" />
+    </AdaptationSet>
+  </Period>
+</MPD>
