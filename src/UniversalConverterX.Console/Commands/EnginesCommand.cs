@@ -40,14 +40,22 @@ public sealed class EnginesCommand : Command<EnginesCommand.Settings>
                     tool_directory = AppContext.BaseDirectory,
                 },
             };
-            catalogue.AddRange(entries.Select(entry => (object)new
+            catalogue.AddRange(entries.Select(entry =>
             {
-                name = entry.Name,
-                kind = "sidecar",
-                available = entry.Available,
-                executable_path = entry.ExecutablePath,
-                manifest_path = entry.ManifestPath,
-                tool_directory = entry.ToolDirectory,
+                var compatibility = entry.ExecutablePath is null
+                    ? ExtensionCompatibilityResult.Incompatible("The sidecar executable is not installed.")
+                    : ExtensionManifestCompatibility.ValidateSidecar(entry.Name, entry.ExecutablePath);
+                return (object)new
+                {
+                    name = entry.Name,
+                    kind = "sidecar",
+                    installed = entry.Available,
+                    available = entry.Available && compatibility.IsCompatible,
+                    compatibility_reason = compatibility.Reason,
+                    executable_path = entry.ExecutablePath,
+                    manifest_path = entry.ManifestPath,
+                    tool_directory = entry.ToolDirectory,
+                };
             }));
             System.Console.WriteLine(JsonSerializer.Serialize(catalogue, new JsonSerializerOptions
             {
@@ -56,13 +64,17 @@ public sealed class EnginesCommand : Command<EnginesCommand.Settings>
             return 0;
         }
 
-        var table = new Table().AddColumns("Engine", "Installed", "Manifest", "Executable");
-        table.AddRow("converter", "yes", "native", Environment.ProcessPath ?? "ucx");
+        var table = new Table().AddColumns("Engine", "Installed", "Compatible", "Manifest", "Executable");
+        table.AddRow("converter", "yes", "yes", "native", Environment.ProcessPath ?? "ucx");
         foreach (var entry in entries)
         {
+            var compatibility = entry.ExecutablePath is null
+                ? ExtensionCompatibilityResult.Incompatible("The sidecar executable is not installed.")
+                : ExtensionManifestCompatibility.ValidateSidecar(entry.Name, entry.ExecutablePath);
             table.AddRow(
                 Markup.Escape(entry.Name),
                 entry.Available ? "yes" : "no",
+                compatibility.IsCompatible ? "yes" : Markup.Escape(compatibility.Reason ?? "no"),
                 entry.ManifestPath is null ? "no" : "yes",
                 Markup.Escape(entry.ExecutablePath ?? "not built"));
         }

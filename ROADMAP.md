@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 165 — Version plugin and sidecar host-compatibility manifests
-  Why: plugin schema validates trust but not minimum/maximum host or capability contracts, while built-in sidecar manifests omit schema and engine versions.
-  Evidence: `PluginTrustService.CurrentSchemaVersion`; `tools/*/ucx.sidecar.json`; FileFlows plugin/server compatibility.
-  Touches: plugin and sidecar schemas, discovery/readiness service, CLI diagnostics, compatibility tests.
-  Acceptance: manifests declare schema, engine version, min/max host, capabilities, architecture, tools/models, and migration behavior; incompatible extensions are quarantined with an actionable reason before execution.
-  Complexity: M
-
 - [ ] P2 — Item 166 — Enforce documentation and supported-platform truth
   Why: README links missing CONTRIBUTING guidance and conflicts with project/MSIX/WiX/runtime floors; stale changelog/roadmap state has repeatedly survived releases.
   Evidence: `README.md:112-113,258-259,441`; `src/UniversalConverterX.UI/UniversalConverterX.UI.csproj`; `installer/msix/Package.appxmanifest`; `installer/wix/Product.wxs`; version-consistency tests.

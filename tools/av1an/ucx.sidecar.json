@@ -1,14 +1,91 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "tool:av1an",
+    "tool:vspipe",
+    "tool:ffmpeg",
+    "tool:svtav1encapp",
+    "tool:aomenc",
+    "tool:rav1e",
+    "tool:vpxenc",
+    "tool:x264",
+    "tool:x265"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "av1an",
   "tools": [
-    { "id": "av1an", "executable": "av1an", "display": "Av1an 0.5.2+", "managed": false },
-    { "id": "vspipe", "executable": "vspipe", "display": "VapourSynth", "managed": false },
-    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true },
-    { "id": "svtav1encapp", "executable": "SvtAv1EncApp", "display": "SVT-AV1 encoder", "managed": false, "whenArgContains": "svt-av1" },
-    { "id": "aomenc", "executable": "aomenc", "display": "AOM encoder", "managed": false, "whenArgContains": "aom" },
-    { "id": "rav1e", "executable": "rav1e", "display": "rav1e encoder", "managed": false, "whenArgContains": "rav1e" },
-    { "id": "vpxenc", "executable": "vpxenc", "display": "VPX encoder", "managed": false, "whenArgContains": "vpx" },
-    { "id": "x264", "executable": "x264", "display": "x264 encoder", "managed": false, "whenArgContains": "x264" },
-    { "id": "x265", "executable": "x265", "display": "x265 encoder", "managed": false, "whenArgContains": "x265" }
+    {
+      "id": "av1an",
+      "executable": "av1an",
+      "display": "Av1an 0.5.2+",
+      "managed": false
+    },
+    {
+      "id": "vspipe",
+      "executable": "vspipe",
+      "display": "VapourSynth",
+      "managed": false
+    },
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    },
+    {
+      "id": "svtav1encapp",
+      "executable": "SvtAv1EncApp",
+      "display": "SVT-AV1 encoder",
+      "managed": false,
+      "whenArgContains": "svt-av1"
+    },
+    {
+      "id": "aomenc",
+      "executable": "aomenc",
+      "display": "AOM encoder",
+      "managed": false,
+      "whenArgContains": "aom"
+    },
+    {
+      "id": "rav1e",
+      "executable": "rav1e",
+      "display": "rav1e encoder",
+      "managed": false,
+      "whenArgContains": "rav1e"
+    },
+    {
+      "id": "vpxenc",
+      "executable": "vpxenc",
+      "display": "VPX encoder",
+      "managed": false,
+      "whenArgContains": "vpx"
+    },
+    {
+      "id": "x264",
+      "executable": "x264",
+      "display": "x264 encoder",
+      "managed": false,
+      "whenArgContains": "x264"
+    },
+    {
+      "id": "x265",
+      "executable": "x265",
+      "display": "x265 encoder",
+      "managed": false,
+      "whenArgContains": "x265"
+    }
   ]
 }

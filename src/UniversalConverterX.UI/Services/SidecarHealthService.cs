@@ -282,6 +282,23 @@ public sealed class SidecarHealthService : ISidecarHealthService
             ? MissingSidecar(engine)
             : Ready(engine, "sidecar", Path.GetFileName(sidecarPath), "Frozen sidecar binary found.", "", sidecarPath, SizeOf(sidecarPath)));
 
+        if (sidecarPath is not null)
+        {
+            var compatibility = ExtensionManifestCompatibility.ValidateSidecar(engine, sidecarPath);
+            if (!compatibility.IsCompatible)
+            {
+                rows.Add(new SidecarHealthRequirement(
+                    engine,
+                    "compatibility",
+                    "Host compatibility manifest",
+                    "Missing",
+                    compatibility.Reason ?? "The extension manifest is incompatible with this UCX host.",
+                    "Rebuild or reinstall this sidecar from the current UCX release before running it.",
+                    ExtensionManifestCompatibility.FindSidecarManifest(engine, sidecarPath),
+                    null));
+            }
+        }
+
         foreach (var tool in ToolRequirementsFor(engine, presetArgs))
             rows.Add(await EvaluateToolAsync(engine, tool, cancellationToken));
 

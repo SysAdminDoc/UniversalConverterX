@@ -53,7 +53,9 @@ public sealed class PluginTrustService : IPluginTrustService
     private static readonly HashSet<string> ManifestProperties = new(StringComparer.Ordinal)
     {
         "schemaVersion", "id", "name", "version", "description", "engine", "executable",
-        "presets", "isAi", "models", "gpu", "tools",
+        "presets", "isAi", "models", "gpu", "tools", "engineVersion",
+        "minHostVersion", "maxHostVersion", "capabilities", "architectures",
+        "migration",
     };
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -246,6 +248,14 @@ public sealed class PluginTrustService : IPluginTrustService
             }
 
             var manifest = document.RootElement.Deserialize<PluginManifest>(JsonOptions);
+            var compatibility = ExtensionManifestCompatibility.ValidateJson(
+                document.RootElement,
+                manifest?.Engine ?? directoryName,
+                "plugin",
+                manifestPath: manifestPath);
+            if (!compatibility.IsCompatible)
+                return InvalidDescriptor(directoryName, directory, compatibility.Reason!);
+
             var validationError = ValidateManifest(directoryName, manifest);
             if (validationError is not null)
                 return InvalidDescriptor(directoryName, directory, validationError);
@@ -325,8 +335,6 @@ public sealed class PluginTrustService : IPluginTrustService
     {
         if (manifest is null)
             return "manifest.json could not be parsed.";
-        if (manifest.SchemaVersion != CurrentSchemaVersion)
-            return $"Unsupported plugin schema version {manifest.SchemaVersion}; expected {CurrentSchemaVersion}.";
         if (!IsSafeId(manifest.Id))
             return "Plugin id must contain only ASCII letters, digits, '.', '_' or '-' and be at most 64 characters.";
         if (!directoryName.Equals(manifest.Id, StringComparison.OrdinalIgnoreCase))

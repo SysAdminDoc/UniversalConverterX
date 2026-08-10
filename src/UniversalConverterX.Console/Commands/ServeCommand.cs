@@ -219,6 +219,18 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
                         return;
                     }
 
+                    var compatibility = ExtensionManifestCompatibility.ValidateSidecar(engine, exe);
+                    if (!compatibility.IsCompatible)
+                    {
+                        await WriteJson(resp, 409, new
+                        {
+                            error = "extension_incompatible",
+                            engine,
+                            message = compatibility.Reason,
+                        });
+                        return;
+                    }
+
                     if (!OutputCollisionPolicy.TryProtectArguments(
                             args,
                             options.OverwriteBehavior,
@@ -382,11 +394,16 @@ public class ServeCommand : AsyncCommand<ServeCommand.Settings>
         }
         foreach (var entry in SidecarCatalog.Discover())
         {
+            var compatibility = entry.ExecutablePath is null
+                ? ExtensionCompatibilityResult.Incompatible("The sidecar executable is not installed.")
+                : ExtensionManifestCompatibility.ValidateSidecar(entry.Name, entry.ExecutablePath);
             list.Add(new
             {
                 name = entry.Name,
                 kind = "sidecar",
-                available = entry.Available,
+                installed = entry.Available,
+                available = entry.Available && compatibility.IsCompatible,
+                compatibility_reason = compatibility.Reason,
                 path = entry.ExecutablePath,
                 manifest = entry.ManifestPath,
             });

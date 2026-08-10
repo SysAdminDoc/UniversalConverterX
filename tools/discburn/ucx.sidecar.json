@@ -1,4 +1,24 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "tool:ffmpeg",
+    "tool:dvdauthor",
+    "tool:tsmuxer"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "discburn",
   "tools": [
     {
@@ -6,21 +26,34 @@
       "executable": "ffmpeg",
       "display": "FFmpeg",
       "managed": true,
-      "whenArgContainsAny": ["image-dvd", "burn-dvd", "author-bluray", "image-bluray", "burn-bluray"]
+      "whenArgContainsAny": [
+        "image-dvd",
+        "burn-dvd",
+        "author-bluray",
+        "image-bluray",
+        "burn-bluray"
+      ]
     },
     {
       "id": "dvdauthor",
       "executable": "dvdauthor",
       "display": "dvdauthor",
       "managed": false,
-      "whenArgContainsAny": ["image-dvd", "burn-dvd"]
+      "whenArgContainsAny": [
+        "image-dvd",
+        "burn-dvd"
+      ]
     },
     {
       "id": "tsmuxer",
       "executable": "tsMuxeR",
       "display": "tsMuxeR 2.7.0",
       "managed": false,
-      "whenArgContainsAny": ["author-bluray", "image-bluray", "burn-bluray"]
+      "whenArgContainsAny": [
+        "author-bluray",
+        "image-bluray",
+        "burn-bluray"
+      ]
     }
   ]
 }

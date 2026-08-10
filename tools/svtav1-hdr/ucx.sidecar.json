@@ -1,7 +1,36 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "tool:svtav1encapp",
+    "tool:ffmpeg"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "svtav1-hdr",
   "tools": [
-    { "id": "svtav1encapp", "executable": "svtav1encapp", "display": "SVT-AV1-HDR", "managed": false },
-    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+    {
+      "id": "svtav1encapp",
+      "executable": "svtav1encapp",
+      "display": "SVT-AV1-HDR",
+      "managed": false
+    },
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
   ]
 }

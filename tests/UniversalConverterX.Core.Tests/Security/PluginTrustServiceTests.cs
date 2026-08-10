@@ -73,6 +73,18 @@ public sealed class PluginTrustServiceTests : IDisposable
     }
 
     [Fact]
+    public void Discover_OldManifestSchema_IsQuarantinedWithMigrationAction()
+    {
+        var plugin = CreatePlugin("old", schemaVersion: 1);
+
+        var descriptor = CreateService().Discover().Should().ContainSingle().Subject;
+
+        descriptor.TrustState.Should().Be(PluginTrustState.Invalid);
+        descriptor.StatusDetail.Should().Contain("reinstall");
+        Directory.Exists(plugin).Should().BeTrue();
+    }
+
+    [Fact]
     public void Discover_SymlinkExecutable_IsInvalidWhenSymlinksAreAvailable()
     {
         var directory = CreatePlugin("sample");
@@ -97,7 +109,10 @@ public sealed class PluginTrustServiceTests : IDisposable
 
     private PluginTrustService CreateService() => new(_plugins, _trustStore);
 
-    private string CreatePlugin(string id, string presetPath = "presets/sample.preset.xml")
+    private string CreatePlugin(
+        string id,
+        string presetPath = "presets/sample.preset.xml",
+        int schemaVersion = 2)
     {
         var directory = Path.Combine(_plugins, id);
         Directory.CreateDirectory(directory);
@@ -123,7 +138,17 @@ public sealed class PluginTrustServiceTests : IDisposable
             Path.Combine(directory, "manifest.json"),
             $$"""
             {
-              "schemaVersion": 1,
+              "schemaVersion": {{schemaVersion}},
+              "engineVersion": "1.0.0",
+              "minHostVersion": "2.34.0",
+              "maxHostVersion": null,
+              "capabilities": ["ndjson"],
+              "architectures": ["win-x64"],
+              "migration": {
+                "strategy": "reinstall",
+                "fromSchemaVersions": [1],
+                "notes": "Reinstall when the manifest schema changes."
+              },
               "id": "{{id}}",
               "name": "Sample plugin",
               "version": "1.0.0",

@@ -1,4 +1,23 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "models",
+    "gpu:cuda-optional"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "ocrpro",
   "models": true,
   "gpu": "cuda-optional"

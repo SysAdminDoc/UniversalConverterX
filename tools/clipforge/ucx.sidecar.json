@@ -1,4 +1,25 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "0.4.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "gpu:vulkan",
+    "tool:ffmpeg",
+    "tool:ffprobe",
+    "tool:rife-ncnn-vulkan"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "clipforge",
   "gpu": "vulkan",
   "tools": [

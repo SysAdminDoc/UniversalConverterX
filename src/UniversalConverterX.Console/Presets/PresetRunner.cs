@@ -24,6 +24,8 @@ public static class PresetRunner
                 "or install a release bundle containing that engine.");
             return 3;
         }
+        if (!EnsureCompatible(engine, executable))
+            return 3;
 
         return SpawnWithOutputPolicy(
             executable,
@@ -52,6 +54,8 @@ public static class PresetRunner
                 $"so the sidecars are bundled.");
             return 3;
         }
+        if (!EnsureCompatible(preset.Engine, exe))
+            return 3;
 
         var effectiveOptions = options ?? ConverterXOptions.Load();
         return preset.Mode switch
@@ -248,4 +252,15 @@ public static class PresetRunner
 
     /// <summary>Mirror of SidecarRunner.Locate semantics.</summary>
     public static string? ResolveSidecar(string toolName) => SidecarCatalog.Resolve(toolName);
+
+    private static bool EnsureCompatible(string engine, string executable)
+    {
+        var compatibility = ExtensionManifestCompatibility.ValidateSidecar(engine, executable);
+        if (compatibility.IsCompatible)
+            return true;
+
+        System.Console.Error.WriteLine(
+            $"Sidecar '{engine}' is quarantined: {compatibility.Reason}");
+        return false;
+    }
 }

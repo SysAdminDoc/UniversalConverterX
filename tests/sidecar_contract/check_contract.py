@@ -343,7 +343,11 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
             manifest_path, 1, "health-manifest", "root must be a JSON object",
         )]
 
-    allowed_keys = {"engine", "tools", "models", "gpu", "onnxRuntime"}
+    allowed_keys = {
+        "schemaVersion", "engine", "engineVersion", "minHostVersion",
+        "maxHostVersion", "capabilities", "architectures", "migration",
+        "tools", "models", "gpu", "onnxRuntime",
+    }
     unknown_keys = sorted(set(payload) - allowed_keys)
     if unknown_keys:
         violations.append(Violation(
@@ -356,6 +360,73 @@ def check_health_manifest(sidecar_path: Path) -> list[Violation]:
         violations.append(Violation(
             manifest_path, 1, "health-manifest",
             f"engine must exactly match directory name {expected_engine!r}",
+        ))
+
+    if payload.get("schemaVersion") != 2:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "schemaVersion must be 2; rebuild or reinstall the sidecar to migrate it",
+        ))
+
+    semver = re.compile(r"^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?$")
+    for field in ("engineVersion", "minHostVersion"):
+        value = payload.get(field)
+        if not isinstance(value, str) or not semver.fullmatch(value.strip()):
+            violations.append(Violation(
+                manifest_path, 1, "health-manifest",
+                f"{field} must be a semantic version",
+            ))
+    if "maxHostVersion" not in payload:
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "maxHostVersion must be declared; use null for no upper bound",
+        ))
+    elif payload["maxHostVersion"] is not None and (
+        not isinstance(payload["maxHostVersion"], str)
+        or not semver.fullmatch(payload["maxHostVersion"].strip())
+    ):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "maxHostVersion must be a semantic version or null",
+        ))
+
+    architectures = payload.get("architectures")
+    if (
+        not isinstance(architectures, list)
+        or not architectures
+        or any(item not in {"win-x64", "win-arm64", "any"} for item in architectures)
+    ):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "architectures must declare win-x64, win-arm64, or any",
+        ))
+
+    capabilities = payload.get("capabilities")
+    if (
+        not isinstance(capabilities, list)
+        or not capabilities
+        or any(not isinstance(item, str) or not item.strip() for item in capabilities)
+    ):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "capabilities must be a non-empty string array",
+        ))
+
+    migration = payload.get("migration")
+    if (
+        not isinstance(migration, dict)
+        or migration.get("strategy") not in {"none", "in-place", "reinstall"}
+        or not isinstance(migration.get("fromSchemaVersions"), list)
+        or any(
+            not isinstance(item, int) or item <= 0
+            for item in migration.get("fromSchemaVersions", [])
+        )
+        or not isinstance(migration.get("notes"), str)
+        or not migration["notes"].strip()
+    ):
+        violations.append(Violation(
+            manifest_path, 1, "health-manifest",
+            "migration must declare strategy, positive fromSchemaVersions, and actionable notes",
         ))
 
     if "models" in payload and not isinstance(payload["models"], bool):

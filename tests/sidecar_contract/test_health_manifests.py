@@ -58,7 +58,18 @@ class SidecarHealthManifestTests(unittest.TestCase):
             (sidecar.parent / "ucx.sidecar.json").write_text(
                 json.dumps(
                     {
+                        "schemaVersion": 2,
                         "engine": "sample",
+                        "engineVersion": "1.0.0",
+                        "minHostVersion": "2.34.0",
+                        "maxHostVersion": None,
+                        "capabilities": ["ndjson"],
+                        "architectures": ["win-x64"],
+                        "migration": {
+                            "strategy": "reinstall",
+                            "fromSchemaVersions": [1],
+                            "notes": "Reinstall when the manifest schema changes.",
+                        },
                         "models": True,
                         "gpu": "cuda-required",
                         "onnxRuntime": "cuda12-transition",

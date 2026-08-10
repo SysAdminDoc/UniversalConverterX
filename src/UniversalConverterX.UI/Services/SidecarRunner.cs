@@ -136,6 +136,26 @@ public sealed class SidecarRunner : ISidecarRunner
                 ExitCode: -1);
         }
 
+        // A discovered binary is not executable until its signed-in-repo
+        // compatibility contract agrees with this host. Trusted plugins are
+        // already validated by PluginTrustService; built-in sidecars use the
+        // shared manifest gate here so direct page launches cannot bypass
+        // health diagnostics.
+        if (SidecarCatalog.Resolve(toolName) is not null)
+        {
+            var compatibility = ExtensionManifestCompatibility.ValidateSidecar(toolName, exe);
+            if (!compatibility.IsCompatible)
+            {
+                return new SidecarResult(
+                    Success: false,
+                    OutputPath: null,
+                    SizeBytes: null,
+                    ErrorCode: "extension_incompatible",
+                    ErrorMessage: compatibility.Reason,
+                    ExitCode: -1);
+            }
+        }
+
         var psi = new ProcessStartInfo
         {
             FileName = exe,

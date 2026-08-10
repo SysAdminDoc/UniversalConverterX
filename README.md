@@ -52,7 +52,7 @@ UniversalConverter X uses a compact, queue-first desktop workspace: readable typ
 
 ## Architecture
 
-UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md).
+UCX is a C# / .NET 10 / WinUI 3 shell that hosts the Converter natively and orchestrates specialized engines as sidecar processes. Each sidecar lives under `tools/<name>/` and follows the NDJSON CLI contract documented in [`tools/README.md`](tools/README.md). Its `ucx.sidecar.json` declares the v2 schema, engine version, host-version range, capabilities, supported architecture, tool/model requirements, and migration path. UCX validates that contract during discovery, health checks, CLI/REST diagnostics, and immediately before launch; an old, unsupported, or architecture-mismatched extension is quarantined with a rebuild or reinstall reason.
 
 Representative sidecar engines: VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift, Comskip, Audio Compressor, Voice Changer, Slideshow Maker, and Video Face Enhance.
 
@@ -455,18 +455,30 @@ Each directory needs a `manifest.json`, its declared executable, and at least on
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": ["ndjson", "presets"],
+  "architectures": ["win-x64"],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [1],
+    "notes": "Reinstall when the manifest schema changes."
+  },
   "id": "example-plugin",
   "name": "Example Plugin",
   "version": "1.0.0",
   "description": "Local example conversion workflow",
   "engine": "example-plugin",
   "executable": "example-plugin.exe",
-  "presets": ["presets/example.preset.xml"]
+  "presets": ["presets/example.preset.xml"],
+  "models": false,
+  "tools": []
 }
 ```
 
-The directory name, `id`, and `engine` must match. Plugin preset files use the same validated `.preset.xml` schema as built-in workflows.
+The directory name, `id`, and `engine` must match. Plugin preset files use the same validated `.preset.xml` schema as built-in workflows. Trusted status does not bypass compatibility validation: a schema, host-version, capability, or architecture mismatch keeps the plugin quarantined until it is rebuilt or reinstalled.
 
 Subtitle Studio runs a local Whisper → optional Helsinki OPUS-MT ONNX pipeline, opens the timecoded cues for text/timing edits, and exports SRT, VTT, or ASS. Video sources can also receive a hard-coded caption copy after the edited subtitle file is saved.
 

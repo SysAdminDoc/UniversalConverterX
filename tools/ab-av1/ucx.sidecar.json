@@ -1,7 +1,36 @@
 {
+  "schemaVersion": 2,
+  "engineVersion": "1.0.0",
+  "minHostVersion": "2.34.0",
+  "maxHostVersion": null,
+  "capabilities": [
+    "ndjson",
+    "tool:ab-av1",
+    "tool:ffmpeg"
+  ],
+  "architectures": [
+    "win-x64"
+  ],
+  "migration": {
+    "strategy": "reinstall",
+    "fromSchemaVersions": [
+      1
+    ],
+    "notes": "Reinstall the sidecar when the UCX manifest schema changes."
+  },
   "engine": "ab-av1",
   "tools": [
-    { "id": "ab-av1", "executable": "ab-av1", "display": "ab-av1", "managed": false },
-    { "id": "ffmpeg", "executable": "ffmpeg", "display": "FFmpeg", "managed": true }
+    {
+      "id": "ab-av1",
+      "executable": "ab-av1",
+      "display": "ab-av1",
+      "managed": false
+    },
+    {
+      "id": "ffmpeg",
+      "executable": "ffmpeg",
+      "display": "FFmpeg",
+      "managed": true
+    }
   ]
 }
