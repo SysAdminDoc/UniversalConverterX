@@ -176,7 +176,15 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
 
         // Expand glob patterns and find files
-        var inputFiles = ExpandFiles(settings.Files);
+        var inputFiles = ExpandFiles(settings.Files, out var missingFiles);
+        if (missingFiles.Count > 0)
+        {
+            foreach (var missingFile in missingFiles)
+                AnsiConsole.MarkupLine($"[red]Error:[/] Input file not found: {Esc(missingFile)}");
+
+            return 1;
+        }
+
         if (inputFiles.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]Error:[/] No matching files found.");
@@ -544,7 +552,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
     }
 
-    private static List<string> ExpandFiles(string[] patterns)
+    internal static List<string> ExpandFiles(string[] patterns, out List<string> missingFiles)
     {
         // Always emit absolute paths so downstream output-dir computation and
         // de-duplication don't disagree based on whether the pattern was given
@@ -554,6 +562,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             ? StringComparer.OrdinalIgnoreCase
             : StringComparer.Ordinal);
         var files = new List<string>();
+        missingFiles = [];
 
         void Add(string path)
         {
@@ -590,6 +599,10 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             else if (File.Exists(pattern))
             {
                 Add(pattern);
+            }
+            else
+            {
+                missingFiles.Add(pattern);
             }
         }
 
