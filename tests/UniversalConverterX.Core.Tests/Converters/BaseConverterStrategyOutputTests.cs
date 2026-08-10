@@ -49,7 +49,9 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         var converter = new FakeConverterStrategy(_scriptPath, "write");
         var job = CreateJob();
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         result.OutputPath.Should().Be(job.OutputPath);
@@ -64,7 +66,9 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         var converter = new FakeConverterStrategy(_scriptPath, "missing");
         var job = CreateJob();
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("did not create the expected output file");
@@ -79,7 +83,9 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         var converter = new FakeConverterStrategy(_scriptPath, "empty");
         var job = CreateJob();
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("empty output file");
@@ -94,7 +100,9 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         var converter = new FakeConverterStrategy(_scriptPath, "missing", requiresOutputFile: false);
         var job = CreateJob();
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         result.OutputSize.Should().Be(0);
@@ -107,7 +115,9 @@ public sealed class BaseConverterStrategyOutputTests : IDisposable
         var converter = new FakeConverterStrategy(_scriptPath, "environment");
         var job = CreateJob();
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         File.ReadAllText(job.OutputPath).Should().Be("hardened");

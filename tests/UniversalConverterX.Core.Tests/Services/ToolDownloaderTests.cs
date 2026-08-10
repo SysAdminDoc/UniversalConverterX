@@ -21,7 +21,10 @@ public class ToolDownloaderTests : IDisposable
     {
         Directory.CreateDirectory(Path.Combine(_toolsBasePath, "bin"));
         var previousBytes = new byte[] { 9, 9, 9 };
-        await File.WriteAllBytesAsync(ExpectedToolPath("ffmpeg"), previousBytes);
+        await File.WriteAllBytesAsync(
+            ExpectedToolPath("ffmpeg"),
+            previousBytes,
+            TestContext.Current.CancellationToken);
 
         var downloader = CreateDownloader([1, 2, 3]);
         var info = downloader.GetToolDownloadInfo("ffmpeg");
@@ -29,7 +32,9 @@ public class ToolDownloaderTests : IDisposable
         info!.ExpectedChecksum = new string('0', 64);
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("Checksum mismatch");
@@ -47,7 +52,9 @@ public class ToolDownloaderTests : IDisposable
         info.MaxDownloadBytes = 1024;
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("exceeds the");
@@ -65,7 +72,9 @@ public class ToolDownloaderTests : IDisposable
         info.MaxDownloadBytes = 1024;
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("exceeded the");
@@ -82,7 +91,9 @@ public class ToolDownloaderTests : IDisposable
         info!.ExpectedChecksum = Sha256(payload);
         SetAllPlatformUrls(info, "https://example.test/setup.exe");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("Automatic execution of downloaded installers is disabled");
@@ -103,7 +114,9 @@ public class ToolDownloaderTests : IDisposable
         info!.ExpectedChecksum = Sha256(payload);
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         File.Exists(ExpectedToolPath("ffmpeg")).Should().BeTrue();
@@ -117,8 +130,14 @@ public class ToolDownloaderTests : IDisposable
         var companionName = "ffprobe" + (OperatingSystem.IsWindows() ? ".exe" : "");
         var binDir = Path.Combine(_toolsBasePath, "bin");
         Directory.CreateDirectory(binDir);
-        await File.WriteAllBytesAsync(Path.Combine(binDir, exeName), [7, 7, 7]);
-        await File.WriteAllBytesAsync(Path.Combine(binDir, companionName), [8, 8, 8]);
+        await File.WriteAllBytesAsync(
+            Path.Combine(binDir, exeName),
+            [7, 7, 7],
+            TestContext.Current.CancellationToken);
+        await File.WriteAllBytesAsync(
+            Path.Combine(binDir, companionName),
+            [8, 8, 8],
+            TestContext.Current.CancellationToken);
 
         var payload = CreateZip(
             ("nested/" + exeName, [1, 2, 3]),
@@ -129,7 +148,9 @@ public class ToolDownloaderTests : IDisposable
         info!.ExpectedChecksum = Sha256(payload);
         SetAllPlatformUrls(info, "https://example.test/ffmpeg.zip");
 
-        var result = await downloader.DownloadToolAsync("ffmpeg");
+        var result = await downloader.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         File.ReadAllBytes(Path.Combine(binDir, exeName)).Should().Equal([1, 2, 3]);
@@ -166,7 +187,9 @@ public class ToolDownloaderTests : IDisposable
         info!.RequireReleaseVersionMatch = false;
         info.AssetNames = info.AssetNames!.Keys.ToDictionary(key => key, _ => assetName);
 
-        var result = await downloader.DownloadToolAsync("yt-dlp");
+        var result = await downloader.DownloadToolAsync(
+            "yt-dlp",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue(result.ErrorMessage);
         File.ReadAllBytes(ExpectedToolPath("yt-dlp")).Should().Equal(payload);
@@ -199,7 +222,9 @@ public class ToolDownloaderTests : IDisposable
     {
         var downloader = CreateDownloader([]);
 
-        var result = await downloader.CheckForUpdateAsync("ffmpeg");
+        var result = await downloader.CheckForUpdateAsync(
+            "ffmpeg",
+            TestContext.Current.CancellationToken);
 
         result.Should().NotBeNull();
         result!.IsInstalled.Should().BeFalse();

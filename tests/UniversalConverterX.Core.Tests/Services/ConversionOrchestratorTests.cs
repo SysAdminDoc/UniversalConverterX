@@ -181,7 +181,9 @@ public class ConversionOrchestratorTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(ConversionResult.Succeeded(job, job.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().NotBeNull();
         _converterMock1.Verify(x => x.ConvertAsync(
@@ -213,7 +215,9 @@ public class ConversionOrchestratorTests
             probe,
             _loggerMock.Object);
 
-        var result = await orchestrator.ConvertAsync(CreateTestJob("input.mp4", "output.mkv"));
+        var result = await orchestrator.ConvertAsync(
+            CreateTestJob("input.mp4", "output.mkv"),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("FFmpeg");
@@ -242,7 +246,9 @@ public class ConversionOrchestratorTests
             probe,
             _loggerMock.Object);
 
-        var result = await orchestrator.ConvertAsync(CreateTestJob("input.mp4", "output.mkv"));
+        var result = await orchestrator.ConvertAsync(
+            CreateTestJob("input.mp4", "output.mkv"),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         converter.Verify(x => x.ConvertAsync(
@@ -263,7 +269,9 @@ public class ConversionOrchestratorTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(ConversionResult.Succeeded(job, job.OutputPath, TimeSpan.FromSeconds(1), "converter2"));
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().NotBeNull();
         _converterMock2.Verify(x => x.ConvertAsync(
@@ -280,7 +288,9 @@ public class ConversionOrchestratorTests
 
         var job = CreateTestJob("input.xyz", "output.abc");
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
     }
@@ -308,7 +318,9 @@ public class ConversionOrchestratorTests
             .ReturnsAsync((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                 ConversionResult.Succeeded(j, j.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue();
         _converterMock1.Verify(x => x.ConvertAsync(
@@ -353,10 +365,13 @@ public class ConversionOrchestratorTests
             })
             .ReturnsAsync(ConversionResult.Succeeded(job, job.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-        await _orchestrator.ConvertAsync(job, progress);
+        await _orchestrator.ConvertAsync(
+            job,
+            progress,
+            TestContext.Current.CancellationToken);
 
         // Allow time for progress reporting
-        await Task.Delay(100);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
         progressReports.Should().NotBeEmpty();
     }
@@ -378,7 +393,9 @@ public class ConversionOrchestratorTests
             .ReturnsAsync((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                 ConversionResult.Succeeded(j, j.OutputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-        var batch = await _orchestrator.ConvertBatchAsync(jobs);
+        var batch = await _orchestrator.ConvertBatchAsync(
+            jobs,
+            cancellationToken: TestContext.Current.CancellationToken);
         var results = batch.Results;
 
         results.Should().HaveCount(3);
@@ -406,7 +423,9 @@ public class ConversionOrchestratorTests
                 .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                     WriteOutputAndSucceed(j, "converter1"));
 
-            var result = await _orchestrator.ConvertAsync(job);
+            var result = await _orchestrator.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeTrue();
             File.Exists(inputPath).Should().BeFalse();
@@ -440,7 +459,9 @@ public class ConversionOrchestratorTests
                 .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                     WriteOutputAndSucceed(j, "converter1"));
 
-            var result = await _orchestrator.ConvertAsync(job);
+            var result = await _orchestrator.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeTrue();
             File.Exists(inputPath).Should().BeFalse();
@@ -476,7 +497,9 @@ public class ConversionOrchestratorTests
                 .Returns((ConversionJob j, IProgress<ConversionProgress> p, CancellationToken ct) =>
                     WriteOutputAndSucceed(j, "converter1"));
 
-            var result = await _orchestrator.ConvertAsync(job);
+            var result = await _orchestrator.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeTrue();
             File.ReadAllText(outputPath + ":Zone.Identifier").Should().Be(zoneIdentifier);
@@ -507,7 +530,9 @@ public class ConversionOrchestratorTests
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ConversionResult.Failed(job, "converter failed", TimeSpan.FromSeconds(1), converter: "converter1"));
 
-            var result = await _orchestrator.ConvertAsync(job);
+            var result = await _orchestrator.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Contain("converter failed");
@@ -539,7 +564,9 @@ public class ConversionOrchestratorTests
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ConversionResult.Succeeded(job, outputPath, TimeSpan.FromSeconds(1), "converter1"));
 
-            var result = await _orchestrator.ConvertAsync(job);
+            var result = await _orchestrator.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeFalse();
             result.OutputPath.Should().Be(outputPath);
@@ -584,7 +611,9 @@ public class ConversionOrchestratorTests
         var job = CreateTestJob("input.mp4", "output.png");
         job.Options.ForceConverter = "converter2";
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("converter2");
@@ -604,7 +633,9 @@ public class ConversionOrchestratorTests
         var job = CreateTestJob("input.mp4", "output.png");
         job.Options.ForceConverter = "does-not-exist";
 
-        var result = await _orchestrator.ConvertAsync(job);
+        var result = await _orchestrator.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Contain("does-not-exist");

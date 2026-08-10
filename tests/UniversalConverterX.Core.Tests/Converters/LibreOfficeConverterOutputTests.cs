@@ -136,7 +136,9 @@ public sealed class LibreOfficeConverterOutputTests : IDisposable
         var converter = new StagingProbeLibreOfficeConverter(_tempDir);
         var job = ConversionJob.Create(input, requestedOutput);
 
-        var result = await converter.ConvertAsync(job);
+        var result = await converter.ConvertAsync(
+            job,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeTrue(result.ErrorMessage ?? result.StandardError ?? "conversion failed without diagnostics");
         File.ReadAllText(existingSibling).Should().Be("keep me");

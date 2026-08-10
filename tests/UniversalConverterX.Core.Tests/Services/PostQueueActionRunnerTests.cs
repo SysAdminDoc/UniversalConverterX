@@ -21,12 +21,14 @@ public sealed class PostQueueActionRunnerTests : IDisposable
             QueueCompletionAction.Shutdown,
             scriptPath: null,
             notificationsEnabled: true,
-            CreateSummary(QueueCompletionItemStatus.Succeeded));
+            CreateSummary(QueueCompletionItemStatus.Succeeded),
+            cancellationToken: TestContext.Current.CancellationToken);
         var failedResult = await runner.ExecuteAsync(
             QueueCompletionAction.Shutdown,
             scriptPath: null,
             notificationsEnabled: true,
-            CreateSummary(QueueCompletionItemStatus.Failed));
+            CreateSummary(QueueCompletionItemStatus.Failed),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         cleanResult.Executed.Should().BeTrue();
         failedResult.Executed.Should().BeFalse();
@@ -48,14 +50,17 @@ public sealed class PostQueueActionRunnerTests : IDisposable
             QueueCompletionAction.RunScript,
             scriptPath,
             notificationsEnabled: false,
-            CreateSummary(QueueCompletionItemStatus.Failed));
+            CreateSummary(QueueCompletionItemStatus.Failed),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Executed.Should().BeTrue();
         result.ReportPath.Should().NotBeNull();
         File.Exists(result.ReportPath).Should().BeTrue();
         host.ScriptRuns.Should().ContainSingle().Which.Should().Be((scriptPath, result.ReportPath!));
 
-        using var json = JsonDocument.Parse(await File.ReadAllTextAsync(result.ReportPath!));
+        using var json = JsonDocument.Parse(await File.ReadAllTextAsync(
+            result.ReportPath!,
+            TestContext.Current.CancellationToken));
         json.RootElement.GetProperty("workflow").GetString().Should().Be("Converter");
         json.RootElement.GetProperty("failed").GetInt32().Should().Be(1);
         json.RootElement.GetProperty("items")[0].GetProperty("status").GetString().Should().Be("Failed");
@@ -75,7 +80,8 @@ public sealed class PostQueueActionRunnerTests : IDisposable
             QueueCompletionAction.RunScript,
             scriptPath,
             notificationsEnabled: false,
-            CreateSummary(QueueCompletionItemStatus.Succeeded));
+            CreateSummary(QueueCompletionItemStatus.Succeeded),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Executed.Should().BeFalse();
         host.ScriptRuns.Should().BeEmpty();
@@ -92,7 +98,8 @@ public sealed class PostQueueActionRunnerTests : IDisposable
             QueueCompletionAction.Notify,
             scriptPath: null,
             notificationsEnabled: false,
-            CreateSummary(QueueCompletionItemStatus.Succeeded));
+            CreateSummary(QueueCompletionItemStatus.Succeeded),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Executed.Should().BeFalse();
         host.Notifications.Should().BeEmpty();
@@ -108,7 +115,8 @@ public sealed class PostQueueActionRunnerTests : IDisposable
             QueueCompletionAction.Sleep,
             scriptPath: null,
             notificationsEnabled: true,
-            CreateSummary(QueueCompletionItemStatus.Succeeded));
+            CreateSummary(QueueCompletionItemStatus.Succeeded),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Executed.Should().BeTrue();
         host.SleepCount.Should().Be(1);

@@ -41,13 +41,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P2 — Product depth, performance, and compatibility
 
-- [ ] P2 — Item 168 — Migrate the Core test suite from xunit 2.x to xunit.v3
-  Why: NuGet marks xunit 2.9.3 and its four transitive packages Legacy because xunit.v3 supersedes them; the deprecation is currently suppressed in `tools/gates/allowlist.json` and that suppression expires 2027-01-29.
-  Evidence: `dotnet list package --deprecated` via `tools/gates/dependency_gate.py`; `tests/UniversalConverterX.Core.Tests/UniversalConverterX.Core.Tests.csproj`; xunit v3 migration guidance.
-  Touches: Core test project references, runner/test-platform wiring, `tools/gates/Invoke-Gates.ps1` if the invocation changes, allowlist removal.
-  Acceptance: the Core suite runs on xunit.v3 with the same 2400+ tests green under `build.ps1 -Target Test`, and the five xunit allowlist entries are deleted rather than extended.
-  Complexity: M
-
 - [ ] P2 — Item 167 — Service .NET packages and validate Windows App SDK 2.3.1
   Why: UCX repeats Microsoft 10.0.9 versions across projects while .NET 10.0.10 is a security servicing release, and Windows App SDK 2.3.1 supersedes the 2.2.0 UI/runtime smoke dependency.
   Evidence: project package references; .NET 10.0.10 release notes; Windows App SDK downloads; live 2026-07-29 outdated-package audit.

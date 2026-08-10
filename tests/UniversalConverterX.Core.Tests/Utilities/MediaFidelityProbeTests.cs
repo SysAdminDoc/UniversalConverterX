@@ -132,7 +132,10 @@ public sealed class MediaFidelityProbeTests
             return;
 
         var fixture = FindFixture("malformed.mkv");
-        var result = await MediaFidelityProbe.ProbeAsync(ffprobe, fixture);
+        var result = await MediaFidelityProbe.ProbeAsync(
+            ffprobe,
+            fixture,
+            TestContext.Current.CancellationToken);
 
         result.Succeeded.Should().BeFalse();
         result.Snapshot.Should().BeNull();
@@ -188,7 +191,10 @@ public sealed class MediaFidelityProbeTests
             File.Exists(source).Should().BeTrue();
 
             var originalHash = await HashAsync(source);
-            var before = await MediaFidelityProbe.ProbeAsync(ffprobe, source);
+            var before = await MediaFidelityProbe.ProbeAsync(
+                ffprobe,
+                source,
+                TestContext.Current.CancellationToken);
             before.Succeeded.Should().BeTrue(before.Diagnostic);
             before.Snapshot!.Streams.Should().HaveCount(6);
             before.Snapshot.Chapters.Should().HaveCount(2);
@@ -205,10 +211,15 @@ public sealed class MediaFidelityProbeTests
                     StreamCopy = true,
                 });
             var conversion = await new FFmpegConverter(Path.Combine(tempRoot, "no-managed-tools"))
-                .ConvertAsync(job);
+                .ConvertAsync(
+                    job,
+                    cancellationToken: TestContext.Current.CancellationToken);
 
             conversion.Success.Should().BeTrue(conversion.ErrorMessage);
-            var after = await MediaFidelityProbe.ProbeAsync(ffprobe, output);
+            var after = await MediaFidelityProbe.ProbeAsync(
+                ffprobe,
+                output,
+                TestContext.Current.CancellationToken);
             after.Succeeded.Should().BeTrue(after.Diagnostic);
             var comparison = MediaFidelityProbe.Compare(
                 before.Snapshot,
@@ -266,24 +277,32 @@ public sealed class MediaFidelityProbeTests
                 ]);
             generated.ExitCode.Should().Be(0, generated.StandardError);
 
-            var before = await MediaFidelityProbe.ProbeAsync(ffprobe, source);
+            var before = await MediaFidelityProbe.ProbeAsync(
+                ffprobe,
+                source,
+                TestContext.Current.CancellationToken);
             before.Succeeded.Should().BeTrue(before.Diagnostic);
             var sourceNames = MediaFidelityProbe.ExtractTrackNames(before.Snapshot!);
             sourceNames.Should().ContainValues("English Commentary", "English Captions");
 
             var conversion = await new FFmpegConverter(Path.Combine(tempRoot, "no-managed-tools"))
-                .ConvertAsync(ConversionJob.Create(
-                    source,
-                    output,
-                    new ConversionOptions
-                    {
-                        OverwriteExisting = true,
-                        PreserveMetadata = true,
-                        StreamCopy = true,
-                    }));
+                .ConvertAsync(
+                    ConversionJob.Create(
+                        source,
+                        output,
+                        new ConversionOptions
+                        {
+                            OverwriteExisting = true,
+                            PreserveMetadata = true,
+                            StreamCopy = true,
+                        }),
+                    cancellationToken: TestContext.Current.CancellationToken);
             conversion.Success.Should().BeTrue(conversion.ErrorMessage);
 
-            var after = await MediaFidelityProbe.ProbeAsync(ffprobe, output);
+            var after = await MediaFidelityProbe.ProbeAsync(
+                ffprobe,
+                output,
+                TestContext.Current.CancellationToken);
             after.Succeeded.Should().BeTrue(after.Diagnostic);
             var outputNames = MediaFidelityProbe.ExtractTrackNames(after.Snapshot!);
             outputNames.Should().BeEquivalentTo(sourceNames);

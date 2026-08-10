@@ -19,9 +19,14 @@ public sealed class ConversionReportWriterTests : IDisposable
         var report = ConversionReportWriter.Create(results, generatedAt);
         var path = Path.Combine(_tempDirectory, "nested", "batch.json");
 
-        await ConversionReportWriter.WriteAsync(path, report);
+        await ConversionReportWriter.WriteAsync(
+            path,
+            report,
+            TestContext.Current.CancellationToken);
 
-        using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        using var json = JsonDocument.Parse(await File.ReadAllTextAsync(
+            path,
+            TestContext.Current.CancellationToken));
         json.RootElement.GetProperty("schemaVersion").GetInt32().Should().Be(1);
         json.RootElement.GetProperty("generatedAtUtc").GetDateTime().Should().Be(generatedAt);
 
@@ -46,9 +51,14 @@ public sealed class ConversionReportWriterTests : IDisposable
         var report = ConversionReportWriter.Create(CreateResults());
         var path = Path.Combine(_tempDirectory, "batch.csv");
 
-        await ConversionReportWriter.WriteAsync(path, report);
+        await ConversionReportWriter.WriteAsync(
+            path,
+            report,
+            TestContext.Current.CancellationToken);
 
-        var csv = await File.ReadAllTextAsync(path);
+        var csv = await File.ReadAllTextAsync(
+            path,
+            TestContext.Current.CancellationToken);
         csv.Should().StartWith("timestamp_utc,source_path,output_path,status,source_bytes,output_bytes,byte_delta,duration_seconds,");
         csv.Should().Contain(",succeeded,100,60,-40,1.25,");
         csv.Should().Contain(",metadata profile changed,,");
@@ -76,9 +86,14 @@ public sealed class ConversionReportWriterTests : IDisposable
         var report = ConversionReportWriter.Create(results);
         var path = Path.Combine(_tempDirectory, "inject.csv");
 
-        await ConversionReportWriter.WriteAsync(path, report);
+        await ConversionReportWriter.WriteAsync(
+            path,
+            report,
+            TestContext.Current.CancellationToken);
 
-        var csv = await File.ReadAllTextAsync(path);
+        var csv = await File.ReadAllTextAsync(
+            path,
+            TestContext.Current.CancellationToken);
         // Formula-triggering error text is prefixed with an apostrophe...
         csv.Should().Contain("'=cmd|'/c calc'!A1");
         csv.Should().NotContain(",=cmd");

@@ -102,7 +102,9 @@ public class ToolManagerTests
     [Fact]
     public async Task GetToolVersionAsync_NonExistentTool_ShouldReturnNull()
     {
-        var version = await _toolManager.GetToolVersionAsync("ffmpeg");
+        var version = await _toolManager.GetToolVersionAsync(
+            "ffmpeg",
+            TestContext.Current.CancellationToken);
 
         version.Should().BeNull();
     }
@@ -128,7 +130,9 @@ public class ToolManagerTests
             .ToArray();
         var allTasks = Task.WhenAll(tasks);
 
-        var completed = await Task.WhenAny(allTasks, Task.Delay(TimeSpan.FromSeconds(5)));
+        var completed = await Task.WhenAny(
+            allTasks,
+            Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         completed.Should().Be(allTasks);
         await allTasks;
     }
@@ -166,7 +170,9 @@ public class ToolManagerTests
     [Fact]
     public async Task VerifyToolIntegrityAsync_NonExistentTool_ShouldReturnFalse()
     {
-        var result = await _toolManager.VerifyToolIntegrityAsync("ffmpeg");
+        var result = await _toolManager.VerifyToolIntegrityAsync(
+            "ffmpeg",
+            TestContext.Current.CancellationToken);
 
         result.Should().BeFalse();
     }
@@ -174,7 +180,9 @@ public class ToolManagerTests
     [Fact]
     public async Task DownloadToolAsync_WithoutConfiguredDownloader_ShouldReturnFailure()
     {
-        var result = await _toolManager.DownloadToolAsync("ffmpeg");
+        var result = await _toolManager.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().NotBeNullOrEmpty();
@@ -187,7 +195,9 @@ public class ToolManagerTests
         var downloader = new RecordingToolDownloader(expected);
         var manager = new ToolManager(_optionsMock.Object, downloader);
 
-        var result = await manager.DownloadToolAsync("ffmpeg");
+        var result = await manager.DownloadToolAsync(
+            "ffmpeg",
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().Be(expected);
         downloader.ToolName.Should().Be("ffmpeg");

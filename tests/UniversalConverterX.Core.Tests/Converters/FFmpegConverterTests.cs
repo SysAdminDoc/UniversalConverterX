@@ -137,7 +137,9 @@ public class FFmpegConverterTests
                 },
             };
 
-            var result = await converter.ConvertAsync(job);
+            var result = await converter.ConvertAsync(
+                job,
+                cancellationToken: TestContext.Current.CancellationToken);
 
             result.Success.Should().BeTrue();
             result.Capability.Should().BeEquivalentTo(new CapabilityDecision(

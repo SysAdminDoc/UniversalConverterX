@@ -29,7 +29,7 @@ public sealed class HistoryStoreTests : IDisposable
             Success = true,
             Profile = "Web résumé",
             RerunParameters = "{\"schemaVersion\":1}",
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         var secondId = await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "heicshift",
@@ -40,39 +40,59 @@ public sealed class HistoryStoreTests : IDisposable
             Success = false,
             ErrorCode = "decode_failed",
             ErrorMessage = "Invalid image",
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
         firstId.Should().BePositive();
         secondId.Should().BeGreaterThan(firstId);
 
-        var all = await store.QueryAsync(limit: 10);
+        var all = await store.QueryAsync(
+            limit: 10,
+            cancellationToken: TestContext.Current.CancellationToken);
         all.Select(entry => entry.Id).Should().Equal(secondId, firstId);
         all[0].ErrorMessage.Should().Be("Invalid image");
         all[1].OutputPath.Should().EndWith("café output.mp4");
         all[1].RerunParameters.Should().Be("{\"schemaVersion\":1}");
 
-        var byId = await store.GetAsync(firstId);
+        var byId = await store.GetAsync(
+            firstId,
+            TestContext.Current.CancellationToken);
         byId.Should().NotBeNull();
         byId!.SourcePath.Should().EndWith("café source.mov");
-        (await store.GetAsync(long.MaxValue)).Should().BeNull();
+        (await store.GetAsync(
+            long.MaxValue,
+            TestContext.Current.CancellationToken)).Should().BeNull();
 
-        var search = await store.QueryAsync("résumé");
+        var search = await store.QueryAsync(
+            "résumé",
+            cancellationToken: TestContext.Current.CancellationToken);
         search.Should().ContainSingle().Which.Id.Should().Be(firstId);
 
-        var crossFieldSearch = await store.QueryAsync("videocrush résumé");
+        var crossFieldSearch = await store.QueryAsync(
+            "videocrush résumé",
+            cancellationToken: TestContext.Current.CancellationToken);
         crossFieldSearch.Should().ContainSingle().Which.Id.Should().Be(firstId);
 
-        var failureSearch = await store.QueryAsync("heicshift Invalid image");
+        var failureSearch = await store.QueryAsync(
+            "heicshift Invalid image",
+            cancellationToken: TestContext.Current.CancellationToken);
         failureSearch.Should().ContainSingle().Which.Id.Should().Be(secondId);
 
-        (await store.QueryAsync("succeeded")).Should().ContainSingle()
+        (await store.QueryAsync(
+            "succeeded",
+            cancellationToken: TestContext.Current.CancellationToken)).Should().ContainSingle()
             .Which.Id.Should().Be(firstId);
-        (await store.QueryAsync("failed")).Should().ContainSingle()
+        (await store.QueryAsync(
+            "failed",
+            cancellationToken: TestContext.Current.CancellationToken)).Should().ContainSingle()
             .Which.Id.Should().Be(secondId);
 
-        (await store.QueryAsync("%")).Should().BeEmpty("wildcards are literal search text");
+        (await store.QueryAsync(
+            "%",
+            cancellationToken: TestContext.Current.CancellationToken)).Should().BeEmpty("wildcards are literal search text");
 
-        (await store.SummarizeAsync("café mp4")).Should().Be(new ConversionHistorySummary(
+        (await store.SummarizeAsync(
+            "café mp4",
+            TestContext.Current.CancellationToken)).Should().Be(new ConversionHistorySummary(
             TotalJobs: 1,
             Succeeded: 1,
             Failed: 0,
@@ -80,7 +100,8 @@ public sealed class HistoryStoreTests : IDisposable
             TotalOutputBytes: 600,
             SpaceSavedBytes: 400));
 
-        var summary = await store.SummarizeAsync();
+        var summary = await store.SummarizeAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
         summary.Should().Be(new ConversionHistorySummary(
             TotalJobs: 2,
             Succeeded: 1,
@@ -89,11 +110,15 @@ public sealed class HistoryStoreTests : IDisposable
             TotalOutputBytes: 600,
             SpaceSavedBytes: 400));
 
-        await store.DeleteAsync(secondId);
-        (await store.QueryAsync()).Should().ContainSingle().Which.Id.Should().Be(firstId);
+        await store.DeleteAsync(
+            secondId,
+            TestContext.Current.CancellationToken);
+        (await store.QueryAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Should().ContainSingle().Which.Id.Should().Be(firstId);
 
-        await store.ClearAsync();
-        (await store.QueryAsync()).Should().BeEmpty();
+        await store.ClearAsync(TestContext.Current.CancellationToken);
+        (await store.QueryAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Should().BeEmpty();
     }
 
     [Fact]
@@ -109,10 +134,12 @@ public sealed class HistoryStoreTests : IDisposable
                     Action = "convert",
                     SourcePath = $"input-{index}.dat",
                     Success = true,
-                });
+                }, cancellationToken: TestContext.Current.CancellationToken);
             }
 
-            var retained = await rowStore.QueryAsync(limit: 10);
+            var retained = await rowStore.QueryAsync(
+                limit: 10,
+                cancellationToken: TestContext.Current.CancellationToken);
             retained.Select(entry => entry.Engine).Should().Equal("engine-4", "engine-3", "engine-2");
         }
 
@@ -124,7 +151,7 @@ public sealed class HistoryStoreTests : IDisposable
             Action = "convert",
             SourcePath = "old.dat",
             Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         await ageStore.AddAsync(new ConversionHistoryEntry
         {
             Timestamp = DateTime.UtcNow,
@@ -132,9 +159,10 @@ public sealed class HistoryStoreTests : IDisposable
             Action = "convert",
             SourcePath = "current.dat",
             Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        (await ageStore.QueryAsync()).Should().ContainSingle()
+        (await ageStore.QueryAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Should().ContainSingle()
             .Which.Engine.Should().Be("current");
     }
 
@@ -149,9 +177,11 @@ public sealed class HistoryStoreTests : IDisposable
                 Action = "convert",
                 SourcePath = $"input-{index}.dat",
                 Success = true,
-            })));
+            }, cancellationToken: TestContext.Current.CancellationToken)));
 
-        var rows = await store.QueryAsync(limit: 100);
+        var rows = await store.QueryAsync(
+            limit: 100,
+            cancellationToken: TestContext.Current.CancellationToken);
         rows.Should().HaveCount(40);
         rows.Select(row => row.SourcePath).Should().OnlyHaveUniqueItems();
     }
@@ -177,9 +207,11 @@ public sealed class HistoryStoreTests : IDisposable
             SourcePath = "input.mov",
             Success = true,
             RerunParameters = "{\"schemaVersion\":1}",
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        (await migrated.GetAsync(id))!.RerunParameters.Should().Be("{\"schemaVersion\":1}");
+        (await migrated.GetAsync(
+            id,
+            TestContext.Current.CancellationToken))!.RerunParameters.Should().Be("{\"schemaVersion\":1}");
     }
 
     [Fact]
@@ -199,9 +231,11 @@ public sealed class HistoryStoreTests : IDisposable
             SourcePath = @"C:\In\clip.mov",
             Success = true,
             RerunParameters = rerunJson,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        var rerun = await store.GetRerunRequestAsync(id);
+        var rerun = await store.GetRerunRequestAsync(
+            id,
+            TestContext.Current.CancellationToken);
 
         rerun.Should().NotBeNull();
         rerun!.OutputFormat.Should().Be("mp4");
@@ -215,16 +249,22 @@ public sealed class HistoryStoreTests : IDisposable
         var noParams = await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\a.mov", Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         var badParams = await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\b.mov", Success = true,
             RerunParameters = "{ not valid json",
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        (await store.GetRerunRequestAsync(noParams)).Should().BeNull();
-        (await store.GetRerunRequestAsync(badParams)).Should().BeNull();
-        (await store.GetRerunRequestAsync(999_999)).Should().BeNull();
+        (await store.GetRerunRequestAsync(
+            noParams,
+            TestContext.Current.CancellationToken)).Should().BeNull();
+        (await store.GetRerunRequestAsync(
+            badParams,
+            TestContext.Current.CancellationToken)).Should().BeNull();
+        (await store.GetRerunRequestAsync(
+            999_999,
+            TestContext.Current.CancellationToken)).Should().BeNull();
     }
 
     [Fact]
@@ -240,12 +280,12 @@ public sealed class HistoryStoreTests : IDisposable
             {
                 SourcePaths = [@"C:\old.mov"], OutputFormat = "webm",
             }),
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         // Newer row WITHOUT rerun params — must be skipped, not block the lookup.
         await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\newer.mov", Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         // Newest row WITH valid rerun params — this is "last used".
         await store.AddAsync(new ConversionHistoryEntry
         {
@@ -254,9 +294,10 @@ public sealed class HistoryStoreTests : IDisposable
             {
                 SourcePaths = [@"C:\newest.mov"], OutputFormat = "mkv",
             }),
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        var lastUsed = await store.GetLastUsedRerunAsync();
+        var lastUsed = await store.GetLastUsedRerunAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
 
         lastUsed.Should().NotBeNull();
         lastUsed!.OutputFormat.Should().Be("mkv");
@@ -269,9 +310,10 @@ public sealed class HistoryStoreTests : IDisposable
         await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "ffmpeg", Action = "convert", SourcePath = @"C:\a.mov", Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        (await store.GetLastUsedRerunAsync()).Should().BeNull();
+        (await store.GetLastUsedRerunAsync(
+            cancellationToken: TestContext.Current.CancellationToken)).Should().BeNull();
     }
 
     [Fact]
@@ -286,15 +328,24 @@ public sealed class HistoryStoreTests : IDisposable
                 Action = "convert",
                 SourcePath = $"input-{index}.dat",
                 Success = true,
-            });
+            }, cancellationToken: TestContext.Current.CancellationToken);
         }
 
-        var firstPage = await store.QueryAsync(limit: 2, offset: 0);
-        var secondPage = await store.QueryAsync(limit: 2, offset: 2);
+        var firstPage = await store.QueryAsync(
+            limit: 2,
+            offset: 0,
+            cancellationToken: TestContext.Current.CancellationToken);
+        var secondPage = await store.QueryAsync(
+            limit: 2,
+            offset: 2,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         firstPage.Select(entry => entry.Engine).Should().Equal("engine-4", "engine-3");
         secondPage.Select(entry => entry.Engine).Should().Equal("engine-2", "engine-1");
-        (await store.QueryAsync(limit: 2, offset: 20)).Should().BeEmpty();
+        (await store.QueryAsync(
+            limit: 2,
+            offset: 20,
+            cancellationToken: TestContext.Current.CancellationToken)).Should().BeEmpty();
     }
 
     [Fact]
@@ -308,7 +359,7 @@ public sealed class HistoryStoreTests : IDisposable
             {
                 SourcePaths = [@"C:\convert.mov"], OutputFormat = "mp4", Surface = "converter",
             }),
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "videocrush", Action = "compress", SourcePath = @"C:\compress.mov", Success = true,
@@ -316,10 +367,14 @@ public sealed class HistoryStoreTests : IDisposable
             {
                 SourcePaths = [@"C:\compress.mov"], OutputFormat = "mp4", Surface = "compressor",
             }),
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        var converter = await store.GetLastUsedRerunAsync(surface: "converter");
-        var compressor = await store.GetLastUsedRerunAsync(surface: "compressor");
+        var converter = await store.GetLastUsedRerunAsync(
+            cancellationToken: TestContext.Current.CancellationToken,
+            surface: "converter");
+        var compressor = await store.GetLastUsedRerunAsync(
+            cancellationToken: TestContext.Current.CancellationToken,
+            surface: "compressor");
 
         converter.Should().NotBeNull();
         converter!.SourcePaths.Should().ContainSingle().Which.Should().Be(@"C:\convert.mov");
@@ -362,9 +417,11 @@ public sealed class HistoryStoreTests : IDisposable
             SourcePath = "clip.mkv",
             Success = true,
             Provenance = JobProvenanceCodec.Serialize(provenance),
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        var restored = await store.GetProvenanceAsync(id);
+        var restored = await store.GetProvenanceAsync(
+            id,
+            TestContext.Current.CancellationToken);
 
         restored.Should().NotBeNull();
         restored!.PresetName.Should().Be("web-1080p");
@@ -384,7 +441,7 @@ public sealed class HistoryStoreTests : IDisposable
             Action = "Compress",
             SourcePath = "clip.mkv",
             Success = true,
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
         var corrupt = await store.AddAsync(new ConversionHistoryEntry
         {
             Engine = "videocrush",
@@ -392,10 +449,14 @@ public sealed class HistoryStoreTests : IDisposable
             SourcePath = "clip.mkv",
             Success = true,
             Provenance = "{ not json",
-        });
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
-        (await store.GetProvenanceAsync(withoutProvenance)).Should().BeNull();
-        (await store.GetProvenanceAsync(corrupt)).Should().BeNull();
+        (await store.GetProvenanceAsync(
+            withoutProvenance,
+            TestContext.Current.CancellationToken)).Should().BeNull();
+        (await store.GetProvenanceAsync(
+            corrupt,
+            TestContext.Current.CancellationToken)).Should().BeNull();
     }
 
     [Fact]
@@ -433,7 +494,8 @@ public sealed class HistoryStoreTests : IDisposable
         }
 
         using var store = new HistoryStore(path);
-        var rows = await store.QueryAsync();
+        var rows = await store.QueryAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
 
         rows.Should().ContainSingle();
         rows[0].Engine.Should().Be("legacy");
@@ -446,8 +508,10 @@ public sealed class HistoryStoreTests : IDisposable
             SourcePath = "new.mkv",
             Success = true,
             Provenance = JobProvenanceCodec.Serialize(new JobProvenance { Engine = "videocrush" }),
-        });
-        (await store.GetProvenanceAsync(id)).Should().NotBeNull();
+        }, cancellationToken: TestContext.Current.CancellationToken);
+        (await store.GetProvenanceAsync(
+            id,
+            TestContext.Current.CancellationToken)).Should().NotBeNull();
     }
 
     private HistoryStore CreateStore(

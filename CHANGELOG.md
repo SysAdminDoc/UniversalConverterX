@@ -24,6 +24,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Added v2 compatibility manifests for all 212 built-in sidecars and trusted plugins. Manifests now declare engine/host versions, capabilities, architectures, tool/model requirements, and migration behavior; discovery, health, CLI, REST, and direct launch paths quarantine incompatible extensions with actionable rebuild or reinstall diagnostics.
 - Reconciled platform and packaging truth around a Windows 10 21H2 (build 19044) floor: added one tested release matrix, aligned UI/shell/smoke targets, MSIX/WiX guards, self-contained versus framework-dependent runtime notes, unsigned artifact behavior, and active-document link/version checks.
 
+### Changed
+
+- Migrated the 2,648-test Core suite to xUnit.net v3 with the standalone executable project model and v3 Visual Studio adapter; removed the five xUnit v2 deprecation suppressions from the dependency allowlist.
+
 ### Fixed
 
 - LibreOffice conversions now render into a per-job temporary directory and promote only a fresh, non-input artifact to the requested destination. Collision-resolved outputs cannot overwrite sibling files, and stale same-stem files no longer turn an exit-code-zero run into a false success.

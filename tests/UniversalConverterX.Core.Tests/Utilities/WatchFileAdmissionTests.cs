@@ -10,7 +10,10 @@ public sealed class WatchFileAdmissionTests
         var path = Path.Combine(Path.GetTempPath(), $"ucx-watch-{Guid.NewGuid():N}.tmp");
         try
         {
-            await File.WriteAllBytesAsync(path, new byte[100]);
+            await File.WriteAllBytesAsync(
+                path,
+                new byte[100],
+                TestContext.Current.CancellationToken);
             Task<WatchFileObservation?> waitTask;
             await using (var writer = new FileStream(
                 path,
@@ -22,12 +25,15 @@ public sealed class WatchFileAdmissionTests
                 waitTask = WatchFileStability.WaitAsync(
                     path,
                     checkInterval: TimeSpan.FromMilliseconds(25),
-                    timeout: TimeSpan.FromSeconds(2));
+                    timeout: TimeSpan.FromSeconds(2),
+                    cancellationToken: TestContext.Current.CancellationToken);
 
-                await Task.Delay(75);
+                await Task.Delay(75, TestContext.Current.CancellationToken);
                 Assert.False(waitTask.IsCompleted);
-                await writer.WriteAsync(new byte[100]);
-                await writer.FlushAsync();
+                await writer.WriteAsync(
+                    new byte[100],
+                    TestContext.Current.CancellationToken);
+                await writer.FlushAsync(TestContext.Current.CancellationToken);
             }
 
             var stable = await waitTask;
