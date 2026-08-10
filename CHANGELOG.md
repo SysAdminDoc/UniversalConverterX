@@ -4,11 +4,11 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.36.0] - 2026-08-10
+
 ### Fixed
 
 - Opus conversion now fails closed for explicit sample rates unsupported by the bundled FFmpeg/libopus encoder, and the audio page hides the incompatible 44.1 kHz and 96 kHz choices when Opus is selected.
-
-## [2.35.0] - 2026-08-10
 
 ### Added
 
