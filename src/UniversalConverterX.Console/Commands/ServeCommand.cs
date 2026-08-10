@@ -749,7 +749,7 @@ internal sealed class JobManager
             }
 
             var proc = new Process { StartInfo = psi };
-            var metricEngine = engine.Trim().ToLowerInvariant();
+            var metricEngine = NormalizeMetricEngine(engine);
             var counters = _metrics.GetOrAdd(metricEngine, static _ => new EngineJobCounters());
             var rec = new JobRecord(
                 id,
@@ -784,7 +784,7 @@ internal sealed class JobManager
     public IReadOnlyList<UcxEngineMetricSnapshot> MetricsSnapshot()
     {
         var live = _jobs.Values
-            .GroupBy(job => job.Engine, StringComparer.Ordinal)
+            .GroupBy(job => NormalizeMetricEngine(job.Engine), StringComparer.Ordinal)
             .ToDictionary(
                 group => group.Key,
                 group => (Running: group.Count(job => job.IsRunning), Retained: group.Count()),
@@ -798,6 +798,8 @@ internal sealed class JobManager
             .OrderBy(item => item.Engine, StringComparer.Ordinal)
             .ToList();
     }
+
+    internal static string NormalizeMetricEngine(string engine) => engine.Trim().ToLowerInvariant();
 
     public void KillAll()
     {
@@ -823,7 +825,7 @@ internal sealed class JobManager
         }
     }
 
-    private sealed class EngineJobCounters
+    internal sealed class EngineJobCounters
     {
         private long _started;
         private long _succeeded;
@@ -833,6 +835,12 @@ internal sealed class JobManager
 
         public void MarkCompleted(int? exitCode)
         {
+            // A process can be released before its exit code is observable
+            // (for example while the server is being stopped). Keep that
+            // completion unknown instead of turning it into a false failure.
+            if (exitCode is null)
+                return;
+
             if (exitCode == 0)
                 Interlocked.Increment(ref _succeeded);
             else

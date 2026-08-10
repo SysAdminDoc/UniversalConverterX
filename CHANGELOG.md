@@ -49,6 +49,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Removed the unreachable ProgressWindow and its localization entries; live queue completion now owns the optional completion sound, eliminating the window's orphaned cancellation and process-launch paths.
 - Fixed the LosslessCut timeline playhead's light-theme contrast by replacing the hardcoded white fill with themed red accent and inverse outline brushes.
 - Removed the inert hardcoded border color from `DangerButtonStyle`, keeping the destructive action style entirely theme-token based.
+- Fixed REST per-engine metrics to normalize live job names consistently with their counters; jobs without an observable exit code remain unknown instead of being counted as failures.
 - Fixed Potrace PDF, DXF, GeoJSON, and XFig argument construction so each `-b` option is followed by its required backend name.
 - Fixed libheif encoding for small requested widths by removing the incomplete `heif-enc -t` thumbnail flag; image width is no longer misinterpreted as a thumbnail request.
 - Fixed Ghostscript output paths so literal percent signs are escaped and cannot become page-number templates.
