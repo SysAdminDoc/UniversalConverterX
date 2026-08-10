@@ -114,10 +114,8 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
 
         if (!match.MatchesAll(resolved))
         {
-            var msg = $"[yellow]Warning:[/] preset '{match.Name}' lists {match.InputTypes.Count} input "
-                    + "extension(s) and not every selected file matches. Running anyway -- the sidecar "
-                    + "may reject incompatible inputs.";
-            AnsiConsole.MarkupLine(msg);
+            AnsiConsole.MarkupLineInterpolated(
+                $"[yellow]Warning:[/] preset '{match.Name}' lists {match.InputTypes.Count} input extension(s) and not every selected file matches. Running anyway -- the sidecar may reject incompatible inputs.");
         }
 
         AnsiConsole.MarkupLineInterpolated(
@@ -141,12 +139,12 @@ public class ConvertPresetCommand : Command<ConvertPresetCommand.Settings>
         foreach (var p in displayed)
         {
             table.AddRow(
-                p.Name,
-                p.Folder ?? "(root)",
-                p.Engine,
-                p.InputTypes.Count == 0 ? "*" : string.Join(",", p.InputTypes),
-                "." + p.OutputExtension,
-                Path.GetFileName(p.SourcePath));
+                Markup.Escape(p.Name),
+                Markup.Escape(p.Folder ?? "(root)"),
+                Markup.Escape(p.Engine),
+                Markup.Escape(p.InputTypes.Count == 0 ? "*" : string.Join(",", p.InputTypes)),
+                Markup.Escape("." + p.OutputExtension),
+                Markup.Escape(Path.GetFileName(p.SourcePath)));
         }
         AnsiConsole.Write(table);
     }

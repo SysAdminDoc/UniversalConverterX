@@ -133,8 +133,10 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
                             ? "[red]✗ Blocked[/]"
                             : "[yellow]⚠ Outdated[/]"
                         : "[green]✓ Found[/]";
-            var versionStr = version ?? "[dim]N/A[/]";
-            var pathStr = found ? $"[dim]{TruncatePath(path!, 40)}[/]" : "[dim]N/A[/]";
+            var versionStr = version is null ? "[dim]N/A[/]" : Markup.Escape(version);
+            var pathStr = found
+                ? $"[dim]{Markup.Escape(TruncatePath(path!, 40))}[/]"
+                : "[dim]N/A[/]";
 
             table.AddRow(tool.Name, status, versionStr, pathStr);
 
@@ -189,18 +191,18 @@ public class ToolsCommand : AsyncCommand<ToolsCommand.Settings>
 
         if (downloader.GetToolDownloadInfo(toolId) is not null)
         {
-            AnsiConsole.MarkupLine($"[green]Downloading {tool.Name} to:[/] {toolsPath}");
+            AnsiConsole.MarkupLine($"[green]Downloading {tool.Name} to:[/] {Markup.Escape(toolsPath)}");
             cancellationToken.ThrowIfCancellationRequested();
             var result = await downloader.DownloadToolAsync(toolId);
             if (result.Success)
             {
                 var version = string.IsNullOrWhiteSpace(result.Version) ? "" : $" {result.Version}";
-                AnsiConsole.MarkupLine($"[green]Installed {tool.Name}{version}.[/]");
+                AnsiConsole.MarkupLine($"[green]Installed {tool.Name}{Markup.Escape(version)}.[/]");
                 AnsiConsole.MarkupLine("[dim]Existing binaries, if replaced, were retained under tools/rollback.[/]");
                 return 0;
             }
 
-            AnsiConsole.MarkupLine($"[red]Download failed:[/] {result.ErrorMessage}");
+            AnsiConsole.MarkupLine($"[red]Download failed:[/] {Markup.Escape(result.ErrorMessage ?? "unknown error")}");
             AnsiConsole.WriteLine();
             return 1;
         }
