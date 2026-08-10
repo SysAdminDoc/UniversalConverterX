@@ -39,13 +39,6 @@ _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs contin
 
 ### P1 — Reliability, trust, accessibility, and test foundations
 
-- [ ] P1 — Item 162 — Implement or remove every persisted setting
-  Why: accent, minimize-to-tray, start-minimized, and completion-sound values are loaded/saved but have no runtime consumers, undermining settings trust.
-  Evidence: `SettingsWindow.xaml.cs`; `ConverterXOptions.cs`; repository-wide consumer scan.
-  Touches: app/window lifecycle, notification service, theme resources, settings schema/migrations/tests.
-  Acceptance: each visible setting has an observable tested effect immediately or after clearly stated restart; unused options are removed through a versioned migration and no-op settings fail a contract test.
-  Complexity: M
-
 - [ ] P1 — Item 157 — Replace duplicated discovery lists with one stable workflow catalog
   Why: Main, Home, Toolbox, Presets, and Universal Convert diverge, and Toolbox deduplication by route removes distinct tasks sharing the same destination.
   Evidence: `MainWindow.xaml.cs`; `HomePage.xaml.cs`; `ToolboxPage.DedupeTiles`; Adobe/Apple/Topaz preset browsers.

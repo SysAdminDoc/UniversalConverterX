@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Extensions.DependencyInjection;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.UI.Services;
 using UniversalConverterX.UI.Views.Pages;
 using Windows.System;
@@ -84,6 +86,16 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        var configuredOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
+            .Value;
+        ShellRoot.RequestedTheme = configuredOptions.Theme switch
+        {
+            AppTheme.Light => ElementTheme.Light,
+            AppTheme.Dark => ElementTheme.Dark,
+            _ => ElementTheme.Default,
+        };
+        App.ApplyAccentColor(configuredOptions.AccentColor);
         ConfigureKeyboardAccelerators();
         ContentFrame.Navigated += ContentFrame_Navigated;
         AccessibilityPrimitives.ApplyLiveRegions(ShellRoot);
@@ -128,6 +140,13 @@ public sealed partial class MainWindow : Window
 
         App.Register(this);
         Activated += MainWindow_Activated;
+    }
+
+    internal void HideToBackground()
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+        Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId).Hide();
     }
 
     /// <summary>

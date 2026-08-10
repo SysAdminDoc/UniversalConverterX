@@ -1317,6 +1317,9 @@
   <data name="Code_0C822129213C67D48AFD" xml:space="preserve">
     <value>No supported audio or video files were added from that folder.</value>
   </data>
+  <data name="Code_0CE1B612F06E53A30ECA" xml:space="preserve">
+    <value>Explorer integration was {0} successfully.</value>
+  </data>
   <data name="Code_0CEF4210B1FCF7D35127" xml:space="preserve">
     <value>Checking mpv and local shader pack...</value>
   </data>
@@ -1493,6 +1496,9 @@
   </data>
   <data name="Code_1FE847B27BB09B741C37" xml:space="preserve">
     <value>Saved -&gt; {0}</value>
+  </data>
+  <data name="Code_206797C65C08CE3A2167" xml:space="preserve">
+    <value>The shell extension is not present in this installation. Re-run the installer with Explorer integration enabled.</value>
   </data>
   <data name="Code_20EEB9BA6C44F785F532" xml:space="preserve">
     <value>clipforge sidecar not built. Run pwsh tools/clipforge/build.ps1.</value>
@@ -1974,6 +1980,9 @@
   <data name="Code_570F3D6E55256F7224E9" xml:space="preserve">
     <value>blank = one PDF per page</value>
   </data>
+  <data name="Code_577B2CC89C486D3D51AD" xml:space="preserve">
+    <value>Windows could not start the elevated registration command.</value>
+  </data>
   <data name="Code_57B3A213917A9B7816E4" xml:space="preserve">
     <value>Security update required: {0} is blocked</value>
   </data>
@@ -2033,6 +2042,9 @@
   </data>
   <data name="Code_5E5873669159D2DA1E94" xml:space="preserve">
     <value>Chapter {0} failed: {1}</value>
+  </data>
+  <data name="Code_5E6AEB0262943AD709FC" xml:space="preserve">
+    <value>Explorer integration could not be {0}. Windows returned exit code {1}.</value>
   </data>
   <data name="Code_5F40C97DDBB44122BE07" xml:space="preserve">
     <value>Drop into convert queue</value>
@@ -2613,6 +2625,9 @@
   <data name="Code_A7DF3C70A2DF7A8B92C7" xml:space="preserve">
     <value>Rip cancelled.</value>
   </data>
+  <data name="Code_A7EFE28A21DED45B5A1A" xml:space="preserve">
+    <value>Explorer integration was not changed: {0}</value>
+  </data>
   <data name="Code_A8B1E30C21A44A7A5DE7" xml:space="preserve">
     <value>{0} active · {1} settling/running · {2} recent files remembered</value>
   </data>
@@ -2690,6 +2705,9 @@
   </data>
   <data name="Code_B0E8AD298ADF566AA221" xml:space="preserve">
     <value>Caption file exported, but burn-in failed: {0}</value>
+  </data>
+  <data name="Code_B1A9E561106EA030330A" xml:space="preserve">
+    <value>registered</value>
   </data>
   <data name="Code_B21C9C93E804E30B501F" xml:space="preserve">
     <value>Report export failed: {0}</value>
@@ -3119,6 +3137,9 @@ SHA-256: {0}</value>
   </data>
   <data name="Code_E159B06187D369A0615F" xml:space="preserve">
     <value>Paused</value>
+  </data>
+  <data name="Code_E1F79758CC42E6FE6037" xml:space="preserve">
+    <value>removed</value>
   </data>
   <data name="Code_E20846D20BCD60F0F577" xml:space="preserve">
     <value>Ready.</value>
@@ -6840,15 +6861,6 @@ SHA-256: {0}</value>
   </data>
   <data name="SettingsWindow_LanguageSystem.Content" xml:space="preserve">
     <value>Użyj języka Windows</value>
-  </data>
-  <data name="SettingsWindow_MinimizeToTrayToggle.Header" xml:space="preserve">
-    <value>Minimalizuj do tacki systemowej</value>
-  </data>
-  <data name="SettingsWindow_MinimizeToTrayToggle.OffContent" xml:space="preserve">
-    <value>Blisko paska narzędziowego</value>
-  </data>
-  <data name="SettingsWindow_MinimizeToTrayToggle.OnContent" xml:space="preserve">
-    <value>Minimalizuj do tacki</value>
   </data>
   <data name="SettingsWindow_NoPluginsText.Text" xml:space="preserve">
     <value>Nie znaleziono wtyczek. Upuść katalog wtyczek zawierający manifest.json do lokalnego folderu wtyczek.</value>

@@ -39,9 +39,12 @@ internal static class SettingsMigrations
     ///   v1 → v2 (2026-05-02): no rename / rewrite needed. Adds the
     ///   <c>SchemaVersion</c> field if missing; legacy files lacked it
     ///   entirely.
-    ///   v2 → v3 (2026-06-28): PostConversionAction replaces
-    ///   DeleteSourceOnSuccess. If the legacy bool is true and the new
-    ///   enum is absent, inject <c>"PostConversionAction": "Delete"</c>.
+///   v2 → v3 (2026-06-28): PostConversionAction replaces
+///   DeleteSourceOnSuccess. If the legacy bool is true and the new
+///   enum is absent, inject <c>"PostConversionAction": "Delete"</c>.
+///   v3 → v4 (2026-08-09): remove the unsupported MinimizeToTray and
+///   StartWithWindows toggles. The values are intentionally discarded rather
+///   than kept as inert preferences.
     /// </remarks>
     private static readonly List<Action<JsonObject>> Migrations =
     [
@@ -58,6 +61,14 @@ internal static class SettingsMigrations
             {
                 v2["PostConversionAction"] = "Delete";
             }
+        },
+
+        // v3 -> v4: these toggles had no dependable runtime surface. Remove
+        // them so an old value cannot masquerade as an active preference.
+        v3 =>
+        {
+            v3.Remove("MinimizeToTray");
+            v3.Remove("StartWithWindows");
         },
     ];
 

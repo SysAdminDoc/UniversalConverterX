@@ -575,14 +575,6 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Minimize to Tray -->
-                        <ToggleSwitch x:Uid="SettingsWindow_MinimizeToTrayToggle" x:Name="MinimizeToTrayToggle"
-                                      Header="Minimize to system tray"
-                                      OffContent="Close to taskbar"
-                                      OnContent="Minimize to tray"
-                                      Toggled="SettingsToggle_Changed"
-                            AutomationProperties.AutomationId="MinimizeToTrayToggle"/>
-
                         <!-- Start Minimized -->
                         <ToggleSwitch x:Uid="SettingsWindow_StartMinimizedToggle" x:Name="StartMinimizedToggle"
                                       Header="Start minimized"

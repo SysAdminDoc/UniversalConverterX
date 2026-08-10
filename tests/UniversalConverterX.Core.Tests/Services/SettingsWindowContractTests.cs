@@ -37,8 +37,8 @@ public sealed class SettingsWindowContractTests
 
         code.Should().Contain("private ConverterXOptions _draftOptions");
         code.Should().Contain("_draftOptions.ResetToDefaults()");
-        code.Should().Contain("RestoreThemePreview();");
-        code.Should().Contain("Closed += (_, _) => RestoreThemePreview();");
+        code.Should().Contain("RestorePreview();");
+        code.Should().Contain("Closed += (_, _) => RestorePreview();");
     }
 
     private static string FindRepoRoot()

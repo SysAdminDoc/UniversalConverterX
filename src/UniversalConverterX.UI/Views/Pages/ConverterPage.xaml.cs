@@ -13,6 +13,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using UniversalConverterX.Core.Converters;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
@@ -57,6 +58,7 @@ public sealed partial class ConverterPage : Page
     private const string QueuePageName = "Converter";
 
     private readonly IConversionOrchestrator _orchestrator;
+    private readonly ConverterXOptions _appOptions;
     private readonly IBatchQueueStore _queueStore;
     private readonly IAppJobCoordinator _jobCoordinator;
     private readonly IHistoryService _history;
@@ -83,6 +85,17 @@ public sealed partial class ConverterPage : Page
     public ConverterPage()
     {
         InitializeComponent();
+        _appOptions = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
+            .Value;
+        _qualityPreset = _appOptions.DefaultQuality;
+        _outputDirectory = string.IsNullOrWhiteSpace(_appOptions.DefaultOutputDirectory)
+            ? null
+            : _appOptions.DefaultOutputDirectory;
+        OutputDirectoryBox.Text = _outputDirectory ?? "";
+        SameAsSourceFolderCheckBox.IsChecked = _outputDirectory is null;
+        HighSpeedToggle.IsOn = _appOptions.EnableHardwareAcceleration
+            && _appOptions.DefaultHardwareAcceleration != HardwareAcceleration.None;
         // Resolve the singleton orchestrator from DI rather than newing up a
         // private one — every prior page navigation built a fresh registry of
         // 13 converter strategies for no reason.
@@ -99,6 +112,7 @@ public sealed partial class ConverterPage : Page
         // queue before RestorePersistedQueue has had a chance to read it.
         _restoringQueue = true;
         SelectFormat("mp4");
+        SelectTaggedItem(QualityPresetSelector, _qualityPreset.ToString());
         _restoringQueue = false;
         RestorePersistedQueue();
         UpdateUI();
@@ -1510,14 +1524,11 @@ public sealed partial class ConverterPage : Page
         }
         else
         {
-            var appOptions = App.Services
-                .GetRequiredService<Microsoft.Extensions.Options.IOptions<UniversalConverterX.Core.Configuration.ConverterXOptions>>()
-                .Value;
             conversionOptions = new ConversionOptions
             {
-                PostConversionAction = appOptions.PostConversionAction,
-                PostConversionArchiveFolder = appOptions.PostConversionArchiveFolder,
-                DeleteSourceOnSuccess = appOptions.DeleteSourceOnSuccess,
+                PostConversionAction = _appOptions.PostConversionAction,
+                PostConversionArchiveFolder = _appOptions.PostConversionArchiveFolder,
+                DeleteSourceOnSuccess = _appOptions.DeleteSourceOnSuccess,
             };
         }
 
@@ -1547,7 +1558,10 @@ public sealed partial class ConverterPage : Page
     private void ApplyVisibleOutputProfile(ConversionOptions options)
     {
         options.Quality = _qualityPreset;
-        options.UseHardwareAcceleration = HighSpeedToggle.IsOn;
+        options.UseHardwareAcceleration = HighSpeedToggle.IsOn
+            && _appOptions.EnableHardwareAcceleration;
+        options.HardwareAccel = _appOptions.DefaultHardwareAcceleration;
+        options.PreserveMetadata = _appOptions.PreserveMetadataByDefault;
         options.OutputDirectory = _outputDirectory;
         options.Video.Width = _outputWidth;
         options.Video.Height = _outputHeight;

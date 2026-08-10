@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Extensions.DependencyInjection;
 using WinRT.Interop;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Interfaces;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Utilities;
@@ -14,6 +16,7 @@ namespace UniversalConverterX.UI.Views;
 public sealed partial class ProgressWindow : Window
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ConverterXOptions _options;
     private readonly IConversionOrchestrator _orchestrator;
     private readonly ObservableCollection<ConversionItemViewModel> _items = [];
     private readonly List<string> _inputFiles;
@@ -35,6 +38,9 @@ public sealed partial class ProgressWindow : Window
         string? outputDirectory = null)
     {
         _serviceProvider = serviceProvider;
+        _options = serviceProvider
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
+            .Value;
         _orchestrator = serviceProvider.GetRequiredService<IConversionOrchestrator>();
         _inputFiles = inputFiles.ToList();
         _targetFormat = targetFormat;
@@ -140,7 +146,17 @@ public sealed partial class ProgressWindow : Window
         {
             InputPath = item.FilePath,
             OutputPath = outputPath,
-            Options = new ConversionOptions()
+            Options = new ConversionOptions
+            {
+                Quality = _options.DefaultQuality,
+                PreserveMetadata = _options.PreserveMetadataByDefault,
+                UseHardwareAcceleration = _options.EnableHardwareAcceleration
+                    && _options.DefaultHardwareAcceleration != HardwareAcceleration.None,
+                HardwareAccel = _options.DefaultHardwareAcceleration,
+                PostConversionAction = _options.PostConversionAction,
+                PostConversionArchiveFolder = _options.PostConversionArchiveFolder,
+                DeleteSourceOnSuccess = _options.DeleteSourceOnSuccess,
+            }
         };
 
         var startTime = DateTime.Now;
@@ -281,10 +297,12 @@ public sealed partial class ProgressWindow : Window
         if (!wasCancelled)
         {
             // Play completion sound
-            PlayCompletionSound();
+            if (_options.PlaySoundOnComplete)
+                PlayCompletionSound();
 
             // Show notification
-            ShowCompletionNotification();
+            if (_options.ShowNotifications)
+                ShowCompletionNotification();
         }
     }
 
@@ -384,8 +402,9 @@ public sealed partial class ProgressWindow : Window
     {
         try
         {
-            // System.Media.SystemSounds is unavailable in net8.0-windows10.0 WinUI 3 target.
-            // Notification sound is handled by Windows toast machinery in ShowCompletionNotification().
+            // MessageBeep uses the operator's configured Windows notification
+            // sound without opening a media player or leaving a process behind.
+            MessageBeep(0xFFFFFFFF);
         }
         catch { }
     }
@@ -405,6 +424,9 @@ public sealed partial class ProgressWindow : Window
         }
         catch { }
     }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool MessageBeep(uint type);
 }
 
 public enum ConversionItemStatus

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.UI;
@@ -58,7 +59,7 @@ public sealed partial class SettingsWindow : Window
         appWindow.Title = AppLocalizer.Get(
             "SettingsWindow_Item_001.Title", "Settings - UniversalConverter X");
 
-        Closed += (_, _) => RestoreThemePreview();
+        Closed += (_, _) => RestorePreview();
 
         LoadSettings();
         LoadTools();
@@ -196,8 +197,8 @@ public sealed partial class SettingsWindow : Window
             LanguageTags,
             tag => tag.Equals(_draftOptions.Language ?? "", StringComparison.OrdinalIgnoreCase));
         LanguageComboBox.SelectedIndex = languageIndex >= 0 ? languageIndex : 0;
-        MinimizeToTrayToggle.IsOn = _draftOptions.MinimizeToTray;
         StartMinimizedToggle.IsOn = _draftOptions.StartMinimized;
+        App.ApplyAccentColor(_draftOptions.AccentColor);
 
         // Advanced
         FfmpegCommandEditingToggle.IsOn = _draftOptions.EnableFfmpegCommandEditing;
@@ -474,14 +475,70 @@ public sealed partial class SettingsWindow : Window
 
     private async void RegisterShell_Click(object sender, RoutedEventArgs e)
     {
-        await ShowMessageAsync(AppLocalizer.Get("Shell Integration"),
-            AppLocalizer.Get("Explorer registration is handled by the installer or an elevated registration command. This settings page saves your context-menu preferences, but it will not silently modify system shell entries."));
+        await RunShellRegistrationAsync(register: true);
     }
 
     private async void UnregisterShell_Click(object sender, RoutedEventArgs e)
     {
-        await ShowMessageAsync(AppLocalizer.Get("Shell Integration"),
-            AppLocalizer.Get("Use the installer or elevated shell-extension registration command to remove Explorer integration. Saved preferences can be changed here before the next registration."));
+        await RunShellRegistrationAsync(register: false);
+    }
+
+    private async Task RunShellRegistrationAsync(bool register)
+    {
+        var shellDll = FindShellExtensionComHost();
+        if (shellDll is null)
+        {
+            await ShowMessageAsync(
+                AppLocalizer.Get("Shell Integration"),
+                AppLocalizer.Get("The shell extension is not present in this installation. Re-run the installer with Explorer integration enabled."));
+            return;
+        }
+
+        var verb = register ? AppLocalizer.Get("registered") : AppLocalizer.Get("removed");
+        var arguments = register
+            ? $"/s \"{shellDll}\""
+            : $"/u /s \"{shellDll}\"";
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = Path.Combine(Environment.SystemDirectory, "regsvr32.exe"),
+                Arguments = arguments,
+                UseShellExecute = true,
+                Verb = "runas",
+            });
+            if (process is null)
+            {
+                await ShowMessageAsync(
+                    AppLocalizer.Get("Shell Integration"),
+                    AppLocalizer.Get("Windows could not start the elevated registration command."));
+                return;
+            }
+
+            await process.WaitForExitAsync();
+            await ShowMessageAsync(
+                AppLocalizer.Get("Shell Integration"),
+                process.ExitCode == 0
+                    ? AppLocalizer.Format($"Explorer integration was {verb} successfully.")
+                    : AppLocalizer.Format($"Explorer integration could not be {verb}. Windows returned exit code {process.ExitCode}."));
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageAsync(
+                AppLocalizer.Get("Shell Integration"),
+                AppLocalizer.Format($"Explorer integration was not changed: {ex.Message}"));
+        }
+    }
+
+    private static string? FindShellExtensionComHost()
+    {
+        const string fileName = "UniversalConverterX.ShellExtension.comhost.dll";
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "shell", fileName),
+            Path.Combine(AppContext.BaseDirectory, fileName),
+        };
+        return candidates.FirstOrDefault(File.Exists);
     }
 
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -503,9 +560,9 @@ public sealed partial class SettingsWindow : Window
     {
         if (sender is Button button && button.Tag is string colorHex)
         {
+            _draftOptions.AccentColor = colorHex;
+            App.ApplyAccentColor(colorHex);
             MarkDirty();
-            // Store the selected accent color
-            // In a real implementation, this would update the app's accent color resources
         }
     }
 
@@ -648,7 +705,7 @@ public sealed partial class SettingsWindow : Window
             return;
         }
 
-        RestoreThemePreview();
+        RestorePreview();
         Close();
     }
 
@@ -668,7 +725,7 @@ public sealed partial class SettingsWindow : Window
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            RestoreThemePreview();
+            RestorePreview();
             Close();
         }
     }
@@ -733,8 +790,8 @@ public sealed partial class SettingsWindow : Window
         // Appearance
         _options.Theme = (AppTheme)ThemeComboBox.SelectedIndex;
         _options.Language = LanguageTags[Math.Clamp(LanguageComboBox.SelectedIndex, 0, LanguageTags.Length - 1)];
-        _options.MinimizeToTray = MinimizeToTrayToggle.IsOn;
         _options.StartMinimized = StartMinimizedToggle.IsOn;
+        _options.AccentColor = _draftOptions.AccentColor;
 
         // Advanced
         _options.EnableFfmpegCommandEditing = FfmpegCommandEditingToggle.IsOn;
@@ -791,9 +848,14 @@ public sealed partial class SettingsWindow : Window
             root.RequestedTheme = theme;
 
         App.ApplyTheme(theme);
+        App.ApplyAccentColor(_draftOptions.AccentColor);
     }
 
-    private void RestoreThemePreview() => ApplyThemePreview(ToElementTheme(_options.Theme));
+    private void RestorePreview()
+    {
+        ApplyThemePreview(ToElementTheme(_options.Theme));
+        App.ApplyAccentColor(_options.AccentColor);
+    }
 
     private void UpdatePostConversionArchiveState()
     {

@@ -275,4 +275,24 @@ public class SettingsMigrationsTests
 
         loaded.PostConversionAction.Should().Be(PostConversionAction.Delete);
     }
+
+    [Fact]
+    public void Migrate_V3ToV4_RemovesUnsupportedWindowLifecycleToggles()
+    {
+        var root = new JsonObject
+        {
+            ["SchemaVersion"] = 3,
+            ["MinimizeToTray"] = true,
+            ["StartWithWindows"] = true,
+            ["StartMinimized"] = true,
+        };
+
+        SettingsMigrations.Migrate(root, fromVersion: 3, toVersion: 4, out var didMigrate);
+
+        didMigrate.Should().BeTrue();
+        ((int?)root["SchemaVersion"]).Should().Be(4);
+        root.ContainsKey("MinimizeToTray").Should().BeFalse();
+        root.ContainsKey("StartWithWindows").Should().BeFalse();
+        ((bool?)root["StartMinimized"]).Should().BeTrue();
+    }
 }

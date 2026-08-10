@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using Microsoft.Windows.AppNotifications;
 using UniversalConverterX.Core.Configuration;
@@ -24,6 +25,7 @@ public partial class App : Application
     private static MainWindow? _mainWindow;
     private static DispatcherQueue? _dispatcherQueue;
     private static bool _notificationsRegistered;
+    private static ConverterXOptions? _startupOptions;
 
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -33,8 +35,10 @@ public partial class App : Application
     public App()
     {
         var persistedOptions = ConverterXOptions.Load();
+        _startupOptions = persistedOptions;
         ApplyLanguageOverride(persistedOptions.Language);
         InitializeComponent();
+        ApplyAccentColor(persistedOptions.AccentColor);
         ConfigureServices(persistedOptions);
         LocalizedText.Configure(AppLocalizer.Get);
     }
@@ -165,6 +169,8 @@ public partial class App : Application
 
         _mainWindow = new MainWindow();
         _mainWindow.Activate();
+        if (_startupOptions?.StartMinimized == true)
+            _mainWindow.HideToBackground();
         DrainPendingActivations();
 
         if (smokeOptions is not null)
@@ -381,6 +387,58 @@ public partial class App : Application
     {
         if (_mainWindow?.Content is Microsoft.UI.Xaml.FrameworkElement root)
             root.RequestedTheme = theme;
+    }
+
+    /// <summary>
+    /// Applies the user-selected primary accent to the shared brush instances.
+    /// Semantic success/warning/error colors remain distinct so status meaning
+    /// is not conveyed by accent color alone.
+    /// </summary>
+    public static void ApplyAccentColor(string? hex)
+    {
+        if (!TryParseColor(hex, out var color) || Current?.Resources is not { } resources)
+            return;
+
+        SetBrushColor(resources, "AccentPrimaryBrush", color);
+        SetBrushColor(resources, "AccentPrimaryHoverBrush", Blend(color, 0.18, 255, 255, 255));
+        SetBrushColor(resources, "AccentPrimaryPressedBrush", Blend(color, 0.22, 0, 0, 0));
+        SetBrushColor(resources, "AccentPrimarySoftBrush", Blend(color, 0.82, 255, 255, 255));
+    }
+
+    private static void SetBrushColor(ResourceDictionary resources, string key, Windows.UI.Color color)
+    {
+        if (resources.TryGetValue(key, out var resource) && resource is SolidColorBrush brush)
+            brush.Color = color;
+    }
+
+    private static Windows.UI.Color Blend(
+        Windows.UI.Color color,
+        double amount,
+        byte red,
+        byte green,
+        byte blue) => Windows.UI.Color.FromArgb(
+            color.A,
+            (byte)(color.R + (red - color.R) * amount),
+            (byte)(color.G + (green - color.G) * amount),
+            (byte)(color.B + (blue - color.B) * amount));
+
+    private static bool TryParseColor(string? hex, out Windows.UI.Color color)
+    {
+        color = default;
+        if (string.IsNullOrWhiteSpace(hex))
+            return false;
+
+        var value = hex.Trim().TrimStart('#');
+        if (value.Length != 6
+            || !byte.TryParse(value[0..2], System.Globalization.NumberStyles.HexNumber, null, out var red)
+            || !byte.TryParse(value[2..4], System.Globalization.NumberStyles.HexNumber, null, out var green)
+            || !byte.TryParse(value[4..6], System.Globalization.NumberStyles.HexNumber, null, out var blue))
+        {
+            return false;
+        }
+
+        color = Windows.UI.Color.FromArgb(255, red, green, blue);
+        return true;
     }
 
     private static string GetDefaultToolsPath()

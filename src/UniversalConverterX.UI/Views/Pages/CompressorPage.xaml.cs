@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Models;
 using UniversalConverterX.Core.Services;
 using UniversalConverterX.Core.ViewModels;
@@ -67,6 +68,7 @@ public sealed partial class CompressorPage : Page
         _postQueueActions = App.Services.GetRequiredService<IPostQueueActionService>();
         FileList.ItemsSource = _files;
         FinishedList.ItemsSource = _finished;
+        ApplyConfiguredHardwareAcceleration();
         UpdatePresetSummaries();
         RestorePersistedQueue();
         UpdateUi();
@@ -390,6 +392,30 @@ public sealed partial class CompressorPage : Page
         if (HwAccelCombo?.SelectedItem is ComboBoxItem item && item.Tag is string tag)
             return tag;
         return "none";
+    }
+
+    private void ApplyConfiguredHardwareAcceleration()
+    {
+        var options = App.Services
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ConverterXOptions>>()
+            .Value;
+        var tag = !options.EnableHardwareAcceleration
+            || options.DefaultHardwareAcceleration == HardwareAcceleration.None
+                ? "none"
+                : options.DefaultHardwareAcceleration switch
+                {
+                    HardwareAcceleration.Nvenc or HardwareAcceleration.Cuda => "nvenc",
+                    HardwareAcceleration.Qsv => "qsv",
+                    HardwareAcceleration.Amf => "amf",
+                    _ => "none",
+                };
+
+        var match = HwAccelCombo.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => string.Equals(
+                item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase));
+        if (match is not null)
+            HwAccelCombo.SelectedItem = match;
     }
 
     private void RestorePersistedQueue()

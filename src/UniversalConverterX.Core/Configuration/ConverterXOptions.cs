@@ -30,8 +30,10 @@ public class ConverterXOptions
     ///        unchanged by the migrator).
     ///   v3 — 2026-06-28. PostConversionAction replaces DeleteSourceOnSuccess.
     ///        Migration: DeleteSourceOnSuccess=true → PostConversionAction="Delete".
+    ///   v4 — 2026-08-09. Removed unsupported MinimizeToTray and
+    ///        StartWithWindows toggles; neither had a reliable runtime surface.
     /// </remarks>
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
 
     private static readonly string SettingsFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -230,19 +232,9 @@ public class ConverterXOptions
     public string AccentColor { get; set; } = "#22c55e";
 
     /// <summary>
-    /// Minimize to system tray instead of taskbar
-    /// </summary>
-    public bool MinimizeToTray { get; set; } = false;
-
-    /// <summary>
-    /// Start application minimized
+    /// Start application minimized. Applied on the next launch.
     /// </summary>
     public bool StartMinimized { get; set; } = false;
-
-    /// <summary>
-    /// Start with Windows
-    /// </summary>
-    public bool StartWithWindows { get; set; } = false;
 
     #endregion
 

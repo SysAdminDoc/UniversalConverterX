@@ -14,12 +14,14 @@ public sealed record ShellPreset(
     string Name,
     string? Folder,
     IReadOnlyList<string> InputTypes,
+    string OutputExtension,
     string SourcePath)
 {
     public static ShellPreset FromDocument(PresetDefinition definition, string sourcePath) => new(
         definition.Name,
         definition.Folder,
         definition.InputTypes,
+        definition.OutputExtension,
         sourcePath);
 
     public bool MatchesAll(IReadOnlyList<string> exts)

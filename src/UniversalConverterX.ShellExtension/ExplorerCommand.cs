@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using UniversalConverterX.Core.Configuration;
 using UniversalConverterX.Core.Utilities;
 using UniversalConverterX.ShellExtension.Presets;
 
@@ -48,6 +49,12 @@ public partial class ConverterExplorerCommand : IExplorerCommand
     public int GetState(IShellItemArray? psiItemArray, bool fOkToBeSlow, out uint pCmdState)
     {
         pCmdState = 0; // ECS_ENABLED
+        var options = ShellSettings.Load();
+        if (!options.ShellIntegrationEnabled || options.ShellExtension?.Enabled == false)
+        {
+            pCmdState = 2; // ECS_HIDDEN
+            return HResult.S_OK;
+        }
         if (psiItemArray is null) { pCmdState = 2; return HResult.S_OK; }
 
         try
@@ -82,7 +89,9 @@ public partial class ConverterExplorerCommand : IExplorerCommand
 
     public int GetFlags(out uint pFlags)
     {
-        pFlags = 1; // ECF_HASSUBCOMMANDS
+        pFlags = ShellSettings.Load().ContextMenuStyle == ContextMenuStyle.Single
+            ? 0u
+            : 1u; // ECF_HASSUBCOMMANDS
         return HResult.S_OK;
     }
 
@@ -180,6 +189,13 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
     private static List<IExplorerCommand> BuildSubmenu(IReadOnlyList<string> selection)
     {
         var commands = new List<IExplorerCommand>();
+        var options = ShellSettings.Load();
+        if (!options.ShellIntegrationEnabled || options.ShellExtension?.Enabled == false)
+            return commands;
+
+        if (options.ContextMenuStyle == ContextMenuStyle.Single)
+            return commands;
+
         var exts = selection
             .Select(p => Path.GetExtension(p).TrimStart('.').ToLowerInvariant())
             .Where(s => s.Length > 0)
@@ -199,11 +215,18 @@ public partial class ConvertSubCommandEnumerator : IEnumExplorerCommand
 
         // Match: every selected extension is in this preset's InputTypes
         // (or the preset is wildcard / has no InputTypes).
-        var matching = presets
+        var matchingQuery = presets
             .Where(p => p.MatchesAll(exts))
-            .OrderBy(p => p.Folder ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .Where(p => ShellSettings.IsQuickPreset(p.OutputExtension, options));
+        var matching = options.ContextMenuStyle == ContextMenuStyle.Flat
+            ? matchingQuery
+                .OrderBy(p => p.OutputExtension, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList()
+            : matchingQuery
+                .OrderBy(p => p.Folder ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
         foreach (var p in matching)
             commands.Add(new PresetSubCommand(p, selection));
