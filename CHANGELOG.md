@@ -4,6 +4,25 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.36.1] - 2026-09-06
+
+### Changed
+
+- Rebuilt the public README around the product's local-first value, current capabilities, honest runtime status, clear install paths, and current interface screenshots.
+- Replaced the glossy legacy icon with a compact folded-path identity that stays legible from the README hero down to the 16-pixel Windows icon. Windows and README surfaces use the rounded app tile; the matching standalone X glyph remains clear against the in-app sidebar.
+- Added launch, localization, offscreen-capture, transition-settle, and Toolbox keyboard-access contracts to the Core test suite.
+- Moved the centralized .NET servicing package floor to 10.0.11 so locked restore matches the installed .NET 10.0.400 SDK and 10.0.11 host.
+- Added a portable-build switch that omits WinGet manifest generation when only release artifacts are needed.
+- Declared the supported x64 and ARM64 runtime graphs on the shared .NET projects so locked solution restore and RID-specific publishing use the same dependency graph.
+- Made release packaging restore the committed dependency graph once, then publish without allowing command-specific properties to rewrite NuGet locks.
+
+### Fixed
+
+- Fixed unpackaged WinUI startup crashes caused by touching application resources and the Windows language broker before those services were ready.
+- Kept the 55-route visual test sweep fully transparent, outside the virtual desktop, absent from switchers, and unable to take foreground focus.
+- Waited for navigation transitions before naming screenshots so each capture now shows the route in its filename.
+- Made every Toolbox tile a real button, restoring keyboard focus and activation across the catalog.
+
 ## [2.36.0] - 2026-08-10
 
 ### Fixed
@@ -89,10 +108,10 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
-- `build.ps1 -Target Test` is now the whole release contract in one fail-fast command. `tools/gates/Invoke-Gates.ps1` runs 17 gates — NuGet lock, build, Core suite, VideoScaler probe, Python syntax sweep, 212-sidecar contract, sidecar and shared-library unit tests, localization parity, static UIA coverage, release-manifest tests, sidecar dependency manifests, NuGet vulnerability and deprecation audits, allowlist expiry, the runtime UI sweep, staged-artifact verification, and SBOM reconciliation — and writes `artifacts/gates/gate-summary.json`. Gates needing artifacts that are not present report as skipped with the reason instead of being silently dropped; `-Only`, `-Skip`, and `-ContinueOnFailure` support iteration.
+- `build.ps1 -Target Test` is now the whole release contract in one fail-fast command. `tools/gates/Invoke-Gates.ps1` runs 17 gates: NuGet lock, build, Core suite, VideoScaler probe, Python syntax sweep, 212-sidecar contract, sidecar and shared-library unit tests, localization parity, static UIA coverage, release-manifest tests, sidecar dependency manifests, NuGet vulnerability and deprecation audits, allowlist expiry, the runtime UI sweep, staged-artifact verification, and SBOM reconciliation: and writes `artifacts/gates/gate-summary.json`. Gates needing artifacts that are not present report as skipped with the reason instead of being silently dropped; `-Only`, `-Skip`, and `-ContinueOnFailure` support iteration.
 - NuGet restore is reproducible: `packages.lock.json` is committed for all seven projects, `RestorePackagesWithLockFile` and `NuGetAudit` are on repo-wide, and the gate restores with `--locked-mode`.
 - Vulnerability and deprecation suppressions live in `tools/gates/allowlist.json` and must carry a reason, an owner, and an expiry no more than 180 days out. The gate fails on a lapsed entry and an expired entry stops suppressing its finding, so a suppression cannot become permanent by neglect.
-- Runtime UI smoke gate (`build.ps1 -Target UiSmoke`, `tests/ui_smoke/Invoke-UiSmoke.ps1`). The real x64 shell is launched and driven through all 54 registered routes in light, dark, and a 640-DIP narrow reflow pass — 162 navigations — asserting each page constructs, lays out to a non-empty rect, and exposes a reachable focus target. Failures capture a PNG of the shell and are reported per route/theme with the exception; unhandled XAML and AppDomain exceptions are recorded rather than killing the sweep, so one broken page no longer hides the rest. Verified by fault injection: a thrown constructor is reported on all three passes with screenshots.
+- Runtime UI smoke gate (`build.ps1 -Target UiSmoke`, `tests/ui_smoke/Invoke-UiSmoke.ps1`). The real x64 shell is launched and driven through all 54 registered routes in light, dark, and a 640-DIP narrow reflow pass: 162 navigations: asserting each page constructs, lays out to a non-empty rect, and exposes a reachable focus target. Failures capture a PNG of the shell and are reported per route/theme with the exception; unhandled XAML and AppDomain exceptions are recorded rather than killing the sweep, so one broken page no longer hides the rest. Verified by fault injection: a thrown constructor is reported on all three passes with screenshots.
 
 ### Fixed
 
@@ -100,7 +119,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Changed
 
-- Sidecar progress is normalized once, in the runner, instead of by each of the ~49 handlers that consume it. Non-finite readings are ignored, values are clamped to 0–100, progress never walks backwards when a two-pass engine restarts its counter, a verified success pins the bar at 100 while a failure leaves it where it stopped, and an ETA the engine stopped refreshing expires rather than counting down on its own. `JobProgressTracker.Scale` maps a per-item reading into a whole run, so a preset over N files no longer sweeps 0–100 once per file.
+- Sidecar progress is normalized once, in the runner, instead of by each of the ~49 handlers that consume it. Non-finite readings are ignored, values are clamped to 0 to 100, progress never walks backwards when a two-pass engine restarts its counter, a verified success pins the bar at 100 while a failure leaves it where it stopped, and an ETA the engine stopped refreshing expires rather than counting down on its own. `JobProgressTracker.Scale` maps a per-item reading into a whole run, so a preset over N files no longer sweeps 0 to 100 once per file.
 
 ### Added
 
@@ -109,9 +128,9 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Security
 
-- Sidecar process trees are now contained. Each run is held in a Windows job object with `KILL_ON_JOB_CLOSE`, so an engine's children — FFmpeg, PyInstaller bootstraps, ncnn workers — die with the job and with the app instead of being stranded by a cancel or a crash. Process-count and committed-memory ceilings are enforced (defaults: 128 processes, 90% of physical RAM), with an optional wall-clock cap left off by default so a slow-but-healthy encode is not killed. Applies to the UI runner and the `ucx serve` REST launcher alike.
+- Sidecar process trees are now contained. Each run is held in a Windows job object with `KILL_ON_JOB_CLOSE`, so an engine's children: FFmpeg, PyInstaller bootstraps, ncnn workers: die with the job and with the app instead of being stranded by a cancel or a crash. Process-count and committed-memory ceilings are enforced (defaults: 128 processes, 90% of physical RAM), with an optional wall-clock cap left off by default so a slow-but-healthy encode is not killed. Applies to the UI runner and the `ucx serve` REST launcher alike.
 - Each sidecar job gets a private temp root (`TMP`/`TEMP`/`TMPDIR`/`UCX_JOB_TEMP`) that is deleted when the job ends, so one engine's frame dumps and demuxes are not visible to the next. Workspaces abandoned by a hard kill are reclaimed on next launch.
-- The path a sidecar reports in its `complete` event is now confined to the destination the app asked it to write to. Traversal, absolute escapes, and any symlink or junction between the approved root and the file are rejected before the output is finalized, probed, moved, or shown — the engines consume untrusted input, so the reported output path is untrusted too.
+- The path a sidecar reports in its `complete` event is now confined to the destination the app asked it to write to. Traversal, absolute escapes, and any symlink or junction between the approved root and the file are rejected before the output is finalized, probed, moved, or shown: the engines consume untrusted input, so the reported output path is untrusted too.
 
 ### Changed
 
@@ -137,30 +156,30 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
-- **VVC / H.266 decode support (decode-only).** Raw VVC bitstreams (`.vvc`, `.h266`, `.266`) are now recognized as video, categorized correctly, and transcodable to common containers via FFmpeg's native `vvc` decoder (FFmpeg 8.1+; `vvc_qsv` hardware decode is also available where present). VVC is intentionally not offered as an output/encode target — decode-only, per the format's still-thin encode ecosystem. Covered by CanConvert tests.
+- **VVC / H.266 decode support (decode-only).** Raw VVC bitstreams (`.vvc`, `.h266`, `.266`) are now recognized as video, categorized correctly, and transcodable to common containers via FFmpeg's native `vvc` decoder (FFmpeg 8.1+; `vvc_qsv` hardware decode is also available where present). VVC is intentionally not offered as an output/encode target: decode-only, per the format's still-thin encode ecosystem. Covered by CanConvert tests.
 - **Batch-queue search & non-destructive clone primitives.** `BatchQueueOperations.Search` filters queued jobs by a free-text query across source/output path, engine, action, preset, status, and error message; `CloneAsNew` clones a job into a fresh re-queueable one (new id, `Queued` status, cleared error, deep-copied args) without mutating the original. Both are unit-tested.
 - **Encode-history replay accessors.** `HistoryStore.GetRerunRequestAsync(id)` reconstructs the saved `ConversionRerunRequest` for a specific history row ("Apply settings"), and `GetLastUsedRerunAsync()` returns the most recent row that still carries valid re-run parameters ("Apply last used settings"), skipping rows without them. Both are covered by tests over a real SQLite store.
-- **Hardware video encoder detection beyond NVENC.** New `FfmpegEncoderProbe` parses `ffmpeg -encoders` and classifies the available hardware encoders by vendor (NVIDIA NVENC, AMD AMF, Intel Quick Sync, VAAPI, VideoToolbox, Vulkan) and codec. Exposed as `ucx encoders`, which lists what the local FFmpeg build actually supports — on this machine it detects AMD AMF AV1, Intel QSV AV1/HEVC, and NVENC alongside the previously-only-assumed NVENC. Parsing is unit-tested with fixture output; the live probe is cached per FFmpeg binary.
+- **Hardware video encoder detection beyond NVENC.** New `FfmpegEncoderProbe` parses `ffmpeg -encoders` and classifies the available hardware encoders by vendor (NVIDIA NVENC, AMD AMF, Intel Quick Sync, VAAPI, VideoToolbox, Vulkan) and codec. Exposed as `ucx encoders`, which lists what the local FFmpeg build actually supports: on this machine it detects AMD AMF AV1, Intel QSV AV1/HEVC, and NVENC alongside the previously-only-assumed NVENC. Parsing is unit-tested with fixture output; the live probe is cached per FFmpeg binary.
 - **Per-track audio/subtitle stream selection.** `ConversionOptions.AudioTrackSelection` and `SubtitleTrackSelection` drive explicit FFmpeg `-map` directives: `null` keeps every track of that kind, an empty list drops it, and a list of zero-based indices keeps exactly those streams (all video streams are always kept). Works for both re-encode and remux (`-c copy`) paths. Exposed on the CLI as `ucx convert --audio-tracks 0,2` / `--subtitle-tracks none`. Covered by command-builder tests.
 
 ## [2.32.0] - 2026-07-20
 
 ### Added
 
-- **Completed the outcome-named "Production" preset family.** Added `Video/Production` curated presets for the remaining professional tiers — ProRes 422 HQ, ProRes 422 Proxy, ProRes 4444, DNxHR SQ, DNxHR HQX — alongside the existing ProRes 422 / DNxHR HQ entries, giving a full HandBrake-style editing-mezzanine family (all routing through the videocrush sidecar). The `Video/Preservation` FFV1+FLAC lossless-archival preset is unchanged. Extended the family regression test to lock in every tier.
-- **Offline "best format for target" recommender.** New `FormatRecommender` maps a source file's media category and a delivery target (`Web`, `Apple`, `Android`, `Discord`, `Email`, `Archive`, `Editing`) to a concrete container/codec choice with a one-line rationale — fully deterministic, zero network calls (unlike the cloud "AI recommend" features rivals paywall). Exposed on the CLI as `ucx recommend <file> --target <target>`. Unit-tested rule table across video/audio/image and the extension-classifier overload.
+- **Completed the outcome-named "Production" preset family.** Added `Video/Production` curated presets for the remaining professional tiers: ProRes 422 HQ, ProRes 422 Proxy, ProRes 4444, DNxHR SQ, DNxHR HQX: alongside the existing ProRes 422 / DNxHR HQ entries, giving a full HandBrake-style editing-mezzanine family (all routing through the videocrush sidecar). The `Video/Preservation` FFV1+FLAC lossless-archival preset is unchanged. Extended the family regression test to lock in every tier.
+- **Offline "best format for target" recommender.** New `FormatRecommender` maps a source file's media category and a delivery target (`Web`, `Apple`, `Android`, `Discord`, `Email`, `Archive`, `Editing`) to a concrete container/codec choice with a one-line rationale: fully deterministic, zero network calls (unlike the cloud "AI recommend" features rivals paywall). Exposed on the CLI as `ucx recommend <file> --target <target>`. Unit-tested rule table across video/audio/image and the extension-classifier overload.
 - **Remux / stream-copy ("change container, no re-encode").** New `ConversionOptions.StreamCopy` makes `FFmpegConverter` emit `-map 0 -c copy` (video containers) or `-map 0:a? -c:a copy -vn` (audio containers) instead of re-encoding, so a container swap (e.g. MKV→MP4) is near-instant and lossless when the source codecs are allowed in the target container. Exposed on the CLI as `ucx convert <file> -o <ext> --copy` (alias `--remux`). Incompatible codec/container pairs surface as a normal failed conversion with FFmpeg's error. Two-pass planning is skipped when stream-copy is set.
 - **Cross-instance-safe batch queue claiming.** `IBatchQueueStore` gains `TryClaimJob(queueKey, jobId)`, which atomically transitions a job from `Queued` to `Running` and persists it, returning `false` when the job is missing or already claimed. `JsonBatchQueueStore` now serializes every read/write/claim behind a per-directory named mutex (`Local\ucx-batch-queue-<hash>`, with abandoned-mutex recovery) layered over its in-process lock, so a second running instance watching the same queue directory can no longer double-claim and re-process the same file. Writes were already atomic (temp + rename); a concurrency test proves exactly one of many contending claims wins.
 
 ### Fixed
 
-- **JPEG XL lossless-JPEG recompression is now correct.** `LibJxlConverter` previously emitted `--lossless_jpeg=1` for *any* Lossless input (including PNG/PPM, where it is invalid) and combined it with `--progressive` (which conflicts with JPEG recompression). It now applies `--lossless_jpeg=1` only when the input is a JPEG — producing a byte-for-byte reconstructable JXL — and drops the incompatible distance/effort/progressive/responsive flags in that mode. Lossless non-JPEG inputs correctly encode mathematically lossless pixels via `-d 0`.
-- **Native FFmpeg two-pass encoding now actually runs two passes** instead of silently falling back to single-pass. Previously `VideoOptions.TwoPass = true` only wrote a debug warning and encoded once, so callers who requested average-bitrate two-pass got single-pass output reported as success. `FFmpegConverter` now overrides `ConvertAsync` to run a real analysis pass (to the OS null sink, audio disabled) followed by the encode pass, sharing a `-passlogfile` prefix that is cleaned up afterward. Two-pass engages only when it is meaningful — an explicit target bitrate with no CRF override on a video output; CRF-mode/audio-only/raw-command-override jobs fall through to the unchanged single-pass path. Added unit coverage for the pass-1/pass-2 argument planning and the engagement gate.
+- **JPEG XL lossless-JPEG recompression is now correct.** `LibJxlConverter` previously emitted `--lossless_jpeg=1` for *any* Lossless input (including PNG/PPM, where it is invalid) and combined it with `--progressive` (which conflicts with JPEG recompression). It now applies `--lossless_jpeg=1` only when the input is a JPEG: producing a byte-for-byte reconstructable JXL: and drops the incompatible distance/effort/progressive/responsive flags in that mode. Lossless non-JPEG inputs correctly encode mathematically lossless pixels via `-d 0`.
+- **Native FFmpeg two-pass encoding now actually runs two passes** instead of silently falling back to single-pass. Previously `VideoOptions.TwoPass = true` only wrote a debug warning and encoded once, so callers who requested average-bitrate two-pass got single-pass output reported as success. `FFmpegConverter` now overrides `ConvertAsync` to run a real analysis pass (to the OS null sink, audio disabled) followed by the encode pass, sharing a `-passlogfile` prefix that is cleaned up afterward. Two-pass engages only when it is meaningful: an explicit target bitrate with no CRF override on a video output; CRF-mode/audio-only/raw-command-override jobs fall through to the unchanged single-pass path. Added unit coverage for the pass-1/pass-2 argument planning and the engagement gate.
 
 ### Security
 
-- **The security version floor is now enforced at conversion time, not just surfaced as a warning.** `ConversionOrchestrator` probes the CLI tool backing the selected converter (via the new `IToolVersionProbe`/`ProcessToolVersionProbe`, cached per executable + mtime) and refuses the job with a clear message when the tool is *positively identified* as below its floor (`ToolVersionGate.IsBlocked`). Unknown/unparseable versions (custom or nightly builds) and missing executables never block — the gate only stops known-old, vulnerable binaries. Added `IConverterStrategy.ResolveExecutablePath()` so the probe reuses each strategy's own executable resolution. Regression tests cover the blocked path (converter never invoked) and the pass-through path.
-- Extended the `ToolVersionPolicy` security floor to four previously-ungated external parsers that read untrusted files: **libheif ≥ 1.22.0** (CVE-2026-32740/-32741/-32814 — grid-tile heap OOB write on the default HEIF/AVIF decode path, CVSS 8.8), **libjxl ≥ 0.11.2** (CVE-2026-1837 decoder UAF), **libvips ≥ 8.19.0** (CVE-2026-3281), and **Ghostscript ≥ 10.07.1** (PostScript/PDF parser hardening). Added canonical aliases (`libvips`→`vips`, `gswin64c`/`gswin32c`/`gs`→`ghostscript`, `cjxl`/`djxl`→`libjxl`, `heif-enc`/`heif-dec`→`libheif`) so `SidecarHealthService`, Settings, and `ucx tools` all surface an out-of-date warning for these engines.
+- **The security version floor is now enforced at conversion time, not just surfaced as a warning.** `ConversionOrchestrator` probes the CLI tool backing the selected converter (via the new `IToolVersionProbe`/`ProcessToolVersionProbe`, cached per executable + mtime) and refuses the job with a clear message when the tool is *positively identified* as below its floor (`ToolVersionGate.IsBlocked`). Unknown/unparseable versions (custom or nightly builds) and missing executables never block: the gate only stops known-old, vulnerable binaries. Added `IConverterStrategy.ResolveExecutablePath()` so the probe reuses each strategy's own executable resolution. Regression tests cover the blocked path (converter never invoked) and the pass-through path.
+- Extended the `ToolVersionPolicy` security floor to four previously-ungated external parsers that read untrusted files: **libheif ≥ 1.22.0** (CVE-2026-32740/-32741/-32814: grid-tile heap OOB write on the default HEIF/AVIF decode path, CVSS 8.8), **libjxl ≥ 0.11.2** (CVE-2026-1837 decoder UAF), **libvips ≥ 8.19.0** (CVE-2026-3281), and **Ghostscript ≥ 10.07.1** (PostScript/PDF parser hardening). Added canonical aliases (`libvips`→`vips`, `gswin64c`/`gswin32c`/`gs`→`ghostscript`, `cjxl`/`djxl`→`libjxl`, `heif-enc`/`heif-dec`→`libheif`) so `SidecarHealthService`, Settings, and `ucx tools` all surface an out-of-date warning for these engines.
 
 ## [2.31.5] - 2026-07-19
 
@@ -170,31 +189,31 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Fixed
 
-- LibreOffice output relocation now reconciles the filter's native extension. `--convert-to` writes the filter's own extension (requesting `.jpeg` yields `.jpg`, `.text` yields `.txt`), so the exact-extension relocation added earlier could still miss the produced file and report a successful conversion as failed. The validator now also relocates a known-alias output (`jpeg`↔`jpg`, `tif`↔`tiff`, `htm`↔`html`, `text`→`txt`), guarded to only pick a file freshly written during the conversion — never the input or a stale same-stem file.
-- `PathSafety.SanitizeFileNameComponent` now neutralizes Windows reserved device names (`CON`/`NUL`/`PRN`/`AUX`/`COM1`–`COM9`/`LPT1`–`LPT9`, with or without an extension) by prefixing an underscore, and strips trailing dots/spaces that Windows silently removes. Untrusted metadata (EXIF/ID3/probe titles) resolving a stem to one of these previously produced a name the downstream file create would reject.
+- LibreOffice output relocation now reconciles the filter's native extension. `--convert-to` writes the filter's own extension (requesting `.jpeg` yields `.jpg`, `.text` yields `.txt`), so the exact-extension relocation added earlier could still miss the produced file and report a successful conversion as failed. The validator now also relocates a known-alias output (`jpeg`↔`jpg`, `tif`↔`tiff`, `htm`↔`html`, `text`→`txt`), guarded to only pick a file freshly written during the conversion: never the input or a stale same-stem file.
+- `PathSafety.SanitizeFileNameComponent` now neutralizes Windows reserved device names (`CON`/`NUL`/`PRN`/`AUX`/`COM1` through `COM9`/`LPT1` through `LPT9`, with or without an extension) by prefixing an underscore, and strips trailing dots/spaces that Windows silently removes. Untrusted metadata (EXIF/ID3/probe titles) resolving a stem to one of these previously produced a name the downstream file create would reject.
 - Vips no longer discards image quality/compression/strip/metadata settings when a resize dimension is set. Previously, specifying a width or height rebuilt a bare `thumbnail in out <size>` command that dropped every selected `Q=`/`compression=`/`lossless=`/`effort=`/`strip=` option, so any resized output silently reverted to default quality with metadata intact. The save options now ride in the vips output-filename suffix (`out.jpg[Q=55,strip=true]`), which is how `thumbnail` accepts saver options. Also extends `strip=true` honoring to PNG/WebP/AVIF/HEIF/JXL/TIFF outputs (was JPEG-only).
 
 ### Security
 
-- Cap tool downloads at a per-tool size ceiling (default 1 GiB; 256 MiB for the non-checksum-required image tools resvg/vips/libjxl/libheif/imagemagick/potrace). A response whose declared `Content-Length` exceeds the cap is rejected before any byte is written, and the copy loop aborts (deleting the partial file) if a chunked/under-declaring body streams past the cap — a compromised or mis-pinned asset can no longer fill the disk ahead of the post-download checksum.
+- Cap tool downloads at a per-tool size ceiling (default 1 GiB; 256 MiB for the non-checksum-required image tools resvg/vips/libjxl/libheif/imagemagick/potrace). A response whose declared `Content-Length` exceeds the cap is rejected before any byte is written, and the copy loop aborts (deleting the partial file) if a chunked/under-declaring body streams past the cap: a compromised or mis-pinned asset can no longer fill the disk ahead of the post-download checksum.
 
 ## [2.31.4] - 2026-07-17
 
 ### Security
 
-- Guard sidecar `tarfile.extractall` and the Godot `.pck` extractor against path traversal (tar-slip): a malicious `.cbt` comic archive, Joplin `.jex` export, or crafted `.pck` could write outside the extraction directory or plant symlinks. Added shared `safe_tar_extractall`/`safe_extract_path` helpers. (zip extraction was already safe — CPython strips `..`.)
+- Guard sidecar `tarfile.extractall` and the Godot `.pck` extractor against path traversal (tar-slip): a malicious `.cbt` comic archive, Joplin `.jex` export, or crafted `.pck` could write outside the extraction directory or plant symlinks. Added shared `safe_tar_extractall`/`safe_extract_path` helpers. (zip extraction was already safe: CPython strips `..`.)
 - Neutralize CSV formula injection in exported conversion reports: fields beginning with `= + - @` (from filenames or tool output) are prefixed with an apostrophe so they aren't executed as formulas in Excel/LibreOffice, while genuine negative numbers are left intact.
 - Escape user-controlled values in `ucx` CLI markup output so a `[` in a config key/value, path, format, tool name, or action no longer throws inside Spectre and returns exit code -1 instead of the intended 0/1.
 
 ### Fixed
 
-- Fix a fatal crash when opening several tool pages from the Toolbox (and Home / AI Lab). Nine pages — Image Converter, Image Enhancer, Video Enhancer, Photo Restoration, Noise Remover, GIF Maker, PDF Tools, Batch Rename, and Auto Reframe — wired a `SelectionChanged`/`Changed` handler that fires while `InitializeComponent()` is still constructing the page, before the controls it reads exist. The existing `if (RunButton is null) return;` guard checked a control created too early, so the handler ran and threw `NullReferenceException`, fail-fasting the app. Added an `_isReady` flag set immediately after `InitializeComponent()` and guarded the affected handlers on it. Verified by navigating to all 40 tool routes with zero crashes.
+- Fix a fatal crash when opening several tool pages from the Toolbox (and Home / AI Lab). Nine pages: Image Converter, Image Enhancer, Video Enhancer, Photo Restoration, Noise Remover, GIF Maker, PDF Tools, Batch Rename, and Auto Reframe: wired a `SelectionChanged`/`Changed` handler that fires while `InitializeComponent()` is still constructing the page, before the controls it reads exist. The existing `if (RunButton is null) return;` guard checked a control created too early, so the handler ran and threw `NullReferenceException`, fail-fasting the app. Added an `_isReady` flag set immediately after `InitializeComponent()` and guarded the affected handlers on it. Verified by navigating to all 40 tool routes with zero crashes.
 - Fix a cluster of clipped/overflowing layouts introduced by the density pass:
-  - **Converter queue** — the 7-column table forced a 720px min-width into a ~520px panel, clipping the Size/Status columns and crushing the filename. Rebuilt as a 6-column table (the estimated output is now stacked under Size), fitting the panel with readable headers and filenames.
-  - **Downloader** — the Quality/Container combos and three option checkboxes shared one non-wrapping row that ran off the right edge (hiding "Skip sponsor segments"). Split into two rows and widened the Quality combo so "Highest available (video + audio)" fits.
-  - **AI Lab tiles** — 148px tiles clipped the second description line with no ellipsis; raised to 168px so descriptions show in full.
-  - **Home** — workflow cards were too short (148px) to render their descriptions at all; raised to 176px, and the AI-feature tiles now ellipsize overflow instead of hard-cutting.
-- Fix clipped, unreadable Toolbox tiles. The "tighten workspace density" pass shrank tile height to 116px, but each tile renders a 40px icon block, title, two-line description, and a status row — needing ~170px. Title and description were squeezed to an unreadable sliver. Restored the tile to 216×172 (padding 14) so all tile content is fully visible.
+  - **Converter queue**: the 7-column table forced a 720px min-width into a ~520px panel, clipping the Size/Status columns and crushing the filename. Rebuilt as a 6-column table (the estimated output is now stacked under Size), fitting the panel with readable headers and filenames.
+  - **Downloader**: the Quality/Container combos and three option checkboxes shared one non-wrapping row that ran off the right edge (hiding "Skip sponsor segments"). Split into two rows and widened the Quality combo so "Highest available (video + audio)" fits.
+  - **AI Lab tiles**: 148px tiles clipped the second description line with no ellipsis; raised to 168px so descriptions show in full.
+  - **Home**: workflow cards were too short (148px) to render their descriptions at all; raised to 176px, and the AI-feature tiles now ellipsize overflow instead of hard-cutting.
+- Fix clipped, unreadable Toolbox tiles. The "tighten workspace density" pass shrank tile height to 116px, but each tile renders a 40px icon block, title, two-line description, and a status row: needing ~170px. Title and description were squeezed to an unreadable sliver. Restored the tile to 216×172 (padding 14) so all tile content is fully visible.
 - Fix a fatal launch crash: `MainWindow`, `SettingsWindow`, and `ProgressWindow` each carried an `x:Uid` on the `Window` root. A WinUI 3 `Window` is not a `FrameworkElement`, so `x:Uid`-driven resource application throws `XamlParseException` ("Failed to assign to property Window.Title") during `InitializeComponent`. `MainWindow` crashed the app on startup; the other two would crash when Settings or a progress window opened. Removed the `x:Uid`/literal `Title` from all three roots and set the (localized) title in code-behind, matching the existing pattern.
 - Format and parse all external-tool numbers with `InvariantCulture`. On comma-decimal locales (de/fr, which ship as resources) converters emitted args like `-r 29,97` that FFmpeg rejects, and `double.Parse` of period-decimal tool output threw, breaking FFmpeg/Calibre/JXL progress and resvg SVG sizing. Covers FFmpeg, potrace, cjxl, resvg, Calibre.
 - Do not fail an otherwise-successful conversion when Mark-of-the-Web can't be copied under the default Keep action (output on FAT32/exFAT/SMB or an over-cap zone). Surface it as a warning instead of a hard failure.
@@ -231,7 +250,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Changed
 
-- Rebuilt the WinUI visual system across all 53 pages around a compact 28 px page-title scale, readable 15 px body copy, shorter descriptions, tighter section rhythm, and restrained blue/emerald accents. Removed explicit card outlines, tiny 9–11 px labels, decorative status pills, hero gradients, and glass-backed AI tiles in favor of tonal grouping and sparse structural separators.
+- Rebuilt the WinUI visual system across all 53 pages around a compact 28 px page-title scale, readable 15 px body copy, shorter descriptions, tighter section rhythm, and restrained blue/emerald accents. Removed explicit card outlines, tiny 9 to 11 px labels, decorative status pills, hero gradients, and glass-backed AI tiles in favor of tonal grouping and sparse structural separators.
 - Reworked the application shell, Home, Converter, AI Lab, Toolbox, Settings, and progress surfaces to keep primary controls higher in the viewport. Converter now exposes its main action beside file intake, the shell uses the shipped UniversalConverter X mark, and high-traffic discovery tiles are denser with bounded descriptions.
 - Synchronized the complete WinUI localization catalog after the page-wide copy and hierarchy pass; localized catalogs retain matching keys and placeholder contracts.
 
@@ -288,7 +307,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Video Timelines now has verified CMX 3600 EDL and FCPXML import paths. The preset-backed `vidpost` engine converts multi-event EDL files to structured CSV, probes FCPXML assets, formats, projects, sequences, and clips, and retains optional OpenTimelineIO conversion through `otioconvert`; focused fixtures and frozen-executable smokes protect both interchange formats.
 - Added a native whisper.cpp speech-to-text path alongside faster-whisper. The frozen 9.9 MB NDJSON wrapper discovers local GGUF models and compiled Vulkan/CUDA/VAD capabilities, converts media to the required 16 kHz mono input through managed FFmpeg, and is selectable from both Speech-to-Text and AI Subtitle with a matching preset. The separately pinned upstream runtime remains an explicit-consent, SHA-256-verified install so the default package does not silently acquire models or binaries.
 - Added one shared engine catalogue across WinUI, Console, the loopback REST API, and the PowerShell module. `ucx engines --json`, `GET /engines`, and `Get-UcxEngine` expose the same native converter plus all source and installed sidecars; `ucx invoke-engine`, the existing REST job endpoint, and `Invoke-UcxEngine` can execute any installed specialized engine. REST now routes the native `converter` engine through the canonical CLI, and repository contracts fail when a UI/preset engine falls outside the shared catalogue or an automation surface loses generic discovery/invocation.
-- Added a local sidecar verification harness covering all 198 engines. It enforces one valid health manifest and PyInstaller entry point per sidecar, imports each source in an isolated process, checks responsive `--help` and statically discovered operation surfaces, offers an opt-in full freeze plus frozen-help mode, and runs a five-engine fast subset in the pytest contract suite. Missing build entry points for Disc Burner, SVT-AV1-HDR, and Vship Metrics are now supplied and verified through real frozen executables.
+- Added a local sidecar verification suite covering all 198 engines. It enforces one valid health manifest and PyInstaller entry point per sidecar, imports each source in an isolated process, checks responsive `--help` and statically discovered operation surfaces, offers an opt-in full freeze plus frozen-help mode, and runs a five-engine fast subset in the pytest contract suite. Missing build entry points for Disc Burner, SVT-AV1-HDR, and Vship Metrics are now supplied and verified through real frozen executables.
 - Added pinned, opt-in ISO 21496-1 gain-map tooling. UltraHDR JPEGs can be round-tripped through libvips 8.18.2 without dropping gain-map metadata or converted to AVIF through a reproducible static libavif 1.4.2 build; SDR/HDR image pairs can also synthesize new AVIF gain maps. Downloads require explicit license acceptance and exact size/SHA-256 verification, outputs are re-inspected before atomic promotion, and a generated-fixture headless smoke covers the writer.
 - Video Enhancer now offers Anime4K v4.0.1 as an optional local 2× GLSL backend alongside Real-ESRGAN. Modes A, B, and C run through mpv with isolated configuration, preserve audio, and expose CRF control; the pinned MIT shader pack requires explicit consent and SHA-256 verification. A matching preset, readiness status, focused archive/command tests, and a headless 640×360 to 1280×720 render proof are included.
 - Navigation, AI Lab cards, and the Settings panel now use element-scoped Mica or Acrylic through Windows App SDK `SystemBackdropElement`. Each material is guarded by runtime API/controller capability checks and layered over the existing solid theme surface, so unsupported GPUs, remote sessions, elevated launches, and disabled transparency keep the previous legible appearance.
@@ -305,7 +324,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ### Added
 
-- Shipped the **Video Summarizer** (previously a "Planned" placeholder): turn a long recording into a written summary, timestamped chapters, and an optional condensed highlight cut — all offline. A new `videosummary` sidecar transcribes audio/video with the existing Whisper engine, then runs a pure-standard-library **extractive TextRank** summarizer that needs no model download, no GPU, and no network. It picks the most central sentences (Brief / Standard / Detailed / Executive lengths), detects chapters and titles them from their top keywords, and can render a speech-driven highlight reel by concatenating the highest-ranked segments with FFmpeg. Output as plain text, Markdown, YouTube-style chapter descriptions (first chapter pinned to 00:00 with auto hashtags), or a bare chapters list; transcripts (SRT / VTT / JSON / TXT) can be summarized directly, and you can bring your own transcript alongside a video to cut a reel without re-transcribing. An optional local-LLM path via Ollama is used only when a server is reachable, otherwise it transparently falls back to the offline extractive engine.
+- Shipped the **Video Summarizer** (previously a "Planned" placeholder): turn a long recording into a written summary, timestamped chapters, and an optional condensed highlight cut: all offline. A new `videosummary` sidecar transcribes audio/video with the existing Whisper engine, then runs a pure-standard-library **extractive TextRank** summarizer that needs no model download, no GPU, and no network. It picks the most central sentences (Brief / Standard / Detailed / Executive lengths), detects chapters and titles them from their top keywords, and can render a speech-driven highlight reel by concatenating the highest-ranked segments with FFmpeg. Output as plain text, Markdown, YouTube-style chapter descriptions (first chapter pinned to 00:00 with auto hashtags), or a bare chapters list; transcripts (SRT / VTT / JSON / TXT) can be summarized directly, and you can bring your own transcript alongside a video to cut a reel without re-transcribing. An optional local-LLM path via Ollama is used only when a server is reachable, otherwise it transparently falls back to the offline extractive engine.
 
 ## [2.26.0] - 2026-07-16
 
@@ -370,7 +389,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Added APV camera-master support backed by the bundled FFmpeg 8.1.2 codec: Format Inspector recognizes RFC 9924 raw bitstreams, and presets convert APV to H.265 10-bit, ProRes 422 HQ, or compatible H.264. Raw streams without container duration now run with indeterminate progress instead of failing, and professional/lossless VideoCrush presets correctly bypass lossy CRF validation.
 - Subtitle Studio now runs a complete local Whisper-to-caption workflow with optional Helsinki OPUS-MT translation through ONNX Runtime, editable text and cue timing preview, SRT/VTT/ASS export, and post-preview video burn-in. The AI Lab and Home tiles now open the ready workflow.
 - Converter now exposes batch-safe FFmpeg command templates with required `{input}` and `{output}` placeholders. An off-by-default Advanced setting enables shell-free argument editing for direct conversions and exact per-invocation command review for FFmpeg calls made inside sidecars; edited vectors reject shell metacharacters before dispatch.
-- Audio Converter is now a complete batch workflow in Toolbox with MP3, AAC, FDK-AAC, Opus, Ogg Vorbis, FLAC, WAV, ALAC, WavPack, AC-3, E-AC-3, and WMA targets. Codec-aware VBR quality (0–9), fixed bitrate, sample-rate/channel overrides, Opus application/frame controls, FDK-AAC cutoff/afterburner/profile controls, and Vorbis managed mode are wired to AudioPro; existing outputs receive unique names instead of being overwritten.
+- Audio Converter is now a complete batch workflow in Toolbox with MP3, AAC, FDK-AAC, Opus, Ogg Vorbis, FLAC, WAV, ALAC, WavPack, AC-3, E-AC-3, and WMA targets. Codec-aware VBR quality (0 to 9), fixed bitrate, sample-rate/channel overrides, Opus application/frame controls, FDK-AAC cutoff/afterburner/profile controls, and Vorbis managed mode are wired to AudioPro; existing outputs receive unique names instead of being overwritten.
 - Conversion history persistence now lives in a headless Core store with CI coverage for CRUD, search, summaries, row/age retention, and concurrent writers. Explorer preset launches now use a tested argument-vector builder with safe quote/Unicode handling and automatic list-file fallback, and the test suite executes a real preset through its sidecar.
 - Every one of the 190 sidecars now carries a schema-validated `ucx.sidecar.json` health manifest. Model, GPU, external-tool, managed-tool, optional-tool, and argument-conditional requirements are resolved from manifest data; CI rejects missing or mismatched manifests and prevents reintroduction of hard-coded engine fallback tables.
 - Application update checks now consume each release's preset/queue compatibility contract, compare it with user-defined preset schemas, saved queue schemas, and referenced engines, and show actionable pre-update warnings on Home and in Settings. Legacy saved queues default safely to schema v1, while incompatible or unverifiable release metadata fails visibly instead of implying compatibility.
@@ -407,7 +426,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 - **P1**: ConverterPage finally block now dispatches UI property access to the dispatcher thread, preventing COM exception crash when conversion completes on a thread-pool thread.
 - **P2**: OpenContainingFolder now quotes folder paths in explorer.exe /select invocation across 21 pages so paths with spaces open correctly.
-- **P2**: PersistQueue removed from per-progress-tick callback — was causing disk thrashing with dozens of JSON writes per second during conversion.
+- **P2**: PersistQueue removed from per-progress-tick callback: was causing disk thrashing with dozens of JSON writes per second during conversion.
 - **P2**: WatchFolderService _watchers and _profileCts switched from Dictionary to ConcurrentDictionary to prevent data race between FSW callback and UI threads.
 - **P2**: PostConversionHandler refuses to delete/move source when output file is zero bytes (prevents data loss on corrupt conversions).
 - **P2**: Clipforge op_speed and op_reverse now probe input streams and build filters conditionally for video-only, audio-only, or A+V inputs instead of crashing.
@@ -425,7 +444,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Extended UIA gate with icon-only button accessible-name semantic check to prevent screen-reader regressions.
 - Created `ucx.sidecar.json` manifests for 50 sidecars declaring tool, model, and GPU requirements. SidecarHealthService now reads manifests with hard-coded fallback.
 - Added orjson fast-path to all 188 sidecar emit functions for ~3-5x NDJSON serialization speedup when orjson is installed.
-- Wired OutputSizeEstimator into ConverterPage queue — queued files now show estimated output size with tooltip caveat.
+- Wired OutputSizeEstimator into ConverterPage queue: queued files now show estimated output size with tooltip caveat.
 - Added lock toggles for crop and quality values in EditorPage that persist across operation/preset switches.
 - Added VOBSUB/PGS OCR subtitle extraction presets for the existing subocr sidecar.
 - Added shared Pydantic validation layer (`tools/_lib/ucx_validate.py`) for structured input validation in sidecars.
@@ -451,7 +470,7 @@ All notable changes to UniversalConverterX will be documented in this file.
 - Updated compatible NuGet pins, documented intentional test-package holds, and adapted CLI command overrides to the current Spectre.Console.Cli API.
 - Added a version consistency test that fails when active release surfaces drift.
 
-### Added — Post-Conversion Source File Management (ROADMAP Item 59)
+### Added: Post-Conversion Source File Management (ROADMAP Item 59)
 
 - New `PostConversionAction` enum (Keep/Move/Delete) replaces the limited `DeleteSourceOnSuccess` bool
 - `PostConversionHandler` utility with output-file verification, in-place conversion safety, and archive folder collision resolution
@@ -465,33 +484,33 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [2.21.0] - 2026-05-03
 
-### Added — Parallel Job Limit Enforcement with SemaphoreSlim (ROADMAP Item 99)
+### Added: Parallel Job Limit Enforcement with SemaphoreSlim (ROADMAP Item 99)
 
 - Refactored `ConverterPage.xaml.cs` ConvertButton_Click to use Task.WhenAll with semaphore gating
-- Read MaxParallelConversions from ConverterXOptions (default: CPU count / 2, range 1–16)
+- Read MaxParallelConversions from ConverterXOptions (default: CPU count / 2, range 1 to 16)
 - Wrap job execution in SemaphoreSlim to prevent exceeding configured limit
 - Use Interlocked counters to safely track completed/failed jobs across parallel tasks
 - Dispatch all UI updates via DispatcherQueue to prevent cross-thread issues
 - Graceful cancellation support with CancellationToken propagation
 - Enables true parallel conversion (up to N jobs simultaneously) instead of sequential processing
 
-### Added — DPAPI Cookie Encryption Infrastructure (ROADMAP Item 100)
+### Added: DPAPI Cookie Encryption Infrastructure (ROADMAP Item 100)
 
-- New `Core/Security/DpapiProvider.cs` — cross-platform encryption/decryption wrapper
+- New `Core/Security/DpapiProvider.cs`: cross-platform encryption/decryption wrapper
 - Encrypt() and Decrypt() methods for sensitive configuration at rest
 - Windows-only DPAPI (DataProtectionScope.LocalMachine); graceful no-op on macOS/Linux
 - Used by future config encryption for credentials, tokens, webhooks
 - Complements existing streamkeep sidecar DPAPI cookie encryption (streamkeep/dpapi.py)
 - IsAvailable() check for platform detection
 
-### Added — Premium UI Polish Pass (23/45 XAML Pages)
+### Added: Premium UI Polish Pass (23/45 XAML Pages)
 
 - Refined visual hierarchy: spacing (14→16px), typography (explicit line-heights), component consistency
 - Applied EyebrowTextStyle header pattern consistently across all refined pages
-- Improved empty states: icon size (80→88–120px), supporting text hierarchy
+- Improved empty states: icon size (80→88 to 120 px), supporting text hierarchy
 - Standardized button padding (20,10), GhostButton color (gray→blue), spacing rhythm (8/12/16/20/32px)
-- Established consistent RowSpacing (4–12px depending on density) and ColumnSpacing (16px)
-- Typography: explicit line-height (16–18px) for description text, monospace font stack for logs
+- Established consistent RowSpacing (4 to 12 px depending on density) and ColumnSpacing (16px)
+- Typography: explicit line-height (16 to 18 px) for description text, monospace font stack for logs
 - Pages refined: HomePage, ToolboxPage, AiLabPage, PresetsPage, ConverterPage, HistoryPage, WatchFoldersPage, ImageConverterPage, DocumentConverterPage, EbookConverterPage, SubtitleConverterPage, FontConverterPage, VideoEnhancerPage, SpeechToTextPage, OcrPage, ImageEnhancerPage, TextToSpeechPage, NoiseRemoverPage, AudioCompressorPage (+ 4 from prior sessions)
 
 ### Build Status
@@ -501,13 +520,13 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [v2.20.1] - 2026-05-01
 
-### Fixed — Universal-converter audit cleanup
+### Fixed: Universal-converter audit cleanup
 
 Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-reference) revealed orphan engines that existed on disk but weren't surfaced through the UI. This release closes those gaps so every shipping sidecar is reachable from both the Toolbox grid and the preset browser.
 
 ### Added
 
-- **`tools/framesnap/sidecar.py`** — NDJSON wrapper around the existing FrameSnap GUI for headless batch frame extraction. Ops: `every-n-seconds`, `every-n-frames`, `at-time`, `scene-cuts`. Emits `frame` events per extracted image.
+- **`tools/framesnap/sidecar.py`**: NDJSON wrapper around the existing FrameSnap GUI for headless batch frame extraction. Ops: `every-n-seconds`, `every-n-frames`, `at-time`, `scene-cuts`. Emits `frame` events per extracted image.
 - **31 new presets** linking previously-orphan engines into the preset browser: `bg-remove-video`, `audiotag-read`, `audiotag-strip`, `chaptermark-read`, `codeformat`, `coordfmt-convert`, `demucs-stems`, `ebookconvert-epub`, `edge-tts-speak`, `fontconvert`, `gfpgan-restore`, `gisconvert-vector`, `gisconvert-raster`, `lipsight-transcribe`, `mailbox-mbox-to-maildir`, `mailbox-mbox-split`, `ocr-recognize`, `pdfocr-recognize`, `pdftools-merge`, `pdftools-compress`, `pdftools-split`, `realesrgan-upscale`, `rnnoise-denoise`, `scenedetect-detect`, `timefmt-convert`, `vertigo-9x16`, `videosubtitleremover`, `wallet-bip39-check`, `wallet-keystore`, `whisper-cpp-transcribe`, `whisper-stt-transcribe`, `framesnap-every-n-seconds`.
 - **33 new Toolbox tiles** for previously-orphan engines: `alphacut`, `archive`, `audiotag`, `chaptermark`, `codeformat`, `coordfmt`, `demucs`, `docconvert`, `ebookconvert`, `edge-tts`, `fontconvert`, `framesnap`, `gfpgan`, `gifstudio`, `gisconvert`, `heicshift`, `lipsight`, `mailbox`, `ocr`, `pdfocr`, `pdftools`, `realesrgan`, `recordcast`, `rnnoise`, `scenedetect`, `streamkeep`, `subconvert`, `timefmt`, `vertigo`, `videocrush`, `videosubtitleremover`, `whisper-cpp`, `whisper-stt`.
 - KNOWN_EVENTS gains `frame` for the new framesnap sidecar.
@@ -515,30 +534,30 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 ### Changed
 
 - Sidecar count: 175 → **176** (added framesnap).
-- Toolbox tile coverage: 150 → **176 unique engines** — every shipping sidecar now has a tile.
-- Preset coverage: 148 → **174 unique engines** — every shipping conversion sidecar has at least one preset. The two remaining preset-less sidecars (`recordcast` for live screen recording, `streamkeep` for URL-input downloads) are intentional: they take device handles or URLs, not files, so the preset model doesn't apply.
+- Toolbox tile coverage: 150 → **176 unique engines**: every shipping sidecar now has a tile.
+- Preset coverage: 148 → **174 unique engines**: every shipping conversion sidecar has at least one preset. The two remaining preset-less sidecars (`recordcast` for live screen recording, `streamkeep` for URL-input downloads) are intentional: they take device handles or URLs, not files, so the preset model doesn't apply.
 - Contract test: 175 → **176 sidecars conforming**, 0 broken tile refs, 0 broken preset refs.
 - Version 2.20.0 → 2.20.1 across all manifests.
 
 ## [v2.20.0] - 2026-05-01
 
-### Added — 13 new pure-format conversion sidecars (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
+### Added: 13 new pure-format conversion sidecars (AI/ML + Forensics + Notes + DAW + Video post + PCB + BI + Reg + LMS + Med + IoT + Social + Dev)
 
-- **mlmodel** — ML model interchange probes: HuggingFace `.safetensors` JSON header (read 8-byte length-prefix + JSON metadata without loading tensors), GGUF v2/v3 llama.cpp header + KV metadata walker (handles all 13 type IDs + array recursion), ONNX graph summary via `onnx` lib (input/output shapes + op-counts + opset imports), PyTorch `.pt`/`.pth`/`.bin` magic-byte heuristic detection, TFLite / CoreML / TF SavedModel format detection.
-- **forensics** — Digital forensics artifact decoders: NTFS `$MFT` 1024-byte record parser with attribute walking + Windows FILETIME -> ISO-8601 timestamps, Windows `.reg` UTF-16 export -> JSON tree, Windows Prefetch `.pf` SCCA header (executable / path-hash decode), Chrome+Firefox+Edge browser history SQLite -> CSV with proper Chromium 1601-epoch + Firefox 1970-microsecond timestamps, EnCase `.E01` EWF probe via `ewfinfo` shellout.
-- **notetaking** — Knowledge management exports: Evernote `.enex` XML walker with HTML-to-Markdown crude transform + per-note frontmatter, Notion workspace ZIP -> Markdown vault with manifest CSV, Obsidian vault crawler with tag/backlink extraction, Joplin `.jex` tar extraction, Day One JSON journal -> per-entry Markdown, Roam Research recursive block-tree -> Markdown bullet outline.
-- **dawproject** — DAW project probes: Ableton Live `.als` gunzip + XML walk (tracks + plugins), REAPER `.rpp` text parser, Audacity `.aup` XML + `.aup3` SQLite probes, FL Studio `.flp` chunk-header reader, LMMS `.mmp`/`.mmpz` XML, DAWproject open-standard ZIP probe.
-- **vidpost** — Video post-production timelines: FCPXML probe (formats + assets + sequences), `otioconvert` shellout for FCPXML <-> OpenTimelineIO, Premiere Pro `.prproj` gunzip + regex-based version/sequence/bin/clip count, CMX 3600 EDL parser with timecode regex -> CSV.
-- **pcbcad** — Electronics CAD: Gerber RS-274X aperture catalog + command-count probe, Excellon NC drill (T-tool definitions + X/Y hole coordinates), KiCad `.kicad_pro` JSON + `.kicad_pcb` S-expression regex (footprints/tracks/vias/zones), Eagle XML probe, IPC-D-356 fixed-width netlist parser.
-- **bireport** — BI / reporting projects: Tableau `.twb` XML / `.twbx` ZIP probe, Power BI `.pbix` UTF-16-LE DataModelSchema decode (tables + measures + data sources + culture), SSRS `.rdl` XML probe, Looker LookML directory regex, dbt project directory walker.
-- **sdmx** — Regulatory data interchange: XBRL document parser with context + unit + concept resolution -> per-fact CSV, iXBRL inline-XBRL HTML extraction, SDMX-ML 2.1 generic data series + observation walker, SDMX codelist code/name extraction, DDI 2.5 codebook variable list.
-- **lmskit** — Learning Management System: SCORM 1.2 / 2004 `imsmanifest.xml` probe, Common Cartridge `.imscc` ZIP probe, QTI assessment item walker, xAPI Tin Can statement JSON + NDJSON normalization, LTI 1.3 launch JWT decoder (no signature check), Moodle `.mbz` gzipped tar with `moodle_backup.xml` walker.
-- **medkitex** — Healthcare extras: DICOM Structured Report content-sequence recursive walker with concept codes + measured values, DICOM Waveform per-channel CSV with proper sample-rate timing, HL7 CDA R2 / CCD / CCDA section walker, IHE XDS ExtrinsicObject metadata -> CSV, NCPDP SCRIPT e-prescribing -> JSON.
-- **iotbus** — Industrial IoT: OPC UA NodeSet XML node-type counts + namespace + sample listing, Modbus register map JSON -> CSV, KNX ETS `.knxproj` ZIP probe, EDS DeviceNet/EtherNet-IP INI-style sections.
-- **socialarchives** — Social-media exports: Twitter / X archive ZIP `.js`-prefixed JSON tweet decoder -> CSV, Mastodon `.tar`/`.tar.gz` outbox.json ActivityPub walker -> CSV, Reddit data export ZIP CSV bundle extraction, auto-detection of Twitter/Mastodon/Reddit/Discord/Bluesky archive types.
-- **devbuild** — Developer build manifests: npm `package-lock.json` v1+v2 dependency tree -> CSV with depth, Cargo.lock TOML block parser, composer.lock packages + packages-dev, go.sum module/version/hash, Maven pom.xml dependency walker, .NET `.csproj` PackageReferences, auto-detect manifest format.
+- **mlmodel**: ML model interchange probes: HuggingFace `.safetensors` JSON header (read 8-byte length-prefix + JSON metadata without loading tensors), GGUF v2/v3 llama.cpp header + KV metadata walker (handles all 13 type IDs + array recursion), ONNX graph summary via `onnx` lib (input/output shapes + op-counts + opset imports), PyTorch `.pt`/`.pth`/`.bin` magic-byte heuristic detection, TFLite / CoreML / TF SavedModel format detection.
+- **forensics**: Digital forensics artifact decoders: NTFS `$MFT` 1024-byte record parser with attribute walking + Windows FILETIME -> ISO-8601 timestamps, Windows `.reg` UTF-16 export -> JSON tree, Windows Prefetch `.pf` SCCA header (executable / path-hash decode), Chrome+Firefox+Edge browser history SQLite -> CSV with proper Chromium 1601-epoch + Firefox 1970-microsecond timestamps, EnCase `.E01` EWF probe via `ewfinfo` shellout.
+- **notetaking**: Knowledge management exports: Evernote `.enex` XML walker with HTML-to-Markdown crude transform + per-note frontmatter, Notion workspace ZIP -> Markdown vault with manifest CSV, Obsidian vault crawler with tag/backlink extraction, Joplin `.jex` tar extraction, Day One JSON journal -> per-entry Markdown, Roam Research recursive block-tree -> Markdown bullet outline.
+- **dawproject**: DAW project probes: Ableton Live `.als` gunzip + XML walk (tracks + plugins), REAPER `.rpp` text parser, Audacity `.aup` XML + `.aup3` SQLite probes, FL Studio `.flp` chunk-header reader, LMMS `.mmp`/`.mmpz` XML, DAWproject open-standard ZIP probe.
+- **vidpost**: Video post-production timelines: FCPXML probe (formats + assets + sequences), `otioconvert` shellout for FCPXML <-> OpenTimelineIO, Premiere Pro `.prproj` gunzip + regex-based version/sequence/bin/clip count, CMX 3600 EDL parser with timecode regex -> CSV.
+- **pcbcad**: Electronics CAD: Gerber RS-274X aperture catalog + command-count probe, Excellon NC drill (T-tool definitions + X/Y hole coordinates), KiCad `.kicad_pro` JSON + `.kicad_pcb` S-expression regex (footprints/tracks/vias/zones), Eagle XML probe, IPC-D-356 fixed-width netlist parser.
+- **bireport**: BI / reporting projects: Tableau `.twb` XML / `.twbx` ZIP probe, Power BI `.pbix` UTF-16-LE DataModelSchema decode (tables + measures + data sources + culture), SSRS `.rdl` XML probe, Looker LookML directory regex, dbt project directory walker.
+- **sdmx**: Regulatory data interchange: XBRL document parser with context + unit + concept resolution -> per-fact CSV, iXBRL inline-XBRL HTML extraction, SDMX-ML 2.1 generic data series + observation walker, SDMX codelist code/name extraction, DDI 2.5 codebook variable list.
+- **lmskit**: Learning Management System: SCORM 1.2 / 2004 `imsmanifest.xml` probe, Common Cartridge `.imscc` ZIP probe, QTI assessment item walker, xAPI Tin Can statement JSON + NDJSON normalization, LTI 1.3 launch JWT decoder (no signature check), Moodle `.mbz` gzipped tar with `moodle_backup.xml` walker.
+- **medkitex**: Healthcare extras: DICOM Structured Report content-sequence recursive walker with concept codes + measured values, DICOM Waveform per-channel CSV with proper sample-rate timing, HL7 CDA R2 / CCD / CCDA section walker, IHE XDS ExtrinsicObject metadata -> CSV, NCPDP SCRIPT e-prescribing -> JSON.
+- **iotbus**: Industrial IoT: OPC UA NodeSet XML node-type counts + namespace + sample listing, Modbus register map JSON -> CSV, KNX ETS `.knxproj` ZIP probe, EDS DeviceNet/EtherNet-IP INI-style sections.
+- **socialarchives**: Social-media exports: Twitter / X archive ZIP `.js`-prefixed JSON tweet decoder -> CSV, Mastodon `.tar`/`.tar.gz` outbox.json ActivityPub walker -> CSV, Reddit data export ZIP CSV bundle extraction, auto-detection of Twitter/Mastodon/Reddit/Discord/Bluesky archive types.
+- **devbuild**: Developer build manifests: npm `package-lock.json` v1+v2 dependency tree -> CSV with depth, Cargo.lock TOML block parser, composer.lock packages + packages-dev, go.sum module/version/hash, Maven pom.xml dependency walker, .NET `.csproj` PackageReferences, auto-detect manifest format.
 
-### Added — 33 new presets
+### Added: 33 new presets
 
 `safetensors-header`, `gguf-header`, `onnx-info`, `mft-to-csv`, `reg-to-json`, `browser-history`, `enex-to-md`, `notion-zip`, `joplin-jex`, `als-info`, `flp-info`, `rpp-info`, `fcpxml-to-otio`, `edl-to-csv`, `gerber-info`, `drill-to-csv`, `kicad-pro`, `twb-info`, `pbix-info`, `rdl-info`, `xbrl-facts-csv`, `sdmx-data-csv`, `scorm-info`, `xapi-to-csv`, `dicom-sr-json`, `ccd-to-json`, `opcua-nodeset-info`, `twitter-tweets-csv`, `mastodon-outbox-csv`, `package-lock-csv`, `cargo-lock-csv`, `pom-deps-csv`, `manifest-info`.
 
@@ -550,22 +569,22 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.19.0] - 2026-05-01
 
-### Added — 12 new pure-format conversion sidecars (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
+### Added: 12 new pure-format conversion sidecars (Lab + Scope + Retro + Test reports + DB exports + Splat + ArcGIS + Thumbs)
 
-- **labkit** — Lab + Windows-trace data: LabVIEW .lvm text Measurement file with `***End_of_Header***` sentinel parsing -> CSV, LabVIEW .tdms binary via npTDMS -> per-group CSV, Sysinternals Procmon .pml -> CSV via `Procmon.exe /OpenLog`, Windows ETW .etl -> CSV via `tracerpt`, Performance Monitor .blg -> CSV via `relog`.
-- **scope** — Oscilloscope vendor formats: Tektronix .isf (curve-array ASCII headers + binary curve data with YMULT/YOFF/YZERO scaling) -> CSV, Tektronix .wfm v3+ binary -> CSV, LeCroy .trc with WAVEDESC descriptor -> CSV, Keysight / Agilent .bin (AG1000/AG1100 magic) -> CSV. Pure stdlib struct unpacking.
-- **retroimg** — Retrocomputing graphics decoders: Atari ST DEGAS (.PI1/.PI2/.PI3/.NEO) with proper interleaved-bitplane unpacking, ZX Spectrum SCR (256x192 with bizarre line-address scrambling + attribute bytes), WBMP (Wireless Bitmap) for OMA mobile, Apple II HGR (8192-byte hi-res with vertical scrambling), all -> PNG via Pillow.
-- **retrodisks** — Retrocomputing disk images: Apple II DOS 3.3 catalog walker (track 17 sector 15) for .dsk/.do/.po (143KB), Commodore 64 D64 catalog (track 18 sector 1) with 5-type file table (DEL/SEQ/PRG/USR/REL), Atari ATR magic header probe, ZX Spectrum .tap block walker (header + data block decoder).
-- **legacydocs** — DOS / early-Windows word processors: WordStar 8th-bit-stripping decoder for .ws/.wsd, Microsoft Write .wri body extraction (after 256-byte OLE header), Lotus Word Pro .lwp last-resort string scrape, format detection by magic-byte heuristics.
-- **testreports** — Test-runner result formats: JUnit XML (Jest/Vitest/Mocha/pytest/Maven/Gradle/MSTest) -> normalized CSV / standalone Catppuccin-themed HTML report, TAP (Test Anything Protocol) line parser, Allure JSON cases, Cucumber JSON (one row per scenario step), format auto-detection.
-- **dbexport** — Database vendor exports: IBM DB2 IXF (record-oriented binary with H/T/C/D/A type prefixes) column metadata + data row decoder, SQL Server BCP character format -> CSV, MySQL .sql dump regex-extraction of `INSERT INTO table VALUES (...)` -> per-table CSV (handles escaped strings + NULL + numeric literals), Oracle SQL*Loader .ctl probe.
-- **demosound** — Demoscene chip-music: Atari ST .YM file probe (YM2/3/4/5/6 magic + LeOnArD! tag check), .YM -> WAV via sc68 / sndh-converter, ZX Spectrum .ay -> WAV via zxtune123, Atari 8-bit SAP -> WAV via asap.
-- **vidlegacy** — Legacy / proprietary video: RealVideo .rm/.rmvb, Bink .bik/.bk2 (RAD), Smacker .smk, OGG Media .ogm, DivX, MS Video 1, Cinepak, Indeo — all -> MP4 H.264 via FFmpeg with explicit codec hints, plus ffprobe-style legacy probe.
-- **gsplat** — 3D Gaussian Splatting: Antimatter15 .splat (32-byte records: position + scales + RGBA + quaternion) <-> 3DGS .ply round-trip with proper PLY binary header emission and ASCII/binary input handling, splat header probe.
-- **arcgis** — ArcGIS file geodatabase via GDAL: .gdb / .gpkg layer enumeration via ogrinfo, per-layer extraction via ogr2ogr to GeoJSON / Shapefile / GeoPackage / FlatGeobuf / GML / KML, extract-all walks every layer, ArcGIS Pro .aprx project ZIP probe.
-- **mediathumb** — Universal media thumbnail extractor: video frame at N seconds via FFmpeg, PDF first page via pdftoppm, audio cover art (ID3 APIC + FLAC/Vorbis embedded picture) via mutagen, EPUB/CBZ/DOCX first image via zipfile, image resize via Pillow. Single `thumb` op auto-detects input type. `bulk-thumb` walks a directory tree preserving structure.
+- **labkit**: Lab + Windows-trace data: LabVIEW .lvm text Measurement file with `***End_of_Header***` sentinel parsing -> CSV, LabVIEW .tdms binary via npTDMS -> per-group CSV, Sysinternals Procmon .pml -> CSV via `Procmon.exe /OpenLog`, Windows ETW .etl -> CSV via `tracerpt`, Performance Monitor .blg -> CSV via `relog`.
+- **scope**: Oscilloscope vendor formats: Tektronix .isf (curve-array ASCII headers + binary curve data with YMULT/YOFF/YZERO scaling) -> CSV, Tektronix .wfm v3+ binary -> CSV, LeCroy .trc with WAVEDESC descriptor -> CSV, Keysight / Agilent .bin (AG1000/AG1100 magic) -> CSV. Pure stdlib struct unpacking.
+- **retroimg**: Retrocomputing graphics decoders: Atari ST DEGAS (.PI1/.PI2/.PI3/.NEO) with proper interleaved-bitplane unpacking, ZX Spectrum SCR (256x192 with bizarre line-address scrambling + attribute bytes), WBMP (Wireless Bitmap) for OMA mobile, Apple II HGR (8192-byte hi-res with vertical scrambling), all -> PNG via Pillow.
+- **retrodisks**: Retrocomputing disk images: Apple II DOS 3.3 catalog walker (track 17 sector 15) for .dsk/.do/.po (143KB), Commodore 64 D64 catalog (track 18 sector 1) with 5-type file table (DEL/SEQ/PRG/USR/REL), Atari ATR magic header probe, ZX Spectrum .tap block walker (header + data block decoder).
+- **legacydocs**: DOS / early-Windows word processors: WordStar 8th-bit-stripping decoder for .ws/.wsd, Microsoft Write .wri body extraction (after 256-byte OLE header), Lotus Word Pro .lwp last-resort string scrape, format detection by magic-byte heuristics.
+- **testreports**: Test-runner result formats: JUnit XML (Jest/Vitest/Mocha/pytest/Maven/Gradle/MSTest) -> normalized CSV / standalone Catppuccin-themed HTML report, TAP (Test Anything Protocol) line parser, Allure JSON cases, Cucumber JSON (one row per scenario step), format auto-detection.
+- **dbexport**: Database vendor exports: IBM DB2 IXF (record-oriented binary with H/T/C/D/A type prefixes) column metadata + data row decoder, SQL Server BCP character format -> CSV, MySQL .sql dump regex-extraction of `INSERT INTO table VALUES (...)` -> per-table CSV (handles escaped strings + NULL + numeric literals), Oracle SQL*Loader .ctl probe.
+- **demosound**: Demoscene chip-music: Atari ST .YM file probe (YM2/3/4/5/6 magic + LeOnArD! tag check), .YM -> WAV via sc68 / sndh-converter, ZX Spectrum .ay -> WAV via zxtune123, Atari 8-bit SAP -> WAV via asap.
+- **vidlegacy**: Legacy / proprietary video: RealVideo .rm/.rmvb, Bink .bik/.bk2 (RAD), Smacker .smk, OGG Media .ogm, DivX, MS Video 1, Cinepak, Indeo: all -> MP4 H.264 via FFmpeg with explicit codec hints, plus ffprobe-style legacy probe.
+- **gsplat**: 3D Gaussian Splatting: Antimatter15 .splat (32-byte records: position + scales + RGBA + quaternion) <-> 3DGS .ply round-trip with proper PLY binary header emission and ASCII/binary input handling, splat header probe.
+- **arcgis**: ArcGIS file geodatabase via GDAL: .gdb / .gpkg layer enumeration via ogrinfo, per-layer extraction via ogr2ogr to GeoJSON / Shapefile / GeoPackage / FlatGeobuf / GML / KML, extract-all walks every layer, ArcGIS Pro .aprx project ZIP probe.
+- **mediathumb**: Universal media thumbnail extractor: video frame at N seconds via FFmpeg, PDF first page via pdftoppm, audio cover art (ID3 APIC + FLAC/Vorbis embedded picture) via mutagen, EPUB/CBZ/DOCX first image via zipfile, image resize via Pillow. Single `thumb` op auto-detects input type. `bulk-thumb` walks a directory tree preserving structure.
 
-### Added — 23 new presets
+### Added: 23 new presets
 
 `lvm-to-csv`, `tdms-to-csv`, `etl-to-csv`, `blg-to-csv`, `wfm-to-csv`, `isf-to-csv`, `trc-to-csv`, `retro-img-to-png`, `retrodisk-list`, `wordstar-to-text`, `wri-to-text`, `junit-to-csv`, `junit-to-html`, `tap-to-csv`, `ixf-to-csv`, `mysql-dump-csv`, `ym-to-wav`, `ay-to-wav`, `realvideo-to-mp4`, `splat-to-ply`, `ply-to-splat`, `arcgis-list-layers`, `mediathumb`.
 
@@ -577,22 +596,22 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.18.0] - 2026-05-01
 
-### Added — 12 new pure-format conversion sidecars (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)
+### Added: 12 new pure-format conversion sidecars (Source Xform + DICOM-RT + niche eBooks + Auto + Airline + Tax)
 
-- **srctranspile** — Cross-language source code transpilation: Python 2 -> Python 3 via stdlib lib2to3 (no install required), CoffeeScript -> JS via npm `coffee` CLI, Vue 2 SFC -> Vue 3 via `vue-codemod`, JS -> TypeScript bootstrap via `tsc --allowJs --declaration`, Flow-annotated JS -> TypeScript via `flow-to-ts`.
-- **dicomrt** — DICOM-RT (radiation therapy) decoder extending `dicomkit`/`medkit`: RTSTRUCT structure-set ROI table -> CSV/JSON with full contour data, RTPLAN beam + control point + fraction sequence -> JSON, RTDOSE 3D dose grid -> NIfTI (.nii.gz) with proper spacing/origin via SimpleITK, dose-statistics probe (max/mean/Dx/Vx/p95/p99).
-- **ebookmore** — Niche / legacy ebook formats: FictionBook 2 (.fb2 Russian/Slavic ecosystem) -> HTML / plain text via stdlib XML walker, PalmDoc TEXt/REAd PDB -> plain text via custom LZ77-style decompressor, .pdb header probe distinguishing PalmDoc / iSilo / Mobi6, Calibre `ebook-convert` fallback for LRF/TPZ/PRC.
-- **bus** — Automotive / industrial bus database: DBC (Vector CAN) parser handling BO_/SG_/VAL_ keywords -> JSON / per-signal CSV (no cantools required), AUTOSAR ARXML quick probe (package + ECU count), SocketCAN candump trace -> CSV (timestamp/iface/id/len/payload), built-in OBD-II PID reference dictionary.
-- **iata** — IATA airline messaging: NDC v17.2/v21.3 (AirShoppingRQ/RS, OfferPriceRQ/RS, OrderCreateRQ/RS, OrderViewRS, ItinReshopRQ/RS, ServiceListRS, SeatAvailabilityRQ/RS) XML -> structured JSON via stdlib XML walker, NDC type/version detection, legacy line-based PNR -> JSON, built-in IATA airport (39 codes) + airline (34 codes) reference data.
-- **mobilephotos** — Mobile photo-library exports: Google Takeout Photos directory walker pairs each image with its sidecar `*.json` -> CSV manifest + selective EXIF/mtime re-injection, Apple `.photoslibrary` SQLite probe (handles ZASSET / ZGENERICASSET schema variations), Android MediaStore `.db` SQLite -> CSV (auto-detects images/media table), iOS `.ips` diagnostic archive (header JSON + body JSON) -> JSON.
-- **taxkit** — Tax / accounting interchange: Swedish SIE 4 (BAS chart of accounts via `#KONTO` + voucher `#VER` / `#TRANS` lines, latin-1 encoded) -> CSV / JSON, DATEV German accounting CP1252 CSV with semicolon separator -> normalized UTF-8 CSV, IFX (Interactive Financial Exchange) XML -> JSON via generic walker, ELSTER tax filing XML probe (Verfahren / DatenArt / tax period detection).
-- **datakitmore** — Niche data formats (extends `datakit`): EDN (Clojure's Extensible Data Notation), KDL (Cuddly Data Language) line-oriented parser, JSON5 (relaxed JSON with comments + trailing commas) via regex strip-down fallback when `json5` lib missing, HJSON (Human JSON), RON (Rusty Object Notation) regex transform, NestedText round-trip with JSON.
-- **diagrammore** — Niche diagrams (extends `diagram`): GraphML (yEd / Cytoscape) -> JSON nodes+edges + SVG via Graphviz `dot` shellout, Freemind .mm mind maps -> Markdown bullet outline / OPML, Lucidchart `.lcc` bundle extract.
-- **bgpkit** — BGP / RPKI routing telemetry: MRT TABLE_DUMP_V2 RIB (RFC 6396) via `mrtparse` -> CSV (prefix/next_hop/AS_PATH/origin/MED/local_pref/community) / JSON, BIRD `birdc show route` text output -> CSV, RPKI ROA dump normalization (handles RIPE / Cloudflare / NLnet column variants).
-- **sdrkit** — Software-Defined Radio IQ format conversion: RTL-SDR `.cu8` (unsigned 8-bit) -> HackRF `.cs16` (signed 16-bit) -> GNU Radio `.cf32` (32-bit float) round-trip via stdlib struct + 1 MiB chunked I/O (no OOM on multi-GB captures), IQ-stream statistics (mean/min/max/RMS for I and Q), SigMF `.sigmf-meta` probe.
-- **comicmeta** — Comic Rack ComicInfo.xml metadata for CBZ libraries: bulk read across CBZ collection -> CSV manifest with all 32 ComicInfo fields, inject ComicInfo.xml into existing CBZ files (preserves all other contents), CSV-driven bulk-edit (read manifest, edit, write back), scrub strips ComicInfo.xml + ComicBookInfo JSON.
+- **srctranspile**: Cross-language source code transpilation: Python 2 -> Python 3 via stdlib lib2to3 (no install required), CoffeeScript -> JS via npm `coffee` CLI, Vue 2 SFC -> Vue 3 via `vue-codemod`, JS -> TypeScript bootstrap via `tsc --allowJs --declaration`, Flow-annotated JS -> TypeScript via `flow-to-ts`.
+- **dicomrt**: DICOM-RT (radiation therapy) decoder extending `dicomkit`/`medkit`: RTSTRUCT structure-set ROI table -> CSV/JSON with full contour data, RTPLAN beam + control point + fraction sequence -> JSON, RTDOSE 3D dose grid -> NIfTI (.nii.gz) with proper spacing/origin via SimpleITK, dose-statistics probe (max/mean/Dx/Vx/p95/p99).
+- **ebookmore**: Niche / legacy ebook formats: FictionBook 2 (.fb2 Russian/Slavic ecosystem) -> HTML / plain text via stdlib XML walker, PalmDoc TEXt/REAd PDB -> plain text via custom LZ77-style decompressor, .pdb header probe distinguishing PalmDoc / iSilo / Mobi6, Calibre `ebook-convert` fallback for LRF/TPZ/PRC.
+- **bus**: Automotive / industrial bus database: DBC (Vector CAN) parser handling BO_/SG_/VAL_ keywords -> JSON / per-signal CSV (no cantools required), AUTOSAR ARXML quick probe (package + ECU count), SocketCAN candump trace -> CSV (timestamp/iface/id/len/payload), built-in OBD-II PID reference dictionary.
+- **iata**: IATA airline messaging: NDC v17.2/v21.3 (AirShoppingRQ/RS, OfferPriceRQ/RS, OrderCreateRQ/RS, OrderViewRS, ItinReshopRQ/RS, ServiceListRS, SeatAvailabilityRQ/RS) XML -> structured JSON via stdlib XML walker, NDC type/version detection, legacy line-based PNR -> JSON, built-in IATA airport (39 codes) + airline (34 codes) reference data.
+- **mobilephotos**: Mobile photo-library exports: Google Takeout Photos directory walker pairs each image with its sidecar `*.json` -> CSV manifest + selective EXIF/mtime re-injection, Apple `.photoslibrary` SQLite probe (handles ZASSET / ZGENERICASSET schema variations), Android MediaStore `.db` SQLite -> CSV (auto-detects images/media table), iOS `.ips` diagnostic archive (header JSON + body JSON) -> JSON.
+- **taxkit**: Tax / accounting interchange: Swedish SIE 4 (BAS chart of accounts via `#KONTO` + voucher `#VER` / `#TRANS` lines, latin-1 encoded) -> CSV / JSON, DATEV German accounting CP1252 CSV with semicolon separator -> normalized UTF-8 CSV, IFX (Interactive Financial Exchange) XML -> JSON via generic walker, ELSTER tax filing XML probe (Verfahren / DatenArt / tax period detection).
+- **datakitmore**: Niche data formats (extends `datakit`): EDN (Clojure's Extensible Data Notation), KDL (Cuddly Data Language) line-oriented parser, JSON5 (relaxed JSON with comments + trailing commas) via regex strip-down fallback when `json5` lib missing, HJSON (Human JSON), RON (Rusty Object Notation) regex transform, NestedText round-trip with JSON.
+- **diagrammore**: Niche diagrams (extends `diagram`): GraphML (yEd / Cytoscape) -> JSON nodes+edges + SVG via Graphviz `dot` shellout, Freemind .mm mind maps -> Markdown bullet outline / OPML, Lucidchart `.lcc` bundle extract.
+- **bgpkit**: BGP / RPKI routing telemetry: MRT TABLE_DUMP_V2 RIB (RFC 6396) via `mrtparse` -> CSV (prefix/next_hop/AS_PATH/origin/MED/local_pref/community) / JSON, BIRD `birdc show route` text output -> CSV, RPKI ROA dump normalization (handles RIPE / Cloudflare / NLnet column variants).
+- **sdrkit**: Software-Defined Radio IQ format conversion: RTL-SDR `.cu8` (unsigned 8-bit) -> HackRF `.cs16` (signed 16-bit) -> GNU Radio `.cf32` (32-bit float) round-trip via stdlib struct + 1 MiB chunked I/O (no OOM on multi-GB captures), IQ-stream statistics (mean/min/max/RMS for I and Q), SigMF `.sigmf-meta` probe.
+- **comicmeta**: Comic Rack ComicInfo.xml metadata for CBZ libraries: bulk read across CBZ collection -> CSV manifest with all 32 ComicInfo fields, inject ComicInfo.xml into existing CBZ files (preserves all other contents), CSV-driven bulk-edit (read manifest, edit, write back), scrub strips ComicInfo.xml + ComicBookInfo JSON.
 
-### Added — 28 new presets
+### Added: 28 new presets
 
 `py2-to-py3`, `coffee-to-js`, `js-to-ts`, `rtstruct-to-csv`, `rtdose-to-nifti`, `rtplan-to-json`, `fb2-to-html`, `fb2-to-text`, `palmdoc-to-text`, `dbc-to-json`, `dbc-to-csv`, `candump-to-csv`, `ndc-to-json`, `takeout-list`, `sie-to-csv`, `datev-to-csv`, `edn-to-json`, `kdl-to-json`, `json5-to-json`, `graphml-to-svg`, `graphml-to-json`, `freemind-to-md`, `mrt-rib-to-csv`, `rpki-roa-fix`, `cu8-to-cs16`, `cs16-to-cf32`, `comicinfo-read`, `comicinfo-scrub`.
 
@@ -604,20 +623,20 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.17.0] - 2026-05-01
 
-### Added — 10 new pure-format conversion sidecars (Specialty Engineering + Wire / Network / Music / Sci)
+### Added: 10 new pure-format conversion sidecars (Specialty Engineering + Wire / Network / Music / Sci)
 
-- **wells** — Oil & gas well-log conversion: LAS 2.0/3.0 (CWLS Log ASCII Standard) parser handles section headers (~V/~W/~C/~P/~A) without lasio, plus DLIS binary read via dlisio. Outputs CSV (curves + units row) / JSON (full sections) / LAS round-trip from CSV.
-- **datawire** — Schema-driven binary wire format conversion (extends `wirefmt`): Protocol Buffers binary <-> text-format via protoc CLI shellout, Apache Avro Object Container Format <-> JSON via fastavro, Apache Thrift IDL symbol introspection, FlatBuffers .fbs schema introspection.
-- **wirelesskit** — NMEA 0183 GPS sentences (GGA/RMC/GLL/VTG/GSA/GSV) -> JSON / CSV / KML LineString track / GPX trkpt track. Plus AIS marine tracking (!AIVDM/!AIVDO) decode via pyais. Pure stdlib NMEA parser with checksum validation.
-- **iac** — Infrastructure-as-Code translation: Docker Compose v1 -> v3 (links to depends_on, volumes_from drop, log_driver to logging.driver), CloudFormation YAML <-> JSON (intrinsic-function aware !Ref/!Sub/!GetAtt), Terraform plan JSON -> create/update/delete/replace/no-op summary, Helm template + Kustomize build shellouts.
-- **bed** — Genome interval format conversion: BED3/BED6/BED12 + ENCODE narrowPeak/broadPeak/gappedPeak round-trip + GFF3/GTF -> BED6 (1-based -> 0-based coordinate translation, gene_id/transcript_id pulled from attributes) + bigBed <-> BED via UCSC bigBedToBed/bedToBigBed CLI.
-- **swiftmx** — SWIFT MX (ISO 20022 XML banking) message decoder. Handles pacs.* / pain.* / camt.* / setr.* / remt.* families. Detects family + version from xmlns. Pure stdlib XML walk -> JSON. SEPA pain.001 Credit Transfer -> CSV (EndToEndId/Amount/Currency/Creditor/IBAN/BIC/RemittanceInfo). camt.053 statement entries -> CSV (BookingDate/ValueDate/Amount/CdtDbtInd/BankRef).
-- **musicmore** — Notation conversion (extends `music`): LilyPond .ly -> PDF/SVG/MIDI via lilypond CLI, MusicXML -> LilyPond via musicxml2ly, LilyPond -> MusicXML via MIDI roundtrip + music21, MuseScore .mscz -> MIDI/PDF via mscore CLI.
-- **playlistmore** — Playlist format extras (extends `playlist`): iTunes Library.xml plist -> M3U (whole library + per-playlist subset) + normalized JSON with track metadata + Spotify export JSON/CSV (exportify-style) -> M3U (with #EXTINF) + normalized CSV.
-- **netflowkit** — Network flow telemetry decoder: NetFlow v5 fixed-width PDU parser (24-byte header + 48-byte records), NetFlow v9 + IPFIX (v10) template-aware parser maintaining template cache across flowsets, IPv4/IPv6 address decoding via ipaddress module, IANA IPFIX field names. Pure stdlib.
-- **proteomics** — Mass-spectrometry / proteomics format conversion: mzML (HUPO-PSI XML standard) -> JSON / CSV with base64-encoded m/z + intensity arrays decoded via struct (32/64-bit float, optional zlib compression), mzXML (older ISB format), MGF (Mascot Generic Format) line-based parser. Pure stdlib (xml.etree).
+- **wells**: Oil & gas well-log conversion: LAS 2.0/3.0 (CWLS Log ASCII Standard) parser handles section headers (~V/~W/~C/~P/~A) without lasio, plus DLIS binary read via dlisio. Outputs CSV (curves + units row) / JSON (full sections) / LAS round-trip from CSV.
+- **datawire**: Schema-driven binary wire format conversion (extends `wirefmt`): Protocol Buffers binary <-> text-format via protoc CLI shellout, Apache Avro Object Container Format <-> JSON via fastavro, Apache Thrift IDL symbol introspection, FlatBuffers .fbs schema introspection.
+- **wirelesskit**: NMEA 0183 GPS sentences (GGA/RMC/GLL/VTG/GSA/GSV) -> JSON / CSV / KML LineString track / GPX trkpt track. Plus AIS marine tracking (!AIVDM/!AIVDO) decode via pyais. Pure stdlib NMEA parser with checksum validation.
+- **iac**: Infrastructure-as-Code translation: Docker Compose v1 -> v3 (links to depends_on, volumes_from drop, log_driver to logging.driver), CloudFormation YAML <-> JSON (intrinsic-function aware !Ref/!Sub/!GetAtt), Terraform plan JSON -> create/update/delete/replace/no-op summary, Helm template + Kustomize build shellouts.
+- **bed**: Genome interval format conversion: BED3/BED6/BED12 + ENCODE narrowPeak/broadPeak/gappedPeak round-trip + GFF3/GTF -> BED6 (1-based -> 0-based coordinate translation, gene_id/transcript_id pulled from attributes) + bigBed <-> BED via UCSC bigBedToBed/bedToBigBed CLI.
+- **swiftmx**: SWIFT MX (ISO 20022 XML banking) message decoder. Handles pacs.* / pain.* / camt.* / setr.* / remt.* families. Detects family + version from xmlns. Pure stdlib XML walk -> JSON. SEPA pain.001 Credit Transfer -> CSV (EndToEndId/Amount/Currency/Creditor/IBAN/BIC/RemittanceInfo). camt.053 statement entries -> CSV (BookingDate/ValueDate/Amount/CdtDbtInd/BankRef).
+- **musicmore**: Notation conversion (extends `music`): LilyPond .ly -> PDF/SVG/MIDI via lilypond CLI, MusicXML -> LilyPond via musicxml2ly, LilyPond -> MusicXML via MIDI roundtrip + music21, MuseScore .mscz -> MIDI/PDF via mscore CLI.
+- **playlistmore**: Playlist format extras (extends `playlist`): iTunes Library.xml plist -> M3U (whole library + per-playlist subset) + normalized JSON with track metadata + Spotify export JSON/CSV (exportify-style) -> M3U (with #EXTINF) + normalized CSV.
+- **netflowkit**: Network flow telemetry decoder: NetFlow v5 fixed-width PDU parser (24-byte header + 48-byte records), NetFlow v9 + IPFIX (v10) template-aware parser maintaining template cache across flowsets, IPv4/IPv6 address decoding via ipaddress module, IANA IPFIX field names. Pure stdlib.
+- **proteomics**: Mass-spectrometry / proteomics format conversion: mzML (HUPO-PSI XML standard) -> JSON / CSV with base64-encoded m/z + intensity arrays decoded via struct (32/64-bit float, optional zlib compression), mzXML (older ISB format), MGF (Mascot Generic Format) line-based parser. Pure stdlib (xml.etree).
 
-### Added — 28 new presets
+### Added: 28 new presets
 
 `las-to-csv`, `las-to-json`, `dlis-to-csv`, `avro-to-json`, `thrift-list-types`, `fbs-list-types`, `nmea-to-gpx`, `nmea-to-kml`, `ais-to-json`, `compose-upgrade`, `cfn-yaml-to-json`, `cfn-json-to-yaml`, `tf-plan-summary`, `bed-to-csv`, `gff-to-bed`, `gtf-to-bed`, `bigbed-to-bed`, `swift-mx-to-json`, `sepa-pain-to-csv`, `camt-statement-to-csv`, `lilypond-to-pdf`, `lilypond-to-midi`, `musicxml-to-lilypond`, `itunes-library-to-m3u`, `itunes-library-to-json`, `spotify-to-m3u`, `netflow-v5-to-json`, `ipfix-to-json`, `mzml-to-csv`, `mzml-to-json`, `mgf-to-json`.
 
@@ -629,22 +648,22 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.16.0] - 2026-05-01
 
-### Added — 12 new pure-format conversion sidecars (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
+### Added: 12 new pure-format conversion sidecars (Email + Messaging + Calendar + Subtitles + Specialty Enterprise)
 
-- **emailpro** — Specialty email format conversion (extends `mailbox`): Outlook .msg via extract-msg → .eml or HTML, Apple Mail .emlx (length-prefix stripping) → .eml, and `thread-mbox` to bundle a directory of .eml files into a single .mbox.
-- **messaging** — Chat / messenger export normalization: Telegram JSON, Discord JSON, Slack workspace ZIP, iMessage chat.db SQLite, WhatsApp text export. Normalized `Message` dataclass per platform → CSV / JSON / browseable HTML.
-- **calmore** — Calendar + address-book extras (extends `calconvert`): Apple `.icbu` calendar-backup unpack, Google Takeout calendar JSON → ICS via icalendar lib, LDIF address books → vCard 3.0, Outlook CSV contacts → vCard 3.0.
-- **subextra** — Subtitle format extras (extends `subkit` / `subocr`): CEA-608 / 708 closed captions via ccextractor CLI shellout, Apple iTunes Timed Text (.itt) → SRT / VTT, ASS karaoke → LRC lyrics (strips `\kNN` tags).
-- **edi** — EDI X12 (US healthcare / supply chain / banking) and EDIFACT (international supply chain) → hierarchical JSON / per-segment CSV. Pure stdlib parser handles ISA / UNA delimiter declarations and EDIFACT release-character escaping.
-- **swift** — SWIFT MT (banking) message decoder: parses {1:...}{2:...}{3:...}{4:...}{5:...} block envelope, extracts message type from block 2, walks block-4 fields by `:TAG:` boundaries → JSON / per-field CSV.
-- **asn1** — ASN.1 BER / DER / PEM converter: structural TLV walk produces JSON tree (handles X.509 / PKCS#7 / CMS / SNMP / Kerberos blobs), human-readable universal tag names, OID dotted-decimal decoding, PEM ↔ DER round-trip.
-- **mobile** — Mobile-device backup decoder: iTunes / Finder iOS backup inventory via Manifest.db SQLite + selective extract by relativePath substring; Android adb backup (.ab) → plain tar via DEFLATE strip.
-- **dbsql** — SQL dialect translation via `sqlglot`: MySQL / Postgres / SQL Server / Oracle / SQLite / BigQuery / Snowflake / DuckDB / ClickHouse / Spark / Hive / Redshift / Databricks / Presto / Trino round-trip + format + AST dump.
-- **spreadsheet** — Legacy spreadsheet conversion via LibreOffice headless: Lotus 1-2-3 (.wk1/.wk3/.wk4/.123), Quattro Pro (.wq1/.wq2/.qpw), Gnumeric, StarOffice .sxc, AppleWorks .cwk → XLSX / ODS / CSV.
-- **colorfmt** — Color-format converter: hex (#RRGGBB[AA]) ↔ RGB ↔ HSL ↔ HSV ↔ CMYK ↔ CIE Lab (D65) ↔ CSS named (147 colors). Outputs CSV / JSON / CSS custom-property block. Pure stdlib (sRGB↔linear↔XYZ↔Lab math inline).
-- **gameasset** — Game-engine asset container reader: Quake .pak (id Software), Doom .wad (IWAD/PWAD), Valve VPK v1/v2 (Source / GoldSrc), Godot .pck, ZIP-style .pk3 / .pk4 / .bsa. List manifest → JSON, extract → directory tree.
+- **emailpro**: Specialty email format conversion (extends `mailbox`): Outlook .msg via extract-msg → .eml or HTML, Apple Mail .emlx (length-prefix stripping) → .eml, and `thread-mbox` to bundle a directory of .eml files into a single .mbox.
+- **messaging**: Chat / messenger export normalization: Telegram JSON, Discord JSON, Slack workspace ZIP, iMessage chat.db SQLite, WhatsApp text export. Normalized `Message` dataclass per platform → CSV / JSON / browseable HTML.
+- **calmore**: Calendar + address-book extras (extends `calconvert`): Apple `.icbu` calendar-backup unpack, Google Takeout calendar JSON → ICS via icalendar lib, LDIF address books → vCard 3.0, Outlook CSV contacts → vCard 3.0.
+- **subextra**: Subtitle format extras (extends `subkit` / `subocr`): CEA-608 / 708 closed captions via ccextractor CLI shellout, Apple iTunes Timed Text (.itt) → SRT / VTT, ASS karaoke → LRC lyrics (strips `\kNN` tags).
+- **edi**: EDI X12 (US healthcare / supply chain / banking) and EDIFACT (international supply chain) → hierarchical JSON / per-segment CSV. Pure stdlib parser handles ISA / UNA delimiter declarations and EDIFACT release-character escaping.
+- **swift**: SWIFT MT (banking) message decoder: parses {1:...}{2:...}{3:...}{4:...}{5:...} block envelope, extracts message type from block 2, walks block-4 fields by `:TAG:` boundaries → JSON / per-field CSV.
+- **asn1**: ASN.1 BER / DER / PEM converter: structural TLV walk produces JSON tree (handles X.509 / PKCS#7 / CMS / SNMP / Kerberos blobs), human-readable universal tag names, OID dotted-decimal decoding, PEM ↔ DER round-trip.
+- **mobile**: Mobile-device backup decoder: iTunes / Finder iOS backup inventory via Manifest.db SQLite + selective extract by relativePath substring; Android adb backup (.ab) → plain tar via DEFLATE strip.
+- **dbsql**: SQL dialect translation via `sqlglot`: MySQL / Postgres / SQL Server / Oracle / SQLite / BigQuery / Snowflake / DuckDB / ClickHouse / Spark / Hive / Redshift / Databricks / Presto / Trino round-trip + format + AST dump.
+- **spreadsheet**: Legacy spreadsheet conversion via LibreOffice headless: Lotus 1-2-3 (.wk1/.wk3/.wk4/.123), Quattro Pro (.wq1/.wq2/.qpw), Gnumeric, StarOffice .sxc, AppleWorks .cwk → XLSX / ODS / CSV.
+- **colorfmt**: Color-format converter: hex (#RRGGBB[AA]) ↔ RGB ↔ HSL ↔ HSV ↔ CMYK ↔ CIE Lab (D65) ↔ CSS named (147 colors). Outputs CSV / JSON / CSS custom-property block. Pure stdlib (sRGB↔linear↔XYZ↔Lab math inline).
+- **gameasset**: Game-engine asset container reader: Quake .pak (id Software), Doom .wad (IWAD/PWAD), Valve VPK v1/v2 (Source / GoldSrc), Godot .pck, ZIP-style .pk3 / .pk4 / .bsa. List manifest → JSON, extract → directory tree.
 
-### Added — 22 new presets
+### Added: 22 new presets
 
 `msg-to-eml`, `msg-to-html`, `emlx-to-eml`, `messaging-to-csv`, `messaging-to-json`, `messaging-to-html`, `icbu-extract`, `google-takeout-to-ics`, `ldif-to-vcard`, `outlook-csv-to-vcard`, `cea608-to-srt`, `itt-to-srt`, `itt-to-vtt`, `ass-to-lrc`, `edi-x12-to-json`, `edi-x12-to-csv`, `swift-mt-to-json`, `swift-mt-to-csv`, `asn1-to-json`, `ab-to-tar`, `sql-mysql-to-postgres`, `sql-postgres-to-bigquery`, `sql-tsql-to-snowflake`, `lotus-to-xlsx`, `lotus-to-ods`, `colors-expand`, `colors-to-css`, `game-asset-list`, `game-asset-extract`.
 
@@ -656,17 +675,17 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.15.0] - 2026-05-01
 
-### Added — 7 new pure-format conversion sidecars (Healthcare + Finance + Engineering + Wire)
+### Added: 7 new pure-format conversion sidecars (Healthcare + Finance + Engineering + Wire)
 
-- **hl7** — HL7 healthcare messaging conversion. `v2-to-json` parses HL7 v2 pipe-delimited messages into structured JSON honouring all five delimiters (field / component / repetition / escape / subcomponent). `json-to-v2` re-emits cleanly. `fhir-to-xml` and `fhir-to-json` round-trip FHIR R4 / R5 resources. All pure stdlib (no fhir.resources / hl7apy dependency).
-- **finance** — Personal finance / accounting interchange: OFX / QFX (Quicken / banks) via ofxparse, QIF (Quicken Interchange) via custom parser, IIF (QuickBooks Desktop) tab-delimited, MT940 / MT942 (European banking) via mt-940. Normalized Transaction record (date / amount / payee / memo / category / account / type / fitid). Outputs CSV / JSON / QIF.
-- **cadmore** — 3D-printing / additive-manufacturing CAD: STL / OBJ / PLY / GLB / GLTF / DAE / OFF mutual conversion + 3MF (3D Manufacturing Format ZIP-based) + AMF (Additive Manufacturing Format XML). Custom 3MF emitter writes `[Content_Types].xml` + `_rels/.rels` + `3D/3dmodel.model`. `gcode-info` op probes G-code line / layer count + extrusion / travel mm + max Z height.
-- **genome** — Genomics binary formats: VCF <-> BCF round-trip via pysam, BGZF (block-gzip) compress / decompress, tabix .tbi index generation for VCF / GFF / BED / SAM, ENCODE narrowPeak / broadPeak / gappedPeak -> BED6.
-- **gistiles** — GIS raster + tile-pyramid conversion: GeoTIFF -> Cloud Optimized GeoTIFF via `gdal_translate -of COG`, KMZ -> KML + assets (zip extract), KML -> KMZ (zip), MBTiles SQLite metadata probe, PMTiles header probe.
-- **imgmore** — Niche image conversion (extends `rasterimg`): JBIG2 (.jb2) via jbig2dec, Mac PICT / Amiga IFF / Atari Degas via ImageMagick, Adobe layered TIFF preserved via tifffile (one PNG per IFD page).
-- **wirefmt** — Binary wire-format conversion: CBOR (RFC 8949) / MessagePack / BSON (MongoDB) / Apache Ion <-> JSON. Decodes from any of the four to JSON, encodes JSON to any of the four. Handles bytes / dates safely through round-trip.
+- **hl7**: HL7 healthcare messaging conversion. `v2-to-json` parses HL7 v2 pipe-delimited messages into structured JSON honouring all five delimiters (field / component / repetition / escape / subcomponent). `json-to-v2` re-emits cleanly. `fhir-to-xml` and `fhir-to-json` round-trip FHIR R4 / R5 resources. All pure stdlib (no fhir.resources / hl7apy dependency).
+- **finance**: Personal finance / accounting interchange: OFX / QFX (Quicken / banks) via ofxparse, QIF (Quicken Interchange) via custom parser, IIF (QuickBooks Desktop) tab-delimited, MT940 / MT942 (European banking) via mt-940. Normalized Transaction record (date / amount / payee / memo / category / account / type / fitid). Outputs CSV / JSON / QIF.
+- **cadmore**: 3D-printing / additive-manufacturing CAD: STL / OBJ / PLY / GLB / GLTF / DAE / OFF mutual conversion + 3MF (3D Manufacturing Format ZIP-based) + AMF (Additive Manufacturing Format XML). Custom 3MF emitter writes `[Content_Types].xml` + `_rels/.rels` + `3D/3dmodel.model`. `gcode-info` op probes G-code line / layer count + extrusion / travel mm + max Z height.
+- **genome**: Genomics binary formats: VCF <-> BCF round-trip via pysam, BGZF (block-gzip) compress / decompress, tabix .tbi index generation for VCF / GFF / BED / SAM, ENCODE narrowPeak / broadPeak / gappedPeak -> BED6.
+- **gistiles**: GIS raster + tile-pyramid conversion: GeoTIFF -> Cloud Optimized GeoTIFF via `gdal_translate -of COG`, KMZ -> KML + assets (zip extract), KML -> KMZ (zip), MBTiles SQLite metadata probe, PMTiles header probe.
+- **imgmore**: Niche image conversion (extends `rasterimg`): JBIG2 (.jb2) via jbig2dec, Mac PICT / Amiga IFF / Atari Degas via ImageMagick, Adobe layered TIFF preserved via tifffile (one PNG per IFD page).
+- **wirefmt**: Binary wire-format conversion: CBOR (RFC 8949) / MessagePack / BSON (MongoDB) / Apache Ion <-> JSON. Decodes from any of the four to JSON, encodes JSON to any of the four. Handles bytes / dates safely through round-trip.
 
-### Added — 14 new presets
+### Added: 14 new presets
 
 `hl7-v2-to-json`, `fhir-json-to-xml`, `ofx-to-csv`, `finance-to-qif`, `stl-to-3mf`, `stl-to-amf`, `vcf-to-bcf`, `bcf-to-vcf`, `geotiff-to-cog`, `kmz-to-kml`, `jbig2-to-png`, `cbor-to-json`, `msgpack-to-json`, `bson-to-json`, `json-to-cbor`.
 
@@ -678,17 +697,17 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.14.0] - 2026-05-01
 
-### Added — 7 new pure-format conversion sidecars (Streaming + Crypto + Niche A/V)
+### Added: 7 new pure-format conversion sidecars (Streaming + Crypto + Niche A/V)
 
-- **videopro** — Specialty video container conversion: DVD VOB / EVO / Blu-ray MTS / M2TS / TS / DV / DIF / 3GP / 3G2 / F4V / SWF / Y4M / IVF + AVS / AVS2. `extract-bitstream` op pulls raw H.264 / H.265 / AV1 / VP9 elementary streams from any container.
-- **streaming** — Adaptive streaming manifests: MP4 → HLS (.m3u8 + .ts) and MP4 → DASH (.mpd + .m4s) via FFmpeg or shaka-packager. `to-mp4` op assembles a single MP4 from any HLS / DASH manifest.
-- **imageseq** — VFX image-sequence ↔ video conversion. `encode` takes a DPX / Cineon / OpenEXR / PNG / TIFF / JPEG sequence and produces ProRes 422 / 422 HQ / 4444 / DNxHR HQ / SQ / H.264 / H.265 / AV1 / FFV1 / raw video. `decode` extracts frames from any video as PNG / JPG / TIFF / EXR / DPX with optional FPS override.
-- **chiptune** — Retro game-music renderer: NSF / NSFE (NES), SPC (SNES), VGM / VGZ (multi-system), GBS (Game Boy), HES (PCEngine), KSS (MSX), GYM (Genesis), AY (ZX Spectrum), SID (C64). Backed by `game-music-emu` Python binding + `sidplayfp` for SID. Renders to WAV / FLAC / MP3 / OGG / Opus.
-- **audiomore** — Long-tail audio codec conversion (extends `audiopro`): AIFF / AIFC / IFF-8SVX / Apple CAF / G.711 ulaw / alaw / DTS / DTS-HD MA / Dolby TrueHD / MLP / HE-AAC v2 / xHE-AAC.
-- **gpgkit** — OpenPGP / GnuPG armor codec. `armor` op wraps any binary `.gpg`/`.pgp` blob in RFC 4880 ASCII armor with proper CRC-24, `dearmor` op reverses it. `key-info` op shells out to `gpg` to probe fingerprints + user IDs.
-- **wallet** — Read-only crypto wallet metadata. `bip39-check` validates a BIP39 mnemonic phrase + checksum. `keystore-info` decodes Ethereum keystore JSON v3 header (cipher / KDF / address) without ever exposing the private key. `descriptor` parses Bitcoin output descriptors (`wpkh(...)`, `tr(...)`, `multi(...)`). `psbt-decode` heuristically counts inputs / outputs of a Partially Signed Bitcoin Transaction. **Never** decodes private keys, never signs.
+- **videopro**: Specialty video container conversion: DVD VOB / EVO / Blu-ray MTS / M2TS / TS / DV / DIF / 3GP / 3G2 / F4V / SWF / Y4M / IVF + AVS / AVS2. `extract-bitstream` op pulls raw H.264 / H.265 / AV1 / VP9 elementary streams from any container.
+- **streaming**: Adaptive streaming manifests: MP4 → HLS (.m3u8 + .ts) and MP4 → DASH (.mpd + .m4s) via FFmpeg or shaka-packager. `to-mp4` op assembles a single MP4 from any HLS / DASH manifest.
+- **imageseq**: VFX image-sequence ↔ video conversion. `encode` takes a DPX / Cineon / OpenEXR / PNG / TIFF / JPEG sequence and produces ProRes 422 / 422 HQ / 4444 / DNxHR HQ / SQ / H.264 / H.265 / AV1 / FFV1 / raw video. `decode` extracts frames from any video as PNG / JPG / TIFF / EXR / DPX with optional FPS override.
+- **chiptune**: Retro game-music renderer: NSF / NSFE (NES), SPC (SNES), VGM / VGZ (multi-system), GBS (Game Boy), HES (PCEngine), KSS (MSX), GYM (Genesis), AY (ZX Spectrum), SID (C64). Backed by `game-music-emu` Python binding + `sidplayfp` for SID. Renders to WAV / FLAC / MP3 / OGG / Opus.
+- **audiomore**: Long-tail audio codec conversion (extends `audiopro`): AIFF / AIFC / IFF-8SVX / Apple CAF / G.711 ulaw / alaw / DTS / DTS-HD MA / Dolby TrueHD / MLP / HE-AAC v2 / xHE-AAC.
+- **gpgkit**: OpenPGP / GnuPG armor codec. `armor` op wraps any binary `.gpg`/`.pgp` blob in RFC 4880 ASCII armor with proper CRC-24, `dearmor` op reverses it. `key-info` op shells out to `gpg` to probe fingerprints + user IDs.
+- **wallet**: Read-only crypto wallet metadata. `bip39-check` validates a BIP39 mnemonic phrase + checksum. `keystore-info` decodes Ethereum keystore JSON v3 header (cipher / KDF / address) without ever exposing the private key. `descriptor` parses Bitcoin output descriptors (`wpkh(...)`, `tr(...)`, `multi(...)`). `psbt-decode` heuristically counts inputs / outputs of a Partially Signed Bitcoin Transaction. **Never** decodes private keys, never signs.
 
-### Added — 12 new presets
+### Added: 12 new presets
 
 `vob-to-mp4`, `extract-h264`, `mp4-to-hls`, `mp4-to-dash`, `hls-to-mp4`, `seq-to-prores`, `video-to-png-seq`, `nsf-to-flac`, `aiff-to-flac`, `to-aiff`, `gpg-armor`, `gpg-dearmor`.
 
@@ -700,24 +719,24 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.13.0] - 2026-05-01
 
-### Added — 14 new pure-format conversion sidecars (Office + Diagrams + Sysadmin)
+### Added: 14 new pure-format conversion sidecars (Office + Diagrams + Sysadmin)
 
-- **legacyoffice** — WordPerfect (.wpd/.wpt/.wpg) / AmiPro (.sam) / Microsoft Works (.wps) / Microsoft Publisher (.pub) / StarOffice 1-5 (.sxw/.sxc/.sxi) / KOffice (.kwd) / AbiWord (.abw) / AppleWorks (.cwk) / MacWrite (.mw) -> PDF / DOCX / ODT / RTF / HTML / TXT via LibreOffice CLI.
-- **applepro** — Apple Pages / Numbers / Keynote (.pages/.numbers/.key) -> DOCX / XLSX / PPTX / PDF / ODT / RTF / HTML / TXT. LibreOffice path for older iWork; embedded `Preview.pdf` extraction fallback for modern (post-2013) bundles.
-- **hwpkit** — Korean Hangul HWP / HWPX -> PDF / DOCX / ODT / RTF / HTML / TXT. LibreOffice primary path; pyhwp text/HTML extraction fallback.
-- **diagram** — Render text-based and binary diagrams: Mermaid (.mmd) via mmdc, PlantUML (.puml) via plantuml.jar, Graphviz (.dot) via dot, Visio (.vsd/.vsdx) via LibreOffice + libvisio, draw.io (.drawio) via drawio CLI, Excalidraw (.excalidraw) via excalidraw-cli. Outputs SVG / PNG / PDF / HTML.
-- **playlist** — M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S / iTunes Library .xml mutual conversion. Normalizes track metadata (path/title/artist/album/length) through a unified intermediate; CSV + JSON output also supported.
-- **comic** — CBZ / CBR / CBT / CB7 mutual re-pack + CBZ-to-PDF (img2pdf) + CBZ-to-EPUB (EbookLib). RAR support via the rarfile package + unrar binary.
-- **notebooks** — Jupyter ipynb <-> py / md / Rmd / qmd / html / pdf / tex / rst / slides via nbconvert and jupytext. `execute` op runs notebook + saves outputs.
-- **helpkit** — Compiled HTML Help (.chm): `extract` op cracks open the bundle to a directory of HTML, `to-pdf` stitches the pages into a single PDF via weasyprint.
-- **tlskit** — X.509 certificate + key conversion: PEM <-> DER <-> PKCS#7 (.p7b) cert conversion, PKCS#12 (.p12 / .pfx) bundle extract + create, private key PEM <-> DER. `cert-info` op probes subject/issuer/validity/SAN/SHA-256+SHA-1 fingerprints.
-- **sshkit** — SSH key format conversion: OpenSSH <-> PKCS#8 PEM, PEM/OpenSSH <-> PuTTY .ppk (via puttygen), OpenSSH .pub -> RFC 4716 wrapped public key. Encrypted output supported via `--out-password`.
-- **timefmt** — Timestamp conversion: ISO 8601 / RFC 822 / Unix epoch (s + ms) / Excel serial date / Apple Cocoa epoch / Microsoft FILETIME / HFS+ / mainframe Julian / .NET ticks. `cron-explain` op shows next N runs + human-readable description for any cron expression.
-- **coordfmt** — Geographic coordinate conversion: DD <-> DMS <-> DDM <-> UTM <-> MGRS <-> Geohash <-> Plus Codes (Open Location Code). CSV bulk transform appends all representations as columns.
-- **config** — DevOps configuration formats: HCL (Terraform .tf / .hcl) / HOCON (Typesafe .conf) / Java .properties / INI (.ini/.cfg) / systemd unit files <-> JSON / YAML / TOML / properties / INI. Round-trips through normalized JSON middle representation.
-- **dnskit** — DNS zone file conversion: BIND zone (.zone/.db) <-> JSON / YAML / CSV via dnspython. `validate` op reports findings (missing SOA, missing NS, etc.). `emit` op rebuilds a BIND zone from JSON/YAML/CSV.
+- **legacyoffice**: WordPerfect (.wpd/.wpt/.wpg) / AmiPro (.sam) / Microsoft Works (.wps) / Microsoft Publisher (.pub) / StarOffice 1-5 (.sxw/.sxc/.sxi) / KOffice (.kwd) / AbiWord (.abw) / AppleWorks (.cwk) / MacWrite (.mw) -> PDF / DOCX / ODT / RTF / HTML / TXT via LibreOffice CLI.
+- **applepro**: Apple Pages / Numbers / Keynote (.pages/.numbers/.key) -> DOCX / XLSX / PPTX / PDF / ODT / RTF / HTML / TXT. LibreOffice path for older iWork; embedded `Preview.pdf` extraction fallback for modern (post-2013) bundles.
+- **hwpkit**: Korean Hangul HWP / HWPX -> PDF / DOCX / ODT / RTF / HTML / TXT. LibreOffice primary path; pyhwp text/HTML extraction fallback.
+- **diagram**: Render text-based and binary diagrams: Mermaid (.mmd) via mmdc, PlantUML (.puml) via plantuml.jar, Graphviz (.dot) via dot, Visio (.vsd/.vsdx) via LibreOffice + libvisio, draw.io (.drawio) via drawio CLI, Excalidraw (.excalidraw) via excalidraw-cli. Outputs SVG / PNG / PDF / HTML.
+- **playlist**: M3U / M3U8 / PLS / XSPF / WPL / ASX / B4S / iTunes Library .xml mutual conversion. Normalizes track metadata (path/title/artist/album/length) through a unified intermediate; CSV + JSON output also supported.
+- **comic**: CBZ / CBR / CBT / CB7 mutual re-pack + CBZ-to-PDF (img2pdf) + CBZ-to-EPUB (EbookLib). RAR support via the rarfile package + unrar binary.
+- **notebooks**: Jupyter ipynb <-> py / md / Rmd / qmd / html / pdf / tex / rst / slides via nbconvert and jupytext. `execute` op runs notebook + saves outputs.
+- **helpkit**: Compiled HTML Help (.chm): `extract` op cracks open the bundle to a directory of HTML, `to-pdf` stitches the pages into a single PDF via weasyprint.
+- **tlskit**: X.509 certificate + key conversion: PEM <-> DER <-> PKCS#7 (.p7b) cert conversion, PKCS#12 (.p12 / .pfx) bundle extract + create, private key PEM <-> DER. `cert-info` op probes subject/issuer/validity/SAN/SHA-256+SHA-1 fingerprints.
+- **sshkit**: SSH key format conversion: OpenSSH <-> PKCS#8 PEM, PEM/OpenSSH <-> PuTTY .ppk (via puttygen), OpenSSH .pub -> RFC 4716 wrapped public key. Encrypted output supported via `--out-password`.
+- **timefmt**: Timestamp conversion: ISO 8601 / RFC 822 / Unix epoch (s + ms) / Excel serial date / Apple Cocoa epoch / Microsoft FILETIME / HFS+ / mainframe Julian / .NET ticks. `cron-explain` op shows next N runs + human-readable description for any cron expression.
+- **coordfmt**: Geographic coordinate conversion: DD <-> DMS <-> DDM <-> UTM <-> MGRS <-> Geohash <-> Plus Codes (Open Location Code). CSV bulk transform appends all representations as columns.
+- **config**: DevOps configuration formats: HCL (Terraform .tf / .hcl) / HOCON (Typesafe .conf) / Java .properties / INI (.ini/.cfg) / systemd unit files <-> JSON / YAML / TOML / properties / INI. Round-trips through normalized JSON middle representation.
+- **dnskit**: DNS zone file conversion: BIND zone (.zone/.db) <-> JSON / YAML / CSV via dnspython. `validate` op reports findings (missing SOA, missing NS, etc.). `emit` op rebuilds a BIND zone from JSON/YAML/CSV.
 
-### Added — 25+ new presets
+### Added: 25+ new presets
 
 `wpd-to-pdf`, `pages-to-docx`, `numbers-to-xlsx`, `keynote-to-pptx`, `hwp-to-pdf`, `mermaid-to-svg`, `diagram-to-png`, `visio-to-pdf`, `playlist-to-m3u`, `playlist-to-xspf`, `comic-to-pdf`, `comic-to-epub`, `comic-to-cbz`, `ipynb-to-html`, `ipynb-to-md`, `py-to-ipynb`, `chm-extract`, `chm-to-pdf`, `cert-pem-to-der`, `cert-der-to-pem`, `pfx-extract`, `ssh-to-pem`, `ssh-to-ppk`, `hcl-to-json`, `properties-to-yaml`, `zone-to-json`.
 
@@ -729,20 +748,20 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.12.0] - 2026-05-01
 
-### Added — 10 new domain-specific raw-conversion sidecars
+### Added: 10 new domain-specific raw-conversion sidecars
 
-- **chemkit** — Chemistry / cheminformatics: SMILES, MOL, SDF, MOL2, PDB, XYZ, CIF, InChI mutual conversion via RDKit; falls back to Open Babel CLI for the broader format pool. `info` op probes molecular formula, MW, SMILES, InChI, ring count, heavy-atom count.
-- **biokit** — Bioinformatics: FASTA / FASTQ / GenBank / EMBL / Newick / Stockholm / Clustal / PHYLIP / NEXUS sequence + alignment conversion via Biopython. `fastq-stats` op for QC (read count, GC %, mean Phred Q, length distribution). `vcf-to-tsv` flattens VCF to tab-delimited. `bam-to-fastq` extracts reads from BAM/CRAM via pysam.
-- **medkit** — 3D medical / scientific imaging: NIfTI 1/2 (.nii, .nii.gz), Analyze 7.5, MetaImage (.mha/.mhd), NRRD, MINC, GIPL, VTK ImageData mutual conversion via SimpleITK. `to-png-stack` op renders every Z slice as a normalized PNG. `info` op reports dim / spacing / origin / dtype.
-- **netcap** — Network capture conversion: PCAP <-> PCAPNG via scapy. `to-csv` op flattens each packet into a CSV row (time / src / dst / protocol / port / summary).
-- **logkit** — Log file -> structured JSONL: Apache CLF / Combined / Nginx, syslog (RFC 3164 + RFC 5424), Windows Event Log .evtx (via python-evtx + xmltodict).
-- **rasterimg** — Niche raster image conversion: PCX, Truevision TGA, Cineon, DPX, SGI/RGB, Sun Raster, Wireless Bitmap (.wbmp), Photo CD (.pcd), Netpbm (.pbm/.pgm/.ppm), APNG, MNG (read), FLI/FLC (read), X PixMap (.xpm), XBM, Palm Pixmap. Handled via Pillow with smart mode coercion (auto-drop alpha for formats that lack it).
-- **morearchive** — Long-tail archive / package extraction: SIT/SITX (StuffIt via unar), LHA/LZH, ARJ, ZOO/HA/ARC (legacy DOS via unar), DEB/IPK (Debian), RPM (Red Hat via 7z + cpio), DMG (macOS, read-only via 7z), IPA (iOS), APK/XAPK/APKS (Android), MSIX/APPX (Windows modern app), NUPKG (NuGet). `info` op probes APK/IPA/MSIX manifests.
-- **bookmark** — Cross-browser bookmark conversion: Chromium (Chrome/Edge/Brave/Opera) JSON `Bookmarks` file, Firefox bookmark backup JSON, Safari .plist (binary), Opera classic .adr, Netscape HTML (de-facto export format), CSV / Pinboard / Diigo / Raindrop. Outputs Netscape HTML, CSV, or normalized JSON.
-- **engcad** — Engineering CAD: STEP (ISO 10303), IGES, BREP, STL, OBJ via pythonocc-core (Open CASCADE Technology BREP solid modeling kernel). Falls back to trimesh for mesh-only paths when pythonocc isn't available.
-- **animkit** — 3D animation / scene description: BVH (Biovision Hierarchy motion capture), Alembic (.abc), USD / USDA / USDC / USDZ (Pixar Universal Scene Description), FBX, glTF / GLB, VRM (VRoid), Collada (.dae). USD path via usd-core; FBX/Collada/Alembic via assimp CLI shellout.
+- **chemkit**: Chemistry / cheminformatics: SMILES, MOL, SDF, MOL2, PDB, XYZ, CIF, InChI mutual conversion via RDKit; falls back to Open Babel CLI for the broader format pool. `info` op probes molecular formula, MW, SMILES, InChI, ring count, heavy-atom count.
+- **biokit**: Bioinformatics: FASTA / FASTQ / GenBank / EMBL / Newick / Stockholm / Clustal / PHYLIP / NEXUS sequence + alignment conversion via Biopython. `fastq-stats` op for QC (read count, GC %, mean Phred Q, length distribution). `vcf-to-tsv` flattens VCF to tab-delimited. `bam-to-fastq` extracts reads from BAM/CRAM via pysam.
+- **medkit**: 3D medical / scientific imaging: NIfTI 1/2 (.nii, .nii.gz), Analyze 7.5, MetaImage (.mha/.mhd), NRRD, MINC, GIPL, VTK ImageData mutual conversion via SimpleITK. `to-png-stack` op renders every Z slice as a normalized PNG. `info` op reports dim / spacing / origin / dtype.
+- **netcap**: Network capture conversion: PCAP <-> PCAPNG via scapy. `to-csv` op flattens each packet into a CSV row (time / src / dst / protocol / port / summary).
+- **logkit**: Log file -> structured JSONL: Apache CLF / Combined / Nginx, syslog (RFC 3164 + RFC 5424), Windows Event Log .evtx (via python-evtx + xmltodict).
+- **rasterimg**: Niche raster image conversion: PCX, Truevision TGA, Cineon, DPX, SGI/RGB, Sun Raster, Wireless Bitmap (.wbmp), Photo CD (.pcd), Netpbm (.pbm/.pgm/.ppm), APNG, MNG (read), FLI/FLC (read), X PixMap (.xpm), XBM, Palm Pixmap. Handled via Pillow with smart mode coercion (auto-drop alpha for formats that lack it).
+- **morearchive**: Long-tail archive / package extraction: SIT/SITX (StuffIt via unar), LHA/LZH, ARJ, ZOO/HA/ARC (legacy DOS via unar), DEB/IPK (Debian), RPM (Red Hat via 7z + cpio), DMG (macOS, read-only via 7z), IPA (iOS), APK/XAPK/APKS (Android), MSIX/APPX (Windows modern app), NUPKG (NuGet). `info` op probes APK/IPA/MSIX manifests.
+- **bookmark**: Cross-browser bookmark conversion: Chromium (Chrome/Edge/Brave/Opera) JSON `Bookmarks` file, Firefox bookmark backup JSON, Safari .plist (binary), Opera classic .adr, Netscape HTML (de-facto export format), CSV / Pinboard / Diigo / Raindrop. Outputs Netscape HTML, CSV, or normalized JSON.
+- **engcad**: Engineering CAD: STEP (ISO 10303), IGES, BREP, STL, OBJ via pythonocc-core (Open CASCADE Technology BREP solid modeling kernel). Falls back to trimesh for mesh-only paths when pythonocc isn't available.
+- **animkit**: 3D animation / scene description: BVH (Biovision Hierarchy motion capture), Alembic (.abc), USD / USDA / USDC / USDZ (Pixar Universal Scene Description), FBX, glTF / GLB, VRM (VRoid), Collada (.dae). USD path via usd-core; FBX/Collada/Alembic via assimp CLI shellout.
 
-### Added — 19 new presets
+### Added: 19 new presets
 
 `smiles-to-sdf`, `mol-to-pdb`, `fasta-to-genbank`, `fastq-to-fasta`, `bam-to-fastq`, `nifti-to-png-stack`, `analyze-to-nifti`, `pcap-to-pcapng`, `pcap-to-csv`, `apache-log-to-jsonl`, `evtx-to-jsonl`, `tga-to-png`, `extract-niche-archive`, `bookmarks-to-html`, `bookmarks-to-csv`, `step-to-stl`, `step-to-iges`, `fbx-to-glb`, `usd-to-usdz`.
 
@@ -754,23 +773,23 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 
 ## [v2.11.0] - 2026-05-01
 
-### Added — 13 new pure-format conversion sidecars (no AI)
+### Added: 13 new pure-format conversion sidecars (no AI)
 
-- **psdkit sidecar** — Photoshop / GIMP layered images: PSD/PSB/XCF -> flatten to PNG/JPEG/TIFF/WebP/BMP, or extract every visible layer as its own PNG. `info` op for layer-tree probe.
-- **audiopro sidecar** — Niche audio codec conversion via FFmpeg: DSD (.dsf/.dff), APE, WavPack (.wv), TAK, TTA, ALAC, MLP/TrueHD, AC3, E-AC3, DTS, AMR/AMR-WB, SPEEX, GSM, WMA, MusePack, AU, VOC, Real Audio. `codecs` op probes which encoders the local FFmpeg has compiled in.
-- **subocr sidecar** — Bitmap subtitle OCR: Blu-ray PGS (.sup) + DVD VobSub (.idx/.sub) -> SRT via FFmpeg subtitle decoder + Tesseract OCR pipeline. Configurable language pack.
-- **subkit sidecar** — Text subtitle interchange beyond pysubs2: SAMI/SMI, TTML/DFXP, SCC (CEA-608 broadcast), EBU STL teletext, MicroDVD, JACoSub, LRC karaoke, SBV YouTube. Backed by pycaption + pysubs2.
-- **dbtools sidecar** — Database / statistical-format conversion: SQLite, MS Access (.mdb/.accdb via mdbtools shellout), dBase (.dbf), SAS XPORT/.sas7bdat, SPSS .sav, Stata .dta, R Data (.rda/.rds) -> CSV/TSV/JSON-Lines/Parquet/SQLite.
-- **textencode sidecar** — Charset recoding (utf-8 ↔ utf-16 ↔ latin-1 ↔ cp1252 ↔ shift_jis ↔ gb18030 ↔ big5 ↔ koi8-r ↔ iso-8859-x), line-ending normalization (LF/CRLF/CR), BOM management, encoding auto-detection via chardet.
-- **hashkit sidecar** — File hashing + verification: MD5/SHA-1/SHA-224/256/384/512/SHA3-256/SHA3-512/BLAKE2b/BLAKE2s/BLAKE3/xxHash (32/64/128)/CRC32/Adler32. `generate` writes SHA256SUMS-style manifest or per-file `.sha256` sidecars; `verify` validates files against an existing SUMS manifest.
-- **encodekit sidecar** — Binary text encoding: Base64/Base32/Base85/Hex encode + decode, plus `inline` op that wraps any file as a `data:<mime>;base64,...` URL.
-- **iconkit sidecar** — Multi-resolution icon container generation: PNG -> Windows .ico (multi-res), Apple .icns (multi-layer with PNG-encoded slots from 16x16 to 1024x1024), Apple .iconset folder layout for use with `iconutil`.
-- **plistkit sidecar** — Apple Property-List mutual conversion: binary plist <-> XML plist <-> JSON. Handles bytes (base64 round-trip) and dates safely through the JSON form.
-- **hdrkit sidecar** — HDR / floating-point image conversion: Radiance HDR (.hdr/.pic/.rgbe), OpenEXR (.exr, half/float), PFM (Portable Float Map), 16-bit PNG, 16-bit TIFF. `tonemap` op renders 8-bit LDR via Reinhard / Drago / Mantiuk / linear tone-map operators (OpenCV).
-- **music sidecar** — Music notation conversion: MusicXML / .mxl / MIDI / ABC / MuseScore .mscz / .mscx / GuitarPro (.gp, .gp3, .gp4, .gp5, .gpx). Backed by music21 + guitarpro library + MuseScore CLI shellout for .mscz round-trip.
-- **hexkit sidecar** — Embedded firmware image conversion: Intel HEX (.hex/.ihex), Motorola SREC (.s19/.s28/.s37), TI-TXT (.txt), raw binary (.bin/.raw/.img). Backed by bincopy. `info` op probes segment layout and address range.
+- **psdkit sidecar**: Photoshop / GIMP layered images: PSD/PSB/XCF -> flatten to PNG/JPEG/TIFF/WebP/BMP, or extract every visible layer as its own PNG. `info` op for layer-tree probe.
+- **audiopro sidecar**: Niche audio codec conversion via FFmpeg: DSD (.dsf/.dff), APE, WavPack (.wv), TAK, TTA, ALAC, MLP/TrueHD, AC3, E-AC3, DTS, AMR/AMR-WB, SPEEX, GSM, WMA, MusePack, AU, VOC, Real Audio. `codecs` op probes which encoders the local FFmpeg has compiled in.
+- **subocr sidecar**: Bitmap subtitle OCR: Blu-ray PGS (.sup) + DVD VobSub (.idx/.sub) -> SRT via FFmpeg subtitle decoder + Tesseract OCR pipeline. Configurable language pack.
+- **subkit sidecar**: Text subtitle interchange beyond pysubs2: SAMI/SMI, TTML/DFXP, SCC (CEA-608 broadcast), EBU STL teletext, MicroDVD, JACoSub, LRC karaoke, SBV YouTube. Backed by pycaption + pysubs2.
+- **dbtools sidecar**: Database / statistical-format conversion: SQLite, MS Access (.mdb/.accdb via mdbtools shellout), dBase (.dbf), SAS XPORT/.sas7bdat, SPSS .sav, Stata .dta, R Data (.rda/.rds) -> CSV/TSV/JSON-Lines/Parquet/SQLite.
+- **textencode sidecar**: Charset recoding (utf-8 ↔ utf-16 ↔ latin-1 ↔ cp1252 ↔ shift_jis ↔ gb18030 ↔ big5 ↔ koi8-r ↔ iso-8859-x), line-ending normalization (LF/CRLF/CR), BOM management, encoding auto-detection via chardet.
+- **hashkit sidecar**: File hashing + verification: MD5/SHA-1/SHA-224/256/384/512/SHA3-256/SHA3-512/BLAKE2b/BLAKE2s/BLAKE3/xxHash (32/64/128)/CRC32/Adler32. `generate` writes SHA256SUMS-style manifest or per-file `.sha256` sidecars; `verify` validates files against an existing SUMS manifest.
+- **encodekit sidecar**: Binary text encoding: Base64/Base32/Base85/Hex encode + decode, plus `inline` op that wraps any file as a `data:<mime>;base64,...` URL.
+- **iconkit sidecar**: Multi-resolution icon container generation: PNG -> Windows .ico (multi-res), Apple .icns (multi-layer with PNG-encoded slots from 16x16 to 1024x1024), Apple .iconset folder layout for use with `iconutil`.
+- **plistkit sidecar**: Apple Property-List mutual conversion: binary plist <-> XML plist <-> JSON. Handles bytes (base64 round-trip) and dates safely through the JSON form.
+- **hdrkit sidecar**: HDR / floating-point image conversion: Radiance HDR (.hdr/.pic/.rgbe), OpenEXR (.exr, half/float), PFM (Portable Float Map), 16-bit PNG, 16-bit TIFF. `tonemap` op renders 8-bit LDR via Reinhard / Drago / Mantiuk / linear tone-map operators (OpenCV).
+- **music sidecar**: Music notation conversion: MusicXML / .mxl / MIDI / ABC / MuseScore .mscz / .mscx / GuitarPro (.gp, .gp3, .gp4, .gp5, .gpx). Backed by music21 + guitarpro library + MuseScore CLI shellout for .mscz round-trip.
+- **hexkit sidecar**: Embedded firmware image conversion: Intel HEX (.hex/.ihex), Motorola SREC (.s19/.s28/.s37), TI-TXT (.txt), raw binary (.bin/.raw/.img). Backed by bincopy. `info` op probes segment layout and address range.
 
-### Added — 24 new presets
+### Added: 24 new presets
 
 `psd-flatten-png`, `psd-extract-layers`, `dsd-to-flac`, `wma-to-mp3`, `pgs-to-srt`, `sami-to-srt`, `srt-to-lrc`, `access-to-csv`, `db-to-sqlite`, `recode-to-utf8`, `newline-lf`, `hash-sha256`, `hash-blake3`, `encode-base64`, `inline-data-url`, `png-to-ico`, `png-to-icns`, `plist-to-xml`, `plist-to-json`, `hdr-to-png16`, `hdr-tonemap-jpg`, `musicxml-to-midi`, `midi-to-musicxml`, `hex-to-bin`, `bin-to-hex`.
 
@@ -783,20 +802,20 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 ## [v2.10.0] - 2026-05-01
 
 ### Added
-- **NEW bgremove sidecar** — Modern image background removal: BiRefNet (CVPR 2024 SOTA, Apache-2.0), RMBG-2.0 (BRIA Apache-2.0), IS-Net, U2Net via rembg, SAM 2. Default backend `birefnet`.
-- **NEW superres sidecar** — Modern image super-resolution via spandrel (the same loader used by ChaiNNer): HAT / HAT-L / DAT / SwinIR / SwinIR-Large / APISR / Real-ESRGAN / Real-CUGAN / SCUNet. Auto-downloads checkpoints from authors' repos. Default model `hat-l-x4`.
-- **NEW facerestore sidecar** — Face restoration: CodeFormer with fidelity slider (`--w 0.0`-`1.0`) for identity-vs-quality control, plus GFPGAN v1.4 fallback.
-- **NEW ocrpro sidecar** — Surya OCR (Apache-2.0): layout analysis + text recognition + tables + math + 90+ languages. Markdown or JSON output.
-- **NEW premiumtts sidecar** — Best-in-class OSS TTS: Kokoro-82M (fast, 54 voices, 9 languages), F5-TTS (zero-shot voice cloning from 5-15 s reference clip), XTTS v2 (multilingual + cloning). Default backend `kokoro`.
-- **NEW translatekit sidecar** — Offline neural translation: NLLB-200 (Meta, 200 languages) + MADLAD-400 (Google, 419 languages) + Helsinki OPUS-MT. Three ops: `text`, `file` (line-by-line), `srt` (timecode-preserving subtitle translation).
-- **NEW inpaint sidecar** — Fast object removal via LaMa (Samsung Apache-2.0). Three mask sources: explicit mask image, `--bbox X,Y,W,H` rectangle, or `--auto-detect person,car,bird` (YOLOv11 + segmentation).
-- **NEW audiomastering sidecar** — Reference-based mastering via Matchering 2.0 + EBU R128 loudness normalization (two-pass FFmpeg loudnorm). Streaming preset = -14 LUFS / -1 dBTP.
-- **sdkit upgraded** — Now defaults to FLUX.1 schnell (Apache-2.0, 4-step SOTA). Catalog: FLUX.1 schnell/dev, SD 3.5 Large/Medium, SD 3 Medium, SDXL Turbo, SDXL 1.0, SD 2.1, SD 1.5, SD x4 upscaler. Aliases: `flux`, `sd35`, `sdxl`, `sdxl-turbo`. Per-model recommended steps + cfg auto-applied unless overridden.
-- **whisper-stt upgraded** — Default model now `large-v3-turbo` (Whisper v3 Turbo, 2024-10, ~8x faster than v3). Adds Distil-Whisper variants (`distil-large-v3`, `distil-medium.en`, etc.), `--vad` flag (Silero VAD via faster-whisper), `--diarize` flag (pyannote 3.1 speaker diarization, requires `HF_TOKEN`).
-- **videocrush upgraded** — New AV1 profiles powered by SVT-AV1 v2 (FFmpeg 7.1+): `archive-av1-fast` (preset 8, 4-6x faster), `archive-av1-quality` (preset 4, archive-grade), `stream-av1-1080p` (1080p YouTube/Vimeo upload).
-- **pdfmarkdown upgraded** — Adds Docling (IBM Apache-2.0, best for technical PDFs with tables/math) and MinerU/magic-pdf (best for academic math-heavy content) as backends alongside pymupdf4llm and marker.
-- **13 new presets** — `bg-remove-birefnet`, `bg-remove-rmbg2`, `superres-hat-x4`, `superres-anime-apisr`, `restore-face-codeformer`, `ocr-pro-surya`, `pdf-to-markdown-docling`, `tts-kokoro-bella`, `translate-to-spanish`, `translate-srt-japanese`, `loudnorm-streaming`, `inpaint-remove-people`, `to-av1-fast`, `to-av1-quality`, `sd-flux-schnell`.
-- **8 new Toolbox tiles** — All v2.10 engines surface in the Toolbox via `presets:engine` deep-link route.
+- **NEW bgremove sidecar**: Modern image background removal: BiRefNet (CVPR 2024 SOTA, Apache-2.0), RMBG-2.0 (BRIA Apache-2.0), IS-Net, U2Net via rembg, SAM 2. Default backend `birefnet`.
+- **NEW superres sidecar**: Modern image super-resolution via spandrel (the same loader used by ChaiNNer): HAT / HAT-L / DAT / SwinIR / SwinIR-Large / APISR / Real-ESRGAN / Real-CUGAN / SCUNet. Auto-downloads checkpoints from authors' repos. Default model `hat-l-x4`.
+- **NEW facerestore sidecar**: Face restoration: CodeFormer with fidelity slider (`--w 0.0`-`1.0`) for identity-vs-quality control, plus GFPGAN v1.4 fallback.
+- **NEW ocrpro sidecar**: Surya OCR (Apache-2.0): layout analysis + text recognition + tables + math + 90+ languages. Markdown or JSON output.
+- **NEW premiumtts sidecar**: High-quality open-source TTS with Kokoro-82M (fast, 54 voices, 9 languages), F5-TTS (zero-shot voice cloning from a 5 to 15 second reference clip), and XTTS v2 (multilingual plus cloning). Default backend `kokoro`.
+- **NEW translatekit sidecar**: Offline neural translation: NLLB-200 (Meta, 200 languages) + MADLAD-400 (Google, 419 languages) + Helsinki OPUS-MT. Three ops: `text`, `file` (line-by-line), `srt` (timecode-preserving subtitle translation).
+- **NEW inpaint sidecar**: Fast object removal via LaMa (Samsung Apache-2.0). Three mask sources: explicit mask image, `--bbox X,Y,W,H` rectangle, or `--auto-detect person,car,bird` (YOLOv11 + segmentation).
+- **NEW audiomastering sidecar**: Reference-based mastering via Matchering 2.0 + EBU R128 loudness normalization (two-pass FFmpeg loudnorm). Streaming preset = -14 LUFS / -1 dBTP.
+- **sdkit upgraded**: Now defaults to FLUX.1 schnell (Apache-2.0, 4-step SOTA). Catalog: FLUX.1 schnell/dev, SD 3.5 Large/Medium, SD 3 Medium, SDXL Turbo, SDXL 1.0, SD 2.1, SD 1.5, SD x4 upscaler. Aliases: `flux`, `sd35`, `sdxl`, `sdxl-turbo`. Per-model recommended steps + cfg auto-applied unless overridden.
+- **whisper-stt upgraded**: Default model now `large-v3-turbo` (Whisper v3 Turbo, 2024-10, ~8x faster than v3). Adds Distil-Whisper variants (`distil-large-v3`, `distil-medium.en`, etc.), `--vad` flag (Silero VAD via faster-whisper), `--diarize` flag (pyannote 3.1 speaker diarization, requires `HF_TOKEN`).
+- **videocrush upgraded**: New AV1 profiles powered by SVT-AV1 v2 (FFmpeg 7.1+): `archive-av1-fast` (preset 8, 4-6x faster), `archive-av1-quality` (preset 4, archive-grade), `stream-av1-1080p` (1080p YouTube/Vimeo upload).
+- **pdfmarkdown upgraded**: Adds Docling (IBM Apache-2.0, best for technical PDFs with tables/math) and MinerU/magic-pdf (best for academic math-heavy content) as backends alongside pymupdf4llm and marker.
+- **13 new presets**: `bg-remove-birefnet`, `bg-remove-rmbg2`, `superres-hat-x4`, `superres-anime-apisr`, `restore-face-codeformer`, `ocr-pro-surya`, `pdf-to-markdown-docling`, `tts-kokoro-bella`, `translate-to-spanish`, `translate-srt-japanese`, `loudnorm-streaming`, `inpaint-remove-people`, `to-av1-fast`, `to-av1-quality`, `sd-flux-schnell`.
+- **8 new Toolbox tiles**: All v2.10 engines surface in the Toolbox via `presets:engine` deep-link route.
 
 ### Changed
 - KNOWN_EVENTS extended with `matte_image`, `matte_model`, `upscale_image`, `upscale_model`, `face_restore`, `ocr_pro`, `tts_audio`, `tts_voice`, `translation`, `translation_lang`, `inpaint_image`, `master_audio`. Contract test passes 65 sidecars.
@@ -805,45 +824,45 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 ## [v2.9.0] - 2026-05-01
 
 ### Added
-- **gametools sidecar** — Pure-Python ROM patcher (IPS / BPS / UPS), iNES + SMC header strip, N64 byteswap (z64 / v64 / n64), header probe, plus CHD ↔ CUE/BIN/ISO/GDI via MAME `chdman` wrapper.
-- **datasci sidecar** — Tabular and array data interchange across CSV / TSV / JSON-Lines / Parquet / Feather / Arrow / Avro / ORC / HDF5 / NumPy NPY-NPZ / Matlab MAT / NetCDF / FITS. `info` op probes shape + dtype + columns.
-- **i18nkit sidecar** — Localization-format mutual conversion: PO / POT / MO / XLIFF (1.2 + 2.0) / TMX / RESX / iOS .strings / JSON-i18n / YAML / CSV. Internal MessageEntry normalization keeps comments + keys.
-- **pointcloud sidecar** — Point cloud / 3D scan formats: PLY / PCD / XYZ / PTS / OBJ via Open3D, LAS / LAZ via laspy + lazrs, E57 via pye57. `info` op reports point count + bounds.
-- **diskimage sidecar** — VM disk image conversion via qemu-img: RAW / IMG / QCOW2 / VMDK / VHD / VHDX / VDI / QED / Parallels HDS. Optional QCOW2 compression flag.
-- **mailimport sidecar** — Outlook PST / OST extraction via libpff (`pypff`). Walks every folder; ops: `to-eml` (per-message), `to-mbox` (single Unix mailbox), `list` (folder inventory only).
-- **UniversalConvertPage** — New top-level UX page. Drop or pick any file(s); UCX intersects extensions against every loaded preset's `InputTypes` and renders matching presets ranked by full-coverage first. Click "Convert..." on any match to run that preset against the same files. Doubles as the answer to "what can I do with this file?".
-- **13 new presets** — `rom-strip-header`, `n64-to-z64`, `cue-to-chd`, `chd-to-cue`, `csv-to-parquet`, `parquet-to-csv`, `po-to-xliff`, `xliff-to-po`, `las-to-ply`, `e57-to-las`, `vmdk-to-qcow2`, `qcow2-to-vmdk`, `pst-to-mbox`, `pst-to-eml`.
-- **7 new Toolbox tiles** — `presets:gametools`, `presets:datasci`, `presets:i18nkit`, `presets:pointcloud`, `presets:diskimage`, `presets:mailimport`, plus the killer `universal-convert` tile.
+- **gametools sidecar**: Pure-Python ROM patcher (IPS / BPS / UPS), iNES + SMC header strip, N64 byteswap (z64 / v64 / n64), header probe, plus CHD ↔ CUE/BIN/ISO/GDI via MAME `chdman` wrapper.
+- **datasci sidecar**: Tabular and array data interchange across CSV / TSV / JSON-Lines / Parquet / Feather / Arrow / Avro / ORC / HDF5 / NumPy NPY-NPZ / Matlab MAT / NetCDF / FITS. `info` op probes shape + dtype + columns.
+- **i18nkit sidecar**: Localization-format mutual conversion: PO / POT / MO / XLIFF (1.2 + 2.0) / TMX / RESX / iOS .strings / JSON-i18n / YAML / CSV. Internal MessageEntry normalization keeps comments + keys.
+- **pointcloud sidecar**: Point cloud / 3D scan formats: PLY / PCD / XYZ / PTS / OBJ via Open3D, LAS / LAZ via laspy + lazrs, E57 via pye57. `info` op reports point count + bounds.
+- **diskimage sidecar**: VM disk image conversion via qemu-img: RAW / IMG / QCOW2 / VMDK / VHD / VHDX / VDI / QED / Parallels HDS. Optional QCOW2 compression flag.
+- **mailimport sidecar**: Outlook PST / OST extraction via libpff (`pypff`). Walks every folder; ops: `to-eml` (per-message), `to-mbox` (single Unix mailbox), `list` (folder inventory only).
+- **UniversalConvertPage**: New top-level UX page. Drop or pick any file(s); UCX intersects extensions against every loaded preset's `InputTypes` and renders matching presets ranked by full-coverage first. Click "Convert..." on any match to run that preset against the same files. Doubles as the answer to "what can I do with this file?".
+- **13 new presets**: `rom-strip-header`, `n64-to-z64`, `cue-to-chd`, `chd-to-cue`, `csv-to-parquet`, `parquet-to-csv`, `po-to-xliff`, `xliff-to-po`, `las-to-ply`, `e57-to-las`, `vmdk-to-qcow2`, `qcow2-to-vmdk`, `pst-to-mbox`, `pst-to-eml`.
+- **7 new Toolbox tiles**: `presets:gametools`, `presets:datasci`, `presets:i18nkit`, `presets:pointcloud`, `presets:diskimage`, `presets:mailimport`, plus the killer `universal-convert` tile.
 
 ### Changed
 - KNOWN_EVENTS extended with `rom_patch`, `rom_info`, `disc_image`, `data_table`, `data_info`, `locale_doc`, `point_cloud`, `point_cloud_info`, `disk_image`, `disk_image_info`, `email_index`. Contract test passes 57 sidecars.
-- Version 2.8.0 → 2.9.0 across all manifests (csproj × 3, PowerShell module psd1, README badge, CLAUDE.md, `ucx serve` `/healthz`).
+- Version 2.8.0 → 2.9.0 across all manifests (csproj × 3, PowerShell module psd1, README badge, working notes, `ucx serve` `/healthz`).
 - Route table in `MainWindow.xaml.cs` gains `universal-convert` → `UniversalConvertPage`.
 
 ## [v2.8.0] - 2026-04-30
 
 ### Added
-- **sdkit sidecar** — Stable Diffusion via `diffusers`. Ops: `txt2img`, `img2img`, `inpaint`, `upscale-x4`, `models`. fp16/bf16/fp32 dtype selector; cuda/cpu device selector. Default model `runwayml/stable-diffusion-v1-5`. Emits `sd_image` per generation, `sd_model` per discoverable pipeline.
-- **speechenhance sidecar** — DeepFilterNet 3 SOTA neural speech denoise + dereverb. Single `enhance` op with `--atten` dB attenuation cap. Emits `speech_enhance` per file, writes `<stem>_dfn3.wav`.
-- **stemkit sidecar** — Music source separation via `audio-separator` (BS-Roformer, MelBand-Roformer, htdemucs FT/MMI, UVR-MDX, VR-Arch, Spleeter). Friendly aliases: `vocals` / `vocals-roformer` / `4stem` / `4stem-fast` / `6stem` / `karaoke` / `denoise` / `dereverb`. Output format wav/flac/mp3.
-- **pdfmarkdown sidecar** — PDF → Markdown via `pymupdf4llm` (default, fast layout-aware) or `marker` (LLM-grade backend). Optional `--page-chunks` for one-chunk-per-page output.
-- **vectorkit sidecar** — Inkscape headless wrapper for AI / EPS / PS / EMF / WMF / SVG / SVGZ / CDR / VSD ↔ SVG / PDF / EPS / PS / EMF / WMF / PNG. Auto-discovers Inkscape via `INKSCAPE_PATH` env or standard install paths.
-- **lutgen sidecar** — 3D LUT generator. Builds .cube and .3dl LUTs from before/after image pairs by binning source RGB and averaging target RGB into the cube; iterative neighbour-fill for sparse bins. Identity LUT generator for testing.
-- **fontsubset sidecar** — Webfont subsetter via `fontTools.subset`. Subset by `--text` string or `--unicodes` ranges; output WOFF2/WOFF/sfnt with optional zopfli compression and CFF desubroutinization.
-- **8 new presets** — `pdf-to-markdown`, `ai-to-svg`, `svg-to-pdf-vector`, `separate-vocals`, `separate-4-stem`, `enhance-speech`, `subset-webfont`, `identity-lut`.
-- **7 new Toolbox tiles** — `presets:sdkit`, `presets:speechenhance`, `presets:stemkit`, `presets:pdfmarkdown`, `presets:vectorkit`, `presets:lutgen`, `presets:fontsubset`. All route into the unified PresetsPage filtered by engine.
+- **sdkit sidecar**: Stable Diffusion via `diffusers`. Ops: `txt2img`, `img2img`, `inpaint`, `upscale-x4`, `models`. fp16/bf16/fp32 dtype selector; cuda/cpu device selector. Default model `runwayml/stable-diffusion-v1-5`. Emits `sd_image` per generation, `sd_model` per discoverable pipeline.
+- **speechenhance sidecar**: DeepFilterNet 3 SOTA neural speech denoise + dereverb. Single `enhance` op with `--atten` dB attenuation cap. Emits `speech_enhance` per file, writes `<stem>_dfn3.wav`.
+- **stemkit sidecar**: Music source separation via `audio-separator` (BS-Roformer, MelBand-Roformer, htdemucs FT/MMI, UVR-MDX, VR-Arch, Spleeter). Friendly aliases: `vocals` / `vocals-roformer` / `4stem` / `4stem-fast` / `6stem` / `karaoke` / `denoise` / `dereverb`. Output format wav/flac/mp3.
+- **pdfmarkdown sidecar**: PDF → Markdown via `pymupdf4llm` (default, fast layout-aware) or `marker` (LLM-grade backend). Optional `--page-chunks` for one-chunk-per-page output.
+- **vectorkit sidecar**: Inkscape headless wrapper for AI / EPS / PS / EMF / WMF / SVG / SVGZ / CDR / VSD ↔ SVG / PDF / EPS / PS / EMF / WMF / PNG. Auto-discovers Inkscape via `INKSCAPE_PATH` env or standard install paths.
+- **lutgen sidecar**: 3D LUT generator. Builds .cube and .3dl LUTs from before/after image pairs by binning source RGB and averaging target RGB into the cube; iterative neighbour-fill for sparse bins. Identity LUT generator for testing.
+- **fontsubset sidecar**: Webfont subsetter via `fontTools.subset`. Subset by `--text` string or `--unicodes` ranges; output WOFF2/WOFF/sfnt with optional zopfli compression and CFF desubroutinization.
+- **8 new presets**: `pdf-to-markdown`, `ai-to-svg`, `svg-to-pdf-vector`, `separate-vocals`, `separate-4-stem`, `enhance-speech`, `subset-webfont`, `identity-lut`.
+- **7 new Toolbox tiles**: `presets:sdkit`, `presets:speechenhance`, `presets:stemkit`, `presets:pdfmarkdown`, `presets:vectorkit`, `presets:lutgen`, `presets:fontsubset`. All route into the unified PresetsPage filtered by engine.
 
 ### Changed
 - KNOWN_EVENTS extended with `sd_image`, `sd_model`, `speech_enhance`, `stem_track`, `stem_models`, `pdf_md`, `vector_doc`, `lut_cube`, `font_subset`. Contract test passes 51 sidecars.
-- Version 2.7.0 → 2.8.0 across all manifests (csproj × 3, PowerShell module psd1, README badge, CLAUDE.md, `ucx serve` `/healthz`).
+- Version 2.7.0 → 2.8.0 across all manifests (csproj × 3, PowerShell module psd1, README badge, working notes, `ucx serve` `/healthz`).
 
 ## [v2.3.0] - 2026-05-01
 
 ### Added
-- **Demucs Vocal Remover** — `htdemucs_ft` model (MIT), 2-stem and 4-stem separation. VocalRemoverPage fully wired with queue UI, per-stem output to `<name>_stems/` subdirectory, model/format/quality controls, and cancel support.
-- **Whisper STT** — `faster-whisper` primary (CUDA + CPU), `openai-whisper` fallback. SpeechToTextPage fully wired with queue UI, model size selector, language selector, output format (SRT/VTT/TXT/JSON/TSV), word timestamps toggle, and translate mode. Segment-level progress events.
-- **RecordCast webcam + microphone** — DirectShow device enumeration via `ffmpeg -list_devices`. `ScreenToggle`/`WebcamToggle` source selector, webcam device dropdown, audio device dropdown. `list-devices` NDJSON sidecar op. Webcam + screen mux via FFmpeg dshow.
-- **`ISidecarRunner.RunAsync` raw event callback** — New optional `Action<string, JsonElement>? onRawEvent` parameter added to both interface and implementation. Backward-compatible (all existing callers unaffected). Used by RecordCast for `device` events during enumeration.
+- **Demucs Vocal Remover**: `htdemucs_ft` model (MIT), 2-stem and 4-stem separation. VocalRemoverPage fully wired with queue UI, per-stem output to `<name>_stems/` subdirectory, model/format/quality controls, and cancel support.
+- **Whisper STT**: `faster-whisper` primary (CUDA + CPU), `openai-whisper` fallback. SpeechToTextPage fully wired with queue UI, model size selector, language selector, output format (SRT/VTT/TXT/JSON/TSV), word timestamps toggle, and translate mode. Segment-level progress events.
+- **RecordCast webcam + microphone**: DirectShow device enumeration via `ffmpeg -list_devices`. `ScreenToggle`/`WebcamToggle` source selector, webcam device dropdown, audio device dropdown. `list-devices` NDJSON sidecar op. Webcam + screen mux via FFmpeg dshow.
+- **`ISidecarRunner.RunAsync` raw event callback**: New optional `Action<string, JsonElement>? onRawEvent` parameter added to both interface and implementation. Backward-compatible (all existing callers unaffected). Used by RecordCast for `device` events during enumeration.
 
 ### Changed
 - `ToolboxTile` `ai-vocal` status: `"Future"` → `"Ready"` (engine: Demucs).
@@ -853,18 +872,18 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 ## [v2.2.0] - 2026-04-30
 
 ### Added
-- **ClipForge crop op** — `-vf crop=W:H:X:Y` with CRF re-encode; W/H/X/Y inputs in Editor panel.
-- **ClipForge rotate/flip op** — 90°/180°/270° transpose and horizontal/vertical flip via `transpose` filter chain; no-re-encode path for lossless rotations not yet supported (stream copy skipped for correctness).
-- **ClipForge loudnorm op** — EBU R128 two-pass normalization. Pass 1 parses measured levels from FFmpeg stderr JSON; pass 2 targets configurable LUFS target (default −14 LUFS). Falls back to single-pass if JSON parsing fails.
-- **ClipForge rewrap op** — Stream-copy container remux (`-c copy`). Adds `-movflags +faststart` for MP4/MOV/M4V. No re-encode; lossless and instant.
-- **EditorPage multi-op UI** — `OperationCombo` selector (Trim / Crop / Rotate / Normalize Audio / Rewrap Container) with conditional panel reveal per op. Quality (CRF) panel hidden for lossless ops. Per-op output suffixes: `_trimmed`, `_cropped`, `_rotated`, `_normalized`, `_rewrapped`.
-- **VideoCrush hardware acceleration** — `--hwaccel` flag (none / nvenc / amf / qsv / d3d12). `_HW_ENCODER` table maps codec × accelerator to FFmpeg encoder; VP9 and unsupported combos fall back to software.
-- **CompressorPage HW accel dropdown** — Five-item combo (Software / NVIDIA NVENC / AMD AMF / Intel QSV / D3D12) above preset profiles. Selection passed as `--hwaccel` to videocrush.
-- **Shared ONNX model cache** — `SidecarRunner` resolves `tools/_models/` and injects `UCX_MODEL_DIR` env var for all sidecar launches. AlphaCut sidecar reads `UCX_MODEL_DIR` (or `--model-dir` arg) and passes `model_dir` to `ProcessingWorker`. Future ONNX sidecars point to the same directory.
+- **ClipForge crop op**: `-vf crop=W:H:X:Y` with CRF re-encode; W/H/X/Y inputs in Editor panel.
+- **ClipForge rotate/flip op**: 90°/180°/270° transpose and horizontal/vertical flip via `transpose` filter chain; no-re-encode path for lossless rotations not yet supported (stream copy skipped for correctness).
+- **ClipForge loudnorm op**: EBU R128 two-pass normalization. Pass 1 parses measured levels from FFmpeg stderr JSON; pass 2 targets configurable LUFS target (default −14 LUFS). Falls back to single-pass if JSON parsing fails.
+- **ClipForge rewrap op**: Stream-copy container remux (`-c copy`). Adds `-movflags +faststart` for MP4/MOV/M4V. No re-encode; lossless and instant.
+- **EditorPage multi-op UI**: `OperationCombo` selector (Trim / Crop / Rotate / Normalize Audio / Rewrap Container) with conditional panel reveal per op. Quality (CRF) panel hidden for lossless ops. Per-op output suffixes: `_trimmed`, `_cropped`, `_rotated`, `_normalized`, `_rewrapped`.
+- **VideoCrush hardware acceleration**: `--hwaccel` flag (none / nvenc / amf / qsv / d3d12). `_HW_ENCODER` table maps codec × accelerator to FFmpeg encoder; VP9 and unsupported combos fall back to software.
+- **CompressorPage HW accel dropdown**: Five-item combo (Software / NVIDIA NVENC / AMD AMF / Intel QSV / D3D12) above preset profiles. Selection passed as `--hwaccel` to videocrush.
+- **Shared ONNX model cache**: `SidecarRunner` resolves `tools/_models/` and injects `UCX_MODEL_DIR` env var for all sidecar launches. AlphaCut sidecar reads `UCX_MODEL_DIR` (or `--model-dir` arg) and passes `model_dir` to `ProcessingWorker`. Future ONNX sidecars point to the same directory.
 
 ### Security
-- Pinned `yt-dlp>=2026.02.21` in streamkeep/requirements.txt — fixes CVE-2026-26331 (command injection via `--netrc-cmd`).
-- Pinned `onnxruntime>=1.25.0` in alphacut/requirements.txt — fixes heap OOB and integer overflow; aligns with ONNX Runtime 1.25 security advisory.
+- Pinned `yt-dlp>=2026.02.21` in streamkeep/requirements.txt: fixes CVE-2026-26331 (command injection via `--netrc-cmd`).
+- Pinned `onnxruntime>=1.25.0` in alphacut/requirements.txt: fixes heap OOB and integer overflow; aligns with ONNX Runtime 1.25 security advisory.
 
 ### Changed
 - Version 2.1.0 → 2.2.0 across `Directory.Build.props` (root + src), `UniversalConverterX.UI.csproj`, `app.manifest`, `build-installer.ps1`, `SettingsWindow.xaml`, `HomePage.xaml`, README badge, ROADMAP header.
@@ -874,27 +893,27 @@ Comprehensive structural audit (sidecars × Toolbox tiles × presets cross-refer
 First three sidecar engines wired end-to-end. Compressor, Editor, and Downloader modules are functional.
 
 ### Added
-- **UniConverter-style UX pass** — refreshed the WinUI resource palette to a light AI-suite direction, replaced the sparse Home launcher with a guided dashboard, added first-class AI Lab navigation, and added workflow/persona/tool cards aligned to the public UniConverter 17 feature surface.
-- **Converter queue parity pass** — replaced the flat converter drop zone with a UniConverter-style queue layout: Converting / Finished tabs, Add Files / Add Folder actions, output location controls, per-file status/progress rows, finished result cards, and open-folder recovery.
-- **Compressor queue parity pass** — upgraded Compressor from a single-file panel to a batch queue with Compressing / Finished tabs, Add Files / Add Folder, output folder selection, aggregate source/result/savings metrics, per-file progress, and finished result recovery.
-- **Downloader queue parity pass** — replaced the single active download panel with queued URL intake, Downloading / Finished tabs, captured per-job options, per-job progress/log preview, sequential Download All, cancellation, and open-folder recovery.
-- **Editor queue parity pass** — upgraded Editor from a single loaded-file trim flow to a batch edit queue with Add Files / Add Folder, Editing / Finished tabs, shared trim and re-encode settings, output-folder selection, per-file progress, cancellation, and finished result recovery.
-- **Recorder screen-capture pass** — replaced the disabled Recorder placeholder with a queued recording workflow and a first-party `recordcast` FFmpeg sidecar for fixed-duration Windows desktop capture, per-session progress, cancellation, output-folder selection, and finished result recovery.
-- **Format Inspector toolbox tool** — converted the Toolbox Format Inspector tile from a placeholder into a real workspace for batch file inspection, signature detection, conversion target suggestions, FFprobe stream metadata, selectable reports, and open-folder recovery.
-- **Frame Snapshot toolbox tool** — converted the Toolbox Frame Snapshot tile from a placeholder into a real workspace for batch video still extraction, timestamp/interval plans, PNG/JPEG/WebP output, per-file progress, cancellation, and open-folder recovery.
-- **Premium polish pass** — refined shared design tokens, typography, button sizing, shell trust cues, Home readiness hierarchy, Toolbox status semantics, AI Lab roadmap honesty, placeholder recovery actions, and Settings save/discard confidence.
-- **Queue safety confirmations** — added consistent confirmation dialogs before clearing queued work across converter, compressor, downloader, editor, recorder, format inspector, and frame snapshot workspaces.
-- **Settings trust polish** — replaced generic About links and simulated update checks with concrete repository destinations, releases access, and honest shell-registration guidance.
-- **Converter recommendation panel** — added local file-type output guidance and one-click profile shortcuts for Smart Match, Web MP4, Audio MP3, and Image WebP workflows.
-- **AI Lab page** — central route for planned Video Enhancer, Image Enhancer, Background Remover, Watermark Remover, Subtitle & Translation, Video Summarizer, Noise Remover, Vocal Remover, Voice Changer, TTS/STT, and photo restoration scope cards.
-- **Search-driven navigation** — sidebar search and Home search now suggest modules/tools and route directly to the matching workspace.
-- **`SidecarRunner` service** — generic launcher for `tools/<name>/<name>.exe` sidecars. Walks up from `AppContext.BaseDirectory` to locate the binary, falls back to `%LocalAppData%/UniversalConverterX/tools/`. Streams stdout NDJSON line-by-line, parses `progress`/`log`/`complete`/`error` events, supports cancellation by killing the process tree.
-- **VideoCrush sidecar (Compressor)** — `tools/videocrush/sidecar.py` reimplements the FFmpeg two-pass / CRF compression logic without the PyQt6 dependency. Presets: `web-1080p`, `email-10mb`, `archive-av1`. AV1 falls back to single-pass since SVT-AV1's two-pass is unreliable through FFmpeg. `tools/videocrush/build.ps1` freezes via PyInstaller.
-- **Compressor page wired** — drag/drop or browse → preset radio → live progress overlay (FFmpeg pass1/pass2 split, ETA, log tail) → result-size and savings calculation. Cancel kills the sidecar process tree.
-- **ClipForge sidecar (Editor, trim op)** — `tools/clipforge/sidecar.py` exposes a `trim` op with `--start`, `--end`, `--lossless`, `--crf`, `--preset` flags. Lossless mode stream-copies (fast, keyframe-bounded); re-encode mode is frame-accurate. Crop/upscale/filter/audio extensions land as additional ops in v2.2+.
-- **Editor page wired (trim slice)** — drag/drop or browse → start/end time inputs (seconds) → lossless toggle → CRF slider with quality hint label → Export.
-- **StreamKeep sidecar (Downloader)** — `tools/streamkeep/sidecar.py` uses yt-dlp's Python API, covering 1000+ sites: YouTube, Twitch VODs, Vimeo, X/Twitter, Facebook, Instagram, Reddit, podcasts, direct URLs. Subcommands: `probe` (metadata + format list), `download` (with merge, audio-only, subtitle, format selectors). Native Kick/Rumble/SoundCloud extractors from StreamKeep's `streamkeep/` package land in v2.2+.
-- **Downloader page wired** — paste URL → quality / container / audio-only / subtitle options → Download → live progress with speed and ETA, log tail, total bytes. Output defaults to `~/Downloads/UniversalConverterX/`. "Open Output Folder" launches Explorer at the target.
+- **UniConverter-style UX pass**: refreshed the WinUI resource palette to a light AI-suite direction, replaced the sparse Home launcher with a guided dashboard, added first-class AI Lab navigation, and added workflow/persona/tool cards aligned to the public UniConverter 17 feature surface.
+- **Converter queue parity pass**: replaced the flat converter drop zone with a UniConverter-style queue layout: Converting / Finished tabs, Add Files / Add Folder actions, output location controls, per-file status/progress rows, finished result cards, and open-folder recovery.
+- **Compressor queue parity pass**: upgraded Compressor from a single-file panel to a batch queue with Compressing / Finished tabs, Add Files / Add Folder, output folder selection, aggregate source/result/savings metrics, per-file progress, and finished result recovery.
+- **Downloader queue parity pass**: replaced the single active download panel with queued URL intake, Downloading / Finished tabs, captured per-job options, per-job progress/log preview, sequential Download All, cancellation, and open-folder recovery.
+- **Editor queue parity pass**: upgraded Editor from a single loaded-file trim flow to a batch edit queue with Add Files / Add Folder, Editing / Finished tabs, shared trim and re-encode settings, output-folder selection, per-file progress, cancellation, and finished result recovery.
+- **Recorder screen-capture pass**: replaced the disabled Recorder placeholder with a queued recording workflow and a first-party `recordcast` FFmpeg sidecar for fixed-duration Windows desktop capture, per-session progress, cancellation, output-folder selection, and finished result recovery.
+- **Format Inspector toolbox tool**: converted the Toolbox Format Inspector tile from a placeholder into a real workspace for batch file inspection, signature detection, conversion target suggestions, FFprobe stream metadata, selectable reports, and open-folder recovery.
+- **Frame Snapshot toolbox tool**: converted the Toolbox Frame Snapshot tile from a placeholder into a real workspace for batch video still extraction, timestamp/interval plans, PNG/JPEG/WebP output, per-file progress, cancellation, and open-folder recovery.
+- **Premium polish pass**: refined shared design tokens, typography, button sizing, shell trust cues, Home readiness hierarchy, Toolbox status semantics, AI Lab roadmap honesty, placeholder recovery actions, and Settings save/discard confidence.
+- **Queue safety confirmations**: added consistent confirmation dialogs before clearing queued work across converter, compressor, downloader, editor, recorder, format inspector, and frame snapshot workspaces.
+- **Settings trust polish**: replaced generic About links and simulated update checks with concrete repository destinations, releases access, and honest shell-registration guidance.
+- **Converter recommendation panel**: added local file-type output guidance and one-click profile shortcuts for Smart Match, Web MP4, Audio MP3, and Image WebP workflows.
+- **AI Lab page**: central route for planned Video Enhancer, Image Enhancer, Background Remover, Watermark Remover, Subtitle & Translation, Video Summarizer, Noise Remover, Vocal Remover, Voice Changer, TTS/STT, and photo restoration scope cards.
+- **Search-driven navigation**: sidebar search and Home search now suggest modules/tools and route directly to the matching workspace.
+- **`SidecarRunner` service**: generic launcher for `tools/<name>/<name>.exe` sidecars. Walks up from `AppContext.BaseDirectory` to locate the binary, falls back to `%LocalAppData%/UniversalConverterX/tools/`. Streams stdout NDJSON line-by-line, parses `progress`/`log`/`complete`/`error` events, supports cancellation by killing the process tree.
+- **VideoCrush sidecar (Compressor)**: `tools/videocrush/sidecar.py` reimplements the FFmpeg two-pass / CRF compression logic without the PyQt6 dependency. Presets: `web-1080p`, `email-10mb`, `archive-av1`. AV1 falls back to single-pass since SVT-AV1's two-pass is unreliable through FFmpeg. `tools/videocrush/build.ps1` freezes via PyInstaller.
+- **Compressor page wired**: drag/drop or browse → preset radio → live progress overlay (FFmpeg pass1/pass2 split, ETA, log tail) → result-size and savings calculation. Cancel kills the sidecar process tree.
+- **ClipForge sidecar (Editor, trim op)**: `tools/clipforge/sidecar.py` exposes a `trim` op with `--start`, `--end`, `--lossless`, `--crf`, `--preset` flags. Lossless mode stream-copies (fast, keyframe-bounded); re-encode mode is frame-accurate. Crop/upscale/filter/audio extensions land as additional ops in v2.2+.
+- **Editor page wired (trim slice)**: drag/drop or browse → start/end time inputs (seconds) → lossless toggle → CRF slider with quality hint label → Export.
+- **StreamKeep sidecar (Downloader)**: `tools/streamkeep/sidecar.py` uses yt-dlp's Python API, covering 1000+ sites: YouTube, Twitch VODs, Vimeo, X/Twitter, Facebook, Instagram, Reddit, podcasts, direct URLs. Subcommands: `probe` (metadata + format list), `download` (with merge, audio-only, subtitle, format selectors). Native Kick/Rumble/SoundCloud extractors from StreamKeep's `streamkeep/` package land in v2.2+.
+- **Downloader page wired**: paste URL → quality / container / audio-only / subtitle options → Download → live progress with speed and ETA, log tail, total bytes. Output defaults to `~/Downloads/UniversalConverterX/`. "Open Output Folder" launches Explorer at the target.
 
 ### Changed
 - Settings navigation now opens the existing settings window instead of a placeholder page.
@@ -904,21 +923,21 @@ First three sidecar engines wired end-to-end. Compressor, Editor, and Downloader
 
 ## [v2.0.0] - 2026-04-29
 
-Major scope expansion: from a context-menu file converter into a full all-in-one media tool — a Wondershare UniConverter alternative.
+Major scope expansion: from a context-menu file converter into a full all-in-one media tool: a Wondershare UniConverter alternative.
 
 ### Added
-- **NavigationView shell** — Wondershare-style left sidebar with Home / Converter / Compressor / Editor / Downloader / Recorder / Toolbox / Account.
-- **Home page** — hero, search, quick-launch module tiles, recent files area.
-- **Toolbox page** — categorized tile grid with 29 specialized tools across Image, Video, AI, Audio, Disc, and Other.
-- **Module shells** — Compressor, Video Editor, Downloader, and Recorder pages with mocked-up final-state UI.
-- **Placeholder page** — generic "Coming Soon" landing for tiles whose backing engines arrive in later phases.
-- **`tools/` directory — all 10 sidecar engines ported in.** Source code (~12 MB total) for VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift now lives under the UCX repo. Build artifacts (`build/`, `dist/`, `__pycache__`, frozen `.exe`s, `.git`, AI working files) were stripped during the port. Each tool retains its `LICENSE`, original README (renamed to `README-source.md`), `requirements.txt`, and small assets.
+- **NavigationView shell**: Wondershare-style left sidebar with Home / Converter / Compressor / Editor / Downloader / Recorder / Toolbox / Account.
+- **Home page**: hero, search, quick-launch module tiles, recent files area.
+- **Toolbox page**: categorized tile grid with 29 specialized tools across Image, Video, AI, Audio, Disc, and Other.
+- **Module shells**: Compressor, Video Editor, Downloader, and Recorder pages with mocked-up final-state UI.
+- **Placeholder page**: generic "Coming Soon" landing for tiles whose backing engines arrive in later phases.
+- **`tools/` directory: all 10 sidecar engines ported in.** Source code (~12 MB total) for VideoCrush, ClipForge, StreamKeep, AlphaCut, VideoSubtitleRemover, LipSight, Vertigo, FrameSnap, GifStudio, HEICShift now lives under the UCX repo. Build artifacts (`build/`, `dist/`, `__pycache__`, frozen `.exe`s, `.git`, AI working files) were stripped during the port. Each tool retains its `LICENSE`, original README (renamed to `README-source.md`), `requirements.txt`, and small assets.
 - Per-tool sidecar README documenting UCX module mapping, integration phase, entry point, and runtime.
 - Top-level [`tools/README.md`](tools/README.md) audit table with deliberate skip list (MediaForge, MediaDL, yt_livestream_downloader, Tunerize, Stock-Video-Collector, NovaCut, OpenCut).
 - NDJSON sidecar contract documented in `tools/README.md`.
 
 ### Changed
-- `MainWindow` no longer hosts the Converter UI directly — moved to `Views/Pages/ConverterPage.xaml`.
+- `MainWindow` no longer hosts the Converter UI directly: moved to `Views/Pages/ConverterPage.xaml`.
 - App startup window resized to 1280x820 to fit sidebar + content.
 - Title bar extended into client area with tall preferred height.
 - Version bumped to 2.0.0 across `Directory.Build.props`, all csproj files, app.manifest, WiX, MSIX, build scripts, and SettingsWindow.
@@ -931,15 +950,15 @@ Major scope expansion: from a context-menu file converter into a full all-in-one
 - Added: CLI (`ucx`) with convert / list / info / config / tools commands.
 - Added: WinUI 3 desktop UI with drag-and-drop and batch progress.
 
-## Roadmap archive — 2026-08-10 — ROADMAP.md
+## Roadmap archive: 2026-08-10: ROADMAP.md
 
 <details>
 <summary>Original roadmap snapshot</summary>
 
 ```markdown
-# UniversalConverterX — Product Roadmap
+# UniversalConverterX: Product Roadmap
 
-**Status:** v2.36.0 · 212 sidecar engines · 459 preset files · 53 UI pages
+**Status:** v2.36.1 · 212 sidecar engines · 465 preset files · 54 UI page files · 55 registered routes
 **Last updated:** 2026-07-29
 
 Blocked items live in [`Roadmap_Blocked.md`](Roadmap_Blocked.md).
@@ -969,25 +988,25 @@ Shipped work is recorded in [`CHANGELOG.md`](CHANGELOG.md).
 
 _2026-07-29 research pass. Existing incomplete IDs are preserved; new IDs continue at Item 147. Evidence is in [`RESEARCH.md`](RESEARCH.md)._
 
-### P1 — Reliability, trust, accessibility, and test foundations
+### P1: Reliability, trust, accessibility, and test foundations
 
-### P2 — Product depth, performance, and compatibility
+### P2: Product depth, performance, and compatibility
 
-### P2/P3 — Governed local AI capability
+### P2/P3: Governed local AI capability
 
-### P3 — Specialist capability and consolidation
+### P3: Specialist capability and consolidation
 
 ---
 
-## Audit Findings — 2026-08-02
+## Audit Findings: 2026-08-02
 
-_Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: `build.ps1 -Target Test` = 17/17 gates pass, 0 failures. Findings below are verified reachable unless marked Needs-repro. IDs continue the existing `Item NNN` scheme. Each entry is self-contained — the implementer needs no audit context._
+_Deep audit-only pass (principal-eng / QA / security / UX). Baseline was clean: `build.ps1 -Target Test` = 17/17 gates pass, 0 failures. Findings below are verified reachable unless marked Needs-repro. IDs continue the existing `Item NNN` scheme. Each entry is self-contained: the implementer needs no audit context._
 
-### P1 — correctness, data-safety, security
+### P1: correctness, data-safety, security
 
-### P2 — reliability, correctness edges, security hardening, performance
+### P2: reliability, correctness edges, security hardening, performance
 
-### P3 — debt, polish, lower-value correctness
+### P3: debt, polish, lower-value correctness
 
 ### Refinement to an existing item (not a duplicate)
 ```

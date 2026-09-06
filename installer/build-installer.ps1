@@ -8,11 +8,13 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.36.0.0',
+    [string]$Version = '2.36.1.0',
 
     [string]$FfmpegArchivePath,
 
-    [string]$SidecarBuildReport
+    [string]$SidecarBuildReport,
+
+    [switch]$SkipWinGetManifest
 )
 
 $ErrorActionPreference = 'Stop'
@@ -95,11 +97,26 @@ if (Test-Path -LiteralPath $releaseStage) {
 }
 New-Item -ItemType Directory -Path $releaseStage -Force | Out-Null
 
+# Resolve the committed solution graph once, before publish-only properties can
+# change SDK auto-references. Every publish below consumes this verified graph
+# without rewriting packages.lock.json.
+Write-Step "Restoring locked dependency graph..."
+dotnet restore "$rootDir\src\UniversalConverterX.sln" `
+    --locked-mode `
+    -p:Platform=x64 `
+    --nologo
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Locked dependency restore failed"
+    exit 1
+}
+
 Write-Step "Publishing UI application..."
 dotnet publish "$rootDir\src\UniversalConverterX.UI\UniversalConverterX.UI.csproj" `
     -c $Configuration `
     -r win-x64 `
     --self-contained true `
+    --no-restore `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
     -o $releaseStage
@@ -114,6 +131,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.Console\UniversalConverterX.Con
     -c $Configuration `
     -r win-x64 `
     --self-contained true `
+    --no-restore `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
     -o "$releaseStage\cli"
@@ -127,6 +145,7 @@ Write-Step "Publishing Shell Extension..."
 dotnet publish "$rootDir\src\UniversalConverterX.ShellExtension\UniversalConverterX.ShellExtension.csproj" `
     -c $Configuration `
     -r win-x64 `
+    --no-restore `
     -p:Version=$semanticVersion `
     -o "$releaseStage\shell"
 
@@ -140,6 +159,7 @@ dotnet publish "$rootDir\src\UniversalConverterX.FfmpegProxy\UniversalConverterX
     -c $Configuration `
     -r win-x64 `
     --self-contained false `
+    --no-restore `
     -p:PublishSingleFile=false `
     -p:Version=$semanticVersion `
     -o "$releaseStage\tools\ffmpeg-proxy"
@@ -248,13 +268,15 @@ if ($Type -eq 'portable' -or $Type -eq 'all') {
     }
 
     Write-Success "Portable ZIP created: $portableOutput"
-    Write-Step "Generating WinGet manifest content..."
-    & (Join-Path $scriptDir 'New-WinGetManifest.ps1') `
-        -Version $semanticVersion `
-        -PortableArchivePath $portableOutput `
-        -ReleaseTag $releaseTag `
-        -OutputDirectory $wingetOutput | Out-Null
-    Write-Success "WinGet manifests created under: $wingetOutput\$semanticVersion"
+    if (-not $SkipWinGetManifest) {
+        Write-Step "Generating WinGet manifest content..."
+        & (Join-Path $scriptDir 'New-WinGetManifest.ps1') `
+            -Version $semanticVersion `
+            -PortableArchivePath $portableOutput `
+            -ReleaseTag $releaseTag `
+            -OutputDirectory $wingetOutput | Out-Null
+        Write-Success "WinGet manifests created under: $wingetOutput\$semanticVersion"
+    }
 }
 
 # Build MSIX

@@ -243,6 +243,13 @@ internal static class UiSmokeHarness
         string? screenshot = null;
         if (failure is not null || options.CaptureEveryPage)
         {
+            if (options.CaptureEveryPage)
+            {
+                // NavigationThemeTransition can still be compositing the old
+                // page after Frame.Content has switched. Marketing and visual
+                // audit captures must name the page that is actually visible.
+                await Task.Delay(450).ConfigureAwait(true);
+            }
             screenshot = await TryCaptureAsync(
                 window,
                 Path.Combine(

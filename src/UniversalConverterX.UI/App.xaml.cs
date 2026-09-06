@@ -38,7 +38,6 @@ public partial class App : Application
         _startupOptions = persistedOptions;
         ApplyLanguageOverride(persistedOptions.Language);
         InitializeComponent();
-        ApplyAccentColor(persistedOptions.AccentColor);
         ConfigureServices(persistedOptions);
         LocalizedText.Configure(AppLocalizer.Get);
     }
@@ -164,19 +163,19 @@ public partial class App : Application
             catch { }
         };
 
-        RegisterNotificationActivation();
-        DispatchActivation(
-            Program.InitialActivationArguments,
-            Program.InitialCommandLine);
+        if (smokeOptions is null)
+        {
+            RegisterNotificationActivation();
+            DispatchActivation(
+                Program.InitialActivationArguments,
+                Program.InitialCommandLine);
+        }
 
         _mainWindow = new MainWindow();
-        _mainWindow.Activate();
-        if (_startupOptions?.StartMinimized == true)
-            _mainWindow.HideToBackground();
-        DrainPendingActivations();
-
         if (smokeOptions is not null)
         {
+            UiTestHooks.ShowOffscreen(_mainWindow);
+
             // Runtime UI gate: sweep every registered route in both themes and
             // at the narrow reflow width, then exit with the verdict. Nothing
             // below this point should start background work during a sweep.
@@ -185,6 +184,11 @@ public partial class App : Application
                 await UiSmokeHarness.RunAsync(smokeWindow, smokeOptions));
             return;
         }
+
+        _mainWindow.Activate();
+        if (_startupOptions?.StartMinimized == true)
+            _mainWindow.HideToBackground();
+        DrainPendingActivations();
 
         // Eagerly resolve singletons that need to start before any page is opened:
         //   * HistoryService: SQLite warm-up + initial Recent[] load on background thread.

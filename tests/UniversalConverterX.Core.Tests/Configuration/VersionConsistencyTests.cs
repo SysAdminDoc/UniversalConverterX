@@ -63,7 +63,7 @@ public class VersionConsistencyTests
         var dotnetVersion = SingleElementValue(rootProps, "DotnetServicingPackageVersion");
         var windowsAppSdkVersion = SingleElementValue(rootProps, "WindowsAppSdkPackageVersion");
 
-        dotnetVersion.Should().Be("10.0.10");
+        dotnetVersion.Should().Be("10.0.11");
         windowsAppSdkVersion.Should().Be("2.3.1");
 
         var servicedReferenceCount = 0;

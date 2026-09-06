@@ -66,11 +66,35 @@ public static class AppLocalizer
         return $"Code_{Convert.ToHexString(hash.AsSpan(0, 10))}";
     }
 
-    public static bool IsPseudoLocale =>
-        string.Equals(Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"), "1", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"), "true", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(
-            Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride,
-            "qps-ploc",
-            StringComparison.OrdinalIgnoreCase);
+    public static bool IsPseudoLocale
+    {
+        get
+        {
+            if (string.Equals(
+                    Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"),
+                    "1",
+                    StringComparison.OrdinalIgnoreCase)
+                || string.Equals(
+                    Environment.GetEnvironmentVariable("UCX_PSEUDO_LOCALE"),
+                    "true",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            try
+            {
+                return string.Equals(
+                    Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride,
+                    "qps-ploc",
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch (InvalidOperationException)
+            {
+                // An unpackaged process can start before the WinRT language
+                // broker is available. English fallback text must still load.
+                return false;
+            }
+        }
+    }
 }

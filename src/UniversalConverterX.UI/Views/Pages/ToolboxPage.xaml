@@ -10,12 +10,13 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ToolboxTileTemplate">
-            <Border Width="216" Height="172" Padding="14" Margin="0,0,10,10"
+            <Button Width="216" Height="172" Padding="14" Margin="0,0,10,10"
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
                     CornerRadius="12"
-                    IsTapEnabled="True"
-                    Tapped="Tile_Tapped"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Click="Tile_Click"
                     AutomationProperties.Name="{Binding Title}"
                     ToolTipService.ToolTip="{Binding ToolTipText}">
                 <Grid RowSpacing="10">
@@ -56,7 +57,7 @@
                                    Foreground="{Binding StatusBrush}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </Button>
         </DataTemplate>
     </Page.Resources>
 

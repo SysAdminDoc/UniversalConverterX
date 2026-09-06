@@ -1,5 +1,5 @@
-# Research — UniversalConverterX
-Date: 2026-07-29 — replaces all prior research.
+# Research: UniversalConverterX
+Date: 2026-07-29. This replaces all prior research.
 Confidence: repository and source claims are **[Verified]** as of 2026-07-29. No **[Assumption]** claim is used for prioritization; hardware/model outcomes that still need execution are acceptance work, not present-tense claims.
 
 ## Executive Summary
@@ -9,7 +9,7 @@ UniversalConverterX (UCX) is an offline-first Windows conversion suite whose str
 1. Correct the libvips CVE policy and refresh the pinned UltraHDR runtime.
 2. Eliminate mutable cached model code and lock the Python/PyInstaller supply chain.
 3. Repair Explorer, file, protocol, startup, and toast activation end to end.
-4. Make installer/portable artifacts contain—or truthfully mark unavailable—every advertised workflow.
+4. Make installer and portable artifacts contain every advertised workflow, or mark unavailable workflows truthfully.
 5. Aggregate all existing test, localization, sidecar, UI, dependency, and release checks behind the canonical build.
 6. Move page-owned conversions into a durable app-scoped job coordinator with preflight, recovery, retry, and trustworthy progress.
 7. Unify Home, navigation search, Toolbox, Presets, and Universal Convert around one stable localized workflow catalog.
@@ -54,21 +54,21 @@ UniversalConverterX (UCX) is an offline-first Windows conversion suite whose str
 - **UI boundary:** approximately 40 pages own cancellation state and 54 C# files assign user-visible strings directly. Only four `AppLocalizer` calls, three live-region declarations, no keyboard accelerator/access-key infrastructure, no adaptive XAML state, and no high-contrast resources were found. Move imperative copy to resources, add pseudo-localization, shared live status, keyboard/focus contracts, high-contrast resources, and 225% text-scale/adaptive layout tests.
 - **Performance:** Toolbox nests eight `GridView`s inside one `ScrollViewer`; Presets and History also materialize large result sets. Use one virtualized, incremental source per surface and measure cold navigation/filter latency with 459 presets and 500 history rows.
 - **Test gap:** canonical `build.ps1 -Target Test` runs Core tests and one VideoScaler smoke only. It omits Python unit tests, sidecar contract/integrity tests, UIA/runtime page navigation, localization, release compatibility, packaging contents, and dependency advisories. Existing Item 124 should use Appium/UIA rather than deprecated WinAppDriver.
-- **Documentation and upgrade gap:** README links a missing `CONTRIBUTING.md`; Windows floors conflict across README, the UI project, MSIX, and WiX; README says the runtime is required while published UI/CLI artifacts are self-contained; duplicate Unreleased changelog sections and shipped-roadmap entries have recurred. Add executable documentation/release assertions and sequence Windows App SDK 2.3.1 behind the runtime UI harness.
+- **Documentation and upgrade gap:** README links a missing `CONTRIBUTING.md`; Windows floors conflict across README, the UI project, MSIX, and WiX; README says the runtime is required while published UI/CLI artifacts are self-contained; duplicate Unreleased changelog sections and shipped-roadmap entries have recurred. Add executable documentation/release assertions and sequence Windows App SDK 2.3.1 behind the runtime UI test suite.
 - **Existing-roadmap corrections:** narrow Item 136 to KEPUB/KCC because KFX input exists; narrow Item 137 to managed RIFE exposure because ClipForge already integrates it; delete duplicate Kokoro, BiRefNet, Surya/Marker, and SeedVR2 rows; make Item 141 a governed offline diarization-pack/output/UI task; keep Opus HD under consideration because 96 kHz remains experimental and is not delivered by a floor bump.
 
 ## Rejected Ideas
 
-- **Cloud conversion, accounts, telemetry, shared histories, or multi-user mode** — conflict with `CLAUDE.md` and the offline/local privacy differentiator; ConvertX/Stirling/Topaz show the accompanying server, policy, and trust burden.
-- **Mobile client or browser/WASM rewrite** — VERT still needs a daemon for video, and UCX depends on Windows shell integration, native codecs, and specialist executables.
-- **Distributed worker architecture now** — Tdarr/FileFlows/Compressor prove its value for farms, but UCX has not yet made one local staged artifact deterministic.
-- **AV2 encode/mux now** — AV2 1.0 is final, but AOMedia identifies container bindings, conformance streams, and tooling as follow-on work; bundled FFmpeg 8.1.2 exposes no AV2 codec.
-- **C2PA authoring/signing** — read-only offline inspection fits; authoring adds key custody and trust-list governance and conflicts with the repository’s no-signing policy.
-- **DVD decryption/DeDRM** — legal, maintenance, and malware-surface costs do not fit a general converter; retain clear rejection of protected inputs.
-- **More AI backends before governance** — existing Kokoro, BiRefNet, Surya, Marker, SeedVR2, and diarization work already need immutable assets, readiness, artifact parity, and regression coverage.
-- **Pause button before checkpoint semantics** — community evidence shows false pause/resume is worse than cancel/retry; do not expose it until each engine can prove resumability.
-- **Arbitrary post-job executables** — MKVToolNix and batch tools expose them, but they bypass UCX’s plugin trust boundary; prefer versioned local recipes with allowlisted operations.
-- **Hybrid smart cut as a default promise** — LosslessCut still documents seeking, audio-sync, subtitle, codec, and multi-stream limitations; keep UCX’s explicit keyframe-copy versus frame-exact re-encode modes.
+- **Cloud conversion, accounts, telemetry, shared histories, or multi-user mode:** These conflict with the offline product charter and its local privacy advantage. ConvertX, Stirling, and Topaz show the accompanying server, policy, and trust burden.
+- **Mobile client or browser/WASM rewrite:** VERT still needs a daemon for video, and UCX depends on Windows shell integration, native codecs, and specialist executables.
+- **Distributed worker architecture now:** Tdarr, FileFlows, and Compressor prove its value for farms, but UCX has not yet made one local staged artifact deterministic.
+- **AV2 encode/mux now:** AV2 1.0 is final, but AOMedia identifies container bindings, conformance streams, and tooling as follow-on work. Bundled FFmpeg 8.1.2 exposes no AV2 codec.
+- **C2PA authoring/signing:** Read-only offline inspection fits. Authoring adds key custody and trust-list governance and conflicts with the repository's no-signing policy.
+- **DVD decryption/DeDRM:** Legal, maintenance, and malware-surface costs do not fit a general converter. Protected inputs should remain clearly rejected.
+- **More AI backends before governance:** Existing Kokoro, BiRefNet, Surya, Marker, SeedVR2, and diarization work already need immutable assets, readiness, artifact parity, and regression coverage.
+- **Pause button before checkpoint semantics:** Community evidence shows false pause/resume is worse than cancel/retry. Do not expose it until each engine can prove resumability.
+- **Arbitrary post-job executables:** MKVToolNix and batch tools expose them, but they bypass UCX's plugin trust boundary. Prefer versioned local recipes with allowlisted operations.
+- **Hybrid smart cut as a default promise:** LosslessCut still documents seeking, audio-sync, subtitle, codec, and multi-stream limitations. Keep UCX's explicit keyframe-copy versus frame-exact re-encode modes.
 
 ## Sources
 

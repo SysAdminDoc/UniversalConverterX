@@ -13,7 +13,7 @@
          project files, tests, and installer checks share one servicing pin. -->
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>LatestPatch</RollForward>
-    <DotnetServicingPackageVersion>10.0.10</DotnetServicingPackageVersion>
+    <DotnetServicingPackageVersion>10.0.11</DotnetServicingPackageVersion>
     <WindowsAppSdkPackageVersion>2.3.1</WindowsAppSdkPackageVersion>
     <!-- Restore is reproducible: packages.lock.json is committed and the
          release gate restores with RestoreLockedMode so a transitive bump
@@ -31,9 +31,9 @@
     <Company>SysAdminDoc</Company>
     <Product>UniversalConverter X</Product>
     <Copyright>Copyright © 2026 SysAdminDoc</Copyright>
-    <Version>2.36.0</Version>
-    <AssemblyVersion>2.36.0.0</AssemblyVersion>
-    <FileVersion>2.36.0.0</FileVersion>
+    <Version>2.36.1</Version>
+    <AssemblyVersion>2.36.1.0</AssemblyVersion>
+    <FileVersion>2.36.1.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

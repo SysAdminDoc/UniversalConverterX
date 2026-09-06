@@ -76,8 +76,8 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
     for name in ("AssemblyVersion", "FileVersion"):
         if element_value(props, name) != f"{version}.0":
             errors.append(f"Directory.Build.props {name} must be {version}.0")
-    if element_value(props, "DotnetServicingPackageVersion") != "10.0.10":
-        errors.append("Directory.Build.props must pin .NET servicing packages to 10.0.10")
+    if element_value(props, "DotnetServicingPackageVersion") != "10.0.11":
+        errors.append("Directory.Build.props must pin .NET servicing packages to 10.0.11")
     if element_value(props, "WindowsAppSdkPackageVersion") != "2.3.1":
         errors.append("Directory.Build.props must pin Windows App SDK to 2.3.1")
 
@@ -108,7 +108,7 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
         "212",
         "reinstall",
         "unsigned",
-        ".NET 10.0.10",
+        ".NET 10.0.11",
         "Windows App SDK 2.3.1",
     )
     for fragment in required_readme_fragments:
@@ -134,7 +134,29 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
             if fragment not in text:
                 errors.append(f"{relative} is missing required release/platform value {fragment!r}")
 
+    installer_script = read("installer/build-installer.ps1")
+    if installer_script.count("--locked-mode") != 1:
+        errors.append("installer/build-installer.ps1 must restore the locked graph exactly once")
+    if installer_script.count("--no-restore") != 4:
+        errors.append("every installer publish must consume the pre-restored dependency graph")
+    restore_position = installer_script.find("dotnet restore")
+    first_publish_position = installer_script.find("dotnet publish")
+    if restore_position < 0 or first_publish_position < 0 or restore_position > first_publish_position:
+        errors.append("installer/build-installer.ps1 must restore before publishing")
+
     project_expectations = {
+        "src/UniversalConverterX.Core/UniversalConverterX.Core.csproj": {
+            "TargetFramework": "net10.0",
+            "RuntimeIdentifiers": "win-x64;win-arm64",
+        },
+        "src/UniversalConverterX.Console/UniversalConverterX.Console.csproj": {
+            "TargetFramework": "net10.0",
+            "RuntimeIdentifiers": "win-x64;win-arm64",
+        },
+        "src/UniversalConverterX.FfmpegProxy/UniversalConverterX.FfmpegProxy.csproj": {
+            "TargetFramework": "net10.0",
+            "RuntimeIdentifiers": "win-x64;win-arm64",
+        },
         "src/UniversalConverterX.UI/UniversalConverterX.UI.csproj": {
             "TargetFramework": "net10.0-windows10.0.22621.0",
             "TargetPlatformMinVersion": "10.0.19044.0",
