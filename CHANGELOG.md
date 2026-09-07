@@ -4,6 +4,18 @@ All notable changes to UniversalConverterX will be documented in this file.
 
 ## [Unreleased]
 
+## [2.36.2] (2026-09-07)
+
+### Changed
+
+- Preserved all five original identity directions under `assets/brand/concepts/` with a selection record and an untouched copy of the approved folded-path master.
+- Linked the public project notes to the brand archive so the complete visual history remains easy to find.
+- Recaptured the five README product views from the current offscreen-rendered application build.
+
+### Fixed
+
+- Restored the compiled XAML and app resource index to release staging. Fresh portable and MSI smoke tests now launch the packaged WinUI app and exercise all 55 routes before an artifact can pass.
+
 ## [2.36.1] - 2026-09-06
 
 ### Changed

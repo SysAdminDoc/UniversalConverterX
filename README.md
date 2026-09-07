@@ -7,7 +7,7 @@
 <p align="center"><strong>Convert, compress, edit, record, and inspect files without uploading them.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/SysAdminDoc/UniversalConverterX/releases/latest"><img src="https://img.shields.io/badge/version-2.36.1-blue" alt="Version 2.36.1"></a>
+  <a href="https://github.com/SysAdminDoc/UniversalConverterX/releases/latest"><img src="https://img.shields.io/badge/version-2.36.2-blue" alt="Version 2.36.2"></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-12b886" alt="Windows 10 and 11">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/processing-local-19c2a0" alt="Local processing">
@@ -250,6 +250,7 @@ Each sidecar lives under `tools/<name>/` and follows the NDJSON contract in [`to
 ## Project notes
 
 - [Changelog](CHANGELOG.md)
+- [Brand concept archive](assets/brand/concepts)
 - [Roadmap](ROADMAP.md)
 - [Research and audit notes](RESEARCH.md)
 - [Issue tracker](https://github.com/SysAdminDoc/UniversalConverterX/issues)

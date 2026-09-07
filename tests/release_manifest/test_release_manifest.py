@@ -38,6 +38,9 @@ def test_wix_installs_the_generated_complete_release_payload() -> None:
     assert "Test-ReleaseArtifacts.ps1" in installer
     assert '-o "$releaseStage\\cli"' in installer
     assert '-o "$releaseStage\\shell"' in installer
+    assert "UniversalConverterX.pri" in installer
+    assert "Views\\MainWindow.xbf" in installer
+    assert "Staging compiled WinUI resources" in installer
 
 
 class ReleaseManifestTests(unittest.TestCase):

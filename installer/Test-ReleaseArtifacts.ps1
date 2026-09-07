@@ -50,9 +50,13 @@ function Test-ExtractedRelease {
     }
 
     $ucx = Join-Path $ReleaseRoot 'cli\ucx.exe'
+    $ui = Join-Path $ReleaseRoot 'UniversalConverterX.exe'
     $ffmpeg = Join-Path $ReleaseRoot 'tools\bin\ffmpeg.exe'
     $ffprobe = Join-Path $ReleaseRoot 'tools\bin\ffprobe.exe'
-    foreach ($required in @($ucx, $ffmpeg, $ffprobe)) {
+    $appXbf = Join-Path $ReleaseRoot 'App.xbf'
+    $appPri = Join-Path $ReleaseRoot 'UniversalConverterX.pri'
+    $mainWindowXbf = Join-Path $ReleaseRoot 'Views\MainWindow.xbf'
+    foreach ($required in @($ucx, $ui, $ffmpeg, $ffprobe, $appXbf, $appPri, $mainWindowXbf)) {
         if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
             throw "$Kind payload is incomplete: $required"
         }
@@ -64,6 +68,31 @@ function Test-ExtractedRelease {
     }
 
     $fixtureRoot = Join-Path $temporaryRoot ("fixture-" + $Kind.ToLowerInvariant())
+    $uiReport = Join-Path $fixtureRoot 'ui-smoke'
+    $uiProcess = Start-Process -FilePath $ui `
+        -ArgumentList @('--ui-smoke', $uiReport) `
+        -WorkingDirectory $ReleaseRoot `
+        -WindowStyle Hidden `
+        -PassThru
+    if (-not $uiProcess.WaitForExit(900000)) {
+        $uiProcess.Kill($true)
+        throw "$Kind UI smoke did not finish within 15 minutes."
+    }
+    if ($uiProcess.ExitCode -ne 0) {
+        throw "$Kind UI smoke failed with exit code $($uiProcess.ExitCode)."
+    }
+    $uiReportPath = Join-Path $uiReport 'ui-smoke.json'
+    if (-not (Test-Path -LiteralPath $uiReportPath -PathType Leaf)) {
+        throw "$Kind UI smoke did not produce a report."
+    }
+    $uiResult = Get-Content -LiteralPath $uiReportPath -Raw | ConvertFrom-Json
+    if ($uiResult.routeCount -le 0 -or
+        $uiResult.failures -ne 0 -or
+        @($uiResult.unhandledExceptions).Count -ne 0 -or
+        $uiResult.passes -ne ($uiResult.routeCount * 3)) {
+        throw "$Kind UI smoke report is incomplete or contains failures."
+    }
+
     $outputRoot = Join-Path $fixtureRoot 'output'
     New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
     $fixture = Join-Path $fixtureRoot 'fixture.wav'
@@ -111,6 +140,8 @@ function Test-ExtractedRelease {
         Kind = $Kind
         Root = $ReleaseRoot
         CliVersion = ($versionOutput -join ' ').Trim()
+        UiRoutes = $uiResult.routeCount
+        UiPasses = $uiResult.passes
         Fixture = $converted
     }
 }

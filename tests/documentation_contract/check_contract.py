@@ -90,7 +90,11 @@ def check_platform_and_release_contract(errors: list[str]) -> tuple[str, int]:
         errors.append("ROADMAP status does not match Directory.Build.props")
     if len(re.findall(r"^## \[Unreleased\]$", changelog, re.MULTILINE)) != 1:
         errors.append("CHANGELOG.md must contain exactly one Unreleased section")
-    if not re.search(rf"^## \[{re.escape(version)}\] - ", changelog, re.MULTILINE):
+    if not re.search(
+        rf"^## \[{re.escape(version)}\] \(\d{{4}}-\d{{2}}-\d{{2}}\)$",
+        changelog,
+        re.MULTILINE,
+    ):
         errors.append(f"CHANGELOG.md has no release heading for {version}")
     if re.search(r"^- \[[xX]\]", roadmap, re.MULTILINE):
         errors.append("ROADMAP.md contains a completed checkbox; completed items must be deleted")

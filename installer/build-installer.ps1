@@ -8,7 +8,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     
-    [string]$Version = '2.36.1.0',
+    [string]$Version = '2.36.2.0',
 
     [string]$FfmpegArchivePath,
 
@@ -125,6 +125,44 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to publish UI application"
     exit 1
 }
+
+# The WinUI SDK writes the app's compiled XAML and resource index beside the
+# RID build output, but `dotnet publish -o` does not copy those app-specific
+# files into a custom output directory. Without them the EXE starts and then
+# exits with 0xC000027B while MainWindow.xaml is parsed.
+Write-Step "Staging compiled WinUI resources..."
+$uiBuildOutput = Join-Path $rootDir (
+    "src\UniversalConverterX.UI\bin\$Configuration\" +
+    'net10.0-windows10.0.22621.0\win-x64')
+if (-not (Test-Path -LiteralPath $uiBuildOutput -PathType Container)) {
+    throw "WinUI build output is missing: $uiBuildOutput"
+}
+$compiledUiResources = @(
+    Get-ChildItem -LiteralPath $uiBuildOutput -Recurse -File |
+        Where-Object {
+            $_.Extension.Equals('.xbf', [StringComparison]::OrdinalIgnoreCase) -or
+            $_.Name.Equals('UniversalConverterX.pri', [StringComparison]::OrdinalIgnoreCase)
+        }
+)
+foreach ($resource in $compiledUiResources) {
+    $relativeResource = [IO.Path]::GetRelativePath($uiBuildOutput, $resource.FullName)
+    $resourceDestination = Join-Path $releaseStage $relativeResource
+    $resourceDirectory = Split-Path -Parent $resourceDestination
+    if (-not (Test-Path -LiteralPath $resourceDirectory)) {
+        New-Item -ItemType Directory -Path $resourceDirectory -Force | Out-Null
+    }
+    Copy-Item -LiteralPath $resource.FullName -Destination $resourceDestination -Force
+}
+foreach ($requiredResource in @(
+        'App.xbf',
+        'UniversalConverterX.pri',
+        'Views\MainWindow.xbf')) {
+    $requiredPath = Join-Path $releaseStage $requiredResource
+    if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+        throw "Compiled WinUI resource was not staged: $requiredPath"
+    }
+}
+Write-Success "Staged $($compiledUiResources.Count) compiled WinUI resource file(s)"
 
 Write-Step "Publishing Console application..."
 dotnet publish "$rootDir\src\UniversalConverterX.Console\UniversalConverterX.Console.csproj" `
